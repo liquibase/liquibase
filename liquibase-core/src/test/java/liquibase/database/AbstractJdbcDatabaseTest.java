@@ -1,9 +1,25 @@
 package liquibase.database;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.core.CreateTableChange;
+import liquibase.executor.ExecutorService;
+import liquibase.sdk.executor.MockExecutor;
+import liquibase.sql.visitor.AppendSqlVisitor;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
+
 import org.junit.Test;
 
 /**
@@ -90,7 +106,104 @@ public abstract class AbstractJdbcDatabaseTest {
             assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
         }
     }
+    
+    @Test
+    public void executeRollbackStatements_WithStatementsOverload_ShouldNotIncludeAppendTextFromApplyToRollbackFalseVisitor() throws Exception {
+        Database database = getDatabase();
+        
+        final MockExecutor mockExecutor = new MockExecutor();
+        
+        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        
+        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        
+        final SqlStatement dropTableStatement = new DropTableStatement(null, null, "test_table", false);
+        
+        final AppendSqlVisitor appendSqlVisitor = new AppendSqlVisitor();
+        appendSqlVisitor.setApplyToRollback(false);
+        appendSqlVisitor.setValue(" SHOULD NOT BE APPENDED");
+        
+        sqlVisitors.add(appendSqlVisitor);
+                
+        database.executeRollbackStatements(new SqlStatement[] {dropTableStatement}, sqlVisitors);
 
+        assertEquals("DROP TABLE test_table;", mockExecutor.getRanSql().trim());        
+    }
+
+    @Test
+    public void executeRollbackStatements_WithStatementsOverload_ShouldIncludeAppendTextFromApplyToRollbackTrueVisitor() throws Exception {
+        Database database = getDatabase();
+        
+        final MockExecutor mockExecutor = new MockExecutor();
+        
+        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        
+        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        
+        final SqlStatement dropTableStatement = new DropTableStatement(null, null, "test_table", false);        
+        
+        final AppendSqlVisitor appendSqlVisitor = new AppendSqlVisitor();
+        
+        appendSqlVisitor.setApplyToRollback(true);
+        appendSqlVisitor.setValue(" SHOULD BE APPENDED");
+        
+        sqlVisitors.add(appendSqlVisitor);
+                
+        database.executeRollbackStatements(new SqlStatement[] {dropTableStatement}, sqlVisitors);
+
+        assertEquals("DROP TABLE test_table SHOULD BE APPENDED;", mockExecutor.getRanSql().trim());
+    }
+    
+    @Test
+    public void executeRollbackStatements_WithChangeOverload_ShouldNotIncludeAppendTextFromApplyToRollbackFalseVisitor() throws Exception {
+        Database database = getDatabase();
+        
+        final MockExecutor mockExecutor = new MockExecutor();
+        
+        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        
+        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        
+        final CreateTableChange change = new CreateTableChange();
+        change.setTableName("test_table");
+        
+        final AppendSqlVisitor appendSqlVisitor = new AppendSqlVisitor();
+        appendSqlVisitor.setApplyToRollback(false);
+        appendSqlVisitor.setValue(" SHOULD NOT BE APPENDED");
+        
+        sqlVisitors.add(appendSqlVisitor);
+                
+        database.executeRollbackStatements(change, sqlVisitors);
+
+        assertEquals("DROP TABLE test_table;", mockExecutor.getRanSql().trim());
+    }
+
+    @Test
+    public void executeRollbackStatements_WithChangeOverload_ShouldIncludeAppendTextFromApplyToRollbackTrueVisitor() throws Exception {
+        Database database = getDatabase();
+        
+        final MockExecutor mockExecutor = new MockExecutor();
+        
+        ExecutorService.getInstance().setExecutor(database, mockExecutor);
+        
+        final List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
+        
+        final CreateTableChange change = new CreateTableChange();
+        change.setTableName("test_table");
+        
+        final AppendSqlVisitor appendSqlVisitor = new AppendSqlVisitor();
+        
+        appendSqlVisitor.setApplyToRollback(true);
+        appendSqlVisitor.setValue(" SHOULD BE APPENDED");
+        
+        sqlVisitors.add(appendSqlVisitor);
+                
+        database.executeRollbackStatements(change, sqlVisitors);
+
+        assertEquals("DROP TABLE test_table SHOULD BE APPENDED;", mockExecutor.getRanSql().trim());
+    }
+
+    
 //    @Test
 //    public void getColumnType_javaTypes() throws SQLException {
 //        Database database = getDatabase();

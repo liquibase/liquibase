@@ -604,22 +604,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             }
             
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
-            if (rollBackChanges != null && rollBackChanges.size() > 0) {
+            if (hasCustomRollbackChanges()) {
+                
+                final List<SqlStatement> statements = new LinkedList<SqlStatement>();
                 for (Change rollback : rollBackChanges) {
                     if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] statements = rollback.generateStatements(database);
-                    if (statements == null) {
-                        continue;
+                    SqlStatement[] changeStatements = rollback.generateStatements(database);
+                    if (changeStatements != null) {
+                        statements.addAll(Arrays.asList(changeStatements));
                     }
-                    for (SqlStatement statement : statements) {
-                        try {
-                            executor.execute(statement, sqlVisitors);
-                        } catch (DatabaseException e) {
-                            throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
-                        }
-                    }
+                }
+                if (!statements.isEmpty()) {
+                    database.executeRollbackStatements(statements.toArray(new SqlStatement[]{}), sqlVisitors);
                 }
 
             } else {
@@ -655,6 +653,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     }
 
+    /**
+     * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
+     */
+    protected boolean hasCustomRollbackChanges() {
+        return rollBackChanges != null && rollBackChanges.size() > 0;
+    }
+    
     /**
      * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
      */
