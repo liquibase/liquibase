@@ -89,24 +89,19 @@ public class DiffToChangeLog {
                 return;
             }
 
-            String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
-            BufferedReader fileReader = new BufferedReader(new FileReader(file));
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
             String line;
             long offset = 0;
-            while ((line = fileReader.readLine()) != null) {
+            while ((line = randomAccessFile.readLine()) != null) {
                 int index = line.indexOf("</databaseChangeLog>");
                 if (index >= 0) {
-                    offset += index;
+                    break;
                 } else {
-                    offset += line.getBytes().length;
-                    offset += lineSeparator.getBytes().length;
+                    offset = randomAccessFile.getFilePointer();
                 }
             }
-            fileReader.close();
 
-            // System.out.println("resulting XML: " + xml.trim());
-
-            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
             randomAccessFile.seek(offset);
             randomAccessFile.writeBytes("    ");
             randomAccessFile.write(xml.getBytes());
