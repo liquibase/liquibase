@@ -3,7 +3,6 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;
@@ -244,6 +243,16 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     protected String getAutoIncrementClause() {
         return "AUTO_INCREMENT";
+    }
+
+    @Override
+    protected String getAutoIncrementStartWithClause() {
+	return "%d";
+    }
+
+    @Override
+    protected String getAutoIncrementByClause() {
+	return "%d";
     }
 
     @Override

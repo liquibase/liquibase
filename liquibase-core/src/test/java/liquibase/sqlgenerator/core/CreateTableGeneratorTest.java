@@ -503,7 +503,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-    			assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGINT AUTO_INCREMENT (START WITH 0))", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGINT AUTO_INCREMENT (0))", generatedSql[0].toSql());
     		}
     	}
     }
@@ -521,7 +521,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-				assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGINT AUTO_INCREMENT (START WITH 0, INCREMENT BY 10))", generatedSql[0].toSql());
+				assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGINT AUTO_INCREMENT (0, 10))", generatedSql[0].toSql());
     		}
     	}
     }
