@@ -12,6 +12,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Set;
@@ -29,7 +30,7 @@ public class StandardDiffGenerator implements DiffGenerator {
     }
 
     @Override
-    public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
+    public DiffResult compare(NewDatabaseSnapshot referenceSnapshot, NewDatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
 
         if (comparisonSnapshot == null) {
             try {
@@ -60,7 +61,7 @@ public class StandardDiffGenerator implements DiffGenerator {
         return diffResult;
     }
 
-    protected void checkVersionInfo(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) throws DatabaseException {
+    protected void checkVersionInfo(NewDatabaseSnapshot referenceSnapshot, NewDatabaseSnapshot comparisonSnapshot, DiffResult diffResult) throws DatabaseException {
 
         if (comparisonSnapshot != null && comparisonSnapshot.getDatabase() != null) {
             diffResult.setProductNameDiff(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductName(), comparisonSnapshot.getDatabase().getDatabaseProductName()));
@@ -69,7 +70,7 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     }
 
-    protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
+    protected <T extends DatabaseObject> void compareObjectType(Class<T> type, NewDatabaseSnapshot referenceSnapshot, NewDatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
 
         CompareControl.SchemaComparison[] schemaComparisons = diffResult.getCompareControl().getSchemaComparisons();
         if (schemaComparisons != null) {

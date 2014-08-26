@@ -35,7 +35,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
 
 
         runCompleteChangeLog();
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
+        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
         System.out.println(snapshot);
     }
 
@@ -59,7 +59,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
                 "KEY active (active)\n" +
                 ")"));
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, getDatabase(), new SnapshotControl(getDatabase()));
+        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, getDatabase(), new SnapshotControl(getDatabase()));
         Column createdColumn = snapshot.get(new Column().setRelation(new Table().setName("ad").setSchema(new Schema())).setName("created"));
 
         Object defaultValue = createdColumn.getDefaultValue();

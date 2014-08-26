@@ -17,6 +17,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
@@ -258,7 +259,7 @@ public class WatchCommand extends AbstractCommand {
 
         public void loadIndexData(Map<String, Object> context) {
             try {
-                DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+                NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
                 StringBuilder buffer = new StringBuilder();
                 Database database = snapshot.getDatabase();

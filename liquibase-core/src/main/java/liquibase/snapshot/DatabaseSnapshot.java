@@ -16,6 +16,9 @@ import liquibase.structure.core.Schema;
 
 import java.util.*;
 
+/**
+ * @deprecated Moving to {@link liquibase.snapshot.NewDatabaseSnapshot}
+ */
 public abstract class DatabaseSnapshot implements LiquibaseSerializable{
 
     private HashSet<String> serializableFields;
@@ -276,12 +279,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
 
 
     protected SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
-        SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
-        if (generators == null || generators.size() == 0) {
-            return null;
-        }
-        //noinspection unchecked
-        return new SnapshotGeneratorChain(generators);
+//        SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
+//        if (generators == null || generators.size() == 0) {
+//            return null;
+//        }
+//        //noinspection unchecked
+//        return new SnapshotGeneratorChain(generators);
+
+        return null;
     }
 
     private boolean isKnownNull(DatabaseObject example) {

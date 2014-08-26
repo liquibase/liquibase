@@ -5,6 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -28,7 +29,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         try {
             StringBuilder buffer = new StringBuilder();
-            DatabaseSnapshot snapshot = ((DatabaseSnapshot) object);
+            NewDatabaseSnapshot snapshot = ((NewDatabaseSnapshot) object);
             Database database = snapshot.getDatabase();
 
             buffer.append("Database snapshot for ").append(database.getConnection().getURL()).append("\n");

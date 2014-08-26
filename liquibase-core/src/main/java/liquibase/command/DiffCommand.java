@@ -134,13 +134,13 @@ public class DiffCommand extends AbstractCommand {
     }
 
     protected DiffResult createDiffResult() throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
-        DatabaseSnapshot targetSnapshot = createTargetSnapshot();
+        NewDatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
+        NewDatabaseSnapshot targetSnapshot = createTargetSnapshot();
 
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 
-    protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
+    protected NewDatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
 
         if (compareControl == null || compareControl.getSchemaComparisons() == null) {
@@ -163,7 +163,7 @@ public class DiffCommand extends AbstractCommand {
         return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
     }
 
-    protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
+    protected NewDatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
 
         if (compareControl == null || compareControl.getSchemaComparisons() == null) {

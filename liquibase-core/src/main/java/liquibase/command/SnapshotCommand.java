@@ -3,10 +3,7 @@ package liquibase.command;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.serializer.SnapshotSerializerFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotListener;
+import liquibase.snapshot.*;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -83,7 +80,7 @@ public class SnapshotCommand extends AbstractCommand {
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
         return SnapshotSerializerFactory.getInstance().getSerializer(getSerializerFormat()).serialize(snapshot, true);
     }

@@ -4,6 +4,9 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 
+/**
+ * @deprecated Moving to {@link liquibase.snapshot.NewSnapshotGenerator}
+ */
 public interface SnapshotGenerator {
 
     final int PRIORITY_NONE = -1;

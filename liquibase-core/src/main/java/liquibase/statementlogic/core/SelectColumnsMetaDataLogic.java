@@ -58,7 +58,7 @@ public class SelectColumnsMetaDataLogic extends AbstractStatementLogic<SelectMet
         }
         Column example = (Column) statement.getExample();
         String tableName = null;
-        if (example.getRelation() != null) {
+        if (example.getRelation() != null && example.getRelation().getName() != null) {
             if (database instanceof PostgresDatabase) {
                 tableName = example.getRelation().getName().toLowerCase();
             } else {

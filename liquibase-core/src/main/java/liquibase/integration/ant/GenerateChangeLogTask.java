@@ -9,6 +9,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import org.apache.tools.ant.BuildException;
@@ -78,7 +79,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
             Database database = liquibase.getDatabase();
             SnapshotControl snapshotControl = new SnapshotControl(database, getDiffTypes());
 
-            DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()), database, snapshotControl);
+            NewDatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()), database, snapshotControl);
 
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, null, new CompareControl(new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()), new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))}, getDiffTypes() ));
 //			diff.addStatusListener(new OutDiffStatusListener());

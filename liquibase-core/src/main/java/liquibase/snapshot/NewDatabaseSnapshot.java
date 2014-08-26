@@ -1,67 +1,30 @@
-package liquibase.structure;
+package liquibase.snapshot;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectComparator;
 
 import java.util.*;
 
-/**
- * @deprecated Moving to {@link liquibase.snapshot.NewDatabaseSnapshot}
- */
-public class DatabaseObjectCollection implements LiquibaseSerializable {
+public class NewDatabaseSnapshot extends AbstractLiquibaseSerializable {
 
+    private final SnapshotControl snapshotControl;
     private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new HashMap<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>>();
     private Database database;
 
-    public DatabaseObjectCollection(Database database) {
-        this.database = database;
+    public NewDatabaseSnapshot(SnapshotControl snapshotControl, ExecutionEnvironment environment) {
+        this.snapshotControl = snapshotControl;
+        this.database = environment.getTargetDatabase();
     }
 
-    @Override
-    public String getSerializedObjectName() {
-        return "objects";
-    }
-
-    @Override
-    public String getSerializedObjectNamespace() {
-        return STANDARD_SNAPSHOT_NAMESPACE;
-    }
-
-    @Override
-    public Set<String> getSerializableFields() {
-        SortedSet<String> types = new TreeSet<String>();
-        for (Class type : cache.keySet()) {
-            types.add(type.getName());
-        }
-        return types;
-
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        SortedSet<DatabaseObject> objects = new TreeSet<DatabaseObject>(new DatabaseObjectComparator());
-        try {
-            Map<String, Set<DatabaseObject>> map = cache.get(Class.forName(field));
-            if (map == null) {
-                return null;
-            }
-            for (Set<DatabaseObject> set : map.values()) {
-                objects.addAll(set);
-            }
-            return objects;
-        } catch (ClassNotFoundException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
-    @Override
-    public SerializationType getSerializableFieldType(String field) {
-        return SerializationType.NAMED_FIELD;
+    public Database getDatabase() {
+        return database;
     }
 
     public void add(DatabaseObject databaseObject) {
@@ -151,13 +114,16 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
+    public String getSerializedObjectName() {
+        return "databaseSnapshot";
     }
 
     @Override
-    public ParsedNode serialize() {
-        throw new RuntimeException("TODO");
+    public String getSerializedObjectNamespace() {
+        return STANDARD_SNAPSHOT_NAMESPACE;
     }
 
+    public SnapshotControl getSnapshotControl() {
+        return snapshotControl;
+    }
 }

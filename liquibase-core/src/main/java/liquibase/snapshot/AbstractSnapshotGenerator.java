@@ -8,17 +8,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
 
-public abstract class AbstractSnapshotGenerator<T extends DatabaseObject> {
-
-    public Statement generateLookupStatement(T example, ExecutionEnvironment env, StatementLogicChain chain) {
-        return new SelectMetaDataStatement(example);
-    }
-
-
-    public abstract Statement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, StatementLogicChain chain);
-
-    public abstract void addTo(DatabaseObject object, DatabaseObjectCollection collection, ExecutionEnvironment env, StatementLogicChain chain);
-
+public abstract class AbstractSnapshotGenerator<T extends DatabaseObject> implements NewSnapshotGenerator {
 
     protected String getCatalogName(Schema schema) {
         if (schema == null) {

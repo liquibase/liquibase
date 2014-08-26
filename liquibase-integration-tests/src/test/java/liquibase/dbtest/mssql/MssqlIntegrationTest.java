@@ -9,10 +9,7 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.EmptyDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
@@ -48,7 +45,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/default.values.xml");
         liquibase.update((String) null);
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
+        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
         for (Table table : snapshot.get(Table.class)) {
             for (Column column : table.getColumns()) {
@@ -88,7 +85,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.types.xml");
         liquibase.update((String) null);
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
+        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
         for (Table table : snapshot.get(Table.class)) {
             if (getDatabase().isLiquibaseObject(table)) {
@@ -126,7 +123,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.type.params.xml");
         liquibase.update((String) null);
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
+        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
         for (Table table : snapshot.get(Table.class)) {
             if (getDatabase().isLiquibaseObject(table)) {

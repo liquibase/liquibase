@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
+import liquibase.snapshot.*;
 import liquibase.statement.Statement;
 import liquibase.statement.core.RawDatabaseCommandStatement;
 import liquibase.statementlogic.StatementLogicFactory;
@@ -25,10 +26,6 @@ import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.EmptyDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -710,7 +707,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
-            DatabaseSnapshot snapshot;
+            NewDatabaseSnapshot snapshot;
             try {
 	            final SnapshotControl snapshotControl = new SnapshotControl(this);
 	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();

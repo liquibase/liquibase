@@ -5,6 +5,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 
 import java.io.IOException;
@@ -12,8 +13,8 @@ import java.util.*;
 
 public class DiffResult {
 
-    private DatabaseSnapshot referenceSnapshot;
-    private DatabaseSnapshot comparisonSnapshot;
+    private NewDatabaseSnapshot referenceSnapshot;
+    private NewDatabaseSnapshot comparisonSnapshot;
 
     private CompareControl compareControl;
 
@@ -25,17 +26,17 @@ public class DiffResult {
     private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<DatabaseObject, ObjectDifferences>();
 
 
-    public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {
+    public DiffResult(NewDatabaseSnapshot referenceDatabaseSnapshot, NewDatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {
         this.referenceSnapshot = referenceDatabaseSnapshot;
         this.comparisonSnapshot = comparisonDatabaseSnapshot;
         this.compareControl = compareControl;
     }
 
-    public DatabaseSnapshot getReferenceSnapshot() {
+    public NewDatabaseSnapshot getReferenceSnapshot() {
         return referenceSnapshot;
     }
 
-    public DatabaseSnapshot getComparisonSnapshot() {
+    public NewDatabaseSnapshot getComparisonSnapshot() {
         return comparisonSnapshot;
     }
 

@@ -13,6 +13,7 @@ import java.util.Set;
 public class DatabaseObjectFactory {
 
     private static DatabaseObjectFactory instance;
+    private Set<Class<? extends DatabaseObject>> allTypes;
     private Set<Class<? extends DatabaseObject>> standardTypes;
 
     public static DatabaseObjectFactory getInstance() {
@@ -51,6 +52,20 @@ public class DatabaseObjectFactory {
             }
             return returnSet;
         }
+    }
+
+    public Set<Class<? extends DatabaseObject>> getAllTypes() {
+        if (allTypes == null) {
+            Set<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
+
+            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+            for (Class<? extends DatabaseObject> clazz : classes) {
+                set.add(clazz);
+            }
+
+            allTypes = set;
+        }
+        return allTypes;
     }
 
     public Set<Class<? extends DatabaseObject>> getStandardTypes() {

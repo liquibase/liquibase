@@ -5,20 +5,22 @@ import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.MetaDataQueryAction;
 import liquibase.action.QueryAction;
-import liquibase.exception.UnsupportedException;
-import liquibase.statement.Statement;
-import liquibase.statementlogic.StatementLogicChain;
-import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.core.ColumnSnapshotGenerator;
 import liquibase.snapshot.core.TableSnapshotGenerator;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
+import liquibase.structure.core.Data;
+import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
@@ -28,15 +30,12 @@ public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
-    private List<SnapshotGenerator> generators = new ArrayList<SnapshotGenerator>();
+    private List<NewSnapshotGenerator> generators = new ArrayList<NewSnapshotGenerator>();
 
     protected SnapshotGeneratorFactory() {
-        Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SnapshotGenerator) clazz.getConstructor().newInstance());
+            for (Class clazz : ServiceLocator.getInstance().findClasses(NewSnapshotGenerator.class)) {
+                registerGenerator((NewSnapshotGenerator) clazz.getConstructor().newInstance());
             }
 
         } catch (Exception e) {
@@ -60,34 +59,41 @@ public class SnapshotGeneratorFactory {
     }
 
 
-    public void register(SnapshotGenerator generator) {
+    public void registerGenerator(NewSnapshotGenerator generator) {
         generators.add(generator);
     }
 
-    public void unregister(SnapshotGenerator generator) {
+    public void unregisterGenerator(NewSnapshotGenerator generator) {
         generators.remove(generator);
     }
 
-    public void unregister(Class generatorClass) {
-        SnapshotGenerator toRemove = null;
-        for (SnapshotGenerator existingGenerator : generators) {
+    public void unregisterGenerator(Class generatorClass) {
+        NewSnapshotGenerator toRemove = null;
+        for (NewSnapshotGenerator existingGenerator : generators) {
             if (existingGenerator.getClass().equals(generatorClass)) {
                 toRemove = existingGenerator;
             }
         }
 
-        unregister(toRemove);
+        unregisterGenerator(toRemove);
     }
 
-    protected SortedSet<SnapshotGenerator> getGenerators(Class<? extends DatabaseObject> generatorClass, Database database) {
-        SortedSet<SnapshotGenerator> validGenerators = new TreeSet<SnapshotGenerator>(new SnapshotGeneratorComparator(generatorClass, database));
+    protected NewSnapshotGenerator getGenerator(Class<? extends DatabaseObject> databaseObjectType, ExecutionEnvironment environment) {
+        SortedSet<NewSnapshotGenerator> validGenerators = new TreeSet<NewSnapshotGenerator>(new SnapshotGeneratorComparator(databaseObjectType, environment));
 
-        for (SnapshotGenerator generator : generators) {
-            if (generator.getPriority(generatorClass, database) > 0) {
+        for (NewSnapshotGenerator generator : generators) {
+            if (generator.getPriority(databaseObjectType, environment) > 0) {
                 validGenerators.add(generator);
             }
         }
-        return validGenerators;
+        if (validGenerators.size() == 0) {
+            return null;
+        }
+        return new ArrayList<NewSnapshotGenerator>(validGenerators).get(validGenerators.size()-1);
+    }
+
+    protected Set<Class<? extends DatabaseObject>> getDatabaseObjectTypes() {
+        return Collections.unmodifiableSet(DatabaseObjectFactory.getInstance().getAllTypes());
     }
 
 
@@ -104,7 +110,7 @@ public class SnapshotGeneratorFactory {
         } else {
             catalogAndSchema = example.getSchema().toCatalogAndSchema();
         }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, example.getClass()));
+        NewDatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, example.getClass()));
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
                 return true;
@@ -113,11 +119,11 @@ public class SnapshotGeneratorFactory {
         return false;
     }
 
-    public DatabaseSnapshot createSnapshot(CatalogAndSchema example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+    public NewDatabaseSnapshot createSnapshot(CatalogAndSchema example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         return createSnapshot(new CatalogAndSchema[] {example}, database, snapshotControl);
     }
 
-    public DatabaseSnapshot createSnapshot(CatalogAndSchema[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+    public NewDatabaseSnapshot createSnapshot(CatalogAndSchema[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         if (database == null) {
             return null;
         }
@@ -126,7 +132,13 @@ public class SnapshotGeneratorFactory {
             examples[i] = examples[i].customize(database);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
         }
-        return createSnapshot(schemas, database, snapshotControl);
+
+        ExecutionEnvironment env = new ExecutionEnvironment(database);
+        try {
+            return createSnapshot(schemas, snapshotControl, env);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -141,6 +153,37 @@ public class SnapshotGeneratorFactory {
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        return null;
+    }
+
+    public NewDatabaseSnapshot createSnapshot(DatabaseObject[] examples, SnapshotControl snapshotControl, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
+
+        NewDatabaseSnapshot snapshot = new NewDatabaseSnapshot(snapshotControl, env);
+
+        Map<Class, NewSnapshotGenerator> generators = new HashMap<Class, NewSnapshotGenerator>();
+        for (Class<? extends DatabaseObject> objectType : getDatabaseObjectTypes()) {
+            if (!snapshotControl.getTypesToInclude().contains(objectType)) {
+                continue;
+            }
+            NewSnapshotGenerator generator = getGenerator(objectType, env);
+            if (generator != null) {
+                generators.put(objectType, generator);
+
+                for (DatabaseObject example : examples) {
+                    for (DatabaseObject obj : generator.lookupFor(example, objectType, env)) {
+                        snapshot.add(obj);
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Class, NewSnapshotGenerator> generatorEntry : generators.entrySet()) {
+            generatorEntry.getValue().relate(generatorEntry.getKey(), snapshot);
+        }
+
+
+        return snapshot;
+
 //        QueryResult results = ExecutorService.getInstance().getExecutor(database).query(new FetchObjectsStatement(example), new ExecutionOptions(new RuntimeEnvironment(database, null)));
 //        DatabaseObject result = results.toObject(example.getClass());
 //
@@ -148,59 +191,59 @@ public class SnapshotGeneratorFactory {
 //
 //        return (T) result;
 
-        AbstractSnapshotGenerator generator = new TableSnapshotGenerator();
-        List<Statement> statements = new ArrayList<Statement>();
-        ExecutionEnvironment executionEnvironment = new ExecutionEnvironment(database);
-        statements.add(generator.generateLookupStatement(example, executionEnvironment, new StatementLogicChain(null)));
-
-
-        Statement[] addToStatements = new TableSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new StatementLogicChain(null));
-        if (addToStatements != null) {
-            statements.addAll(Arrays.asList(addToStatements));
-        }
-        addToStatements = new ColumnSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new StatementLogicChain(null));
-        if (addToStatements != null) {
-            statements.addAll(Arrays.asList(addToStatements));
-        }
-
-        DatabaseObjectCollection collection = new DatabaseObjectCollection(database);
-        List<Action> actions = new ArrayList<Action>();
-        for (Statement statement : statements) {
-            if (StatementLogicFactory.getInstance().supports(statement, executionEnvironment)) {
-                try {
-                    Action[] actionArray = StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(database));
-                    if (actionArray == null || actionArray.length == 0) {
-                        continue;
-                    }
-                    if (actionArray.length == 1) {
-                        actions.add(actionArray[0]);
-                    }
-                    if (actionArray.length > 1) {
-                        throw new UnexpectedLiquibaseException("Too many actions generated from "+statement);
-                    }
-                } catch (UnsupportedException e) {
-                    throw new DatabaseException(e);
-                }
-            }
-        }
-
-        for (Action action : mergeActions(actions)) {
-            for (DatabaseObject object : ((QueryAction) action).query(executionEnvironment).toList(DatabaseObject.class)) {
-                collection.add(object);
-            }
-        }
-
-        for (DatabaseObject object : collection.get(Table.class)) {
-            new ColumnSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new StatementLogicChain(null));
-        }
-
-        for (DatabaseObject object : collection.get(Schema.class)) {
-            new TableSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new StatementLogicChain(null));
-        }
-
-        System.out.println(collection);
-
-        return collection.get(example);
+//        AbstractSnapshotGenerator generator = new TableSnapshotGenerator();
+//        List<Statement> statements = new ArrayList<Statement>();
+//        ExecutionEnvironment executionEnvironment = new ExecutionEnvironment(snapshot.getDatabase());
+//        statements.add(generator.generateLookupStatement(example, executionEnvironment, new StatementLogicChain(null)));
+//
+//
+//        Statement[] addToStatements = new TableSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new StatementLogicChain(null));
+//        if (addToStatements != null) {
+//            statements.addAll(Arrays.asList(addToStatements));
+//        }
+//        addToStatements = new ColumnSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new StatementLogicChain(null));
+//        if (addToStatements != null) {
+//            statements.addAll(Arrays.asList(addToStatements));
+//        }
+//
+//        DatabaseObjectCollection collection = new DatabaseObjectCollection(snapshot.getDatabase());
+//        List<Action> actions = new ArrayList<Action>();
+//        for (Statement statement : statements) {
+//            if (StatementLogicFactory.getInstance().supports(statement, executionEnvironment)) {
+//                try {
+//                    Action[] actionArray = StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(snapshot.getDatabase()));
+//                    if (actionArray == null || actionArray.length == 0) {
+//                        continue;
+//                    }
+//                    if (actionArray.length == 1) {
+//                        actions.add(actionArray[0]);
+//                    }
+//                    if (actionArray.length > 1) {
+//                        throw new UnexpectedLiquibaseException("Too many actions generated from "+statement);
+//                    }
+//                } catch (UnsupportedException e) {
+//                    throw new DatabaseException(e);
+//                }
+//            }
+//        }
+//
+//        for (Action action : mergeActions(actions)) {
+//            for (DatabaseObject object : ((QueryAction) action).query(executionEnvironment).toList(DatabaseObject.class)) {
+//                collection.add(object);
+//            }
+//        }
+//
+//        for (DatabaseObject object : collection.get(Table.class)) {
+//            new ColumnSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new StatementLogicChain(null));
+//        }
+//
+//        for (DatabaseObject object : collection.get(Schema.class)) {
+//            new TableSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new StatementLogicChain(null));
+//        }
+//
+//        System.out.println(collection);
+//
+//        return snapshot;
     }
 
     public List<Action> mergeActions(List<Action> originalList) {
@@ -274,16 +317,16 @@ public class SnapshotGeneratorFactory {
         if (!returnSet.add(type)) {
             return;
         }
-        SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
-        if (generators != null && generators.size() > 0) {
-            SnapshotGenerator generator = generators.iterator().next();
-            if (generator.addsTo() != null) {
-                for (Class<? extends DatabaseObject> newType : generator.addsTo()) {
-                    returnSet.add(newType);
-                    getContainerTypes(newType, database, returnSet);
-                }
-            }
-        }
+//        SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
+//        if (generators != null && generators.size() > 0) {
+//            SnapshotGenerator generator = generators.iterator().next();
+//            if (generator.addsTo() != null) {
+//                for (Class<? extends DatabaseObject> newType : generator.addsTo()) {
+//                    returnSet.add(newType);
+//                    getContainerTypes(newType, database, returnSet);
+//                }
+//            }
+//        }
 
     }
 }
