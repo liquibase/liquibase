@@ -203,7 +203,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     //no attributes
                 } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
                     //data length is in bytes but specified in chars
-                    type.setColumnSize(type.getColumnSize() / 2);
+                    type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
                     type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
                 } else {
                     String charUsed = columnMetadataResultSet.getString("CHAR_USED");
