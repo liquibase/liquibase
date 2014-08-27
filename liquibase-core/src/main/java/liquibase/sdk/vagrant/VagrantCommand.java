@@ -26,7 +26,7 @@ public class VagrantCommand extends AbstractCommand {
     public VagrantCommand(Main mainApp) {
         this.mainApp = mainApp;
 
-        this.vagrantPath = this.mainApp.getPath("vagrant.bat", "vagrant.sh", "vagrant");
+        this.vagrantPath = this.mainApp.getPath("vagrant.exe", "vagrant.bat", "vagrant.sh", "vagrant");
 
         if (vagrantPath == null) {
             throw new UnexpectedLiquibaseSdkException("Cannot find vagrant in " + mainApp.getPath());
