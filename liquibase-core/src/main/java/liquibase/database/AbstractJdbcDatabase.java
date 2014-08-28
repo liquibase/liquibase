@@ -964,6 +964,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName.contains("(")) {
             return false;
         }
+        if (objectName.contains(quotingStartCharacter) || objectName.contains(quotingEndCharacter)) {
+            return false;
+        }
+
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains(" ");
     }
 
