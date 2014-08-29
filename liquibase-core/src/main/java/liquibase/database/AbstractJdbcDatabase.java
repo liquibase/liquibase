@@ -1202,7 +1202,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
                 continue;
             }
-            LogFactory.getLogger().debug("Executing Statement: " + statement.getClass().getName());
+            LogFactory.getLogger().debug("Executing Statement: " + statement);
             ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
         }
     }
