@@ -540,6 +540,7 @@
 			<xsd:attribute name="file" type="xsd:string" />
 			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
 			<xsd:attribute name="primaryKey" type="xsd:string" use="required" />
+			<xsd:attribute name="updateOnly" type="xsd:boolean" default="false" />
 			<xsd:attribute name="separator" type="xsd:string" default=","/>
 			<xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
 		</xsd:complexType>

@@ -10,6 +10,13 @@ public class InsertOrUpdateStatementTest extends InsertStatementTest {
         String primaryKey = "PRIMARYKEY";
         InsertOrUpdateStatement statement = new InsertOrUpdateStatement("CATALOG", "SCHEMA","TABLE", primaryKey);
         assertEquals(primaryKey,statement.getPrimaryKey());
+        assertEquals(Boolean.FALSE,statement.getUpdateOnly());
     }
 
+    @Test
+    public void setUpdateOnly(){
+        String primaryKey = "PRIMARYKEY";
+        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("CATALOG", "SCHEMA","TABLE", primaryKey, true);
+        assertEquals(Boolean.TRUE,statement.getUpdateOnly());
+    }
 }
