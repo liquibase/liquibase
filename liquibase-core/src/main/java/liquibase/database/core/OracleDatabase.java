@@ -303,4 +303,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
         return userDefinedTypes;
     }
+
+    @Override
+    public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
+        if (databaseFunction != null && databaseFunction.toString().equalsIgnoreCase("current_timestamp")) {
+            return databaseFunction.toString().toUpperCase();
+        }
+        return super.generateDatabaseFunctionValue(databaseFunction);
+    }
 }
