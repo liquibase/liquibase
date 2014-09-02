@@ -79,16 +79,14 @@ public class StandardLockService implements LockService {
 
     @Override
     public void init() throws DatabaseException {
-
         boolean createdTable = false;
         Executor executor = ExecutorService.getInstance().getExecutor(database);
-        if (!hasDatabaseChangeLogLockTable && !hasDatabaseChangeLogLockTable()) {
 
+        if (!hasDatabaseChangeLogLockTable()) {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             database.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-            this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
         }
 
@@ -112,20 +110,21 @@ public class StandardLockService implements LockService {
 
 
     public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
-        boolean initialized;
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
-        try {
-            initialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))) > 0;
-        } catch (LiquibaseException e) {
-            if (executor.updatesDatabase()) {
-                throw new UnexpectedLiquibaseException(e);
-            } else {
-                //probably didn't actually create the table yet.
-
-                initialized = !tableJustCreated;
+        if (!isDatabaseChangeLogLockTableInitialized) {
+            Executor executor = ExecutorService.getInstance().getExecutor(database);
+        
+            try {
+                isDatabaseChangeLogLockTableInitialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))) > 0;
+            } catch (LiquibaseException e) {
+                if (executor.updatesDatabase()) {
+                    throw new UnexpectedLiquibaseException(e);
+                } else {
+                    //probably didn't actually create the table yet.
+                    isDatabaseChangeLogLockTableInitialized = !tableJustCreated;
+                }
             }
         }
-        return initialized;
+        return isDatabaseChangeLogLockTableInitialized;
     }
 
     @Override
@@ -134,13 +133,14 @@ public class StandardLockService implements LockService {
     }
 
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        boolean hasTable = false;
-        try {
-            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(database);
-        } catch (LiquibaseException e) {
-            throw new UnexpectedLiquibaseException(e);
+        if (!hasDatabaseChangeLogLockTable) {
+            try {
+                hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(database);
+            } catch (LiquibaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
-        return hasTable;
+        return hasDatabaseChangeLogLockTable;
     }
 
 
