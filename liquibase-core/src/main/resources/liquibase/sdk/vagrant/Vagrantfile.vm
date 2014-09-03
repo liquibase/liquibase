@@ -9,6 +9,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     config.vm.network :private_network, ip: "${configVmNetworkIp}"
     config.vm.synced_folder "../install-files", "/vagrant-install-files"
+    config.vm.boot_timeout = 900
 
 ${osLevelConfig}
 

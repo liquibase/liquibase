@@ -26,7 +26,7 @@ public class VagrantCommand extends AbstractCommand {
     public VagrantCommand(Main mainApp) {
         this.mainApp = mainApp;
 
-        this.vagrantPath = this.mainApp.getPath("vagrant.bat", "vagrant.sh", "vagrant");
+        this.vagrantPath = this.mainApp.getPath("vagrant.exe", "vagrant.bat", "vagrant.sh", "vagrant");
 
         if (vagrantPath == null) {
             throw new UnexpectedLiquibaseSdkException("Cannot find vagrant in " + mainApp.getPath());
@@ -411,12 +411,7 @@ public class VagrantCommand extends AbstractCommand {
         String shellScript;
         String osLevelConfig;
         if (vagrantInfo.baseBoxName.contains("windows")) {
-            osLevelConfig = "config.vm.guest = :windows\n"
-                    + "config.vm.network :forwarded_port, guest: 3389, host: 83389, id: \"rdp\", auto_correct: true\n"
-                    + "config.vm.network :forwarded_port, guest: 5985, host: 85985, id: \"winrm\", auto_correct: true\n"
-                    + "config.windows.halt_timeout = 30\n"
-                    + "config.winrm.username = 'vagrant'\n";
-
+            osLevelConfig = "config.vm.communicator = \"winrm\"\n";
             shellScript = "shell/bootstrap.bat";
         } else {
             shellScript = "shell/bootstrap.sh";

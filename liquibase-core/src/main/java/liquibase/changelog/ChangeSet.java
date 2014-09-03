@@ -267,9 +267,15 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.comments = StringUtils.trimToNull(this.comments);
 
         String objectQuotingStrategyString = StringUtils.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
-        this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
+        if (changeLog != null) {
+            this.objectQuotingStrategy = changeLog.getObjectQuotingStrategy();
+        }
         if (objectQuotingStrategyString != null) {
             this.objectQuotingStrategy = ObjectQuotingStrategy.valueOf(objectQuotingStrategyString);
+        }
+
+        if (this.objectQuotingStrategy == null) {
+            this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
         }
 
         this.filePath = StringUtils.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));

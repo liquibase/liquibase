@@ -268,7 +268,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 String filterCondition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
                 if (filterCondition != null) {
-                    filterCondition = filterCondition.replaceAll("\"", "");
+                    if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
+                        filterCondition = filterCondition.replaceAll("\"", "");
+                    }
                     columnName = filterCondition;
                 }
 
