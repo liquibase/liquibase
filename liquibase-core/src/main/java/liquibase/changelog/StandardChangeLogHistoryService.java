@@ -29,7 +29,7 @@ import java.util.*;
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private List<RanChangeSet> ranChangeSetList;
-
+    private boolean serviceInitialized = false;
     private Integer lastChangeSetSequenceValue;
 
     @Override
@@ -74,6 +74,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     public void init() throws DatabaseException {
+        if (serviceInitialized) {
+            return;
+        }
         Database database = getDatabase();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
@@ -165,7 +168,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
             LogFactory.getLogger().info("Creating database history table with name: " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
-//                }
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -176,7 +178,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+getDatabase().getShortName()+" when checking databasechangelog table");
             }
         }
-
+        serviceInitialized = true;
     }
 
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
