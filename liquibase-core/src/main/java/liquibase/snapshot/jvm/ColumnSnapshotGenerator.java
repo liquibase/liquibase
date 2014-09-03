@@ -48,7 +48,26 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (columnMetadataRs.size() > 0) {
                 CachedRow data = columnMetadataRs.get(0);
-                return readColumn(data, relation, database);
+                Column column = readColumn(data, relation, database);
+
+                if (column != null && database instanceof MSSQLDatabase) {
+                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
+                            " CAST(value as varchar(max)) as REMARKS\n" +
+                            " FROM\n" +
+                            " sys.extended_properties\n" +
+                            "  WHERE\n" +
+                            " name='MS_Description' " +
+                            " AND major_id = OBJECT_ID('"+column.getRelation().getName()+"')\n" +
+                            " AND\n" +
+                            " minor_id = COLUMNPROPERTY(major_id, '"+column.getName()+"', 'ColumnId')"), String.class);
+
+                    if (remarks != null && remarks.size() > 0) {
+                        column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+                    }
+
+                }
+
+                return column;
             } else {
                 return null;
             }
