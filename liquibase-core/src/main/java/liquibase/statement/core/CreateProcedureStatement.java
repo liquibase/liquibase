@@ -9,6 +9,7 @@ public class CreateProcedureStatement extends AbstractSqlStatement {
     private String procedureName;
     private String procedureText;
     private String endDelimiter;
+    private Boolean replaceIfExists;
 
     public CreateProcedureStatement(String catalogName, String schemaName, String procedureName, String procedureText, String endDelimiter) {
         this.catalogName = catalogName;
@@ -36,5 +37,13 @@ public class CreateProcedureStatement extends AbstractSqlStatement {
 
     public String getEndDelimiter() {
         return endDelimiter;
+    }
+
+    public Boolean getReplaceIfExists() {
+        return replaceIfExists;
+    }
+
+    public void setReplaceIfExists(Boolean replaceIfExists) {
+        this.replaceIfExists = replaceIfExists;
     }
 }

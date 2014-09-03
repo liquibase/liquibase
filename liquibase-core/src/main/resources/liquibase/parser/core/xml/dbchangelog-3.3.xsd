@@ -959,7 +959,8 @@
             <xsd:attribute name="encoding" type="xsd:string" />
             <xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
             <xsd:attribute name="dbms" type="xsd:string" />
-		</xsd:complexType>
+            <xsd:attribute name="replaceIfExists" type="xsd:boolean" />
+        </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="executeCommand">

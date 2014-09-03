@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -36,6 +37,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private String path;
     private Boolean relativeToChangelogFile;
     private String encoding = null;
+    private Boolean replaceIfExists;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -145,6 +147,14 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.comments = comments;
     }
 
+    public Boolean getReplaceIfExists() {
+        return replaceIfExists;
+    }
+
+    public void setReplaceIfExists(Boolean replaceIfExists) {
+        this.replaceIfExists = replaceIfExists;
+    }
+
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validate = new ValidationErrors(); //not falling back to default because of path/procedureText option group. Need to specify everything
@@ -155,6 +165,18 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         if (StringUtils.trimToNull(getProcedureText()) == null && StringUtils.trimToNull(getPath()) == null) {
             validate.addError("Cannot specify either 'path' or a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
         }
+
+        if (this.getReplaceIfExists() != null) {
+            if (database instanceof MSSQLDatabase) {
+                if (this.getReplaceIfExists() && this.getProcedureName() == null) {
+                    validate.addError("procedureName is required if replaceIfExists = true");
+                }
+            } else {
+                validate.checkDisallowedField("replaceIfExists", this.getReplaceIfExists(), null);
+            }
+
+        }
+
 
         return validate;
     }
@@ -236,8 +258,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
+        CreateProcedureStatement statement = new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter);
+        statement.setReplaceIfExists(getReplaceIfExists());
         return new SqlStatement[]{
-                new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter),
+                statement,
         };
     }
 
