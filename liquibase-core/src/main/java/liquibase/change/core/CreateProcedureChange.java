@@ -172,7 +172,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
             } else {
-                validate.checkDisallowedField("replaceIfExists", this.getReplaceIfExists(), null);
+                validate.checkDisallowedField("replaceIfExists", this.getReplaceIfExists(), database);
             }
 
         }
