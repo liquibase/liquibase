@@ -40,7 +40,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
             sql.add(new UnparsedSql("if object_id('dbo."+statement.getProcedureName()+"', 'p') is null exec ('create procedure "+database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class)+" as select 1 a')"));
 
-            procedureText = procedureText.replaceFirst("(?i)create\\s+procedure", "alter procedure");
+            procedureText = procedureText.replaceFirst("(?i)create\\s+procedure", "ALTER PROCEDURE");
         }
 
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));

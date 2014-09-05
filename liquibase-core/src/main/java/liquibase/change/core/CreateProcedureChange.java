@@ -147,6 +147,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.comments = comments;
     }
 
+    @DatabaseChangeProperty
     public Boolean getReplaceIfExists() {
         return replaceIfExists;
     }
