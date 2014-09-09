@@ -4,8 +4,8 @@ import liquibase.change.AddColumnConfig
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.core.Index
 
 public class CreateIndexChangeTest extends StandardChangeTest {
@@ -21,8 +21,8 @@ public class CreateIndexChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def index = new Index("idx_test", null, null, "test_table", "test_col")
         index.unique = true

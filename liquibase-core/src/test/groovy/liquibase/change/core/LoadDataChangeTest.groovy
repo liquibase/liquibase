@@ -5,8 +5,8 @@ import liquibase.change.StandardChangeTest;
 import liquibase.sdk.database.MockDatabase
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement
 import liquibase.statement.core.InsertDataStatement
 import spock.lang.Unroll
@@ -150,8 +150,8 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def change = new LoadDataChange()
 

@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
@@ -83,7 +83,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase());
+            Column snapshot = SnapshotFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase());
             Boolean nullable = snapshot.isNullable();
             return new ChangeStatus().assertComplete(nullable == null || nullable, "Column is not null");
         } catch (Exception e) {

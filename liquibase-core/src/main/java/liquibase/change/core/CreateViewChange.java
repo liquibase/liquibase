@@ -6,7 +6,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
@@ -128,7 +128,7 @@ public class CreateViewChange extends AbstractChange {
         try {
             View example = new View(getCatalogName(), getSchemaName(), getViewName());
 
-            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
+            View snapshot = SnapshotFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "View does not exist");
 
             return result;

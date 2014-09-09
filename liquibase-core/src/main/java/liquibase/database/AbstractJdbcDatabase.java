@@ -724,7 +724,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 	            }
 
 	            final long createSnapshotStarted = System.currentTimeMillis();
-	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+	            snapshot = SnapshotFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
 	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);

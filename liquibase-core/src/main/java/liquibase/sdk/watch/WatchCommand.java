@@ -16,10 +16,9 @@ import liquibase.lockservice.LockServiceFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
-import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -162,7 +161,7 @@ public class WatchCommand extends AbstractCommand {
                     TemplateService.getInstance().write("liquibase/sdk/watch/index.html.vm", httpServletResponse.getWriter(), context);
                     request.setHandled(true);
                 } else if (url.equals("/liquibase-status.json")) {
-                    if (SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(database)) {
+                    if (SnapshotFactory.getInstance().hasDatabaseChangeLogTable(database)) {
                         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                         lockService.waitForLock();
                         List<Row> rows;
@@ -200,7 +199,7 @@ public class WatchCommand extends AbstractCommand {
         protected void writeDatabaseChangeLogTab(Map<String, Object> context) throws DatabaseException {
             String outString;
             String changeLogDetails = "";
-            if (SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(database)) {
+            if (SnapshotFactory.getInstance().hasDatabaseChangeLogTable(database)) {
 
                 outString = "<table class='table table-striped table-bordered table-condensed'>";
                 outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
@@ -259,7 +258,7 @@ public class WatchCommand extends AbstractCommand {
 
         public void loadIndexData(Map<String, Object> context) {
             try {
-                NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+                NewDatabaseSnapshot snapshot = SnapshotFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
                 StringBuilder buffer = new StringBuilder();
                 Database database = snapshot.getDatabase();

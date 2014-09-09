@@ -15,6 +15,8 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     private Set<Class<? extends DatabaseObject>> types;
     private SnapshotListener snapshotListener;
+    private boolean shouldRelateObjects = true;
+    private boolean shouldAddDetails = true;
 
     public SnapshotControl(Database database) {
         setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
@@ -87,7 +89,7 @@ public class SnapshotControl implements LiquibaseSerializable {
     public boolean addType(Class<? extends DatabaseObject> type, Database database) {
         boolean added = this.types.add(type);
         if (added) {
-            for (Class<? extends DatabaseObject> container : SnapshotGeneratorFactory.getInstance().getContainerTypes(type, database)) {
+            for (Class<? extends DatabaseObject> container : SnapshotFactory.getInstance().getContainerTypes(type, database)) {
                 addType(container, database);
             }
         }
@@ -102,6 +104,22 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
         return types.contains(type);
+    }
+
+    public boolean shouldRelateObjects() {
+        return shouldRelateObjects;
+    }
+
+    public void setShouldRelateObjects(boolean shouldRelateObjects) {
+        this.shouldRelateObjects = shouldRelateObjects;
+    }
+
+    public boolean shouldAddDetails() {
+        return shouldAddDetails;
+    }
+
+    public void setShouldAddDetails(boolean shouldAddDetails) {
+        this.shouldAddDetails = shouldAddDetails;
     }
 
     @Override

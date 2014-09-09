@@ -1,12 +1,11 @@
 package liquibase.snapshot;
 
 import liquibase.ExecutionEnvironment;
-import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Comparator;
 
-class SnapshotGeneratorComparator implements Comparator<NewSnapshotGenerator> {
+class SnapshotGeneratorComparator implements Comparator<SnapshotLookupLogic> {
 
     private Class<? extends DatabaseObject> objectType;
     private ExecutionEnvironment environment;
@@ -17,7 +16,7 @@ class SnapshotGeneratorComparator implements Comparator<NewSnapshotGenerator> {
     }
 
     @Override
-    public int compare(NewSnapshotGenerator o1, NewSnapshotGenerator o2) {
+    public int compare(SnapshotLookupLogic o1, SnapshotLookupLogic o2) {
         int result = -1 * new Integer(o1.getPriority(objectType, environment)).compareTo(o2.getPriority(objectType, environment));
         if (result == 0) {
             return o1.getClass().getName().compareTo(o2.getClass().getName());

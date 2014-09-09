@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.core.DB2Database;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReindexStatement;
@@ -104,7 +104,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         try {
             PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
 
-            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
+            PrimaryKey snapshot = SnapshotFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Primary key does not exist");
 
             return result;

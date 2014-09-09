@@ -1,24 +1,20 @@
 package liquibase.snapshot.core;
 
 import liquibase.ExecutionEnvironment;
-import liquibase.action.Action;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
+import liquibase.snapshot.AbstractSnapshotLookupLogic;
 import liquibase.snapshot.NewDatabaseSnapshot;
-import liquibase.statement.Statement;
+import liquibase.snapshot.SnapshotRelateLogic;
 import liquibase.statement.core.SelectMetaDataStatement;
-import liquibase.statementlogic.StatementLogicChain;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
-import liquibase.snapshot.AbstractSnapshotGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import java.util.Collection;
 
-public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
+public class TableSnapshotGenerator extends AbstractSnapshotLookupLogic<Table> implements SnapshotRelateLogic {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, ExecutionEnvironment environment) {
@@ -31,7 +27,12 @@ public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
     }
 
     @Override
-    public <T extends DatabaseObject> Collection<T> lookupFor(DatabaseObject example, Class<T> objectType, ExecutionEnvironment environment) throws DatabaseException, UnsupportedException {
+    public boolean supports(ExecutionEnvironment environment) {
+        return true;
+    }
+
+    @Override
+    public <T extends DatabaseObject> Collection<T> lookup(Class<T> objectType, DatabaseObject example, ExecutionEnvironment environment) throws DatabaseException, UnsupportedException {
         SelectMetaDataStatement statement;
         if (example instanceof Schema) {
             statement =  new SelectMetaDataStatement(new Table().setSchema(((Schema) example)));
@@ -45,13 +46,11 @@ public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
     }
 
     @Override
-    public void relate(Class<? extends DatabaseObject> objectType, NewDatabaseSnapshot snapshot) {
-        if (Table.class.isAssignableFrom(objectType)) {
-            for (Table table : snapshot.get(Table.class)) {
-                Schema realSchema = snapshot.get(table.getSchema());
-                realSchema.addDatabaseObject(table);
-                table.setSchema(realSchema);
-            }
+    public void relate(NewDatabaseSnapshot snapshot) {
+        for (Table table : snapshot.get(Table.class)) {
+            Schema realSchema = snapshot.get(table.getSchema());
+            realSchema.addDatabaseObject(table);
+            table.setSchema(realSchema);
         }
     }
 }

@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
@@ -132,7 +132,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
                 }
             }
 
-            Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
+            Index snapshot = SnapshotFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Index does not exist");
 
             if (snapshot != null) {

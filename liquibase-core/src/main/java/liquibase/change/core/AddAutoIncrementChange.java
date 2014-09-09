@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.core.PostgresDatabase;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.Statement;
 import liquibase.statement.core.AddAutoIncrementStatement;
@@ -121,7 +121,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         ChangeStatus result = new ChangeStatus();
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
+            Column column = SnapshotFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             if (column == null) return result.unknown("Column does not exist");
 
 

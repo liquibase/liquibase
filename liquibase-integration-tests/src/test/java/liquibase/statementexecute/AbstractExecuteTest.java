@@ -12,6 +12,7 @@ import java.util.Set;
 import liquibase.CatalogAndSchema;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -20,7 +21,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.example.ExampleCustomDatabase;
@@ -52,7 +52,7 @@ public abstract class AbstractExecuteTest {
         testedDatabases = new HashSet<Class<? extends Database>>();
         this.statementUnderTest = null;
 
-        SnapshotGeneratorFactory.resetAll();
+        SnapshotFactory.resetAll();
     }
 
     protected abstract List<? extends Statement> setupStatements(Database database);

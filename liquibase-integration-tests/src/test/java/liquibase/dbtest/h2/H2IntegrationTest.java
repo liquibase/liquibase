@@ -55,7 +55,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
 
         runCompleteChangeLog();
-        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
+        NewDatabaseSnapshot snapshot = SnapshotFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
         System.out.println(snapshot);
     }
 

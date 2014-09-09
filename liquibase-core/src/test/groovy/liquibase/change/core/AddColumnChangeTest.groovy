@@ -9,8 +9,8 @@ import liquibase.sdk.database.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
@@ -61,8 +61,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def table = new Table(null, null, "test_table")
         def testColumn = new Column(Table.class, null, null, table.name, "test_col")
@@ -113,8 +113,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
     def "checkStatus with default value"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def table = new Table(((AddColumnChange) change).getCatalogName(), ((AddColumnChange) change).getSchemaName(), ((AddColumnChange) change).getTableName())
         snapshotFactory.addObjects(table)
@@ -140,8 +140,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
     def "checkStatus with auto-increment"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def table = new Table(((AddColumnChange) change).getCatalogName(), ((AddColumnChange) change).getSchemaName(), ((AddColumnChange) change).getTableName())
         snapshotFactory.addObjects(table)
@@ -166,8 +166,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
     def "checkStatus with primary key"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         then: "table is not there yet"
         assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
@@ -222,7 +222,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         change.columns[1].position== 3
     }
 
-    protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {
+    protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotFactory snapshotFactory) {
         for (columnDef in ((AddColumnChange) change).getColumns()) {
             def column = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, columnDef.name)
             table.getColumns().add(column)

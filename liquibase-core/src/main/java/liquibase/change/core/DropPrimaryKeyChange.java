@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.Index;
@@ -85,7 +85,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Primary key exists");
+            return new ChangeStatus().assertComplete(!SnapshotFactory.getInstance().has(new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Primary key exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

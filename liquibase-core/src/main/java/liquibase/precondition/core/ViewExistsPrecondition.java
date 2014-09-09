@@ -8,7 +8,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 
@@ -58,7 +58,7 @@ public class ViewExistsPrecondition extends AbstractPrecondition {
     	try {
             currentCatalogName = getCatalogName();
             currentSchemaName = getSchemaName();
-            if (!SnapshotGeneratorFactory.getInstance().has(new View().setName(getViewName()).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
+            if (!SnapshotFactory.getInstance().has(new View().setName(getViewName()).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
                 throw new PreconditionFailedException("View "+database.escapeTableName(currentCatalogName, currentSchemaName, getViewName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

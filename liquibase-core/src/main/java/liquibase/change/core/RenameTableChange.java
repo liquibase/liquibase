@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.ReindexStatement;
 import liquibase.statement.core.RenameTableStatement;
@@ -80,8 +80,8 @@ public class RenameTableChange extends AbstractChange {
         try {
             Database database = env.getTargetDatabase();
             ChangeStatus changeStatus = new ChangeStatus();
-            Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
-            Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
+            Table newTable = SnapshotFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
+            Table oldTable = SnapshotFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
 
             if (newTable == null && oldTable == null) {
                 return changeStatus.unknown("Neither table exists");

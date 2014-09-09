@@ -5,7 +5,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Column;
@@ -114,8 +114,8 @@ public class RenameColumnChange extends AbstractChange {
             Database database = env.getTargetDatabase();
 
             ChangeStatus changeStatus = new ChangeStatus();
-            Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()), database);
-            Column oldColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getOldColumnName()), database);
+            Column newColumn = SnapshotFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()), database);
+            Column oldColumn = SnapshotFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getOldColumnName()), database);
 
             if (newColumn == null && oldColumn == null) {
                 return changeStatus.unknown("Neither column exists");

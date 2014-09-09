@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropSequenceStatement;
 import liquibase.structure.core.Sequence;
@@ -52,7 +52,7 @@ public class DropSequenceChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), env.getTargetDatabase()), "Sequence exists");
+            return new ChangeStatus().assertComplete(!SnapshotFactory.getInstance().has(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), env.getTargetDatabase()), "Sequence exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

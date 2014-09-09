@@ -5,8 +5,8 @@ import liquibase.database.core.OracleDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 
 public class CreateProcedureChangeTest extends StandardChangeTest {
 
@@ -21,8 +21,8 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
         def change = new CreateProcedureChange()
         change.procedureName = "test_proc"
 

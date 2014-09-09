@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReindexStatement;
@@ -239,9 +239,9 @@ public class AddLookupTableChange extends AbstractChange {
             foreignKeyExample.setForeignKeyColumns(getExistingColumnName());
             foreignKeyExample.setPrimaryKeyColumns(getNewColumnName());
 
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
+            result.assertComplete(SnapshotFactory.getInstance().has(newTableExample, database), "New table does not exist");
+            result.assertComplete(SnapshotFactory.getInstance().has(newColumnExample, database), "New column does not exist");
+            result.assertComplete(SnapshotFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
 
             return result;
 

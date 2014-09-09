@@ -160,7 +160,7 @@ public class DiffCommand extends AbstractCommand {
         if (getSnapshotListener() != null) {
             snapshotControl.setSnapshotListener(getSnapshotListener());
         }
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
+        return SnapshotFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
     }
 
     protected NewDatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
@@ -184,7 +184,7 @@ public class DiffCommand extends AbstractCommand {
         if (getSnapshotListener() != null) {
             snapshotControl.setSnapshotListener(getSnapshotListener());
         }
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
+        return SnapshotFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
     }
 }
 

@@ -6,7 +6,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReindexStatement;
@@ -116,7 +116,7 @@ public class DropColumnChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase()), "Column exists");
+            return new ChangeStatus().assertComplete(!SnapshotFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase()), "Column exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

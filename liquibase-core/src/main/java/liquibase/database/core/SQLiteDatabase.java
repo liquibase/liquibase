@@ -11,7 +11,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
@@ -128,7 +128,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         Table table = null;
         try {
             Database database = env.getTargetDatabase();
-            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+            table = SnapshotFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
             List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();
@@ -155,7 +155,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             }
 
             List<Index> newIndices = new ArrayList<Index>();
-            for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
+            for (Index index : SnapshotFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
                 if (index.getTable().getName().equalsIgnoreCase(tableName)) {
                     if (alterTableVisitor.createThisIndex(index)) {
                         newIndices.add(index);

@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.ForeignKey;
@@ -268,7 +268,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             example.setForeignKeyColumns(getBaseColumnNames());
             example.setPrimaryKeyColumns(getReferencedColumnNames());
 
-            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
+            ForeignKey snapshot = SnapshotFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Foreign key does not exist");
 
             if (snapshot != null) {

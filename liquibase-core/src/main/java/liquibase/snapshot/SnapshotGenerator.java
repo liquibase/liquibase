@@ -5,7 +5,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 
 /**
- * @deprecated Moving to {@link liquibase.snapshot.NewSnapshotGenerator}
+ * @deprecated Moving to {@link SnapshotLookupLogic}
  */
 public interface SnapshotGenerator {
 

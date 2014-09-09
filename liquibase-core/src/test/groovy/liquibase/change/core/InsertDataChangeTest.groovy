@@ -4,8 +4,8 @@ import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 
 public class InsertDataChangeTest extends StandardChangeTest {
 
@@ -47,8 +47,8 @@ public class InsertDataChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def change = new InsertDataChange()
 

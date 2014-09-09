@@ -8,7 +8,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -74,7 +74,7 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
             example.setTable(table);
             example.setName(getPrimaryKeyName());
 
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotFactory.getInstance().has(example, database)) {
                 if (tableName != null) {
                     throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeObjectName(getTableName(), Table.class), changeLog, this);
                 } else {

@@ -6,7 +6,7 @@ import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.core.string.StringChangeLogSerializer
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.SnapshotFactory
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -22,7 +22,7 @@ public abstract class StandardChangeTest extends Specification {
     @Shared resourceSupplier = new ResourceSupplier()
 
     def cleanup() {
-        SnapshotGeneratorFactory.reset()
+        SnapshotFactory.reset()
     }
 
     def "refactoring name matches expected class name"() {

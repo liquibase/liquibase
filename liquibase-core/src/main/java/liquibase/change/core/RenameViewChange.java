@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.RenameViewStatement;
 import liquibase.structure.core.View;
@@ -75,8 +75,8 @@ public class RenameViewChange extends AbstractChange {
         try {
             ChangeStatus changeStatus = new ChangeStatus();
             Database database = env.getTargetDatabase();
-            View newView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
-            View oldView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
+            View newView = SnapshotFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
+            View oldView = SnapshotFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
 
             if (newView == null && oldView == null) {
                 return changeStatus.unknown("Neither view exists");

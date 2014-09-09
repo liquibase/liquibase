@@ -10,10 +10,9 @@ import liquibase.dbdoc.*;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -130,7 +129,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+        NewDatabaseSnapshot snapshot = SnapshotFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));

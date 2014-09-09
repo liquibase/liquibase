@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
@@ -9,7 +10,6 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
@@ -160,12 +160,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
             ChangeStatus status = new ChangeStatus();
-            Table tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            Table tableSnapshot = SnapshotFactory.getInstance().createSnapshot(example, database);
             status.assertComplete(tableSnapshot != null, "Table does not exist");
 
             if (tableSnapshot != null) {
                 for (ColumnConfig columnConfig : getColumns()) {
-                    Column columnSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(columnConfig).setRelation(tableSnapshot), database);
+                    Column columnSnapshot = SnapshotFactory.getInstance().createSnapshot(new Column(columnConfig).setRelation(tableSnapshot), database);
                     status.assertCorrect(columnSnapshot != null, "Column "+columnConfig.getName()+" is missing");
                     if (columnSnapshot != null) {
                         ConstraintsConfig constraints = columnConfig.getConstraints();

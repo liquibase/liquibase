@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.core.SybaseASADatabase;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
 import liquibase.structure.core.UniqueConstraint;
@@ -92,7 +92,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
                     example.addColumn(example.getColumns().size(), column);
                 }
             }
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(example, env.getTargetDatabase()), "Unique constraint exists");
+            return new ChangeStatus().assertComplete(!SnapshotFactory.getInstance().has(example, env.getTargetDatabase()), "Unique constraint exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

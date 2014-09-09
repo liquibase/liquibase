@@ -1,12 +1,12 @@
 package liquibase.change.core;
 
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.core.*;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
@@ -190,7 +190,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         ChangeStatus result = new ChangeStatus();
         try {
             for (AddColumnConfig column : getColumns()) {
-                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), env.getTargetDatabase());
+                Column snapshot = SnapshotFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), env.getTargetDatabase());
                 result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
 
                 if (snapshot != null) {

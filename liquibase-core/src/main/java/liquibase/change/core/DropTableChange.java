@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
@@ -68,7 +68,7 @@ public class DropTableChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Table(getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Table exists");
+            return new ChangeStatus().assertComplete(!SnapshotFactory.getInstance().has(new Table(getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Table exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

@@ -9,10 +9,9 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.NewDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
@@ -144,8 +143,8 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             diffOutputControl.setDataDir(getDataDir());
 
-            NewDatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase, getDiffTypes()));
-            NewDatabaseSnapshot comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(liquibase.getDatabase().getDefaultSchema(), liquibase.getDatabase(), new SnapshotControl(liquibase.getDatabase(), getDiffTypes()));
+            NewDatabaseSnapshot referenceSnapshot = SnapshotFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase, getDiffTypes()));
+            NewDatabaseSnapshot comparisonSnapshot = SnapshotFactory.getInstance().createSnapshot(liquibase.getDatabase().getDefaultSchema(), liquibase.getDatabase(), new SnapshotControl(liquibase.getDatabase(), getDiffTypes()));
 
             CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
                     new CompareControl.SchemaComparison(

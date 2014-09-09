@@ -8,7 +8,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
@@ -54,7 +54,7 @@ public class TableExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
             String correctedTableName = database.correctObjectName(getTableName(), Table.class);
-            if (!SnapshotGeneratorFactory.getInstance().has(new Table().setName(correctedTableName).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
+            if (!SnapshotFactory.getInstance().has(new Table().setName(correctedTableName).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
                 throw new PreconditionFailedException("Table "+database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

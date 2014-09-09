@@ -4,22 +4,19 @@ import liquibase.ExecutionEnvironment;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.snapshot.AbstractSnapshotLookupLogic;
 import liquibase.snapshot.NewDatabaseSnapshot;
-import liquibase.statement.Statement;
+import liquibase.snapshot.SnapshotRelateLogic;
 import liquibase.statement.core.SelectMetaDataStatement;
-import liquibase.statementlogic.StatementLogicChain;
-import liquibase.snapshot.AbstractSnapshotGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import java.util.Collection;
-import java.util.Set;
 
-public class ColumnSnapshotGenerator extends AbstractSnapshotGenerator<Column> {
+public class ColumnLookup extends AbstractSnapshotLookupLogic<Column> implements SnapshotRelateLogic {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, ExecutionEnvironment environment) {
@@ -31,7 +28,12 @@ public class ColumnSnapshotGenerator extends AbstractSnapshotGenerator<Column> {
     }
 
     @Override
-    public <T extends DatabaseObject> Collection<T> lookupFor(DatabaseObject example, Class<T> objectType, ExecutionEnvironment environment) {
+    public boolean supports(ExecutionEnvironment environment) {
+        return true;
+    }
+
+    @Override
+    public <T extends DatabaseObject> Collection<T> lookup(Class<T> objectType, DatabaseObject example, ExecutionEnvironment environment) {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(environment.getTargetDatabase());
             if (example instanceof Schema) {
@@ -47,7 +49,7 @@ public class ColumnSnapshotGenerator extends AbstractSnapshotGenerator<Column> {
     }
 
     @Override
-    public void relate(Class<? extends DatabaseObject> objectType, NewDatabaseSnapshot snapshot) {
+    public void relate(NewDatabaseSnapshot snapshot) {
         for (Column column : snapshot.get(Column.class)) {
             Relation exampleRelation = column.getRelation();
 

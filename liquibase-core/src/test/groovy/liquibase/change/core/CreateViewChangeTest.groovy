@@ -5,8 +5,8 @@ import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNodeException
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.core.View
 
 public class CreateViewChangeTest extends StandardChangeTest {
@@ -24,8 +24,8 @@ public class CreateViewChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def view = new View(null, null, "test_view")
 

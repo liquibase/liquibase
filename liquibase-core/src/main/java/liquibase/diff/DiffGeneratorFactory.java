@@ -72,12 +72,12 @@ public class DiffGeneratorFactory {
     }
 
     public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, SnapshotControl referenceSnapshotControl, SnapshotControl comparisonSnapshotControl, CompareControl compareControl) throws LiquibaseException {
-        NewDatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, referenceSnapshotControl);
+        NewDatabaseSnapshot referenceSnapshot = SnapshotFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, referenceSnapshotControl);
         NewDatabaseSnapshot comparisonSnapshot = null;
         if (comparisonDatabase == null) {
             comparisonSnapshot = new EmptyDatabaseSnapshot(referenceDatabase);
         } else {
-            comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase.getDefaultSchema(), comparisonDatabase, comparisonSnapshotControl);
+            comparisonSnapshot = SnapshotFactory.getInstance().createSnapshot(comparisonDatabase.getDefaultSchema(), comparisonDatabase, comparisonSnapshotControl);
         }
 
         return getGenerator(referenceDatabase, comparisonDatabase).compare(referenceSnapshot, comparisonSnapshot, compareControl);

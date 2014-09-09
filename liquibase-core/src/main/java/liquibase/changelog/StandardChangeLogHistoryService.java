@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.Contexts;
 import liquibase.ExecutionEnvironment;
 import liquibase.exception.*;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.LabelExpression;
@@ -13,7 +14,6 @@ import liquibase.executor.*;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -64,7 +64,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             return true;
         }
         try {
-            return SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(getDatabase());
+            return SnapshotFactory.getInstance().hasDatabaseChangeLogTable(getDatabase());
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -76,7 +76,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         Table changeLogTable = null;
         try {
-            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(database, Table.class, Column.class), database);
+            changeLogTable = SnapshotFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(database, Table.class, Column.class), database);
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -354,7 +354,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void destroy() throws DatabaseException {
         Database database = getDatabase();
         try {
-            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+            if (SnapshotFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), false));
             }
         } catch (InvalidExampleException e) {

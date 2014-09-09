@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.structure.core.Index;
@@ -57,7 +57,7 @@ public class DropIndexChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Index exists");
+            return new ChangeStatus().assertComplete(!SnapshotFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Index exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

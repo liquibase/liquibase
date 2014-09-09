@@ -1,7 +1,8 @@
 package liquibase.snapshot;
 
-import liquibase.database.Database;
+import liquibase.ExecutionEnvironment;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
@@ -10,10 +11,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
+public class MockSnapshotFactory extends SnapshotFactory {
     private List<DatabaseObject> objects;
 
-    public MockSnapshotGeneratorFactory(DatabaseObject... objects) {
+    public MockSnapshotFactory(DatabaseObject... objects) {
         this.objects = new ArrayList<DatabaseObject>();
         if (objects != null) {
             this.objects.addAll(Arrays.asList(objects));
@@ -21,8 +22,8 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
     }
 
     @Override
-    public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        return new MockDatabaseSnapshot(objects, examples, database, snapshotControl);
+    public NewDatabaseSnapshot createSnapshot(DatabaseObject[] examples, SnapshotControl snapshotControl, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
+        return new NewDatabaseSnapshot(snapshotControl, env);
     }
 
     public void addObjects(DatabaseObject... objects) {

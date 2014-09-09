@@ -3,8 +3,8 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 
 public class DropSequenceChangeTest extends StandardChangeTest {
 
@@ -20,8 +20,8 @@ public class DropSequenceChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def sequence = new liquibase.structure.core.Sequence(null, null, "seq_test")
 

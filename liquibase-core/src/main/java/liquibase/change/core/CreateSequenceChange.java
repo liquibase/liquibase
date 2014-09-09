@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.structure.core.Sequence;
@@ -133,7 +133,7 @@ public class CreateSequenceChange extends AbstractChange {
     public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), env.getTargetDatabase());
+            Sequence sequence = SnapshotFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), env.getTargetDatabase());
             result.assertComplete(sequence != null, "Sequence " + getSequenceName() + " does not exist");
             if (sequence != null) {
                 if (getIncrementBy() != null) {

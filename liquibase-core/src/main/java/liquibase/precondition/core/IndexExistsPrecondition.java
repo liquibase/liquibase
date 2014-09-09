@@ -8,7 +8,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
@@ -98,7 +98,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
                     example.getColumns().add(database.correctObjectName(column, Column.class));
                 }
             }
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+            if (!SnapshotFactory.getInstance().has(example, database)) {
                 String name = "";
 
                 if (getIndexName() != null) {

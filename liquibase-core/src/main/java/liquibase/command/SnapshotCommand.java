@@ -80,7 +80,7 @@ public class SnapshotCommand extends AbstractCommand {
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
-        NewDatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+        NewDatabaseSnapshot snapshot = SnapshotFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
         return SnapshotSerializerFactory.getInstance().getSerializer(getSerializerFormat()).serialize(snapshot, true);
     }

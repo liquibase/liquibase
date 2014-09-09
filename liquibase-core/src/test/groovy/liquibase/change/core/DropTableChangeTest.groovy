@@ -3,8 +3,8 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.sdk.database.MockDatabase
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.core.Table
 
 public class DropTableChangeTest extends StandardChangeTest {
@@ -22,8 +22,8 @@ public class DropTableChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         def table = new Table(null, null, "test_table")
 

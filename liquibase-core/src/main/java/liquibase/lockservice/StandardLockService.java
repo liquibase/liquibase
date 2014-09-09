@@ -10,7 +10,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Table;
@@ -137,7 +137,7 @@ public class StandardLockService implements LockService {
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
         boolean hasTable = false;
         try {
-            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(database);
+            hasTable = SnapshotFactory.getInstance().hasDatabaseChangeLogLockTable(database);
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -294,7 +294,7 @@ public class StandardLockService implements LockService {
     @Override
     public void destroy() throws DatabaseException {
         try {
-            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+            if (SnapshotFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
             }
         } catch (InvalidExampleException e) {

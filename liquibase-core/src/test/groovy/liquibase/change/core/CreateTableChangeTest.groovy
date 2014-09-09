@@ -7,8 +7,8 @@ import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.snapshot.MockSnapshotFactory
+import liquibase.snapshot.SnapshotFactory
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.ForeignKeyConstraint
 import liquibase.statement.SequenceNextValueFunction
@@ -178,8 +178,8 @@ public class CreateTableChangeTest extends StandardChangeTest {
         change.addColumn(new ColumnConfig(column3).setType(column3.type.toString()))
 
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
+        def snapshotFactory = new MockSnapshotFactory()
+        SnapshotFactory.instance = snapshotFactory
 
         then: "when no tables"
         assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
