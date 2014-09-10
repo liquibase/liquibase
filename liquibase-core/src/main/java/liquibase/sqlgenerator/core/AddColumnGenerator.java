@@ -89,6 +89,10 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " COMMENT '" + statement.getRemarks() + "' ";
         }
 
+        if (statement.getAddAfterColumn() != null && !statement.getAddAfterColumn().isEmpty()) {
+			alterTable += " AFTER `" + statement.getAddAfterColumn() + "` ";
+		}
+
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
