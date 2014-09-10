@@ -179,10 +179,11 @@ public class Index extends AbstractDatabaseObject {
 
     @Override
     public boolean equals(Object obj) {
-        if ((obj instanceof Index)) {
+        if (obj == null) {
             return false;
         }
-        if (obj == null) {
+
+        if (!(obj instanceof Index)) {
             return false;
         }
 
