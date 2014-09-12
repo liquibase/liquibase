@@ -89,6 +89,11 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
+    public String getSerializableFieldNamespace(String field) {
+        return getSerializedObjectNamespace();
+    }
+
+    @Override
     public Set<String> getSerializableFields() {
         TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
         fields.add("snapshotId");

@@ -1,6 +1,7 @@
 package liquibase.serializer;
 
 import liquibase.exception.SetupException;
+import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -28,6 +29,8 @@ public interface LiquibaseSerializable {
     Object getSerializableFieldValue(String field);
 
     public SerializationType getSerializableFieldType(String field);
+
+    String getSerializableFieldNamespace(String field);
 
     String getSerializedObjectNamespace();
 

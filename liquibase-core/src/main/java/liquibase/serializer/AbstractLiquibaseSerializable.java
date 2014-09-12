@@ -1,17 +1,12 @@
 package liquibase.serializer;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
-import liquibase.util.StringUtils;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializable {
@@ -111,5 +106,10 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
         }
     }
 
+
+    @Override
+    public String getSerializableFieldNamespace(String field) {
+        return getSerializedObjectNamespace();
+    }
 
 }

@@ -518,6 +518,11 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
+    public String getSerializableFieldNamespace(String field) {
+        return getSerializedObjectNamespace();
+    }
+
+    @Override
     public String toString() {
         return ChangeFactory.getInstance().getChangeMetaData(this).getName();
     }

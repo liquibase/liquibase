@@ -62,6 +62,12 @@ public class MockPrecondition implements Precondition {
     }
 
     @Override
+    public String getSerializableFieldNamespace(String field) {
+        return getSerializedObjectNamespace();
+    }
+
+
+    @Override
     public ParsedNode serialize() {
         return null;
     }

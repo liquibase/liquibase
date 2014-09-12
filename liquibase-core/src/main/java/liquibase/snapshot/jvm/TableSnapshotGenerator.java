@@ -87,6 +87,17 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
+        if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
+            table.setAttribute("temporary", "GLOBAL");
+
+            String duration = tableMetadataResultSet.getString("DURATION");
+            if (duration != null && duration.equals("SYS$TRANSACTION")) {
+                table.setAttribute("duration", "ON COMMIT DELETE ROWS");
+            } else if (duration != null && duration.equals("SYS$SESSION")) {
+                table.setAttribute("duration", "ON COMMIT PRESERVE ROWS");
+            }
+        }
+
         return table;
     }
 

@@ -77,6 +77,11 @@ public class SnapshotControl implements LiquibaseSerializable {
         return STANDARD_SNAPSHOT_NAMESPACE;
     }
 
+    @Override
+    public String getSerializableFieldNamespace(String field) {
+        return getSerializedObjectNamespace();
+    }
+
     private void setTypes(Set<Class<? extends DatabaseObject>> types, Database database) {
         this.types = new HashSet<Class<? extends DatabaseObject>>();
         for (Class<? extends DatabaseObject> type : types) {

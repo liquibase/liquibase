@@ -392,8 +392,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
 
                         String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
-                        String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a."+nameColumn+" as TABLE_NAME, 'TABLE' as TABLE_TYPE,  c.COMMENTS as REMARKS " +
-                            "from "+allTable+" a " +
+                        String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a."+nameColumn+" as TABLE_NAME, 'TABLE' as TABLE_TYPE,  c.COMMENTS as REMARKS";
+                        if (allTable.equals("ALL_TABLES")) {
+                            sql += ", a.TEMPORARY as TEMPORARY, a.DURATION as DURATION";
+                        }
+                        sql += " from "+allTable+" a " +
                             "join ALL_TAB_COMMENTS c on a."+nameColumn+"=c.table_name and a.owner=c.owner " +
                             "WHERE a.OWNER='" + ownerName + "'";
                         if (tableName != null) {
