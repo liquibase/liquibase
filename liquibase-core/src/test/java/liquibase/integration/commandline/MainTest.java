@@ -229,6 +229,59 @@ public class MainTest {
     }
 
     @Test
+    public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictFalseIsInFile() throws Exception {
+        Main cli = new Main();
+
+        Properties props = new Properties();
+        props.setProperty("driver", "DRIVER");
+        props.setProperty("unknown.property", "UnknownValue");
+        props.setProperty("strict", "false");
+
+        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
+        props.store(propFile, "");
+
+        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
+
+        assertEquals("DRIVER", cli.driver);
+
+    }
+
+    @Test
+    public void propertiesFileParsingShouldIgnoreUnknownArgumentsIfStrictModeIsFalse() throws Exception {
+        Main cli = new Main();
+        String[] args = new String[]{"--strict=false"};
+
+        cli.parseOptions(args);
+        Properties props = new Properties();
+        props.setProperty("driver", "DRIVER");
+        props.setProperty("unknown.property", "UnknownValue");
+
+        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
+        props.store(propFile, "");
+
+        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
+
+        assertEquals("DRIVER", cli.driver);
+
+    }
+
+    @Test(expected = CommandLineParsingException.class)
+    public void propertiesFileParsingShouldFailOnUnknownArgumentsIfStrictMode() throws Exception {
+        Main cli = new Main();
+
+        Properties props = new Properties();
+        props.setProperty("driver", "DRIVER");
+        props.setProperty("unknown.property", "UnknownValue");
+        props.setProperty("strict", "true");
+
+        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
+        props.store(propFile, "");
+
+        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
+
+    }
+
+    @Test
     public void applyDefaults() {
         Main cli = new Main();
 

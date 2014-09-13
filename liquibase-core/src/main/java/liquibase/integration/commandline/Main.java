@@ -65,6 +65,7 @@ public class Main {
     protected String driverPropertiesFile;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
+    protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
 
     protected String diffTypes;
@@ -409,6 +410,9 @@ public class Main {
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
         Properties props = new Properties();
         props.load(propertiesInputStream);
+        if(props.containsKey("strict")){
+            strict = Boolean.valueOf(props.getProperty("strict"));
+        }
 
         for (Map.Entry entry : props.entrySet()) {
             try {
@@ -429,6 +433,12 @@ public class Main {
                             field.set(this, value);
                         }
                     }
+                }
+            } catch (NoSuchFieldException nsfe){
+                if(strict){
+                    throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
+                } else {
+                    LogFactory.getInstance().getLog().info("Ignored parameter: " + entry.getKey());
                 }
             } catch (Exception e) {
                 throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
