@@ -2,7 +2,7 @@
 
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
     <changeSet id="1" author="a">
         <comment>Some comments go here</comment>
@@ -29,5 +29,10 @@
             <column name="firstname"/>
             <column name="lastname"/>
         </dropColumn>
+    </changeSet>
+
+    <changeSet id="4" author="a">
+        <comment>drop single column (compatibility)</comment>
+        <dropColumn tableName="person" columnName="id"/>
     </changeSet>
 </databaseChangeLog>
