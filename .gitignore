@@ -12,3 +12,4 @@ derby.log
 /.idea
 *.iml
 .DS_Store
+/tmp
