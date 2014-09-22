@@ -65,15 +65,6 @@ public class IndexComparator implements DatabaseObjectComparator {
                 }
             }
 
-            if (thisIndex.getClustered() == null) {
-                if (otherIndex.getClustered() != null && otherIndex.getClustered()) {
-                    return false;
-                }
-            } else {
-                if (!thisIndex.getClustered().equals(otherIndex.getClustered())) {
-                    return false;
-                }
-            }
             return true;
         } else {
             if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
