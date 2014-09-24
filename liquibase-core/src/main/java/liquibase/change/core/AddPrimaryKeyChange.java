@@ -22,6 +22,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String tablespace;
     private String columnNames;
     private String constraintName;
+    private Boolean clustered;
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
     public String getTableName() {
@@ -77,12 +78,21 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    public Boolean getClustered() {
+        return clustered;
+    }
+
+    public void setClustered(Boolean clustered) {
+        this.clustered = clustered;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
 
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
+        statement.setClustered(getClustered());
 
         if (database instanceof DB2Database) {
             return new SqlStatement[]{

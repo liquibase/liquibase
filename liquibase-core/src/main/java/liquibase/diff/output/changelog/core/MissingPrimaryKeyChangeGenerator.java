@@ -3,6 +3,7 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
@@ -55,6 +56,10 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
         change.setColumnNames(pk.getColumnNames());
         if (control.getIncludeTablespace()) {
             change.setTablespace(pk.getTablespace());
+        }
+
+        if (referenceDatabase instanceof MSSQLDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && !pk.getBackingIndex().getClustered()) {
+            change.setClustered(false);
         }
 
         control.setAlreadyHandledMissing(pk.getBackingIndex());

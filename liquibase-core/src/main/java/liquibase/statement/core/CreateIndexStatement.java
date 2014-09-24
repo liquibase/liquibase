@@ -14,7 +14,7 @@ public class CreateIndexStatement extends AbstractSqlStatement {
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
 	private String associatedWith;
-    private boolean clustered;
+    private Boolean clustered;
 
     public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String... columns) {
         this.indexName = indexName;

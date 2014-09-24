@@ -2,10 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
@@ -167,6 +164,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         short type = row.getShort("TYPE");
                         if (type == DatabaseMetaData.tableIndexClustered) {
                             index.setClustered(true);
+                        } else if (database instanceof MSSQLDatabase) {
+                            index.setClustered(false);
                         }
 
                         foundIndexes.put(indexName, index);
@@ -294,6 +293,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     if (type == DatabaseMetaData.tableIndexClustered) {
                         returnIndex.setClustered(true);
+                    } else if (database instanceof MSSQLDatabase) {
+                        returnIndex.setClustered(false);
                     }
 
                     foundIndexes.put(indexName, returnIndex);

@@ -404,7 +404,8 @@
 				use="required" />
 			<xsd:attribute name="constraintName" type="xsd:string" />
 			<xsd:attribute name="tablespace" type="xsd:string" />
-		</xsd:complexType>
+            <xsd:attribute name="clustered" type="booleanExp" />
+        </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="dropPrimaryKey">

@@ -10,6 +10,7 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     private String tablespace;
     private String columnNames;
     private String constraintName;
+    private Boolean clustered;
 
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
         this.catalogName = catalogName;
@@ -47,4 +48,18 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     public String getConstraintName() {
         return constraintName;
     }
+
+    public Boolean isClustered() {
+        return clustered;
+    }
+
+    public AddPrimaryKeyStatement setClustered(Boolean clustered) {
+        if (clustered == null) {
+            this.clustered = true;
+        } else {
+            this.clustered = clustered;
+        }
+        return this;
+    }
+
 }
