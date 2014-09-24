@@ -740,6 +740,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
                 for (ChangeSet changeSet : changeSets) {
+                    changeSet.setFailOnError(false);
                     for (Change change : changeSet.getChanges()) {
                         if (change instanceof DropTableChange) {
                             ((DropTableChange) change).setCascadeConstraints(true);
