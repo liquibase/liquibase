@@ -26,7 +26,9 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
 
         if (!(database instanceof MSSQLDatabase || database instanceof MockDatabase)) {
-            validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
+            if (!addPrimaryKeyStatement.isClustered()) {
+                validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
+            }
         }
 
         return validationErrors;
