@@ -11,6 +11,8 @@ import liquibase.exception.DatabaseException;
 import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.Row;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
@@ -29,6 +31,9 @@ import java.util.Map;
  * No changes in case are made to any object names, they must be corrected as needed before creating this object.
  */
 public class ColumnsJdbcMetaDataQueryAction extends MetaDataQueryAction {
+
+    Logger log = LogFactory.getInstance().getLog();
+
     private static final String CATALOG_NAME = "catalogName";
     private static final String SCHEMA_NAME = "schemaName";
     private static final String TABLE_NAME = "tableName";
@@ -73,6 +78,8 @@ public class ColumnsJdbcMetaDataQueryAction extends MetaDataQueryAction {
     @Override
     protected QueryResult getRawMetaData(ExecutionEnvironment env) throws DatabaseException {
         DatabaseMetaData metaData = ((JdbcConnection) env.getTargetDatabase().getConnection()).getMetaData();
+
+        log.debug("QUERY: metaData.getColumns("+getCatalogName()+", "+getSchemaName()+", "+getTableName()+", "+getColumnName()+")");
 
         try {
             return new QueryResult(JdbcUtils.extract(metaData.getColumns(

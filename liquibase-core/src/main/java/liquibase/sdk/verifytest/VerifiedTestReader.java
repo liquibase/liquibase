@@ -152,6 +152,7 @@ public class VerifiedTestReader {
                     } else {
                         if (!firstTableRow) {
                             saveLastPermutation(currentDetails, results);
+                            currentDetails = new CurrentDetails(testClass, testName);
                         }
                         firstTableRow = false;
                         if (values[1].equals("")) {

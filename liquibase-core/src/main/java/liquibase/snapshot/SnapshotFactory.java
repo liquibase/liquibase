@@ -169,22 +169,18 @@ public class SnapshotFactory {
         List<Class<? extends DatabaseObject>> types = new ArrayList<Class<? extends DatabaseObject>>(getContainerTypes(example.getClass(), database));
         types.add(example.getClass());
 
-        if (createSnapshot(example, database, new SnapshotControl(database,  types.toArray(new Class[types.size()]))) != null) {
-            return true;
-        }
-        CatalogAndSchema catalogAndSchema;
         if (example.getSchema() == null) {
-            catalogAndSchema = database.getDefaultSchema();
-        } else {
-            catalogAndSchema = example.getSchema().toCatalogAndSchema();
-        }
-        NewDatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, example.getClass()));
-        for (DatabaseObject obj : snapshot.get(example.getClass())) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
-                return true;
+            CatalogAndSchema catalogAndSchema = database.getDefaultSchema();
+            NewDatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, example.getClass()));
+            for (DatabaseObject obj : snapshot.get(example.getClass())) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
+                    return true;
+                }
             }
+            return false;
+        } else {
+            return createSnapshot(example, database, new SnapshotControl(database,  types.toArray(new Class[types.size()]))) != null;
         }
-        return false;
     }
 
     /**
@@ -229,7 +225,12 @@ public class SnapshotFactory {
      * Related objects are included based on the settings in the passed {@link liquibase.snapshot.SnapshotControl} object. For example, a table's columns attribute will be populated only if the Column type is set to snapshot.
      */
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        return null;
+        try {
+            NewDatabaseSnapshot snapshot = createSnapshot(new DatabaseObject[]{example}, snapshotControl, new ExecutionEnvironment(database));
+            return snapshot.get(example);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     /**

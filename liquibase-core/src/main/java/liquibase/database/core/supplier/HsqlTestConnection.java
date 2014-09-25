@@ -7,6 +7,9 @@ import liquibase.util.JdbcUtils;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class HsqlTestConnection extends JdbcTestConnection {
 
@@ -20,6 +23,7 @@ public class HsqlTestConnection extends JdbcTestConnection {
         Connection connection = super.openConnection();
         Statement statement = connection.createStatement();
         statement.execute("CREATE SCHEMA LBSCHEMA");
+        statement.execute("CREATE SCHEMA LBSCHEMA2");
         JdbcUtils.closeStatement(statement);
         return connection;
     }
@@ -34,4 +38,8 @@ public class HsqlTestConnection extends JdbcTestConnection {
         return "Standard Hsql connection";
     }
 
+    @Override
+    public List<String> getAvailableCatalogs() {
+        return Arrays.asList(new String[] {null, "PUBLIC"});
+    }
 }

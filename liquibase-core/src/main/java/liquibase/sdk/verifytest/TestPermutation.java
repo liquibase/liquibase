@@ -1,6 +1,8 @@
 package liquibase.sdk.verifytest;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
@@ -159,17 +161,29 @@ public class TestPermutation implements Comparable<TestPermutation> {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "Test Permutation "+key+" ["+StringUtils.join(getDescription(), ", ")+"]";
+    }
+
     /**
      * Runs the actual test.
      * Automatically called by {@link #expect(liquibase.sdk.verifytest.TestPermutation.Verification)}
      */
     protected void test() throws Exception {
+        Logger log = LogFactory.getInstance().getLog();
+        log.debug("----- Running "+this.toString()+" -----");
         if (notRanMessage != null) {
+            log.debug("Not running test permutation: "+notRanMessage);
             return;
         }
 
-        if (previousRun != null) {
+        if (previousRun == null) {
+            log.debug("Previous test permutation run NOT found");
+        } else {
+            log.debug("Previous test permutation run found");
             if (previousRun.getVerified()) {
+                log.debug("Previous test permutation run was verified");
                 boolean allEqual = true;
                 if (previousRun.getData().size() == this.getData().size()) {
                     for (Map.Entry<String, Value> previousData : previousRun.getData().entrySet()) {
@@ -180,28 +194,37 @@ public class TestPermutation implements Comparable<TestPermutation> {
                     }
                 }
                 if (allEqual) {
+                    log.debug("This test permutation is unchanged since the verified permutation. Do not run again");
+
                     this.setValid(true);
                     this.setVerified(true);
                     canSave = true;
                     return;
                 }
+            } else {
+                log.debug("Previous test permutation run was NOT verified");
             }
         }
 
         try {
+            log.debug("Test permutation is being (re)tested");
             if (setup != null) {
+                log.debug("Executing test permutation setup");
+
                 SetupResult result = setup.run();
 
                 if (result == null) {
                     throw new UnexpectedLiquibaseException("No result returned by setup");
                 } else {
                     if (!result.isValid()) {
+                        log.debug("Test permutation setup is not valid");
                         valid = false;
                         canVerify = false;
                         notRanMessage = result.getMessage();
                     } else if (!result.canVerify()) {
                         canVerify = false;
                         notRanMessage = result.getMessage();
+                        log.debug("Not running permutation: "+notRanMessage);
                     } else {
                         valid = true;
                         canVerify = true;
@@ -433,6 +456,11 @@ public class TestPermutation implements Comparable<TestPermutation> {
                 stringValue = format.format(value);
             }
             return stringValue;
+        }
+
+        @Override
+        public String toString() {
+            return serialize();
         }
     }
 

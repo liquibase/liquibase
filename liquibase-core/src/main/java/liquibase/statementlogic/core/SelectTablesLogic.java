@@ -19,7 +19,7 @@ import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.structure.core.Table;
 
-public class SelectTablesMetaDataLogic extends AbstractStatementLogic<SelectMetaDataStatement> {
+public class SelectTablesLogic extends AbstractStatementLogic<SelectMetaDataStatement> {
 
     @Override
     public boolean supports(SelectMetaDataStatement statement, ExecutionEnvironment env) {

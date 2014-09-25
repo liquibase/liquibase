@@ -28,7 +28,7 @@ public class SelectMetaDataStatement extends AbstractStatement {
     @Override
     public String toString() {
         DatabaseObject example = getExample();
-        return "Fetch "+ example.getClass().getSimpleName()+"(s) like '"+example.toString()+"'";
+        return "Select "+ example.getClass().getSimpleName()+"(s) like '"+example.toString()+"' in '"+example.getSchema()+"'";
     }
 
     @Override

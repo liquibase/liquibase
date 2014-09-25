@@ -244,7 +244,7 @@ public class StatementLogicFactory {
         }
         Database database = env.getTargetDatabase();
         if (!supports(statement, env)) {
-            throw new UnsupportedException("Unsupported database for "+statement.toString()+": "+database.getShortName());
+            throw new UnsupportedException("Unsupported database for '"+statement.toString()+"': "+database.getShortName());
         }
         ValidationErrors validate = validate(statement, env);
         if (validate.hasErrors()) {

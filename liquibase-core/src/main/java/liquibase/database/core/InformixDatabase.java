@@ -125,12 +125,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
         super.setConnection(connection);
         if (!(connection instanceof OfflineConnection)) {
             try {
-                /*
-                 * TODO Maybe there is a better place for this.
-                 * For each session this statement has to be executed,
-                 * to allow newlines in quoted strings
-                 */
-                ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
+                ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');")); //For each session this statement has to be executed, to allow newlines in quoted strings
             } catch (Exception e) {
                 LogFactory.getInstance().getLog().warning("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
             }

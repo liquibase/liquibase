@@ -119,7 +119,11 @@ public class CatalogAndSchema {
         }
 
         if (schemaName == null) {
-            schemaName = accordingTo.getDefaultSchemaName();
+            if (accordingTo.supportsSchemas()) {
+                schemaName = accordingTo.getDefaultSchemaName();
+            } else {
+                schemaName = catalogName;
+            }
         }
 
         if (catalogName != null) {

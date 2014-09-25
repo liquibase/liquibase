@@ -4,10 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
-import liquibase.snapshot.*;
-import liquibase.statement.Statement;
-import liquibase.statement.core.RawDatabaseCommandStatement;
-import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
@@ -26,10 +22,17 @@ import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
+import liquibase.snapshot.NewDatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.Statement;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -58,6 +61,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     private DatabaseConnection connection;
     protected String defaultCatalogName;
     protected String defaultSchemaName;
+
+    protected String connectionCatalogName;
+    protected String connectionSchemaName;
+
     protected String currentDateTimeFunction;
 
     /**
@@ -247,7 +254,19 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected String getConnectionCatalogName() throws DatabaseException {
-        return connection.getCatalog();
+        if (connection == null || connection instanceof OfflineConnection) {
+            return null;
+        }
+        if (connectionCatalogName == null) {
+            try {
+                connectionCatalogName = connection.getCatalog();
+
+            } catch (Exception e) {
+                LogFactory.getLogger().info("Error getting connection catalog", e);
+                connectionCatalogName = "UNKNOWN";
+            }
+        }
+        return connectionCatalogName;
     }
 
     /**
@@ -312,13 +331,17 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null || connection instanceof OfflineConnection) {
             return null;
         }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).query(new RawDatabaseCommandStatement("call current_schema")).toObject(String.class);
 
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+        if (connectionSchemaName == null) {
+            try {
+                connectionSchemaName = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("call current_schema")).toObject(String.class);
+
+            } catch (Exception e) {
+                LogFactory.getLogger().info("Error getting connection schema", e);
+                connectionSchemaName = "UNKNOWN";
+            }
         }
-        return null;
+        return connectionSchemaName;
     }
 
     @Override
@@ -707,7 +730,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
-            NewDatabaseSnapshot snapshot;
+            final NewDatabaseSnapshot snapshot;
             try {
 	            final SnapshotControl snapshotControl = new SnapshotControl(this);
 	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
@@ -725,7 +748,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 	            final long createSnapshotStarted = System.currentTimeMillis();
 	            snapshot = SnapshotFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: [%s]", System.currentTimeMillis() - createSnapshotStarted, StringUtils.join(typesToInclude, ", ", new StringUtils.StringUtilsFormatter<Class>() {
+                    @Override
+                    public String toString(Class obj) {
+                        return obj.getName()+" ("+snapshot.get(obj).size()+" objects)";
+                    }
+                })));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

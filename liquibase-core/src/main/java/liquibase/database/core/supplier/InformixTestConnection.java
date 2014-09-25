@@ -4,7 +4,11 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.sdk.supplier.database.JdbcTestConnection;
 
-public class InformixConnSupplier extends JdbcTestConnection {
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+public class InformixTestConnection extends JdbcTestConnection {
 
     @Override
     protected String getUrl() {
@@ -22,4 +26,11 @@ public class InformixConnSupplier extends JdbcTestConnection {
         return "Standard Informix connection";
     }
 
+    @Override
+    protected boolean sqlExecuteOnUnavailableConnection(String sql, Throwable openException) throws SQLException {
+        if (sql.equals("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');")) {
+            return true;
+        }
+        return super.sqlExecuteOnUnavailableConnection(sql, openException);
+    }
 }

@@ -3,7 +3,12 @@ package liquibase.database.core.supplier;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.sdk.supplier.database.JdbcTestConnection;
+import liquibase.util.CollectionUtil;
 
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class OracleTestConnection extends JdbcTestConnection {
@@ -34,6 +39,17 @@ public class OracleTestConnection extends JdbcTestConnection {
         return properties;
     }
 
+    @Override
+    public List<String> getAvailableCatalogs() {
+        return Arrays.asList(new String[] {null, "LBUSER", "LBUSER2"});
+    }
 
+    @Override
+    protected List<Map<String, ?>> sqlQueryOnUnavailableConnection(String sql, Throwable openException) throws SQLException {
+        if (sql.equalsIgnoreCase("select sys_context( 'userenv', 'current_schema' ) from dual")) {
+            return CollectionUtil.createSingleItemList("current_schema", getPrimarySchema());
+        }
 
+        return super.sqlQueryOnUnavailableConnection(sql, openException);
+    }
 }

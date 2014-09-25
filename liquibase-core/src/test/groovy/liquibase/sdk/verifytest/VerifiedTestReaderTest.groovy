@@ -1,6 +1,8 @@
 package liquibase.sdk.verifytest
 
 import spock.lang.Specification
+import static org.hamcrest.Matchers.*
+import static spock.util.matcher.HamcrestSupport.that
 
 class VerifiedTestReaderTest extends Specification {
 
@@ -81,5 +83,30 @@ class VerifiedTestReaderTest extends Specification {
         out.close()
         return out.toString()
 
+    }
+
+    def "table format correctly resets values from one row to the next"() {
+        when:
+        def contents = """# Test: liquibase.statementlogic.core.SelectTablesLogicTest "emptyDatabase" #
+
+NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
+
+## Permutations ##
+
+- **connection:** Standard MS SqlServer connection
+
+| Permutation | Verified | catalogName | schemaName | tableName  | DETAILS
+| 2724b9      | true     |             |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=dbo, tableName=TABLE_NAME)
+| b3e0f1      | true     |             | LBSCHEMA   | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema, tableName=TABLE_NAME)
+| aac6ec      | true     |             | LBSCHEMA2  | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema2, tableName=TABLE_NAME)
+| 0183ff      | true     | LBCAT       |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=dbo, tableName=TABLE_NAME)
+| a87c62      | true     | LBCAT       | LBSCHEMA   | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema, tableName=TABLE_NAME)
+| e9a23a      | true     | LBCAT       | LBSCHEMA2  | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema2, tableName=TABLE_NAME)
+"""
+        def readPermutations = new VerifiedTestReader().read(new StringReader(contents))
+
+        then:
+        readPermutations.size() == 6
+        that readPermutations.collect({it.getKey()}), containsInAnyOrder(["2724b9", "b3e0f1", "aac6ec", "0183ff", "a87c62", "e9a23a"] as String[])
     }
 }

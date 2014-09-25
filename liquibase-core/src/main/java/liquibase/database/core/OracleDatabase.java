@@ -8,7 +8,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawDatabaseCommandStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
@@ -130,7 +129,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return getConnection().getCatalog();
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).query(new RawDatabaseCommandStatement("select sys_context( 'userenv', 'current_schema' ) from dual")).toObject(String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("select sys_context( 'userenv', 'current_schema' ) from dual")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }

@@ -10,6 +10,8 @@ import liquibase.executor.ExecuteResult;
 import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.util.StringUtils;
 
 /**
@@ -20,6 +22,8 @@ public class UnparsedSql implements Sql {
 
     private String sql;
     private String endDelimiter;
+
+    private Logger log = LogFactory.getInstance().getLog();
 
     public UnparsedSql(String sql) {
         this(sql, ";");
@@ -59,11 +63,14 @@ public class UnparsedSql implements Sql {
 
     @Override
     public QueryResult query(ExecutionEnvironment env) throws DatabaseException {
+        String sql = getSql();
+        log.debug("QUERY: "+sql);
+
         Database database = env.getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
 
         if (conn instanceof JdbcConnection) {
-            return ((JdbcConnection) conn).query(getSql());
+            return ((JdbcConnection) conn).query(sql);
         } else {
             throw new DatabaseException("Cannot execute SQL against a "+conn.getClass().getName()+" connection");
         }
@@ -71,6 +78,9 @@ public class UnparsedSql implements Sql {
 
     @Override
     public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
+        String sql = getSql();
+        log.debug("EXECUTE: "+sql);
+
 //TODO        if(sql instanceof ExecutablePreparedStatement) {
 //            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
 //            return new ExecuteResult();
@@ -79,7 +89,7 @@ public class UnparsedSql implements Sql {
         Database database = env.getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
         if (conn instanceof JdbcConnection) {
-            return ((JdbcConnection) conn).execute(getSql());
+            return ((JdbcConnection) conn).execute(sql);
         } else {
             throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
         }
@@ -87,6 +97,9 @@ public class UnparsedSql implements Sql {
 
     @Override
     public UpdateResult update(ExecutionEnvironment env) throws DatabaseException {
+        String sql = getSql();
+
+        log.debug("UPDATE: "+sql);
 //        if (sql instanceof CallableSqlStatement) {
 //            throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
 //        }
@@ -94,7 +107,7 @@ public class UnparsedSql implements Sql {
         Database database = env.getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
         if (conn instanceof JdbcConnection) {
-            return ((JdbcConnection) conn).update(getSql());
+            return ((JdbcConnection) conn).update(sql);
         } else {
             throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
         }

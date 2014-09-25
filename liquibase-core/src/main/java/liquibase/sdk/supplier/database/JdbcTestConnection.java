@@ -2,6 +2,8 @@ package liquibase.sdk.supplier.database;
 
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.sdk.database.MockResultSet;
+import liquibase.util.CollectionUtil;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -15,6 +17,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public abstract class JdbcTestConnection extends AbstractTestConnection {
@@ -39,7 +43,7 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
             try {
                 connection = openConnection();
             } catch (Throwable e) {
-                unavailableConnectionProxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Connection.class, DatabaseMetaData.class}, new UnavailableConnection(e));
+                unavailableConnectionProxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Connection.class, DatabaseMetaData.class, java.sql.Statement.class}, new UnavailableConnection(e));
                 connection = (Connection) unavailableConnectionProxy;
             }
         }
@@ -103,7 +107,7 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
     protected abstract String getUrl();
 
     protected String getIpAddress() {
-        return "10.10.100.100";
+        return "vagrant";
     }
 
     public String getPrimaryCatalog() {
@@ -117,6 +121,21 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
     @Override
     public Class<? extends DatabaseConnection> getConnectionClass() {
         return JdbcConnection.class;
+    }
+
+    protected Object invokeOnUnavailableConnection(Object proxy, Method method, Object[] args, Throwable openException) throws SQLException {
+        throw new SQLException("Cannot invoke '" + method.toString() + "' because the connection is unavailable: " + openException.getMessage(), openException);
+    }
+
+    protected boolean sqlExecuteOnUnavailableConnection(String sql, Throwable openException) throws SQLException {
+        throw new SQLException("Cannot execute sql '" + sql + "' because the connection is unavailable: " + openException.getMessage(), openException);
+    }
+
+    protected List<Map<String, ?>> sqlQueryOnUnavailableConnection(String sql, Throwable openException) throws SQLException {
+        if (sql.equalsIgnoreCase("call current_schema")) {
+            return CollectionUtil.createSingleItemList("current_schema", getPrimarySchema());
+        }
+        throw new SQLException("Cannot query sql '" + sql + "' because the connection is unavailable: " + openException.getMessage(), openException);
     }
 
     private class UnavailableConnection implements InvocationHandler {
@@ -137,6 +156,8 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
                     return null;
                 } else if (method.getName().equals("getCatalog")) {
                     return getPrimaryCatalog();
+                } else if (method.getName().equals("createStatement")) {
+                    return unavailableConnectionProxy;
                 }
             } else if (method.getDeclaringClass().equals(DatabaseMetaData.class)) {
                 if (method.getName().equals("getUserName")) {
@@ -148,12 +169,22 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
                 } else if (method.getName().equals("supportsMixedCaseIdentifiers")) {
                     return true;
                 }
+            } else if (method.getDeclaringClass().equals(java.sql.Statement.class)) {
+                if (method.getName().equals("execute") && args.length == 1) {
+                    return sqlExecuteOnUnavailableConnection((String) args[0], openException);
+                } else if (method.getName().equals("executeQuery") && args.length == 1) {
+                    return new MockResultSet(sqlQueryOnUnavailableConnection((String) args[0], openException));
+                }
             } else if (method.getDeclaringClass().equals(Object.class)) {
                 if (method.getName().equals("hashCode")) {
                     return JdbcTestConnection.this.describe().hashCode();
+                } else if (method.getName().equals("equals")) {
+                    return JdbcTestConnection.this.toString().equals(args[0].toString());
+                } else if (method.getName().equals("toString")) {
+                    return JdbcTestConnection.this.toString();
                 }
             }
-            throw new SQLException("Cannot call '" + method.toString() + "' because the connection is unavailable: " + openException.getMessage(), openException);
+            return invokeOnUnavailableConnection(proxy, method, args, openException);
         }
     }
 }

@@ -49,8 +49,10 @@ public class TableSnapshotGenerator extends AbstractSnapshotLookupLogic<Table> i
     public void relate(NewDatabaseSnapshot snapshot) {
         for (Table table : snapshot.get(Table.class)) {
             Schema realSchema = snapshot.get(table.getSchema());
-            realSchema.addDatabaseObject(table);
-            table.setSchema(realSchema);
+            if (realSchema != null) {
+                realSchema.addDatabaseObject(table);
+                table.setSchema(realSchema);
+            }
         }
     }
 }

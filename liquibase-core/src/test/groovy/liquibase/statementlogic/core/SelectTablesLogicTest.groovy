@@ -6,6 +6,8 @@ import liquibase.action.QueryAction
 import liquibase.database.OfflineConnection
 import liquibase.datatype.core.IntType
 import liquibase.executor.ExecutorService
+import liquibase.logging.LogFactory
+import liquibase.logging.LogLevel
 import liquibase.sdk.supplier.database.ConnectionSupplier
 import liquibase.sdk.verifytest.TestPermutation
 import liquibase.sdk.verifytest.VerifyService
@@ -17,9 +19,17 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class SelectTablesMetaDataLogicTest extends Specification {
+class SelectTablesLogicTest extends Specification {
 
     @Shared connectionSupplier = new ConnectionSupplier()
+
+    def setup() {
+        LogFactory.getInstance().getLog().setLogLevel(LogLevel.DEBUG)
+    }
+
+    def cleanup() {
+        LogFactory.getInstance().getLog().setLogLevel(LogLevel.INFO)
+    }
 
     @Unroll("#featureName: #connection")
     def emptyDatabase() {

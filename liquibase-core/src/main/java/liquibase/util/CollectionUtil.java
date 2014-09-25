@@ -4,6 +4,15 @@ import java.util.*;
 
 public class CollectionUtil {
 
+    public static List<Map<String, ?>> createSingleItemList(String key, Object value) {
+        ArrayList<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
+        HashMap<String, Object> row = new HashMap<String, Object>();
+        row.put(key, value);
+        returnList.add(row);
+        return returnList;
+
+    }
+
     public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
         Set<Set<T>> sets = new HashSet<Set<T>>();
         if (originalSet.isEmpty()) {

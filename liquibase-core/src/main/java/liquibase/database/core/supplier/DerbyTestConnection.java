@@ -36,8 +36,4 @@ public class DerbyTestConnection extends JdbcTestConnection {
         return "Standard Derby connection";
     }
 
-    @Override
-    public List<String[]> getTestCatalogsAndSchemas() {
-        return super.getTestCatalogsAndSchemas();
-    }
 }
