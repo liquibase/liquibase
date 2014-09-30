@@ -308,7 +308,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS,\n" +
-                            "-- ALL_TAB_COLUMNS.*\n" +
                             "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
                             // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
                             "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
@@ -316,10 +315,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "DATA_DEFAULT, NUM_DISTINCT, LOW_VALUE, HIGH_VALUE, DENSITY, NUM_NULLS, " +
                             "NUM_BUCKETS, LAST_ANALYZED, SAMPLE_SIZE, CHARACTER_SET_NAME, " +
                             "CHAR_COL_DECL_LENGTH, GLOBAL_STATS, USER_STATS, AVG_COL_LEN, CHAR_LENGTH, " +
-                            "CHAR_USED, V80_FMT_IMAGE, DATA_UPGRADED, HISTOGRAM\n" +
-                            "FROM ALL_TAB_COLUMNS c " +
+                            "CHAR_USED, V80_FMT_IMAGE, DATA_UPGRADED, HISTOGRAM, VIRTUAL_COLUMN\n" +
+                            "FROM ALL_TAB_COLS c " +
                             "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
-                            "WHERE OWNER='"+((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"'";
+                            "WHERE OWNER='"+((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"' AND hidden_column='NO'";
                     if (!bulk) {
                         if (tableName != null) {
                             sql += " AND TABLE_NAME='"+database.escapeObjectName(tableName, Table.class)+"'";
