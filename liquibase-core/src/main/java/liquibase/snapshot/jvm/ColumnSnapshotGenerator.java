@@ -364,7 +364,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             } else if (liquibaseDataType instanceof DateTimeType || type == Types.TIMESTAMP) {
                 maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-            } else {
+            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
                 return new DatabaseFunction(stringVal);
             }
             if (maybeDate != null) {
