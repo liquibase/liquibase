@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.sdk.supplier.database.JdbcTestConnection;
 
+import java.util.List;
+
 public class MSSQLTestConnection extends JdbcTestConnection {
 
     @Override

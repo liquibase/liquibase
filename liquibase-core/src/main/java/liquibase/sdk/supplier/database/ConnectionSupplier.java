@@ -25,9 +25,13 @@ public class ConnectionSupplier {
                         try {
                             TestConnection testConnection = (TestConnection) testConnectionClasses.newInstance();
                             long startTime = System.currentTimeMillis();
-                            System.out.println("Initializing "+testConnection+"...");
                             testConnection.init();
-                            System.out.println("Initializing " + testConnection + " done in " + ((System.currentTimeMillis() - startTime) / 1000d)+"s");
+                            if (testConnection.getConnectionUnavailableReason() == null) {
+                                System.out.println("Connected to " + testConnection + " in " + ((System.currentTimeMillis() - startTime) / 1000d) + "s");
+                            } else {
+                                System.out.println("CANNOT CONNECT TO " + testConnection + " after " + ((System.currentTimeMillis() - startTime) / 1000d)+"s: "+testConnection.getConnectionUnavailableReason());
+
+                            }
                             existingConnections.add(testConnection);
                         } catch (Throwable e) {
                             e.printStackTrace();

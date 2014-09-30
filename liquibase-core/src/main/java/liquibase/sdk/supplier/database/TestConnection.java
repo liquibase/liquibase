@@ -20,9 +20,14 @@ public interface TestConnection {
 
     Class<? extends DatabaseConnection> getConnectionClass();
 
-    boolean connectionIsAvailable();
+    String getConnectionUnavailableReason();
 
     List<String[]> getTestCatalogsAndSchemas();
 
     Database getConnectedDatabase();
+
+    String getPrimaryCatalog();
+
+    String getPrimarySchema();
+
 }

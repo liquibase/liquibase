@@ -25,6 +25,7 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
 
     private Connection connection;
     private Object unavailableConnectionProxy;
+    private String unavailableReason = null;
 
     protected JdbcTestConnection() {
     }
@@ -34,8 +35,8 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
     }
 
     @Override
-    public boolean connectionIsAvailable() {
-        return unavailableConnectionProxy == null;
+    public String getConnectionUnavailableReason() {
+        return unavailableReason;
     }
 
     public void init() throws Exception {
@@ -45,6 +46,7 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
             } catch (Throwable e) {
                 unavailableConnectionProxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Connection.class, DatabaseMetaData.class, java.sql.Statement.class}, new UnavailableConnection(e));
                 connection = (Connection) unavailableConnectionProxy;
+                unavailableReason = e.getClass().getName()+": "+e.getMessage();
             }
         }
 

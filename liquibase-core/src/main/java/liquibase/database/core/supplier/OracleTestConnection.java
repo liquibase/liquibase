@@ -45,6 +45,11 @@ public class OracleTestConnection extends JdbcTestConnection {
     }
 
     @Override
+    public String getPrimaryCatalog() {
+        return "LBUSER";
+    }
+
+    @Override
     protected List<Map<String, ?>> sqlQueryOnUnavailableConnection(String sql, Throwable openException) throws SQLException {
         if (sql.equalsIgnoreCase("select sys_context( 'userenv', 'current_schema' ) from dual")) {
             return CollectionUtil.createSingleItemList("current_schema", getPrimarySchema());

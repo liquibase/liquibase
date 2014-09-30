@@ -9,8 +9,8 @@ public class OfflineTestConnection extends AbstractTestConnection {
     private String url;
 
     @Override
-    public boolean connectionIsAvailable() {
-        return true;
+    public String getConnectionUnavailableReason() {
+        return null;
     }
 
     @Override
@@ -20,6 +20,13 @@ public class OfflineTestConnection extends AbstractTestConnection {
 
     protected String getUrl() {
         return url;
+    }
+    public String getPrimaryCatalog() {
+        return "offline";
+    }
+
+    public String getPrimarySchema() {
+        return "offline";
     }
 
     @Override

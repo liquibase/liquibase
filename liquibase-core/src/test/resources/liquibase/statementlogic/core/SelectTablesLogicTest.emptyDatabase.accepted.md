@@ -62,9 +62,9 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 - **connection:** Standard MySQL connection
 
-| Permutation | Verified               | catalogName | schemaName | tableName  | DETAILS
-| 8a8575      | Connection Unavailable |             |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbcat, tableName=TABLE_NAME)
-| a9dc40      | Connection Unavailable | LBCAT       |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbcat, tableName=TABLE_NAME)
+| Permutation | Verified | catalogName | schemaName | tableName  | DETAILS
+| 8a8575      | true     |             |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbcat, tableName=TABLE_NAME)
+| a9dc40      | true     | LBCAT       |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbcat, tableName=TABLE_NAME)
 
 
 ## Permutations ##
@@ -138,12 +138,12 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 - **connection:** Standard PostgreSQL connection
 
-| Permutation | Verified               | catalogName | schemaName | tableName  | DETAILS
-| 20060b      | Connection Unavailable |             |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=public, tableName=table_name)
-| 76ed8d      | Connection Unavailable |             | LBSCHEMA   | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema, tableName=table_name)
-| cc8688      | Connection Unavailable |             | LBSCHEMA2  | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema2, tableName=table_name)
-| 696d04      | Connection Unavailable | LBCAT       |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=public, tableName=table_name)
-| 1b4592      | Connection Unavailable | LBCAT       | LBSCHEMA   | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema, tableName=table_name)
-| 33be44      | Connection Unavailable | LBCAT       | LBSCHEMA2  | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema2, tableName=table_name)
+| Permutation | Verified | catalogName | schemaName | tableName  | DETAILS
+| 20060b      | true     |             |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=public, tableName=table_name)
+| 76ed8d      | true     |             | LBSCHEMA   | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema, tableName=table_name)
+| cc8688      | true     |             | LBSCHEMA2  | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema2, tableName=table_name)
+| 696d04      | true     | LBCAT       |            | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=public, tableName=table_name)
+| 1b4592      | true     | LBCAT       | LBSCHEMA   | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema, tableName=table_name)
+| 33be44      | true     | LBCAT       | LBSCHEMA2  | table_name | **action**: TablesJdbcMetaDataQueryAction(catalogName=lbcat, schemaName=lbschema2, tableName=table_name)
 
 

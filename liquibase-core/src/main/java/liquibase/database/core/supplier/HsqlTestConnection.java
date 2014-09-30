@@ -42,4 +42,9 @@ public class HsqlTestConnection extends JdbcTestConnection {
     public List<String> getAvailableCatalogs() {
         return Arrays.asList(new String[] {null, "PUBLIC"});
     }
+
+    @Override
+    public String getPrimaryCatalog() {
+        return "PUBLIC";
+    }
 }
