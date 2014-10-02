@@ -35,7 +35,7 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
     }
 
     @Override
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, final Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) missingObject;
 
         CreateViewChange change = new CreateViewChange();
@@ -61,7 +61,7 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
                     + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
-                    return ((Column) obj).getName();
+                    return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName());
                 }
             }) + ") AS "+selectQuery;
             change.setFullDefinition(true);
