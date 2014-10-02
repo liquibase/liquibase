@@ -325,6 +325,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof OracleDatabase) {
             if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
                 columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
+
+                if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
+                    columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+columnMetadataResultSet.get("COLUMN_DEF")+")");
+                }
             }
 
         }
