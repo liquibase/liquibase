@@ -1,6 +1,8 @@
 package liquibase.statement.core;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.core.Column;
 
 public class CreateIndexStatement extends AbstractSqlStatement {
 
@@ -8,7 +10,7 @@ public class CreateIndexStatement extends AbstractSqlStatement {
     private String tableSchemaName;
     private String indexName;
     private String tableName;
-    private String[] columns;
+    private AddColumnConfig[] columns;
     private String tablespace;
     private Boolean unique;
 	// Contain associations of index
@@ -16,7 +18,7 @@ public class CreateIndexStatement extends AbstractSqlStatement {
 	private String associatedWith;
     private Boolean clustered;
 
-    public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String... columns) {
+    public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, AddColumnConfig... columns) {
         this.indexName = indexName;
         this.tableCatalogName = tableCatalogName;
         this.tableSchemaName = tableSchemaName;
@@ -42,7 +44,7 @@ public class CreateIndexStatement extends AbstractSqlStatement {
         return tableName;
     }
 
-    public String[] getColumns() {
+    public AddColumnConfig[] getColumns() {
         return columns;
     }
 

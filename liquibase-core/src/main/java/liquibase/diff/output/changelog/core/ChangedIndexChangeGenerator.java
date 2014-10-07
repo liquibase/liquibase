@@ -11,6 +11,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
@@ -49,8 +50,8 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         CreateIndexChange addIndexChange = new CreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
         List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
-        for (String col : index.getColumns()) {
-            columns.add((AddColumnConfig) new AddColumnConfig().setName(col));
+        for (Column col : index.getColumns()) {
+            columns.add(new AddColumnConfig(col));
         }
         addIndexChange.setColumns(columns);
         addIndexChange.setIndexName(index.getName());
@@ -65,22 +66,27 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
             addIndexChange.setSchemaName(index.getSchema().getName());
         }
 
-        Difference columnNames = differences.getDifference("columnNames");
+        Difference columnsDifference = differences.getDifference("columns");
         
-        if (columnNames != null) {
-            String referenceColumns = StringUtils.join(
-                (Collection<String>) columnNames.getReferenceValue(), ",");
-            String comparedColumns = StringUtils.join(
-                (Collection<String>) columnNames.getComparedValue(), ",");
-    
+        if (columns != null) {
+            List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
+            List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
+
+            StringUtils.StringUtilsFormatter<Column> formatter = new StringUtils.StringUtilsFormatter<Column>() {
+                @Override
+                public String toString(Column obj) {
+                    return obj.toString(false);
+                }
+            };
+
             control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
-            if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+            if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
                 control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
             }
     
             if (index.isUnique() != null && index.isUnique()) {
                 control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
-                if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+                if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
                     control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
                 }
             }

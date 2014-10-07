@@ -7,6 +7,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
@@ -113,7 +114,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
         try {
-            PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
+            PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
 
             PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             result.assertComplete(snapshot != null, "Primary key does not exist");

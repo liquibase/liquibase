@@ -178,6 +178,8 @@ public interface Database extends PrioritizedService {
      */
     String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName);
 
+    String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions);
+
     /**
      * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column
      * name (i.e. "return").

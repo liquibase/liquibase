@@ -95,6 +95,9 @@ public class StringUtils {
     }
 
     public static String join(Object[] array, String delimiter, StringUtilsFormatter formatter) {
+        if (array == null) {
+            return null;
+        }
         return join(Arrays.asList(array), delimiter, formatter);
     }
 

@@ -6,6 +6,7 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
 
 /**
@@ -76,7 +77,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 //        }
         DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
     	if (database instanceof SybaseASADatabase) {
-    		statement.setUniqueColumns(uniqueColumns);
+    		statement.setUniqueColumns(ColumnConfig.arrayFromNames(uniqueColumns));
     	}
     	return new SqlStatement[]{
 			statement
@@ -89,7 +90,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
             UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName());
             if (getUniqueColumns() != null) {
                 for (String column : getUniqueColumns().split("\\s*,\\s*")) {
-                    example.addColumn(example.getColumns().size(), column);
+                    example.addColumn(example.getColumns().size(), new Column(column));
                 }
             }
             return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(example, database), "Unique constraint exists");

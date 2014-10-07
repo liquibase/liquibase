@@ -170,7 +170,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         foundIndexes.put(indexName, index);
                     }
-                    index.getColumns().add(row.getString("COLUMN_NAME"));
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")));
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {
@@ -209,7 +209,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
         for (int i=0; i<((Index) example).getColumns().size(); i++) {
-            ((Index) example).getColumns().set(i, database.correctObjectName(((Index) example).getColumns().get(i), Column.class));
+            ((Index) example).getColumns().set(i, ((Index) example).getColumns().get(i));
         }
 
         String exampleName = example.getName();
@@ -265,12 +265,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         && position == 0) {
                     System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
                 }
-                String filterCondition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
-                if (filterCondition != null) {
+                String definition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
+                if (definition != null) {
                     if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
-                        filterCondition = filterCondition.replaceAll("\"", "");
+                        definition = definition.replaceAll("\"", "");
                     }
-                    columnName = filterCondition;
                 }
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {
@@ -280,7 +279,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 //                    continue;
                 //                }
 
-                if (columnName == null) {
+                if (columnName == null && definition == null) {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
@@ -303,7 +302,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (int i = returnIndex.getColumns().size(); i < position; i++) {
                     returnIndex.getColumns().add(null);
                 }
-                returnIndex.getColumns().set(position - 1, columnName);
+                if (definition == null) {
+                    returnIndex.getColumns().set(position - 1, new Column(columnName).setRelation(returnIndex.getTable()));
+                } else {
+                    returnIndex.getColumns().set(position - 1, new Column().setDefinition(definition));
+                }
             }
         } catch (Exception e) {
             throw new DatabaseException(e);

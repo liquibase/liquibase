@@ -8,6 +8,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.StringUtils;
 
 public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -47,7 +48,12 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.getIncludeSchema()) {
             change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
         }
-        change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
+        change.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
+            @Override
+            public String toString(Column obj) {
+                return obj.getName();
+            }
+        }));
 
         change.setBaseTableName(fk.getForeignKeyTable().getName());
         if (control.getIncludeCatalog()) {
@@ -56,7 +62,12 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         if (control.getIncludeSchema()) {
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
-        change.setBaseColumnNames(fk.getForeignKeyColumns());
+        change.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
+            @Override
+            public String toString(Column obj) {
+                return obj.getName();
+            }
+        }));
 
         change.setDeferrable(fk.isDeferrable());
         change.setInitiallyDeferred(fk.isInitiallyDeferred());

@@ -32,7 +32,7 @@ public class DropIndexChangeTest extends StandardChangeTest {
         table.getColumns().add(new Column(Table.class, null, null, table.name, "other_col"))
         table.getColumns().add(test_col)
 
-        def index = new Index("idx_test", null, null, table.name, test_col.name)
+        def index = new Index("idx_test", null, null, table.name, new Column(test_col.name))
 
         def change = new DropIndexChange()
         change.indexName = index.name

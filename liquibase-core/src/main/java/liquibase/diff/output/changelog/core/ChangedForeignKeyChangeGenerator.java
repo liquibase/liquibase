@@ -9,9 +9,11 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
 public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -36,6 +38,13 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) changedObject;
 
+        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+            @Override
+            public String toString(Column obj) {
+                return obj.toString(false);
+            }
+        };
+
         DropForeignKeyConstraintChange dropFkChange = new DropForeignKeyConstraintChange();
         dropFkChange.setConstraintName(fk.getName());
         dropFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
@@ -43,9 +52,9 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
         AddForeignKeyConstraintChange addFkChange = new AddForeignKeyConstraintChange();
         addFkChange.setConstraintName(fk.getName());
         addFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
-        addFkChange.setBaseColumnNames(fk.getForeignKeyColumns());
+        addFkChange.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", formatter));
         addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        addFkChange.setReferencedColumnNames(fk.getPrimaryKeyColumns());
+        addFkChange.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", formatter));
 
         if (control.getIncludeCatalog()) {
             dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());

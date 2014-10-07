@@ -1,23 +1,33 @@
 package liquibase.statement.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
 
 public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
-    private String[] columnsToSelect;
+    private ColumnConfig[] columnsToSelect;
     private WhereClause whereClause;
     private String[] orderByColumns;
 
     public SelectFromDatabaseChangeLogStatement(String... columnsToSelect) {
+        if (columnsToSelect != null) {
+            this.columnsToSelect = new ColumnConfig[columnsToSelect.length];
+            for (int i = 0; i < columnsToSelect.length; i++) {
+                this.columnsToSelect[i] = new ColumnConfig().setName(columnsToSelect[i]);
+            }
+        }
+    }
+
+    public SelectFromDatabaseChangeLogStatement(ColumnConfig... columnsToSelect) {
         this(null, columnsToSelect);
     }
 
-    public SelectFromDatabaseChangeLogStatement(WhereClause whereClause, String... columnsToSelect) {
+    public SelectFromDatabaseChangeLogStatement(WhereClause whereClause, ColumnConfig... columnsToSelect) {
         this.columnsToSelect = columnsToSelect;
         this.whereClause = whereClause;
     }
 
-    public String[] getColumnsToSelect() {
+    public ColumnConfig[] getColumnsToSelect() {
         return columnsToSelect;
     }
 

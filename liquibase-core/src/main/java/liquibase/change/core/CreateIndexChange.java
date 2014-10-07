@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
@@ -92,11 +93,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<String> columns = new ArrayList<String>();
-        for (ColumnConfig column : getColumns()) {
-            columns.add(column.getName());
-        }
-
 	    return new SqlStatement[]{
                 new CreateIndexStatement(
 					    getIndexName(),
@@ -105,7 +101,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 					    getTableName(),
 					    this.isUnique(),
 					    getAssociatedWith(),
-					    columns.toArray(new String[getColumns().size()]))
+					    getColumns().toArray(new AddColumnConfig[getColumns().size()]))
 					    .setTablespace(getTablespace())
                         .setClustered(getClustered())
 	    };
@@ -130,7 +126,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
             if (getColumns() != null) {
                 for (ColumnConfig column : getColumns() ) {
-                    example.addColumn(column.getName());
+                    example.addColumn(new Column(column));
                 }
             }
 

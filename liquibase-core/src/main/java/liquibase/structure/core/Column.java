@@ -2,19 +2,25 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Column extends AbstractDatabaseObject {
 
     private String name;
+    private String definition;
 
     public Column() {
+    }
+
+    public Column(String columnName) {
+        setName(columnName);
     }
 
     public Column(Class<? extends Relation> relationType, String catalogName, String schemaName, String tableName, String columnName) {
@@ -34,7 +40,7 @@ public class Column extends AbstractDatabaseObject {
             setDefaultValue(columnConfig.getDefaultValueObject());
         }
 
-        if (columnConfig.isAutoIncrement()) {
+        if (columnConfig.isAutoIncrement() != null && columnConfig.isAutoIncrement()) {
             setAutoIncrementInformation(new AutoIncrementInformation(columnConfig.getStartWith(), columnConfig.getIncrementBy()));
         }
 
@@ -86,6 +92,17 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
+    public String getDefinition() {
+        return definition;
+    }
+
+    public Column setDefinition(String definition) {
+        this.definition = definition;
+        setAttribute("definition", definition);
+
+        return this;
+    }
+
     public Boolean isNullable() {
         return getAttribute("nullable", Boolean.class);
     }
@@ -129,10 +146,31 @@ public class Column extends AbstractDatabaseObject {
         setAttribute("autoIncrementInformation", autoIncrementInformation);
     }
 
+
+    public String toString(boolean includeRelation) {
+        if (includeRelation) {
+            return toString();
+        } else {
+            if (getName() == null) {
+                return getDefinition();
+            } else {
+                return getName();
+            }
+        }
+    }
+
     @Override
     public String toString() {
-        String tableOrViewName = getRelation().getName();
-        return tableOrViewName + "." + getName();
+        if (getName() == null) {
+            return getDefinition();
+        } else {
+            if (getRelation() == null) {
+                return getName();
+            } else {
+                String tableOrViewName = getRelation().getName();
+                return tableOrViewName + "." + getName();
+            }
+        }
     }
 
 
@@ -151,7 +189,7 @@ public class Column extends AbstractDatabaseObject {
             }
 
             if (returnValue == 0) {
-                returnValue = this.getName().compareTo(o.getName());
+                returnValue = this.toString().compareTo(o.toString());
             }
 
             return returnValue;
@@ -169,7 +207,7 @@ public class Column extends AbstractDatabaseObject {
 
             Column column = (Column) o;
 
-            return getName().equalsIgnoreCase(column.getName()) && !(getRelation() != null ? !getRelation().equals(column.getRelation()) : column.getRelation() != null);
+            return toString().equalsIgnoreCase(column.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -178,14 +216,7 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        try {
-            int result;
-            result = (getRelation() != null ? getRelation().hashCode() : 0);
-            result = 31 * result + getName().toUpperCase().hashCode();
-            return result;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return toString().toUpperCase().hashCode();
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
@@ -234,6 +265,27 @@ public class Column extends AbstractDatabaseObject {
 
         return this;
     }
+
+    public static Column[] arrayFromNames(String columnNames) {
+        if (columnNames == null) {
+            return null;
+        }
+
+        List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
+        Column[] returnArray = new Column[columnNameList.size()];
+        for (int i=0; i<columnNameList.size(); i++) {
+            returnArray[i] = new Column(columnNameList.get(i));
+        }
+        return returnArray;
+    }
+
+    public static List<Column> listFromNames(String columnNames) {
+        if (columnNames == null) {
+            return null;
+        }
+        return Arrays.asList(arrayFromNames(columnNames));
+    }
+
 
     public static class AutoIncrementInformation {
         private BigInteger startWith;

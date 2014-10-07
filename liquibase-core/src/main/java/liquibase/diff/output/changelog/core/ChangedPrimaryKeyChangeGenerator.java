@@ -9,12 +9,14 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
     @Override
@@ -57,16 +59,18 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
             addPkChange.setSchemaName(pk.getSchema().getName());
         }
 
-        String referenceColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getReferenceValue(), ",");
-        String comparedColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getComparedValue(), ",");
+        List<Column> referenceColumns = (List<Column>) differences.getDifference("columns").getReferenceValue();
+        List<Column> comparedColumns = (List<Column>) differences.getDifference("columns").getComparedValue();
+
+        StringUtils.ToStringFormatter formatter = new StringUtils.ToStringFormatter();
 
         control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
-        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
             control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
         }
 
         control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
-        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, "," , formatter))) {
             control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
         }
 

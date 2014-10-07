@@ -908,7 +908,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 "dbms",
                 "comment",
                 "changes",
-                "rollback"));
+                "rollback",
+                "objectQuotingStrategy"));
 
     }
 
@@ -971,6 +972,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         if (field.equals("comment")) {
             return StringUtils.trimToNull(this.getComments());
+        }
+
+        if (field.equals("objectQuotingStrategy")) {
+            return this.getObjectQuotingStrategy().toString();
         }
 
         if (field.equals("changes")) {

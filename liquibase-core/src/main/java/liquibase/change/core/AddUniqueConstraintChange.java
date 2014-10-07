@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
 
 /**
@@ -126,7 +127,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
             disabled = getDisabled();
         }
 
-    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
@@ -140,7 +141,12 @@ public class AddUniqueConstraintChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
         try {
-            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
+            String[] columnNames = getColumnNames().split("\\s+,\\s+");
+            Column[] columns = new Column[columnNames.length];
+            for (int i=0; i<columnNames.length; i++) {
+                columns[i] = new Column(columnNames[i]);
+            }
+            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), columns);
 
             UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             result.assertComplete(snapshot != null, "Unique constraint does not exist");

@@ -8,6 +8,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 
 import static junit.framework.Assert.assertNotNull;
@@ -34,7 +35,12 @@ public class AddPrimaryKeyChangeSupplier extends AbstractChangeSupplier<AddPrima
 
     @Override
     public void checkDiffResult(DiffResult diffResult, AddPrimaryKeyChange change) {
-        PrimaryKey pk = diffResult.getUnexpectedObject(new PrimaryKey(change.getConstraintName(), change.getCatalogName(), change.getSchemaName(), change.getTableName(), change.getColumnNames().split(",")));
+        String[] columnNames = change.getColumnNames().split(",");
+        Column[] columns = new Column[columnNames.length];
+        for (int i=0; i<columnNames.length; i++) {
+            columns[i] = new Column(columnNames[i]);
+        }
+        PrimaryKey pk = diffResult.getUnexpectedObject(new PrimaryKey(change.getConstraintName(), change.getCatalogName(), change.getSchemaName(), change.getTableName(), columns));
         assertNotNull(pk);
     }
 }

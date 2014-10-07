@@ -30,7 +30,7 @@ public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
 
         def table = new Table(null, null, "test_table")
         def testColumn = new Column(Table.class, null, null, table.name, "test_col").setDefaultValue("def_val").setNullable(false)
-        def constraint = new UniqueConstraint("uq_test", null, null, table.name, testColumn.name)
+        def constraint = new UniqueConstraint("uq_test", null, null, table.name, new Column(testColumn.name))
 
         def change = new DropUniqueConstraintChange()
         change.tableName = table.name

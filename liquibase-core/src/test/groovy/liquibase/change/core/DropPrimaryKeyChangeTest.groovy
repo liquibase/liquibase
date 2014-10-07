@@ -31,7 +31,7 @@ public class DropPrimaryKeyChangeTest extends StandardChangeTest {
 
         def table = new Table(null, null, "test_table")
         def testColumn = new Column(Table.class, null, null, table.name, "test_col")
-        def pk = new PrimaryKey("pk_test", null, null, table.name, testColumn.name)
+        def pk = new PrimaryKey("pk_test", null, null, table.name, new Column(testColumn.name))
 
         def change = new DropPrimaryKeyChange()
         change.tableName = table.name

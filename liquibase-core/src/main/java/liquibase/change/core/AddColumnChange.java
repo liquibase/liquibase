@@ -199,7 +199,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
                     ConstraintsConfig constraints = column.getConstraints();
                     if (constraints != null) {
-                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNamesAsList().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
+                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNames().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
                     }
                 }
             }

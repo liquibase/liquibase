@@ -50,7 +50,9 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
             change.setSchemaName(index.getTable().getSchema().getName());
         }
         change.setIndexName(index.getName());
-        change.setUnique(index.isUnique());
+        if (index.isUnique() != null && index.isUnique()) {
+            change.setUnique(index.isUnique());
+        }
         change.setAssociatedWith(index.getAssociatedWithAsString());
         change.setClustered(index.getClustered());
 
@@ -58,10 +60,8 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
 //            continue;
 //        }
 
-        for (String columnName : index.getColumns()) {
-            AddColumnConfig column = new AddColumnConfig();
-            column.setName(columnName);
-            change.addColumn(column);
+        for (Column column : index.getColumns()) {
+            change.addColumn(new AddColumnConfig(column));
         }
 
         return new Change[] { change };

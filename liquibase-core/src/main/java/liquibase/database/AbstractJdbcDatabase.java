@@ -962,18 +962,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName.contains("(")) {
-            return false;
-        }
-        if (objectName.contains(quotingStartCharacter) || objectName.contains(quotingEndCharacter)) {
-            return false;
-        }
-
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains(" ");
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return quotingStartCharacter + objectName + quotingEndCharacter;
+        return quotingStartCharacter + escapeStringForDatabase(objectName) + quotingEndCharacter;
     }
 
     @Override
@@ -993,6 +986,23 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
+        return escapeObjectName(columnName, Column.class);
+    }
+
+    /**
+     * Similar to {@link #escapeColumnName(String, String, String, String)} but allows control over whether function-like names should be left unquoted.
+     *
+     * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
+     */
+    @Override
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
+        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return quoteObject(columnName, Column.class);
+        }
+
+        if (!quoteNamesThatMayBeFunctions && columnName.contains("(")) {
+            return columnName;
+        }
         return escapeObjectName(columnName, Column.class);
     }
 

@@ -45,7 +45,7 @@ public class AddPrimaryKeyChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "Column is a primary"
-        def pk = new PrimaryKey(null, null, null, table.name, testColumn.name)
+        def pk = new PrimaryKey(null, null, null, table.name, new Column(testColumn.name))
         table.setPrimaryKey(pk)
         snapshotFactory.addObjects(pk)
         then:

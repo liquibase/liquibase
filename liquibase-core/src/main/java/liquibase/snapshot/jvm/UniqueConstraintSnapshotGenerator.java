@@ -45,7 +45,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         constraint.setTable(table);
         constraint.setName(example.getName());
         for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add((String) col.get("COLUMN_NAME"));
+            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")));
         }
 
         return constraint;

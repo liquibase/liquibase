@@ -45,7 +45,7 @@ public class AddUniqueConstraintChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "Column is unique"
-        def constraint = new UniqueConstraint(null, null, null, table.name, testColumn.name)
+        def constraint = new UniqueConstraint(null, null, null, table.name, new Column(testColumn.name))
         snapshotFactory.addObjects(constraint)
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.complete

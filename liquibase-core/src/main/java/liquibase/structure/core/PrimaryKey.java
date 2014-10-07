@@ -12,17 +12,20 @@ import java.util.List;
 public class PrimaryKey extends AbstractDatabaseObject {
 
     public PrimaryKey() {
-        setAttribute("columnNames", new ArrayList());
+        setAttribute("columns", new ArrayList());
     }
 
-    public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, String... columnNames) {
+    public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, Column... columns) {
         this();
         setName(name);
         if (tableName != null) {
             Table table = new Table(tableCatalogName, tableSchemaName, tableName);
 
-            if (columnNames != null) {
-                setAttribute("columnNames", Arrays.asList(columnNames));
+            if (columns != null) {
+                setAttribute("columns", Arrays.asList(columns));
+                for (Column column : getColumns()) {
+                    column.setRelation(table);
+                }
             }
 
             setTable(table);
@@ -56,16 +59,21 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public String getColumnNames() {
-        return StringUtils.join(getColumnNamesAsList(), ", ");
+        return StringUtils.join(getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
+            @Override
+            public String toString(Object obj) {
+                return ((Column) obj).toString(false);
+            }
+        });
     }
 
-    public PrimaryKey addColumnName(int position, String columnName) {
-        if (position >= getColumnNamesAsList().size()) {
-            for (int i = getColumnNamesAsList().size()-1; i < position; i++) {
-                this.getColumnNamesAsList().add(null);
+    public PrimaryKey addColumn(int position, Column column) {
+        if (position >= getColumns().size()) {
+            for (int i = getColumns().size()-1; i < position; i++) {
+                this.getColumns().add(null);
             }
         }
-        this.getColumnNamesAsList().set(position, columnName);
+        this.getColumns().set(position, column);
         return this;
     }
 
@@ -122,8 +130,16 @@ public class PrimaryKey extends AbstractDatabaseObject {
         }
     }
 
+    public List<Column> getColumns() {
+        return getAttribute("columns", List.class);
+    }
+
     public List<String> getColumnNamesAsList() {
-        return getAttribute("columnNames", List.class);
+        List<String> names = new ArrayList<String>();
+        for (Column col : getColumns()) {
+            names.add(col.getName());
+        }
+        return names;
     }
 
     public boolean isCertainName() {

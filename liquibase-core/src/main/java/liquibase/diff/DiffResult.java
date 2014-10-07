@@ -6,6 +6,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 
 import java.io.*;
 import java.util.*;
@@ -92,6 +93,9 @@ public class DiffResult {
     }
 
     public void addMissingObject(DatabaseObject obj) {
+        if (obj instanceof Column && ((Column) obj).getDefinition() != null) {
+            return; //not really missing, it's a virtual column
+        }
         missingObjects.add(obj);
     }
 

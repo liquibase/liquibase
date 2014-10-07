@@ -7,6 +7,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
@@ -42,7 +43,7 @@ public class AddLookupTableChangeSupplier extends AbstractChangeSupplier<AddLook
         assertEquals(change.getNewColumnName().toUpperCase(), newTable.getPrimaryKey().getColumnNames().toUpperCase());
 
         assertNotNull(diffResult.getUnexpectedObject(new Table(change.getNewTableCatalogName(), change.getNewTableSchemaName(), change.getNewTableName())));
-        assertNotNull(new ForeignKey(change.getConstraintName(), change.getExistingTableCatalogName(), change.getExistingTableSchemaName(), change.getExistingTableName(), change.getExistingColumnName()));
+        assertNotNull(new ForeignKey(change.getConstraintName(), change.getExistingTableCatalogName(), change.getExistingTableSchemaName(), change.getExistingTableName(), new Column(change.getExistingColumnName())));
 
     }
 }

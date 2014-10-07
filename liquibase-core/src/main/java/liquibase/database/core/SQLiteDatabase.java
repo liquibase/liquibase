@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractJdbcDatabase;
@@ -184,13 +185,17 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             statements.addAll(Arrays.asList(new ReindexStatement(catalogName, schemaName, tableName)));
             // add remaining indices
             for (Index index_config : newIndices) {
+                AddColumnConfig[] columns = new AddColumnConfig[index_config.getColumns().size()];
+                for (int i=0; i<index_config.getColumns().size(); i++) {
+                    columns[i] = new AddColumnConfig(index_config.getColumns().get(i));
+                }
+
                 statements.addAll(Arrays.asList(new CreateIndexStatement(
                         index_config.getName(),
                         catalogName, schemaName, tableName,
                         index_config.isUnique(),
                         index_config.getAssociatedWithAsString(),
-                        index_config.getColumns().
-                                toArray(new String[index_config.getColumns().size()]))));
+                        columns)));
             }
 
             return statements;

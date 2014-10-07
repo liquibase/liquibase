@@ -8,6 +8,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropUniqueConstraintChange;
 import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.UniqueConstraint;
 
 import static junit.framework.Assert.assertNotNull;
@@ -47,9 +48,12 @@ public class DropUniqueConstraintChangeSupplier extends AbstractChangeSupplier<D
 
     @Override
     public void checkDiffResult(DiffResult diffResult, DropUniqueConstraintChange change) {
-        String[] columns = null;
+        Column[] columns = null;
         if (change.getUniqueColumns() != null) {
-            columns = change.getUniqueColumns().split(",");
+            String[] columnNames = change.getUniqueColumns().split(",");
+            for (int i=0; i<columnNames.length; i++) {
+                columns[i] = new Column(columnNames[i]);
+            }
         }
 
         assertNotNull(diffResult.getMissingObject(new UniqueConstraint(change.getConstraintName(), change.getCatalogName(), change.getSchemaName(), change.getTableName(), columns)));

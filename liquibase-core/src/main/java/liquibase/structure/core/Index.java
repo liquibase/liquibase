@@ -27,13 +27,13 @@ public class Index extends AbstractDatabaseObject {
         setName(indexName);
     }
 
-    public Index(String indexName, String catalogName, String schemaName, String tableName, String... columns) {
+    public Index(String indexName, String catalogName, String schemaName, String tableName, Column... columns) {
         this();
         setName(indexName);
         if (tableName != null) {
             setTable(new Table(catalogName, schemaName, tableName));
             if (columns != null && columns.length > 0) {
-                setColumns(StringUtils.join(columns, ","));
+                setColumns(Arrays.asList(columns));
             }
         }
     }
@@ -83,22 +83,27 @@ public class Index extends AbstractDatabaseObject {
         return this;
 	}
 
-    public List<String> getColumns() {
+    public List<Column> getColumns() {
         return getAttribute("columns", List.class);
     }
 
-    public Index addColumn(String column) {
+    public Index addColumn(Column column) {
+        column.setRelation(getTable());
         getColumns().add(column);
+
         return this;
     }
 
-    public Index setColumns(String columns) {
-        getColumns().addAll(StringUtils.splitAndTrim(columns, ","));
+    public Index setColumns(List<Column> columns) {
+        for (Column column :columns) {
+            column.setRelation(getTable());
+        }
+        setAttribute("columns", columns);
         return this;
     }
 
     public String getColumnNames() {
-        return StringUtils.join(getColumns(), ", ");
+        return StringUtils.join(getColumns(), ", ", new StringUtils.ToStringFormatter());
     }
 
     public Index setUnique(Boolean value) {
@@ -201,8 +206,8 @@ public class Index extends AbstractDatabaseObject {
             stringBuffer.append(" on ").append(getTable().getName());
             if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
-                for (String column : getColumns()) {
-                    stringBuffer.append(column).append(", ");
+                for (Column column : getColumns()) {
+                    stringBuffer.append(column.toString(false)).append(", ");
                 }
                 stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
                 stringBuffer.append(")");
