@@ -962,15 +962,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName.contains(quotingStartCharacter) || objectName.contains(quotingEndCharacter)) {
-            return false;
-        }
-
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return quotingStartCharacter + objectName + quotingEndCharacter;
+        return quotingStartCharacter + escapeStringForDatabase(objectName) + quotingEndCharacter;
     }
 
     @Override

@@ -7,6 +7,10 @@ public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStateme
 
     private ColumnConfig[] columnsToSelect;
 
+    public SelectFromDatabaseChangeLogLockStatement() {
+        this.columnsToSelect = new ColumnConfig[0];
+    }
+
     public SelectFromDatabaseChangeLogLockStatement(String... columnsToSelect) {
         this.columnsToSelect = new ColumnConfig[columnsToSelect.length];
         for (int i=0; i< columnsToSelect.length; i++) {
