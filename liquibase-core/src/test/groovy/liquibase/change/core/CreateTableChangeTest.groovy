@@ -208,7 +208,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
 
         when: "table has primary key as expected"
-        def pk = new PrimaryKey("pk_test", table.schema.catalogName, table.schema.name, table.name, column1.name)
+        def pk = new PrimaryKey("pk_test", table.schema.catalogName, table.schema.name, table.name, new Column(column1.name))
         table.setPrimaryKey(pk)
         snapshotFactory.addObjects(pk)
         then:

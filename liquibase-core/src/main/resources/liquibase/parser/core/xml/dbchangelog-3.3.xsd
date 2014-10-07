@@ -277,7 +277,8 @@
     </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="column">
-		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="name" type="xsd:string"/>
+        <xsd:attribute name="definition" type="xsd:string"/>
 		<xsd:attribute name="type" type="xsd:string" />
 		<xsd:attribute name="value" type="xsd:string" />
 		<xsd:attribute name="valueNumeric" type="xsd:string" />

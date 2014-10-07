@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -24,12 +25,18 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     }
 
     @Override
-    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<String> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
-        for (int i=0; i<columnsToSelect.size(); i++) {
-            columnsToSelect.set(i, database.escapeColumnName(null, null, null, columnsToSelect.get(i)));
-        }
-        String sql = "SELECT " + StringUtils.join(columnsToSelect, ",").toUpperCase() + " FROM " +
+    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, final Database database, SqlGeneratorChain sqlGeneratorChain) {
+        List<ColumnConfig> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
+        String sql = "SELECT " + StringUtils.join(columnsToSelect, ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+            @Override
+            public String toString(ColumnConfig column) {
+                if (column.getDefinition() == null) {
+                    return database.escapeColumnName(null, null, null, column.getName());
+                } else {
+                    return column.getDefinition();
+                }
+            }
+        }).toUpperCase() + " FROM " +
                 database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 
         SelectFromDatabaseChangeLogStatement.WhereClause whereClause = statement.getWhereClause();

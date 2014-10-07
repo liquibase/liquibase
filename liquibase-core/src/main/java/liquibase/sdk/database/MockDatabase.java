@@ -381,6 +381,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
+        return columnName;
+    }
+
+    @Override
     public String escapeColumnNameList(final String columnNames) {
         return columnNames;
     }

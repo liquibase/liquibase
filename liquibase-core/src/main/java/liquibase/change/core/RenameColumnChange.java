@@ -157,7 +157,7 @@ public class RenameColumnChange extends AbstractChange {
             public boolean createThisIndex(Index index) {
 				if (index.getColumns().contains(getOldColumnName())) {
 					index.getColumns().remove(getOldColumnName());
-					index.getColumns().add(getNewColumnName());
+					index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
 				}
 				return true;
 			}

@@ -228,7 +228,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
             snapshotFactory.addObjects(column)
 
             if (columnDef.constraints != null && columnDef.constraints.isPrimaryKey()) {
-                def pk = new PrimaryKey(null, table.schema.catalogName, table.schema.name, table.name, column.name)
+                def pk = new PrimaryKey(null, table.schema.catalogName, table.schema.name, table.name, new Column(column.name))
                 snapshotFactory.addObjects(pk)
                 table.setPrimaryKey(pk)
             }

@@ -233,8 +233,8 @@ public class AddLookupTableChange extends AbstractChange {
 
             ForeignKey foreignKeyExample = new ForeignKey(getConstraintName(), getExistingTableCatalogName(), getExistingTableSchemaName(), getExistingTableName());
             foreignKeyExample.setPrimaryKeyTable(newTableExample);
-            foreignKeyExample.setForeignKeyColumns(getExistingColumnName());
-            foreignKeyExample.setPrimaryKeyColumns(getNewColumnName());
+            foreignKeyExample.setForeignKeyColumns(Column.listFromNames(getExistingColumnName()));
+            foreignKeyExample.setPrimaryKeyColumns(Column.listFromNames(getNewColumnName()));
 
             result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
             result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");

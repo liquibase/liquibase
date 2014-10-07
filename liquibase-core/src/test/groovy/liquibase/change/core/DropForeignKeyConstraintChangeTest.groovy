@@ -36,7 +36,7 @@ public class DropForeignKeyConstraintChangeTest extends StandardChangeTest {
         def refTable = new Table(null, null, "ref_table")
         def refColumn = new Column(Table.class, null, null, refTable.name, "ref_col")
 
-        def fk = new ForeignKey("fk_test", null, null, baseTable.name, baseColumn.name).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(refColumn.name)
+        def fk = new ForeignKey("fk_test", null, null, baseTable.name, new Column(baseColumn.name)).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(new Column(refColumn.name))
 
         snapshotFactory.addObjects(baseTable, refColumn)
 

@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
@@ -23,7 +24,7 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<A
 
     @Override
     protected AddUniqueConstraintStatement createSampleSqlStatement() {
-        return new AddUniqueConstraintStatement(null, null, TABLE_NAME, COLUMN_NAME, null);
+        return new AddUniqueConstraintStatement(null, null, TABLE_NAME, new ColumnConfig[] {new ColumnConfig().setName(COLUMN_NAME)}, null);
     }
 
     @Override

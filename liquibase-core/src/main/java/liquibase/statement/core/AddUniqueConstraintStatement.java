@@ -1,13 +1,15 @@
 package liquibase.statement.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private String columnNames;
+    private ColumnConfig[] columns;
     private String constraintName;
     private String tablespace;
 
@@ -15,11 +17,11 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean initiallyDeferred;
     private boolean disabled;
 
-    public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
+    public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, ColumnConfig[] columns, String constraintName) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
-        this.columnNames = columnNames;
+        this.columns = columns;
         this.constraintName = constraintName;
     }
 
@@ -35,9 +37,17 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return tableName;
     }
 
-    public String getColumnNames() {
-        return columnNames;
+    public ColumnConfig[] getColumns() {
+        return columns;
     }
+
+    public String getColumnNames() {
+        return StringUtils.join(columns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+            @Override
+            public String toString(ColumnConfig obj) {
+                return obj.getName();
+            }
+        });    }
 
     public String getConstraintName() {
         return constraintName;

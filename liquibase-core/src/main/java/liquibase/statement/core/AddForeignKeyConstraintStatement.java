@@ -1,18 +1,20 @@
 package liquibase.statement.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.util.StringUtils;
 
 public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
-    private String baseColumnNames;
+    private ColumnConfig[] baseColumns;
 
     private String referencedTableCatalogName;
     private String referencedTableSchemaName;
     private String referencedTableName;
-    private String referencedColumnNames;
+    private ColumnConfig[] referencedColumns;
 
     private String constraintName;
 
@@ -22,16 +24,16 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
     private String onDelete;
     private String onUpdate;
 
-    public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
+    public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, ColumnConfig[] baseColumns, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, ColumnConfig[] referencedColumns) {
         this.baseTableCatalogName = baseTableCatalogName;
         this.baseTableSchemaName = baseTableSchemaName;
         this.baseTableName = baseTableName;
-        this.baseColumnNames = baseColumnNames;
+        this.baseColumns = baseColumns;
 
         this.referencedTableCatalogName = referencedTableCatalogName;
         this.referencedTableSchemaName = referencedTableSchemaName;
         this.referencedTableName = referencedTableName;
-        this.referencedColumnNames = referencedColumnNames;
+        this.referencedColumns = referencedColumns;
         this.constraintName = constraintName;
     }
 
@@ -47,8 +49,17 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
         return baseTableName;
     }
 
+    public ColumnConfig[] getBaseColumns() {
+        return baseColumns;
+    }
+
     public String getBaseColumnNames() {
-        return baseColumnNames;
+        return StringUtils.join(baseColumns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+            @Override
+            public String toString(ColumnConfig obj) {
+                return obj.getName();
+            }
+        });
     }
 
     public String getReferencedTableCatalogName() {
@@ -63,8 +74,17 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
         return referencedTableName;
     }
 
+    public ColumnConfig[] getReferencedColumns() {
+        return referencedColumns;
+    }
+
     public String getReferencedColumnNames() {
-        return referencedColumnNames;
+        return StringUtils.join(referencedColumns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+            @Override
+            public String toString(ColumnConfig obj) {
+                return obj.getName();
+            }
+        });
     }
 
     public String getConstraintName() {

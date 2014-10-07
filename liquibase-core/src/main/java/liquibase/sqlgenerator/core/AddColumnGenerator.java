@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
@@ -110,7 +111,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
     protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
         if (statement.isUnique()) {
-            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
+            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), ColumnConfig.arrayFromNames(statement.getColumnName()), statement.getUniqueStatementName());
             returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
         }
     }
@@ -140,7 +141,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 }
 
 
-                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), null, refSchemaName, refTableName, refColName);
+                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), ColumnConfig.arrayFromNames(statement.getColumnName()), null, refSchemaName, refTableName, ColumnConfig.arrayFromNames(refColName));
                 returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
             }
         }

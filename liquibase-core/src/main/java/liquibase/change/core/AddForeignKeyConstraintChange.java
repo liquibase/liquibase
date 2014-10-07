@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -234,11 +235,11 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         getBaseTableCatalogName(),
                         getBaseTableSchemaName(),
                         getBaseTableName(),
-                        getBaseColumnNames(),
+                        ColumnConfig.arrayFromNames(getBaseColumnNames()),
                         getReferencedTableCatalogName(),
                         getReferencedTableSchemaName(),
                         getReferencedTableName(),
-                        getReferencedColumnNames())
+                        ColumnConfig.arrayFromNames(getReferencedColumnNames()))
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
@@ -264,8 +265,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         try {
             ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
             example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
-            example.setForeignKeyColumns(getBaseColumnNames());
-            example.setPrimaryKeyColumns(getReferencedColumnNames());
+            example.setForeignKeyColumns(Column.listFromNames(getBaseColumnNames()));
+            example.setPrimaryKeyColumns(Column.listFromNames(getReferencedColumnNames()));
 
             ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             result.assertComplete(snapshot != null, "Foreign key does not exist");

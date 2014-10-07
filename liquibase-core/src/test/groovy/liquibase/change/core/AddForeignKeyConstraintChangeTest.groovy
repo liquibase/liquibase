@@ -61,7 +61,7 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "FK exists"
-        def fk = new ForeignKey(null, null, null, baseTable.name, baseColumn.name).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(refColumn.name)
+        def fk = new ForeignKey(null, null, null, baseTable.name, new Column(baseColumn.name)).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(new Column(refColumn.name))
         if (snapshotInitiallyDeferred != null) {
             fk.setInitiallyDeferred(snapshotInitiallyDeferred)
         }

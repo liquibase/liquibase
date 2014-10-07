@@ -125,12 +125,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
                 foreignKey.setForeignKeyTable(foreignKeyTable);
-                foreignKey.addForeignKeyColumn(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database));
+                foreignKey.addForeignKeyColumn(new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)));
 
                 CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table().setName(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
                 foreignKey.setPrimaryKeyTable(tempPkTable);
-                foreignKey.addPrimaryKeyColumn(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database));
+                foreignKey.addPrimaryKeyColumn(new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)));
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 
                 ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
@@ -155,7 +155,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 if (database.createsIndexesForForeignKeys()) {
                     Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
-                    exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
+                    exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
                     foreignKey.setBackingIndex(exampleIndex);
                 }
             }

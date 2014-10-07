@@ -22,12 +22,12 @@ public class ColumnConfigTest extends Specification {
         when:
         def table = new Table();
 
-        table.setPrimaryKey(new PrimaryKey().addColumnName(0, "colName").setName("pk_name").setTablespace("pk_tablespace"));
-        table.getUniqueConstraints().add(new UniqueConstraint().setName("uq1").addColumn(0, "otherCol"));
-        table.getUniqueConstraints().add(new UniqueConstraint().setName("uq2").addColumn(0, "colName"));
+        table.setPrimaryKey(new PrimaryKey().addColumn(0, new Column("colName")).setName("pk_name").setTablespace("pk_tablespace"));
+        table.getUniqueConstraints().add(new UniqueConstraint().setName("uq1").addColumn(0, new Column("otherCol")));
+        table.getUniqueConstraints().add(new UniqueConstraint().setName("uq2").addColumn(0, new Column("colName")));
 
-        table.getOutgoingForeignKeys().add(new ForeignKey().setName("fk1").setForeignKeyColumns("otherCol"));
-        table.getOutgoingForeignKeys().add(new ForeignKey().setName("fk2").setForeignKeyColumns("colName").setPrimaryKeyTable(new Table().setName("otherTable")).setPrimaryKeyColumns("id"));
+        table.getOutgoingForeignKeys().add(new ForeignKey().setName("fk1").setForeignKeyColumns([new Column("otherCol")]));
+        table.getOutgoingForeignKeys().add(new ForeignKey().setName("fk2").setForeignKeyColumns([new Column("colName")]).setPrimaryKeyTable(new Table().setName("otherTable")).setPrimaryKeyColumns([new Column("id")]));
 
         Column column = new Column();
         column.setName("colName");
@@ -78,17 +78,7 @@ public class ColumnConfigTest extends Specification {
         config.getDefaultValue() == null
         config.getRemarks() == null
         config.getType() == "BIGINT"
-        config.getConstraints().isNullable() == null //nullable could be unknown
-
-        config.getConstraints().isUnique() == false //we know it is unique or not, cannot return null
-        config.getConstraints().getUniqueConstraintName() == null
-
-        config.getConstraints().isPrimaryKey() == false //we know it is unique or not, cannot return null
-        config.getConstraints().getPrimaryKeyName() == null
-        config.getConstraints().getPrimaryKeyTablespace() == null
-
-        config.getConstraints().getForeignKeyName() == null
-        config.getConstraints().getReferences() == null
+        config.getConstraints()  == null
 
         config.isAutoIncrement() == false  //we know it is unique or not, cannot return null
         config.getStartWith() == null

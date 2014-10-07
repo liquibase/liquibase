@@ -30,6 +30,7 @@ public class JsonChangeLogSerializerTest {
                 "  \"changeSet\": {\n" +
                 "    \"id\": \"1\",\n" +
                 "    \"author\": \"nvoxland\",\n" +
+                "    \"objectQuotingStrategy\": \"LEGACY\",\n" +
                 "    \"changes\": [\n" +
                 "      {\n" +
                 "        \"addColumn\": {\n" +

@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.sdk.database.MockDatabase;
-import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -82,11 +83,15 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             buffer.append("CLUSTER ");
         }
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
 	    while (iterator.hasNext()) {
-		    String column = iterator.next();
-		    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column));
-		    if (iterator.hasNext()) {
+            AddColumnConfig column = iterator.next();
+            if (column.getDefinition() == null) {
+                buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
+            } else {
+                buffer.append(column.getDefinition());
+            }
+            if (iterator.hasNext()) {
 			    buffer.append(", ");
 		    }
 	    }

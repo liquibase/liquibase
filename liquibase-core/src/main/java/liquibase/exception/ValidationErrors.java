@@ -40,7 +40,7 @@ public class ValidationErrors {
         }
 
         if (isDisallowed && value != null) {
-            addError(disallowedFieldName + " is not allowed on "+database.getShortName());
+            addError(disallowedFieldName + " is not allowed on "+(database == null?"unknown":database.getShortName()));
         }
     }
 

@@ -55,12 +55,19 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
                 otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
         boolean columnsTheSame;
+        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+            @Override
+            public String toString(Column obj) {
+                return obj.toString(false);
+            }
+        };
+
         if (accordingTo.isCaseSensitive()) {
-                columnsTheSame = StringUtils.trimToEmpty(thisForeignKey.getForeignKeyColumns()).equals(StringUtils.trimToEmpty(otherForeignKey.getForeignKeyColumns())) &&
-                        StringUtils.trimToEmpty(thisForeignKey.getPrimaryKeyColumns()).equals(StringUtils.trimToEmpty(otherForeignKey.getPrimaryKeyColumns()));
+                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
+                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
         } else {
-                columnsTheSame = thisForeignKey.getForeignKeyColumns().equalsIgnoreCase(otherForeignKey.getForeignKeyColumns()) &&
-                        thisForeignKey.getPrimaryKeyColumns().equalsIgnoreCase(otherForeignKey.getPrimaryKeyColumns());
+                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
+                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
         }
 
         return columnsTheSame &&

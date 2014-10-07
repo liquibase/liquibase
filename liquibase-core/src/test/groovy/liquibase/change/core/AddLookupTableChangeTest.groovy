@@ -36,7 +36,7 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
         def newColumn = new Column(Table.class, null, null, newTable.name, "new_col")
         newTable.getColumns().add(newColumn)
 
-        def fk = new ForeignKey("fk_test", null, null, baseTable.name, baseColumn.name).setPrimaryKeyTable(newTable).addPrimaryKeyColumn(newColumn.name)
+        def fk = new ForeignKey("fk_test", null, null, baseTable.name, new Column(baseColumn.name)).setPrimaryKeyTable(newTable).addPrimaryKeyColumn(new Column(newColumn.name))
 
         snapshotFactory.addObjects(baseTable)
 

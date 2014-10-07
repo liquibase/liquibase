@@ -8,6 +8,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
@@ -45,6 +46,6 @@ public class AddForeignKeyConstraintChangeSupplier extends AbstractChangeSupplie
         Table baseTable = new Table(change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName());
         Table referencedTable = new Table(change.getReferencedTableCatalogName(), change.getReferencedTableSchemaName(), change.getReferencedTableName());
 
-        assertNotNull(diffResult.getUnexpectedObject(new ForeignKey().setName(change.getConstraintName()).setForeignKeyTable(baseTable).setPrimaryKeyTable(referencedTable).setForeignKeyColumns(change.getBaseColumnNames()).setPrimaryKeyColumns(change.getReferencedColumnNames())));
+        assertNotNull(diffResult.getUnexpectedObject(new ForeignKey().setName(change.getConstraintName()).setForeignKeyTable(baseTable).setPrimaryKeyTable(referencedTable).setForeignKeyColumns(Column.listFromNames(change.getBaseColumnNames())).setPrimaryKeyColumns(Column.listFromNames(change.getReferencedColumnNames()))));
     }
 }

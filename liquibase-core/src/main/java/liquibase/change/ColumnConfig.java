@@ -32,6 +32,7 @@ import liquibase.util.StringUtils;
  */
 public class ColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
+    private String definition;
     private String type;
     private String value;
     private Number valueNumeric;
@@ -63,15 +64,23 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setType(columnSnapshot.getType().toString());
+        setDefinition(columnSnapshot.getDefinition());
+        if (columnSnapshot.getType() != null) {
+            setType(columnSnapshot.getType().toString());
+        }
 
         if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
             if (columnSnapshot.getDefaultValue() != null) {
                 setDefaultValue(columnSnapshot.getDefaultValue().toString());
             }
+
+            boolean nonDefaultConstraints = false;
             ConstraintsConfig constraints = new ConstraintsConfig();
 
-            constraints.setNullable(columnSnapshot.isNullable());
+            if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
+                constraints.setNullable(columnSnapshot.isNullable());
+                nonDefaultConstraints = true;
+            }
 
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
@@ -88,6 +97,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 constraints.setPrimaryKey(true);
                 constraints.setPrimaryKeyName(primaryKey.getName());
                 constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
+                nonDefaultConstraints = true;
             }
 
             List<UniqueConstraint> uniqueConstraints = table.getUniqueConstraints();
@@ -96,6 +106,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                     if (constraint.getColumnNames().contains(getName())) {
                         constraints.setUnique(true);
                         constraints.setUniqueConstraintName(constraint.getName());
+                        nonDefaultConstraints = true;
                     }
                 }
             }
@@ -103,20 +114,23 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             List<ForeignKey> fks = table.getOutgoingForeignKeys();
             if (fks != null) {
                 for (ForeignKey fk : fks) {
-                    if (fk.getForeignKeyColumns().equals(getName())) {
+                    if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
                         constraints.setForeignKeyName(fk.getName());
-                        constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns() + ")");
+                        constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns().get(0).getName() + ")");
+                        nonDefaultConstraints = true;
                     }
                 }
             }
 
-            if (constraints.isPrimaryKey() == null) {
-                constraints.setPrimaryKey(false);
+//            if (constraints.isPrimaryKey() == null) {
+//                constraints.setPrimaryKey(false);
+//            }
+//            if (constraints.isUnique() == null) {
+//                constraints.setUnique(false);
+//            }
+            if (nonDefaultConstraints) {
+                setConstraints(constraints);
             }
-            if (constraints.isUnique() == null) {
-                constraints.setUnique(false);
-            }
-            setConstraints(constraints);
         }
 
         setRemarks(columnSnapshot.getRemarks());
@@ -140,6 +154,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     public ColumnConfig setName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public ColumnConfig setDefinition(String definition) {
+        this.definition = definition;
         return this;
     }
 
@@ -667,6 +690,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         name = parsedNode.getChildValue(null, "name", String.class);
+        definition = parsedNode.getChildValue(null, "definition", String.class);
         type = parsedNode.getChildValue(null, "type", String.class);
         encoding = parsedNode.getChildValue(null, "encoding", String.class);
         autoIncrement = parsedNode.getChildValue(null, "autoIncrement", Boolean.class);
@@ -754,4 +778,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     }
 
+    public static ColumnConfig[] arrayFromNames(String names) {
+        if (names == null) {
+            return null;
+        }
+        List<String> nameArray = StringUtils.splitAndTrim(names, ",");
+        ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
+        for (int i=0; i<nameArray.size(); i++) {
+            returnArray[i] = new ColumnConfig().setName(nameArray.get(i));
+        }
+        return returnArray;
+    }
 }

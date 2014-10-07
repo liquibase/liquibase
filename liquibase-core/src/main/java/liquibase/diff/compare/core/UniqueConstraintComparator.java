@@ -63,7 +63,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
             }
 
             for (int i=0; i< otherConstraintSize; i++) {
-                if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisConstraint.getColumns().get(i)).setRelation(thisConstraint.getTable()), new Column().setName(otherConstraint.getColumns().get(i)).setRelation(otherConstraint.getTable()), accordingTo)) {
+                if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getColumns().get(i).setRelation(thisConstraint.getTable()), otherConstraint.getColumns().get(i).setRelation(otherConstraint.getTable()), accordingTo)) {
                     return false;
                 }
             }

@@ -95,7 +95,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
             example.setName(database.correctObjectName(getIndexName(), Index.class));
             if (StringUtils.trimToNull(getColumnNames()) != null) {
                 for (String column : getColumnNames().split("\\s*,\\s*")) {
-                    example.getColumns().add(database.correctObjectName(column, Column.class));
+                    example.addColumn(new Column(database.correctObjectName(column, Column.class)));
                 }
             }
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {

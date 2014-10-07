@@ -7,6 +7,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
 
@@ -38,13 +39,13 @@ public class CreateIndexChangeSupplier extends AbstractChangeSupplier<CreateInde
     public void checkDiffResult(DiffResult diffResult, CreateIndexChange change) {
         Index example = new Index(change.getIndexName(), change.getCatalogName(), change.getSchemaName(), change.getTableName());
 
-        List<String> columns = null;
+        List<Column> columns = null;
         if (change.getColumns() != null) {
-            columns = new ArrayList<String>();
+            columns = new ArrayList<Column>();
             for (ColumnConfig col : change.getColumns()) {
-                columns.add(col.getName());
+                columns.add(new Column(col));
             }
-            example.setColumns(StringUtils.join(columns, ","));
+            example.setColumns(columns);
         }
 
         assertNotNull(diffResult.getUnexpectedObject(example));

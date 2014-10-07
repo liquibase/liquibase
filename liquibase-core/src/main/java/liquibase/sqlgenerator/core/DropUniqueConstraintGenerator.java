@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -50,8 +51,8 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         UniqueConstraint constraint = new UniqueConstraint().setName(statement.getConstraintName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
         if (statement.getUniqueColumns() != null) {
             int i = 0;
-            for (String column : StringUtils.splitAndTrim(statement.getUniqueColumns(), ",")) {
-                constraint.addColumn(i++, column);
+            for (ColumnConfig column : statement.getUniqueColumns()) {
+                constraint.addColumn(i++, new Column(column));
             }
         }
         return constraint;

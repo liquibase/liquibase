@@ -6,6 +6,7 @@ import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.structure.core.Column
 import liquibase.structure.core.Index
 
 public class CreateIndexChangeTest extends StandardChangeTest {
@@ -24,7 +25,7 @@ public class CreateIndexChangeTest extends StandardChangeTest {
         def snapshotFactory = new MockSnapshotGeneratorFactory()
         SnapshotGeneratorFactory.instance = snapshotFactory
 
-        def index = new Index("idx_test", null, null, "test_table", "test_col")
+        def index = new Index("idx_test", null, null, "test_table", new Column("test_col"))
         index.unique = true
 
         def change = new CreateIndexChange()

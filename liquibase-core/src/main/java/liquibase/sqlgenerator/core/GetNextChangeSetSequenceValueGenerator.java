@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -18,6 +19,6 @@ public class GetNextChangeSetSequenceValueGenerator extends AbstractSqlGenerator
 
     @Override
     public Sql[] generateSql(GetNextChangeSetSequenceValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return SqlGeneratorFactory.getInstance().generateSql(new SelectFromDatabaseChangeLogStatement("MAX(ORDEREXECUTED)"), database);
+        return SqlGeneratorFactory.getInstance().generateSql(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setDefinition("MAX(ORDEREXECUTED)")), database);
     }
 }

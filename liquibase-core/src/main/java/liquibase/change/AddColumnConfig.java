@@ -4,12 +4,20 @@ package liquibase.change;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.core.Column;
 
 public class AddColumnConfig extends ColumnConfig {
 
     private String afterColumn;
     private String beforeColumn;
     private Integer position;
+
+    public AddColumnConfig(Column columnSnapshot) {
+        super(columnSnapshot);
+    }
+
+    public AddColumnConfig() {
+    }
 
     public String getAfterColumn() {
         return afterColumn;
