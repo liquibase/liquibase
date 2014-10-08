@@ -2,6 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
@@ -9,6 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -200,5 +203,25 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        Object value = super.getSerializableFieldValue(field);
+        if (value != null && field.equals("columns")) {
+            for (ColumnConfig config : (Collection<ColumnConfig>) value) {
+                config.setType(null);
+                config.setAutoIncrement(null);
+                config.setConstraints(null);
+                config.setDefaultValue(null);
+                config.setValue(null);
+                config.setStartWith(null);
+                config.setIncrementBy(null);
+                config.setEncoding(null);
+                config.setRemarks(null);
+            }
+
+        }
+        return value;
     }
 }
