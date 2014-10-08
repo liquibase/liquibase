@@ -556,6 +556,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     } else if (database instanceof SybaseDatabase) {
                         LogFactory.getLogger().warning("Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
+                    } else if (database instanceof SybaseASADatabase) {
+                        sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +
+                                "from sysconstraint, systable " +
+                                "where sysconstraint.table_object_id = systable.object_id " +
+                                "and sysconstraint.constraint_type = 'U'";
+                        if (tableName != null) {
+                            sql += " and systable.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
                     } else {
                         sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME " +
                                 "from "+database.getSystemSchema()+".constraints " +

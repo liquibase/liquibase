@@ -171,6 +171,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME " +
                     "WHERE UPPER(RDB$INDICES.RDB$INDEX_NAME)='"+database.correctObjectName(name, UniqueConstraint.class)+"' " +
                     "ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION";
+        } else if (database instanceof SybaseASADatabase) {
+            sql = "select sysconstraint.constraint_name, syscolumn.column_name " +
+                    "from sysconstraint, syscolumn, systable " +
+                    "where sysconstraint.ref_object_id = syscolumn.object_id " +
+                    "and sysconstraint.table_object_id = systable.object_id " +
+                    "and sysconstraint.constraint_name = '"+database.correctObjectName(name, UniqueConstraint.class)+"' " +
+                    "and systable.table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
         } else {
             String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
             String schemaName = database.correctObjectName(schema.getName(), Schema.class);
