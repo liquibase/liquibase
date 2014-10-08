@@ -170,7 +170,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         foundIndexes.put(indexName, index);
                     }
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")));
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setRelation(index.getTable()));
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {

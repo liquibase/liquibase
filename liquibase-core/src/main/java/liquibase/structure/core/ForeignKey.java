@@ -103,6 +103,7 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     public void addForeignKeyColumn(Column foreignKeyColumn) {
+        foreignKeyColumn.setRelation(getForeignKeyTable());
         getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
     }
 
