@@ -515,6 +515,7 @@
 			</xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attribute name="file" type="xsd:string" />
+			<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
 			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
 			<xsd:attribute name="separator" type="xsd:string" default=","/>
 			<xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
@@ -540,6 +541,7 @@
 			</xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attribute name="file" type="xsd:string" />
+			<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
 			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
 			<xsd:attribute name="primaryKey" type="xsd:string" use="required" />
 			<xsd:attribute name="onlyUpdate" type="xsd:boolean" default="false" />
