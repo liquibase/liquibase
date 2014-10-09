@@ -103,10 +103,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
-        for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
+        for(String columnKey:insertOrUpdateStatement.getColumnUpdateValues().keySet())
         {
             if (!hashPkFields.contains(columnKey)) {
-                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnUpdateValue(columnKey));
             }
         }
         // this isn't very elegant but the code fails above without any columns to update

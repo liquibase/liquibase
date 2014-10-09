@@ -11,6 +11,7 @@ public class InsertStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private Map<String, Object> columnValues = new LinkedHashMap<String, Object>();
+    private Map<String, Object> columnUpdateValues = new LinkedHashMap<String, Object>();
 
     public InsertStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -46,5 +47,23 @@ public class InsertStatement extends AbstractSqlStatement {
     
     public InsertStatement addColumn(ColumnConfig columnConfig) {
     	return addColumnValue(columnConfig.getName(), columnConfig.getValueObject());
+    }
+    
+    public InsertStatement addColumnUpdateValue(String columnName, Object newValue) {
+    	columnUpdateValues.put(columnName, newValue);
+
+        return this;
+    }
+
+    public Object getColumnUpdateValue(String columnName) {
+        return columnUpdateValues.get(columnName);
+    }
+
+    public Map<String, Object> getColumnUpdateValues() {
+        return columnUpdateValues;
+    }
+    
+    public InsertStatement addColumnUpdate(ColumnConfig columnConfig) {
+    	return addColumnUpdateValue(columnConfig.getName(), columnConfig.getValueObject());
     }
 }

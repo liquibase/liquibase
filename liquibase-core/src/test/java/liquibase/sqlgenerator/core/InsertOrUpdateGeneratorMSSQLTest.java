@@ -88,7 +88,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
          MSSQLDatabase database = new MSSQLDatabase();
 
          InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
-         statement.addColumnValue("col2","value2");
+         statement.addColumnUpdateValue("col2","value2");
 
          String where = "1 = 1";
 

@@ -174,7 +174,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                     Object value = line[i];
 
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+                    LoadDataColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 
@@ -212,8 +212,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
                     }
 
-
                     insertStatement.addColumnValue(columnName, value);
+                    
+                    if (columnConfig.isUpdateable() == null || columnConfig.isUpdateable()) {
+                    	insertStatement.addColumnUpdateValue(columnName, value);
+                    }
                 }
                 statements.add(insertStatement);
             }
@@ -280,7 +283,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return new InsertStatement(catalogName, schemaName,tableName);
     }
 
-    protected ColumnConfig getColumnConfig(int index, String header) {
+    protected LoadDataColumnConfig getColumnConfig(int index, String header) {
         for (LoadDataColumnConfig config : columns) {
             if (config.getIndex() != null && config.getIndex().equals(index)) {
                 return config;

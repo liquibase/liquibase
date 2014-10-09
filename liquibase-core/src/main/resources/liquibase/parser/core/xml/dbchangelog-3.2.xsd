@@ -296,7 +296,7 @@
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
 		<xsd:attribute name="remarks" type="xsd:string" />
-        <xsd:attribute name="encoding" type="xsd:string">
+        <xsd:attribute name="encoding" type="xsd:string">       
             <xsd:annotation>
                 <xsd:appinfo>
                     <xsd:documentation>
@@ -524,6 +524,7 @@
 						<xsd:attribute name="header" type="xsd:string" />
 						<xsd:attribute name="name" type="xsd:string" />
 						<xsd:attribute name="type" type="xsd:string" />
+						<xsd:attribute name="updateable" type="booleanExp" default="true"/>
 						<xsd:attribute name="defaultValue" type="xsd:string" />
 						<xsd:attribute name="defaultValueNumeric" type="xsd:string" />
 						<xsd:attribute name="defaultValueDate" type="xsd:string" />
