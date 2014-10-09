@@ -226,7 +226,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), tableName, exampleName);
 
             for (CachedRow row : rs) {
-                String indexName = database.correctObjectName(cleanNameFromDatabase(row.getString("INDEX_NAME"), database), Index.class);
+                String indexName = cleanNameFromDatabase(row.getString("INDEX_NAME"), database);
                 if (indexName == null) {
                     continue;
                 }
