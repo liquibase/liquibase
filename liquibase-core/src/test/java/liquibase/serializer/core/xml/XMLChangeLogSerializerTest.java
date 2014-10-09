@@ -731,6 +731,21 @@ public class XMLChangeLogSerializerTest {
         assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
         assertEquals("NEW_NAME", node.getAttribute("newTableName"));
     }
+    
+    @Test
+    public void createNode_RenameSequenceChange() throws Exception {
+        RenameSequenceChange refactoring = new RenameSequenceChange();
+
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setOldSequenceName("OLD_NAME");
+        refactoring.setNewSequenceName("NEW_NAME");
+
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        assertEquals("renameSequence", node.getTagName());
+        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
+        assertEquals("OLD_NAME", node.getAttribute("oldSequenceName"));
+        assertEquals("NEW_NAME", node.getAttribute("newSequenceName"));
+    }
 
     @Test
     public void createNode_RenameViewChange() throws Exception {
