@@ -4,16 +4,16 @@ import liquibase.change.DatabaseChangeProperty;
 
 public class InsertOrUpdateStatement extends InsertStatement {
     private String primaryKey;
-    private Boolean updateOnly = Boolean.FALSE;
+    private Boolean onlyUpdate = Boolean.FALSE;
 
     public InsertOrUpdateStatement(String catalogName, String schemaName, String tableName, String primaryKey) {
         super(catalogName, schemaName, tableName);
         this.primaryKey = primaryKey ;
     }
 
-    public InsertOrUpdateStatement(String catalogName, String schemaName, String tableName, String primaryKey, boolean updateOnly ) {
+    public InsertOrUpdateStatement(String catalogName, String schemaName, String tableName, String primaryKey, boolean onlyUpdate) {
         this(catalogName, schemaName, tableName,primaryKey);
-        this.updateOnly = updateOnly;
+        this.onlyUpdate = onlyUpdate;
     }
     
     public String getPrimaryKey() {
@@ -21,14 +21,14 @@ public class InsertOrUpdateStatement extends InsertStatement {
     }
 
     @DatabaseChangeProperty(description = "Whether records with no matching database record should be ignored")
-    public Boolean getUpdateOnly() {
-    	if ( updateOnly == null ) {
+    public Boolean getOnlyUpdate() {
+    	if ( onlyUpdate == null ) {
     		return false;
     	}
-		return updateOnly;
+		return onlyUpdate;
 	}
 
-	public void setUpdateOnly(Boolean updateOnly) {
-		this.updateOnly = updateOnly;
+	public void setOnlyUpdate(Boolean onlyUpdate) {
+		this.onlyUpdate = onlyUpdate;
 	}
 }

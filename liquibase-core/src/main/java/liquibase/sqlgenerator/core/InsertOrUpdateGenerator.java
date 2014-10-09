@@ -10,7 +10,6 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
 import java.util.HashSet;
@@ -129,7 +128,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer completeSql = new StringBuffer();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);
-        if ( !insertOrUpdateStatement.getUpdateOnly() ) {
+        if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
 	        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));
 	
 	        completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
@@ -138,7 +137,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         	
             String updateStatement = getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain);
             
-            if ( !insertOrUpdateStatement.getUpdateOnly() ) {
+            if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
             	completeSql.append(getElse(database));
             }
 
@@ -146,7 +145,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             
         } catch (LiquibaseException e) {}
 
-        if ( !insertOrUpdateStatement.getUpdateOnly() ) {
+        if ( !insertOrUpdateStatement.getOnlyUpdate() ) {
         	completeSql.append(getPostUpdateStatements(database));
         }
 

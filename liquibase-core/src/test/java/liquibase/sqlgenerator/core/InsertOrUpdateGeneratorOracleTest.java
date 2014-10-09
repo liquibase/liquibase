@@ -75,7 +75,7 @@ END;*/
     }
 
     @Test
-    public void testUpdateOnlyFlag(){
+    public void testOnlyUpdateFlag(){
         OracleDatabase database = new OracleDatabase();
         InsertOrUpdateGeneratorOracle generator = new InsertOrUpdateGeneratorOracle();
         InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1", true);
