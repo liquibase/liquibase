@@ -892,6 +892,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.changeLogParameters = changeLogParameters;
     }
 
+    /**
+     * Called to update file path from database entry when rolling back and ignoreClasspathPrefix is true.
+     */
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
         return objectQuotingStrategy;
     }

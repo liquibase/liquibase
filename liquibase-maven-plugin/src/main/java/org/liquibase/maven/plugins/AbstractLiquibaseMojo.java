@@ -283,6 +283,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             }
         }
 
+        processSystemProperties();
+
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
 
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
@@ -294,8 +296,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
-
-        processSystemProperties();
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         configureFieldsAndValues(getFileOpener(artifactClassLoader));

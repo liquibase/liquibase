@@ -388,9 +388,10 @@ public class Liquibase {
             checkLiquibaseTables(false, changeLog, contexts, labelExpression);
 
             changeLog.validate(database, contexts, labelExpression);
+            changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
-                    new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
+                    new AlreadyRanChangeSetFilter(database.getRanChangeSetList(), ignoreClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database),
@@ -459,7 +460,7 @@ public class Liquibase {
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                     new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
-                    new AlreadyRanChangeSetFilter(ranChangeSetList),
+                    new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
@@ -514,7 +515,7 @@ public class Liquibase {
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                     new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                    new AlreadyRanChangeSetFilter(ranChangeSetList),
+                    new AlreadyRanChangeSetFilter(ranChangeSetList, ignoreClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));

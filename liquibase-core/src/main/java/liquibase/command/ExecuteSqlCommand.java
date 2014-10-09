@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -61,7 +62,11 @@ public class ExecuteSqlCommand extends AbstractCommand {
         if (sqlFile == null) {
             sqlText = sql;
         } else {
-             sqlText = FileUtil.getContents(new File(sqlFile));
+            File file = new File(sqlFile);
+            if (! file.exists()){
+              throw new LiquibaseException(String.format("The file '%s' does not exist", file.getCanonicalPath()));
+            }
+            sqlText = FileUtil.getContents(file);
         }
 
         String out = "";
