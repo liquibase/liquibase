@@ -384,6 +384,15 @@
         <xsd:attribute name="cacheSize" type="xsd:nonNegativeInteger" />
     </xsd:attributeGroup>
 
+	<xsd:attributeGroup name="renameSequenceAttributes">
+		<xsd:attribute name="catalogName" type="xsd:string" />
+		<xsd:attribute name="schemaName" type="xsd:string" />
+		<xsd:attribute name="oldSequenceName" type="xsd:string"
+					   use="required" />
+		<xsd:attribute name="newSequenceName" type="xsd:string"
+					   use="required" />
+	</xsd:attributeGroup>
+
 	<xsd:attributeGroup name="indexName">
 		<xsd:attribute name="indexName" type="xsd:string" use="required" />
 	</xsd:attributeGroup>
@@ -1102,6 +1111,12 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="renameSequence">
+		<xsd:complexType>
+			<xsd:attributeGroup ref="renameSequenceAttributes" />
+		</xsd:complexType>
+	</xsd:element>
+
 	<xsd:element name="createIndex">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -1159,6 +1174,7 @@
 			<xsd:element ref="createSequence" maxOccurs="unbounded" />
 			<xsd:element ref="alterSequence" maxOccurs="unbounded" />
 			<xsd:element ref="dropSequence" maxOccurs="unbounded" />
+			<xsd:element ref="renameSequence" maxOccurs="unbounded" />
 			<xsd:element ref="createIndex" maxOccurs="unbounded" />
 			<xsd:element ref="dropIndex" maxOccurs="unbounded" />
 			<xsd:element ref="addNotNullConstraint" maxOccurs="unbounded" />

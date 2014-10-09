@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class UtfBomAwareReaderTest {
@@ -135,7 +136,7 @@ public class UtfBomAwareReaderTest {
 		reader = new UtfBomAwareReader(prepareStream(0x00, 0x00, 0xFE, 0xFF,
 				0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x62, 0x00, 0x00,
 				0x00, 0x63));
-		assertEncoding("UTF-32BE", Charset.defaultCharset().toString());
+		assertEncoding("UTF-32BE", "UTF-8");
 		assertData();
 	}
 	
