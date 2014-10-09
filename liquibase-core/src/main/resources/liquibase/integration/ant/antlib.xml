@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<antlib>
+    <!--
+     Import all pre-1.7 tasks for compatibility. Please do not add new tasks to the properties file. Add them here by
+     adding a <taskdef> element.
+
+     <taskdef name="newtask" classname="liquibase.integration.ant.NewTask"/>
+    -->
+    <taskdef resource="liquibasetasks.properties"/>
+
+    <typedef name="database" classname="liquibase.integration.ant.type.DatabaseType"/>
+    <typedef name="changelogparameters" classname="liquibase.integration.ant.type.ChangeLogParametersType"/>
+</antlib>

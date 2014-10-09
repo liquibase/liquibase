@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DiffDatabaseTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="DiffDatabaseTaskTest" destDir="${java.io.tmpdir}"/>
+
+    <path id="basic-classpath">
+        <pathelement path="."/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="db1.jdbc.url" value="jdbc:h2:mem:test1;DB_CLOSE_DELAY=-1"/>
+    <property name="db2.jdbc.url" value="jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <lb:database id="db1" driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+    <lb:database id="db2" driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <lb:changelogparameters id="test-parameters">
+        <propertyset refid="db-propertyset"/>
+    </lb:changelogparameters>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${db1.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <sql driver="${jdbc.driver}" url="${db2.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${db1.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <sql driver="${jdbc.driver}" url="${db2.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="testDiffDatabaseLegacy">
+        <lb:diffDatabase driver="${jdbc.driver}" url="${db1.jdbc.url}" username="${db.user}" password="${db.password}"
+                         referencedriver="${jdbc.driver}" referenceurl="${db2.jdbc.url}" referenceusername="${db.user}"
+                         referencepassword="${db.password}" outputfile="${temp.dir}/diff.txt"/>
+        <au:assertFileExists file="${temp.dir}/diff.txt"/>
+    </target>
+
+    <target name="testDiffDatabase">
+        <lb:diffDatabase outputfile="${temp.dir}/diff.txt">
+            <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:diffDatabase>
+        <au:assertFileExists file="${temp.dir}/diff.txt"/>
+    </target>
+
+    <target name="testDiffDatabaseWithReferences">
+        <lb:diffDatabase outputfile="${temp.dir}/diff.txt" databaseref="db1" referencedatabaseref="db2"/>
+        <au:assertFileExists file="${temp.dir}/diff.txt"/>
+    </target>
+
+    <target name="testDiffDatabaseMissingDatabase">
+        <au:expectfailure>
+            <lb:diffDatabase outputfile="${temp.dir}/diff.txt">
+                <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:diffDatabase>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDiffDatabaseMissingReferenceDatabase">
+        <au:expectfailure>
+            <lb:diffDatabase outputfile="${temp.dir}/diff.txt">
+                <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:diffDatabase>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDiffDatabaseMissingOutputFile">
+        <au:expectfailure>
+            <lb:diffDatabase>
+                <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+                <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:diffDatabase>
+        </au:expectfailure>
+    </target>
+</project>

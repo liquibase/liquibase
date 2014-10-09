@@ -3,35 +3,30 @@ package liquibase.integration.ant;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
 
-import java.io.Writer;
+import java.io.IOException;
 
-/**
- * Ant task for rolling back a database.
- */
-public class DatabaseRollbackFutureTask extends BaseLiquibaseTask {
-
+public class DatabaseRollbackFutureTask extends AbstractChangeLogBasedTask {
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
-        Liquibase liquibase = null;
+        Liquibase liquibase = getLiquibase();
         try {
-            Writer writer = createOutputWriter();
-            if (writer == null) {
-                throw new BuildException("rollbackFutureDatabase requires outputFile to be set");
-            }
+            liquibase.futureRollbackSQL(null, new Contexts(getContexts()), getLabels(), getOutputFileWriter());
+        } catch (LiquibaseException e) {
+            throw new BuildException("Unable to generate future rollback SQL.", e);
+        } catch (IOException e) {
+            throw new BuildException("Unable to generate future rollback SQL. Error creating output writer.", e);
+        }
+    }
 
-            liquibase = createLiquibase();
+    @Override
+    protected void validateParameters() {
+        super.validateParameters();
 
-
-            liquibase.futureRollbackSQL(null, new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
-
-            writer.flush();
-            writer.close();
-        } catch (Exception e) {
-            throw new BuildException(e);
-        } finally {
-            closeDatabase(liquibase);
+        if(getOutputFile() == null) {
+            throw new BuildException("Output file is required.");
         }
     }
 }

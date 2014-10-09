@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DiffDatabaseToChangeLogTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="DiffDatabaseToChangeLogTaskTest" destDir="${java.io.tmpdir}"/>
+
+    <path id="basic-classpath">
+        <pathelement path="."/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="db1.jdbc.url" value="jdbc:h2:mem:test1;DB_CLOSE_DELAY=-1"/>
+    <property name="db2.jdbc.url" value="jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <lb:database id="db1" driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+    <lb:database id="db2" driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <lb:changelogparameters id="test-parameters">
+        <propertyset refid="db-propertyset"/>
+    </lb:changelogparameters>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${db1.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <sql driver="${jdbc.driver}" url="${db2.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${db1.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <sql driver="${jdbc.driver}" url="${db2.jdbc.url}" userid="${db.user}" password="${db.password}"
+             encoding="UTF-8" src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogLegacy">
+        <lb:diffDatabaseToChangeLog driver="${jdbc.driver}" url="${db1.jdbc.url}" username="${db.user}"
+                                    password="${db.password}" referencedriver="${jdbc.driver}"
+                                    referenceurl="${db2.jdbc.url}" referenceusername="${db.user}"
+                                    referencepassword="${db.password}" outputFile="${temp.dir}/diff-changelog.xml"/>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.xml"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogXmlOutput">
+        <lb:diffDatabaseToChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:xml outputFile="${temp.dir}/diff-changelog.xml" encoding="UTF-8"/>
+        </lb:diffDatabaseToChangeLog>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.xml"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogYamlOutput">
+        <lb:diffDatabaseToChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:yaml outputFile="${temp.dir}/diff-changelog.yaml" encoding="UTF-8"/>
+        </lb:diffDatabaseToChangeLog>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.yaml"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogJsonOutput">
+        <lb:diffDatabaseToChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:json outputFile="${temp.dir}/diff-changelog.json" encoding="UTF-8"/>
+        </lb:diffDatabaseToChangeLog>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.json"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogTxtOutput">
+        <lb:diffDatabaseToChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:txt outputFile="${temp.dir}/diff-changelog.txt" encoding="UTF-8"/>
+        </lb:diffDatabaseToChangeLog>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.txt"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogMultipleOutputFiles">
+        <lb:diffDatabaseToChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:xml outputFile="${temp.dir}/diff-changelog.xml" encoding="UTF-8"/>
+            <lb:yaml outputFile="${temp.dir}/diff-changelog.yaml" encoding="UTF-8"/>
+            <lb:json outputFile="${temp.dir}/diff-changelog.json" encoding="UTF-8"/>
+            <lb:txt outputFile="${temp.dir}/diff-changelog.txt" encoding="UTF-8"/>
+        </lb:diffDatabaseToChangeLog>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.xml"/>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.yaml"/>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.json"/>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.txt"/>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogMissingOutputFile">
+        <au:expectfailure>
+            <lb:diffDatabaseToChangeLog>
+                <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+                <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:diffDatabaseToChangeLog>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogMissingReferenceDatabase">
+        <au:expectfailure>
+            <lb:diffDatabaseToChangeLog>
+                <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>
+                <lb:xml outputFile="${temp.dir}/diff-changelog.xml" encoding="UTF-8"/>
+            </lb:diffDatabaseToChangeLog>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDiffDatabaseToChangeLogMissingDatabase">
+        <au:expectfailure>
+            <lb:diffDatabaseToChangeLog>
+                <lb:referenceDatabase driver="${jdbc.driver}" url="${db2.jdbc.url}" user="${db.user}" password="${db.password}"/>
+                <lb:xml outputFile="${temp.dir}/diff-changelog.xml" encoding="UTF-8"/>
+            </lb:diffDatabaseToChangeLog>
+        </au:expectfailure>
+    </target>
+</project>

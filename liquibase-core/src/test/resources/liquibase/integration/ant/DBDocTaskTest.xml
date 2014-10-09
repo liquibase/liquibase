@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DBDocTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="DBDocTaskTest" destDir="${java.io.tmpdir}"/>
+
+    <path id="basic-classpath">
+        <pathelement path="."/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="jdbc.url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="testDbDocLegacy">
+        <lb:dbDoc driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                  outputdirectory="${temp.dir}/dbdoc"
+                  changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
+        <au:assertFileExists file="${temp.dir}/dbdoc"/>
+    </target>
+
+    <target name="testDbDoc">
+        <lb:dbDoc outputdirectory="${temp.dir}/dbdoc" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:dbDoc>
+        <au:assertFileExists file="${temp.dir}/dbdoc"/>
+    </target>
+
+    <target name="testDbDocDatabaseRef">
+        <lb:dbDoc databaseref="test-db" outputdirectory="${temp.dir}/dbdoc" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
+        </lb:dbDoc>
+        <au:assertFileExists file="${temp.dir}/dbdoc"/>
+    </target>
+
+    <target name="testDbDocMissingOutputDirectory">
+        <au:expectfailure>
+            <lb:dbDoc changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:dbDoc>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDbDocMissingChangeLogFile">
+        <au:expectfailure>
+            <lb:dbDoc outputdirectory="${test.dir}/dbdoc">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:dbDoc>
+        </au:expectfailure>
+    </target>
+</project>

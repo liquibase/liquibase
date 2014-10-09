@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ChangeLogSyncTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="ChangeLogSyncTaskTest" destDir="${java.io.tmpdir}"/>
+
+    <path id="basic-classpath">
+        <pathelement path="."/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="jdbc.url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <property name="column.one" value="new_column_one"/>
+    <property name="column.two" value="new_column_two"/>
+    <propertyset id="db-propertyset">
+        <propertyref prefix="column"/>
+    </propertyset>
+
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <lb:changelogparameters id="test-parameters">
+        <propertyset refid="db-propertyset"/>
+    </lb:changelogparameters>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="testChangeLogSyncLegacy">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSync driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                          changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testChangeLogSync">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSync changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSync>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testChangeLogSyncDatabaseRef">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:changeLogSync databaseref="test-db" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testChangeLogSyncToOutputFile">
+        <lb:changeLogSync changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                          outputfile="${temp.dir}/sync.sql">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:changeLogSync>
+        <au:assertFileExists file="${temp.dir}/sync.sql"/>
+    </target>
+
+    <target name="testChangeLogSyncMissingDatabase">
+        <au:expectfailure>
+            <lb:changeLogSync changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
+        </au:expectfailure>
+    </target>
+
+    <target name="testChangeLogSyncMissingChangeLogFile">
+        <au:expectfailure>
+            <lb:changeLogSync>
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:changeLogSync>
+        </au:expectfailure>
+    </target>
+</project>

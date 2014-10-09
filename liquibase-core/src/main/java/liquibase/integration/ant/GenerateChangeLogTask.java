@@ -3,51 +3,105 @@ package liquibase.integration.ant;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
-import liquibase.diff.DiffGeneratorFactory;
-import liquibase.diff.DiffResult;
-import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.logging.LogFactory;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
+import liquibase.exception.DatabaseException;
+import liquibase.integration.ant.type.ChangeLogOutputFile;
+import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.core.json.JsonChangeLogSerializer;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
+import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.types.resources.FileResource;
+import org.apache.tools.ant.util.FileUtils;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
+    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<ChangeLogOutputFile>();
+    private boolean includeSchema = true;
+    private boolean includeCatalog = true;
+    private boolean includeTablespace = true;
 
-	private String diffTypes;
-    private String dataDir;
-    private boolean includeCatalog;
-    private boolean includeSchema;
-    private boolean includeTablespace;
+    @Override
+	public void executeWithLiquibaseClassloader() throws BuildException {
+        Liquibase liquibase = getLiquibase();
+        Database database = liquibase.getDatabase();
+        CatalogAndSchema catalogAndSchema = buildCatalogAndSchema(database);
+        DiffOutputControl diffOutputControl = getDiffOutputControl();
+        DiffToChangeLog diffToChangeLog = new DiffToChangeLog(diffOutputControl);
 
-    public String getDiffTypes() {
-		return diffTypes;
+        for(ChangeLogOutputFile changeLogOutputFile : changeLogOutputFiles) {
+            String encoding = getOutputEncoding(changeLogOutputFile);
+            PrintStream printStream = null;
+            try {
+                FileResource outputFile = changeLogOutputFile.getOutputFile();
+                ChangeLogSerializer changeLogSerializer = changeLogOutputFile.getChangeLogSerializer();
+                log("Writing change log file " + outputFile.toString(), Project.MSG_INFO);
+                printStream = new PrintStream(outputFile.getOutputStream(), true, encoding);
+                liquibase.generateChangeLog(catalogAndSchema, diffToChangeLog, printStream, changeLogSerializer);
+            } catch (UnsupportedEncodingException e) {
+                throw new BuildException("Unable to generate a change log. Encoding [" + encoding + "] is not supported.", e);
+            } catch (IOException e) {
+                throw new BuildException("Unable to generate a change log. Error creating output stream.", e);
+            } catch (ParserConfigurationException e) {
+                throw new BuildException("Unable to generate a change log. Error configuring parser.", e);
+            } catch (DatabaseException e) {
+                throw new BuildException("Unable to generate a change log.", e);
+            } finally {
+                FileUtils.close(printStream);
+            }
+        }
 	}
 
-	public void setDiffTypes(String diffTypes) {
-		this.diffTypes = diffTypes;
-	}
+    @Override
+    protected void validateParameters() {
+        super.validateParameters();
 
-    public String getDataDir() {
-        return dataDir;
+        if(changeLogOutputFiles == null || changeLogOutputFiles.isEmpty()) {
+            throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
+        }
     }
 
-    public void setDataDir(String dataDir) {
-        this.dataDir = dataDir;
+    private String getOutputEncoding(ChangeLogOutputFile changeLogOutputFile) {
+        String encoding = changeLogOutputFile.getEncoding();
+        return (encoding == null) ? getDefaultOutputEncoding() : encoding;
     }
 
+    private CatalogAndSchema buildCatalogAndSchema(Database database) {
+        return new CatalogAndSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
+    }
+
+    private DiffOutputControl getDiffOutputControl() {
+        return new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+    }
+
+    public void addConfiguredJson(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new JsonChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addConfiguredXml(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new XMLChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addConfiguredYaml(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new YamlChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addConfiguredTxt(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new StringChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
 
     public boolean getIncludeCatalog() {
         return includeCatalog;
@@ -73,40 +127,14 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
         this.includeTablespace = includeTablespace;
     }
 
-    @Override
-	public void executeWithLiquibaseClassloader() throws BuildException {
-		Liquibase liquibase = null;
-		try {
-			PrintStream writer = createPrintStream();
-			if (writer == null) {
-				throw new BuildException("generateChangeLog requires outputFile to be set");
-			}
-
-			liquibase = createLiquibase();
-
-            Database database = liquibase.getDatabase();
-            SnapshotControl snapshotControl = new SnapshotControl(database, getDiffTypes());
-
-            DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()), database, snapshotControl);
-
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, null, new CompareControl(new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()), new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))}, getDiffTypes() ));
-//			diff.addStatusListener(new OutDiffStatusListener());
-
-            DiffOutputControl diffOutputConfig = new DiffOutputControl(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace()).addIncludedSchema(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()));
-            diffOutputConfig.setDataDir(getDataDir());
-			if (getChangeLogFile() == null) {
-				new DiffToChangeLog(diffResult, diffOutputConfig).print(writer);
-			} else {
-                new DiffToChangeLog(diffResult, diffOutputConfig).print(getChangeLogFile());
-			}
-
-			writer.flush();
-			writer.close();
-		} catch (Exception e) {
-			throw new BuildException(e);
-		} finally {
-			closeDatabase(liquibase);
-		}
-	}
-
+    /**
+     * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
+     */
+    @Deprecated
+    public void setOutputFile(FileResource outputFile) {
+        log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);
+        ChangeLogOutputFile changeLogOutputFile = new ChangeLogOutputFile();
+        changeLogOutputFile.setOutputFile(outputFile);
+        addConfiguredXml(changeLogOutputFile);
+    }
 }

@@ -1,38 +1,34 @@
 package liquibase.integration.ant;
 
 import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.types.resources.FileResource;
+import org.apache.tools.ant.util.FileUtils;
 
+import java.io.IOException;
 import java.io.Writer;
 
-public class MarkNextChangeSetRanTask extends BaseLiquibaseTask {
-
+public class MarkNextChangeSetRanTask extends AbstractChangeLogBasedTask {
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
-
-        if (!shouldRun()) {
-            return;
-        }
-
-        Liquibase liquibase = null;
+        Liquibase liquibase = getLiquibase();
+        Writer writer = null;
         try {
-            liquibase = createLiquibase();
-
-            Writer writer = createOutputWriter();
-            if (writer == null) {
-                liquibase.markNextChangeSetRan(new Contexts(getContexts()), new LabelExpression(getLabels()));
+            FileResource outputFile = getOutputFile();
+            if (outputFile != null) {
+                writer = getOutputFileWriter();
+                liquibase.markNextChangeSetRan(new Contexts(getContexts()), getLabels(), writer);
             } else {
-                liquibase.markNextChangeSetRan(new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
-                writer.flush();
-                writer.close();
+                liquibase.markNextChangeSetRan(new Contexts(getContexts()), getLabels());
             }
-
-        } catch (Exception e) {
-            throw new BuildException(e);
+        } catch (LiquibaseException e) {
+            throw new BuildException("Unable to mark next changeset as ran.", e);
+        } catch (IOException e) {
+            throw new BuildException("Unable to mark next changeset as ran. Error creating output writer.", e);
         } finally {
-            closeDatabase(liquibase);
+            FileUtils.close(writer);
         }
     }
 }
