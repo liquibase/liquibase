@@ -36,6 +36,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
+    private boolean ignoreClasspathPrefix = false;
 
     public DatabaseChangeLog() {
     }
@@ -124,7 +125,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public ChangeSet getChangeSet(String path, String author, String id) {
         for (ChangeSet changeSet : changeSets) {
-            if (changeSet.getFilePath().equalsIgnoreCase(path)
+            if (normalizePath(changeSet.getFilePath()).equalsIgnoreCase(normalizePath(path))
                     && changeSet.getAuthor().equalsIgnoreCase(author)
                     && changeSet.getId().equalsIgnoreCase(id)
                     && (changeSet.getDbmsSet() == null
@@ -336,4 +337,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         };
     }
 
+    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
+        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
+    }
+
+    public boolean ignoreClasspathPrefix() {
+        return ignoreClasspathPrefix;
+    }
+
+    protected String normalizePath(String filePath) {
+        if (ignoreClasspathPrefix) {
+            return filePath.replaceFirst("^classpath:", "");
+        }
+        return filePath;
+    }
 }

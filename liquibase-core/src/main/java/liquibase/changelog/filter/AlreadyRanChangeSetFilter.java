@@ -7,8 +7,8 @@ import java.util.List;
 
 public class AlreadyRanChangeSetFilter extends RanChangeSetFilter {
 
-    public AlreadyRanChangeSetFilter(List<RanChangeSet> ranChangeSets) {
-        super(ranChangeSets);
+    public AlreadyRanChangeSetFilter(List<RanChangeSet> ranChangeSets, boolean ignoreClasspathPrefix) {
+        super(ranChangeSets, ignoreClasspathPrefix);
     }
 
     @Override
