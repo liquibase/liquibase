@@ -18,3 +18,6 @@ Kept existing interfaces for the most part for backwards compatibility, but need
 Features:
 - liquibase.parser.core.formattedsql.FormattedSqlChangeLogParser
 Added support for multiple DBMS values in formatted SQL changelogs. Use comma separated values without spaces, e.g. "dbms:oracle,h2".
+
+Added system property "liquibase.env" to support multiple instances running on a single host, keeping a separation of instances by including an environment 
+name. The LOCKEDBY column when the system property is set will include the liquibase.env value, separated by a #. e.g. localhost#server1 (127.0.0.1)

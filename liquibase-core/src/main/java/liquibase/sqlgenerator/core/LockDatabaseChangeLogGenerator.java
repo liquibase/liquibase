@@ -22,6 +22,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
 
     protected static final String hostname;
     protected static final String hostaddress;
+    protected static final String hostDescription = System.getProperty( "liquibase.hostDescription" ) == null ? "" : "#" + System.getProperty( "liquibase.hostDescription" );
 
     static {
         try {
@@ -37,12 +38,10 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     	String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
 
-
-
         UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         updateStatement.addNewColumnValue("LOCKED", true);
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
-        updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
+        updateStatement.addNewColumnValue("LOCKEDBY", hostname + hostDescription + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
