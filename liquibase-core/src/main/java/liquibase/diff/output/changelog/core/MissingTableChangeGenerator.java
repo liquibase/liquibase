@@ -5,8 +5,12 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.DateTimeType;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
@@ -62,7 +66,9 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
-            columnConfig.setType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toDatabaseDataType(referenceDatabase).toString());
+            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
+            DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
+            columnConfig.setType(ddt.toString());
 
             if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);
@@ -103,7 +109,38 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             } else if (defaultValue instanceof Number) {
                 columnConfig.setDefaultValueNumeric(((Number) defaultValue));
             } else if (defaultValue instanceof DatabaseFunction) {
-                columnConfig.setDefaultValueComputed((DatabaseFunction) defaultValue);
+
+                DatabaseFunction function = (DatabaseFunction) defaultValue;
+                if ("current".equals(function.getValue())) {
+                  if (referenceDatabase instanceof InformixDatabase) {
+                    if (ldt instanceof DateTimeType) {
+                      if (ldt.getAdditionalInformation() == null || ldt.getAdditionalInformation().length() == 0) {
+                        if (ldt.getParameters() != null && ldt.getParameters().length > 0) {
+
+                          String parameter = String.valueOf(ldt.getParameters()[0]);
+
+                          if ("4365".equals(parameter)) {
+                            function = new DatabaseFunction("current year to fraction(3)");
+                          }
+
+                          if ("3594".equals(parameter)) {
+                            function = new DatabaseFunction("current year to second");
+                          }
+
+                          if ("3080".equals(parameter)) {
+                            function = new DatabaseFunction("current year to minute");
+                          }
+
+                          if ("2052".equals(parameter)) {
+                            function = new DatabaseFunction("current year to day");
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                columnConfig.setDefaultValueComputed(function);
             } else {
                 columnConfig.setDefaultValue(defaultValue.toString());
             }

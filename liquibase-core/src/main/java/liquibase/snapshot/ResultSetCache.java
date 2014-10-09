@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
@@ -214,18 +215,39 @@ class ResultSetCache {
         public abstract List<CachedRow> bulkFetch() throws SQLException, DatabaseException;
 
         protected List<CachedRow> extract(ResultSet resultSet) throws SQLException {
+            return extract(resultSet, false);
+        }
+
+        protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint) throws SQLException {
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {
                 result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
-                    @Override
-                    protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-                        Object value = super.getColumnValue(rs, index);
-                        if (value != null && value instanceof String) {
-                            value = ((String) value).trim();
+                  @Override
+                  protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+                    Object value = super.getColumnValue(rs, index);
+                    if (value != null && value instanceof String) {
+
+                      // Don't trim for informix database,
+                      // We need to discern the space in front of an index name,
+                      // to know if it was auto-generated or not
+                      
+                      if(informixIndexTrimHint == false) {
+                        value = ((String) value).trim(); // Trim the value normally
+                      } else {
+                        boolean startsWithSpace = false;
+                        if(database instanceof InformixDatabase && ((String)value).matches("^ .*$")) {
+                          startsWithSpace = true; // Set the flag if the value started with a space
                         }
-                        return value;
+                        value = ((String) value).trim(); // Trim the value normally
+                        if(startsWithSpace == true) {
+                          value = " "+value; // Put the space back at the beginning if the flag was set
+                        }
+                      }
+
                     }
+                    return value;
+                  }
                 }).extractData(resultSet);
 
                 for (Map row : result) {
@@ -236,8 +258,6 @@ class ResultSetCache {
             }
             return returnList;
         }
-
-
     }
 
     private int getTimesSingleQueried(String schemaKey) {
