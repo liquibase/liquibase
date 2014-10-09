@@ -1205,10 +1205,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /*
-     * Executes the statements passed as argument to a target {@link Database}
+     * Executes the statements passed
      *
      * @param statements an array containing the SQL statements to be issued
-     * @param database the target {@link Database}
+     * @param sqlVisitors a list of {@link SqlVisitor} objects to be applied to the executed statements
      * @throws DatabaseException if there were problems issuing the statements
      */
     @Override
@@ -1234,17 +1234,14 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
-        SqlStatement[] statements = change.generateRollbackStatements(this);
-        List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
-        if (sqlVisitors != null) {
-            for (SqlVisitor visitor : sqlVisitors) {
-                if (visitor.isApplyToRollback()) {
-                    rollbackVisitors.add(visitor);
-                }
-            }
-        }
-        execute(statements, rollbackVisitors);
+    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
+        execute(statements, filterRollbackVisitors(sqlVisitors));
+    }
+    
+    @Override
+    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {        
+        final SqlStatement[] statements = change.generateRollbackStatements(this);
+        executeRollbackStatements(statements, sqlVisitors);
     }
 
     @Override
@@ -1257,6 +1254,22 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    /**
+     * Takes a list of SqlVisitors and returns a new list with only the SqlVisitors set to apply to rollbacks
+     */
+    protected List<SqlVisitor> filterRollbackVisitors(final List<SqlVisitor> visitors) {
+        final List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
+        if (visitors != null) {
+            for (SqlVisitor visitor : visitors) {
+               if (visitor.isApplyToRollback()) {
+                   rollbackVisitors.add(visitor);
+               }
+            }
+        }
+        
+        return rollbackVisitors;
+    }
+    
     @Override
     public List<DatabaseFunction> getDateFunctions() {
         return dateFunctions;
