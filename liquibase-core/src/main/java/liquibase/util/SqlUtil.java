@@ -128,7 +128,7 @@ public class SqlUtil {
             } else {
                 return new Integer(stringVal);
             }
-        } else if (liquibaseDataType instanceof BlobType || typeId == Types.BLOB) {
+        } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             return new DatabaseFunction(stringVal);
         } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN )) {
             if (scanner.hasNextBoolean()) {
@@ -233,7 +233,7 @@ public class SqlUtil {
         } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
             return stringVal;
         } else {
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' typeId " + typeName + " (" + typeId + "), assuming it is a function");
+            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
             return new DatabaseFunction(stringVal);
         }
     }
