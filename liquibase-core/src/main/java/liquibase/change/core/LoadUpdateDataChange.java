@@ -23,6 +23,7 @@ import java.util.List;
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table", since = "2.0")
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
+    private Boolean onlyUpdate = Boolean.FALSE;
 
     @Override
     @DatabaseChangeProperty(description = "Name of the table to insert or update data in", requiredForDatabase = "all")
@@ -39,9 +40,21 @@ public class LoadUpdateDataChange extends LoadDataChange {
         return primaryKey;
     }
 
-    @Override
+    @DatabaseChangeProperty(description = "If true, records with no matching database record should be ignored", since = "3.3" )
+    public Boolean getOnlyUpdate() {
+    	if ( onlyUpdate == null ) {
+    		return false;
+    	}
+		return onlyUpdate;
+	}
+
+	public void setOnlyUpdate(Boolean onlyUpdate) {
+		this.onlyUpdate = onlyUpdate;
+	}
+
+	@Override
     protected InsertStatement createStatement(String catalogName, String schemaName, String tableName) {
-        return new InsertOrUpdateStatement(catalogName, schemaName, tableName, this.primaryKey);
+        return new InsertOrUpdateStatement(catalogName, schemaName, tableName, this.primaryKey, this.onlyUpdate);
     }
 
     @Override

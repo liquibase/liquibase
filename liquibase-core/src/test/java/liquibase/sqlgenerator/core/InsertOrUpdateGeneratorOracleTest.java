@@ -1,11 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import org.junit.Test;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
-import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.database.core.OracleDatabase;
 import liquibase.sql.Sql;
-import static junit.framework.Assert.assertTrue;
+import liquibase.statement.core.InsertOrUpdateStatement;
+
+import org.junit.Test;
 
 
 public class InsertOrUpdateGeneratorOracleTest {
@@ -72,4 +74,21 @@ END;*/
 
     }
 
+    @Test
+    public void testOnlyUpdateFlag(){
+        OracleDatabase database = new OracleDatabase();
+        InsertOrUpdateGeneratorOracle generator = new InsertOrUpdateGeneratorOracle();
+        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1", true);
+        statement.addColumnValue("pk_col1","value1");
+        statement.addColumnValue("col2","value2");
+        Sql[] sql = generator.generateSql( statement, database,  null);
+        String theSql = sql[0].toSql();
+        assertFalse("should not have had insert statement",theSql.contains("INSERT INTO mycatalog.mytable (pk_col1, col2) VALUES ('value1', 'value2');"));
+        assertTrue("missing update statement", theSql.contains("UPDATE mycatalog.mytable"));
+        String[] sqlLines = theSql.split("\n");
+        int lineToCheck = 0;
+        assertEquals("UPDATE mycatalog.mytable SET col2 = 'value2' WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
+        lineToCheck++;
+        assertEquals( "Wrong number of lines", 1, sqlLines.length);
+    }
 }
