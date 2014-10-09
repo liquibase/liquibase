@@ -226,7 +226,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), tableName, exampleName);
 
             for (CachedRow row : rs) {
-                String indexName = cleanNameFromDatabase(row.getString("INDEX_NAME"), database);
+                String rawIndexName = row.getString("INDEX_NAME");
+                String indexName = cleanNameFromDatabase(rawIndexName, database);
+
                 if (indexName == null) {
                     continue;
                 }
@@ -245,7 +247,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 * So here is it replaced.
                 */
                 if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
-                    indexName = "_generated_index_" + indexName.substring(1);
+                    //indexName = "_generated_index_" + indexName.substring(1);
+                    continue; // suppress creation of generated_index records
                 }
                 short type = row.getShort("TYPE");
                 //                String tableName = rs.getString("TABLE_NAME");
@@ -313,7 +316,17 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (exampleName != null) {
-            return foundIndexes.get(exampleName);
+            Index index = null;
+
+            // If we are informix then must alter the lookup if we get here
+            // Wont get here now though due to the continue for generated indexes above
+            if(database instanceof InformixDatabase) {
+              index = foundIndexes.get("_generated_index_" + exampleName.substring(1));
+            } else {
+              index = foundIndexes.get(exampleName);
+            }
+            
+            return index;
         } else {
             for (Index index : foundIndexes.values()) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, database)) {
