@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GenerateChangeLogTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="GenerateChangeLogTaskTest" destDir="${java.io.tmpdir}"/>
+
+    <path id="basic-classpath">
+        <pathelement path="."/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="jdbc.url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="testGenerateChangeLogLegacy">
+        <lb:generateChangeLog driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                              outputFile="${temp.dir}/new-change-log.xml"
+                              classpathref="basic-classpath"/>
+        <au:assertFileExists file="${temp.dir}/new-change-log.xml"/>
+    </target>
+
+    <target name="testGenerateChangeLogXmlOutput">
+        <lb:generateChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:xml outputfile="${temp.dir}/new-change-log.xml" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.xml"/>
+    </target>
+
+    <target name="testGenerateChangeLogYamlOutput">
+        <lb:generateChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:yaml outputfile="${temp.dir}/new-change-log.yaml" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.yaml"/>
+    </target>
+
+    <target name="testGenerateChangeLogJsonOutput">
+        <lb:generateChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:json outputfile="${temp.dir}/new-change-log.json" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.json"/>
+    </target>
+
+    <target name="testGenerateChangeLogTxtOutput">
+        <lb:generateChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:txt outputfile="${temp.dir}/new-change-log.txt" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.txt"/>
+    </target>
+
+    <target name="testGenerateChangeLogMultipleOutputFiles">
+        <lb:generateChangeLog>
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:xml outputfile="${temp.dir}/new-change-log.xml" encoding="UTF-8"/>
+            <lb:yaml outputfile="${temp.dir}/new-change-log.yaml" encoding="UTF-8"/>
+            <lb:json outputfile="${temp.dir}/new-change-log.json" encoding="UTF-8"/>
+            <lb:txt outputfile="${temp.dir}/new-change-log.txt" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.xml"/>
+        <au:assertFileExists file="${temp.dir}/new-change-log.yaml"/>
+        <au:assertFileExists file="${temp.dir}/new-change-log.json"/>
+        <au:assertFileExists file="${temp.dir}/new-change-log.txt"/>
+    </target>
+
+    <target name="testGenerateChangeLogDatabaseRef">
+        <lb:generateChangeLog databaseref="test-db">
+            <lb:xml outputfile="${temp.dir}/new-change-log.xml" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.xml"/>
+    </target>
+
+    <target name="testGenerateChangeLogBadOutputEncoding">
+        <au:expectfailure>
+            <lb:generateChangeLog>
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+                <lb:txt outputfile="${temp.dir}/new-change-log.txt" encoding="REALLY-BAD-ENCODING"/>
+            </lb:generateChangeLog>
+        </au:expectfailure>
+    </target>
+
+    <target name="testGenerateChangeLogMissingOutputElement">
+        <au:expectfailure>
+            <lb:generateChangeLog>
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:generateChangeLog>
+        </au:expectfailure>
+    </target>
+
+    <target name="testGenerateChangeLogMissingDatabase">
+        <au:expectfailure>
+            <lb:generateChangeLog>
+                <lb:xml outputfile="${temp.dir}/new-change-log.xml" encoding="UTF-8"/>
+            </lb:generateChangeLog>
+        </au:expectfailure>
+    </target>
+</project>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DatabaseRollbackFutureTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="DatabaseRollbackFutureTaskTest" destDir="${java.io.tmpdir}"/>
+
+    <path id="basic-classpath">
+        <pathelement path="."/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="jdbc.url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <property name="column.one" value="new_column_one"/>
+    <property name="column.two" value="new_column_two"/>
+    <propertyset id="db-propertyset">
+        <propertyref prefix="column"/>
+    </propertyset>
+
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <lb:changelogparameters id="test-parameters">
+        <propertyset refid="db-propertyset"/>
+    </lb:changelogparameters>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+        <lb:tagDatabase databaseref="test-db" tag="${tag}"/>
+        <lb:updateDatabase databaseref="test-db"
+                           changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="testDatabaseRollbackFutureLegacy">
+        <lb:rollbackFutureDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}"
+                                   password="${db.password}" outputfile="${temp.dir}/rollback-future.sql"
+                                   changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"/>
+        <au:assertFileExists file="${temp.dir}/rollback-future.sql"/>
+    </target>
+
+    <target name="testDatabaseRollbackFuture">
+        <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
+                                   changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:rollbackFutureDatabase>
+        <au:assertFileExists file="${temp.dir}/rollback-future.sql"/>
+    </target>
+
+    <target name="testDatabaseRollbackFutureDatabaseReference">
+        <lb:rollbackFutureDatabase databaseref="test-db" outputfile="${temp.dir}/rollback-future.sql"
+                                   changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"/>
+        <au:assertFileExists file="${temp.dir}/rollback-future.sql"/>
+    </target>
+
+    <target name="testDatabaseRollbackFutureMissingOutputFile">
+        <au:expectfailure>
+            <lb:rollbackFutureDatabase changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:rollbackFutureDatabase>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDatabaseRollbackFutureMissingChangeLogFile">
+        <au:expectfailure>
+            <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:rollbackFutureDatabase>
+        </au:expectfailure>
+    </target>
+
+    <target name="testDatabaseRollbackFutureMissingDatabase">
+        <au:expectfailure>
+            <lb:rollbackFutureDatabase outputfile="${temp.dir}/rollback-future.sql"
+                                       changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml"/>
+        </au:expectfailure>
+    </target>
+</project>

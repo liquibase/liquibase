@@ -1,0 +1,11 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+    <changeSet id="1" author="testuser">
+        <insert tableName="users">
+            <column name="first_name" value="test"/>
+            <column name="last_name" value="name"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<antlib xmlns="antlib:org.apache.tools.ant" xmlns:current="ant:current" xmlns:au="antlib:org.apache.ant.antunit">
+    <typedef name="tableExists" classname="liquibase.integration.ant.test.TableExistsCondition"/>
+    <typedef name="columnExists" classname="liquibase.integration.ant.test.ColumnExistsCondition"/>
+    <typedef name="rowCountEquals" classname="liquibase.integration.ant.test.RowCountEqualsCondition"/>
+
+    <macrodef name="assertTableExists" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="table"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertTrue message="@{message}">
+                <current:tableExists driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" table="@{table}"/>
+            </au:assertTrue>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="assertTableDoesntExist" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="table"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertFalse message="@{message}">
+                <current:tableExists driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" table="@{table}"/>
+            </au:assertFalse>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="assertColumnExists" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="table"/>
+        <attribute name="column"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertTrue message="@{message}">
+                <current:columnExists driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" table="@{table}" column="@{column}"/>
+            </au:assertTrue>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="assertColumnDoesntExist" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="table"/>
+        <attribute name="column"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertFalse message="@{message}">
+                <current:columnExists driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" table="@{table}" column="@{column}"/>
+            </au:assertFalse>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="assertRowCountEquals" backtrace="false">
+        <attribute name="driver"/>
+        <attribute name="url"/>
+        <attribute name="user"/>
+        <attribute name="password"/>
+        <attribute name="table"/>
+        <attribute name="count"/>
+        <attribute name="message" default="Assertion failed"/>
+        <sequential>
+            <au:assertTrue message="@{message}">
+                <current:rowCountEquals driver="@{driver}" url="@{url}" user="@{user}" password="@{password}" table="@{table}" count="@{count}"/>
+            </au:assertTrue>
+        </sequential>
+    </macrodef>
+</antlib>

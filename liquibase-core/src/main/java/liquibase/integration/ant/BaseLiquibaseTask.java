@@ -1,32 +1,34 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.integration.ant.logging.AntTaskLogFactory;
+import liquibase.integration.ant.type.ChangeLogParametersType;
+import liquibase.integration.ant.type.DatabaseType;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.taskdefs.Property;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
+import org.apache.tools.ant.types.resources.FileResource;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -36,98 +38,145 @@ import java.util.logging.LogRecord;
  * that are common to all tasks.
  */
 public abstract class BaseLiquibaseTask extends Task {
-    private String changeLogFile;
-    private String driver;
-    private String url;
-    private String username;
-    private String password;
-    protected Path classpath;
+    private AntClassLoader classLoader;
+    private Liquibase liquibase;
+
+    private Path classpath;
+    private DatabaseType databaseType;
+    private ChangeLogParametersType changeLogParameters;
     private boolean promptOnNonLocalDatabase = false;
-    private String currentDateTimeFunction;
-    private String contexts;
-    private String labels;
-    private String outputFile;
-    private String defaultCatalogName;
-    private String defaultSchemaName;
-    private String databaseClass;
-    private String databaseChangeLogTableName;
-    private String databaseChangeLogLockTableName;
-    private String databaseChangeLogObjectsTablespace;
-    private boolean outputDefaultSchema = true; // Default based on setting in AbstractJdbcDatabase
-    private boolean outputDefaultCatalog = true;
-
-
-    private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
 
     public BaseLiquibaseTask() {
         super();
-        new LogRedirector(this).redirectLogger();
+    }
+
+    @Override
+    public void init() throws BuildException {
+        LogFactory.setInstance(new AntTaskLogFactory(this));
+        classpath = new Path(getProject());
     }
 
     @Override
     public final void execute() throws BuildException {
         super.execute();
-
-        AntClassLoader loader = getProject().createClassLoader(classpath);
-        loader.setParent(this.getClass().getClassLoader());
-        loader.setThreadContextLoader();
-
+        log("Starting Liquibase.", Project.MSG_INFO);
+        classLoader = getProject().createClassLoader(classpath);
+        classLoader.setParent(this.getClass().getClassLoader());
+        classLoader.setParentFirst(false);
+        classLoader.setThreadContextLoader();
+        validateParameters();
+        Database database = null;
         try {
-            executeWithLiquibaseClassloader();
+            ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
+            database = createDatabaseFromType(databaseType);
+            String changeLogFilePath = getChangeLogFilePath();
+            liquibase = new Liquibase(changeLogFilePath, resourceAccessor, database);
+            if(changeLogParameters != null) {
+                changeLogParameters.applyParameters(liquibase);
+            }
+            if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
+                    UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                log("User chose not to run task against a non-local database.", Project.MSG_INFO);
+                return;
+            }
+            if(shouldRun()) {
+                executeWithLiquibaseClassloader();
+            }
+        } catch (LiquibaseException e) {
+            throw new BuildException("Unable to initialize Liquibase.", e);
         } finally {
-            loader.resetThreadContextLoader();
+            closeDatabase(database);
+            classLoader.resetThreadContextLoader();
+            classLoader.cleanup();
+            classLoader = null;
         }
     }
 
     protected abstract void executeWithLiquibaseClassloader() throws BuildException;
 
-    public boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+    protected Database createDatabaseFromType(DatabaseType databaseType) {
+        return databaseType.createDatabase(classLoader);
     }
 
-    public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
-        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+    protected Liquibase getLiquibase() {
+        return liquibase;
     }
 
-    public String getDriver() {
-        return driver;
+    /**
+     * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
+     *
+     * @return Returns null in this implementation. Subclasses that need a change log should implement.
+     * @see AbstractChangeLogBasedTask#getChangeLogFile()
+     */
+    protected FileResource getChangeLogFile() {
+        return null;
     }
 
-    public void setDriver(String driver) {
-        this.driver = driver.trim();
+    protected boolean shouldRun() {
+        LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
+        GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
+        if (!globalConfiguration.getShouldRun()) {
+            log("Liquibase did not run because " + configuration.describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false", Project.MSG_INFO);
+            return false;
+        }
+        return true;
     }
 
-    public String getUrl() {
-        return url;
+    protected String getDefaultOutputEncoding() {
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
+        return globalConfiguration.getOutputEncoding();
     }
 
-    public void setUrl(String url) {
-        this.url = url.trim();
+    /**
+     * Subclasses that override this method must always call <code>super.validateParameters()</code> method.
+     */
+    protected void validateParameters() {
+        if(databaseType == null) {
+            throw new BuildException("A database or databaseref is required.");
+        }
     }
 
-    public String getUsername() {
-        return username;
+    /**
+     * Creates a suitable ResourceAccessor for use in an Ant task..
+     *
+     * @param classLoader The ClassLoader to use in the ResourceAccessor. It is preferable that it is an AntClassLoader.
+     * @return A ResourceAccessor.
+     */
+    private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
+        FileSystemResourceAccessor fileSystemResourceAccessor = new FileSystemResourceAccessor();
+        ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(classLoader);
+        return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
     }
 
-    public void setUsername(String username) {
-        this.username = username.trim();
+    /**
+     * Convenience method to get the change log file path from the change log file resource if it exists.
+     *
+     * @return The change log file path string.
+     */
+    private String getChangeLogFilePath() {
+        FileResource changeLogFile = getChangeLogFile();
+        return (changeLogFile != null) ? changeLogFile.toString() : null;
     }
 
-    public String getPassword() {
-        return password;
+    /**
+     * Convenience method to safely close the database connection.
+     *
+     * @param database The database to close.
+     */
+    private void closeDatabase(Database database) {
+        try {
+            if(database != null) {
+                database.close();
+            }
+        } catch (DatabaseException e) {
+            log("Error closing the database connection.", e, Project.MSG_WARN);
+        }
     }
 
-    public void setPassword(String password) {
-        this.password = password.trim();
-    }
-
-    public String getChangeLogFile() {
-        return changeLogFile;
-    }
-
-    public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile.trim();
-    }
+    /*
+     * Ant parameters
+     */
 
     public Path createClasspath() {
         if (this.classpath == null) {
@@ -140,75 +189,263 @@ public abstract class BaseLiquibaseTask extends Task {
         createClasspath().setRefid(r);
     }
 
+    public void addDatabase(DatabaseType databaseType) {
+        if(this.databaseType != null) {
+            throw new BuildException("Only one <database> element is allowed.");
+        }
+        this.databaseType = databaseType;
+    }
+
+    public void setDatabaseRef(Reference databaseRef) {
+        databaseType = new DatabaseType(getProject());
+        databaseType.setRefid(databaseRef);
+    }
+
+    public void addChangeLogParameters(ChangeLogParametersType changeLogParameters) {
+        if(this.changeLogParameters != null) {
+            throw new BuildException("Only one <changeLogParameters> element is allowed.");
+        }
+        this.changeLogParameters = changeLogParameters;
+    }
+
+    public void setChangeLogParametersRef(Reference changeLogParametersRef) {
+        changeLogParameters = new ChangeLogParametersType(getProject());
+        changeLogParameters.setRefid(changeLogParametersRef);
+    }
+
+    public boolean isPromptOnNonLocalDatabase() {
+        return promptOnNonLocalDatabase;
+    }
+
+    public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
+        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+    }
+
+    /*************************
+     * Deprecated parameters *
+     *************************/
+
+    /**
+     * Helper method for deprecated ant attributes. This method will be removed when the deprecated methods are removed.
+     * Do not rely on this method.
+     *
+     * @return DatabaseType object. Created if doesn't exist.
+     */
+    private DatabaseType getDatabaseType() {
+        if(databaseType == null) {
+            databaseType = new DatabaseType(getProject());
+        }
+        return databaseType;
+    }
+
+    /**
+     * Helper method for deprecated ant attributes. This method will be removed when the deprecated methods are removed.
+     * Do not rely on this method.
+     *
+     * @return ChangeLogParametersType
+     */
+    private ChangeLogParametersType getChangeLogParametersType() {
+        if(changeLogParameters == null) {
+            changeLogParameters = new ChangeLogParametersType(getProject());
+        }
+        return changeLogParameters;
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#getDriver()} instead.
+     */
+    @Deprecated
+    public String getDriver() {
+        return getDatabaseType().getDriver();
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#setDriver(String)} instead.
+     */
+    @Deprecated
+    public void setDriver(String driver) {
+        log("The driver attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setDriver(driver);
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#getUrl()} instead.
+     */
+    @Deprecated
+    public String getUrl() {
+        return getDatabaseType().getUrl();
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#setUrl(String)} instead.
+     */
+    @Deprecated
+    public void setUrl(String url) {
+        log("The url attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setUrl(url);
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#getUser()} instead.
+     */
+    @Deprecated
+    public String getUsername() {
+        return getDatabaseType().getUser();
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#setUser(String)} instead.
+     */
+    @Deprecated
+    public void setUsername(String username) {
+        log("The username attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setUser(username);
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#getPassword()} instead.
+     */
+    @Deprecated
+    public String getPassword() {
+        return getDatabaseType().getPassword();
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#setPassword(String)} instead.
+     */
+    @Deprecated
+    public void setPassword(String password) {
+        log("The password attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setPassword(password);
+    }
+
+    public void setChangeLogFile(FileResource changeLogFile) {
+        // This method is deprecated. Use child implementation.
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#getCurrentDateTimeFunction()} instead.
+     */
+    @Deprecated
     public String getCurrentDateTimeFunction() {
-        return currentDateTimeFunction;
+        return getDatabaseType().getCurrentDateTimeFunction();
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#setCurrentDateTimeFunction(String)} instead.
+     */
+    @Deprecated
     public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
-        this.currentDateTimeFunction = currentDateTimeFunction.trim();
+        log("The currentDateTimeFunction attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setCurrentDateTimeFunction(currentDateTimeFunction);
     }
 
-    public String getOutputFile() {
-        return outputFile;
+    /**
+     * This method does nothing. Use child implementations.
+     */
+    public FileResource getOutputFile() {
+        // This method is deprecated. Use child implementations.
+        return null;
     }
 
-    public void setOutputFile(String outputFile) {
-        this.outputFile = outputFile.trim();
+    /**
+     * This method does nothing. Use child implementations.
+     */
+    public void setOutputFile(FileResource outputFile) {
+        // This method is deprecated. Use child implementation.
     }
 
+    /**
+     * @deprecated Subclasses of this class should either instantiate their own output writers or use
+     * {@link liquibase.integration.ant.AbstractChangeLogBasedTask} if their task involves a change log.
+     */
+    @Deprecated
     public Writer createOutputWriter() throws IOException {
-        if (outputFile == null) {
+        if (getOutputFile() == null) {
             return null;
         }
-        return new FileWriter(new File(getOutputFile()));
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+        String encoding = globalConfiguration.getOutputEncoding();
+        return new OutputStreamWriter(getOutputFile().getOutputStream(), encoding);
     }
 
+    /**
+     * @deprecated Subclasses of this class should either instantiate their own output writers or use
+     * {@link liquibase.integration.ant.AbstractChangeLogBasedTask} if the task involves a change log.
+     */
+    @Deprecated
     public PrintStream createPrintStream() throws IOException {
-        if (outputFile == null) {
+        if (getOutputFile() == null) {
             return null;
         }
-        return new PrintStream(new File(getOutputFile()));
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+        String encoding = globalConfiguration.getOutputEncoding();
+        return new PrintStream(getOutputFile().getOutputStream(), false, encoding);
     }
 
+    public void setOutputEncoding(String outputEncoding) {
+        // This method is deprecated. Use child implementation.
+    }
+
+    /**
+     * @deprecated Use {@link DatabaseType#getDefaultCatalogName()} instead.
+     */
+    @Deprecated
     public String getDefaultCatalogName() {
-        return defaultCatalogName;
+        return getDatabaseType().getDefaultCatalogName();
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#setDefaultCatalogName(String)} instead.
+     */
+    @Deprecated
     public void setDefaultCatalogName(String defaultCatalogName) {
-        this.defaultCatalogName = defaultCatalogName;
+        log("The defaultCatalogName attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setDefaultCatalogName(defaultCatalogName);
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#getDefaultSchemaName()} instead.
+     */
+    @Deprecated
     public String getDefaultSchemaName() {
-        return defaultSchemaName;
+        return getDatabaseType().getDefaultSchemaName();
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#setDefaultSchemaName(String)} instead.
+     */
+    @Deprecated
     public void setDefaultSchemaName(String defaultSchemaName) {
-        this.defaultSchemaName = defaultSchemaName.trim();
+        log("The driver attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setDefaultSchemaName(defaultSchemaName);
     }
 
+    /**
+     * @deprecated Use {@link ChangeLogParametersType#addConfiguredChangeLogParameter(Property)} instead.
+     */
+    @Deprecated
     public void addConfiguredChangeLogProperty(ChangeLogProperty changeLogProperty) {
-        changeLogProperties.put(changeLogProperty.getName(), changeLogProperty.getValue());
+        log("The <changeLogProperty> element is deprecated. Use a nested <changeLogParameters> element instead.", Project.MSG_WARN);
+        Property property = new Property();
+        property.setName(changeLogProperty.getName());
+        property.setValue(changeLogProperty.getValue());
+        getChangeLogParametersType().addConfiguredChangeLogParameter(property);
     }
 
+    /**
+     * @deprecated The Liquibase class is now created automatically when the Ant task is executed. Use
+     * {@link #getLiquibase()} instead.
+     */
+    @Deprecated
     protected Liquibase createLiquibase() throws Exception {
-        ResourceAccessor antFO = new AntResourceAccessor(getProject(), classpath);
-        ResourceAccessor fsFO = new FileSystemResourceAccessor();
-
-        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseClass());
-
-        String changeLogFile = null;
-        if (getChangeLogFile() != null) {
-            changeLogFile = getChangeLogFile().trim();
-        }
-        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeResourceAccessor(antFO, fsFO), database);
-        liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
-        for (Map.Entry<String, Object> entry : changeLogProperties.entrySet()) {
-            liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
-        }
-
-        return liquibase;
+        return this.liquibase;
     }
 
+    /**
+     * @deprecated Use {@link #createDatabaseFromType(DatabaseType)} instead.
+     */
+    @Deprecated
     protected Database createDatabaseObject(String driverClassName,
                                             String databaseUrl,
                                             String username,
@@ -216,92 +453,30 @@ public abstract class BaseLiquibaseTask extends Task {
                                             String defaultCatalogName,
                                             String defaultSchemaName,
                                             String databaseClass) throws Exception {
-        String[] strings = classpath.list();
-
-        final List<URL> taskClassPath = new ArrayList<URL>();
-        for (String string : strings) {
-            URL url = new File(string).toURL();
-            taskClassPath.add(url);
-        }
-
-        URLClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-            @Override
-            public URLClassLoader run() {
-                return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]), Database.class.getClassLoader());
-            }
-        });
-
-        Database database;
-
-
-        if (databaseClass != null) {
-            try {
-                DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
-            } catch (ClassCastException e) { //fails in Ant in particular
-                DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
-            }
-        }
-
-        if (driverClassName == null) {
-            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
-        }
-
-        if (driverClassName == null) {
-            throw new DatabaseException("driver not specified and no default could be found for " + databaseUrl);
-        }
-
-        Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
-
-        Properties info = new Properties();
-        if (username != null) {
-            info.put("user", username);
-        }
-        if (password != null) {
-            info.put("password", password);
-        }
-        Connection connection = driver.connect(databaseUrl, info);
-
-        if (connection == null) {
-            throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-        }
-
-        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-        database.setDefaultCatalogName(defaultCatalogName);
-        database.setDefaultSchemaName(defaultSchemaName);
-        database.setOutputDefaultSchema(isOutputDefaultSchema());
-        database.setOutputDefaultCatalog(isOutputDefaultCatalog());
-
-        if (getDatabaseChangeLogTableName() != null)
-            database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());
-
-        if (getDatabaseChangeLogLockTableName() != null)
-            database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
-
-        if (getDatabaseChangeLogObjectsTablespace() != null)
-            database.setLiquibaseTablespaceName(getDatabaseChangeLogObjectsTablespace());
-
-        return database;
-    }
-
-    public String getContexts() {
-        return contexts;
-    }
-
-    public void setContexts(String cntx) {
-        this.contexts = cntx.trim();
-    }
-
-    public String getLabels() {
-        return labels;
-    }
-
-    public void setLabels(String labels) {
-        this.labels = labels;
+        return createDatabaseFromType(databaseType);
     }
 
     /**
-     * Redirector of logs from java.util.logging to ANT's loggging
+     * This method no longer does anything. Please extend from
+     * {@link liquibase.integration.ant.AbstractChangeLogBasedTask} which has the equivalent method.
      */
+    public String getContexts() {
+        return null;
+    }
+
+    /**
+     * This method no longer does anything. Please extend from
+     * {@link liquibase.integration.ant.AbstractChangeLogBasedTask} which has the equivalent method.
+     */
+    public void setContexts(String cntx) {
+        // Parent method is deprecated. Use child implementations.
+    }
+
+
+    /**
+     * Redirector of logs from java.util.logging to ANT's logging
+     */
+    @Deprecated
     protected static class LogRedirector {
 
         private final Task task;
@@ -309,7 +484,7 @@ public abstract class BaseLiquibaseTask extends Task {
         /**
          * Constructor
          *
-         * @param task
+         * @param task Ant task
          */
         protected LogRedirector(Task task) {
             super();
@@ -321,7 +496,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getLogger();
+            Logger logger = LogFactory.getInstance().getLog();
         }
 
 
@@ -358,15 +533,10 @@ public abstract class BaseLiquibaseTask extends Task {
 
     }
 
-    protected boolean shouldRun() {
-        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
-        if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
-            return false;
-        }
-        return true;
-    }
-
+    /**
+     * @deprecated Use {@link #closeDatabase(liquibase.database.Database)} instead.
+     */
+    @Deprecated
     protected void closeDatabase(Liquibase liquibase) {
         if (liquibase != null && liquibase.getDatabase() != null && liquibase.getDatabase().getConnection() != null) {
             try {
@@ -377,76 +547,134 @@ public abstract class BaseLiquibaseTask extends Task {
         }
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#getDatabaseClass()} instead.
+     */
+    @Deprecated
     public String getDatabaseClass() {
-        return databaseClass;
+        return getDatabaseType().getDatabaseClass();
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#setDatabaseClass(String)} instead.
+     */
+    @Deprecated
     public void setDatabaseClass(String databaseClass) {
-        this.databaseClass = databaseClass;
+        log("The databaseClass attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setDatabaseClass(databaseClass);
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#getDatabaseChangeLogTableName()} instead.
+     */
+    @Deprecated
     public String getDatabaseChangeLogTableName() {
-        return databaseChangeLogTableName;
+        return getDatabaseType().getDatabaseChangeLogTableName();
     }
 
-
+    /**
+     * @deprecated Use {@link DatabaseType#setDatabaseChangeLogTableName(String)} instead.
+     */
+    @Deprecated
     public void setDatabaseChangeLogTableName(String tableName) {
-        this.databaseChangeLogTableName = tableName;
+        log("The databaseChangeLogTableName attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setDatabaseChangeLogTableName(tableName);
     }
 
-
+    /**
+     * @deprecated Use {@link DatabaseType#getDatabaseChangeLogLockTableName()} instead.
+     */
+    @Deprecated
     public String getDatabaseChangeLogLockTableName() {
-        return databaseChangeLogLockTableName;
+        return getDatabaseType().getDatabaseChangeLogLockTableName();
     }
 
-
+    @Deprecated
     public void setDatabaseChangeLogLockTableName(String tableName) {
-        this.databaseChangeLogLockTableName = tableName;
+        log("The databaseChangeLogLockTableName attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        databaseType.setDatabaseChangeLogLockTableName(tableName);
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#getLiquibaseTablespaceName()} instead.
+     */
+    @Deprecated
     public String getDatabaseChangeLogObjectsTablespace() {
-        return databaseChangeLogObjectsTablespace;
+        return databaseType.getLiquibaseTablespaceName();
     }
 
-
+    /**
+     * @deprecated Use {@link DatabaseType#setLiquibaseTablespaceName(String)} instead.
+     */
+    @Deprecated
     public void setDatabaseChangeLogObjectsTablespace(String tablespaceName) {
-        this.databaseChangeLogObjectsTablespace = tablespaceName;
+        log("The databaseChangeLogObjectsTablespace attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setLiquibaseTablespaceName(tablespaceName);
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#isOutputDefaultSchema()} instead.
+     */
+    @Deprecated
     public boolean isOutputDefaultSchema() {
-        return outputDefaultSchema;
+        return getDatabaseType().isOutputDefaultSchema();
     }
 
     /**
      * If not set, defaults to true.
      *
+     * @deprecated Use a nested {@link DatabaseType DatabaseType} instead.
      * @param outputDefaultSchema True to output the default schema.
      */
+    @Deprecated
     public void setOutputDefaultSchema(boolean outputDefaultSchema) {
-        this.outputDefaultSchema = outputDefaultSchema;
+        log("The outputDefaultSchema attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setOutputDefaultSchema(outputDefaultSchema);
     }
 
+    /**
+     * @deprecated Use {@link DatabaseType#isOutputDefaultCatalog()} instead.
+     */
+    @Deprecated
     public boolean isOutputDefaultCatalog() {
-        return outputDefaultCatalog;
+        return getDatabaseType().isOutputDefaultCatalog();
     }
 
     /**
      * If not set, defaults to true
      *
+     * @deprecated Use {@link DatabaseType#setOutputDefaultCatalog(boolean)} instead.
      * @param outputDefaultCatalog True to output the default catalog.
      */
+    @Deprecated
     public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
-        this.outputDefaultCatalog = outputDefaultCatalog;
+        log("The outputDefaultCatalog attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
+        getDatabaseType().setOutputDefaultCatalog(outputDefaultCatalog);
     }
 
+    /**
+     * @deprecated No longer needed. This method has no replacement.
+     * @return Log level.
+     */
+    @Deprecated
     public String getLogLevel() {
-        return LogFactory.getLogger().getLogLevel().name();
+        return LogFactory.getInstance().getLog().getLogLevel().name();
     }
 
+    /**
+     * @deprecated Use the ant logging flags (-debug, -verbose, -quiet) instead of this method to control logging
+     * output. This will no longer change log levels.
+     * @param level Log level to set.
+     */
+    @Deprecated
     public void setLogLevel(String level) {
-        LogFactory.getLogger().setLogLevel(level);
+        LogFactory.getInstance().getLog().setLogLevel(level);
     }
 
+    /**
+     * @deprecated Use {@link ChangeLogParametersType} instead.
+     */
+    @Deprecated
     public static class ChangeLogProperty {
         private String name;
         private String value;
