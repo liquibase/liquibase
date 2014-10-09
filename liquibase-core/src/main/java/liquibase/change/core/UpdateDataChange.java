@@ -57,7 +57,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
             }
-            if (column.getValueClobFile() != null) {
+            if (column.getValueClobFile() != null
+                || (column.getType() != null && column.getType().equalsIgnoreCase("CLOB"))) {
                 needsPreparedStatement = true;
             }
         }
