@@ -62,6 +62,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();
         changeLog.setChangeLogParameters(changeLogParameters);
+
         changeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
         BufferedReader reader = null;
@@ -73,6 +74,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
+            Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset\\s+([^:]+):(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
@@ -85,6 +87,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern contextPattern = Pattern.compile(".*context:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern logicalFilePathPattern = Pattern.compile(".*logicalFilePath:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
@@ -95,6 +98,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             String line;
             while ((line = reader.readLine()) != null) {
+
+                Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
+                if (changeLogPatterMatcher.matches ()) {
+                   Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
+                   changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
+                }
+
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
                     String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()));
@@ -121,6 +131,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
                     Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
 
+                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
                     Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
                     Matcher contextPatternMatcher = contextPattern.matcher(line);
@@ -139,9 +150,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     String context = parseString(contextPatternMatcher);
                     String labels = parseString(labelsPatternMatcher);
+                    String logicalFilePath = parseString(logicalFilePathMatcher);
+                    if (logicalFilePath == null || "".equals (logicalFilePath)) {
+                       logicalFilePath = changeLog.getLogicalFilePath ();
+                    }
                     String dbms = parseString(dbmsPatternMatcher);
 
-                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+
+                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
