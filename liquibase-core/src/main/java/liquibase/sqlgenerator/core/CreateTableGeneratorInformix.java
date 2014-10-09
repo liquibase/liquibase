@@ -108,11 +108,8 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         buffer.append(",");
 
         // TODO informixdb
-        if (!( (isSinglePrimaryKeyColumn && isPrimaryKeyAutoIncrement) 
-        		/*&& !((database instanceof InformixDatabase)*/ && isSinglePrimaryKeyColumn))/*)*/ {
-            // ...skip this code block for sqlite if a single column primary key
-            // with an autoincrement constraint exists.
-            // This constraint is added after the column type.
+        // Fix according to: https://liquibase.jira.com/browse/CORE-1775
+        if (isSinglePrimaryKeyColumn && isPrimaryKeyAutoIncrement) {
 
             if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
                 buffer.append(" PRIMARY KEY (");

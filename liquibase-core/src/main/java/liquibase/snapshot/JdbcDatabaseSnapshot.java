@@ -205,7 +205,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                         for (String tableName : tables) {
-                            returnList.addAll(extract(databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, false, true)));
+                            ResultSet rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, false, true);
+                            List<CachedRow> rows = extract(rs, (database instanceof InformixDatabase));
+                            returnList.addAll(rows);
                         }
                     }
 
