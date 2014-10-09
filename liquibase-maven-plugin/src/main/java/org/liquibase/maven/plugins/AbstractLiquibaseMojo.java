@@ -35,7 +35,7 @@ import java.util.*;
  * @author Florent Biville
  *
  * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
- * that it would had if it was ran inside test phase 
+ * that it would had if it was ran inside test phase
  * @requiresDependencyResolution test
  */
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
@@ -199,11 +199,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean clearCheckSums;
 
-    /**                                                                                                                                                                          
-     * List of system properties to pass to the database.                                                                                                                        
-     *                                                                                                                                                                           
-     * @parameter                                                                                                                                                                
-     */                                                                                                                                                                          
+    /**
+     * List of system properties to pass to the database.
+     *
+     * @parameter
+     */
     protected Properties systemProperties;
 
     /**
@@ -300,13 +300,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         configureFieldsAndValues(getFileOpener(artifactClassLoader));
 
-        try {
-            LogFactory.setLoggingLevel(logging);
-        }
-        catch (IllegalArgumentException e) {
-            throw new MojoExecutionException("Failed to set logging level: " + e.getMessage(),
-                    e);
-        }
+        LogFactory.getInstance().setDefaultLoggingLevel(logging);
 
         // Displays the settings for the Mojo depending of verbosity mode.
         displayMojoSettings();
@@ -607,7 +601,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             field.set(this, value);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private void processSystemProperties() {
         if (systemProperties == null)
