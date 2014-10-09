@@ -301,6 +301,7 @@ public class StandardLockService implements LockService {
         try {
             if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
+				hasDatabaseChangeLogLockTable = false;
             }
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
