@@ -127,8 +127,9 @@ public class DatabaseFactory {
     public Database openDatabase(String url,
                             String username,
                             String password,
+                            String propertyProviderClass,
                             ResourceAccessor resourceAccessor) throws DatabaseException {
-        return openDatabase(url, username, password, null, null, null, resourceAccessor);
+        return openDatabase(url, username, password, null, null, null, propertyProviderClass, resourceAccessor);
     }
 
     public Database openDatabase(String url,
@@ -137,16 +138,18 @@ public class DatabaseFactory {
                             String driver,
                             String databaseClass,
                             String driverPropertiesFile,
+                            String propertyProviderClass,
                             ResourceAccessor resourceAccessor) throws DatabaseException {
-        return this.findCorrectDatabaseImplementation(openConnection(url, username, password, driver, databaseClass, driverPropertiesFile, resourceAccessor));
+        return this.findCorrectDatabaseImplementation(openConnection(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor));
     }
 
     public DatabaseConnection openConnection(String url,
                                              String username,
                                              String password,
+                                             String propertyProvider,
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
 
-        return openConnection(url, username, password, null, null, null, resourceAccessor);
+        return openConnection(url, username, password, null, null, null, propertyProvider, resourceAccessor);
     }
 
     public DatabaseConnection openConnection(String url,
@@ -155,6 +158,7 @@ public class DatabaseFactory {
                                              String driver,
                                              String databaseClass,
                                              String driverPropertiesFile,
+                                             String propertyProviderClass,
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
         if (url.startsWith("offline:")) {
             return new OfflineConnection(url);
@@ -187,8 +191,12 @@ public class DatabaseFactory {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
 
-
-            Properties driverProperties = new Properties();
+            Properties driverProperties;
+            if (propertyProviderClass == null) {
+                driverProperties = new Properties();
+            } else {
+                driverProperties = (Properties) Class.forName(propertyProviderClass, true, resourceAccessor.toClassLoader()).newInstance();
+            }
 
             if (username != null) {
                 driverProperties.put("user", username);

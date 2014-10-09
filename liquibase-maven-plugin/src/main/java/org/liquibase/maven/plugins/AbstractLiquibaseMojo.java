@@ -131,6 +131,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.databaseClass}"
      */
     protected String databaseClass;
+    
+    /**
+     * The class to use as the property provider (must be a java.util.Properties implementation).
+     * 
+     * @parameter expression="${liquibase.propertyProviderClass}"
+     */
+    protected String propertyProviderClass;
 
     /**
      * Controls the prompting of users as to whether or not they really want to run the
@@ -322,6 +329,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     outputDefaultSchema,
                     databaseClass,
                     null,
+                    propertyProviderClass,
                     changelogCatalogName,
                     changelogSchemaName);
             liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);

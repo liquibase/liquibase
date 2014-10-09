@@ -38,10 +38,11 @@ public class CommandLineUtils {
                                                 boolean outputDefaultSchema,
                                                 String databaseClass,
                                                 String driverPropertiesFile,
+                                                String propertyProviderClass,
                                                 String liquibaseCatalogName,
                                                 String liquibaseSchemaName) throws DatabaseException {
         try {
-            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, new ClassLoaderResourceAccessor(classLoader));
+            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, new ClassLoaderResourceAccessor(classLoader));
             database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
             database.setOutputDefaultCatalog(outputDefaultCatalog);

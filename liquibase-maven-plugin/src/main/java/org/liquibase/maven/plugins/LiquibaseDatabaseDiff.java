@@ -141,7 +141,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         }
 
         Database db = liquibase.getDatabase();
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, null, null);
+        Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null);
 
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {

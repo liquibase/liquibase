@@ -63,6 +63,7 @@ public class Main {
     protected String contexts;
     protected String labels;
     protected String driverPropertiesFile;
+    protected String propertyProviderClass = null;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected Boolean strict = Boolean.TRUE;
@@ -555,6 +556,8 @@ public class Main {
         stream.println(" --driver=<jdbc.driver.ClassName>           Database driver class name");
         stream.println(" --databaseClass=<database.ClassName>       custom liquibase.database.Database");
         stream.println("                                            implementation to use");
+        stream.println(" --propertyProviderClass=<properties.ClassName>  custom Properties");
+        stream.println("                                            implementation to use");
         stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
         stream.println(" --labels=<expression>                      Expression defining labeled");
@@ -863,7 +866,7 @@ public class Main {
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url,
-            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.liquibaseCatalogName, this.liquibaseSchemaName);
+            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
         try {
 
 
@@ -1135,7 +1138,7 @@ public class Main {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
-        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.liquibaseCatalogName, this.liquibaseSchemaName);
+        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
