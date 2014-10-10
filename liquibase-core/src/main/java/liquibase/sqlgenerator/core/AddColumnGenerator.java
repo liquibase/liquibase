@@ -101,7 +101,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                     alterTable += ",";
                 }
             }
-            result.add(new UnparsedSql(alterTable, getAffectedColumn(columns.get(0))));
+            result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
         } else {
             for (AddColumnStatement column : columns) {
                 result.addAll(Arrays.asList(generateSingleColumn(column, database)));
@@ -158,6 +158,14 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         return alterTable;
+    }
+
+    protected Column[] getAffectedColumns(List<AddColumnStatement> columns) {
+        List<Column> cols = new ArrayList<Column>();
+        for (AddColumnStatement c : columns) {
+            cols.add(getAffectedColumn(c));
+        }
+        return cols.toArray(new Column[cols.size()]);
     }
 
     protected Column getAffectedColumn(AddColumnStatement statement) {
