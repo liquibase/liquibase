@@ -46,9 +46,14 @@ public class AddColumnStatement extends AbstractSqlStatement {
         this.remarks = remarks;
     }
 
-    public AddColumnStatement(AddColumnStatement... columns) {
-        this.columns.addAll(Arrays.asList(columns));
+    public AddColumnStatement(List<AddColumnStatement> columns) {
+        this.columns.addAll(columns);
     }
+
+    public AddColumnStatement(AddColumnStatement... columns) {
+        this(Arrays.asList(columns));
+    }
+
 
     public boolean isMultiple() {
         return !columns.isEmpty();
