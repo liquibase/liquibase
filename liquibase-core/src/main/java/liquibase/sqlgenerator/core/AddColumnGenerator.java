@@ -30,6 +30,26 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
     @Override
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        if (statement.isMultiple()) {
+            ValidationErrors validationErrors = new ValidationErrors();
+            AddColumnStatement firstColumn = statement.getColumns().get(0);
+
+            for (AddColumnStatement column : statement.getColumns()) {
+                validationErrors.addAll(validateSingleColumn(column, database));
+                if (firstColumn.getTableName() != null && !firstColumn.getTableName().equals(column.getTableName())) {
+                    validationErrors.addError("All columns must be targeted at the same table");
+                }
+                if (column.isMultiple()) {
+                    validationErrors.addError("Nested multiple add column statements are not supported");
+                }
+            }
+            return validationErrors;
+        } else {
+            return validateSingleColumn(statement, database);
+        }
+    }
+
+    private ValidationErrors validateSingleColumn(AddColumnStatement statement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -64,12 +84,55 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
     @Override
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        if (statement.isMultiple()) {
+            return generateMultipleColumns(statement.getColumns(), database);
+        } else {
+            return generateSingleColumn(statement, database);
+        }
+    }
 
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+    private Sql[] generateMultipleColumns(List<AddColumnStatement> columns, Database database) {
+        List<Sql> result = new ArrayList<Sql>();
+        if (database instanceof MySQLDatabase) {
+            String alterTable = generateSingleColumBaseSQL(columns.get(0), database);
+            for (int i = 0; i < columns.size(); i++) {
+                alterTable += generateSingleColumnSQL(columns.get(i), database);
+                if (i < columns.size() - 1) {
+                    alterTable += ",";
+                }
+            }
+            result.add(new UnparsedSql(alterTable, getAffectedColumn(columns.get(0))));
+        } else {
+            for (AddColumnStatement column : columns) {
+                result.addAll(Arrays.asList(generateSingleColumn(column, database)));
+            }
+        }
+        return result.toArray(new Sql[result.size()]);
+    }
+
+    protected Sql[] generateSingleColumn(AddColumnStatement statement, Database database) {
+        String alterTable = generateSingleColumBaseSQL(statement, database);
+        alterTable += generateSingleColumnSQL(statement, database);
+
+        List<Sql> returnSql = new ArrayList<Sql>();
+        returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
+
+        addUniqueConstrantStatements(statement, database, returnSql);
+        addForeignKeyStatements(statement, database, returnSql);
+
+        return returnSql.toArray(new Sql[returnSql.size()]);
+    }
+
+    protected String generateSingleColumBaseSQL(AddColumnStatement statement, Database database) {
+        return "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+    }
+
+    protected String generateSingleColumnSQL(AddColumnStatement statement, Database database) {
+        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
-        	alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
         }
 
         if (!statement.isNullable()) {
@@ -91,16 +154,10 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         if (statement.getAddAfterColumn() != null && !statement.getAddAfterColumn().isEmpty()) {
-			alterTable += " AFTER `" + statement.getAddAfterColumn() + "` ";
-		}
+            alterTable += " AFTER `" + statement.getAddAfterColumn() + "` ";
+        }
 
-        List<Sql> returnSql = new ArrayList<Sql>();
-        returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
-
-        addUniqueConstrantStatements(statement, database, returnSql);
-        addForeignKeyStatements(statement, database, returnSql);
-
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return alterTable;
     }
 
     protected Column getAffectedColumn(AddColumnStatement statement) {
@@ -162,5 +219,4 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
         return clause;
     }
-
 }
