@@ -172,6 +172,10 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     protected Change[] createInverses() {
         List<Change> inverses = new ArrayList<Change>();
 
+        DropColumnChange inverse = new DropColumnChange();
+        inverse.setSchemaName(getSchemaName());
+        inverse.setTableName(getTableName());
+
         for (ColumnConfig aColumn : columns) {
             if (aColumn.hasDefaultValue()) {
                 DropDefaultValueChange dropChange = new DropDefaultValueChange();
@@ -182,14 +186,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 inverses.add(dropChange);
             }
 
-
-            DropColumnChange inverse = new DropColumnChange();
-            inverse.setSchemaName(getSchemaName());
-            inverse.setColumnName(aColumn.getName());
-            inverse.setTableName(getTableName());
-            inverses.add(inverse);
+            inverse.addColumn(aColumn);
         }
-
         return inverses.toArray(new Change[inverses.size()]);
     }
 
