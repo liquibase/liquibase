@@ -188,6 +188,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
             inverse.addColumn(aColumn);
         }
+        inverses.add(inverse);
         return inverses.toArray(new Change[inverses.size()]);
     }
 
