@@ -31,11 +31,11 @@ public class FindForeignKeyConstraintsGeneratorFirebird extends AbstractSqlGener
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
-        sb.append("a.RDB$RELATION_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");
-        sb.append("b.RDB$FIELD_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
-        sb.append("d.RDB$RELATION_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(", ");
-        sb.append("e.RDB$FIELD_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(",");
-        sb.append("a.RDB$CONSTRAINT_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
+        sb.append("TRIM(a.RDB$RELATION_NAME) as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");
+        sb.append("TRIM(b.RDB$FIELD_NAME) as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
+        sb.append("TRIM(d.RDB$RELATION_NAME) as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(", ");
+        sb.append("TRIM(e.RDB$FIELD_NAME) as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(",");
+        sb.append("TRIM(a.RDB$CONSTRAINT_NAME) as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
         sb.append("FROM (((RDB$RELATION_CONSTRAINTS a LEFT OUTER JOIN RDB$INDEX_SEGMENTS b ON b.RDB$INDEX_NAME = a.RDB$INDEX_NAME) ");
         sb.append("LEFT OUTER JOIN RDB$INDICES c ON c.RDB$INDEX_NAME = a.RDB$INDEX_NAME) ");
         sb.append("LEFT OUTER JOIN RDB$RELATION_CONSTRAINTS d ON d.RDB$INDEX_NAME = c.RDB$FOREIGN_KEY AND d.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY') ");
