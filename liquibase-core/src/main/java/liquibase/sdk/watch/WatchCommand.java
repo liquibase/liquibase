@@ -1,9 +1,6 @@
 package liquibase.sdk.watch;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
 import liquibase.change.ColumnConfig;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
@@ -168,7 +165,7 @@ public class WatchCommand extends AbstractCommand {
                         lockService.waitForLock();
                         List<Map<String, ?>> rows;
                         try {
-                            SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setDefinition("COUNT(*) AS ROW_COUNT"), new ColumnConfig().setDefinition("MAX(DATEEXECUTED) AS LAST_EXEC"));
+                            SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*) AS ROW_COUNT", true), new ColumnConfig().setName("MAX(DATEEXECUTED) AS LAST_EXEC", true));
                             rows = executor.queryForList(select);
                         } finally {
                             lockService.releaseLock();

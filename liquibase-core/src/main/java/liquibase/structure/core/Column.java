@@ -7,14 +7,13 @@ import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Column extends AbstractDatabaseObject {
 
     private String name;
-    private String definition;
+    private Boolean computed;
 
     public Column() {
     }
@@ -92,13 +91,22 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
-    public String getDefinition() {
-        return definition;
+    public Column setName(String name, boolean computed) {
+        setName(name);
+        setComputed(computed);
+
+        return this;
     }
 
-    public Column setDefinition(String definition) {
-        this.definition = definition;
-        setAttribute("definition", definition);
+
+
+    public Boolean getComputed() {
+        return computed;
+    }
+
+    public Column setComputed(Boolean computed) {
+        this.computed = computed;
+        setAttribute("computed", computed);
 
         return this;
     }
@@ -151,18 +159,14 @@ public class Column extends AbstractDatabaseObject {
         if (includeRelation) {
             return toString();
         } else {
-            if (getName() == null) {
-                return getDefinition();
-            } else {
-                return getName();
-            }
+            return getName();
         }
     }
 
     @Override
     public String toString() {
-        if (getName() == null) {
-            return getDefinition();
+        if (getComputed() != null && getComputed()) {
+            return getName();
         } else {
             if (getRelation() == null) {
                 return getName();

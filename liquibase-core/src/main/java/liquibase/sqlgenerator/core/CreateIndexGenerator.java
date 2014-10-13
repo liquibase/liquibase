@@ -86,10 +86,14 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
 	    while (iterator.hasNext()) {
             AddColumnConfig column = iterator.next();
-            if (column.getDefinition() == null) {
+            if (column.getComputed() == null) {
                 buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
             } else {
-                buffer.append(column.getDefinition());
+                if (column.getComputed()) {
+                    buffer.append(column.getName());
+                } else {
+                    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
+                }
             }
             if (iterator.hasNext()) {
 			    buffer.append(", ");

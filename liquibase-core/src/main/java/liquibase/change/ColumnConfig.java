@@ -6,14 +6,11 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -32,7 +29,7 @@ import liquibase.util.StringUtils;
  */
 public class ColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
-    private String definition;
+    private Boolean computed;
     private String type;
     private String value;
     private Number valueNumeric;
@@ -64,7 +61,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setDefinition(columnSnapshot.getDefinition());
+        setComputed(columnSnapshot.getComputed());
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -157,12 +154,17 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public String getDefinition() {
-        return definition;
+    public ColumnConfig setName(String name, boolean computed) {
+        setComputed(computed);
+        return setName(name);
     }
 
-    public ColumnConfig setDefinition(String definition) {
-        this.definition = definition;
+    public Boolean getComputed() {
+        return computed;
+    }
+
+    public ColumnConfig setComputed(Boolean computed) {
+        this.computed = computed;
         return this;
     }
 
@@ -690,7 +692,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         name = parsedNode.getChildValue(null, "name", String.class);
-        definition = parsedNode.getChildValue(null, "definition", String.class);
+        computed = parsedNode.getChildValue(null, "computed", Boolean.class);
         type = parsedNode.getChildValue(null, "type", String.class);
         encoding = parsedNode.getChildValue(null, "encoding", String.class);
         autoIncrement = parsedNode.getChildValue(null, "autoIncrement", Boolean.class);

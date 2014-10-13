@@ -6,7 +6,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.util.StringUtils;
@@ -30,10 +29,10 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
         String sql = "SELECT " + StringUtils.join(columnsToSelect, ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig column) {
-                if (column.getDefinition() == null) {
-                    return database.escapeColumnName(null, null, null, column.getName());
+                if (column.getComputed() != null && column.getComputed()) {
+                    return column.getName();
                 } else {
-                    return column.getDefinition();
+                    return database.escapeColumnName(null, null, null, column.getName());
                 }
             }
         }).toUpperCase() + " FROM " +

@@ -28,7 +28,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Relation relation = ((Column) example).getRelation();
-        if (((Column) example).getDefinition() != null) {
+        if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
             return example;
         }
         Schema schema = relation.getSchema();

@@ -297,7 +297,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         Database database = getDatabase();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            int totalRows = ExecutorService.getInstance().getExecutor(database).queryForInt(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setDefinition("COUNT(*)")));
+            int totalRows = ExecutorService.getInstance().getExecutor(database).queryForInt(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true)));
             if (totalRows == 0) {
                 ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, getDatabase().getObjectQuotingStrategy(), null);
                 this.setExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
@@ -317,7 +317,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     @Override
     public boolean tagExists(final String tag) throws DatabaseException {
-        int count = ExecutorService.getInstance().getExecutor(getDatabase()).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), new ColumnConfig().setDefinition("COUNT(*)")));
+        int count = ExecutorService.getInstance().getExecutor(getDatabase()).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), new ColumnConfig().setName("COUNT(*)", true)));
         return count > 0;
     }
 

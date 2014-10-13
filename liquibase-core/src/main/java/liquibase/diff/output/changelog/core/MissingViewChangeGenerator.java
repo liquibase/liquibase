@@ -61,10 +61,10 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
                     + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
-                    if (((Column) obj).getDefinition() == null) {
-                        return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
+                    if (((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+                        return ((Column) obj).getName();
                     } else {
-                        return ((Column) obj).getDefinition();
+                        return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
                     }
                 }
             }) + ") AS "+selectQuery;

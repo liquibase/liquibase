@@ -6,7 +6,6 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.util.StringUtils;
@@ -32,10 +31,10 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig col) {
-                if (col.getDefinition() == null) {
-                    return database.escapeColumnName(null, null, null, col.getName());
+                if (col.getComputed() != null && col.getComputed()) {
+                    return col.getName();
                 } else {
-                    return col.getDefinition();
+                    return database.escapeColumnName(null, null, null, col.getName());
                 }
             }
         }) + " FROM " +
