@@ -31,7 +31,8 @@ public class ChangeLogWriter {
 //        }
 
 
-        File xmlFile = new File(outputDir, changeLog + ".html");
+        String changeLogOutFile = changeLog.replace(":", "_");
+        File xmlFile = new File(outputDir, changeLogOutFile + ".html");
         xmlFile.getParentFile().mkdirs();
 
         BufferedWriter changeLogStream = new BufferedWriter(new FileWriter(xmlFile, false));
