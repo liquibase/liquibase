@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-public class AbstractResourceAccessorTest {
+public class AbstractResourceAccessorJavaTest {
 
 	@Test
 	public void testConvertToPathIsInsensibleToTrailingSlashOnRootPath() throws MalformedURLException {

@@ -72,13 +72,13 @@ class AbstractResourceAccessorTest extends Specification {
     }
 
     protected AbstractResourceAccessor createResourceAccessor(List rootUrls, boolean caseSensitive) {
-        def rootUrlsSet = new HashSet(rootUrls)
+        def rootUrlsSet = new ArrayList(rootUrls)
         new AbstractResourceAccessor() {
             @Override
             protected void init() {}
 
             @Override
-            protected Set<URL> getRootPaths() {
+            protected List<String> getRootPaths() {
                 return rootUrlsSet;
             }
 
