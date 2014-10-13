@@ -46,9 +46,13 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         for(String thisPkColumn:pkColumns)
         {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
-            if (newValue == null || newValue.toString().equals("NULL")) {
+            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
+                        insertOrUpdateStatement.getSchemaName(),
+                        insertOrUpdateStatement.getTableName(),
+                        thisPkColumn)).append(newValue == null || newValue.toString().equalsIgnoreCase("NULL") ? " is " : " = ");
+
+            if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));

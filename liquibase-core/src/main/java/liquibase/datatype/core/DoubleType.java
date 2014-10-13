@@ -29,6 +29,9 @@ public class DoubleType  extends LiquibaseDataType {
         if (database instanceof InformixDatabase) {
             return new DatabaseDataType("DOUBLE PRECISION");
         }
+        if (database instanceof FirebirdDatabase) {
+            return new DatabaseDataType("DOUBLE PRECISION");
+        }
         return super.toDatabaseDataType(database);
     }
 }
