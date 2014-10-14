@@ -456,6 +456,7 @@ public class Liquibase {
             checkLiquibaseTables(false, changeLog, contexts, labelExpression);
 
             changeLog.validate(database, contexts, labelExpression);
+            changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
@@ -511,6 +512,7 @@ public class Liquibase {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
             checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             changeLog.validate(database, contexts, labelExpression);
+            changeLog.setIgnoreClasspathPrefix(ignoreClasspathPrefix);
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
