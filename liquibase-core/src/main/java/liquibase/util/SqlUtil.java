@@ -85,7 +85,7 @@ public class SqlUtil {
                 }
             } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
                 maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-            } else {
+            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
                 return new DatabaseFunction(stringVal);
             }
             if (maybeDate != null) {
