@@ -49,12 +49,12 @@ public class LoadUpdateDataChange extends LoadDataChange {
 	}
 
 	public void setOnlyUpdate(Boolean onlyUpdate) {
-		this.onlyUpdate = onlyUpdate;
+		this.onlyUpdate = (onlyUpdate == null ? Boolean.FALSE : onlyUpdate) ;
 	}
 
 	@Override
     protected InsertStatement createStatement(String catalogName, String schemaName, String tableName) {
-        return new InsertOrUpdateStatement(catalogName, schemaName, tableName, this.primaryKey, this.onlyUpdate);
+        return new InsertOrUpdateStatement(catalogName, schemaName, tableName, this.primaryKey, this.getOnlyUpdate());
     }
 
     @Override
