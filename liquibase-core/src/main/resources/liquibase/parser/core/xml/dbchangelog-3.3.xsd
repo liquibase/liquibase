@@ -368,7 +368,7 @@
 
 	<xsd:attributeGroup name="dropColumnAttributes">
 		<xsd:attributeGroup ref="tableNameAttribute" />
-		<xsd:attribute name="columnName" type="xsd:string" use="required" />
+		<xsd:attribute name="columnName" type="xsd:string" />
 	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="sequenceAttributes">
@@ -1064,11 +1064,14 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="dropColumn">
-		<xsd:complexType>
-			<xsd:attributeGroup ref="dropColumnAttributes" />
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:element name="dropColumn">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="column" minOccurs="0" maxOccurs="unbounded" type="columnType" />
+            </xsd:sequence>
+            <xsd:attributeGroup ref="dropColumnAttributes" />
+        </xsd:complexType>
+    </xsd:element>
 
 	<xsd:element name="mergeColumns">
 		<xsd:complexType>

@@ -583,4 +583,32 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         and: "large numbers are parsed correctly"
         ((CreateSequenceChange) changeLog.getChangeSet(path, "nvoxland", "large number").changes[0]).maxValue.toString() ==  "9999999999999999999999999999"
     }
+
+    def "changelog with multiple dropColumn columns can be parsed"() throws Exception {
+        when:
+        def path = "liquibase/parser/core/xml/addDropColumnsChangeLog.xml"
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        addColumnsChangeSet = changeLog.getChangeSets().get(1)
+        addColumnsChange = addColumnsChangeSet.getChanges().get(0)
+        addColumns = addColumnsChange.getColumns()
+        assert 2 == addColumns.size()
+        assert "firstname" == addColumns.get(0).getName()
+        assert "lastname" == addColumns.get(1).getName()
+
+        dropColumnsChangeSet = changeLog.getChangeSets().get(2)
+        dropColumnsChange = dropColumnsChangeSet.getChanges().get(0)
+        dropColumns = dropColumnsChange.getColumns()
+        assert 2 == dropColumns.size()
+        assert "firstname" == dropColumns.get(0).getName()
+        assert "lastname" == dropColumns.get(1).getName()
+
+        singleDropColumnsChangeSet = changeLog.getChangeSets().get(2)
+        singleDropColumnsChange = singleDropColumnsChangeSet.getChanges().get(0)
+        singleDropColumns = singleDropColumnsChange.getColumns()
+        assert 0 == singleDropColumns.size()
+        assert "id" == singleDropColumnsChange.getColumnName()
+    }
+
 }

@@ -1034,11 +1034,11 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="dropColumn">
-		<xsd:complexType>
-			<xsd:attributeGroup ref="dropColumnAttributes" />
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:element name="dropColumn">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="dropColumnAttributes" />
+        </xsd:complexType>
+    </xsd:element>
 
 	<xsd:element name="mergeColumns">
 		<xsd:complexType>

@@ -1,32 +1,42 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AlterTableStatement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.util.StringUtils;
 
 /**
  * Drops an existing column from a table.
  */
 @DatabaseChange(name = "dropColumn", description = "Drop an existing column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
-public class DropColumnChange extends AbstractChange {
+public class DropColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
+
+    private List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -65,6 +75,19 @@ public class DropColumnChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+    @DatabaseChangeProperty(description = "Columns to be dropped.", requiredForDatabase = "none")
+    public List<ColumnConfig> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<ColumnConfig> columns) {
+        this.columns = columns;
+    }
+
+    @Override
+    public void addColumn(ColumnConfig column) {
+        columns.add(column);
+    }
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema.catalog", since = "3.0")
     public String getCatalogName() {
@@ -99,13 +122,24 @@ public class DropColumnChange extends AbstractChange {
         if (database instanceof SQLiteDatabase) {
             // return special statements for SQLite databases
             return generateStatementsForSQLiteDatabase(database);
+        } else if (database instanceof MySQLDatabase) {
+            return generateStatementsForMySQLDatabase();
         }
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+        if (!columns.isEmpty()) {
+            for (ColumnConfig columnConfig : columns) {
+                statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), columnConfig.getName()));
+                if (database instanceof DB2Database) {
+                    statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+                }
+            }
+        } else {
+            statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
+            if (database instanceof DB2Database) {
+                statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            }
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
@@ -160,9 +194,31 @@ public class DropColumnChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    private SqlStatement[] generateStatementsForMySQLDatabase() {
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        AlterTableStatement statement = new AlterTableStatement(getCatalogName(), getSchemaName(), getTableName());
+        if (!columns.isEmpty()) {
+            for (ColumnConfig columnConfig : columns) {
+                statement.dropColumn(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), columnConfig.getName()));
+            }
+        } else {
+            statement.dropColumn(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
+        }
+        statements.add(statement);
+        return statements.toArray(new SqlStatement[statements.size()]);
+    }
+
     @Override
     public String getConfirmationMessage() {
-        return "Column " + getTableName() + "." + getColumnName() + " dropped";
+        if (!columns.isEmpty()) {
+            List<String> names = new ArrayList<String>(columns.size());
+            for (ColumnConfig col : columns) {
+                names.add(col.getName());
+            }
+            return "Columns " + StringUtils.join(names, ",") + " dropped from " + tableName;
+        } else {
+            return "Column " + getTableName() + "." + getColumnName() + " dropped";
+        }
     }
 
     @Override
