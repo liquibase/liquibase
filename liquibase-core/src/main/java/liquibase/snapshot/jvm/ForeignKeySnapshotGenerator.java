@@ -125,12 +125,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
                 foreignKey.setForeignKeyTable(foreignKeyTable);
-                foreignKey.addForeignKeyColumn(new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)));
+                foreignKey.addForeignKeyColumn(new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)).setRelation(foreignKeyTable));
 
                 CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table().setName(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
                 foreignKey.setPrimaryKeyTable(tempPkTable);
-                foreignKey.addPrimaryKeyColumn(new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)));
+                foreignKey.addPrimaryKeyColumn(new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)).setRelation(tempPkTable));
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 
                 ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);

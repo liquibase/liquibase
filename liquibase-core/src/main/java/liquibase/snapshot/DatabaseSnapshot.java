@@ -193,7 +193,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             for (String field : new HashSet<String>(object.getAttributes())) {
                 Object fieldValue = object.getAttribute(field, Object.class);
                 Object newFieldValue = replaceObject(fieldValue);
-                if (fieldValue != newFieldValue) {
+                if (fieldValue != newFieldValue && newFieldValue != null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
                     object.setAttribute(field, newFieldValue);
                 }
 
