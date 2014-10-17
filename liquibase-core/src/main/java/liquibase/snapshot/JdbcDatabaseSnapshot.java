@@ -358,7 +358,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (database instanceof OracleDatabase) {
-                        return queryOracle(catalogAndSchema, null);
+                        return queryOracle(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -402,7 +402,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "join ALL_TAB_COMMENTS c on a."+nameColumn+"=c.table_name and a.owner=c.owner " +
                             "WHERE a.OWNER='" + ownerName + "'";
                         if (tableName != null) {
-                            sql += " AND "+nameColumn+"='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " AND a."+nameColumn+"='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                         sql += " AND a."+nameColumn+" not in (select mv.name from all_registered_mviews mv where mv.owner='"+ownerName+"')";
                         results.addAll(executeAndExtract(sql, database));
