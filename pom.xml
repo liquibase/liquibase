@@ -259,19 +259,38 @@
                     </configuration>
                 </plugin>
 
-
-                <plugin>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.5</version>
-                    <configuration>
-                        <skip>false</skip>
-                    </configuration>
-                </plugin>
-
                 <plugin>
                     <artifactId>maven-scm-plugin</artifactId>
                     <configuration>
                         <pushChanges>false</pushChanges>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.5</version>
+                    <extensions>true</extensions>
+                    <executions>
+                        <execution>
+                            <id>default-deploy</id>
+                            <phase>deploy</phase>
+                            <goals>
+                                <goal>deploy</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <serverId>sonatype-nexus-staging</serverId>
+                        <nexusUrl>https://oss.sonatype.org/service/local/staging/deploy/maven2/</nexusUrl>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                    <configuration>
+                        <skip>false</skip>
                     </configuration>
                 </plugin>
             </plugins>
@@ -304,14 +323,11 @@
 
     <distributionManagement>
         <repository>
-            <uniqueVersion>false</uniqueVersion>
             <id>sonatype-nexus-staging</id>
             <name>Sonatype Production Repository</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-
         </repository>
         <snapshotRepository>
-            <uniqueVersion>false</uniqueVersion>
             <id>sonatype-nexus-snapshots</id>
             <name>Sontatype Snapshot Repository</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
