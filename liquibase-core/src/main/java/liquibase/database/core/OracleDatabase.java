@@ -231,6 +231,16 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
                 return true;
+            } else if (example.getName().startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.
+                return true;
+            } else if (example.getName().startsWith("RUPD$_")) { //Created by materialized view log tables using primary keys. Not available for DDL operations.
+                return true;
+            } else if (example.getName().startsWith("WM$_")) { //Workspace Manager backup tables.
+                return true;
+            } else if (example.getName().equals("CREATE$JAVA$LOB$TABLE ")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
+                return true;
+            } else if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
+                return true;
             }
         }
 
