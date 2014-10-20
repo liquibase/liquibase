@@ -237,7 +237,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("WM$_")) { //Workspace Manager backup tables.
                 return true;
-            } else if (example.getName().equals("CREATE$JAVA$LOB$TABLE ")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
+            } else if (example.getName().equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
                 return true;
             } else if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
                 return true;
