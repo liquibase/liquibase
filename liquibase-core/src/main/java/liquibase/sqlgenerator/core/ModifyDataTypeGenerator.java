@@ -51,12 +51,17 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         alterTable += " " + getModifyString(database) + " ";
 
         // add column name
-        alterTable += database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName());
+        String columnName = database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName());
+        alterTable += columnName;
 
         alterTable += getPreDataTypeString(database); // adds a space if nothing else
 
         // add column type
         alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType(), database).toDatabaseDataType(database);
+
+        if (database instanceof PostgresDatabase) {
+            alterTable += " USING ("+columnName+"::"+statement.getNewDataType()+")";
+        }
 
         return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
     }
