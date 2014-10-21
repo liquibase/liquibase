@@ -1014,6 +1014,8 @@
 		<xsd:complexType mixed="true" />
 	</xsd:element>
 
+    <xsd:element name="empty"/>
+
     <xsd:element name="output">
         <xsd:complexType mixed="true" >
             <xsd:attribute name="target" type="xsd:string" />
@@ -1199,6 +1201,7 @@
 			<xsd:element ref="executeCommand" maxOccurs="unbounded" />
 			<xsd:element ref="stop" maxOccurs="unbounded" />
             <xsd:element ref="output" maxOccurs="unbounded" />
+            <xsd:element ref="empty" maxOccurs="unbounded" />
 			<xsd:element ref="rollback" maxOccurs="1" />
 			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />

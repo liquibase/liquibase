@@ -993,7 +993,9 @@
 		<xsd:complexType mixed="true" />
 	</xsd:element>
 
-	<!-- renameTable -->
+    <xsd:element name="empty"/>
+
+    <!-- renameTable -->
 	<xsd:element name="renameTable">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="renameTableAttributes" />
@@ -1162,7 +1164,8 @@
 			<xsd:element ref="loadData" maxOccurs="unbounded" />
 			<xsd:element ref="loadUpdateData" maxOccurs="unbounded" />
 			<xsd:element ref="executeCommand" maxOccurs="unbounded" />
-			<xsd:element ref="stop" maxOccurs="unbounded" />
+            <xsd:element ref="empty" maxOccurs="unbounded" />
+            <xsd:element ref="stop" maxOccurs="unbounded" />
 			<xsd:element ref="rollback" maxOccurs="1" />
 			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />
