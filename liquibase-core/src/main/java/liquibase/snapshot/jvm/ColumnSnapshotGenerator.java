@@ -269,15 +269,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
-        Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
-        // don't set size for types like int4, int8 etc
-        if (database.dataTypeIsNotModifiable(columnTypeName)) {
-            columnSize = null;
-        }
-
-        Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
-        if (decimalDigits != null && decimalDigits.equals(0)) {
-            decimalDigits = null;
+        Integer columnSize = null;
+        Integer decimalDigits = null;
+        if (!database.dataTypeIsNotModifiable(columnTypeName)) { // don't set size for types like int4, int8 etc
+            columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
+            decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
+            if (decimalDigits != null && decimalDigits.equals(0)) {
+                decimalDigits = null;
+            }
         }
 
         Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
