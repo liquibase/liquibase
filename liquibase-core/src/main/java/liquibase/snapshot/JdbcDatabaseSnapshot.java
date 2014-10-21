@@ -5,6 +5,8 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.compare.DatabaseObjectComparator;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
@@ -432,7 +434,23 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 				public List<CachedRow> fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                    if (table == null) {
+                        try {
+                            List<CachedRow> foundPks = new ArrayList<CachedRow>();
+                            List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null, new String[]{"TABLE"});
+                            for (CachedRow table : tables) {
+                                List<CachedRow> pkInfo = extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table.getString("TABLE_NAME")));
+                                if (pkInfo != null) {
+                                    foundPks.addAll(pkInfo);
+                                }
+                            }
+                            return foundPks;
+                        } catch (DatabaseException e) {
+                            throw new SQLException(e);
+                        }
+                    } else {
+                        return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                    }
                 }
 
 

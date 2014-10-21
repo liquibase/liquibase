@@ -9,6 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
+import liquibase.util.StringUtils;
 
 import java.util.Set;
 
@@ -24,7 +25,16 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return DatabaseObjectComparatorFactory.getInstance().hash(((PrimaryKey) databaseObject).getTable(), accordingTo);
+        PrimaryKey pk = (PrimaryKey) databaseObject;
+        if (databaseObject.getName() == null) {
+            return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(), accordingTo);
+        } else {
+            if (pk.getTable() == null || pk.getTable().getName() == null) {
+                return new String[] {pk.getName().toLowerCase() };
+            } else {
+                return new String[] {pk.getName().toLowerCase(), pk.getTable().getName().toLowerCase()};
+            }
+        }
     }
 
     @Override
@@ -36,7 +46,11 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
         PrimaryKey thisPrimaryKey = (PrimaryKey) databaseObject1;
         PrimaryKey otherPrimaryKey = (PrimaryKey) databaseObject2;
 
-        return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
+        if (thisPrimaryKey.getTable() != null && thisPrimaryKey.getTable().getName() != null && otherPrimaryKey.getTable() != null && otherPrimaryKey.getTable().getName() != null) {
+            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
+        } else {
+            return StringUtils.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
+        }
     }
 
 

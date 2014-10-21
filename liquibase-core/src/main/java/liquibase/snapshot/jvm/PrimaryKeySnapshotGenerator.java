@@ -39,7 +39,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), searchTableName);
             PrimaryKey returnKey = null;
             for (CachedRow row : rs) {
-                if (example.getName() != null && !example.getName().equals(row.getString("PK_NAME"))) {
+                if (example.getName() != null && !example.getName().equalsIgnoreCase(row.getString("PK_NAME"))) {
                     continue;
                 }
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
