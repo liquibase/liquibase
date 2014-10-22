@@ -77,7 +77,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             } else {
                 Catalog catalog = new Catalog(catalogName);
-                match = new Schema(catalog, null);
+                match = new Schema(catalog, catalogName);
             }
 
         } catch (SQLException e) {

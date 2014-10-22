@@ -86,7 +86,10 @@ public class CatalogAndSchema {
                 schemaName = null;
             }
         } else {
-            schemaName = null;
+            if (catalogName == null && schemaName != null) { //had names in the wrong order
+                catalogName = schemaName;
+            }
+            schemaName = catalogName;
         }
 
         if (catalogName != null) {
@@ -115,6 +118,9 @@ public class CatalogAndSchema {
         String schemaName = standard.getSchemaName();
 
         if (catalogName == null) {
+            if (!accordingTo.supportsSchemas() && schemaName != null) {
+                return new CatalogAndSchema(accordingTo.correctObjectName(schemaName, Catalog.class), null);
+            }
             catalogName = accordingTo.getDefaultCatalogName();
         }
 
