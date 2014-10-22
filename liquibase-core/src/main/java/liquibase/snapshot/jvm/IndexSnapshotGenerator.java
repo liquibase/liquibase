@@ -308,7 +308,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (definition == null) {
                     returnIndex.getColumns().set(position - 1, new Column(columnName).setComputed(false).setRelation(returnIndex.getTable()));
                 } else {
-                    returnIndex.getColumns().set(position - 1, new Column().setName(definition, true));
+                    returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
                 }
             }
         } catch (Exception e) {
