@@ -79,7 +79,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
                     if (tableName == null) {
-                        for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null, new String[] {"TABLE"})) {
+                        for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
                             tables.add(row.getString("TABLE_NAME"));
                         }
                     } else {
@@ -198,7 +198,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     } else {
                         List<String> tables = new ArrayList<String>();
                         if (tableName == null) {
-                            for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, new String[] {"TABLE"})) {
+                            for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null)) {
                                 tables.add(row.getString("TABLE_NAME"));
                             }
                         } else {
@@ -339,8 +339,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table, final String[] types) throws SQLException, DatabaseException {
-            return getResultSetCache("getTables."+StringUtils.join(types, ":")).get(new ResultSetCache.SingleResultSetExtractor(database) {
+        public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
+            return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
 
                 @Override
@@ -360,12 +360,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (database instanceof OracleDatabase) {
-                        return queryOracle(catalogAndSchema, null);
+                        return queryOracle(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), types));
+                    return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), new String[]{"TABLE"}));
                 }
 
 
@@ -377,39 +377,83 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryOracle(catalogAndSchema, null);
                     }
 
-                    return extract(databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types));
+                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return extract(databaseMetaData.getTables(catalog, schema, null, new String[]{"TABLE"}));
                 }
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
-                    List<CachedRow> results = new ArrayList<CachedRow>();
-                    for (String type : types) {
-                        String allTable;
-                        String nameColumn;
-                        if (type.equalsIgnoreCase("table")) {
-                            allTable = "ALL_TABLES";
-                            nameColumn = "TABLE_NAME";
-                        } else if (type.equalsIgnoreCase("view")) {
-                            allTable = "ALL_VIEWS";
-                            nameColumn = "VIEW_NAME";
-                        } else {
-                            throw new UnexpectedLiquibaseException("Unknown table type: "+type);
-                        }
-
-                        String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
-                        String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a."+nameColumn+" as TABLE_NAME, 'TABLE' as TABLE_TYPE,  c.COMMENTS as REMARKS";
-                        if (allTable.equals("ALL_TABLES")) {
-                            sql += ", a.TEMPORARY as TEMPORARY, a.DURATION as DURATION";
-                        }
-                        sql += " from "+allTable+" a " +
-                            "join ALL_TAB_COMMENTS c on a."+nameColumn+"=c.table_name and a.owner=c.owner " +
-                            "WHERE a.OWNER='" + ownerName + "'";
-                        if (tableName != null) {
-                            sql += " AND "+nameColumn+"='" + database.correctObjectName(tableName, Table.class) + "'";
-                        }
-                        sql += " AND a."+nameColumn+" not in (select mv.name from all_registered_mviews mv where mv.owner='"+ownerName+"')";
-                        results.addAll(executeAndExtract(sql, database));
+                    String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
+                    
+                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.TABLE_NAME as TABLE_NAME, a.TEMPORARY as TEMPORARY, a.DURATION as DURATION, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
+                        "from ALL_TABLES a " +
+                        "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
+                        "WHERE a.OWNER='" + ownerName + "'";
+                    if (tableName != null) {
+                        sql += " AND a.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                     }
-                    return results;
+
+                    return executeAndExtract(sql, database);
+                }
+            });
+        }
+		
+        public List<CachedRow> getViews(final String catalogName, final String schemaName, final String view) throws SQLException, DatabaseException {
+            return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
+
+
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
+                }
+
+
+                @Override
+				public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, view);
+                }
+
+
+                @Override
+				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    if (database instanceof OracleDatabase) {
+                        return queryOracle(catalogAndSchema, view);
+                    }
+
+                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(view, View.class), new String[]{"VIEW"}));
+                }
+
+
+                @Override
+				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    if (database instanceof OracleDatabase) {
+                        return queryOracle(catalogAndSchema, null);
+                    }
+
+                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return extract(databaseMetaData.getTables(catalog, schema, null, new String[]{"VIEW"}));
+                }
+
+                private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
+                    String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
+                    
+                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
+                        "from ALL_VIEWS a " +
+                        "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
+                        "WHERE a.OWNER='" + ownerName + "'";
+                    if (viewName != null) {
+                        sql += " AND a.VIEW_NAME='" + database.correctObjectName(viewName, View.class) + "'";
+                    }
+                    sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner='"+ownerName+"')";
+
+                    return executeAndExtract(sql, database);
                 }
             });
         }
