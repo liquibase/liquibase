@@ -54,7 +54,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<CachedRow> viewsMetadataRs = null;
         try {
-            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName(), new String[]{"VIEW"});
+            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName());
             if (viewsMetadataRs.size() > 0) {
                 CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
@@ -115,7 +115,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             List<CachedRow> viewsMetadataRs = null;
             try {
-                viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"VIEW"});
+                viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
                     schema.addDatabaseObject(new View().setName(row.getString("TABLE_NAME")).setSchema(schema));
                 }
