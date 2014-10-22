@@ -53,8 +53,8 @@ public class Main {
     protected String url;
     protected String databaseClass;
     protected String defaultSchemaName;
-    protected String outputDefaultSchema = "true";
-    protected String outputDefaultCatalog = "true";
+    protected String outputDefaultSchema;
+    protected String outputDefaultCatalog;
 	protected String liquibaseCatalogName;
 	protected String liquibaseSchemaName;
     protected String defaultCatalogName;
@@ -67,7 +67,7 @@ public class Main {
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected Boolean strict = Boolean.TRUE;
-    protected String defaultsFile = "liquibase.properties";
+    protected String defaultsFile;
 
     protected String diffTypes;
     protected String changeSetAuthor;
@@ -734,6 +734,17 @@ public class Main {
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
         }
+
+        if (this.outputDefaultCatalog == null) {
+            this.outputDefaultCatalog = "true";
+        }
+        if (this.outputDefaultSchema == null) {
+            this.outputDefaultSchema = "true";
+        }
+        if (this.defaultsFile == null) {
+            this.defaultsFile = "liquibase.properties";
+        }
+
 
     }
 
