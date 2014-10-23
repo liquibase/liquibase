@@ -214,6 +214,15 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
+    public Object getSerializableFieldValue(String field) {
+        Object value = super.getSerializableFieldValue(field);
+        if (field.equals("columns") && ((List) value).size() == 0) {
+            return null;
+        }
+        return value;
+    }
+
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
