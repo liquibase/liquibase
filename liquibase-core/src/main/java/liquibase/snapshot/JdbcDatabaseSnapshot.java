@@ -481,7 +481,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     if (table == null) {
                         try {
                             List<CachedRow> foundPks = new ArrayList<CachedRow>();
-                            List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null, new String[]{"TABLE"});
+                            List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null);
                             for (CachedRow table : tables) {
                                 List<CachedRow> pkInfo = extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table.getString("TABLE_NAME")));
                                 if (pkInfo != null) {
