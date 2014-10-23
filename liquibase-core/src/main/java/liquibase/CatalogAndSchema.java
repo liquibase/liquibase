@@ -77,10 +77,6 @@ public class CatalogAndSchema {
             return new CatalogAndSchema(null, null);
         }
 
-        if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
-            catalogName = null;
-        }
-
         if (accordingTo.supportsSchemas()) {
             if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
                 schemaName = null;
@@ -90,6 +86,14 @@ public class CatalogAndSchema {
                 catalogName = schemaName;
             }
             schemaName = catalogName;
+        }
+
+        if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
+            catalogName = null;
+        }
+
+        if (!accordingTo.supportsSchemas()) {
+            schemaName = null;
         }
 
         if (catalogName != null) {

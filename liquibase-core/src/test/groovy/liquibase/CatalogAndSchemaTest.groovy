@@ -46,16 +46,16 @@ class CatalogAndSchemaTest extends Specification {
         new CatalogAndSchema("Cat1", "Schema1") | new CatalogAndSchema("Cat1", "Schema1") | null   | null      | true  | true
         new CatalogAndSchema(null, "Schema1")   | new CatalogAndSchema(null, "Schema1")   | null   | null      | true  | true
         new CatalogAndSchema("Cat1", "Schema1") | new CatalogAndSchema("Cat2", "Schema1") | null   | null      | false | false
-        new CatalogAndSchema(null, "Schema1")   | new CatalogAndSchema(null, "Schema2")   | null   | null      | false | true
+        new CatalogAndSchema(null, "Schema1")   | new CatalogAndSchema(null, "Schema2")   | null   | null      | false | false
         new CatalogAndSchema("Cat1", "Schema1") | new CatalogAndSchema("Cat1", "Schema2") | null   | null      | false | true
         new CatalogAndSchema("CaT1", null)      | new CatalogAndSchema("cat1", null)      | null   | null      | true  | true
         new CatalogAndSchema(null, "SCHeMA1")   | new CatalogAndSchema(null, "schema1")   | null   | null      | true  | true
         new CatalogAndSchema(null, null)        | new CatalogAndSchema("cat1", null)      | "cat1" | "schema1" | true  | true
         new CatalogAndSchema(null, null)        | new CatalogAndSchema("cat1", "schema1") | "cat1" | "schema1" | true  | true
-        new CatalogAndSchema(null, null)        | new CatalogAndSchema(null, "schema1")   | "cat1" | "schema1" | true  | true
+        new CatalogAndSchema(null, null)        | new CatalogAndSchema(null, "schema1")   | "cat1" | "schema1" | true  | false
         new CatalogAndSchema("cat1", null)      | new CatalogAndSchema(null, null)        | "cat1" | "schema1" | true  | true
         new CatalogAndSchema("cat1", "schema1") | new CatalogAndSchema(null, null)        | "cat1" | "schema1" | true  | true
-        new CatalogAndSchema(null, "schema1")   | new CatalogAndSchema(null, null)        | "cat1" | "schema1" | true  | true
+        new CatalogAndSchema(null, "schema1")   | new CatalogAndSchema(null, null)        | "cat1" | "schema1" | true  | false
     }
 
     @Unroll("standardize schema #schema.catalogName/#schema.schemaName default #defaultCatalogName/#defaultSchemaName")
@@ -80,18 +80,18 @@ class CatalogAndSchemaTest extends Specification {
         "${correctedNotSupportsCatalogs.catalogName}.${correctedNotSupportsCatalogs.schemaName}" == "null.null"
 
         where:
-        schema | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
-        new CatalogAndSchema(null, null)        | null    | null       | "null.null"    | "null.null"
-        new CatalogAndSchema(null, null)        | "MyCat" | null       | "null.null"    | "null.null"
-        new CatalogAndSchema(null, null)        | null    | "MySchema" | "null.null"    | "null.null"
-        new CatalogAndSchema(null, null)        | "MyCat" | "MySchema" | "null.null"    | "null.null"
-        new CatalogAndSchema("Cat1", null)      | null    | null       | "CAT1.null"    | "CAT1.null"
-        new CatalogAndSchema("Cat1", null)      | "Cat1"  | null       | "null.null"    | "null.null"
-        new CatalogAndSchema("Cat1", "Schema1") | null    | null       | "CAT1.SCHEMA1" | "CAT1.null"
-        new CatalogAndSchema("Cat1", "Schema2") | null    | null       | "CAT1.SCHEMA2" | "CAT1.null"
-        new CatalogAndSchema("Cat1", "Schema1") | null    | "Schema1"  | "CAT1.null"    | "CAT1.null"
-        new CatalogAndSchema("Cat1", "Schema1") | "Cat1"  | "Schema1"  | "null.null"    | "null.null"
-        new CatalogAndSchema("Cat1", "Schema1") | "CaT1"  | "SCHeMA1"  | "null.null"    | "null.null"
+        schema                                  | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
+//        new CatalogAndSchema(null, null)        | null               | null              | "null.null"             | "null.null"
+//        new CatalogAndSchema(null, null)        | "MyCat"            | null              | "null.null"             | "null.null"
+//        new CatalogAndSchema(null, null)        | null               | "MySchema"        | "null.null"             | "null.null"
+//        new CatalogAndSchema(null, null)        | "MyCat"            | "MySchema"        | "null.null"             | "null.null"
+//        new CatalogAndSchema("Cat1", null)      | null               | null              | "CAT1.null"             | "CAT1.CAT1"
+        new CatalogAndSchema("Cat1", null)      | "Cat1"             | null              | "null.null"             | "null.null"
+        new CatalogAndSchema("Cat1", "Schema1") | null               | null              | "CAT1.SCHEMA1"          | "CAT1.null"
+        new CatalogAndSchema("Cat1", "Schema2") | null               | null              | "CAT1.SCHEMA2"          | "CAT1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | null               | "Schema1"         | "CAT1.null"             | "CAT1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | "Cat1"             | "Schema1"         | "null.null"             | "null.null"
+        new CatalogAndSchema("Cat1", "Schema1") | "CaT1"             | "SCHeMA1"         | "null.null"             | "null.null"
 
     }
 
