@@ -1,15 +1,24 @@
 package liquibase.sqlgenerator.core;
 
-import org.junit.Test;
-
-import liquibase.database.core.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.core.AddColumnStatement;
-import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
 	private static final String TABLE_NAME = "table_name";
@@ -44,6 +53,11 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
 
         assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
+
+        assertTrue(generatorUnderTest.validate(new AddColumnStatement(
+                new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null),
+                new AddColumnStatement(null, null, "other_table", "other_column", COLUMN_TYPE, null)
+            ), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("All columns must be targeted at the same table"));
     }
 	
 	@Test
@@ -52,5 +66,19 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 		statement.setAddAfterColumn("column_after");
 
 		assertFalse(generatorUnderTest.validate(statement, new MySQLDatabase(), new MockSqlGeneratorChain()).hasErrors());
+	}
+
+	@Test
+	public void testAddMultipleColumnsMySql() {
+	    AddColumnStatement columns = new AddColumnStatement(
+	            new AddColumnStatement(null, null, TABLE_NAME, "column1", "INT", null, new NotNullConstraint()),
+	            new AddColumnStatement(null, null, TABLE_NAME, "column2", "INT", null, new NotNullConstraint()));
+
+        assertFalse(generatorUnderTest.validate(columns, new MySQLDatabase(), new MockSqlGeneratorChain()).hasErrors());
+	    Sql[] sql = generatorUnderTest.generateSql(columns, new MySQLDatabase(), new MockSqlGeneratorChain());
+
+	    assertEquals(1, sql.length);
+	    assertEquals("ALTER TABLE " + TABLE_NAME + " ADD column1 INT NOT NULL, ADD column2 INT NOT NULL", sql[0].toSql());
+	    assertEquals("[DEFAULT, table_name, table_name.column1, table_name.column2]", String.valueOf(sql[0].getAffectedDatabaseObjects()));
 	}
 }

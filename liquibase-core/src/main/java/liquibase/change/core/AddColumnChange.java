@@ -86,6 +86,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
+        List<AddColumnStatement> addColumnStatements = new ArrayList<AddColumnStatement>();
 
         if (getColumns().size() == 0) {
             return new SqlStatement[] {
@@ -135,7 +136,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 addColumnStatement.setAddAtPosition(column.getPosition());
             }
 
-            sql.add(addColumnStatement);
+            addColumnStatements.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
                 sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
@@ -147,6 +148,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 sql.add(updateStatement);
             }
         }
+
+      if (addColumnStatements.size() == 1) {
+          sql.add(0, addColumnStatements.get(0));
+      } else {
+          sql.add(0, new AddColumnStatement(addColumnStatements));
+      }
 
       for (ColumnConfig column : getColumns()) {
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
@@ -165,6 +172,10 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     protected Change[] createInverses() {
         List<Change> inverses = new ArrayList<Change>();
 
+        DropColumnChange inverse = new DropColumnChange();
+        inverse.setSchemaName(getSchemaName());
+        inverse.setTableName(getTableName());
+
         for (ColumnConfig aColumn : columns) {
             if (aColumn.hasDefaultValue()) {
                 DropDefaultValueChange dropChange = new DropDefaultValueChange();
@@ -175,14 +186,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 inverses.add(dropChange);
             }
 
-
-            DropColumnChange inverse = new DropColumnChange();
-            inverse.setSchemaName(getSchemaName());
-            inverse.setColumnName(aColumn.getName());
-            inverse.setTableName(getTableName());
-            inverses.add(inverse);
+            inverse.addColumn(aColumn);
         }
-
+        inverses.add(inverse);
         return inverses.toArray(new Change[inverses.size()]);
     }
 

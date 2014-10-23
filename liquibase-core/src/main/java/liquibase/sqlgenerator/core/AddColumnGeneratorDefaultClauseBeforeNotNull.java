@@ -1,8 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
@@ -13,13 +10,8 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
@@ -46,15 +38,27 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     @Override
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
-        if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
-            validationErrors.addError("Cannot add an identity column to derby");
+        if (statement.isMultiple()) {
+            for (AddColumnStatement column : statement.getColumns()) {
+                validateSingleColumn(column, database, validationErrors);
+            }
+        } else {
+            validateSingleColumn(statement, database, validationErrors);
         }
         return validationErrors;
     }
 
+    private void validateSingleColumn(AddColumnStatement statement,
+            Database database, ValidationErrors validationErrors) {
+        if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
+            validationErrors.addError("Cannot add an identity column to derby");
+        }
+    }
+
     @Override
-    public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+    protected String generateSingleColumnSQL(AddColumnStatement statement,
+            Database database) {
+        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
         alterTable += getDefaultClause(statement, database);
 
@@ -80,16 +84,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
                 alterTable += " PRIMARY KEY";
             }
         }
-
-        List<Sql> returnSql = new ArrayList<Sql>();
-        returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
-
-        addUniqueConstrantStatements(statement, database, returnSql);
-        addForeignKeyStatements(statement, database, returnSql);
-
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return alterTable;
     }
-
 
     private String getDefaultClause(AddColumnStatement statement, Database database) {
         String clause = "";

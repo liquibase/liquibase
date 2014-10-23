@@ -4,6 +4,6 @@ public class AddColumnStatementTest extends AbstractSqStatementTest<AddColumnSta
 
     @Override
     protected AddColumnStatement createStatementUnderTest() {
-        return new AddColumnStatement(null, null, null, null, null, null);
+        return new AddColumnStatement((String)null, null, null, null, null, null);
     }
 }

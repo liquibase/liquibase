@@ -1,10 +1,17 @@
 package liquibase.statement.core;
 
-import liquibase.statement.*;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
+import liquibase.statement.UniqueConstraint;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 
@@ -19,6 +26,8 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String addBeforeColumn;
     private Integer addAtPosition;
     private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+
+    private List<AddColumnStatement> columns = new ArrayList<AddColumnStatement>();
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.catalogName = catalogName;
@@ -35,6 +44,23 @@ public class AddColumnStatement extends AbstractSqlStatement {
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, String remarks,ColumnConstraint... constraints) {
         this(catalogName,schemaName,tableName,columnName,columnType,defaultValue,constraints);
         this.remarks = remarks;
+    }
+
+    public AddColumnStatement(List<AddColumnStatement> columns) {
+        this.columns.addAll(columns);
+    }
+
+    public AddColumnStatement(AddColumnStatement... columns) {
+        this(Arrays.asList(columns));
+    }
+
+
+    public boolean isMultiple() {
+        return !columns.isEmpty();
+    }
+
+    public List<AddColumnStatement> getColumns() {
+        return columns;
     }
 
     public String getCatalogName() {
