@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -20,7 +19,7 @@ import liquibase.util.csv.CSVReader;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import liquibase.util.BooleanParser;
 
 
 @DatabaseChange(name="loadData",
@@ -195,7 +194,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         } else if (columnConfig.getType() != null) {
                             ColumnConfig valueConfig = new ColumnConfig();
                             if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
-                                valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
+                                valueConfig.setValueBoolean(BooleanParser.parseBoolean(value.toString().toLowerCase()));
                             } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
                                 valueConfig.setValueNumeric(value.toString());
                             } else if (columnConfig.getType().toLowerCase().contains("date") ||columnConfig.getType().toLowerCase().contains("time")) {

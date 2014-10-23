@@ -1,0 +1,18 @@
+
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+    <properties>
+        <title>Liquibase rpm packager Changes</title>
+        <author email="Adrien.Sales@gmail.com">Adrien SALES</author>
+    </properties>
+    <body>
+      <release version="3.0.3" date="2014-06-18" description="First rpm build">
+	    <action dev="adriens" type="add">First release of the rpm. Built on debian, deployed on CentOS release 6.4.
+                This first release : installs liquibase binaries as well as a very concise man page.
+            </action>
+            <action dev="adriens" type="add">First version of the associated maven site.
+            </action>
+      </release>
+    </body>
+</document>

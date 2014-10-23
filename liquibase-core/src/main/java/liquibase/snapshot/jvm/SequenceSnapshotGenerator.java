@@ -116,7 +116,14 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected String getSelectSequenceSql(Schema schema, Database database) {
         if (database instanceof DB2Database) {
-            return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
+            if(database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")){
+                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
+            }
+            else{
+                return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
+            }
+            
+            //return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
         } else if (database instanceof DerbyDatabase) {
             return "SELECT " +
                     "  seq.SEQUENCENAME AS SEQUENCE_NAME " +

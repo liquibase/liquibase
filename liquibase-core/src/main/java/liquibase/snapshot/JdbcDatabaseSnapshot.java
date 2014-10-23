@@ -18,6 +18,7 @@ import java.sql.*;
 import java.util.*;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
+
     private CachingDatabaseMetaData cachingDatabaseMetaData;
 
     public JdbcDatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -41,6 +42,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     public class CachingDatabaseMetaData {
+
         private DatabaseMetaData databaseMetaData;
         private Database database;
 
@@ -56,21 +58,18 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
             return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
-
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
                 }
 
-
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
                 }
 
-
                 @Override
-				public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
@@ -86,7 +85,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         tables.add(tableName);
                     }
 
-
                     for (String foundTable : tables) {
                         if (database instanceof OracleDatabase) {
                             throw new RuntimeException("Should have bulk selected");
@@ -97,7 +95,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     return returnList;
                 }
-
 
                 @Override
 				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
@@ -145,7 +142,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
 
-
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
@@ -156,7 +152,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
             return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
-
                 public boolean bulkFetch = false;
 
                 @Override
@@ -164,15 +159,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("INDEX_NAME"));
                 }
 
-
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, indexName);
                 }
 
-
                 @Override
-				public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
 
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
@@ -205,7 +198,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             tables.add(tableName);
                         }
 
-
                         for (String tableName : tables) {
                             ResultSet rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, false, true);
                             List<CachedRow> rows = extract(rs, (database instanceof InformixDatabase));
@@ -216,13 +208,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return returnList;
                 }
 
-
                 @Override
-				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     this.bulkFetch = true;
                     return fastFetch();
                 }
-
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
@@ -240,18 +230,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
             return getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("COLUMN_NAME"));
                 }
 
-
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
                 }
-
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
@@ -261,13 +248,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         resultSetCache.putInfo("seenTables", seenTables);
                     }
 
-                    seenTables.add(catalogName+":"+schemaName+":"+tableName);
+                    seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
                     return seenTables.size() > 2;
                 }
 
-
                 @Override
-				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     if (database instanceof OracleDatabase) {
                         return oracleQuery(false);
                     }
@@ -285,7 +271,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     if (database instanceof OracleDatabase) {
                         return oracleQuery(true);
                     }
@@ -306,8 +292,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected boolean shouldReturnEmptyColumns(SQLException e) {
                     return e.getMessage().contains("references invalid table"); //view with table already dropped. Act like it has no columns.
                 }
-
-
 
                 protected List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
@@ -342,21 +326,18 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
                 }
 
-
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, table);
                 }
 
-
                 @Override
-				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (database instanceof OracleDatabase) {
@@ -368,9 +349,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), new String[]{"TABLE"}));
                 }
 
-
                 @Override
-				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (database instanceof OracleDatabase) {
@@ -461,21 +441,18 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getPrimaryKeys(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
             return getResultSetCache("getPrimaryKeys").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
-                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"),  database, row.getString("TABLE_NAME"));
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
                 }
 
-
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, table);
                 }
 
-
                 @Override
-				public List<CachedRow> fastFetchQuery() throws SQLException {
+                public List<CachedRow> fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (table == null) {
@@ -497,12 +474,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
 
-
                 @Override
-				public List<CachedRow> bulkFetchQuery() throws SQLException {
+                public List<CachedRow> bulkFetchQuery() throws SQLException {
                     return null;
                 }
-
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
@@ -514,29 +489,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getUniqueConstraints(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
             return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
                 }
 
-
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
                 }
 
-
                 @Override
-				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
                 }
 
-
                 @Override
-				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
@@ -551,71 +522,81 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     Database database = JdbcDatabaseSnapshot.this.getDatabase();
                     String sql;
                     if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
-                        sql = "select CONSTRAINT_NAME, TABLE_NAME " +
-                                "from "+database.getSystemSchema()+".table_constraints " +
-                                "where constraint_schema='" + jdbcCatalogName + "' " +
-                                "and constraint_type='UNIQUE'";
+                        sql = "select CONSTRAINT_NAME, TABLE_NAME "
+                                + "from " + database.getSystemSchema() + ".table_constraints "
+                                + "where constraint_schema='" + jdbcCatalogName + "' "
+                                + "and constraint_type='UNIQUE'";
                         if (tableName != null) {
                             sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof PostgresDatabase) {
-                        sql = "select CONSTRAINT_NAME, TABLE_NAME " +
-                                "from "+database.getSystemSchema()+".table_constraints " +
-                                "where constraint_catalog='" + jdbcCatalogName + "' " +
-                                "and constraint_schema='"+jdbcSchemaName+"' " +
-                                "and constraint_type='UNIQUE'";
+                        sql = "select CONSTRAINT_NAME, TABLE_NAME "
+                                + "from " + database.getSystemSchema() + ".table_constraints "
+                                + "where constraint_catalog='" + jdbcCatalogName + "' "
+                                + "and constraint_schema='" + jdbcSchemaName + "' "
+                                + "and constraint_type='UNIQUE'";
                         if (tableName != null) {
-                                sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof MSSQLDatabase) {
-                        sql = "select CONSTRAINT_NAME, TABLE_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS " +
-                                "where CONSTRAINT_TYPE = 'Unique' " +
-                                "and CONSTRAINT_SCHEMA='"+jdbcSchemaName+"'";
+                        sql = "select CONSTRAINT_NAME, TABLE_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS "
+                                + "where CONSTRAINT_TYPE = 'Unique' "
+                                + "and CONSTRAINT_SCHEMA='" + jdbcSchemaName + "'";
                         if (tableName != null) {
-                                sql += " and TABLE_NAME='"+database.correctObjectName(tableName, Table.class)+"'";
+                            sql += " and TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
-                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_indexes ui " +
-                                "where uc.constraint_type='U' and uc.index_name = ui.index_name " +
-                                "and uc.owner = '" + jdbcSchemaName + "' " +
-                                "and ui.table_owner = '" + jdbcSchemaName + "' ";
+                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_indexes ui "
+                                + "where uc.constraint_type='U' and uc.index_name = ui.index_name "
+                                + "and uc.owner = '" + jdbcSchemaName + "' "
+                                + "and ui.table_owner = '" + jdbcSchemaName + "' ";
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof DB2Database) {
-                        sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME from syscat.keycoluse k, syscat.tabconst t " +
-                                "where k.constname = t.constname " +
-                                "and t.tabschema = '" + jdbcCatalogName + "' " +
-                                "and t.type='U'";
-                        if (tableName != null) {
-                            sql += " and t.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        // if we are on DB2 AS400 iSeries
+                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                            sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
+                            if (tableName != null) {
+                                sql += " and table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                            }
+                        }
+                        // here we are on DB2 UDB
+                        else {
+                            sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME from syscat.keycoluse k, syscat.tabconst t "
+                                    + "where k.constname = t.constname "
+                                    + "and t.tabschema = '" + jdbcCatalogName + "' "
+                                    + "and t.type='U'";
+                            if (tableName != null) {
+                                sql += " and t.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
+                            }
                         }
                     } else if (database instanceof FirebirdDatabase) {
-                        sql = "SELECT RDB$INDICES.RDB$INDEX_NAME AS CONSTRAINT_NAME, RDB$INDICES.RDB$RELATION_NAME AS TABLE_NAME FROM RDB$INDICES " +
-                                "LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDICES.RDB$INDEX_NAME " +
-                                "WHERE RDB$INDICES.RDB$UNIQUE_FLAG IS NOT NULL " +
-                                "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "+
-                                "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
+                        sql = "SELECT RDB$INDICES.RDB$INDEX_NAME AS CONSTRAINT_NAME, RDB$INDICES.RDB$RELATION_NAME AS TABLE_NAME FROM RDB$INDICES "
+                                + "LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDICES.RDB$INDEX_NAME "
+                                + "WHERE RDB$INDICES.RDB$UNIQUE_FLAG IS NOT NULL "
+                                + "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "
+                                + "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
                         if (tableName != null) {
-                            sql += " AND RDB$INDICES.RDB$RELATION_NAME='"+database.correctObjectName(tableName, Table.class)+"'";
+                            sql += " AND RDB$INDICES.RDB$RELATION_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof DerbyDatabase) {
-                        sql = "select c.constraintname as CONSTRAINT_NAME, tablename AS TABLE_NAME " +
-                                "from sys.systables t, sys.sysconstraints c, sys.sysschemas s " +
-                                "where s.schemaname='"+jdbcCatalogName+"' "+
-                                "and t.tableid = c.tableid " +
-                                "and t.schemaid=s.schemaid " +
-                                "and c.type = 'U'";
+                        sql = "select c.constraintname as CONSTRAINT_NAME, tablename AS TABLE_NAME "
+                                + "from sys.systables t, sys.sysconstraints c, sys.sysschemas s "
+                                + "where s.schemaname='" + jdbcCatalogName + "' "
+                                + "and t.tableid = c.tableid "
+                                + "and t.schemaid=s.schemaid "
+                                + "and c.type = 'U'";
                         if (tableName != null) {
-                            sql += " AND t.tablename = '"+database.correctObjectName(tableName, Table.class)+"'";
+                            sql += " AND t.tablename = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof InformixDatabase) {
-                        sql = "select sysindexes.idxname, sysindexes.idxtype, systables.tabname "+
-                        		"from sysindexes, systables "+
-                        		"where sysindexes.tabid = systables.tabid "+
-                        		"and sysindexes.idxtype ='U'";
+                        sql = "select sysindexes.idxname, sysindexes.idxtype, systables.tabname "
+                                + "from sysindexes, systables "
+                                + "where sysindexes.tabid = systables.tabid "
+                                + "and sysindexes.idxtype ='U'";
                         if (tableName != null) {
-                            sql += " AND systables.tabname = '"+database.correctObjectName(tableName, Table.class)+"'";
+                            sql += " AND systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
                         LogFactory.getLogger().warning("Finding unique constraints not currently supported for Sybase");
@@ -629,13 +610,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systable.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else {
-                        sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME " +
-                                "from "+database.getSystemSchema()+".constraints " +
-                                "where constraint_schema='" + jdbcSchemaName + "' " +
-                                "and constraint_catalog='" + jdbcCatalogName + "' " +
-                                "and constraint_type='UNIQUE'";
+                        sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME "
+                                + "from " + database.getSystemSchema() + ".constraints "
+                                + "where constraint_schema='" + jdbcSchemaName + "' "
+                                + "and constraint_catalog='" + jdbcCatalogName + "' "
+                                + "and constraint_type='UNIQUE'";
                         if (tableName != null) {
-                                sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
 
                     }

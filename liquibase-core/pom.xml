@@ -17,6 +17,9 @@
     <properties>
         <bundle.namespace>liquibase.*</bundle.namespace>
         <project.version>3.3.0</project.version>
+
+        <!-- Useful to avoid javadoc compil errors when compiling with jdk 1.8 -->
+        <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
 
     <dependencies>

@@ -153,7 +153,19 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 } else {
                     //probably older version of java, need to select from the column to find out if it is auto-increment
-                    String selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                    String selectStatement;
+                    if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
+                        LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
+                        LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
+                        LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
+                        LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
+                        
+                        
+                    }
+                    else{
+                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                    }
                     LogFactory.getLogger().debug("Checking "+rawTableName+"."+rawCatalogName+" for auto-increment with SQL: '"+selectStatement+"'");
                     Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                     Statement statement = null;

@@ -1,0 +1,55 @@
+
+<project name="Liquibase RPM" xmlns="http://maven.apache.org/DECORATION/1.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
+
+  <bannerRight>
+    <src>img/home_tagline.png</src>
+    <name>Liquibase</name>
+        <href>http://www.liquibase.org/</href>
+        <title>Liquibase rpm</title>
+  </bannerRight>
+  
+  
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.2.1</version>
+    </skin>
+    <custom>
+        <fluidoSkin>
+            <sideBarEnabled>true</sideBarEnabled>
+            <googlePlusOne />
+        </fluidoSkin>
+    </custom>
+
+
+    <body>
+        
+        <!--
+        <breadcrumbs>
+            <item name="cups4j" href="http://cups4j.org/"/>
+            <item name="forum" href="http://cups4j.org/forum/"/>
+            <item name="CUPS" href="http://www.cups.org"/>
+        </breadcrumbs>
+    -->
+    
+        <links>
+            <item name="Liquibase" href="http://http://www.liquibase.org"/>
+            <item name = "RPM" href="http://www.rpm.org/"/>
+            <item name = "Maximum RPM" href="http://www.rpm.org/max-rpm/"/>
+            <item name = "RPM on Wikipedia" href="http://http://en.wikipedia.org/wiki/RPM_Package_Manager"/>
+            <item name="redHat" href="http://http://www.redhat.com/"/>
+            <item name="CentOS" href="https://www.centos.org/"/>
+            <item name="RPM Maven Plugin" href="http://mojo.codehaus.org/rpm-maven-plugin/"/>
+            <item name="RPM Maven Plugin Jira" href="https://jira.codehaus.org/browse/MRPM"/>
+            
+        </links>
+
+        <menu name="MAIN MENU">
+            <item name="Build and use rpm" href="build-rpm.html"/>
+        </menu>
+        
+        <menu ref="reports"/>
+    </body>
+</project>
