@@ -229,7 +229,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             }
 
             try {
-                this.valueNumeric = NumberFormat.getInstance(Locale.US).parse(valueNumeric);
+                this.valueNumeric = ValueNumeric.of(Locale.US, valueNumeric);
             } catch (ParseException e) {
                 this.valueComputed = new DatabaseFunction(valueNumeric);
             }
@@ -243,6 +243,49 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         return this;
     }
+    
+	private static class ValueNumeric extends Number {
+		private static final long serialVersionUID = 1381154777956917462L;
+		
+		private final Number delegate;
+		private final String value;
+
+		private static ValueNumeric of(Locale locale, String value) throws ParseException {
+			final Number parsedNumber = NumberFormat.getInstance(locale)
+					.parse(value);
+			return new ValueNumeric(value, parsedNumber);
+		}
+
+		private ValueNumeric(final String value, final Number numeric) {
+			this.delegate = numeric;
+			this.value = value;
+		}
+
+		@Override
+		public double doubleValue() {
+			return delegate.doubleValue();
+		}
+
+		@Override
+		public float floatValue() {
+			return delegate.floatValue();
+		}
+
+		@Override
+		public int intValue() {
+			return delegate.intValue();
+		}
+
+		@Override
+		public long longValue() {
+			return delegate.longValue();
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+	}
 
     /**
      * Return the boolean value this column should be set to.
@@ -470,7 +513,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                     defaultValueNumeric = defaultValueNumeric.replaceFirst("\\)$", "");
                 }
                 try {
-                    this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
+                    this.defaultValueNumeric = ValueNumeric.of(Locale.US, defaultValueNumeric);
                 } catch (ParseException e) {
                     this.defaultValueComputed = new DatabaseFunction(defaultValueNumeric);
                 }
@@ -705,11 +748,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (value == null) {
             value = StringUtils.trimToNull((String) parsedNode.getValue());
         }
-        try {
-            valueNumeric = parsedNode.getChildValue(null, "valueNumeric", Double.class);
-        } catch (ParsedNodeException e) {
-            valueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "valueNumeric", String.class));
-        }
+        
+        setValueNumeric(parsedNode.getChildValue(null, "valueNumeric", String.class));
+
         try {
             valueDate = parsedNode.getChildValue(null, "valueDate", Date.class);
         } catch (ParsedNodeException e) {
@@ -733,11 +774,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
 
         defaultValue = parsedNode.getChildValue(null, "defaultValue", String.class);
-        try {
-            defaultValueNumeric = parsedNode.getChildValue(null, "defaultValueNumeric", Double.class);
-        } catch (ParsedNodeException e) {
-            defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueNumeric", String.class));
-        }
+        
+        setDefaultValueNumeric(parsedNode.getChildValue(null, "defaultValueNumeric", String.class));
+
         try {
             defaultValueDate = parsedNode.getChildValue(null, "defaultValueDate", Date.class);
         } catch (ParsedNodeException e) {
