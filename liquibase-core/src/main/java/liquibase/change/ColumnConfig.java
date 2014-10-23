@@ -285,7 +285,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 		public String toString() {
 			return value;
 		}
-	}
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (!(obj instanceof Number)) {
+                return false;
+            }
+            return obj.toString().equals(this.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return this.toString().hashCode();
+        }
+    }
 
     /**
      * Return the boolean value this column should be set to.
