@@ -367,7 +367,6 @@
             <activation>
                 <os>
                     <family>linux</family>
-                    <arch>i386</arch>
                 </os>
             </activation>
             <modules>
