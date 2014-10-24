@@ -61,7 +61,6 @@
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-debian</module>
-        <module>liquibase-rpm</module>
     </modules>
 
     <dependencyManagement>
@@ -361,6 +360,19 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>rpm</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                    <arch>i386</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>liquibase-rpm</module>
+            </modules>
         </profile>
     </profiles>
 
