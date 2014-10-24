@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
     <url>http://www.liquibase.org/</url>
 
-    <name>Liquibase rpm Packager</name>
+    <name>Liquibase RPM Packager</name>
     <description>Liquibase is an open source database-independent library for tracking, managing and applying database schema changes. It was started in 2006 to allow easier tracking of database changes, especially in an agile software development environment.</description>
     <organization>
         <name>Liquibase.org</name>
@@ -168,6 +168,13 @@
                 <version>3.3</version>
                 <configuration>
                     <locales>en</locales>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
 

@@ -17,9 +17,6 @@
     <properties>
         <bundle.namespace>liquibase.*</bundle.namespace>
         <project.version>3.3.0</project.version>
-
-        <!-- Useful to avoid javadoc compil errors when compiling with jdk 1.8 -->
-        <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
 
     <dependencies>
@@ -324,6 +321,25 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
