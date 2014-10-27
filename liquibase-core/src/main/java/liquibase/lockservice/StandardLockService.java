@@ -300,6 +300,7 @@ public class StandardLockService implements LockService {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
                 hasDatabaseChangeLogLockTable = false;
             }
+            reset();
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
