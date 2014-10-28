@@ -67,7 +67,7 @@ public class Main {
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected Boolean strict = Boolean.TRUE;
-    protected String defaultsFile;
+    protected String defaultsFile = "liquibase.properties";
 
     protected String diffTypes;
     protected String changeSetAuthor;
