@@ -123,7 +123,7 @@ public class ChangeSetTest extends Specification {
                 testValue[param] = "true"
             } else if (param == "context") {
                 testValue[param] = "test or value"
-            } else if (param == "rollback" || param == "changes") {
+            } else if (param == "rollback" || param == "changes" || param == "preconditions") {
                 continue
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
