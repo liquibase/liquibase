@@ -9,6 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

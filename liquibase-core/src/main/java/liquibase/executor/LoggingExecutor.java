@@ -118,6 +118,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                     String endDelimiter = ";";
                     if (sql instanceof RawSqlStatement) {
                         endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    } else if (sql instanceof CreateProcedureStatement) {
+                        endDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
