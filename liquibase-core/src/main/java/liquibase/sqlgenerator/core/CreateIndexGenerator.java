@@ -4,6 +4,7 @@ import liquibase.change.AddColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -27,10 +28,20 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         if (database instanceof HsqlDatabase) {
             validationErrors.checkRequiredField("name", createIndexStatement.getIndexName());
         }
-        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof DB2Database || database instanceof PostgresDatabase || database instanceof MockDatabase)) {
-            validationErrors.checkDisallowedField("clustered", createIndexStatement.isClustered(), database);
-        }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+
+        Warnings warnings = super.warn(createIndexStatement, database, sqlGeneratorChain);
+        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof DB2Database || database instanceof PostgresDatabase || database instanceof MockDatabase)) {
+            if (createIndexStatement.isClustered() != null && createIndexStatement.isClustered()) {
+                warnings.addWarning("Creating clustered index not supported with "+database);
+            }
+        }
+
+        return warnings;
     }
 
     @Override

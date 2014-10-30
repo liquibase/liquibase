@@ -4,6 +4,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeLogHistoryService;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.core.OracleDatabase;
 import liquibase.structure.core.*;
 import liquibase.test.DiffResultAssert;
@@ -113,9 +115,12 @@ public abstract class AbstractIntegrationTest {
 
             SnapshotGeneratorFactory.resetAll();
             ExecutorService.getInstance().reset();
-            LockServiceFactory.getInstance().resetAll();
 
+            LockServiceFactory.getInstance().resetAll();
             LockServiceFactory.getInstance().getLockService(database).init();
+
+
+            ChangeLogHistoryServiceFactory.getInstance().resetAll();
 
             if (database.getConnection() != null) {
                 ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());

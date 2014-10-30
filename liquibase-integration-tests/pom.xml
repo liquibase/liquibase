@@ -79,6 +79,18 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant-antunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <profiles>
         <profile>
