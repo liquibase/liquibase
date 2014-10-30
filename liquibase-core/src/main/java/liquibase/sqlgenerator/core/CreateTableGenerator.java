@@ -11,6 +11,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Relation;
@@ -111,7 +112,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 } else {
                     buffer.append(" DEFAULT ");
                 }
-                buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
+                if (defaultValue instanceof SequenceNextValueFunction) {
+                    buffer.append(database.generateDatabaseFunctionValue((SequenceNextValueFunction) defaultValue));
+                } else {
+                    buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
+                }
             }
 
             if (isAutoIncrementColumn) {
