@@ -432,7 +432,6 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "SCRIPT",
             "SCRIPTFORMAT",
             "SEMICOLON",
-            "SEQUENCE",
             "SHUTDOWN",
             "TEMP",
             "TEXT",
