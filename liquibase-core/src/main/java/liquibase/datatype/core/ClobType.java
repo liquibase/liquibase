@@ -57,6 +57,10 @@ public class ClobType extends LiquibaseDataType {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("CLOB");
+        } else if (database instanceof InformixDatabase) {
+            if (originalDefinition.toLowerCase().startsWith("text")) {
+                return new DatabaseDataType("TEXT");
+            }
         }
         return super.toDatabaseDataType(database);
     }
