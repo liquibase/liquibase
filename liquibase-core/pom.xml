@@ -166,6 +166,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/TestContext.java</exclude>
+                        <exclude>**/*.xml</exclude>
                     </excludes>
                     <systemProperties>
                         <property>
