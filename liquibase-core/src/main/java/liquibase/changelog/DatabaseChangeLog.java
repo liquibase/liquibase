@@ -18,9 +18,14 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
+import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -207,7 +212,26 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    protected void expandExpressions(ParsedNode parsedNode) {
+        try {
+            Object value = parsedNode.getValue();
+            if (value != null && value instanceof String) {
+                parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class)));
+            }
+
+            List<ParsedNode> children = parsedNode.getChildren();
+            if (children != null) {
+                for (ParsedNode child : children) {
+                    expandExpressions(child);
+                }
+            }
+        } catch (ParsedNodeException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        expandExpressions(node);
         String nodeName = node.getName();
         if (nodeName.equals("changeSet")) {
             this.addChangeSet(createChangeSet(node, resourceAccessor));
@@ -239,6 +263,31 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             } catch (ParsedNodeException e) {
                 e.printStackTrace();
             }
+        } else if (nodeName.equals("property")) {
+            try {
+                String context = node.getChildValue(null, "context", String.class);
+                String dbms = node.getChildValue(null, "dbms", String.class);
+                String labels = node.getChildValue(null, "labels", String.class);
+
+                if (node.getChildValue(null, "file", String.class) == null) {
+                    this.changeLogParameters.set(node.getChildValue(null, "name", String.class), node.getChildValue(null, "value", String.class), context, labels, dbms);
+                } else {
+                    Properties props = new Properties();
+                    InputStream propertiesStream = StreamUtil.singleInputStream(node.getChildValue(null, "file", String.class), resourceAccessor);
+                    if (propertiesStream == null) {
+                        LogFactory.getInstance().getLog().info("Could not open properties file " + node.getChildValue(null, "file", String.class));
+                    } else {
+                        props.load(propertiesStream);
+
+                        for (Map.Entry entry : props.entrySet()) {
+                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                throw new ParsedNodeException(e);
+            }
+
         }
     }
 

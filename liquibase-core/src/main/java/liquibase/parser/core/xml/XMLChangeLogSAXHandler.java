@@ -77,36 +77,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     public void startElement(String uri, String localName, String qualifiedName, Attributes attributes) throws SAXException {
         ParsedNode node = new ParsedNode(null, localName);
         try {
-            if (localName.equals("property")) {
-                String context = changeLogParameters.expandExpressions(StringUtils.trimToNull(attributes.getValue("context")));
-                String dbms = changeLogParameters.expandExpressions(StringUtils.trimToNull(attributes.getValue("dbms")));
-                String labels = changeLogParameters.expandExpressions(StringUtils.trimToNull(attributes.getValue("labels")));
-
-                if (StringUtils.trimToNull(attributes.getValue("file")) == null) {
-                    this.changeLogParameters.set(attributes.getValue("name"), changeLogParameters.expandExpressions(attributes.getValue("value")), context, labels, dbms);
-                } else {
-                    Properties props = new Properties();
-                    InputStream propertiesStream = StreamUtil.singleInputStream(attributes.getValue("file"), resourceAccessor);
-                    if (propertiesStream == null) {
-                        log.info("Could not open properties file " + attributes.getValue("file"));
-                    } else {
-                        props.load(propertiesStream);
-
-                        for (Map.Entry entry : props.entrySet()) {
-                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms);
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new SAXException(e);
-        }
-
-        try {
             if (attributes != null) {
                 for (int i=0; i< attributes.getLength(); i++) {
                     try {
-                        node.addChild(null, attributes.getLocalName(i), changeLogParameters.expandExpressions(attributes.getValue(i)));
+                        node.addChild(null, attributes.getLocalName(i), attributes.getValue(i));
                     } catch (NullPointerException e) {
                         throw e;
                     }
@@ -131,7 +105,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         try {
             String seenText = this.textStack.pop().toString();
             if (!StringUtils.trimToEmpty(seenText).equals("")) {
-                node.setValue(changeLogParameters.expandExpressions(seenText).trim());
+                node.setValue(seenText.trim());
             }
         } catch (ParsedNodeException e) {
             throw new SAXException(e);
