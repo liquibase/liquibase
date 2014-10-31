@@ -78,7 +78,7 @@ class AbstractResourceAccessorTest extends Specification {
             protected void init() {}
 
             @Override
-            protected Set<URL> getRootPaths() {
+            protected List<URL> getRootPaths() {
                 return rootUrlsSet;
             }
 
