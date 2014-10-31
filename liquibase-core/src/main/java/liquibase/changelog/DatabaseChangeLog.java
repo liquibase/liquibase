@@ -213,6 +213,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     protected void expandExpressions(ParsedNode parsedNode) {
+        if (changeLogParameters == null) {
+            return;
+        }
         try {
             Object value = parsedNode.getValue();
             if (value != null && value instanceof String) {
