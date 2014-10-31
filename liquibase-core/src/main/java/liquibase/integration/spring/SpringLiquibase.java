@@ -130,29 +130,29 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
 	}
 
-	private String beanName;
+	protected String beanName;
 
-	private ResourceLoader resourceLoader;
+	protected ResourceLoader resourceLoader;
 
-	private DataSource dataSource;
+	protected DataSource dataSource;
 
-	private final Logger log = LogFactory.getLogger(SpringLiquibase.class.getName());
+	protected final Logger log = LogFactory.getLogger(SpringLiquibase.class.getName());
 
-	private String changeLog;
+	protected String changeLog;
 
-	private String contexts;
+	protected String contexts;
 
-    private String labels;
+    protected String labels;
 
-	private Map<String, String> parameters;
+	protected Map<String, String> parameters;
 
-	private String defaultSchema;
+	protected String defaultSchema;
 
-	private boolean dropFirst = false;
+	protected boolean dropFirst = false;
 
-	private boolean shouldRun = true;
+	protected boolean shouldRun = true;
 
-	private File rollbackFile;
+	protected File rollbackFile;
     /**
      * Ignores classpath prefix during changeset comparison.
      * This is particularly useful if Liquibase is run in different ways.
