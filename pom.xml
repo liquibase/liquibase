@@ -307,7 +307,7 @@
                     <version>1.4</version>
                     <configuration>
                         <providerSelection>2.0</providerSelection>
-                        <source/>
+                        <source />
                     </configuration>
                     <executions>
                         <execution>
