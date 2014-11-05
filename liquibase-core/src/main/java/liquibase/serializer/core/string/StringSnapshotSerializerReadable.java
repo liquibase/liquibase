@@ -64,18 +64,8 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
                 StringBuilder catalogBuffer = new StringBuilder();
                 for (Class type : includedTypes) {
-                    List<? extends DatabaseObject> databaseObjects = sort(schema.getDatabaseObjects(type));
-                    if (databaseObjects.size() > 0) {
-                        catalogBuffer.append(type.getName()).append(":\n");
-
-                        StringBuilder typeBuffer = new StringBuilder();
-                        for (DatabaseObject databaseObject : databaseObjects) {
-                            typeBuffer.append(databaseObject.getName()).append("\n");
-                            typeBuffer.append(StringUtils.indent(serialize(databaseObject, new HashSet<String>(), databaseObject.getName()), 4)).append("\n");
-                        }
-
-                        catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
-                    }
+                    outputObjects(schema.getCatalog().getDatabaseObjects(type), type, catalogBuffer);
+                    outputObjects(schema.getDatabaseObjects(type), type, catalogBuffer);
                 }
                 buffer.append(StringUtils.indent(catalogBuffer.toString(), 4));
 
@@ -87,6 +77,21 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    protected void outputObjects(List objects, Class type, StringBuilder catalogBuffer) {
+        List<? extends DatabaseObject> databaseObjects = sort(objects);
+        if (databaseObjects.size() > 0) {
+            catalogBuffer.append(type.getName()).append(":\n");
+
+            StringBuilder typeBuffer = new StringBuilder();
+            for (DatabaseObject databaseObject : databaseObjects) {
+                typeBuffer.append(databaseObject.getName()).append("\n");
+                typeBuffer.append(StringUtils.indent(serialize(databaseObject, new HashSet<String>(), databaseObject.getName()), 4)).append("\n");
+            }
+
+            catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
+        }
     }
 
     private String serialize(final DatabaseObject databaseObject, Set<String> oldParentNames, String newParentName) {
@@ -103,6 +108,9 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                 continue;
             }
             if (attribute.equals("schema")) {
+                continue;
+            }
+            if (attribute.equals("catalog")) {
                 continue;
             }
             Object value = databaseObject.getAttribute(attribute, Object.class);

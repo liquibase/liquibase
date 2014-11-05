@@ -174,8 +174,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
-                Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, objectName);
-                setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE);
+                Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, qualifyName(objectName, objectNamespace, parentNamespace));
+                setValueOnNode(mapNode, objectNamespace, (String) entry.getKey(), entry.getValue(), serializationType, objectNamespace);
+                node.appendChild(mapNode);
             }
         } else if (value instanceof LiquibaseSerializable) {
             node.appendChild(createNode((LiquibaseSerializable) value));
@@ -186,13 +187,17 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else if (serializationType.equals(LiquibaseSerializable.SerializationType.DIRECT_VALUE)) {
                 node.setTextContent(value.toString());
             } else {
-                if (objectNamespace != null && !objectNamespace.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE) && !objectNamespace.equals(parentNamespace)) {
-                    NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, objectNamespace);
-                    node.setAttribute(details.getShortName(objectNamespace)+":"+objectName, value.toString());
-                } else {
-                    node.setAttribute(objectName, value.toString());
-                }
+                node.setAttribute(qualifyName(objectName, objectNamespace, parentNamespace), value.toString());
             }
+        }
+    }
+
+    private String qualifyName(String objectName, String objectNamespace, String parentNamespace) {
+        if (objectNamespace != null && !objectNamespace.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE) && !objectNamespace.equals(parentNamespace)) {
+            NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, objectNamespace);
+            return details.getShortName(objectNamespace) + ":" + objectName;
+        } else {
+            return objectName;
         }
     }
 
