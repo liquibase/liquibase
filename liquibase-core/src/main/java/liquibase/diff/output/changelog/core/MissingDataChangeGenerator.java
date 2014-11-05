@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -13,9 +14,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -93,6 +92,13 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                     } else if (value instanceof Date) {
                         column.setValueDate((Date) value);
                     } else { // string
+                        if (referenceDatabase instanceof InformixDatabase) {
+                            if (value instanceof byte[]) {
+                                byte[] bytes = (byte[]) value;
+                                value = new String(bytes);
+                            }
+                        }
+
                         column.setValue(value.toString().replace("\\", "\\\\"));
                     }
 
