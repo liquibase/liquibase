@@ -737,6 +737,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false).addIncludedSchema(schemaToDrop)).generateChangeSets();
 	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
+            boolean previousAutoCommit = this.getAutoCommitMode();
+            this.commit(); //clear out currently executed statements
+            this.setAutoCommit(false); //some DDL doesn't work in autocommit mode
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
                 for (ChangeSet changeSet : changeSets) {
@@ -751,6 +754,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         }
 
                     }
+                    this.commit();
                 }
             } finally {
                 if (reEnableFK) {
@@ -760,6 +764,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).destroy();
             LockServiceFactory.getInstance().getLockService(this).destroy();
+
+            this.setAutoCommit(previousAutoCommit);
 
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);

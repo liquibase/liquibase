@@ -196,7 +196,7 @@ public class DiffToChangeLog {
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy) {
         if (changes != null) {
             ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, null, changeSetContext,
-                    null, quotingStrategy, null);
+                    null, false, quotingStrategy, null);
             for (Change change : changes) {
                 changeSet.addChange(change);
             }
