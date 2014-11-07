@@ -62,7 +62,6 @@ public abstract class BaseLiquibaseTask extends Task {
         log("Starting Liquibase.", Project.MSG_INFO);
         classLoader = getProject().createClassLoader(classpath);
         classLoader.setParent(this.getClass().getClassLoader());
-        classLoader.setParentFirst(false);
         classLoader.setThreadContextLoader();
         validateParameters();
         Database database = null;
