@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -34,7 +36,7 @@ import liquibase.util.file.FilenameUtils;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-  private Logger log = LogFactory.getLogger();
+  private Logger log = LogFactory.getInstance().getLog();
 
 	protected Database database;
 	private String catalogName;
@@ -77,7 +79,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	        int i = 1;  // index starts from 1
 	        for(ColumnConfig col : cols) {
               log.debug("Applying column parameter = "+i+" for column "+col.getName());
-	            applyColumnParameter(stmt, i, col);
+	            applyColumnParameter(factory, stmt, i, col);
 	            i++;
 	        }
 	        // trigger execution
@@ -94,7 +96,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
 	protected abstract String generateSql(List<ColumnConfig> cols);
 	
-	private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException, DatabaseException {
+	private void applyColumnParameter(PreparedStatementFactory factory, PreparedStatement stmt, int i, ColumnConfig col) throws SQLException, DatabaseException {
 		if(col.getValue() != null) {
         log.debug("value is string = "+col.getValue());
 		    stmt.setString(i, col.getValue());
@@ -126,6 +128,21 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		} else if(col.getValueDate() != null) {
         log.debug("value is date = "+col.getValueDate());
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
+		} else if(col.getValueSequenceNext() != null && database instanceof OracleDatabase) {
+		log.debug("value is sequenceNext = "+col.getValueSequenceNext());
+			String sqlIdentifier = "SELECT " + database.generateDatabaseFunctionValue((DatabaseFunction) col.getValueSequenceNext()) + " FROM DUAL";
+			PreparedStatement pst = factory.create(sqlIdentifier);
+		    ResultSet rs = pst.executeQuery();
+		    
+		    Long id = null;
+		    
+		    if(rs.next()) {
+			   id = rs.getLong(1);
+		    }
+		    
+		    JdbcUtils.closeStatement(pst);
+			
+			stmt.setLong(i, id); 
 		} else if (col.getValueBlobFile() != null) {
         log.debug("value is blob = "+col.getValueBlobFile());
 			try {
