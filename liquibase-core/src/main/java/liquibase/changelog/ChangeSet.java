@@ -991,6 +991,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         if (field.equals("changes")) {
             return getChanges();
         }
+        
+        if (field.equals("preconditions")) {
+        	return getPreconditions();
+        }
 
         if (field.equals("rollback")) {
             if (this.getRollBackChanges() != null && this.getRollBackChanges().length > 0) {
