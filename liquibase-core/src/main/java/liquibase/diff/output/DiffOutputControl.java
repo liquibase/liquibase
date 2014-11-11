@@ -3,6 +3,7 @@ package liquibase.diff.output;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.InternalDatabase;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.H2Database;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
@@ -24,6 +25,7 @@ public class DiffOutputControl {
     private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
+    private ObjectQuotingStrategy objectQuotingStrategy = null;
 
     public DiffOutputControl() {
         includeSchema = true;
@@ -122,6 +124,15 @@ public class DiffOutputControl {
         } else {
             return true;
         }
+    }
+
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return objectQuotingStrategy;
+    }
+
+    public DiffOutputControl setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+        this.objectQuotingStrategy = objectQuotingStrategy;
+        return this;
     }
 
     private static class DatabaseForHash extends H2Database implements InternalDatabase {
