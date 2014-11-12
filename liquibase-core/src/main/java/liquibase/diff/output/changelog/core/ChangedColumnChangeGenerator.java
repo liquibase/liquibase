@@ -50,6 +50,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             return null;
         }
 
+        if (column.getRelation().getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
+            return null;
+        }
+
         List<Change> changes = new ArrayList<Change>();
 
         handleTypeDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
