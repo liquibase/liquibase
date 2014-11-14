@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.InvalidExampleException;
@@ -125,12 +126,25 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
                 foreignKey.setForeignKeyTable(foreignKeyTable);
-                foreignKey.addForeignKeyColumn(new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)).setRelation(foreignKeyTable));
+                Column fkColumn = new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)).setRelation(foreignKeyTable);
+                boolean alreadyAdded = false;
+                for (Column existing : foreignKey.getForeignKeyColumns()) {
+                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(existing, fkColumn, database)) {
+                        alreadyAdded = true; //already added. One is probably an alias
+                    }
+                }
+                if (alreadyAdded) {
+                    break;
+                }
+
 
                 CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table().setName(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
                 foreignKey.setPrimaryKeyTable(tempPkTable);
-                foreignKey.addPrimaryKeyColumn(new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)).setRelation(tempPkTable));
+                Column pkColumn = new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)).setRelation(tempPkTable);
+
+                foreignKey.addForeignKeyColumn(fkColumn);
+                foreignKey.addPrimaryKeyColumn(pkColumn);
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 
                 ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
