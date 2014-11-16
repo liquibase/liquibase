@@ -10,7 +10,7 @@ public class LogFactory {
     private static Map<String, Logger> loggers = new HashMap<String, Logger>();
     private static String defaultLoggingLevel = null;
 
-    private static LogFactory instance;
+    private static volatile LogFactory instance;
 
     public static void reset() {
         instance = new LogFactory();
