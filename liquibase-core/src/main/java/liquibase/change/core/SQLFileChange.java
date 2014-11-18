@@ -109,7 +109,7 @@ public class SQLFileChange extends AbstractSQLChange {
             throw new IOException("Unable to read file '" + path + "'", e);
         }
         if (inputStream == null) {
-            throw new IOException("Unable to read file '" + path + "'");
+            throw new IOException("File does not exist: '" + path + "'");
         }
         return inputStream;
     }
