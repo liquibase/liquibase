@@ -331,6 +331,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
                 columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
 
+                if (columnMetadataResultSet.get("COLUMN_DEF") != null && ((String) columnMetadataResultSet.get("COLUMN_DEF")).equalsIgnoreCase("NULL")) {
+                    columnMetadataResultSet.set("COLUMN_DEF", null);
+                }
+
                 if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
                     columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+columnMetadataResultSet.get("COLUMN_DEF")+")");
                 }
