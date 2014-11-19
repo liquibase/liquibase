@@ -69,6 +69,7 @@ public class DatabaseType extends DataType {
             if(password != null && !password.isEmpty()) {
                 connectionProps.setProperty(PASSWORD, password);
             }
+            ConnectionProperties connectionProperties = getConnectionProperties();
             if(connectionProperties != null) {
                 connectionProps.putAll(connectionProperties.buildProperties());
             }
@@ -204,6 +205,10 @@ public class DatabaseType extends DataType {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public ConnectionProperties getConnectionProperties() {
+        return isReference() ? ((DatabaseType) getCheckedRef()).getConnectionProperties() : connectionProperties;
     }
 
     public void addConnectionProperties(ConnectionProperties connectionProperties) {
