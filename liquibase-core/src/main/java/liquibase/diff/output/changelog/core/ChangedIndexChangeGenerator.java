@@ -68,7 +68,7 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
 
         Difference columnsDifference = differences.getDifference("columns");
         
-        if (columns != null) {
+        if (columnsDifference != null) {
             List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
             List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
 
