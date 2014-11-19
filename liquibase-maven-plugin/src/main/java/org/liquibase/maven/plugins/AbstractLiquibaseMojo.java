@@ -268,6 +268,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected String changelogSchemaName;
 
+    /**
+     * Location of a properties file containing JDBC connection properties for use by the driver.
+     *
+     * @parameter
+     */
+    private File driverPropertiesFile;
+
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
@@ -318,6 +325,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         Database database = null;
         try {
             String dbPassword = emptyPassword || password == null ? "" : password;
+            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
             database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
                     url,
                     username,
@@ -328,7 +336,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     outputDefaultCatalog,
                     outputDefaultSchema,
                     databaseClass,
-                    null,
+                    driverPropsFile,
                     propertyProviderClass,
                     changelogCatalogName,
                     changelogSchemaName);
