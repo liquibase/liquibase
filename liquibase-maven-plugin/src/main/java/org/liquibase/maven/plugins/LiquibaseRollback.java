@@ -49,6 +49,10 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     super.checkRequiredParametersAreSpecified();
 
+    checkRequiredRollbackParameters();
+  }
+
+  protected void checkRequiredRollbackParameters() throws MojoFailureException {
     if (rollbackCount == -1 && rollbackDate == null && rollbackTag == null) {
       throw new MojoFailureException("One of the rollback options must be specified, "
                                      + "please specify one of rollbackTag, rollbackCount "
