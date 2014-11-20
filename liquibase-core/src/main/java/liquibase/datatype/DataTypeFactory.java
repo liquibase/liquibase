@@ -1,5 +1,6 @@
 package liquibase.datatype;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.datatype.core.BigIntType;
 import liquibase.datatype.core.IntType;
@@ -195,6 +196,9 @@ public class DataTypeFactory {
 
 
     public LiquibaseDataType fromObject(Object object, Database database) {
+        if (object instanceof ColumnConfig.ValueNumeric) {
+            object = ((ColumnConfig.ValueNumeric) object).getDelegate();
+        }
         return fromDescription(object.getClass().getName(), database);
     }
 
