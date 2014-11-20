@@ -244,7 +244,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
     
-	private static class ValueNumeric extends Number {
+	public static class ValueNumeric extends Number {
 		private static final long serialVersionUID = 1381154777956917462L;
 		
 		private final Number delegate;
@@ -301,6 +301,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         @Override
         public int hashCode() {
             return this.toString().hashCode();
+        }
+
+        public Number getDelegate() {
+          return delegate;
         }
     }
 
