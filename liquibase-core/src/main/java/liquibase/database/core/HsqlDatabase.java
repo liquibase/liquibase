@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -454,7 +455,16 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public boolean isCaseSensitive() {
         return false;
     }
-    
+
+    @Override
+    public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
+        String quoted = super.quoteObject(objectName, objectType);
+        if (isReservedWord(objectName)) {
+            quoted = quoted.toUpperCase();
+        }
+        return quoted;
+    }
+
     @Override
     public void setConnection(DatabaseConnection conn) {
         oracleSyntax = null;
