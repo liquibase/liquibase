@@ -89,7 +89,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
 
                 for (CachedRow row : allColumnsMetadataRs) {
-                    Column exampleColumn = new Column().setRelation(relation).setName(row.getString("COLUMN_NAME").trim());
+                    Column exampleColumn = new Column().setRelation(relation).setName(StringUtils.trimToNull(row.getString("COLUMN_NAME")));
                     relation.getColumns().add(exampleColumn);
                 }
             } catch (Exception e) {
@@ -111,7 +111,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
         Column column = new Column();
-        column.setName(rawColumnName.trim());
+        column.setName(StringUtils.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
 
