@@ -6,7 +6,7 @@ import junit.framework.TestCase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 public class HsqlDatabaseTest extends TestCase {
     public void testGetDefaultDriver() {
@@ -40,6 +40,23 @@ public class HsqlDatabaseTest extends TestCase {
         Database databaseWithAllQuoting = new HsqlDatabase();
         databaseWithAllQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         assertEquals("\"Test\"", databaseWithAllQuoting.escapeObjectName("Test", Table.class));
+    }
+
+    /**
+     * Verifies that {@link HsqlDatabase#escapeObjectName(String, Class)} quoted object names are emitted in uppercase.
+     */
+    public void testEscapeObjectNameWithReservedWord() {
+        Database databaseWithDefaultQuoting = new HsqlDatabase();
+        databaseWithDefaultQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+
+        assertEquals("\"USER\"", databaseWithDefaultQuoting.escapeObjectName("user", Table.class));
+        assertEquals("\"VALUE\"", databaseWithDefaultQuoting.escapeObjectName("value", Column.class));
+
+        Database databaseWithAllQuoting = new HsqlDatabase();
+        databaseWithAllQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+
+        assertEquals("\"USER\"", databaseWithAllQuoting.escapeObjectName("user", Table.class));
+        assertEquals("\"test\"", databaseWithAllQuoting.escapeObjectName("test", Table.class));
     }
     
     public void testUsingOracleSyntax()  {
