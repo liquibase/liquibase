@@ -43,11 +43,11 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) changedObject;
 
-        DropIndexChange dropIndexChange = new DropIndexChange();
+        DropIndexChange dropIndexChange = createDropIndexChange();
         dropIndexChange.setTableName(index.getTable().getName());
         dropIndexChange.setIndexName(index.getName());
         
-        CreateIndexChange addIndexChange = new CreateIndexChange();
+        CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
         List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
         for (Column col : index.getColumns()) {
@@ -93,5 +93,13 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         }
 
         return new Change[] { dropIndexChange, addIndexChange };
+    }
+
+    protected DropIndexChange createDropIndexChange() {
+        return new DropIndexChange();
+    }
+
+    protected CreateIndexChange createCreateIndexChange() {
+        return new CreateIndexChange();
     }
 }
