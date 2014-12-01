@@ -1,11 +1,5 @@
 package liquibase.parser.core.formattedsql;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import liquibase.Labels;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
@@ -21,6 +15,10 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 	private enum ChangeSetBlock {
@@ -63,8 +61,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 	}
 
 	@Override
-	public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor)
-			throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
 		DatabaseChangeLog changeLog = new DatabaseChangeLog();
 		changeLog.setChangeLogParameters(changeLogParameters);
@@ -149,14 +146,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 					}
 					String dbms = parseString(dbmsPatternMatcher);
 
-					changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange,
-							logicalFilePath, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+
+                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
 					changeSet.setLabels(new Labels(labels));
 					changeSet.setFailOnError(failOnError);
 					changeLog.addChangeSet(changeSet);
 
 					change = new RawSQLChange();
-					// change.setSql(finalCurrentSql);
 					change.setResourceAccessor(resourceAccessor);
 					change.setSplitStatements(splitStatements);
 					change.setStripComments(stripComments);
@@ -243,8 +239,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 			if (reader != null) {
 				try {
 					reader.close();
-				} catch (IOException ignore) {
-				}
+                } catch (IOException ignore) { }
 			}
 		}
 
@@ -275,9 +270,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 	}
 
 	private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException {
-		Pattern[] patterns = new Pattern[] { Pattern.compile("^(?:expectedResult:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
+        Pattern[] patterns = new Pattern[] {
+            Pattern.compile("^(?:expectedResult:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
 				Pattern.compile("^(?:expectedResult:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
-				Pattern.compile("^(?:expectedResult:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE) };
+            Pattern.compile("^(?:expectedResult:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE)
+        };
 		for (Pattern pattern : patterns) {
 			Matcher matcher = pattern.matcher(body);
 			if (matcher.matches() && matcher.groupCount() == 2) {
