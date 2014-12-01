@@ -41,7 +41,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     }
 
     public static String getSchemaVersion() {
-        return "3.4";
+        return "4.0";
     }
 
     @Override
