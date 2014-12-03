@@ -3,7 +3,8 @@
 if [ -n "${LIQUIBASE_HOME+x}" ]; then
 # echo "Liquibase Home: $LIQUIBASE_HOME"
 else
-  # echo "Liquibase Home is not set."
+  ## Do not remove the following echo
+  echo "Liquibase Home is not set."
 
   ## resolve links - $0 may be a symlink
   PRG="$0"
