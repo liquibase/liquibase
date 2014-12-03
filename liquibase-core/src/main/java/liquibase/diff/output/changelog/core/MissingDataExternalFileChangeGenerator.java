@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
@@ -59,9 +60,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            if (!(referenceDatabase instanceof PostgresDatabase)) {
-                stmt.setFetchSize(Integer.MIN_VALUE);
-            }
+            stmt.setFetchSize(100);
             rs = stmt.executeQuery(sql);
 
             List<String> columnNames = new ArrayList<String>();
