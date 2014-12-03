@@ -86,6 +86,10 @@
                             org.mortbay.util.ajax.*;resolution:=optional,
                             org.slf4j.helpers.*;resolution:=optional,
                             org.slf4j.spi.*;resolution:=optional,
+                            org.yaml.snakeyaml.*;resolution:=optional,
+                            org.yaml.snakeyaml.introspector.*;resolution:=optional,
+                            org.yaml.snakeyaml.nodes.*;resolution:=optional,
+                            org.yaml.snakeyaml.representer.*;resolution:=optional,
                             org.junit.*;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
