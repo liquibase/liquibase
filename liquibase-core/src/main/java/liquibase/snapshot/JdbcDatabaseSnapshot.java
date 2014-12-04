@@ -135,6 +135,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "WHERE p.owner = '" +jdbcSchemaName+"' "+
                                 "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R' " +
+                                "AND p.table_name NOT LIKE 'BIN$%' " +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
                         return executeAndExtract(sql, database);
                     } else {
