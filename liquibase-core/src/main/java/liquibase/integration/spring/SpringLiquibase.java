@@ -88,7 +88,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
 
 			for (Resource res : resources) {
-                returnSet.addAll(super.list(relativeTo, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive));
+				Set<String> list = super.list(relativeTo, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
+				if (list != null) {
+					returnSet.addAll(list);
+				}
 			}
 
             return returnSet;

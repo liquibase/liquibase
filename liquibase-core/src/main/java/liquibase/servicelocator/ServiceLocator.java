@@ -155,7 +155,7 @@ public class ServiceLocator {
             }
 
             if (returnObject == null) {
-                throw new ServiceNotFoundException("Could not find implementation of " + requiredInterface.getName());
+                throw new ServiceNotFoundException("Could not find implementation of " + requiredInterface.getName()+". Checking in "+);
             }
             return returnObject.getClass();
         }
