@@ -1,6 +1,150 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.3.1 (2014.12.08)
+- IncludeAll bugfixes
+- Performance improvements
+- Datatype handling fixes
+- Fix for JSON parsing
+- Other bugfixes
+
+- [CORE-1920] - SpringLiqubase includeAll is not including files
+- [CORE-2009] - ClassCastException when executing a custom task change (AntClassLoader problem)
+- [CORE-2097] - "mvn liquibase:futureRollbackSQL" asks for tag, count or date
+- [CORE-2099] - SQLAnywhere support (Driver not capable)
+- [CORE-2103] - changelogSchemaName/changelogCatalogName configuration options will not work on Oracle DB
+- [CORE-2104] - ConcurrentModificationException iterating over System.getProperties().entrySet()
+- [CORE-2105] - Maven profile performing dropAll and update on Oracle failing with an error on populated database.
+- [CORE-2107] - LOWER() keyword fails on Postgres createIndex task
+- [CORE-2108] - dropAll command trying to drop column on table that has already been dropped
+- [CORE-2114] - AddAutoIncrement on Postgres does not work when changes are applied on a specific schema
+- [CORE-2116] - Could not find implementation of liquibase.logging.Logger
+- [CORE-2118] - Change default diffChangeLog/generateChangeLog objectQuotingStrategy back to LEGACY
+- [CORE-2119] - Bad finally block in SpringLiquibase.afterPropertiesSet()
+- [CORE-2120] - LoadUpdateData with value=NUMERIC quoting values
+- [CORE-2121] - DB2: DiffChangeLog/GenerateChangeLog/DropAll sees alias column and tries to drop/add them
+- [CORE-2127] - updateSQL creates duplicate DATABASECHANGELOGLOCK tables
+- [CORE-2130] - setFetchSize to a negative value breaks Oracle JDBC Driver
+- [CORE-2134] - ExecuteCommand won't run with no os attribute.
+- [CORE-2136] - Mysql must quote PARTITION as a keyword
+- [CORE-2137] - Special characters (&#13;) copied during generateChangelog on DB2/400
+- [CORE-2139] - H2Database.supportsDropTableCascadeConstraints() returns false
+- [CORE-2141] - handling dependencies and WAR as classpath
+- [CORE-2142] - generateChangeLog not including all columns in a table
+- [CORE-2146] - snakeyaml is pulled in as transitive dependency for using projects
+- [CORE-2149] - Liquibase command line fails
+- [CORE-2150] - On the 3.3.0-SNAPSHOT, liquibase --version returns 3.2.0
+- [CORE-2153] - Liquibase 3.2.1 is no longer compatible with Oracle 9
+- [CORE-2155] - diffTypes=data fails with java.sql.SQLException: Attribute value not valid (dataOutputDirectory attribute causes build to fail)
+- [CORE-2156] - Resource loader can't load changelog file
+- [CORE-2157] - SQLException if there are single quotes in ChangeSet
+- [CORE-2159] - Datetime2 no longer used for MSSQL
+- [CORE-2161] - includeAll relativeToChangelogFile="true" doesn't work
+- [CORE-2164] - SpringLiquibase: includeAll within jar causes NullPointerException
+- [CORE-2115] - Really slow when using fat jars
+- [CORE-2125] - Make DatabaseChangeLog#include(String, boolean, ResourceAccessor) public
+- [CORE-2148] - Build failure on jdk-1.8
+- [CORE-2152] - Change logs in json format not processed by liquibase - parsing errors
+
+Changes in version 3.3.0 (2014.11.03)
+- New "label" attribute on changeSet
+- New empty and output change tags
+- Support for clustered/nonclustered primary keys and indexes
+- Saving of remarks in mysql and mssql
+- Official RPM and DEB packages
+- Refactoring/update of Ant integration
+
+- [CORE-16] – Support for “nonclustered” primary keys in mssql
+- [CORE-54] – Support System Properties in Maven Plugin
+- [CORE-1528] – Installer for Liquibase
+- [CORE-1598] – support for rename sequence
+- [CORE-1914] – New Change function: output
+- [CORE-1942] – Support for changeSet “labels”
+- [CORE-549] – relativeToChangelogFile for loadData, loadUpdateData, sqlFile
+- [CORE-1438] – createView should support having the entire view definition in the change body
+- [CORE-1502] – CLONE – UpdateSQL needs to append a “/” to the end of createProcedure for Oracle
+- [CORE-1654] – logicalFilePath support in formatted sql
+- [CORE-1660] – “remarks” attribute is ignored in MSSQL
+- [CORE-1932] – support for encrypted passwords / custom properties
+- [CORE-1946] – Have a rpm package for liquibase (built with maven)
+- [CORE-1963] – Ability to define full CREATE VIEW statement in <createView> change.
+- [CORE-1990] – Preserve inline comments in view snapshots in mssql
+- [CORE-2060] – Support liquibase.properties files with unknown properties
+- [CORE-2061] – Improvements to Informix support
+- [CORE-2062] – Add onlyUpdate flag to loadUpdateData
+- [CORE-2064] – Use ignoreClassPathPrefix for rollback as well
+- [CORE-2065] – Use DOUBLE PRECISION for DOUBLE with Firebird
+- [CORE-2066] – Support for –outputFile in command line
+- [CORE-2067] – Refactor Ant Task codebase
+- [CORE-2068] – New liquibase.hostDescription property for additional details in the DATABASECHANGELOGLOCK table
+- [CORE-2069] – Use prepared statement in <update> change whenever a clob type is used
+- [CORE-2072] – Do not include Oracle internal tables in snapshot/diff
+- [CORE-870] – Postgres, in an ALTER TABLE ALTER COLUMN statement, sometimes needs USING clause
+- [CORE-945] – Oracle : Temporary tables are created as regular tables
+- [CORE-1463] – Views not generated correctly with generateChangelog
+- [CORE-1556] – remarks attribute ignored for mysql
+- [CORE-1723] – unable to update on DB2/400, version V6R1, on jt400-6.7.jar
+- [CORE-1745] – afterColumn not working in MySQL
+- [CORE-1774] – Autocommit not restored on close in SpringLiquibase
+- [CORE-1882] – NullPointerException when MySQL foreign key points to an invalid table
+- [CORE-1919] – SpringLiquibase fails when dropFirst is true
+- [CORE-1922] – Sequence is not a reserved object name in HSQLDB
+- [CORE-1925] – liquibase scripts can not represent clustered indexes
+- [CORE-1937] – Oracle Float and VARCHAR precisions in changelog generated by generateChangeLog are incorrect
+- [CORE-1952] – liquibase loadData does not properly load numeric field in boolean always as false
+- [CORE-1956] – Double and float converted to FLOAT8(*, 17) and FLOAT4(*, 8) in PostgreSQL
+- [CORE-1958] – Column type of “TIMESTAMP(6)” under MySql converted to TIMESTAMP dropping fractional seconds
+- [CORE-1974] – dbchangelog-3.1.xsd missing <empty>
+- [CORE-1977] – CreateSequence with cacheSize=0 failing on Oracle
+- [CORE-1979] – MSSQL should not include parameters in SYSNAME data types
+- [CORE-1981] – Parameters set in included file are no longer set in 3.2.0
+- [CORE-1982] – Snapshot outputs defautlValueDate as defaultValueComputed on MSSQL for dates not in ISO format with a T in the middle
+- [CORE-1986] – includeAll from changeLogs within a jar is not working
+- [CORE-1988] – Reported size for Oracle NVARCHAR2 columns is wrong
+- [CORE-1993] – Drop table with cascade is not supported by Sybase
+- [CORE-1996] – addNotNullConstraint on h2 database has unexpected side effects
+- [CORE-1997] – Bit changelog default value of 1 executed as 0
+- [CORE-2002] – AbstractResourceAccessor generates path in a unpredictable way
+- [CORE-2010] – Oracle data type SDO_GEOMETRY snapshotted as SDO_GEOMETRY(1)
+- [CORE-2014] – applyToRollback property ignored when rollback changes are specified
+- [CORE-2015] – DiffChangeLog writes to the wrong point in the file on windows if file uses \n not \r\n
+- [CORE-2020] – Oracle default value current_timestamp converted to systimestamp
+- [CORE-2021] – Column remarks not snapshotted in mssql
+- [CORE-2026] – Oracle columns of type ANYDATA are snapshotted with a size
+- [CORE-2028] – generateChangeLog on SQL Anywhere 11.0.1 throws DatabaseException Driver Not Capable
+- [CORE-2032] – Snapshot incorrectly including clob/blob sizes on diff
+- [CORE-2051] – Not quoting VIEW params with spaces when snapshotting
+- [CORE-2054] – Add new “computed” column attribute to differentiate between an actual column name and a function as a column
+- [CORE-2063] – Fix for H2 autoincrement “start with” and “increment by” syntax
+- [CORE-2070] – dropAllForeignKeyConstraints does not work on Firebird databases
+- [CORE-2075] – generateChangelog generates bad definition for TIME type
+- [CORE-2080] – Liquibase “empty” change not present in XSD version 3.2
+- [CORE-2081] – PrimaryKeyExists precondition without tableName is broken
+- [CORE-2082] – Column snapshot on PostgreSQL does not include precision information for numeric data type
+- [CORE-2087] – Executing against Oracle doesn’t respect liquibaseSchemaName or liquibaseCatalogName
+- [CORE-2088] – outputDefaultSchema and outputDefaultCatalog command line parameters not respected
+- [CORE-2093] – Error: Property ‘relativeToChangelogFile’ not found on object type liquibase.change.core.LoadDataChange
+- [CORE-2094] – Liquibase.dropAll() should reset the lock service
+- [CORE-2095] – Invalid generated changeset for mysql bit with defaultValue 0
+
+Changes in version 3.2.3 (2014.11.03)
+- Bugfixes
+
+- [CORE-1919] – SpringLiquibase fails when dropFirst is true
+- [CORE-1987] – “mvn liquibase:diff” does not find any differences between databases
+- [CORE-1988] – Reported size for Oracle NVARCHAR2 columns is wrong
+- [CORE-1989] – Cannot set objectQuotingStrategy on root databaseChangeLog node
+- [CORE-2002] – AbstractResourceAccessor generates path in a unpredictable way
+- [CORE-2003] – Could not find implementation of liquibase.logging.Logger
+- [CORE-2042] – If liquibase.jar is nested in another jar/war/ear, it fails to start with a “cannot find implementation of liquibase.logging.Logger” error
+- [CORE-2058] – Load/Update tags should use “is null” not “= null” for null comparisons
+- [CORE-2070] – dropAllForeignKeyConstraints does not work on Firebird databases
+- [CORE-2075] – generateChangelog generates bad definition for TIME type
+- [CORE-2080] – Liquibase “empty” change not present in XSD version 3.2
+- [CORE-2065] – Use DOUBLE PRECISION for DOUBLE with Firebird
+- [CORE-54] – Support System Properties in Maven Plugin
+
+
 Changes in version 3.2.2 (2014.07.23)
 - Fix for bug in checksum computation vs. 3.1.1
 
@@ -439,7 +583,7 @@ Changes in version 3.0.3 (2013.08.29)
 - [CORE-1375] - "group" is not included as a reserved word
 - [CORE-1377] - liquibase version says 3.0.0-SNP
 - [CORE-1380] - ^M present in liquibase unix running file (from jar on maven repo)
-- - [CORE-1381] - DropAll: Not working with MsSql
+- - - [CORE-1381] - DropAll: Not working with MsSql
 - [CORE-1383] - Error attempting to re-create databasechangeloglock on second liquibase run if running in Oracle under SYSTEM user
 - [CORE-1387] - dropAll fails with oracle since version 3.0.2
 - [CORE-1388] - MSSQLServer: 'REAL' dataype is returned with unnecessary size modifier during generateChangeLog
