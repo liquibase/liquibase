@@ -6,6 +6,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
+import liquibase.statement.DatabaseFunction;
 
 @DataTypeInfo(name="uuid", aliases = {"uniqueidentifier"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class UUIDType extends LiquibaseDataType {
@@ -35,7 +36,7 @@ public class UUIDType extends LiquibaseDataType {
     @Override
     public String objectToSql(Object value, Database database) {
         if (database instanceof MSSQLDatabase) {
-            return "'"+value+"'";
+			 return (value instanceof DatabaseFunction) ? database.generateDatabaseFunctionValue((DatabaseFunction) value) : "'" + value + "'";
         }
         return super.objectToSql(value, database);
     }
