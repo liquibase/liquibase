@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.database.Database;
@@ -42,11 +43,13 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
         change.setConstraintName(fk.getName());
 
+        CatalogAndSchema defaultSchema = referenceDatabase.getDefaultSchema();
+
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.getIncludeCatalog()) {
+        if (control.getIncludeCatalog() || !defaultSchema.equals(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().toCatalogAndSchema(), referenceDatabase)) {
             change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
-        if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.getIncludeSchema()) {
+        if (control.getIncludeSchema() || !defaultSchema.equals(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().toCatalogAndSchema(), referenceDatabase)) {
             change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
         }
         change.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
