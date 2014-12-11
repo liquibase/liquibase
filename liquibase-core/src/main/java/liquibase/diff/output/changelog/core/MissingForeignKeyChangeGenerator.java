@@ -43,13 +43,14 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
         change.setConstraintName(fk.getName());
 
-        CatalogAndSchema defaultSchema = referenceDatabase.getDefaultSchema();
+        String defaultSchemaName = referenceDatabase.getDefaultSchemaName();
+        String defaultCatalogName = referenceDatabase.getDefaultCatalogName();
 
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        if (control.getIncludeCatalog() || !defaultSchema.equals(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().toCatalogAndSchema(), referenceDatabase)) {
+        if (control.getIncludeCatalog() && referenceDatabase.supportsCatalogs() && defaultCatalogName != null && !defaultCatalogName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getCatalogName())) {
             change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
-        if (control.getIncludeSchema() || !defaultSchema.equals(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().toCatalogAndSchema(), referenceDatabase)) {
+        if (control.getIncludeSchema() && referenceDatabase.supportsSchemas() && defaultSchemaName != null && !defaultSchemaName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getName())) {
             change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
         }
         change.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
