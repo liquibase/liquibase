@@ -46,11 +46,14 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         String defaultSchemaName = referenceDatabase.getDefaultSchemaName();
         String defaultCatalogName = referenceDatabase.getDefaultCatalogName();
 
+        boolean includedCatalog = false;
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        if (control.getIncludeCatalog() && referenceDatabase.supportsCatalogs() && defaultCatalogName != null && !defaultCatalogName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getCatalogName())) {
+        if (referenceDatabase.supportsCatalogs() && (control.getIncludeCatalog() || (defaultCatalogName != null && !defaultCatalogName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getCatalogName())))) {
             change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
+            includedCatalog = true;
         }
-        if (control.getIncludeSchema() && referenceDatabase.supportsSchemas() && defaultSchemaName != null && !defaultSchemaName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getName())) {
+
+        if (referenceDatabase.supportsSchemas() && (includedCatalog || control.getIncludeSchema() || (defaultSchemaName != null && !defaultSchemaName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getName())))) {
             change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
         }
         change.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", new StringUtils.StringUtilsFormatter<Column>() {
