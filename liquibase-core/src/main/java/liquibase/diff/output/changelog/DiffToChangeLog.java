@@ -1,6 +1,5 @@
 package liquibase.diff.output.changelog;
 
-import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
@@ -15,18 +14,14 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
-import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DiffToChangeLog {
 
@@ -195,8 +190,15 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy) {
         if (changes != null) {
+            String changeSetContext = this.changeSetContext;
+            if (diffOutputControl.getContext() != null) {
+                changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
+            }
             ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, null, changeSetContext,
                     null, false, quotingStrategy, null);
+            if (diffOutputControl.getLabels() != null) {
+                changeSet.setLabels(diffOutputControl.getLabels());
+            }
             for (Change change : changes) {
                 changeSet.addChange(change);
             }
