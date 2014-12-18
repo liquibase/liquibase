@@ -142,7 +142,7 @@ public class ChangeSetTest extends Specification {
         then:
         for (param in fields) {
             if (param == "context") {
-                assert changeSet.getSerializableFieldValue(param).toString() == "(${testValue[param]})"
+                assert changeSet.getSerializableFieldValue(param).toString() == "${testValue[param]}"
             } else if (param in testValue.keySet()) {
                 assert changeSet.getSerializableFieldValue(param).toString() == testValue[param]
             }
