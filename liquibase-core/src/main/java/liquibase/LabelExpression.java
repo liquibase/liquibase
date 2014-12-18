@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class LabelExpression {
 
     private HashSet<String> labels = new HashSet<String>();
+    private String originalString = null;
 
     public LabelExpression() {
     }
@@ -26,6 +27,7 @@ public class LabelExpression {
 
     public LabelExpression(String labels) {
         parseLabelString(labels);
+        originalString = labels;
     }
 
     public LabelExpression(Collection<String> labels) {
@@ -58,6 +60,9 @@ public class LabelExpression {
 
     @Override
     public String toString() {
+        if (originalString != null) {
+            return originalString;
+        }
         return "(" + StringUtils.join(new TreeSet(this.labels), "), (") + ")";
     }
 
