@@ -137,7 +137,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         assert changeLog.getChangeSets().get(1).isAlwaysRun()
         assert changeLog.getChangeSets().get(1).isRunOnChange()
         assert !changeLog.getChangeSets().get(1).isRunInTransaction()
-        changeLog.getChangeSets().get(1).getContexts().toString() == "(y)"
+        changeLog.getChangeSets().get(1).getContexts().toString() == "y"
         StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
         changeLog.getChangeSets().get(1).getRollBackChanges().length == 1
         ((RawSQLChange) changeLog.getChangeSets().get(1).getRollBackChanges()[0]).getSql() == "delete from table1;\ndrop table table1;"

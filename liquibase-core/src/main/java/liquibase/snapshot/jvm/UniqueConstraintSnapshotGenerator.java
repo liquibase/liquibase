@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -135,8 +136,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t "
                         + "where k.constname = t.constname "
+                        + "and k.tabschema = t.tabschema "
                         + "and t.type='U' "
                         + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
+                        + "and t.tabschema = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
                         + "order by colseq";
             }
         } else if (database instanceof DerbyDatabase) {
