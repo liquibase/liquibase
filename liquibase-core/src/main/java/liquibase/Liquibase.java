@@ -260,8 +260,6 @@ public class Liquibase {
             output.flush();
         } catch (IOException e) {
             throw new LiquibaseException(e);
-        } finally {
-            lockService.releaseLock();
         }
 
         ExecutorService.getInstance().setExecutor(database, oldTemplate);

@@ -28,6 +28,8 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
     private Map<File, File> unzippedJars = new HashMap<File, File>();
 
+    private Map<String, Set<String>> classFilesByLocation = new HashMap<String, Set<String>>();
+
     @Override
     public void addClassLoader(ClassLoader classLoader) {
         try {
@@ -335,23 +337,32 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      * @param location a File object representing a directory
      */
     private void loadImplementationsInDirectory(String parent, File location, ClassLoader classLoader) {
-        File[] files = location.listFiles();
-        StringBuilder builder = null;
+        Set<String> classFiles = classFilesByLocation.get(location.toString());
+        if (classFiles == null) {
+            classFiles = new HashSet<String>();
 
-        for (File file : files) {
-            builder = new StringBuilder(100);
-            String name = file.getName();
-            if (name != null) {
-                name = name.trim();
-                builder.append(parent).append("/").append(name);
-                String packageOrClass = parent == null ? name : builder.toString();
+            File[] files = location.listFiles();
+            StringBuilder builder = null;
 
-                if (file.isDirectory()) {
-                    loadImplementationsInDirectory(packageOrClass, file, classLoader);
-                } else if (name.endsWith(".class")) {
-                    this.loadClass(packageOrClass, classLoader);
+            for (File file : files) {
+                builder = new StringBuilder(100);
+                String name = file.getName();
+                if (name != null) {
+                    name = name.trim();
+                    builder.append(parent).append("/").append(name);
+                    String packageOrClass = parent == null ? name : builder.toString();
+
+                    if (file.isDirectory()) {
+                        loadImplementationsInDirectory(packageOrClass, file, classLoader);
+                    } else if (name.endsWith(".class")) {
+                        classFiles.add(packageOrClass);
+                    }
                 }
             }
+        }
+
+        for (String packageOrClass : classFiles) {
+            this.loadClass(packageOrClass, classLoader);
         }
     }
 
@@ -392,7 +403,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      * @param stream  the inputstream of the jar file to be examined for classes
      */
     protected void loadImplementationsInJar(String parent, InputStream stream, ClassLoader loader, File parentFile) throws IOException {
-        JarInputStream jarStream = null;
+        Set<String> classFiles = classFilesByLocation.get(parentFile.toString());
+
+        if (classFiles == null) {
+            classFiles = new HashSet<String>();
+            classFilesByLocation.put(parentFile.toString(), classFiles);
+            JarInputStream jarStream = null;
             if (stream instanceof JarInputStream) {
                 jarStream = (JarInputStream) stream;
             } else {
@@ -404,7 +420,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 String name = entry.getName();
                 if (name != null) {
                     if (name.endsWith(".jar")) { //in a nested jar
-                        log.debug("Found nested jar "+name);
+                        log.debug("Found nested jar " + name);
                         File unzippedParent = unzippedJars.get(parentFile);
                         if (unzippedParent == null) {
                             unzippedParent = FileUtil.unzip(parentFile);
@@ -417,15 +433,18 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                         } finally {
                             nestedJarStream.close();
                         }
-
-                    } else if (name.contains(parent)) {
-                        name = name.trim();
-                        if (!entry.isDirectory() && name.endsWith(".class")) {
-                            loadClass(name, loader);
-                        }
+                    } else if (!entry.isDirectory() && name.endsWith(".class")) {
+                        classFiles.add(name.trim());
                     }
                 }
             }
+        }
+
+        for (String name : classFiles) {
+            if (name.contains(parent)) {
+                loadClass(name, loader);
+            }
+        }
     }
 
     /**

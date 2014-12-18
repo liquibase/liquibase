@@ -251,5 +251,9 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
     		super.setAutoCommit(b);
         }
 	}
-    
+
+	@Override
+	public String getJdbcCatalogName(CatalogAndSchema schema) {
+		return "";
+	}
 }

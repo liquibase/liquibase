@@ -988,6 +988,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
 
         if (field.equals("objectQuotingStrategy")) {
+            if (this.getObjectQuotingStrategy() == null) {
+                return null;
+            }
             return this.getObjectQuotingStrategy().toString();
         }
 

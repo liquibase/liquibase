@@ -42,13 +42,28 @@ public class CommandLineUtils {
                                                 String liquibaseCatalogName,
                                                 String liquibaseSchemaName) throws DatabaseException {
         try {
+            liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
+            liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
+            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, new ClassLoaderResourceAccessor(classLoader));
-            database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
-            database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
+
+            if (!database.supportsSchemas()) {
+                if (defaultSchemaName != null && defaultCatalogName == null) {
+                    defaultCatalogName = defaultSchemaName;
+                }
+                if (liquibaseSchemaName != null && liquibaseCatalogName == null) {
+                    liquibaseCatalogName = liquibaseSchemaName;
+                }
+            }
+
+            database.setDefaultCatalogName(defaultCatalogName);
+            database.setDefaultSchemaName(defaultSchemaName);
             database.setOutputDefaultCatalog(outputDefaultCatalog);
             database.setOutputDefaultSchema(outputDefaultSchema);
-            database.setLiquibaseCatalogName(StringUtils.trimToNull(liquibaseCatalogName));
-            database.setLiquibaseSchemaName(StringUtils.trimToNull(liquibaseSchemaName));
+            database.setLiquibaseCatalogName(liquibaseCatalogName);
+            database.setLiquibaseSchemaName(liquibaseSchemaName);
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);

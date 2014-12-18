@@ -135,6 +135,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "WHERE p.owner = '" +jdbcSchemaName+"' "+
                                 "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R' " +
+                                "AND p.table_name NOT LIKE 'BIN$%' " +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
                         return executeAndExtract(sql, database);
                     } else {
@@ -265,7 +266,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName));
+                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, null));
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
                             return new ArrayList<CachedRow>();
@@ -309,7 +310,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "DATA_DEFAULT, NUM_DISTINCT, LOW_VALUE, HIGH_VALUE, DENSITY, NUM_NULLS, " +
                             "NUM_BUCKETS, LAST_ANALYZED, SAMPLE_SIZE, CHARACTER_SET_NAME, " +
                             "CHAR_COL_DECL_LENGTH, GLOBAL_STATS, USER_STATS, AVG_COL_LEN, CHAR_LENGTH, " +
-                            "CHAR_USED, V80_FMT_IMAGE, DATA_UPGRADED, HISTOGRAM, VIRTUAL_COLUMN\n" +
+                            "CHAR_USED, V80_FMT_IMAGE, DATA_UPGRADED, VIRTUAL_COLUMN\n" +
                             "FROM ALL_TAB_COLS c " +
                             "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
                             "WHERE OWNER='"+((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"' AND hidden_column='NO'";

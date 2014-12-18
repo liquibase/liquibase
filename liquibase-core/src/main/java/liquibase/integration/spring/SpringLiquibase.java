@@ -88,7 +88,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
 
 			for (Resource res : resources) {
-                returnSet.addAll(super.list(relativeTo, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive));
+				Set<String> list = super.list(relativeTo, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
+				if (list != null) {
+					returnSet.addAll(list);
+				}
 			}
 
             return returnSet;
@@ -315,8 +318,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		} finally {
-            Database database = liquibase.getDatabase();
-            if (database != null) {
+			Database database = null;
+			if (liquibase != null) {
+				database = liquibase.getDatabase();
+			}
+			if (database != null) {
                 database.close();
             }
         }

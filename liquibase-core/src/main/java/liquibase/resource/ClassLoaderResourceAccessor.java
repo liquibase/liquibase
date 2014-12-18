@@ -52,61 +52,62 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
         path = convertToPath(relativeTo, path);
 
-        URL fileUrl = classLoader.getResource(path);
-        if (fileUrl == null) {
-            return null;
-        }
+        Enumeration<URL> fileUrls = classLoader.getResources(path);
 
-        if (!fileUrl.toExternalForm().startsWith("file:")) {
-            if (fileUrl.toExternalForm().startsWith("jar:file:")
-                    || fileUrl.toExternalForm().startsWith("wsjar:file:")
-                    || fileUrl.toExternalForm().startsWith("zip:")) {
-
-                String file = fileUrl.getFile();
-                String splitPath = file.split("!")[0];
-                if (splitPath.matches("file:\\/[A-Za-z]:\\/.*")) {
-                    splitPath = splitPath.replaceFirst("file:\\/", "");
-                } else {
-                    splitPath = splitPath.replaceFirst("file:", "");
-                }
-                splitPath = URLDecoder.decode(splitPath, "UTF-8");
-                File zipfile = new File(splitPath);
-
-
-                File zipFileDir = FileUtil.unzip(zipfile);
-                if (path.startsWith("classpath:")) {
-                    path = path.replaceFirst("classpath:", "");
-                }
-                if (path.startsWith("classpath*:")) {
-                    path = path.replaceFirst("classpath\\*:", "");
-                }
-                URI fileUri = new File(zipFileDir, path).toURI();
-                fileUrl = fileUri.toURL();
-            }
-        }
-
-        try {
-            File file = new File(fileUrl.toURI());
-            if (file.exists()) {
-                Set<String> returnSet = new HashSet<String>();
-                getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
-                return returnSet;
-            }
-        } catch (URISyntaxException e) {
-            //not a local file
-        } catch (IllegalArgumentException e) {
-            //not a local file
-        }
-
-        Enumeration<URL> resources = classLoader.getResources(path);
-        if (resources == null || !resources.hasMoreElements()) {
-            return null;
-        }
         Set<String> returnSet = new HashSet<String>();
-        while (resources.hasMoreElements()) {
-            String url = resources.nextElement().toExternalForm();
-            url = url.replaceFirst("^\\Q"+path+"\\E", "");
-            returnSet.add(url);
+
+        while (fileUrls.hasMoreElements()) {
+            URL fileUrl = fileUrls.nextElement();
+            if (!fileUrl.toExternalForm().startsWith("file:")) {
+                if (fileUrl.toExternalForm().startsWith("jar:file:")
+                        || fileUrl.toExternalForm().startsWith("wsjar:file:")
+                        || fileUrl.toExternalForm().startsWith("zip:")) {
+
+                    String file = fileUrl.getFile();
+                    String splitPath = file.split("!")[0];
+                    if (splitPath.matches("file:\\/[A-Za-z]:\\/.*")) {
+                        splitPath = splitPath.replaceFirst("file:\\/", "");
+                    } else {
+                        splitPath = splitPath.replaceFirst("file:", "");
+                    }
+                    splitPath = URLDecoder.decode(splitPath, "UTF-8");
+                    File zipfile = new File(splitPath);
+
+
+                    File zipFileDir = FileUtil.unzip(zipfile);
+                    if (path.startsWith("classpath:")) {
+                        path = path.replaceFirst("classpath:", "");
+                    }
+                    if (path.startsWith("classpath*:")) {
+                        path = path.replaceFirst("classpath\\*:", "");
+                    }
+                    URI fileUri = new File(zipFileDir, path).toURI();
+                    fileUrl = fileUri.toURL();
+                }
+            }
+
+            try {
+                File file = new File(fileUrl.toURI());
+                if (file.exists()) {
+                    getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
+                }
+            } catch (URISyntaxException e) {
+                //not a local file
+            } catch (IllegalArgumentException e) {
+                //not a local file
+            }
+
+            Enumeration<URL> resources = classLoader.getResources(path);
+
+            while (resources.hasMoreElements()) {
+                String url = resources.nextElement().toExternalForm();
+                url = url.replaceFirst("^\\Q" + path + "\\E", "");
+                returnSet.add(url);
+            }
+        }
+
+        if (returnSet.size() == 0) {
+            return null;
         }
         return returnSet;
     }

@@ -29,6 +29,8 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             if ((getParameters().length > 0 && "16".equals(getParameters()[0])) || "SMALLDATETIME".equalsIgnoreCase(getRawDefinition())) {
                    return new DatabaseDataType("SMALLDATETIME");
+            } else if (getRawDefinition().toLowerCase().startsWith("datetime2")) {
+                return new DatabaseDataType(getRawDefinition());
             }
         }
         if (database instanceof InformixDatabase) {

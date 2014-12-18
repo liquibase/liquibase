@@ -67,6 +67,7 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${snakeyaml.version}</version>
+            <optional>true</optional>
         </dependency>
         
         <dependency>
@@ -150,6 +151,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

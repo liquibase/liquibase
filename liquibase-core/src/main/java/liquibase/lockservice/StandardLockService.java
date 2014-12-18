@@ -87,6 +87,7 @@ public class StandardLockService implements LockService {
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             database.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
         }
 

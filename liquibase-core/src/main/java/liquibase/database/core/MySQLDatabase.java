@@ -376,6 +376,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "OUT",
                 "OUTER",
                 "OUTFILE",
+                "PARTITION",
                 "PRECISION",
                 "PRIMARY",
                 "PROCEDURE",
