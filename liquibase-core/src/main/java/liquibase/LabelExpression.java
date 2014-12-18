@@ -130,22 +130,24 @@ public class LabelExpression {
         if (expression.startsWith("!")) {
             notExpression = true;
             expression = expression.substring(1);
+        } else if (expression.toLowerCase().startsWith("not ")) {
+            notExpression = true;
+            expression = expression.substring(4);
+        }
+
+        if (expression.trim().equals(":TRUE")) {
+            return !notExpression;
+        }
+        if (expression.trim().equals(":FALSE")) {
+            return notExpression;
         }
 
         for (String label : runtimeLabels.getLabels()) {
             if (label.equalsIgnoreCase(expression)) {
-                if (notExpression) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !notExpression;
             }
         }
-        if (notExpression) {
-            return true;
-        } else {
-            return false;
-        }
+        return notExpression;
 
 
     }
