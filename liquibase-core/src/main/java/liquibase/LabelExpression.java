@@ -26,7 +26,9 @@ public class LabelExpression {
     }
 
     public LabelExpression(String labels) {
-        labels = labels.replace("\\", "");
+        if (labels != null) {
+            labels = labels.replace("\\", "");
+        }
         parseLabelString(labels);
         originalString = labels;
     }
