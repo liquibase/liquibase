@@ -12,7 +12,7 @@ public interface Logger extends PrioritizedService {
 
     void setLogLevel(LogLevel level);
 
-    public void setLogLevel(String logLevel, String logFile);
+    void setLogLevel(String logLevel, String logFile);
 
     void severe(String message);
 
