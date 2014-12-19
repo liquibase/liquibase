@@ -18,7 +18,7 @@ public class ObjectDifferences {
     }
 
     public Set<Difference> getDifferences() {
-        return Collections.unmodifiableSet(new HashSet<Difference>(differences.values()));
+        return Collections.unmodifiableSet(new TreeSet<Difference>(differences.values()));
     }
 
     public Difference getDifference(String field) {

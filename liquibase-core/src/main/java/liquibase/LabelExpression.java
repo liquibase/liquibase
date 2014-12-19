@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class LabelExpression {
 
     private HashSet<String> labels = new HashSet<String>();
+    private String originalString = null;
 
     public LabelExpression() {
     }
@@ -25,7 +26,11 @@ public class LabelExpression {
     }
 
     public LabelExpression(String labels) {
+        if (labels != null) {
+            labels = labels.replace("\\", "");
+        }
         parseLabelString(labels);
+        originalString = labels;
     }
 
     public LabelExpression(Collection<String> labels) {
@@ -58,6 +63,9 @@ public class LabelExpression {
 
     @Override
     public String toString() {
+        if (originalString != null) {
+            return originalString;
+        }
         return "(" + StringUtils.join(new TreeSet(this.labels), "), (") + ")";
     }
 
@@ -130,22 +138,24 @@ public class LabelExpression {
         if (expression.startsWith("!")) {
             notExpression = true;
             expression = expression.substring(1);
+        } else if (expression.toLowerCase().startsWith("not ")) {
+            notExpression = true;
+            expression = expression.substring(4);
+        }
+
+        if (expression.trim().equals(":TRUE")) {
+            return !notExpression;
+        }
+        if (expression.trim().equals(":FALSE")) {
+            return notExpression;
         }
 
         for (String label : runtimeLabels.getLabels()) {
             if (label.equalsIgnoreCase(expression)) {
-                if (notExpression) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !notExpression;
             }
         }
-        if (notExpression) {
-            return true;
-        } else {
-            return false;
-        }
+        return notExpression;
 
 
     }

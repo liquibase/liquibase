@@ -921,6 +921,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 "comment",
                 "changes",
                 "rollback",
+                "labels",
                 "objectQuotingStrategy"));
 
     }
@@ -956,7 +957,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         if (field.equals("context")) {
             if (!this.getContexts().isEmpty()) {
-                return this.getContexts().toString();
+                return this.getContexts().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             } else {
                 return null;
             }
@@ -987,6 +988,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
 
         if (field.equals("objectQuotingStrategy")) {
+            if (this.getObjectQuotingStrategy() == null) {
+                return null;
+            }
             return this.getObjectQuotingStrategy().toString();
         }
 

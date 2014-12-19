@@ -58,13 +58,13 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public int update(SqlStatement sql) throws DatabaseException {
+        outputStatement(sql);
+
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return 1;
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
             return 1;
         }
-
-        outputStatement(sql);
 
         return 0;
     }

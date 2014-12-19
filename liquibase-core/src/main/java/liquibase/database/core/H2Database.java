@@ -259,4 +259,9 @@ public class H2Database extends AbstractJdbcDatabase {
     public boolean createsIndexesForForeignKeys() {
         return true;
     }
+
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        return true;
+    }
 }

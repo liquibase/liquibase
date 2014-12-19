@@ -11,9 +11,7 @@ import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +28,7 @@ public class ChangeLogParameters {
     }
 
     public ChangeLogParameters(Database database) {
-        for (Map.Entry entry : System.getProperties().entrySet()) {
+        for (Map.Entry entry : new HashSet<Map.Entry>(System.getProperties().entrySet())) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
 
