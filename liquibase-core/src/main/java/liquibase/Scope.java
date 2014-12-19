@@ -2,10 +2,13 @@ package liquibase;
 
 import liquibase.util.SmartMap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
  * It also allows new parameters to be added by extensions without affecting standard method signatures.
- * Scope objects can be created in a hierarchical manner with the {@link #createChildScope()} method.
+ * Scope objects can be created in a hierarchical manner with the {@link #createChildScope(java.util.Map)} or {@link #child(String, Object)} methods.
  * Values set in parent scopes are visible in child scopes, but values in child scopes are not visible to parent scopes.
  * Values with the same key in different scopes "mask" each other with the value furthest down the scope chain being returned.
  */
@@ -17,10 +20,16 @@ public class Scope {
     /**
      * Creates a new "root" scope.
      */
-    public Scope() {
+    public Scope(Map<String, Object> scopeValues) {
+        if (scopeValues != null) {
+            for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
+                values.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
-    protected Scope(Scope parent) {
+    protected Scope(Scope parent, Map<String, Object> scopeValues) {
+        this(scopeValues);
         this.parent = parent;
     }
 
@@ -34,8 +43,18 @@ public class Scope {
     /**
      * Creates a new scope that is a child of this scope.
      */
-    public Scope createChildScope() {
-        return new Scope(this);
+    public Scope child(Map<String, Object> scopeValues) {
+        return new Scope(this, scopeValues);
+    }
+
+    /**
+     * Creates a new scope that is a child of this scope.
+     */
+    public Scope child(String newValueKey, Object newValue) {
+        Map<String, Object> scopeValues = new HashMap<String, Object>();
+        scopeValues.put(newValueKey, newValue);
+
+        return new Scope(this, scopeValues);
     }
 
     /**
@@ -71,14 +90,4 @@ public class Scope {
         return (T) value;
 
     }
-
-    /**
-     * Sets the given key/value in this scope and returns "this". Replaces any existing key that may already exist.
-     * A key that matches a parent scope's key doesn't affect the parent scope but will mask the value for this scope.
-     */
-    public Scope set(String key, Object value) {
-        values.put(key, value);
-        return this;
-    }
-
 }
