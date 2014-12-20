@@ -81,6 +81,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 		expect(connection.getConnectionUserName()).andReturn("user").anyTimes();
 		expect(connection.getURL()).andReturn("URL").anyTimes();
 		expect(connection.getAutoCommit()).andReturn(getDatabase().getAutoCommitMode()).anyTimes();
+    expect(connection.getCatalog()).andReturn("catalog").anyTimes();
 
 		Connection sqlConnection = createMock(Connection.class);
 		Statement statement = createMock(Statement.class);
@@ -89,7 +90,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
 		expect(connection.getUnderlyingConnection()).andReturn(sqlConnection).anyTimes();
 		expect( sqlConnection.createStatement()).andReturn(statement);
-		expect( statement.executeQuery("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))")).andReturn(resultSet);
+		expect( statement.executeQuery("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('catalog', 'COLLATION'))")).andReturn(resultSet);
 		expect( resultSet.next() ).andReturn(true);
 		expect( resultSet.getMetaData() ).andReturn(metadata);
 		expect( metadata.getColumnCount() ).andReturn(1);
