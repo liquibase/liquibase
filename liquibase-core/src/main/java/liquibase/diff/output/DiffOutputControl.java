@@ -27,6 +27,8 @@ public class DiffOutputControl {
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
     private ObjectQuotingStrategy objectQuotingStrategy = null;
 
+    private ObjectChangeFilter objectChangeFilter;
+
     public DiffOutputControl() {
         includeSchema = true;
         includeCatalog = true;
@@ -124,6 +126,15 @@ public class DiffOutputControl {
         } else {
             return true;
         }
+    }
+
+    public ObjectChangeFilter getObjectChangeFilter() {
+        return objectChangeFilter;
+    }
+
+    public DiffOutputControl setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
+        this.objectChangeFilter = objectChangeFilter;
+        return this;
     }
 
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
