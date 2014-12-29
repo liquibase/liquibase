@@ -5,7 +5,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Column;
 
 import java.sql.*;
-import java.util.Collection;
+import java.sql.Date;
+import java.util.*;
 
 public abstract class JdbcUtils {
 
@@ -171,5 +172,25 @@ public abstract class JdbcUtils {
         return null;
     }
 
+    public static List<Map<String, ?>> extract(ResultSet rs) throws SQLException {
+        try {
+            List<Map<String, ?>> rows = new ArrayList<Map<String, ?>>();
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<String, Object>();
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
 
+                for (int i = 1; i <= columnCount; i++) {
+                    String key = metaData.getColumnLabel(i).toUpperCase();
+                    Object obj = JdbcUtils.getResultSetValue(rs, i);
+                    row.put(key, obj);
+                }
+                rows.add(row);
+            }
+
+            return rows;
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.ExtensibleObject;
 import liquibase.database.Database;
 
 import java.util.*;
@@ -155,6 +156,18 @@ public class StringUtils {
         List<String> list = new ArrayList<String>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
             list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
+        }
+        return join(list, delimiter);
+    }
+
+    public static String join(ExtensibleObject extensibleObject, String delimiter) {
+        return join(extensibleObject, delimiter, new ToStringFormatter());
+    }
+
+    public static String join(ExtensibleObject extensibleObject, String delimiter, StringUtilsFormatter formatter) {
+        List<String> list = new ArrayList<String>();
+        for (String attribute : extensibleObject.getAttributes()) {
+            list.add(attribute+"="+formatter.toString(extensibleObject.getAttribute(attribute, Object.class)));
         }
         return join(list, delimiter);
     }

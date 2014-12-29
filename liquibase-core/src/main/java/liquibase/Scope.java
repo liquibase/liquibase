@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * This scope object is used to hold configuration and other parameters within a call without needing complex method signatures.
  * It also allows new parameters to be added by extensions without affecting standard method signatures.
- * Scope objects can be created in a hierarchical manner with the {@link #createChildScope(java.util.Map)} or {@link #child(String, Object)} methods.
+ * Scope objects can be created in a hierarchical manner with the {@link #child(java.util.Map)} or {@link #child(String, Object)} methods.
  * Values set in parent scopes are visible in child scopes, but values in child scopes are not visible to parent scopes.
  * Values with the same key in different scopes "mask" each other with the value furthest down the scope chain being returned.
  */
@@ -55,6 +55,15 @@ public class Scope {
         scopeValues.put(newValueKey, newValue);
 
         return new Scope(this, scopeValues);
+    }
+
+
+    public  <T> T get(Enum key, Class<T> type) {
+        return get(key.name(), type);
+    }
+
+    public  <T> T get(Enum key, T defaultValue) {
+        return get(key.name(), defaultValue);
     }
 
     /**
