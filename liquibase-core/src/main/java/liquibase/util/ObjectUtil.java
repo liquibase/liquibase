@@ -128,36 +128,39 @@ public class ObjectUtil {
             if (Number.class.isAssignableFrom(targetClass)) {
                 if (object instanceof Number) {
                     Number number = (Number) object;
+                    String numberAsString = number.toString();
+                    numberAsString = numberAsString.replaceFirst("\\.0+$", ""); //remove zero decimal so int/long/etc. can parse it correctly.
+
                     if (targetClass.equals(Byte.class)) {
-                        long value = Long.valueOf(number.toString());
+                        long value = Long.valueOf(numberAsString);
                         if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Byte) number.byteValue();
                     } else if (targetClass.equals(Short.class)) {
-                        long value = Long.valueOf(number.toString());
+                        long value = Long.valueOf(numberAsString);
                         if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Short) number.shortValue();
                     } else if (targetClass.equals(Integer.class)) {
-                        long value = Long.valueOf(number.toString());
+                        long value = Long.valueOf(numberAsString);
                         if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
                             raiseOverflowException(number, targetClass);
                         }
                         return (T) (Integer) number.intValue();
                     } else if (targetClass.equals(Long.class)) {
-                        return (T) Long.valueOf(number.toString());
+                        return (T) Long.valueOf(numberAsString);
                     } else if (targetClass.equals(Float.class)) {
                         return (T) (Float) number.floatValue();
                     } else if (targetClass.equals(Double.class)) {
                         return (T) (Double) number.doubleValue();
                     } else if (targetClass.equals(BigInteger.class)) {
-                        return (T) new BigInteger(number.toString());
+                        return (T) new BigInteger(numberAsString);
                     } else if (targetClass.equals(BigDecimal.class)) {
                         // using BigDecimal(String) here, to avoid unpredictability of BigDecimal(double)
                         // (see BigDecimal javadoc for details)
-                        return (T) new BigDecimal(number.toString());
+                        return (T) new BigDecimal(numberAsString);
                     } else {
                         return raiseUnknownConversionException(object, targetClass);
                     }
