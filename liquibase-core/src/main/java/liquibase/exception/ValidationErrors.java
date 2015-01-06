@@ -12,9 +12,14 @@ import java.util.List;
 public class ValidationErrors {
 
     protected List<String> errorMessages = new ArrayList<String>();
+    protected List<String> warningMessages = new ArrayList<String>();
 
     public boolean hasErrors() {
         return errorMessages.size() > 0;
+    }
+
+    public boolean hasWarnings() {
+        return warningMessages.size() > 0;
     }
 
     public void checkRequiredField(String requiredFieldName, Object value) {
@@ -49,8 +54,17 @@ public class ValidationErrors {
         return this;
     }
 
+    public ValidationErrors addWarning(String message) {
+        warningMessages.add(message);
+        return this;
+    }
+
     public List<String> getErrorMessages() {
         return errorMessages;
+    }
+
+    public List<String> getWarningMessages() {
+        return warningMessages;
     }
 
     public ValidationErrors addAll(ValidationErrors validationErrors) {
@@ -58,6 +72,7 @@ public class ValidationErrors {
             return this;
         }
         this.errorMessages.addAll(validationErrors.getErrorMessages());
+        this.warningMessages.addAll(validationErrors.getWarningMessages());
         return this;
     }
 
@@ -65,14 +80,30 @@ public class ValidationErrors {
         for (String message : validationErrors.getErrorMessages()) {
             this.errorMessages.add(message+", "+changeSet);
         }
+        for (String message : validationErrors.getWarningMessages()) {
+            this.warningMessages.add(message+", "+changeSet);
+        }
     }
 
     @Override
     public String toString() {
-        if (getErrorMessages().size() == 0) {
-            return "No errors";
+        String string;
+        if (hasErrors()) {
+            string = "No errors";
+        } else {
+            string = StringUtils.join(getErrorMessages(), "; ");
         }
-        return StringUtils.join(getErrorMessages(), "; ");
+
+        if (hasWarnings()) {
+            string = StringUtils.join(getWarningMessages(), "; ", new StringUtils.StringUtilsFormatter() {
+                @Override
+                public String toString(Object obj) {
+                    return "WARNING: "+obj;
+                }
+            });
+        }
+
+        return string;
     }
 
     @Override

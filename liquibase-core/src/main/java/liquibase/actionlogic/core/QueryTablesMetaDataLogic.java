@@ -1,11 +1,11 @@
-package liquibase.actionlogic.core.perform;
+package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.ScopeAttributes;
 import liquibase.action.Action;
-import liquibase.action.QueryAction;
 import liquibase.action.core.QueryTablesMetaDataAction;
-import liquibase.actionlogic.ActionLogicPriority;
+import liquibase.actionlogic.ActionResult;
+import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.ActionPerformException;
@@ -14,25 +14,29 @@ import liquibase.util.JdbcUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class QueryTablesMetaDataPerformLogic extends AbstractJdbcMetaDataPerformLogic {
+public class QueryTablesMetaDataLogic extends AbstractJdbcMetaDataLogic {
 
     @Override
-    public ActionLogicPriority getPriority(Action action, Scope scope) {
+    public int getPriority(Action action, Scope scope) {
         if (action instanceof QueryTablesMetaDataAction) {
             return super.getPriority(action, scope);
         } else {
-            return ActionLogicPriority.NOT_APPLICABLE;
+            return PRIORITY_NOT_APPLICABLE;
         }
     }
 
     @Override
-    public QueryAction.Result query(QueryAction action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         AbstractJdbcDatabase database = scope.get(ScopeAttributes.database, AbstractJdbcDatabase.class);
         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
 
         QueryTablesMetaDataAction queryAction = (QueryTablesMetaDataAction) action;
         try {
-            return new QueryAction.Result(JdbcUtils.extract(underlyingConnection.getMetaData().getTables(queryAction.getCatalogName(), queryAction.getSchemaName(), queryAction.getTableName(), new String[] {"TABLE"})));
+            return new RowBasedQueryResult(JdbcUtils.extract(underlyingConnection.getMetaData().getTables(
+                    queryAction.getAttribute(QueryTablesMetaDataAction.Attr.catalogName, String.class),
+                    queryAction.getAttribute(QueryTablesMetaDataAction.Attr.schemaName, String.class),
+                    queryAction.getAttribute(QueryTablesMetaDataAction.Attr.tableName, String.class),
+                    new String[]{"TABLE"})));
         } catch (SQLException e) {
             throw new ActionPerformException(e);
         }

@@ -1,19 +1,15 @@
 package liquibase.action.core;
 
-import liquibase.AbstractExtensibleObject;
-import liquibase.action.ExecuteAction;
-import liquibase.util.StringUtils;
+import liquibase.action.AbstractAction;
 
-public class DropSequenceAction extends AbstractExtensibleObject implements ExecuteAction {
+/**
+ * Action to drop an existing sequence.
+ */
+public class DropSequenceAction extends AbstractAction {
 
-    public static enum Attributes {
+    public static enum Attr {
         catalogName,
         schemaName,
         sequenceName,
-    }
-
-    @Override
-    public String describe() {
-        return "drop sequence "+StringUtils.join(this, ",")+")";
     }
 }

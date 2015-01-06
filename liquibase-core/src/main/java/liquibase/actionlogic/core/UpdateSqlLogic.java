@@ -1,12 +1,12 @@
-package liquibase.actionlogic.core.perform;
+package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.ScopeAttributes;
+import liquibase.action.AbstractSqlAction;
 import liquibase.action.Action;
 import liquibase.action.UpdateAction;
-import liquibase.action.core.UpdateSqlAction;
-import liquibase.actionlogic.ActionLogicPriority;
-import liquibase.actionlogic.UpdateActionPerformLogic;
+import liquibase.actionlogic.ActionResult;
+import liquibase.actionlogic.UpdateResult;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -16,26 +16,26 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class UpdateSqlPerformLogic extends AbstractSqlPerformLogic implements UpdateActionPerformLogic {
+public class UpdateSqlLogic extends AbstractSqlLogic {
 
     @Override
-    public ActionLogicPriority getPriority(Action action, Scope scope) {
-        if (action instanceof UpdateSqlAction) {
+    public int getPriority(Action action, Scope scope) {
+        if (action instanceof AbstractSqlAction && action instanceof UpdateAction) {
             return super.getPriority(action, scope);
         } else {
-            return ActionLogicPriority.NOT_APPLICABLE;
+            return PRIORITY_NOT_APPLICABLE;
         }
     }
 
     @Override
-    public UpdateAction.Result update(UpdateAction action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         try {
             AbstractJdbcDatabase database = scope.get(ScopeAttributes.database, AbstractJdbcDatabase.class);
             DatabaseConnection connection = database.getConnection();
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();
             Statement stmt = jdbcConnection.createStatement();
-            return new UpdateAction.Result(stmt.executeUpdate(((UpdateSqlAction) action).getSql()));
+            return new UpdateResult(stmt.executeUpdate(((AbstractSqlAction) action).getAttribute(AbstractSqlAction.Attr.sql, String.class)));
 
         } catch (SQLException e) {
             throw new ActionPerformException(e);

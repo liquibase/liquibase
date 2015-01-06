@@ -1,30 +1,23 @@
 package liquibase.action.core;
 
-import liquibase.AbstractExtensibleObject;
+import liquibase.action.AbstractAction;
+import liquibase.action.QueryAction;
 
-public class QueryTablesMetaDataAction extends AbstractExtensibleObject {
+/**
+ * Action to find all existing tables.
+ * If "catalogName", "schemaName", and/or "tableName" attributes are set, the returned columns should only include ones that match the set values.
+ */
+public class QueryTablesMetaDataAction extends AbstractAction implements QueryAction {
 
-    public static enum Attributes {
+    public static enum Attr {
         catalogName,
         schemaName,
         tableName
     }
 
     public QueryTablesMetaDataAction(String catalogName, String schemaName, String tableName) {
-        setAttribute(Attributes.catalogName, catalogName);
-        setAttribute(Attributes.schemaName, schemaName);
-        setAttribute(Attributes.tableName, tableName);
-    }
-
-    public String getCatalogName() {
-        return getAttribute(Attributes.catalogName, String.class);
-    }
-
-    public String getSchemaName() {
-        return getAttribute(Attributes.schemaName, String.class);
-    }
-
-    public String getTableName() {
-        return getAttribute(Attributes.tableName, String.class);
+        setAttribute(Attr.catalogName, catalogName);
+        setAttribute(Attr.schemaName, schemaName);
+        setAttribute(Attr.tableName, tableName);
     }
 }

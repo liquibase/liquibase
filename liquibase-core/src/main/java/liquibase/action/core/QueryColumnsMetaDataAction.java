@@ -1,10 +1,15 @@
 package liquibase.action.core;
 
-import liquibase.AbstractExtensibleObject;
+import liquibase.action.AbstractAction;
+import liquibase.action.QueryAction;
 
-public class QueryColumnsMetaDataAction extends AbstractExtensibleObject {
+/**
+ * Action to find all existing columns.
+ * If "catalogName", "schemaName", "tableName" and/or "columnName" attributes are set, the returned columns should only include ones that match the set values.
+ */
+public class QueryColumnsMetaDataAction extends AbstractAction implements QueryAction {
 
-    public static enum Attributes {
+    public static enum Attr {
         catalogName,
         schemaName,
         tableName,
@@ -12,25 +17,9 @@ public class QueryColumnsMetaDataAction extends AbstractExtensibleObject {
     }
 
     public QueryColumnsMetaDataAction(String catalogName, String schemaName, String tableName, String columnName) {
-        setAttribute(Attributes.catalogName, catalogName);
-        setAttribute(Attributes.schemaName, schemaName);
-        setAttribute(Attributes.tableName, tableName);
-        setAttribute(Attributes.columnName, tableName);
-    }
-
-    public String getCatalogName() {
-        return getAttribute(Attributes.catalogName, String.class);
-    }
-
-    public String getSchemaName() {
-        return getAttribute(Attributes.schemaName, String.class);
-    }
-
-    public String getTableName() {
-        return getAttribute(Attributes.tableName, String.class);
-    }
-
-    public String getColumnName() {
-        return getAttribute(Attributes.columnName, String.class);
+        setAttribute(Attr.catalogName, catalogName);
+        setAttribute(Attr.schemaName, schemaName);
+        setAttribute(Attr.tableName, tableName);
+        setAttribute(Attr.columnName, columnName);
     }
 }

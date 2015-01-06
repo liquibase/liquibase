@@ -1,0 +1,25 @@
+package liquibase.action;
+
+import liquibase.AbstractExtensibleObject;
+import liquibase.action.Action;
+import liquibase.util.StringUtils;
+
+/**
+ * Convenience standard implementation of {@link liquibase.action.Action}.
+ * If your class is an update or query, be sure to also implement {@link liquibase.action.UpdateAction} or {@link liquibase.action.UpdateAction}.
+ */
+public abstract class AbstractAction extends AbstractExtensibleObject implements Action {
+
+    /**
+     * Standard implementation uses reflection to list out the set properties on this object.
+     */
+    @Override
+    public String describe() {
+        String name = getClass().getSimpleName();
+        name = name.replaceFirst("Action$", "");
+        name = name.replaceAll("([A-Z])", " $1");
+        name = name.trim().toLowerCase();
+        return name+"("+ StringUtils.join(this, ",")+")";
+    }
+
+}

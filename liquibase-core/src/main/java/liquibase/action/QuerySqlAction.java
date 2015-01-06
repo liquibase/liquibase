@@ -1,8 +1,8 @@
-package liquibase.action.core;
+package liquibase.action;
 
-import liquibase.action.QueryAction;
-import liquibase.action.UpdateAction;
-
+/**
+ * Describes a SQL-based query action.
+ */
 public class QuerySqlAction extends AbstractSqlAction implements QueryAction {
     public QuerySqlAction(String sql) {
         super(sql);

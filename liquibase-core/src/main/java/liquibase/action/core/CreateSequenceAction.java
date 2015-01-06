@@ -1,12 +1,13 @@
 package liquibase.action.core;
 
-import liquibase.AbstractExtensibleObject;
-import liquibase.action.ExecuteAction;
-import liquibase.util.StringUtils;
+import liquibase.action.AbstractAction;
 
-public class CreateSequenceAction extends AbstractExtensibleObject implements ExecuteAction {
+/**
+ * Action to create a new sequence.
+ */
+public class CreateSequenceAction extends AbstractAction {
 
-    public static enum Attributes {
+    public static enum Attr {
         catalogName,
         schemaName,
         sequenceName,
@@ -17,10 +18,5 @@ public class CreateSequenceAction extends AbstractExtensibleObject implements Ex
         ordered,
         cycle,
         cacheSize
-    }
-
-    @Override
-    public String describe() {
-        return "create sequence "+StringUtils.join(this, ",")+")";
     }
 }
