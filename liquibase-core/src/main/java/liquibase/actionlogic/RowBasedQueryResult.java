@@ -12,7 +12,8 @@ import java.util.*;
 public class RowBasedQueryResult extends QueryResult {
     private List<Row> resultSet;
 
-    public RowBasedQueryResult(Object singleValue) {
+    public RowBasedQueryResult(Object singleValue, String message) {
+        super(message);
         if (singleValue == null) {
             this.resultSet = Collections.unmodifiableList(new ArrayList<Row>());
         } else if (singleValue instanceof List) {
@@ -25,7 +26,12 @@ public class RowBasedQueryResult extends QueryResult {
         }
     }
 
-    public RowBasedQueryResult(List resultSet) {
+    public RowBasedQueryResult(Object singleValue) {
+        this(singleValue, null);
+    }
+
+    public RowBasedQueryResult(List resultSet, String message) {
+        super(message);
         if (resultSet == null || resultSet.size() == 0) {
             this.resultSet = Collections.unmodifiableList(new ArrayList<Row>());
         } else {
@@ -39,6 +45,11 @@ public class RowBasedQueryResult extends QueryResult {
             this.resultSet = Collections.unmodifiableList((List<Row>) resultSet);
         }
     }
+
+    public RowBasedQueryResult(List resultSet) {
+        this(resultSet, null);
+    }
+
 
     /**
      * Return a single object of the given type. Throws exception if there are more than one row in this QueryResult or

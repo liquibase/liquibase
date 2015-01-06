@@ -22,4 +22,24 @@ public abstract class AbstractAction extends AbstractExtensibleObject implements
         return name+"("+ StringUtils.join(this, ",")+")";
     }
 
+    /**
+     * Default implementation compares the output of the {@link #describe()} method.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Action)) {
+            return false;
+        }
+        return this.describe().equals(((Action) obj).describe());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.describe().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return this.describe();
+    }
 }

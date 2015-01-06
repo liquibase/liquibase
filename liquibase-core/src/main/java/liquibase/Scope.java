@@ -1,7 +1,9 @@
 package liquibase;
 
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.SmartMap;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +15,10 @@ import java.util.Map;
  * Values with the same key in different scopes "mask" each other with the value furthest down the scope chain being returned.
  */
 public class Scope {
+
+    public static enum Attr {
+        database
+    }
 
     private Scope parent;
     private SmartMap values = new SmartMap();
@@ -97,6 +103,30 @@ public class Scope {
             return defaultValue;
         }
         return (T) value;
+    }
 
+    /**
+     * Looks up the singleton object of the given type. If the singleton has not been created yet, it will be instantiated.
+     * The singleton is a singleton based on the root scope and the same object will be returned for all child scopes of the root.
+     */
+    public <T> T getSingleton(Class<T> type) {
+        if (getParent() != null) {
+            return getParent().getSingleton(type);
+        }
+
+        String key = type.getName();
+        T singleton = get(key, type);
+        if (singleton == null) {
+            try {
+                Constructor<T> constructor = type.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                singleton = constructor.newInstance();
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+
+            values.put(key, singleton);
+        }
+        return singleton;
     }
 }

@@ -8,6 +8,13 @@ import java.util.List;
  */
 public abstract class QueryResult extends ActionResult {
 
+    public QueryResult() {
+    }
+
+    public QueryResult(String message) {
+        super(message);
+    }
+
     /**
      * Return a single object of the given type.
      */

@@ -6,7 +6,7 @@ import liquibase.AbstractExtensibleObject;
  * Standard base class for sql-based actions.
  * Normally subclass from the more specific {@link UpdateSqlAction}, {@link QuerySqlAction} and {@link ExecuteSqlAction}.
  */
-public abstract class AbstractSqlAction extends AbstractExtensibleObject implements Action {
+public abstract class AbstractSqlAction extends AbstractAction {
 
     public static enum Attr {
         sql,

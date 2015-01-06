@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.ScopeAttributes;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateSequenceAction;
@@ -26,7 +25,7 @@ public class CreateSequenceLogic extends AbstractActionLogic {
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
-        Database database = scope.get(ScopeAttributes.database, Database.class);
+        Database database = scope.get(Scope.Attr.database, Database.class);
         if (!database.supportsAutoIncrement()) {
             errors.addError("Database "+database.getShortName()+" does not support sequences");
         }

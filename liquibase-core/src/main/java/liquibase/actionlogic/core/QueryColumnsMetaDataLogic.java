@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.ScopeAttributes;
 import liquibase.action.Action;
 import liquibase.action.core.QueryColumnsMetaDataAction;
 import liquibase.actionlogic.ActionResult;
@@ -27,7 +26,7 @@ public class QueryColumnsMetaDataLogic extends AbstractJdbcMetaDataLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        AbstractJdbcDatabase database = scope.get(ScopeAttributes.database, AbstractJdbcDatabase.class);
+        AbstractJdbcDatabase database = scope.get(Scope.Attr.database, AbstractJdbcDatabase.class);
         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
 
         QueryColumnsMetaDataAction queryAction = (QueryColumnsMetaDataAction) action;

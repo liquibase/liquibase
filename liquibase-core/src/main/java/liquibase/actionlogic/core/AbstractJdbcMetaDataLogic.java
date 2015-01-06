@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.ScopeAttributes;
 import liquibase.action.Action;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.database.AbstractJdbcDatabase;
@@ -11,7 +10,7 @@ public abstract class AbstractJdbcMetaDataLogic extends AbstractActionLogic {
 
     @Override
     public int getPriority(Action action, Scope scope) {
-        Database database = scope.get(ScopeAttributes.database, Database.class);
+        Database database = scope.get(Scope.Attr.database, Database.class);
         if (database != null && database instanceof AbstractJdbcDatabase) {
             return PRIORITY_DEFAULT;
         }

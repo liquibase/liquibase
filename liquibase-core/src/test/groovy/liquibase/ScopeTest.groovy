@@ -1,5 +1,6 @@
 package liquibase
 
+import liquibase.actionlogic.ActionLogicFactory
 import spock.lang.Specification
 
 class ScopeTest extends Specification {
@@ -75,6 +76,21 @@ class ScopeTest extends Specification {
         grandScope1.get("g1-1", "def") == "g1.1"
         grandScope1.get("override", "def") == "g1"
         grandScope1.get("invalid", "def") == "def"
+    }
+
+    def "getSingleton"() {
+        when:
+        def rootScope = new Scope(new HashMap<String, Object>())
+        def childScope = rootScope.child(new HashMap<String, Object>())
+        def grandScope1 = childScope.child(new HashMap<String, Object>())
+        def grandScope2 = childScope.child(new HashMap<String, Object>())
+
+        def actionLogicFactory = grandScope2.getSingleton(ActionLogicFactory)
+
+        then:
+        grandScope1.getSingleton(ActionLogicFactory).is(actionLogicFactory)
+        childScope.getSingleton(ActionLogicFactory).is(actionLogicFactory)
+        rootScope.getSingleton(ActionLogicFactory).is(actionLogicFactory)
     }
 
 }

@@ -21,6 +21,9 @@ public abstract class ActionResult {
         this.message = message;
     }
 
+    /**
+     * Returns the message (if any) associated with this result.
+     */
     public String getMessage() {
         return message;
     }

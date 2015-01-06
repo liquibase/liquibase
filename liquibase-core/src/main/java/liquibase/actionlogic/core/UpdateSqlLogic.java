@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.ScopeAttributes;
 import liquibase.action.AbstractSqlAction;
 import liquibase.action.Action;
 import liquibase.action.UpdateAction;
@@ -30,7 +29,7 @@ public class UpdateSqlLogic extends AbstractSqlLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         try {
-            AbstractJdbcDatabase database = scope.get(ScopeAttributes.database, AbstractJdbcDatabase.class);
+            AbstractJdbcDatabase database = scope.get(Scope.Attr.database, AbstractJdbcDatabase.class);
             DatabaseConnection connection = database.getConnection();
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();

@@ -7,6 +7,7 @@ import liquibase.ExtensibleObject;
  * If the action is more of a query or update, implement {@link liquibase.action.QueryAction} or {@link liquibase.action.UpdateAction} instead.
  * Implementations should not actually contain the logic to perform the action, they only describe it. The logic to perform the action goes in implementations of {@link liquibase.actionlogic.ActionLogic}.
  * For ease of implementation, consider subclassing {@link AbstractAction}.
+ * Actions are executed using {@link liquibase.actionlogic.ActionExecutor}
  */
 public interface Action extends ExtensibleObject {
 
