@@ -455,11 +455,11 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         assert ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applyToRollback
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).value == " partitioned by stuff"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contexts.toString() == "(prod), (qa)"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contexts.toString() == "prod, qa"
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).applicableDbms == null
 
         ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).value == " engine innodb"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contexts.toString() == "(prod)"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contexts.toString() == "prod"
         that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).getApplicableDbms(), containsInAnyOrder(["mysql"].toArray()))
 
         and: "utf8 is read correctly"
