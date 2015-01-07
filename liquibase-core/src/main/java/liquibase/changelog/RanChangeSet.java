@@ -17,6 +17,8 @@ public class RanChangeSet {
     private ChangeSet.ExecType execType;
     private String description;
     private String comments;
+    private int orderExecuted;
+
 
     public RanChangeSet(ChangeSet changeSet) {
         this(changeSet, null);
@@ -101,7 +103,15 @@ public class RanChangeSet {
         this.comments = comments;
     }
 
-    @Override
+    public int getOrderExecuted() {
+		return orderExecuted;
+	}
+
+	public void setOrderExecuted(int orderExecuted) {
+		this.orderExecuted = orderExecuted;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
