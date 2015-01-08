@@ -1380,13 +1380,22 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            String sequenceName = databaseFunction.getValue();
+            if (!sequenceNextValueFunction.contains("'")) {
+                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+            }
+            return String.format(sequenceNextValueFunction, sequenceName);
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+
+            String sequenceName = databaseFunction.getValue();
+            if (!sequenceCurrentValueFunction.contains("'")) {
+                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+            }
+            return String.format(sequenceCurrentValueFunction, sequenceName);
         } else {
             return databaseFunction.getValue();
         }
