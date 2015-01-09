@@ -34,6 +34,11 @@ public interface ExtensibleObject {
     <T> T getAttribute(String attribute, T defaultValue);
 
 
+    /**
+     * Works like {@link #getAttribute(String, Class)} but uses the Enum name as the attribute name.
+     * By defining an enum containing the possible attributes for an object, you protect yourself from accidental misspellings and provide some level of intellisense.
+     * By convention, Liquibase creates an "Attr" enum in extensible objects containing the standard list of attributes. See {@link liquibase.action.AbstractSqlAction.Attr} for an example.
+     */
     <T> T getAttribute(Enum attribute, Class<T> type);
 
     <T> T getAttribute(Enum attribute, T defaultValue);

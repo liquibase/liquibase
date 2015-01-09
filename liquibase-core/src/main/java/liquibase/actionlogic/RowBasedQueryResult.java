@@ -1,8 +1,10 @@
 package liquibase.actionlogic;
 
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -12,42 +14,46 @@ import java.util.*;
 public class RowBasedQueryResult extends QueryResult {
     private List<Row> resultSet;
 
-    public RowBasedQueryResult(Object singleValue, String message) {
+    /**
+     * Creates a new instance based on the given result.
+     * <li>If the result is null or empty, and empty results is created.</li>
+     * <li>If the result is a single object, it is populated with a single-row result containing the value at key "value" </li>
+     * <li>If the result is a collection of Maps, it stored as a collection with each Map converted to a Row</li>
+     * <li>If the result is a collection of Non-Maps, it stored as a collection with each row containing a single-key Row with the value stored at key "value"</li>
+     */
+    public RowBasedQueryResult(Object result, String message) {
         super(message);
-        if (singleValue == null) {
+        if (result == null) {
             this.resultSet = Collections.unmodifiableList(new ArrayList<Row>());
-        } else if (singleValue instanceof List) {
-            this.resultSet = Collections.unmodifiableList((List) singleValue);
-        } else {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("value", singleValue);
-
-            this.resultSet = Collections.unmodifiableList(Arrays.asList(new Row(map)));
+            return;
         }
+
+        if (result instanceof ResultSet) {
+            throw new UnexpectedLiquibaseException("Cannot pass ResultSet directly into RowBasedQueryResult. Use JdbcUtils.extract() to create a disconnected collection to pass in.");
+        }
+
+        if (!(result instanceof Collection)) {
+            result = Arrays.asList(result);
+        }
+
+        List<Row> convertedResultSet = new ArrayList<Row>();
+        for (Object obj : (Collection) result) {
+            if (obj instanceof Row) {
+                convertedResultSet.add((Row) obj);
+            } else if (obj instanceof Map) {
+                convertedResultSet.add(new Row((Map) obj));
+            } else {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("value", obj);
+                convertedResultSet.add(new Row(map));
+            }
+            resultSet = convertedResultSet;
+        }
+        this.resultSet = Collections.unmodifiableList(convertedResultSet);
     }
 
     public RowBasedQueryResult(Object singleValue) {
         this(singleValue, null);
-    }
-
-    public RowBasedQueryResult(List resultSet, String message) {
-        super(message);
-        if (resultSet == null || resultSet.size() == 0) {
-            this.resultSet = Collections.unmodifiableList(new ArrayList<Row>());
-        } else {
-            if (resultSet.get(0) instanceof Map) {
-                List<Row> convertedResultSet = new ArrayList<Row>();
-                for (Map map : (List<Map>) resultSet) {
-                    convertedResultSet.add(new Row(map));
-                }
-                resultSet = convertedResultSet;
-            }
-            this.resultSet = Collections.unmodifiableList((List<Row>) resultSet);
-        }
-    }
-
-    public RowBasedQueryResult(List resultSet) {
-        this(resultSet, null);
     }
 
 
@@ -93,7 +99,7 @@ public class RowBasedQueryResult extends QueryResult {
      * Returns an empty collection if this QueryResult was originally passed a null collection.
      */
     public List<Row> toList() throws IllegalArgumentException {
-        return resultSet;
+        return Collections.unmodifiableList(resultSet);
     }
 
     /**
@@ -105,7 +111,7 @@ public class RowBasedQueryResult extends QueryResult {
             return null;
         }
         if (resultSet.size() > 1) {
-            throw new IllegalArgumentException("Results contained "+resultSet.size()+" rows");
+            throw new IllegalArgumentException("Results contained " + resultSet.size() + " rows");
         }
         return resultSet.get(0);
     }
@@ -143,12 +149,12 @@ public class RowBasedQueryResult extends QueryResult {
          * Throws an exception if the row has more than one value.
          * Will convert the requiredType if needed via {@link liquibase.util.ObjectUtil#convert(Object, Class)}
          */
-        public  <T> T getSingleValue(Class<T> type) throws IllegalArgumentException {
+        public <T> T getSingleValue(Class<T> type) throws IllegalArgumentException {
             if (data.size() == 0) {
                 return null;
             }
             if (data.size() > 1) {
-                throw new IllegalArgumentException("Row contained "+data.size()+" values");
+                throw new IllegalArgumentException("Row contained " + data.size() + " values");
             }
 
             return get(data.firstKey(), type);
@@ -159,12 +165,12 @@ public class RowBasedQueryResult extends QueryResult {
          * Throws an exception if the row has more than one value.
          * Will convert the requiredType if needed via {@link liquibase.util.ObjectUtil#convert(Object, Class)}
          */
-        public  <T> T getSingleValue(T defaultValue) throws IllegalArgumentException {
+        public <T> T getSingleValue(T defaultValue) throws IllegalArgumentException {
             if (data.size() == 0) {
                 return null;
             }
             if (data.size() > 1) {
-                throw new IllegalArgumentException("Row contained "+data.size()+" values");
+                throw new IllegalArgumentException("Row contained " + data.size() + " values");
             }
 
             return get(data.firstKey(), defaultValue);
@@ -176,10 +182,11 @@ public class RowBasedQueryResult extends QueryResult {
          * Returns null if the column does not exist in the row.
          */
         public <T> T get(String column, Class<T> type) {
-            if (!data.containsKey(column)) {
+            Object object = data.get(column);
+            if (object == null) {
                 return null;
             }
-            return ObjectUtil.convert(data.get(column), type);
+            return ObjectUtil.convert(object, type);
         }
 
         /**
@@ -201,7 +208,7 @@ public class RowBasedQueryResult extends QueryResult {
 
         @Override
         public String toString() {
-            return "["+ StringUtils.join(data, ", ", new StringUtils.ToStringFormatter())+"]";
+            return "[" + StringUtils.join(data, ", ", new StringUtils.ToStringFormatter()) + "]";
         }
 
         @Override
@@ -211,7 +218,14 @@ public class RowBasedQueryResult extends QueryResult {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof Row && this.toString().equals(obj.toString());
+            if (!(obj instanceof Row)) {
+                return false;
+            }
+            if (((Row) obj).size() != this.size()) {
+                return false;
+            }
+
+            return this.toString().equals(obj.toString());
         }
     }
 }
