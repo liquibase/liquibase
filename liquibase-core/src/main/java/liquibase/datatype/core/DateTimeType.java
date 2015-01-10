@@ -6,6 +6,8 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -17,6 +19,8 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        boolean allowFractional = supportsFractionalDigits(database);
+
         if (database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
@@ -68,10 +72,19 @@ public class DateTimeType extends LiquibaseDataType {
         }
         if (database instanceof PostgresDatabase) {
             String rawDefinition = getRawDefinition().toLowerCase();
+            Object[] params = getParameters();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
-                return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
+                if (params.length == 0 || !allowFractional) {
+                    return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
+                } else {
+                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITH TIME ZONE");
+                }
             } else {
-                return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
+                if (params.length == 0 || !allowFractional) {
+                    return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
+                } else {
+                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITHOUT TIME ZONE");
+                }
             }
         }
         if (database instanceof SQLiteDatabase) {
@@ -79,21 +92,76 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            boolean supportsParameters = true;
-            try {
-                supportsParameters = database.getDatabaseMajorVersion() >= 5
-                        && database.getDatabaseMinorVersion() >= 6
-                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
-            } catch (Exception ignore) {
-                //assume supports parameters
-            }
-            if (supportsParameters && getParameters().length > 0 && Integer.valueOf(getParameters()[0].toString()) <= 6) {
-                return new DatabaseDataType(getName(), getParameters());
-            } else {
+            if (getParameters().length == 0 || !allowFractional) {
+                // fast out...
                 return new DatabaseDataType(getName());
-            }        }
+            }
+
+            Object[] params = getParameters();
+            Integer precision = Integer.valueOf(params[0].toString());
+            if (precision > 6) {
+                LogFactory.getInstance().getLog().warning(
+                        "MySQL does not support a timestamp precision"
+                                + " of '" + precision + "' - resetting to"
+                                + " the maximum of '6'");
+                params = new Object[] {6};
+            }
+            return new DatabaseDataType(getName(), params);
+        }
 
         return new DatabaseDataType(getName());
+    }
+
+    protected boolean supportsFractionalDigits(Database database) {
+        if (database.getConnection() == null) {
+            // if no connection is there we cannot do anything...
+            LogFactory.getInstance().getLog().warning(
+                    "No database connection available - specified"
+                            + " DATETIME/TIMESTAMP precision will be tried");
+            return true;
+        }
+
+        try {
+            String minimumVersion = "0";
+            int major = database.getDatabaseMajorVersion();
+            int minor = database.getDatabaseMinorVersion();
+            int patch = 0;
+
+            if (MySQLDatabase.class.isInstance(database)) {
+                patch = ((MySQLDatabase) database).getDatabasePatchVersion();
+
+                // MySQL 5.6.4 introduced fractional support...
+                minimumVersion = "5.6.4";
+            } else if (PostgresDatabase.class.isInstance(database)) {
+                // PostgreSQL 7.2 introduced fractional support...
+                minimumVersion = "7.2";
+            }
+
+            return isMinimumVersion(minimumVersion, major, minor, patch);
+        } catch (DatabaseException x) {
+            LogFactory.getInstance().getLog().warning(
+                    "Unable to determine exact database server version"
+                            + " - specified TIMESTAMP precision"
+                            + " will not be set: ", x);
+            return false;
+        }
+    }
+
+    protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
+        String[] parts = minimumVersion.split("\\.", 3);
+        int minMajor = Integer.valueOf(parts[0]);
+        int minMinor = parts.length > 1 ? Integer.valueOf(parts[1]) : 0;
+        int minPatch = parts.length > 2 ? Integer.valueOf(parts[2]) : 0;
+        
+        if (minMajor > major) {
+            return false;
+        }
+
+        if (minMajor == major && minMinor > minor) {
+            return false;
+        }
+
+        return !(minMajor == major && minMinor == minor && minPatch > patch);
     }
 
     @Override
