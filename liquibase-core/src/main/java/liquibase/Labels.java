@@ -50,6 +50,10 @@ public class Labels {
         return this.labels.add(label.toLowerCase());
     }
 
+    public boolean remove(String label) {
+      return this.labels.remove(label.toLowerCase());
+    }
+
     @Override
     public String toString() {
         return StringUtils.join(new TreeSet(this.labels),",");
