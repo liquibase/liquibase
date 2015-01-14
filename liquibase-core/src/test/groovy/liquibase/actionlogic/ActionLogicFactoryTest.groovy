@@ -4,24 +4,38 @@ import liquibase.Scope
 import liquibase.action.UpdateSqlAction
 import liquibase.action.core.CreateSequenceAction
 import liquibase.action.core.DropSequenceAction
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 
 class ActionLogicFactoryTest extends Specification {
 
     ActionLogicFactory emptyLogicFactory
+    static ActionLogicFactory fullLogicFactory
+    Scope testScope;
 
     def setup() {
-        emptyLogicFactory = new ActionLogicFactory() {
+        testScope = new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>(["resourceAccessor": new JUnitResourceAccessor()]))
+
+        emptyLogicFactory = new ActionLogicFactory(testScope) {
             @Override
             protected Class<? extends ActionLogic>[] getActionLogicClasses() {
                 return new Class[0];
             }
+
+            @Override
+            protected TemplateActionLogic[] getTemplateActionLogic(Scope scope) {
+                return new TemplateActionLogic[0];
+            }
+        }
+
+        if (fullLogicFactory == null) {
+            fullLogicFactory = new ActionLogicFactory(testScope)
         }
     }
 
     def "getActionLogic when empty"() {
         expect:
-        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new HashMap<String, Object>())) == null
+        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) == null
     }
 
     def "getActionLogic"() {
@@ -34,19 +48,19 @@ class ActionLogicFactoryTest extends Specification {
         emptyLogicFactory.register(new MockActionLogic("drop 1", 1, DropSequenceAction))
 
         then:
-        emptyLogicFactory.getActionLogic(new CreateSequenceAction(), new Scope(new HashMap<String, Object>())).toString() == "Mock action logic 'create 2'"
-        emptyLogicFactory.getActionLogic(new DropSequenceAction(), new Scope(new HashMap<String, Object>())).toString() == "Mock action logic 'drop 3'"
-        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new HashMap<String, Object>())) == null
+        emptyLogicFactory.getActionLogic(new CreateSequenceAction(), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())).toString() == "Mock action logic 'create 2'"
+        emptyLogicFactory.getActionLogic(new DropSequenceAction(), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())).toString() == "Mock action logic 'drop 3'"
+        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) == null
 
     }
 
-    def "Automatically finds action classes .logic files"() {
+    def "Automatically finds action classes"() {
         expect:
-        new ActionLogicFactory().logic.size() == 0
+        fullLogicFactory.logic.size() > 0
     }
 
     def "Automatically registers TemplateActionLogic instances based on .logic files"() {
         expect:
-        new ActionLogicFactory().logic.findAll({it.getClass() == TemplateActionLogic}).size() > 0
+        fullLogicFactory.logic.findAll({it.getClass() == TemplateActionLogic}).size() > 0
     }
 }

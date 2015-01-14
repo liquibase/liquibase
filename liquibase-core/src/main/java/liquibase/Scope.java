@@ -1,7 +1,9 @@
 package liquibase;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.SmartMap;
+import liquibase.util.Validate;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -17,7 +19,7 @@ import java.util.Map;
 public class Scope {
 
     public static enum Attr {
-        database
+        resourceAccessor, database
     }
 
     private Scope parent;
@@ -26,17 +28,19 @@ public class Scope {
     /**
      * Creates a new "root" scope.
      */
-    public Scope(Map<String, Object> scopeValues) {
+    public Scope(ResourceAccessor resourceAccessor, Map<String, Object> scopeValues) {
+        this((Scope) null, scopeValues);
+        Validate.notNull(resourceAccessor, "ResourceAccessor not set");
+        this.values.put(Attr.resourceAccessor.name(), resourceAccessor);
+    }
+
+    protected Scope(Scope parent, Map<String, Object> scopeValues) {
+        this.parent = parent;
         if (scopeValues != null) {
             for (Map.Entry<String, Object> entry : scopeValues.entrySet()) {
                 values.put(entry.getKey(), entry.getValue());
             }
         }
-    }
-
-    protected Scope(Scope parent, Map<String, Object> scopeValues) {
-        this(scopeValues);
-        this.parent = parent;
     }
 
     /**
@@ -118,9 +122,9 @@ public class Scope {
         T singleton = get(key, type);
         if (singleton == null) {
             try {
-                Constructor<T> constructor = type.getDeclaredConstructor();
+                Constructor<T> constructor = type.getDeclaredConstructor(Scope.class);
                 constructor.setAccessible(true);
-                singleton = constructor.newInstance();
+                singleton = constructor.newInstance(this);
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }

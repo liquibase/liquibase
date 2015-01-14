@@ -4,6 +4,7 @@ import liquibase.Scope
 import liquibase.action.MockAction
 import liquibase.action.QuerySqlAction
 import liquibase.sdk.database.MockDatabase
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -15,8 +16,8 @@ class TemplateActionLogicTest extends Specification {
         def logic = new TemplateActionLogic(spec)
 
         then:
-        logic.getPriority(action, new Scope(new HashMap<String, Object>())) == priority
-        logic.getPriority(new QuerySqlAction("select * from dual"), new Scope(new HashMap<String, Object>())) == -1
+        logic.getPriority(action, new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) == priority
+        logic.getPriority(new QuerySqlAction("select * from dual"), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) == -1
 
         where:
         spec                                                  | action           | priority
@@ -30,7 +31,7 @@ class TemplateActionLogicTest extends Specification {
         def logic = new TemplateActionLogic(">priority 1\n>action:liquibase.action.MockAction\n" + spec)
 
         then:
-        logic.validate(new MockAction(action), new Scope(["database": new MockDatabase()])).toString() == expected
+        logic.validate(new MockAction(action), new Scope(new JUnitResourceAccessor(), ["database": new MockDatabase()])).toString() == expected
 
         where:
         spec                                  | action                  | expected
@@ -67,7 +68,7 @@ class TemplateActionLogicTest extends Specification {
     def "parse errors from bad template"() {
         when:
         def action = new MockAction(new HashMap<String, Object>())
-        def scope = new Scope(new HashMap<String, Object>());
+        def scope = new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>());
         new TemplateActionLogic(">priority:1\n>action:liquibase.action.MockAction\n" + template).fillTemplate(action, scope)
 
         then:
@@ -92,7 +93,7 @@ class TemplateActionLogicTest extends Specification {
         ])
 
 
-        def scope = new Scope([
+        def scope = new Scope(new JUnitResourceAccessor(), [
                 database  : new MockDatabase(),
                 scopeValue: 551
         ])
@@ -118,7 +119,7 @@ class TemplateActionLogicTest extends Specification {
         ])
 
 
-        def scope = new Scope([
+        def scope = new Scope(new JUnitResourceAccessor(), [
                 database  : new MockDatabase(),
                 scopeValue: 551
         ])
@@ -158,7 +159,7 @@ class TemplateActionLogicTest extends Specification {
         ])
 
 
-        def scope = new Scope([
+        def scope = new Scope(new JUnitResourceAccessor(), [
                 database  : new MockDatabase(),
                 scopeValue: 551
         ])

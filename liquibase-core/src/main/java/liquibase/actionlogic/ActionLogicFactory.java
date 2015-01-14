@@ -3,12 +3,16 @@ package liquibase.actionlogic;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.StreamUtil;
+import liquibase.util.Validate;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
 
 /**
  * Factory/registry for looking up the correct ActionLogic implementation. Should normally be accessed using {@link Scope#getSingleton(Class)}, not constructed directly.
@@ -20,7 +24,7 @@ public class ActionLogicFactory {
     /**
      * Constructor is protected because it should be used as a singleton.
      */
-    protected ActionLogicFactory() {
+    protected ActionLogicFactory(Scope scope) {
         Class[] classes;
         try {
             classes = getActionLogicClasses();
@@ -29,9 +33,45 @@ public class ActionLogicFactory {
                 register((ActionLogic) clazz.getConstructor().newInstance());
             }
 
+            for (TemplateActionLogic templateActionLogic : getTemplateActionLogic(scope)) {
+                register(templateActionLogic);
+            }
+
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected TemplateActionLogic[] getTemplateActionLogic(Scope scope) {
+        ResourceAccessor resourceAccessor = scope.get(Scope.Attr.resourceAccessor, ResourceAccessor.class);
+        Validate.notNull(resourceAccessor, "Scope.resourceAccessor not set");
+
+        for (String packagePath : ServiceLocator.getInstance().getPackages()) {
+            try {
+                Set<String> files = resourceAccessor.list(null, packagePath.replace(".", "/"), true, false, true);
+                if (files == null) {
+                    continue;
+                }
+                for (String resource : files) {
+                    if (resource.endsWith(".logic")) {
+                        Set<InputStream> streams = resourceAccessor.getResourcesAsStream(resource);
+                        Validate.notNull(streams, "Cannot read stream(s) for " + resource);
+
+                        for (InputStream stream : streams) {
+                            try {
+                                register(new TemplateActionLogic(StreamUtil.getReaderContents(new InputStreamReader(stream))));
+                            } catch (TemplateActionLogic.ParseException e) {
+                                throw new UnexpectedLiquibaseException(e);
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                LogFactory.getInstance().getLog().warning("Error reading "+packagePath, e);
+            }
+        }
+
+        return new TemplateActionLogic[0];
     }
 
     /**

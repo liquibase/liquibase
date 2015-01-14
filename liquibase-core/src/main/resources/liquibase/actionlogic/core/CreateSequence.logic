@@ -1,0 +1,5 @@
+>priority: 1
+>action: liquibase.action.core.CreateSequenceAction
+>required: schemaName
+
+CREATE SEQUENCE #escapeName($catalogName, $schemaName, $schemaName)

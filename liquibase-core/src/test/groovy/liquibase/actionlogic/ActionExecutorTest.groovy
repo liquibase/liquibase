@@ -4,6 +4,7 @@ import liquibase.Scope
 import liquibase.action.*
 import liquibase.exception.ActionPerformException
 import liquibase.exception.ValidationErrors
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 
 class ActionExecutorTest extends Specification {
@@ -11,10 +12,15 @@ class ActionExecutorTest extends Specification {
     Scope scope;
 
     def setup() {
-        scope = new Scope(["liquibase.actionlogic.ActionLogicFactory": new ActionLogicFactory() {
+        scope = new Scope(new JUnitResourceAccessor(), ["liquibase.actionlogic.ActionLogicFactory": new ActionLogicFactory(new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) {
             @Override
             protected Class<? extends ActionLogic>[] getActionLogicClasses() {
                 return new Class[0];
+            }
+
+            @Override
+            protected TemplateActionLogic[] getTemplateActionLogic(Scope scope) {
+                return new TemplateActionLogic[0];
             }
         }])
     }

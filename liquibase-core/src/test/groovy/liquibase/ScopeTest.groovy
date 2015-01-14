@@ -1,13 +1,26 @@
 package liquibase
 
 import liquibase.actionlogic.ActionLogicFactory
+import liquibase.exception.UnexpectedLiquibaseException
+import liquibase.resource.ResourceAccessor
+import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 
 class ScopeTest extends Specification {
 
+    def "resouceAccessor required for root scope"() {
+        when:
+        new Scope((ResourceAccessor) null, new HashMap<String, Object>())
+
+        then:
+        def e = thrown(UnexpectedLiquibaseException)
+        e.message == "ResourceAccessor not set"
+
+    }
+
     def "root scope creation and values"() {
         expect:
-        def scope = new Scope(null)
+        def scope = new Scope(new JUnitResourceAccessor(), null)
         scope.getParent() == null
         scope.get("x", String) == null
         scope.get("y", String) == null
@@ -19,7 +32,7 @@ class ScopeTest extends Specification {
 
     def "nested scope logic"() {
         when:
-        def rootScope = new Scope(["root-1"  : 1,
+        def rootScope = new Scope(new JUnitResourceAccessor(), ["root-1"  : 1,
                                    "root-2"  : 2,
                                    "override": "root"])
         def childScope = rootScope.child(["child-1" : "c1",
@@ -80,7 +93,7 @@ class ScopeTest extends Specification {
 
     def "getSingleton"() {
         when:
-        def rootScope = new Scope(new HashMap<String, Object>())
+        def rootScope = new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())
         def childScope = rootScope.child(new HashMap<String, Object>())
         def grandScope1 = childScope.child(new HashMap<String, Object>())
         def grandScope2 = childScope.child(new HashMap<String, Object>())
