@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -243,7 +244,25 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         return this;
     }
-    
+
+    /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ColumnConfig setValueNumeric(Object valueNumeric) {
+        if (valueNumeric == null) {
+            this.valueNumeric = null;
+        } else if (valueNumeric instanceof String) {
+            return setValueNumeric((String) valueNumeric);
+        } else if (valueNumeric instanceof Number) {
+            return setValueNumeric((Number) valueNumeric);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set valueNumeric to a "+valueNumeric.getClass().getName());
+        }
+
+        return this;
+    }
+
+
 	public static class ValueNumeric extends Number {
 		private static final long serialVersionUID = 1381154777956917462L;
 		
@@ -341,6 +360,23 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 this.valueComputed = new DatabaseFunction(valueBoolean);
             }
 
+        }
+
+        return this;
+    }
+
+    /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ColumnConfig setValueBoolean(Object valueBoolean) {
+        if (valueBoolean == null) {
+            this.valueBoolean = null;
+        } else if (valueBoolean instanceof String) {
+            return setValueBoolean((String) valueBoolean);
+        } else if (valueBoolean instanceof Boolean) {
+            return setValueBoolean((Boolean) valueBoolean);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set valueBoolean to a "+valueBoolean.getClass().getName());
         }
 
         return this;
@@ -545,6 +581,40 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     }
 
     /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ColumnConfig setDefaultValueNumeric(Object defaultValueNumeric) {
+        if (defaultValueNumeric == null) {
+            this.defaultValueNumeric = null;
+        } else if (defaultValueNumeric instanceof String) {
+            return setDefaultValueNumeric((String) defaultValueNumeric);
+        } else if (defaultValueNumeric instanceof Number) {
+            return setDefaultValueNumeric((Number) defaultValueNumeric);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set defaultValueNumeric to a "+defaultValueNumeric.getClass().getName());
+        }
+
+        return this;
+    }
+
+    /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ColumnConfig setDefaultValueDate(Object defaultValueDate) {
+        if (defaultValueDate == null) {
+            this.defaultValueDate = null;
+        } else if (defaultValueDate instanceof String) {
+            return setDefaultValueDate((String) defaultValueDate);
+        } else if (defaultValueDate instanceof Date) {
+            return setDefaultValueDate((Date) defaultValueDate);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set defaultValueDate to a "+defaultValueDate.getClass().getName());
+        }
+
+        return this;
+    }
+
+    /**
      * Return the date value this column should default to.
      * @see #setDefaultValue(String)
      */
@@ -573,6 +643,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ColumnConfig setValueDate(Object valueDate) {
+        if (valueDate == null) {
+            this.valueDate = null;
+        } else if (valueDate instanceof String) {
+            return setValueDate((String) valueDate);
+        } else if (valueDate instanceof Date) {
+            return setValueDate((Date) valueDate);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set valueDate to a "+valueDate.getClass().getName());
+        }
+
+        return this;
+    }
+
+
     public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
         this.defaultValueDate = defaultValueDate;
 
@@ -592,6 +680,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         return this;
     }
+
+    /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ColumnConfig setDefaultValueBoolean(Object defaultValueBoolean) {
+        if (defaultValueBoolean == null) {
+            this.defaultValueBoolean = null;
+        } else if (defaultValueBoolean instanceof String) {
+            return setDefaultValueBoolean((String) defaultValueBoolean);
+        } else if (defaultValueBoolean instanceof Boolean) {
+            return setDefaultValueBoolean((Boolean) defaultValueBoolean);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set defaultValueBoolean to a "+defaultValueBoolean.getClass().getName());
+        }
+
+        return this;
+    }
+
 
     /**
      * Set the defaultValueBoolean based on a given string.

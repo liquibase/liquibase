@@ -56,7 +56,23 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * Added for groovy tests that can't tell types apart for nulls values
+     */
+    protected ConstraintsConfig setNullable(Object nullable) {
+        if (nullable == null) {
+            this.nullable = null;
+        } else if (nullable instanceof String) {
+            setNullable((String) nullable);
+        } else if (nullable instanceof Boolean) {
+            setNullable((Boolean) nullable);
+        } else {
+            throw new UnexpectedLiquibaseException("Cannot set nullable with type: "+nullable.getClass().getName());
+        }
 
+
+        return this;
+    }
     /**
      * Returns true if the column should be part of the primary key. Returns null if unspecified
      */
@@ -79,6 +95,22 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     public ConstraintsConfig setPrimaryKey(String primaryKey) {
         this.primaryKey = parseBoolean(primaryKey);
 
+        return this;
+    }
+
+    /**
+     * For groovy tests with null values
+     */
+    protected ConstraintsConfig setPrimaryKey(Object primaryKey) {
+        if (primaryKey == null) {
+            this.primaryKey = null;
+        } else if (primaryKey instanceof String) {
+            return setPrimaryKey((String) primaryKey);
+        } else if (primaryKey instanceof Boolean) {
+            return setPrimaryKey((Boolean) primaryKey);
+        } else {
+            throw new UnexpectedLiquibaseException("Invalid type: "+primaryKey.getClass().getName());
+        }
         return this;
     }
 
@@ -133,6 +165,22 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * For groovy tests with null values
+     */
+    protected ConstraintsConfig setUnique(Object unique) {
+        if (unique == null) {
+            this.unique = null;
+        } else if (unique instanceof String) {
+            return setUnique((String) unique);
+        } else if (unique instanceof Boolean) {
+            return setUnique((Boolean) unique);
+        } else {
+            throw new UnexpectedLiquibaseException("Invalid type: "+unique.getClass().getName());
+        }
+        return this;
+    }
+
 
     /**
      * Returns the name to use for the unique constraint. Returns null if not specified
@@ -184,6 +232,21 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * For groovy tests with null values
+     */
+    protected ConstraintsConfig setDeleteCascade(Object deleteCascade) {
+        if (deleteCascade == null) {
+            this.deleteCascade = null;
+        } else if (deleteCascade instanceof String) {
+            return setDeleteCascade((String) deleteCascade);
+        } else if (deleteCascade instanceof Boolean) {
+            return setDeleteCascade((Boolean) deleteCascade);
+        } else {
+            throw new UnexpectedLiquibaseException("Invalid type: "+deleteCascade.getClass().getName());
+        }
+        return this;
+    }
 
     /**
      * Returns the name to use for the columns foreign key constraint. Returns null if not specified.
@@ -222,6 +285,23 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * For groovy tests with null values
+     */
+    protected ConstraintsConfig setInitiallyDeferred(Object initiallyDeferred) {
+        if (initiallyDeferred == null) {
+            this.initiallyDeferred = null;
+        } else if (initiallyDeferred instanceof String) {
+            return setInitiallyDeferred((String) initiallyDeferred);
+        } else if (initiallyDeferred instanceof Boolean) {
+            return setInitiallyDeferred((Boolean) initiallyDeferred);
+        } else {
+            throw new UnexpectedLiquibaseException("Invalid type: "+initiallyDeferred.getClass().getName());
+        }
+        return this;
+    }
+
+
 
     /**
      * Returns if a foreign key defined for this column should deferrable. Returns null if not specified.
@@ -245,6 +325,22 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     public ConstraintsConfig setDeferrable(String deferrable) {
         this.deferrable = parseBoolean(deferrable);
 
+        return this;
+    }
+
+    /**
+     * For groovy tests with null values
+     */
+    protected ConstraintsConfig setDeferrable(Object deferrable) {
+        if (deferrable == null) {
+            this.deferrable = null;
+        } else if (deferrable instanceof String) {
+            return setDeferrable((String) deferrable);
+        } else if (deferrable instanceof Boolean) {
+            return setDeferrable((Boolean) deferrable);
+        } else {
+            throw new UnexpectedLiquibaseException("Invalid type: "+deferrable.getClass().getName());
+        }
         return this;
     }
 

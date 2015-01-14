@@ -84,7 +84,7 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setInitiallyDeferred("").isInitiallyDeferred() == null
         new ConstraintsConfig().setInitiallyDeferred("null").isInitiallyDeferred() == null
         new ConstraintsConfig().setInitiallyDeferred("NULL").isInitiallyDeferred() == null
-        new ConstraintsConfig().setInitiallyDeferred((String) null).isInitiallyDeferred() == null
+        new ConstraintsConfig().setInitiallyDeferred(null as String).isInitiallyDeferred() == null
     }
 
 
