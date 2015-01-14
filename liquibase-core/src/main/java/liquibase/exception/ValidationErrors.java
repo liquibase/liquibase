@@ -88,7 +88,7 @@ public class ValidationErrors {
     @Override
     public String toString() {
         String string;
-        if (hasErrors()) {
+        if (!hasErrors()) {
             string = "No errors";
         } else {
             string = StringUtils.join(getErrorMessages(), "; ");

@@ -514,12 +514,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String escapeObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return objectName;
+        return "`"+objectName+"`";
     }
 
     @Override
     public String escapeObjectName(final String catalogName, final String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return catalogName +"."+schemaName+"."+objectName;
+        return "`"+catalogName +"`.`"+schemaName+"`.`"+objectName+"`";
     }
 
     @Override

@@ -39,4 +39,14 @@ class ActionLogicFactoryTest extends Specification {
         emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new HashMap<String, Object>())) == null
 
     }
+
+    def "Automatically finds action classes .logic files"() {
+        expect:
+        new ActionLogicFactory().logic.size() == 0
+    }
+
+    def "Automatically registers TemplateActionLogic instances based on .logic files"() {
+        expect:
+        new ActionLogicFactory().logic.findAll({it.getClass() == TemplateActionLogic}).size() > 0
+    }
 }
