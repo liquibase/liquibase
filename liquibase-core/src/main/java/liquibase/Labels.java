@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Labels {
 
-    private HashSet<String> labels = new HashSet<String>();
+    private Set<String> labels = new LinkedHashSet<String>();
 
     public Labels() {
     }
@@ -56,9 +56,8 @@ public class Labels {
 
     @Override
     public String toString() {
-        return StringUtils.join(new TreeSet(this.labels),",");
+        return StringUtils.join(new LinkedHashSet<String>(this.labels),",");
     }
-
 
     public boolean isEmpty() {
         return this.labels == null || this.labels.isEmpty();
