@@ -172,11 +172,11 @@ public abstract class JdbcUtils {
         return null;
     }
 
-    public static List<Map<String, ?>> extract(ResultSet rs) throws SQLException {
+    public static List<SmartMap> extract(ResultSet rs) throws SQLException {
         try {
-            List<Map<String, ?>> rows = new ArrayList<Map<String, ?>>();
+            List<SmartMap> rows = new ArrayList<SmartMap>();
             while (rs.next()) {
-                Map<String, Object> row = new HashMap<String, Object>();
+                SmartMap row = new SmartMap();
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
 
