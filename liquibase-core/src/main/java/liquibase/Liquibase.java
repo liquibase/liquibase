@@ -757,11 +757,11 @@ public class Liquibase {
         LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
     }
 
-    public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
+    public List<ChangeSetStatus> listUnrunChangeSets(String contexts) throws LiquibaseException {
         return listUnrunChangeSets(new Contexts(contexts));
     }
 
-    public List<ChangeSet> listUnrunChangeSets(Contexts contexts) throws LiquibaseException {
+    public List<ChangeSetStatus> listUnrunChangeSets(Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 
         DatabaseChangeLog changeLog = getDatabaseChangeLog();
@@ -772,9 +772,9 @@ public class Liquibase {
 
         ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, changeLog);
 
-        ListVisitor visitor = new ListVisitor();
+        StatusVisitor visitor = new StatusVisitor(database); 
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts));
-        return visitor.getSeenChangeSets();
+        return visitor.getChangeSetsToRun();
     }
 
     /**
@@ -804,7 +804,7 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
 
         try {
-            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts);
+            List<ChangeSetStatus> unrunChangeSets = listUnrunChangeSets(contexts);
             if (unrunChangeSets.size() == 0) {
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");
@@ -819,8 +819,8 @@ public class Liquibase {
                 out.append(getDatabase().getConnection().getURL());
                 out.append(StreamUtil.getLineSeparator());
                 if (verbose) {
-                    for (ChangeSet changeSet : unrunChangeSets) {
-                        out.append("     ").append(changeSet.toString(false)).append(StreamUtil.getLineSeparator());
+                    for (ChangeSetStatus changeSet : unrunChangeSets) {
+                        out.append("     ").append(changeSet.toString()).append(StreamUtil.getLineSeparator());
                     }
                 }
             }
@@ -1004,6 +1004,7 @@ public class Liquibase {
      * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during the liquibase execution
      * @param database Database which propeties are put in the changelog
      * @throws DatabaseException
+     * @deprecated unused
      */
     private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
             setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
@@ -1030,10 +1031,6 @@ public class Liquibase {
             setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
             setChangeLogParameter("database.supportsSequences", database.supportsSequences());
             setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
-    }
-
-    private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
     }
 
     public void setChangeExecListener(ChangeExecListener listener) {
