@@ -2,14 +2,10 @@ package liquibase.sdk;
 
 import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
 import liquibase.sdk.convert.ConvertCommand;
 import liquibase.sdk.vagrant.VagrantCommand;
-import liquibase.sdk.watch.WatchCommand;
 import liquibase.util.StringUtils;
 import org.apache.commons.cli.*;
-import org.eclipse.jetty.util.log.StdErrLog;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -51,24 +47,6 @@ public class Main {
                     ((VagrantCommand) command).setup(commandArguments);
                 } catch (ParseException e) {
                     throw new UserError("Error parsing command arguments: "+e.getMessage());
-                }
-            } else if (main.command.equals("watch")) {
-                ((StdErrLog) org.eclipse.jetty.util.log.Log.getRootLogger()).setLevel(StdErrLog.LEVEL_WARN);
-                LogFactory.getInstance().setDefaultLoggingLevel(LogLevel.WARNING);
-                command = new WatchCommand(main);
-
-                Options options = new Options();
-                options.addOption(OptionBuilder.hasArg().withDescription("Webserver port. Default 8080").create("port"));
-                options.addOption(OptionBuilder.hasArg().withDescription("Database URL").isRequired().create("url"));
-                options.addOption(OptionBuilder.hasArg().withDescription("Database username").isRequired().create("username"));
-                options.addOption(OptionBuilder.hasArg().withDescription("Database password").isRequired().create("password"));
-
-                CommandLine commandArguments = commandParser.parse(options, main.commandArgs.toArray(new String[main.commandArgs.size()]));
-                ((WatchCommand) command).setUrl(commandArguments.getOptionValue("url"));
-                ((WatchCommand) command).setUsername(commandArguments.getOptionValue("username"));
-                ((WatchCommand) command).setPassword(commandArguments.getOptionValue("password"));
-                if (commandArguments.hasOption("port")) {
-                    ((WatchCommand) command).setPort(Integer.valueOf(commandArguments.getOptionValue("port")));
                 }
             } else if (main.command.equals("convert")) {
                 command = new ConvertCommand(main);
