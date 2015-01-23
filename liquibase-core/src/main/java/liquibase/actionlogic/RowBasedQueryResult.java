@@ -122,7 +122,7 @@ public class RowBasedQueryResult extends QueryResult {
 
     public static class Row {
 
-        private SortedMap<String, ?> data;
+        private SortedMap<String, Object> data;
 
         public Row(Map<String, ?> data) {
             if (data == null) {
@@ -205,6 +205,10 @@ public class RowBasedQueryResult extends QueryResult {
 
         }
 
+        public Row set(String column, Object value) {
+            data.put(column, value);
+            return this;
+        }
 
         @Override
         public String toString() {

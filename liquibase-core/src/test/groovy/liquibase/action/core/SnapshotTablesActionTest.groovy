@@ -1,9 +1,8 @@
-package liquibase.actionlogic.core
+package liquibase.action.core
 
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.ExecuteSqlAction
-import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplier
@@ -17,11 +16,11 @@ import spock.lang.Unroll
 import testmd.TestMD
 import testmd.logic.SetupResult
 
-class SnapshotTablesLogicTest extends Specification {
+class SnapshotTablesActionTest extends Specification {
 
     static testTables = ["TEST_TABLE", "test_table", "OTHER_TABLE"]
 
-    def createTables(ConnectionSupplier connectionSupplier, scope) {
+    def setupDatabase(ConnectionSupplier connectionSupplier, scope) {
         Database database = scope.get(Scope.Attr.database, Database)
         if (database instanceof UnsupportedDatabase) {
             throw SetupResult.OK;
@@ -36,19 +35,17 @@ class SnapshotTablesLogicTest extends Specification {
         throw SetupResult.OK
     }
 
-    def cleanupTables(ConnectionSupplier connectionSupplier, scope) {
-        return {
-            Database database = scope.get(Scope.Attr.database, Database)
-            if (database instanceof UnsupportedDatabase) {
-                return;
-            }
+    def cleanupDatabase(ConnectionSupplier connectionSupplier, scope) {
+        Database database = scope.get(Scope.Attr.database, Database)
+        if (database instanceof UnsupportedDatabase) {
+            return;
+        }
 
-            for (def tableName : testTables) {
-                if (!database.canStoreObjectName(tableName, false, Table)) {
-                    continue;
-                }
-                new ActionExecutor().execute(new ExecuteSqlAction("drop table $tableName"), scope)
+        for (def tableName : testTables) {
+            if (!database.canStoreObjectName(tableName, false, Table)) {
+                continue;
             }
+            new ActionExecutor().execute(new ExecuteSqlAction("drop table $tableName"), scope)
         }
     }
 
@@ -73,8 +70,8 @@ class SnapshotTablesLogicTest extends Specification {
                         throw new SetupResult.Skip("Case Insensitive Database")
                     }
 
-                    createTables(connectionSupplier, scope)
-                }).cleanup(cleanupTables(connectionSupplier, scope))
+                    setupDatabase(connectionSupplier, scope)
+                }).cleanup({cleanupDatabase(connectionSupplier, scope)})
                 .run({
             if (database instanceof UnsupportedDatabase) {
                 return;

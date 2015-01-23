@@ -689,19 +689,19 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type) {
-        if (name.matches("[a-z_]")) {
+        if (name.matches("[a-z_]+")) {
             if (quoted) {
                 return storesLowerCaseQuotedIdentifiers();
             } else {
                 return storesLowerCaseIdentifiers();
             }
-        } else if (name.matches("[A-Z_]")) {
+        } else if (name.matches("[A-Z_]+")) {
             if (quoted) {
                 return storesUpperCaseQuotedIdentifiers();
             } else {
                 return storesUpperCaseIdentifiers();
             }
-        } else if (name.matches("[a-zA-Z_]")) {
+        } else if (name.matches("[a-zA-Z_]+")) {
             if (quoted) {
                 return storesMixedCaseQuotedIdentifiers();
             } else {
