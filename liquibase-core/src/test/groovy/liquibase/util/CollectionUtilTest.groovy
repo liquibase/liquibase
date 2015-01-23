@@ -38,7 +38,7 @@ class CollectionUtilTest extends Specification {
         }
 
         where:
-        original | expected
+        original        | expected
         []              | [[]]
         ['a']           | [[], ['a']]
         ['a', 'b']      | [[], ['a'], ['b'], ['a', 'b']]
@@ -46,6 +46,7 @@ class CollectionUtilTest extends Specification {
 
     }
 
+    @Unroll
     def "permuations for multimap"() {
         when:
         def permutations = CollectionUtil.permutations(original)
@@ -54,9 +55,8 @@ class CollectionUtilTest extends Specification {
         permutations Matchers.containsInAnyOrder(expected.toArray())
 
         where:
-        original | expected
-        new HashMap() | []
-        null | []
+        original                                   | expected
+        [:]                                        | []
         ["a": [1, 2, 3]]                           | [["a": 1], ["a": 2], ["a": 3]]
         ["a": [1, 2, 3], "b": [5, 6]]              | [["a": 1, "b": 5], ["a": 2, "b": 5], ["a": 3, "b": 5],
                                                       ["a": 1, "b": 6], ["a": 2, "b": 6], ["a": 3, "b": 6]]
@@ -64,6 +64,26 @@ class CollectionUtilTest extends Specification {
                                                       ["a": 1, "b": 6, "c": 8], ["a": 2, "b": 6, "c": 8], ["a": 3, "b": 6, "c": 8],
                                                       ["a": 1, "b": 5, "c": 9], ["a": 2, "b": 5, "c": 9], ["a": 3, "b": 5, "c": 9],
                                                       ["a": 1, "b": 6, "c": 9], ["a": 2, "b": 6, "c": 9], ["a": 3, "b": 6, "c": 9]]
+    }
+
+    @Unroll
+    def "permuations for multi-list"() {
+        when:
+        def permutations = CollectionUtil.permutations(original)
+
+        then:
+        permutations Matchers.containsInAnyOrder(expected.toArray())
+
+        where:
+        original                    | expected
+        []                          | []
+        [[1, 2, 3]]                 | [[1], [2], [3]]
+        [[1, 2, 3], [5, 6]]         | [[1, 5], [2, 5], [3, 5],
+                                       [1, 6], [2, 6], [3, 6]]
+        [[1, 2, 3], [5, 6], [8, 9]] | [[1, 5, 8], [2, 5, 8], [3, 5, 8],
+                                       [1, 6, 8], [2, 6, 8], [3, 6, 8],
+                                       [1, 5, 9], [2, 5, 9], [3, 5, 9],
+                                       [1, 6, 9], [2, 6, 9], [3, 6, 9]]
     }
 
 }

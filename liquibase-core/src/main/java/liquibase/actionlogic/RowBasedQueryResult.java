@@ -95,10 +95,10 @@ public class RowBasedQueryResult extends QueryResult {
     }
 
     /**
-     * Return a list of map objects corresponding to this QueryResult.
+     * Return a list of row objects corresponding to this QueryResult.
      * Returns an empty collection if this QueryResult was originally passed a null collection.
      */
-    public List<Row> toList() throws IllegalArgumentException {
+    public List<Row> getRows() throws IllegalArgumentException {
         return Collections.unmodifiableList(resultSet);
     }
 

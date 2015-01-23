@@ -2,23 +2,24 @@ package liquibase.actionlogic.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
+import liquibase.action.Action;
+import liquibase.action.core.QueryJdbcMetaDataAction;
+import liquibase.action.core.SnapshotDatabaseObjectsAction;
+import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
-import liquibase.util.SmartMap;
 import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-
-public class TableSnapshotLogic extends AbstractJdbcMetaDataLogic {
+/**
+ * Logic to snapshot database table(s). Delegates to {@link QueryJdbcMetaDataAction} getTables().
+ */
+public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
 
     @Override
     protected Class<? extends DatabaseObject> getTypeToSnapshot() {
@@ -26,7 +27,7 @@ public class TableSnapshotLogic extends AbstractJdbcMetaDataLogic {
     }
 
     @Override
-    protected Class<? extends DatabaseObject>[] getSupportedBaseObject() {
+    protected Class<? extends DatabaseObject>[] getSupportedRelatedTypes() {
         return new Class[]{
                 Schema.class,
                 Catalog.class,
@@ -35,7 +36,9 @@ public class TableSnapshotLogic extends AbstractJdbcMetaDataLogic {
     }
 
     @Override
-    protected List<SmartMap> readRawMetaData(DatabaseObject relatedTo, Class<? extends DatabaseObject> typeToSnapshot, DatabaseMetaData metaData, Scope scope) throws SQLException {
+    protected Action createSnapshotAction(Action action, Scope scope) throws DatabaseException {
+
+        DatabaseObject relatedTo = action.get(SnapshotDatabaseObjectsAction.Attr.relatedTo, DatabaseObject.class);
         String catalogName = null;
         String schemaName = null;
         String tableName = null;
@@ -56,11 +59,11 @@ public class TableSnapshotLogic extends AbstractJdbcMetaDataLogic {
             throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass());
         }
 
-        return JdbcUtils.extract(metaData.getTables(catalogName, schemaName, tableName, new String[]{"TABLE"}));
+        return new QueryJdbcMetaDataAction("getTables", catalogName, schemaName, tableName, new String[]{"TABLE"});
     }
 
     @Override
-    protected DatabaseObject convertToObject(SmartMap row, Class outputType, Scope scope) {
+    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) {
         String rawTableName = row.get("TABLE_NAME", String.class);
         String rawSchemaName = row.get("TABLE_SCHEM", String.class);
         String rawCatalogName = row.get("TABLE_CAT", String.class);
@@ -69,7 +72,7 @@ public class TableSnapshotLogic extends AbstractJdbcMetaDataLogic {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
-        Table table = new Table().setName(cleanNameFromDatabase(rawTableName, scope));
+        Table table = new Table().setName(rawTableName);
         table.setRemarks(remarks);
 
         Database database = scope.get(Scope.Attr.database, Database.class);

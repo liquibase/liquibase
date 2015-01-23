@@ -124,4 +124,23 @@ class StringUtilsTest extends Specification {
         "abc"   | 5   | "abc  "
         "abc "  | 5   | "abc  "
     }
+
+    def "defaultIfEmpty"() {
+        expect:
+        StringUtils.defaultIfEmpty(input, defaultValue) == expected
+
+        where:
+        input     | defaultValue       | expected
+        "test"    | "default value"    | "test"
+        "test   " | "default value"    | "test   "
+        "   test" | "default value"    | "   test"
+        null      | "default value"    | "default value"
+        ""        | "default value"    | "default value"
+        "   "     | "default value"    | "default value"
+        "   "     | " default value  " | " default value  "
+        null      | null               | null
+        null      | ""                 | ""
+        null      | "  "               | "  "
+        ""        | null               | null
+    }
 }

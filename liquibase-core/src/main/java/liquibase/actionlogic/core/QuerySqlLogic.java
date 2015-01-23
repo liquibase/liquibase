@@ -34,7 +34,7 @@ public class QuerySqlLogic extends AbstractSqlLogic {
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();
             Statement stmt = jdbcConnection.createStatement();
-            return new RowBasedQueryResult(JdbcUtils.extract(stmt.executeQuery(action.getAttribute(QuerySqlAction.Attr.sql, String.class))));
+            return new RowBasedQueryResult(JdbcUtils.extract(stmt.executeQuery(action.get(QuerySqlAction.Attr.sql, String.class))));
         } catch (SQLException e) {
             throw new ActionPerformException(e);
         }

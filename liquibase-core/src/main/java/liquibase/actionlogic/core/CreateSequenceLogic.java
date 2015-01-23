@@ -35,6 +35,6 @@ public class CreateSequenceLogic extends AbstractActionLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new ExecuteSqlAction("create sequence "+action.getAttribute(CreateSequenceAction.Attr.sequenceName, String.class)));
+        return new RewriteResult(new ExecuteSqlAction("create sequence "+action.get(CreateSequenceAction.Attr.sequenceName, String.class)));
     }
 }

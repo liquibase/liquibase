@@ -6,7 +6,7 @@ import liquibase.Labels;
 import liquibase.database.Database;
 import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.H2Database;
+import liquibase.database.core.H2DatabaseTemp;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.structure.DatabaseObject;
@@ -158,7 +158,7 @@ public class DiffOutputControl {
         return this;
     }
 
-    private static class DatabaseForHash extends H2Database implements InternalDatabase {
+    private static class DatabaseForHash extends H2DatabaseTemp implements InternalDatabase {
         @Override
         public boolean isCaseSensitive() {
             return true;

@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.core.H2Database;
+import liquibase.database.core.H2DatabaseTemp;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.structure.core.Column;
@@ -74,7 +74,7 @@ public class ChangeMetaDataTest {
     public void getRequiredParameters_empty() {
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, null);
 
-        assertEquals(0, changeMetaData.getRequiredParameters(new H2Database()).size());
+        assertEquals(0, changeMetaData.getRequiredParameters(new H2DatabaseTemp()).size());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ChangeMetaDataTest {
         parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
-        assertSetsEqual(new String[]{"allRequired", "h2Required"}, changeMetaData.getRequiredParameters(new H2Database()).keySet());
+        assertSetsEqual(new String[]{"allRequired", "h2Required"}, changeMetaData.getRequiredParameters(new H2DatabaseTemp()).keySet());
         assertSetsEqual(new String[]{"allRequired", "oracleRequired"}, changeMetaData.getRequiredParameters(new OracleDatabase()).keySet());
         assertSetsEqual(new String[]{"allRequired"}, changeMetaData.getRequiredParameters(new MySQLDatabase()).keySet());
     }
@@ -100,7 +100,7 @@ public class ChangeMetaDataTest {
         parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
-        assertSetsEqual(new String[]{"noneRequired", "oracleRequired"}, changeMetaData.getOptionalParameters(new H2Database()).keySet());
+        assertSetsEqual(new String[]{"noneRequired", "oracleRequired"}, changeMetaData.getOptionalParameters(new H2DatabaseTemp()).keySet());
         assertSetsEqual(new String[]{"noneRequired", "h2Required"}, changeMetaData.getOptionalParameters(new OracleDatabase()).keySet());
         assertSetsEqual(new String[]{"noneRequired", "h2Required", "oracleRequired"}, changeMetaData.getOptionalParameters(new MySQLDatabase()).keySet());
     }

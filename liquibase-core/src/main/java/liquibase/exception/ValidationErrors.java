@@ -1,5 +1,6 @@
 package liquibase.exception;
 
+import liquibase.ExtensibleObject;
 import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
 import liquibase.util.StringUtils;
@@ -22,6 +23,19 @@ public class ValidationErrors {
         return warningMessages.size() > 0;
     }
 
+    /**
+     * More convenient version of {@link #checkRequiredField(String, Object)} that doesn't require you to lookup the value first.
+     * Instead, simply pass the field and the base object.
+     */
+    public void checkForRequiredField(Enum requiredFieldName, ExtensibleObject object) {
+        Object value = object.get(requiredFieldName, Object.class);
+        checkRequiredField(requiredFieldName.name(), value);
+    }
+
+    /**
+     * Less convenient version of {@link #checkForRequiredField(Enum, liquibase.ExtensibleObject)} that takes a value to check if it is null or empty and the field for the error message.
+     * This method will eventually be removed.
+     */
     public void checkRequiredField(String requiredFieldName, Object value) {
         if (value == null) {
             addError(requiredFieldName + " is required");

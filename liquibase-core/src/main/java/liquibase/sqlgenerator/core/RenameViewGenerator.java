@@ -16,7 +16,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     public boolean supports(RenameViewStatement statement, Database database) {
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2Database
+                || database instanceof H2DatabaseTemp
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof InformixDatabase

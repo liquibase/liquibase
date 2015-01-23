@@ -5,16 +5,16 @@ import java.util.*;
 public class CollectionUtil {
 
     public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
-        Set<Set<T>> sets = new HashSet<Set<T>>();
+        Set<Set<T>> sets = new HashSet<>();
         if (originalSet.isEmpty()) {
             sets.add(new HashSet<T>());
             return sets;
         }
-        List<T> list = new ArrayList<T>(originalSet);
+        List<T> list = new ArrayList<>(originalSet);
         T head = list.get(0);
         Collection<T> rest = list.subList(1, list.size());
         for (Set<T> set : powerSet(rest)) {
-            Set<T> newSet = new HashSet<T>();
+            Set<T> newSet = new HashSet<>();
             newSet.add(head);
             newSet.addAll(set);
             sets.add(newSet);
@@ -23,17 +23,40 @@ public class CollectionUtil {
         return sets;
     }
 
-    public static <T> List<Map<String, T>> permutations(Map<String, List<T>> parameterValues) {
-        List<Map<String, T>> list = new ArrayList<Map<String, T>>();
+    public static <T> List<List<T>> permutations(List<List<T>> parameterValues) {
+        List<List<T>> list = new ArrayList<>();
         if (parameterValues == null || parameterValues.size() == 0) {
             return list;
         }
 
-        permute(new HashMap<String, T>(), new ArrayList<String>(parameterValues.keySet()), parameterValues, list);
+        int i=0;
+        LinkedHashMap<String, List<T>> map = new LinkedHashMap<>();
+        for (List<T> value : parameterValues) {
+            map.put(String.valueOf(i++), value);
+        }
+
+        for (Map<String, T> permutation : permutations(map)) {
+            List<T> val = new ArrayList<>();
+            for (String key : permutation.keySet()) {
+                val.add(permutation.get(key));
+            }
+            list.add(val);
+        }
+
+
 
         return list;
+    }
 
+    public static <T> List<Map<String, T>> permutations(Map<String, List<T>> parameterValues) {
+        List<Map<String, T>> list = new ArrayList<>();
+        if (parameterValues == null || parameterValues.size() == 0) {
+            return list;
+        }
 
+        permute(new LinkedHashMap<String, T>(), new ArrayList<>(parameterValues.keySet()), parameterValues, list);
+
+        return list;
     }
 
     private static <T> void permute(Map<String, T> basePermutation, List<String> remainingKeys, Map<String, List<T>> parameterValues, List<Map<String, T>> returnList) {
@@ -41,7 +64,7 @@ public class CollectionUtil {
         String thisKey = remainingKeys.get(0);
         remainingKeys = remainingKeys.subList(1, remainingKeys.size());
         for (T value : parameterValues.get(thisKey)) {
-            Map<String, T> permutation = new HashMap<String, T>(basePermutation);
+            Map<String, T> permutation = new LinkedHashMap<>(basePermutation);
 
             permutation.put(thisKey, value);
 

@@ -19,7 +19,8 @@ import java.util.Map;
 public class Scope {
 
     public static enum Attr {
-        resourceAccessor, database
+        resourceAccessor,
+        database,
     }
 
     private Scope parent;
@@ -67,6 +68,9 @@ public class Scope {
         return new Scope(this, scopeValues);
     }
 
+    public Scope child(Enum newValueKey, Object newValue) {
+        return child(newValueKey.name(), newValue);
+    }
 
     public  <T> T get(Enum key, Class<T> type) {
         return get(key.name(), type);

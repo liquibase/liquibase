@@ -18,7 +18,7 @@ class RowBasedQueryResultTest extends Specification {
         result.asObject(Integer) == 42I
         result.asList(String) == ["42"]
         result.asList(Integer) == [42]
-        result.toList().toString() == "[[value=42]]"
+        result.getRows().toString() == "[[value=42]]"
     }
 
     def "constructor with collection of numbers"() {
@@ -29,7 +29,7 @@ class RowBasedQueryResultTest extends Specification {
         result.size() == 3
         result.asList(String) == ["42", "43", "44"]
         result.asList(Integer) == [42, 43, 44]
-        result.toList().toString() == "[[value=42], [value=43], [value=44]]"
+        result.getRows().toString() == "[[value=42], [value=43], [value=44]]"
     }
 
     def "constructor with collection of maps"() {
@@ -41,10 +41,10 @@ class RowBasedQueryResultTest extends Specification {
 
         then:
         result.size() == 3
-        result.toList().toString() == "[[col1=42, col2=cat], [col1=43, col2=-1], [col1=44, col2=dog, col3=special]]"
-        result.toList()[0].get("col1", Integer) == 42I
-        result.toList()[1].get("col1", Integer) == 43I
-        result.toList()[2].get("col1", Integer) == 44I
+        result.getRows().toString() == "[[col1=42, col2=cat], [col1=43, col2=-1], [col1=44, col2=dog, col3=special]]"
+        result.getRows()[0].get("col1", Integer) == 42I
+        result.getRows()[1].get("col1", Integer) == 43I
+        result.getRows()[2].get("col1", Integer) == 44I
     }
 
     def "asObject with collection of numbers"() {

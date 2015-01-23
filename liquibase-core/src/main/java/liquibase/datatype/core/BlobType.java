@@ -14,7 +14,7 @@ public class BlobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
-        if (database instanceof H2Database || database instanceof HsqlDatabase) {
+        if (database instanceof H2DatabaseTemp || database instanceof HsqlDatabase) {
             if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
                 return new DatabaseDataType("LONGVARBINARY");
             } else {

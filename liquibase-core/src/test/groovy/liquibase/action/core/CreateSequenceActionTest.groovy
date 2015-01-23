@@ -12,8 +12,8 @@ class CreateSequenceActionTest extends Specification {
 
         where:
         object                                                                                                                                          | expected
-        new CreateSequenceAction()                                                                                                                      | "create sequence()"
-        new CreateSequenceAction().setAttribute(CreateSequenceAction.Attr.sequenceName, "test_seq")                                                     | "create sequence(sequenceName=test_seq)"
-        new CreateSequenceAction().setAttribute(CreateSequenceAction.Attr.sequenceName, "test_seq").setAttribute(CreateSequenceAction.Attr.cycle, true) | "create sequence(cycle=true,sequenceName=test_seq)"
+        new CreateSequenceAction()                                                                                                                      | "createSequence()"
+        new CreateSequenceAction().set(CreateSequenceAction.Attr.sequenceName, "test_seq")                                                     | "createSequence(sequenceName=test_seq)"
+        new CreateSequenceAction().set(CreateSequenceAction.Attr.sequenceName, "test_seq").set(CreateSequenceAction.Attr.cycle, true) | "createSequence(cycle=true, sequenceName=test_seq)"
     }
 }

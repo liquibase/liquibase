@@ -199,6 +199,16 @@ public class ObjectUtil {
                 return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
             } else if (targetClass.isAssignableFrom(String.class)) {
                 return (T) object.toString();
+            } else if (targetClass.isAssignableFrom(List.class)) {
+                if (object instanceof List) {
+                    return (T) object;
+                } else if (object instanceof Collection) {
+                    return (T) new ArrayList((Collection) object);
+                } else if (object instanceof Object[]) {
+                    return (T) new ArrayList(Arrays.asList((Object[]) object));
+                } else {
+                    return (T) object;
+                }
             }
             return (T) object;
         } catch (NumberFormatException e) {

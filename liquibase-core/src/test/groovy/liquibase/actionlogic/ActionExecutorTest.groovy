@@ -36,7 +36,7 @@ class ActionExecutorTest extends Specification {
 
     def "execute when validation fails with errors"() {
         when:
-        scope.getSingleton(ActionLogicFactory).register(new MockActionLogic("mock logic", 1, MockAction) {
+        scope.getSingleton(ActionLogicFactory).register(new MockExternalInteractionLogic("mock logic", 1, MockAction) {
             @Override
             ValidationErrors validate(Action action, Scope scope) {
                 return new ValidationErrors()
@@ -54,7 +54,7 @@ class ActionExecutorTest extends Specification {
 
     def "execute update logic"() {
         when:
-        scope.getSingleton(ActionLogicFactory).register(new MockActionLogic("mock logic", 1, MockAction, {
+        scope.getSingleton(ActionLogicFactory).register(new MockExternalInteractionLogic("mock logic", 1, MockAction, {
             return new UpdateResult(12, "update logic ran");
         }))
 
@@ -68,7 +68,7 @@ class ActionExecutorTest extends Specification {
 
     def "execute 'execute' logic"() {
         when:
-        scope.getSingleton(ActionLogicFactory).register(new MockActionLogic("mock logic", 1, MockAction, {
+        scope.getSingleton(ActionLogicFactory).register(new MockExternalInteractionLogic("mock logic", 1, MockAction, {
             return new ExecuteResult("execute logic ran");
         }))
 
@@ -81,7 +81,7 @@ class ActionExecutorTest extends Specification {
 
     def "execute 'query' logic"() {
         when:
-        scope.getSingleton(ActionLogicFactory).register(new MockActionLogic("mock logic", 1, MockAction, {
+        scope.getSingleton(ActionLogicFactory).register(new MockExternalInteractionLogic("mock logic", 1, MockAction, {
             return new RowBasedQueryResult("DATA", "query logic ran");
         }))
 
@@ -112,10 +112,10 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
             return new RewriteResult(new UpdateSqlAction("sql action 1"));
         }))
-        factory.register(new MockActionLogic("mock sql", 1, UpdateSqlAction) {
+        factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).getAttribute(AbstractSqlAction.Attr.sql, String));
+                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).get(AbstractSqlAction.Attr.sql, String));
             }
         })
 
@@ -132,10 +132,10 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
             return new RewriteResult(new UpdateSqlAction("sql action 1"), new UpdateSqlAction("sql action 2"));
         }))
-        factory.register(new MockActionLogic("mock sql", 1, UpdateSqlAction) {
+        factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).getAttribute(AbstractSqlAction.Attr.sql, String));
+                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).get(AbstractSqlAction.Attr.sql, String));
             }
         })
 
@@ -158,10 +158,10 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
             return new RewriteResult(new UpdateSqlAction("sql action 1"), new ExecuteSqlAction("exec sql action"), new UpdateSqlAction("sql action 2"));
         }))
-        factory.register(new MockActionLogic("mock sql", 1, UpdateSqlAction) {
+        factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).getAttribute(AbstractSqlAction.Attr.sql, String));
+                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).get(AbstractSqlAction.Attr.sql, String));
             }
         })
 
@@ -178,16 +178,17 @@ class ActionExecutorTest extends Specification {
         result instanceof CompoundResult
         def nestedActions = new ArrayList<Map.Entry>(((CompoundResult) result).resultsBySource.entrySet())
 
-        nestedActions.size() == 3
+        nestedActions.size() == 4
         nestedActions[0].key == new UpdateSqlAction("sql action 1")
         nestedActions[0].value.message == "executed sql: sql action 1"
 
-        nestedActions[1].key == new ExecuteSqlAction("exec sql action")
-        nestedActions[1].value instanceof CompoundResult
-        ((CompoundResult) nestedActions[1].value).results[0].message == "executed sql: nested 1"
-        ((CompoundResult) nestedActions[1].value).results[1].message == "executed sql: nested 2"
+        nestedActions[1].key == new UpdateSqlAction("nested 1")
+        nestedActions[1].value.message == "executed sql: nested 1"
 
-        nestedActions[2].key == (new UpdateSqlAction("sql action 2"))
-        nestedActions[2].value.message == "executed sql: sql action 2"
+        nestedActions[2].key == new UpdateSqlAction("nested 2")
+        nestedActions[2].value.message == "executed sql: nested 2"
+
+        nestedActions[3].key == (new UpdateSqlAction("sql action 2"))
+        nestedActions[3].value.message == "executed sql: sql action 2"
     }
 }

@@ -130,6 +130,11 @@ public class MockDatabase implements Database, InternalDatabase {
         return caseSensitive;
     }
 
+    @Override
+    public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type) {
+        return true;
+    }
+
     public void setCaseSensitive(boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
     }

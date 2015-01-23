@@ -56,7 +56,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         validationErrors.checkRequiredField("columnType", statement.getColumnType());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && (database instanceof H2Database
+        if (statement.isPrimaryKey() && (database instanceof H2DatabaseTemp
                 || database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof SQLiteDatabase)) {
@@ -72,7 +72,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
         	validationErrors.addError("Cannot add column on specific position");
         }
-        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2Database) || (database instanceof HsqlDatabase))) {
+        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2DatabaseTemp) || (database instanceof HsqlDatabase))) {
         	validationErrors.addError("Cannot add column on specific position");
         }
         if ((statement.getAddAtPosition() != null) && !(database instanceof FirebirdDatabase)) {

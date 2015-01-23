@@ -1,16 +1,11 @@
-package liquibase.datatype;
+package liquibase.datatype
 
-import liquibase.database.core.H2Database
 import liquibase.datatype.core.BigIntType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.VarcharType
-import liquibase.sdk.database.MockDatabase;
-import org.junit.Test
+import liquibase.sdk.database.MockDatabase
 import spock.lang.Specification
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import spock.lang.Unroll
 
 public class DataTypeFactoryTest extends Specification {
 

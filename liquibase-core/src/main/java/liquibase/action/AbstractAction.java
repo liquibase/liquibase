@@ -17,9 +17,8 @@ public abstract class AbstractAction extends AbstractExtensibleObject implements
     public String describe() {
         String name = getClass().getSimpleName();
         name = name.replaceFirst("Action$", "");
-        name = name.replaceAll("([A-Z])", " $1");
-        name = name.trim().toLowerCase();
-        return name+"("+ StringUtils.join(this, ",")+")";
+        name = StringUtils.lowerCaseFirst(name);
+        return name+"("+ StringUtils.join(this, ", ", new StringUtils.DefaultFormatter())+")";
     }
 
     /**

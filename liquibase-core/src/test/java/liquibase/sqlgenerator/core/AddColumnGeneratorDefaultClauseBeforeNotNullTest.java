@@ -24,7 +24,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
     protected boolean shouldBeImplementation(Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2Database
+                || database instanceof H2DatabaseTemp
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase

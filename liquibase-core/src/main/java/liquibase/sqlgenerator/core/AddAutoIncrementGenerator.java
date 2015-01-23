@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.H2Database;
+import liquibase.database.core.H2DatabaseTemp;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.structure.core.Column;
@@ -28,7 +28,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof MSSQLDatabase)
                 && !(database instanceof HsqlDatabase)
-                && !(database instanceof H2Database));
+                && !(database instanceof H2DatabaseTemp));
     }
 
     @Override

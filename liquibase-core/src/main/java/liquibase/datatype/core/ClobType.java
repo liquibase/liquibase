@@ -47,7 +47,7 @@ public class ClobType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("LONGTEXT");
             }
-        } else if (database instanceof H2Database || database instanceof HsqlDatabase) {
+        } else if (database instanceof H2DatabaseTemp || database instanceof HsqlDatabase) {
             if (originalDefinition.toLowerCase().startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
                 return new DatabaseDataType("LONGVARCHAR");
             } else {

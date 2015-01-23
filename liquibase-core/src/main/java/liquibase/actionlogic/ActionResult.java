@@ -27,4 +27,14 @@ public abstract class ActionResult {
     public String getMessage() {
         return message;
     }
+
+    /**
+     * Implementations contain logic to modify the data in an ActionResult and return a new result.
+     * Used to adapt the results of an {@link liquibase.actionlogic.ActionLogic} implementation through another.
+     */
+    public static interface Modifier {
+
+        public ActionResult rewrite(ActionResult result);
+
+    }
 }

@@ -1,8 +1,8 @@
-package liquibase.sdk.supplier.database;
+package liquibase.database;
 
-import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
-import org.apache.velocity.Template;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +78,9 @@ public abstract class ConnectionSupplier implements Cloneable {
         return "lbtbsp2";
     }
 
-    public abstract String getAdminUsername();
+    public String getAdminUsername() {
+        return "lbadmin";
+    };
 
     public String getAdminPassword() {
         return "lbadmin";
@@ -114,7 +116,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         return new HashSet<String>();
     }
 
-    public abstract ConfigTemplate getPuppetTemplate(Map<String, Object> context);
+//    public abstract ConfigTemplate getPuppetTemplate(Map<String, Object> context);
 
     public String getVersion() {
         return version;
@@ -184,11 +186,24 @@ public abstract class ConnectionSupplier implements Cloneable {
         }
     }
 
-    public Connection openConnection() throws SQLException {
-        return DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
+    public DatabaseConnection openConnection() throws DatabaseException {
+        try {
+            Connection connection = DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
+            return new JdbcConnection(connection);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
     }
 
-        public static class ConfigTemplate {
+    public Database openDatabase() throws DatabaseException {
+        DatabaseConnection databaseConnection = openConnection();
+        Database db = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection);
+        db.setConnection(databaseConnection);
+
+        return db;
+    }
+
+    public static class ConfigTemplate {
 
         private final String templatePath;
         private final Map<String, Object> context;

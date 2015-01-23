@@ -1,5 +1,6 @@
 package liquibase.actionlogic
 
+import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.UpdateSqlAction
 import liquibase.action.core.CreateSequenceAction
@@ -14,7 +15,7 @@ class ActionLogicFactoryTest extends Specification {
     Scope testScope;
 
     def setup() {
-        testScope = new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>(["resourceAccessor": new JUnitResourceAccessor()]))
+        testScope = JUnitScope.instance
 
         emptyLogicFactory = new ActionLogicFactory(testScope) {
             @Override
@@ -35,7 +36,7 @@ class ActionLogicFactoryTest extends Specification {
 
     def "getActionLogic when empty"() {
         expect:
-        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) == null
+        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), JUnitScope.instance) == null
     }
 
     def "getActionLogic"() {
@@ -48,9 +49,9 @@ class ActionLogicFactoryTest extends Specification {
         emptyLogicFactory.register(new MockActionLogic("drop 1", 1, DropSequenceAction))
 
         then:
-        emptyLogicFactory.getActionLogic(new CreateSequenceAction(), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())).toString() == "Mock action logic 'create 2'"
-        emptyLogicFactory.getActionLogic(new DropSequenceAction(), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())).toString() == "Mock action logic 'drop 3'"
-        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) == null
+        emptyLogicFactory.getActionLogic(new CreateSequenceAction(), JUnitScope.instance).toString() == "Mock action logic 'create 2'"
+        emptyLogicFactory.getActionLogic(new DropSequenceAction(), JUnitScope.instance).toString() == "Mock action logic 'drop 3'"
+        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), JUnitScope.instance) == null
 
     }
 

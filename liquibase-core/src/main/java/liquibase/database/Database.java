@@ -248,6 +248,7 @@ public interface Database extends PrioritizedService {
     void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
     void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException;
+
     void executeRollbackStatements(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException;
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
@@ -268,6 +269,11 @@ public interface Database extends PrioritizedService {
     void enableForeignKeyChecks() throws DatabaseException;
 
     public boolean isCaseSensitive();
+
+    /**
+     * Return true if the database is able to store the given name as is.
+     */
+    public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type);
 
     public boolean isReservedWord(String string);
 
@@ -315,11 +321,11 @@ public interface Database extends PrioritizedService {
     boolean createsIndexesForForeignKeys();
 
     /**
-	 * Whether the default schema should be included in generated SQL
-	 */
-	void setOutputDefaultSchema(boolean outputDefaultSchema);
+     * Whether the default schema should be included in generated SQL
+     */
+    void setOutputDefaultSchema(boolean outputDefaultSchema);
 
-	boolean getOutputDefaultSchema();
+    boolean getOutputDefaultSchema();
 
     boolean isDefaultSchema(String catalog, String schema);
 

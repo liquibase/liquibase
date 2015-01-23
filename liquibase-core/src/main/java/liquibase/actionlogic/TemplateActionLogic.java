@@ -159,13 +159,13 @@ public class TemplateActionLogic extends AbstractActionLogic {
         ValidationErrors validate = super.validate(action, scope);
         if (requiredAttributes != null) {
             for (String attr : requiredAttributes) {
-                validate.checkRequiredField(attr, action.getAttribute(attr, Object.class));
+                validate.checkRequiredField(attr, action.get(attr, Object.class));
             }
         }
 
         if (unsupportedAttributes != null) {
             for (String attr : unsupportedAttributes) {
-                validate.checkDisallowedField(attr, action.getAttribute(attr, Object.class), scope.get(Scope.Attr.database, Database.class));
+                validate.checkDisallowedField(attr, action.get(attr, Object.class), scope.get(Scope.Attr.database, Database.class));
             }
         }
         return validate;
@@ -239,7 +239,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
         expression = expression.trim();
         if (VARIABLE_PATTERN.matcher(expression).matches()) {
             expression = expression.substring(1);
-            Object value = action.getAttribute(expression, Object.class);
+            Object value = action.get(expression, Object.class);
             if (value == null) {
                 value = scope.get(expression, Object.class);
             }
@@ -312,7 +312,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
         Matcher matcher = VARIABLE_PATTERN.matcher(template);
         while (matcher.find()) {
             String variable = matcher.group(1);
-            String value = action.getAttribute(variable, String.class);
+            String value = action.get(variable, String.class);
 
             if (value == null) {
                 value = scope.get(variable, String.class);

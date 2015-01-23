@@ -12,37 +12,37 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     private SmartMap attributes = new SmartMap();
 
     @Override
-    public Set<String> getAttributes() {
+    public Set<String> getAttributeNames() {
         return attributes.keySet();
     }
 
     @Override
-    public <T> T getAttribute(String attribute, Class<T> type) {
+    public <T> T get(String attribute, Class<T> type) {
         return attributes.get(attribute, type);
     }
 
     @Override
-    public <T> T getAttribute(String attribute, T defaultValue) {
+    public <T> T get(String attribute, T defaultValue) {
         return attributes.get(attribute, defaultValue);
     }
 
     @Override
-    public <T> T getAttribute(Enum attribute, Class<T> type) {
-        return getAttribute(attribute.name(), type);
+    public <T> T get(Enum attribute, Class<T> type) {
+        return get(attribute.name(), type);
     }
 
     @Override
-    public <T> T getAttribute(Enum attribute, T defaultValue) {
-        return getAttribute(attribute.name(), defaultValue);
+    public <T> T get(Enum attribute, T defaultValue) {
+        return get(attribute.name(), defaultValue);
     }
 
     @Override
-    public Object setAttribute(Enum attribute, Object value) {
-        return this.setAttribute(attribute.name(), value);
+    public ExtensibleObject set(Enum attribute, Object value) {
+        return this.set(attribute.name(), value);
     }
 
     @Override
-    public Object setAttribute(String attribute, Object value) {
+    public ExtensibleObject set(String attribute, Object value) {
         attributes.set(attribute, value);
 
         return this;

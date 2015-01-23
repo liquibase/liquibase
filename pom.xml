@@ -61,6 +61,8 @@
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-debian</module>
+
+        <module>liquibase-h2</module>
     </modules>
 
     <dependencyManagement>

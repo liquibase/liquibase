@@ -99,7 +99,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
                 || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2Database
+                || database instanceof H2DatabaseTemp
                 || database instanceof OracleDatabase
                 || database instanceof InformixDatabase) {
             return " ";

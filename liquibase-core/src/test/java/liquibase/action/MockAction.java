@@ -9,7 +9,7 @@ public class MockAction extends AbstractAction {
 
     public MockAction(Map<String, ?> values) {
         for (Map.Entry<String, ?> entry: values.entrySet()) {
-            this.setAttribute(entry.getKey(), entry.getValue());
+            this.set(entry.getKey(), entry.getValue());
         }
     }
 }

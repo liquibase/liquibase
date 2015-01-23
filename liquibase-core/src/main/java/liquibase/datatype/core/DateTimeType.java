@@ -20,7 +20,7 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
-                || database instanceof H2Database
+                || database instanceof H2DatabaseTemp
                 || database instanceof HsqlDatabase
                 || database instanceof OracleDatabase) {
             return new DatabaseDataType("TIMESTAMP");

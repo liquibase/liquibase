@@ -34,7 +34,7 @@ public class UpdateSqlLogic extends AbstractSqlLogic {
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();
             Statement stmt = jdbcConnection.createStatement();
-            return new UpdateResult(stmt.executeUpdate(((AbstractSqlAction) action).getAttribute(AbstractSqlAction.Attr.sql, String.class)));
+            return new UpdateResult(stmt.executeUpdate(action.get(AbstractSqlAction.Attr.sql, String.class)));
 
         } catch (SQLException e) {
             throw new ActionPerformException(e);

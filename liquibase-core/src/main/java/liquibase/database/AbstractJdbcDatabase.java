@@ -664,6 +664,54 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.liquibaseSchemaName = schemaName;
     }
 
+    public boolean storesLowerCaseIdentifiers() {
+        return false;
+    }
+
+    public boolean storesLowerCaseQuotedIdentifiers() {
+        return true;
+    }
+
+    public boolean storesMixedCaseIdentifiers() {
+        return false;
+    }
+
+    public boolean storesMixedCaseQuotedIdentifiers() {
+        return true;
+    }
+
+    public boolean storesUpperCaseIdentifiers() {
+        return true;
+    }
+
+    public boolean storesUpperCaseQuotedIdentifiers() {
+        return true;
+    }
+
+    public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type) {
+        if (name.matches("[a-z_]")) {
+            if (quoted) {
+                return storesLowerCaseQuotedIdentifiers();
+            } else {
+                return storesLowerCaseIdentifiers();
+            }
+        } else if (name.matches("[A-Z_]")) {
+            if (quoted) {
+                return storesUpperCaseQuotedIdentifiers();
+            } else {
+                return storesUpperCaseIdentifiers();
+            }
+        } else if (name.matches("[a-zA-Z_]")) {
+            if (quoted) {
+                return storesMixedCaseQuotedIdentifiers();
+            } else {
+                return storesMixedCaseIdentifiers();
+            }
+        } else {
+            return quoted;
+        }
+    }
+
     @Override
     public boolean isCaseSensitive() {
     	if (caseSensitive == null) {

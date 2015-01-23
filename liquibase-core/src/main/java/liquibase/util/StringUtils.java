@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import liquibase.ExtensibleObject;
-import liquibase.database.Database;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -166,8 +165,8 @@ public class StringUtils {
 
     public static String join(ExtensibleObject extensibleObject, String delimiter, StringUtilsFormatter formatter) {
         List<String> list = new ArrayList<String>();
-        for (String attribute : extensibleObject.getAttributes()) {
-            list.add(attribute+"="+formatter.toString(extensibleObject.getAttribute(attribute, Object.class)));
+        for (String attribute : extensibleObject.getAttributeNames()) {
+            list.add(attribute+"="+formatter.toString(extensibleObject.get(attribute, Object.class)));
         }
         return join(list, delimiter);
     }
@@ -299,6 +298,17 @@ public class StringUtils {
         return value + StringUtils.repeat(" ", length - value.length());
     }
 
+    /**
+     * Returns the original value, unless it is null or only whitespace. If so, it returns the defaultValue.
+     */
+    public static String defaultIfEmpty(String original, String defaultValue) {
+       if (trimToNull(original) == null) {
+           return defaultValue;
+       } else {
+           return original;
+       }
+    }
+
     public static interface StringUtilsFormatter<Type> {
         public String toString(Type obj);
     }
@@ -308,6 +318,20 @@ public class StringUtils {
         public String toString(Object obj) {
             if (obj == null) {
                 return null;
+            }
+            return obj.toString();
+        }
+    }
+
+    public static class DefaultFormatter implements StringUtilsFormatter {
+        @Override
+        public String toString(Object obj) {
+            if (obj == null) {
+                return null;
+            } else if (obj instanceof Class) {
+                return ((Class) obj).getName();
+            } else if (obj instanceof Object[]) {
+                return "["+StringUtils.join((Object[]) obj, ", ", this)+"]";
             }
             return obj.toString();
         }

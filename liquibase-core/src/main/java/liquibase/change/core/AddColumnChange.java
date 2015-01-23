@@ -129,7 +129,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
             if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
                 addColumnStatement.setAddAfterColumn(column.getAfterColumn());
-            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
+            } else if (((database instanceof HsqlDatabase) || (database instanceof H2DatabaseTemp))
                        && (column.getBeforeColumn() != null)) {
                 addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
             } else if ((database instanceof FirebirdDatabase) && (column.getPosition() != null)) {

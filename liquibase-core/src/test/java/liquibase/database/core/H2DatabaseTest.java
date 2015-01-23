@@ -9,7 +9,7 @@ import org.junit.Test;
 public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
 
     public H2DatabaseTest() throws Exception {
-        super(new H2Database());
+        super(new H2DatabaseTemp());
     }
 
     @Override
