@@ -1,6 +1,6 @@
 package liquibase.datatype.core
 
-import liquibase.database.core.*
+import liquibase.database.core.postgresql.PostgresDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 

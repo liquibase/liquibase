@@ -7,7 +7,6 @@ import java.util.Set;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.*;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -129,7 +128,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
             if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
                 addColumnStatement.setAddAfterColumn(column.getAfterColumn());
-            } else if (((database instanceof HsqlDatabase) || (database instanceof H2DatabaseTemp))
+            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
                        && (column.getBeforeColumn() != null)) {
                 addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
             } else if ((database instanceof FirebirdDatabase) && (column.getPosition() != null)) {

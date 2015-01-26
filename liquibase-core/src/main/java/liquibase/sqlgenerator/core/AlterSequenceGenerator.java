@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -20,9 +19,9 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2DatabaseTemp.class);
-        validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class, H2DatabaseTemp.class);
-        validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2DatabaseTemp.class);
+        validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
+        validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class, H2Database.class);
+        validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
         validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, HsqlDatabase.class, DB2Database.class);
 
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
@@ -41,7 +40,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         }
 
         if (statement.getMinValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2DatabaseTemp) {
+            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
                 buffer.append(" RESTART WITH ").append(statement.getMinValue());
             } else {
                 buffer.append(" MINVALUE ").append(statement.getMinValue());

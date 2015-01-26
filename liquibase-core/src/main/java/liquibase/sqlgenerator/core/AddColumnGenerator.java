@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.database.core.*;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
@@ -56,7 +55,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         validationErrors.checkRequiredField("columnType", statement.getColumnType());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && (database instanceof H2DatabaseTemp
+        if (statement.isPrimaryKey() && (database instanceof H2Database
                 || database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof SQLiteDatabase)) {
@@ -72,7 +71,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
         	validationErrors.addError("Cannot add column on specific position");
         }
-        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2DatabaseTemp) || (database instanceof HsqlDatabase))) {
+        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2Database) || (database instanceof HsqlDatabase))) {
         	validationErrors.addError("Cannot add column on specific position");
         }
         if ((statement.getAddAtPosition() != null) && !(database instanceof FirebirdDatabase)) {

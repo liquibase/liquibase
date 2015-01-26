@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.sdk.database.MockDatabase;

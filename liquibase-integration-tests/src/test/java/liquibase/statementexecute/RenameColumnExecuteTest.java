@@ -1,7 +1,6 @@
 package liquibase.statementexecute;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
@@ -47,7 +46,7 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
         this.statementUnderTest = new RenameColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, "new_name", "int");
 
         assertCorrect("rename column table_name.column_name to new_name", DerbyDatabase.class, InformixDatabase.class);
-        assertCorrect("alter table table_name alter column column_name rename to new_name", H2DatabaseTemp.class, HsqlDatabase.class);
+        assertCorrect("alter table table_name alter column column_name rename to new_name", H2Database.class, HsqlDatabase.class);
         assertCorrect("alter table table_name alter column column_name to new_name", FirebirdDatabase.class);
         assertCorrect("alter table table_name change column_name new_name int", MySQLDatabase.class);
         assertCorrect("exec sp_rename '[table_name].[column_name]', 'new_name'", MSSQLDatabase.class);

@@ -1,6 +1,6 @@
 package liquibase.datatype.core;
 
-import liquibase.database.core.*;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -20,7 +20,7 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
-                || database instanceof H2DatabaseTemp
+                || database instanceof H2Database
                 || database instanceof HsqlDatabase
                 || database instanceof OracleDatabase) {
             return new DatabaseDataType("TIMESTAMP");

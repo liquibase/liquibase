@@ -1,7 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -47,7 +47,7 @@ public class ClobType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("LONGTEXT");
             }
-        } else if (database instanceof H2DatabaseTemp || database instanceof HsqlDatabase) {
+        } else if (database instanceof H2Database || database instanceof HsqlDatabase) {
             if (originalDefinition.toLowerCase().startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
                 return new DatabaseDataType("LONGVARCHAR");
             } else {

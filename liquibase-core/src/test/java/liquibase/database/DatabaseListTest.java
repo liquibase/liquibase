@@ -1,6 +1,6 @@
 package liquibase.database;
 
-import liquibase.database.core.H2DatabaseTemp;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -33,15 +33,15 @@ public class DatabaseListTest {
         assertTrue(DatabaseList.definitionMatches("oracle,mysql,mssql", new OracleDatabase(), false));
         assertTrue(DatabaseList.definitionMatches("oracle,mysql,mssql", new MySQLDatabase(), false));
         assertTrue(DatabaseList.definitionMatches("oracle,mysql,mssql", new MSSQLDatabase(), false));
-        assertFalse(DatabaseList.definitionMatches("oracle,mysql,mssql", new H2DatabaseTemp(), false));
+        assertFalse(DatabaseList.definitionMatches("oracle,mysql,mssql", new H2Database(), false));
 
         assertTrue(DatabaseList.definitionMatches("!h2", new MySQLDatabase(), false));
         assertTrue(DatabaseList.definitionMatches("!h2", new MySQLDatabase(), true));
 
-        assertFalse(DatabaseList.definitionMatches("!h2", new H2DatabaseTemp(), false));
-        assertFalse(DatabaseList.definitionMatches("!h2", new H2DatabaseTemp(), true));
+        assertFalse(DatabaseList.definitionMatches("!h2", new H2Database(), false));
+        assertFalse(DatabaseList.definitionMatches("!h2", new H2Database(), true));
 
-        assertFalse(DatabaseList.definitionMatches("!h2,mysql", new H2DatabaseTemp(), false));
+        assertFalse(DatabaseList.definitionMatches("!h2,mysql", new H2Database(), false));
         assertTrue(DatabaseList.definitionMatches("!h2,mysql", new MySQLDatabase(), false));
     }
 

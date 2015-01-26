@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;

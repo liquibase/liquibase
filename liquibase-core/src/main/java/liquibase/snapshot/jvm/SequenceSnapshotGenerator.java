@@ -2,7 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -132,7 +132,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "  sch.SCHEMAID = seq.SCHEMAID";
         } else if (database instanceof FirebirdDatabase) {
             return "SELECT RDB$GENERATOR_NAME AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
-        } else if (database instanceof H2DatabaseTemp) {
+        } else if (database instanceof H2Database) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
         } else if (database instanceof HsqlDatabase) {
             return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";

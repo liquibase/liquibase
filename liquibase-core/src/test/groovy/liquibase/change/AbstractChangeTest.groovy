@@ -3,7 +3,7 @@ package liquibase.change
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
-import liquibase.database.core.MSSQLDatabase
+import MSSQLDatabase
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException

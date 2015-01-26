@@ -1,11 +1,11 @@
 package liquibase.datatype.core
 
-import liquibase.database.core.DerbyDatabase
-import liquibase.database.core.HsqlDatabase
-import liquibase.database.core.MSSQLDatabase
-import liquibase.database.core.MySQLDatabase
-import liquibase.database.core.OracleDatabase
-import liquibase.database.core.PostgresDatabase
+import DerbyDatabase
+import HsqlDatabase
+import MSSQLDatabase
+import MySQLDatabase
+import OracleDatabase
+import liquibase.database.core.postgresql.PostgresDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -8,12 +8,12 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.H2DatabaseTemp;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
@@ -475,7 +475,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementH2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
-    		if (database instanceof H2DatabaseTemp) {
+    		if (database instanceof H2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
@@ -493,7 +493,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementStartWithH2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
-    		if (database instanceof H2DatabaseTemp) {
+    		if (database instanceof H2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
@@ -511,7 +511,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void testAutoIncrementStartWithIncrementByH2Database() throws Exception {
     	for (Database database : TestContext.getInstance().getAllDatabases()) {
-    		if (database instanceof H2DatabaseTemp) {
+    		if (database instanceof H2Database) {
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,

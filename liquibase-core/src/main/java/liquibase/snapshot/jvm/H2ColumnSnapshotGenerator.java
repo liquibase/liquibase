@@ -1,7 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.core.H2DatabaseTemp;
+import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.statement.DatabaseFunction;
@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public class H2ColumnSnapshotGenerator extends ColumnSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (Column.class.isAssignableFrom(objectType) && database instanceof H2DatabaseTemp) {
+        if (Column.class.isAssignableFrom(objectType) && database instanceof H2Database) {
             return PRIORITY_DATABASE;
         } else {
             return PRIORITY_NONE;

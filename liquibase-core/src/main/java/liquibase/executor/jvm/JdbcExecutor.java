@@ -1,7 +1,6 @@
 package liquibase.executor.jvm;
 
 import liquibase.change.Change;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -12,10 +11,8 @@ import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.sql.UnparsedSql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.*;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 

@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -16,7 +16,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     public boolean supports(RenameViewStatement statement, Database database) {
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2DatabaseTemp
+                || database instanceof H2Database
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof InformixDatabase

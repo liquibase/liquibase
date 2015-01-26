@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.H2DatabaseTemp;
+import liquibase.database.core.H2Database;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 public class InsertOrUpdateGeneratorH2 extends InsertOrUpdateGenerator {
     @Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
-        return database instanceof H2DatabaseTemp;
+        return database instanceof H2Database;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
@@ -24,7 +23,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
     protected boolean shouldBeImplementation(Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2DatabaseTemp
+                || database instanceof H2Database
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase

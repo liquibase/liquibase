@@ -1,11 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.Warnings;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
-import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -99,7 +99,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
                 || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2DatabaseTemp
+                || database instanceof H2Database
                 || database instanceof OracleDatabase
                 || database instanceof InformixDatabase) {
             return " ";

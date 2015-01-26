@@ -4,12 +4,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import liquibase.database.Database;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropIndexStatement;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;

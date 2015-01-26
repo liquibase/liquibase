@@ -9,7 +9,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.structure.core.Index;
 import liquibase.sql.Sql;

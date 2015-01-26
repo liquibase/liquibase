@@ -1,7 +1,7 @@
 package liquibase.change.core
 
 import liquibase.change.StandardChangeTest
-import liquibase.database.core.OracleDatabase
+import OracleDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor

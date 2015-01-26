@@ -1,7 +1,6 @@
 package liquibase.statementexecute;
 
 import liquibase.database.*;
-import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 

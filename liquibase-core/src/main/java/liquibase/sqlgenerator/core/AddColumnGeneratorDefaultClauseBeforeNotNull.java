@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.H2DatabaseTemp;
+import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -26,7 +26,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     public boolean supports(AddColumnStatement statement, Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
-                || database instanceof H2DatabaseTemp
+                || database instanceof H2Database
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
@@ -97,7 +97,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     private boolean primaryKeyBeforeNotNull(Database database) {
-        return !(database instanceof HsqlDatabase || database instanceof H2DatabaseTemp);
+        return !(database instanceof HsqlDatabase || database instanceof H2Database);
     }
 
 

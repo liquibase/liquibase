@@ -6,14 +6,9 @@ import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.CachedRow;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
@@ -21,7 +16,6 @@ import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 
 import java.sql.*;
-import java.util.List;
 
 /**
  * Logic to snapshot database column(s). Delegates to {@link QueryJdbcMetaDataAction} getColumns().

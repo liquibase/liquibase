@@ -1,12 +1,6 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import liquibase.change.StandardChangeTest
 
 public class AddNotNullConstraintChangeTest extends StandardChangeTest {
 

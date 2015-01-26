@@ -4,7 +4,7 @@ NOTE: This output is generated and parsed by TestMD. Please read it, but DO NOT 
 
 ---------------------------------------
 
-- **database:** liquibase.database.core.H2Database
+- **database:** liquibase.database.core.h2.H2Database
 
 | Permutation | Verified | catalogName | schemaName | tableName   | RESULTS
 | :---------- | :------- | :---------- | :--------- | :---------- | :------

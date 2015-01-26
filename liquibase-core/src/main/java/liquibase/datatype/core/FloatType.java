@@ -2,7 +2,6 @@ package liquibase.datatype.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeInfo;

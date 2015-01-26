@@ -9,7 +9,6 @@ import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 /**
  * Creates a primary key out of an existing column or set of columns.

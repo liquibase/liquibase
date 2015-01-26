@@ -2,7 +2,6 @@ package liquibase.serializer.core.formattedsql;
 
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.OracleDatabase;
@@ -11,7 +10,6 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 
 import java.io.File;
 import java.io.IOException;

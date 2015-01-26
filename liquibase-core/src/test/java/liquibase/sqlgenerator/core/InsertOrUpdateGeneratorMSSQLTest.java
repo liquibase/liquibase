@@ -4,7 +4,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.sql.Sql;
+
 import static junit.framework.Assert.assertTrue;
 import junit.framework.Assert;
 
