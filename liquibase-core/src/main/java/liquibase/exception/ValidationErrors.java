@@ -5,10 +5,7 @@ import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ValidationErrors {
 
@@ -27,9 +24,11 @@ public class ValidationErrors {
      * More convenient version of {@link #checkRequiredField(String, Object)} that doesn't require you to lookup the value first.
      * Instead, simply pass the field and the base object.
      */
-    public void checkForRequiredField(Enum requiredFieldName, ExtensibleObject object) {
+    public ValidationErrors checkForRequiredField(Enum requiredFieldName, ExtensibleObject object) {
         Object value = object.get(requiredFieldName, Object.class);
         checkRequiredField(requiredFieldName.name(), value);
+
+        return this;
     }
 
     /**
@@ -45,6 +44,21 @@ public class ValidationErrors {
             addError(requiredFieldName + " is empty");
         }
     }
+
+    /**
+     * If an error was added that the given field is required, remove the error.
+     */
+    public ValidationErrors removeRequiredField(String field) {
+        ListIterator<String> it = errorMessages.listIterator();
+        while (it.hasNext()) {
+            String message = it.next();
+            if (message.equals(field+" is required") || message.equals(field+" is empty")) {
+                it.remove();
+            }
+        }
+        return this;
+    }
+
 
     public void checkDisallowedField(String disallowedFieldName, Object value, Database database, Class<? extends Database>... disallowedDatabases) {
         boolean isDisallowed = false;

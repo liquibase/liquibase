@@ -72,6 +72,21 @@ public class Scope {
         return child(newValueKey.name(), newValue);
     }
 
+    /**
+     * Return true if the given key is defined.
+     */
+    public boolean has(String key) {
+        return get(key, Object.class) != null;
+    }
+
+    /**
+     * Return true if the given key is defined.
+     */
+    public boolean has(Enum key) {
+        return has(key.name());
+    }
+
+
     public  <T> T get(Enum key, Class<T> type) {
         return get(key.name(), type);
     }

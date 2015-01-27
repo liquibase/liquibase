@@ -18,7 +18,16 @@ public class RewriteResult extends ActionResult {
     private ActionResult.Modifier modifier;
 
     public RewriteResult(Action... actions) {
-        this(null, actions);
+        this((Modifier) null, actions);
+    }
+
+    /**
+     * Creates a new RewriteResult with the actions of the given previousResult and then the additional actions.
+     * Any modifier defined in the previousResult will be kept as well.
+     */
+    public RewriteResult(RewriteResult previousResult, Action... actions) {
+        this(previousResult.getModifier(), previousResult.getActions().toArray(new Action[previousResult.getActions().size()]));
+        this.actions.addAll(Arrays.asList(actions));
     }
 
     public RewriteResult(ActionResult.Modifier modifier, Action... actions) {

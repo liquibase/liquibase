@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -99,15 +98,6 @@ public class AddAutoIncrementChange extends AbstractChange {
     
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        if (database instanceof PostgresDatabase) {
-            String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
-            return new SqlStatement[]{
-                    new CreateSequenceStatement(catalogName, schemaName, sequenceName),
-                    new SetNullableStatement(catalogName, schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(catalogName, schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction((schemaName==null?"":schemaName+".")+sequenceName)),
-            };
-        }
-
         return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 

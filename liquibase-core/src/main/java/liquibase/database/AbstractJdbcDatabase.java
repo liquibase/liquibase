@@ -832,6 +832,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public boolean supportsDefiningColumnsAsNull() {
+        return false;
+    }
+
+    @Override
     public boolean isSystemObject(final DatabaseObject example) {
         if (example == null) {
             return false;

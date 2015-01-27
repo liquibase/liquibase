@@ -1,8 +1,9 @@
-package liquibase.sqlgenerator.core;
+package liquibase.actionlogic.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
@@ -20,16 +21,16 @@ import liquibase.statement.core.AddColumnStatement;
 
 import org.junit.Test;
 
-public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
+public class AddColumnsLogicTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
 	private static final String TABLE_NAME = "table_name";
 	private static final String COLUMN_NAME = "column_name";
     private static final String COLUMN_TYPE = "column_type";
 
-	public AddColumnGeneratorTest() throws Exception {
-        this(new AddColumnGenerator());
+	public AddColumnsLogicTest() throws Exception {
+        this(new AddColumnsLogic());
     } 
 
-    protected AddColumnGeneratorTest(SqlGenerator<AddColumnStatement> generatorUnderTest) throws Exception {
+    protected AddColumnsLogicTest(SqlGenerator<AddColumnStatement> generatorUnderTest) throws Exception {
         super(generatorUnderTest);
     }
 

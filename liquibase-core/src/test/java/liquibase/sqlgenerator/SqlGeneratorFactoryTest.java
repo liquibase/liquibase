@@ -5,10 +5,10 @@ import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
+import liquibase.actionlogic.core.AddAutoIncrementLogic;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2;
-import liquibase.sqlgenerator.core.AddColumnGenerator;
+import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import org.junit.After;
@@ -54,7 +54,7 @@ public class SqlGeneratorFactoryTest {
         AddAutoIncrementGeneratorHsqlH2 sqlGenerator
         	= new AddAutoIncrementGeneratorHsqlH2();
 
-        factory.register(new AddAutoIncrementGenerator());
+        factory.register(new AddAutoIncrementLogic());
         factory.register(sqlGenerator);
         factory.register(new AddAutoIncrementGeneratorDB2());
 
@@ -75,7 +75,7 @@ public class SqlGeneratorFactoryTest {
         AddAutoIncrementGeneratorHsqlH2 sqlGenerator
         			= new AddAutoIncrementGeneratorHsqlH2();
 
-        factory.register(new AddAutoIncrementGenerator());
+        factory.register(new AddAutoIncrementLogic());
         factory.register(sqlGenerator);
         factory.register(new AddAutoIncrementGeneratorDB2());
 
@@ -93,13 +93,13 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        factory.register(new AddAutoIncrementGenerator());
+        factory.register(new AddAutoIncrementLogic());
         factory.register(new AddAutoIncrementGeneratorHsqlH2());
         factory.register(new AddAutoIncrementGeneratorDB2());
 
         assertEquals(3, factory.getGenerators().size());
 
-        factory.unregister(AddColumnGenerator.class);
+        factory.unregister(AddColumnsLogic.class);
         assertEquals(3, factory.getGenerators().size());
     }
 

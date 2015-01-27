@@ -16,6 +16,20 @@ public class AbstractExtensibleObject implements ExtensibleObject {
         return attributes.keySet();
     }
 
+    /**
+     * Return true if the given key is defined.
+     */
+    public boolean has(String key) {
+        return get(key, Object.class) != null;
+    }
+
+    /**
+     * Return true if the given key is defined.
+     */
+    public boolean has(Enum key) {
+        return has(key.name());
+    }
+
     @Override
     public <T> T get(String attribute, Class<T> type) {
         return attributes.get(attribute, type);

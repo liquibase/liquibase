@@ -19,4 +19,14 @@ public class CreateSequenceAction extends AbstractAction {
         cycle,
         cacheSize
     }
+
+    public CreateSequenceAction() {
+    }
+
+    public CreateSequenceAction(String catalogName, String schemaName, String sequenceName) {
+        set(Attr.catalogName, catalogName);
+        set(Attr.schemaName, schemaName);
+        set(Attr.sequenceName, sequenceName);
+    }
+
 }

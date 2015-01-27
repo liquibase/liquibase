@@ -256,4 +256,9 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	public String getJdbcCatalogName(CatalogAndSchema schema) {
 		return "";
 	}
+
+	@Override
+	public boolean supportsDefiningColumnsAsNull() {
+		return true;
+	}
 }

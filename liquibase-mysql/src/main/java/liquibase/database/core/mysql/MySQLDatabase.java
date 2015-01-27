@@ -456,4 +456,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "XOR",
                 "YEAR_MONTH",
                 "ZEROFILL"));
-    }}
+    }
+
+    @Override
+    public boolean supportsDefiningColumnsAsNull() {
+        return true;
+    }
+}

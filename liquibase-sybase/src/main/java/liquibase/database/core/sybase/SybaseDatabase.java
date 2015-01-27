@@ -305,4 +305,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         }
         return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
     }
+
+    @Override
+    public boolean supportsDefiningColumnsAsNull() {
+        return true;
+    }
 }

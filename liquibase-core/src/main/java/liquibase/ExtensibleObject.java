@@ -1,5 +1,6 @@
 package liquibase;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -15,6 +16,10 @@ public interface ExtensibleObject {
      * Return the names of all the set attributes. If an attribute is null the name may or may not be returned.
      */
     Set<String> getAttributeNames();
+
+    boolean has(String attribute);
+
+    boolean has(Enum attribute);
 
     /**
      * Return the current value of the given attribute name, converted to the passed type.
