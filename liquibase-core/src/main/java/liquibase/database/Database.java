@@ -342,5 +342,7 @@ public interface Database extends PrioritizedService {
     public void addReservedWords(Collection<String> words);
 
     boolean supportsDefiningColumnsAsNull();
+
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType);
 }
 

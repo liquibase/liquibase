@@ -11,13 +11,8 @@ import liquibase.datatype.DataTypeFactory;
 public class AddColumnsLogicOracle extends AddColumnsLogic {
 
     @Override
-    protected int getPriority() {
-        return PRIORITY_SPECIALIZED;
-    }
-
-    @Override
-    protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class) instanceof OracleDatabase;
+    protected Class<? extends Database> getRequiredDatabase() {
+        return OracleDatabase.class;
     }
 
     @Override

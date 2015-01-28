@@ -363,4 +363,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return caseSensitive.booleanValue();
         }
     }
+
+    @Override
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
+        return Index.class.isAssignableFrom(objectType);
+    }
 }

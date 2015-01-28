@@ -6,18 +6,12 @@ import liquibase.action.core.*;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
-import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.structure.core.Column;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.ForeignKeyConstraint;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -29,14 +23,13 @@ import java.util.regex.Pattern;
 
 public class AddColumnsLogic extends AbstractActionLogic {
 
-    @Override
-    protected Class<? extends Action> getSupportedAction() {
-        return AddColumnsAction.class;
+    public static enum Clauses {
+        nullable,
     }
 
     @Override
-    protected int getPriority() {
-        return PRIORITY_DEFAULT;
+    protected Class<? extends Action> getSupportedAction() {
+        return AddColumnsAction.class;
     }
 
     @Override
@@ -98,19 +91,19 @@ public class AddColumnsLogic extends AbstractActionLogic {
 
     protected Action[] execute(ColumnDefinition column, Action action, Scope scope) {
         List<Action> returnActions = new ArrayList<>();
-        returnActions.add(new AlterTableAction(
+        returnActions.add(new RedefineTableAction(
                 action.get(AddColumnsAction.Attr.catalogName, String.class),
                 action.get(AddColumnsAction.Attr.schemaName, String.class),
                 action.get(AddColumnsAction.Attr.tableName, String.class),
-                StringUtils.join(getColumnDefinitionClauses(column, action, scope), " ")
+                getColumnDefinitionClauses(column, action, scope)
         ));
 
 
         return returnActions.toArray(new Action[returnActions.size()]);
     }
 
-    protected List<String> getColumnDefinitionClauses(ColumnDefinition column, Action action, Scope scope) {
-        List<String> clauses = new ArrayList<>();
+    protected StringClauses getColumnDefinitionClauses(ColumnDefinition column, Action action, Scope scope) {
+        StringClauses clauses = new StringClauses();
         Database database = scope.get(Scope.Attr.database, Database.class);
 
         String columnName = column.get(ColumnDefinition.Attr.columnName, String.class);
@@ -120,24 +113,24 @@ public class AddColumnsLogic extends AbstractActionLogic {
         boolean nullable = primaryKey || column.get(ColumnDefinition.Attr.isNullable, false);
         String addAfterColumn = column.get(ColumnDefinition.Attr.addAfterColumn, String.class);
 
-        clauses.add("ADD " + database.escapeObjectName(columnName, Column.class) + " " + DataTypeFactory.getInstance().fromDescription(columnType + (autoIncrement == null? "" : "{autoIncrement:true}"), database).toDatabaseDataType(database));
+        clauses.append("ADD " + database.escapeObjectName(columnName, Column.class) + " " + DataTypeFactory.getInstance().fromDescription(columnType + (autoIncrement == null ? "" : "{autoIncrement:true}"), database).toDatabaseDataType(database));
 
-        clauses.add(getDefaultValueClause(column, action, scope));
+        clauses.append(getDefaultValueClause(column, action, scope));
 
         if (autoIncrement != null && database.supportsAutoIncrement()) {
-            clauses.add(database.getAutoIncrementClause(autoIncrement.get(AutoIncrementDefinition.Attr.startWith, BigInteger.class), autoIncrement.get(AutoIncrementDefinition.Attr.incrementBy, BigInteger.class)));
+            clauses.append(database.getAutoIncrementClause(autoIncrement.get(AutoIncrementDefinition.Attr.startWith, BigInteger.class), autoIncrement.get(AutoIncrementDefinition.Attr.incrementBy, BigInteger.class)));
         }
 
         if (nullable) {
             if (database.supportsDefiningColumnsAsNull()) {
-                clauses.add("NULL");
+                clauses.append(Clauses.nullable, "NULL");
             }
         } else {
-            clauses.add("NOT NULL");
+            clauses.append(Clauses.nullable, "NOT NULL");
         }
 
         if (primaryKey) {
-            clauses.add("PRIMARY KEY");
+            clauses.append("PRIMARY KEY");
         }
 
 //        if (database instanceof MySQLDatabase && statement.getRemarks() != null) {
@@ -145,7 +138,7 @@ public class AddColumnsLogic extends AbstractActionLogic {
 //        }
 
         if (addAfterColumn != null) {
-            clauses.add("AFTER " + database.escapeObjectName(addAfterColumn, Column.class));
+            clauses.append("AFTER " + database.escapeObjectName(addAfterColumn, Column.class));
         }
 
         return clauses;

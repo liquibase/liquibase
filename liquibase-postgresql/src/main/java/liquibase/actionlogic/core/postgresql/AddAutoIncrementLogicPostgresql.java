@@ -13,10 +13,6 @@ import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.statement.core.SetNullableStatement;
 
 public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
 
@@ -26,13 +22,8 @@ public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
     }
 
     @Override
-    protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class) instanceof PostgresDatabase;
-    }
-
-    @Override
-    protected int getPriority() {
-        return PRIORITY_SPECIALIZED;
+    protected Class<? extends Database> getRequiredDatabase() {
+        return PostgresDatabase.class;
     }
 
     @Override

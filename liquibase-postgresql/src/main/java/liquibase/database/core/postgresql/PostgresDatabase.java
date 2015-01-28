@@ -10,6 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -166,6 +167,15 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        if (Index.class.isAssignableFrom(objectType)) {
+            return this.escapeObjectName(objectName, Index.class);
+        } else {
+            return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+        }
+    }
+
+    @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
             return super.correctObjectName(objectName, objectType);
@@ -252,4 +262,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         return count != null && count > 0;
     }
+
+    @Override
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
+        return Index.class.isAssignableFrom(objectType);
+    }
+
 }

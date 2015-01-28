@@ -11,28 +11,29 @@ import liquibase.exception.ValidationErrors;
 public abstract class AbstractActionLogic implements ActionLogic {
 
     /**
-     * Returns the Action class supported by this ActionLogic implementation. Used by {@link liquibase.actionlogic.AbstractActionLogic#getPriority(liquibase.action.Action, liquibase.Scope)}
+     * Returns the Action class supported by this ActionLogic implementation. Used by {@link AbstractActionLogic#getPriority(liquibase.action.Action, liquibase.Scope)}
      */
     protected abstract Class<? extends Action> getSupportedAction();
 
     /**
      * Return true if this ActionLogic requires a database in the scope. Used by {@link #supportsScope(liquibase.Scope)}
      */
-    protected boolean requiresDatabase() {
-        return true;
+    protected Class<? extends Database> getRequiredDatabase() {
+        return Database.class;
     }
 
     /**
-     * Return true this ActionLogic implementation is valid for the given scope. Used by {@link liquibase.actionlogic.AbstractActionLogic#getPriority(liquibase.action.Action, liquibase.Scope)}
+     * Return true this ActionLogic implementation is valid for the given scope. Used by {@link AbstractActionLogic#getPriority(liquibase.action.Action, liquibase.Scope)}
      */
     protected boolean supportsScope(Scope scope) {
-        return requiresDatabase() && !scope.has(Scope.Attr.database);
-    }
+        Class<? extends Database> requiredDatabase = getRequiredDatabase();
+        if (requiredDatabase != null) {
+            Database database = scope.get(Scope.Attr.database, Database.class);
+            return database != null && requiredDatabase.isAssignableFrom(database.getClass());
+        }
 
-    /**
-     * Return the priority to return by {@link liquibase.actionlogic.AbstractActionLogic#getPriority(liquibase.action.Action, liquibase.Scope)} if it is a valid ActionLogic.
-     */
-    protected abstract int getPriority();
+        return true;
+    }
 
     @Override
     public int getPriority(Action action, Scope scope) {
@@ -43,7 +44,12 @@ public abstract class AbstractActionLogic implements ActionLogic {
             return PRIORITY_NOT_APPLICABLE;
         }
 
-        return getPriority();
+        Class<? extends Database> requiredDatabase = getRequiredDatabase();
+        if (requiredDatabase == null || requiredDatabase.equals(Database.class)) {
+            return PRIORITY_DEFAULT;
+        } else {
+            return PRIORITY_SPECIALIZED;
+        }
     }
 
     /**

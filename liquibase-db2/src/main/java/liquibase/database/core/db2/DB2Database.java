@@ -9,6 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -234,6 +235,11 @@ public class DB2Database extends AbstractJdbcDatabase {
     @Override
     public boolean jdbcCallsCatalogsSchemas() {
         return true;
+    }
+
+    @Override
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
+        return Index.class.isAssignableFrom(objectType);
     }
 
 }

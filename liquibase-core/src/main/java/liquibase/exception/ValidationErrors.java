@@ -1,6 +1,7 @@
 package liquibase.exception;
 
 import liquibase.ExtensibleObject;
+import liquibase.action.core.AddPrimaryKeyAction;
 import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
 import liquibase.util.StringUtils;
@@ -59,21 +60,32 @@ public class ValidationErrors {
         return this;
     }
 
+    public ValidationErrors removeRequiredField(Enum field) {
+        return removeRequiredField(field.name());
 
-    public void checkDisallowedField(String disallowedFieldName, Object value, Database database, Class<? extends Database>... disallowedDatabases) {
-        boolean isDisallowed = false;
-        if (disallowedDatabases == null || disallowedDatabases.length == 0) {
-            isDisallowed = true;
-        } else {
-            for (Class<? extends Database> databaseClass : disallowedDatabases) {
-                if (databaseClass.isAssignableFrom(database.getClass())) {
-                    isDisallowed = true;
-                }
-            }
-        }
+    }
 
-        if (isDisallowed && value != null) {
-            addError(disallowedFieldName + " is not allowed on "+(database == null?"unknown":database.getShortName()));
+    public ValidationErrors addUnsupportedError(String message, String scopeDescription) {
+        addError(message+" is not supported in "+scopeDescription);
+        return this;
+    }
+
+    /**
+     * More convenient version of {@link #checkDisallowedField(String, Object, String)} that doesn't require you to lookup the value first.
+     * Instead, simply pass the field and the base object.
+     */
+    public ValidationErrors checkForDisallowedField(Enum disallowedField, ExtensibleObject object, String scopeDescription) {
+        Object value = object.get(disallowedField, Object.class);
+        checkDisallowedField(disallowedField.name(), value, scopeDescription);
+
+        return this;
+
+
+    }
+
+    public void checkDisallowedField(String disallowedFieldName, Object value, String scopeDescription) {
+        if (value != null) {
+            addError(disallowedFieldName + " is not allowed in "+scopeDescription);
         }
     }
 
@@ -152,10 +164,14 @@ public class ValidationErrors {
     public List<String> getUnsupportedErrorMessages() {
         List<String> unsupportedErrorMessages = new ArrayList<String>();
         for (String message : errorMessages) {
-            if (message.contains(" is not allowed on ")) {
+            if (message.contains(" is not allowed on ") || message.contains(" is not supported in ")) {
                 unsupportedErrorMessages.add(message);
             }
         }
         return Collections.unmodifiableList(unsupportedErrorMessages);
+    }
+
+    public ValidationErrors removeUnsupportedField(Enum field) {
+        return this;
     }
 }

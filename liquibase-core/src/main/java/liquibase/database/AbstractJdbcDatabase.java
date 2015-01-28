@@ -1512,4 +1512,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 	public String getSystemSchema(){
     	return "information_schema";
     }
+
+    @Override
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
+        return false;
+    }
 }

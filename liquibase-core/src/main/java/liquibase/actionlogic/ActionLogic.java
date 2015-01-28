@@ -8,7 +8,7 @@ import liquibase.exception.ValidationErrors;
 /**
  * Implementations of this interface contain the logic to handle an {@link liquibase.action.Action} object.
  * Which ActionLogic implementation is used will be based on which returns the highest value from {@link #getPriority(liquibase.action.Action, liquibase.Scope)}.
- * For convenience, consider extending {@link liquibase.actionlogic.AbstractActionLogic}.
+ * For convenience, consider extending {@link AbstractActionLogic}.
  * If this ActionLogic interacts with an external system, implement {@link liquibase.actionlogic.ActionLogic.InteractsExternally}
  */
 public interface ActionLogic {

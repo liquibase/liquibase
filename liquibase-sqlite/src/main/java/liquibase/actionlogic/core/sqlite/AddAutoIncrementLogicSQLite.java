@@ -18,19 +18,14 @@ import liquibase.exception.ValidationErrors;
 public class AddAutoIncrementLogicSQLite extends AddAutoIncrementLogic {
 
     @Override
-    public int getPriority() {
-        return PRIORITY_SPECIALIZED;
-    }
-
-    @Override
-    protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class) instanceof SQLiteDatabase;
+    protected Class<? extends Database> getRequiredDatabase() {
+        return SQLiteDatabase.class;
     }
 
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
         return super.validate(action, scope)
-                .removeRequiredField(AddAutoIncrementAction.Attr.columnDataType.name());
+                .removeRequiredField(AddAutoIncrementAction.Attr.columnDataType);
     }
 
 //    @Override

@@ -32,6 +32,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 
 public class MockDatabase implements Database, InternalDatabase {
@@ -762,4 +763,10 @@ public class MockDatabase implements Database, InternalDatabase {
     public String toString() {
         return "Mock database";
     }
+
+    @Override
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
+        return true;
+    }
+
 }

@@ -15,6 +15,15 @@ public class ColumnDefinition extends AbstractExtensibleObject {
         isPrimaryKey,
         isNullable,
         constraints,
-
+        computed,
     }
+
+    public ColumnDefinition() {
+    }
+
+    public ColumnDefinition(String columnName, String columnType) {
+        set(Attr.columnName, columnName);
+        set(Attr.columnType, columnType);
+    }
+
 }

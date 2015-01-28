@@ -1,6 +1,8 @@
 package liquibase.util;
 
 import liquibase.ExtensibleObject;
+import liquibase.database.Database;
+import liquibase.structure.DatabaseObject;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -334,6 +336,22 @@ public class StringUtils {
                 return "["+StringUtils.join((Object[]) obj, ", ", this)+"]";
             }
             return obj.toString();
+        }
+    }
+
+    public static class ObjectNameFormatter implements StringUtilsFormatter<String> {
+
+        private Database database;
+        private Class<? extends DatabaseObject> objectType;
+
+        public ObjectNameFormatter(Class<? extends DatabaseObject> objectType, Database database) {
+            this.objectType = objectType;
+            this.database = database;
+        }
+
+        @Override
+        public String toString(String obj) {
+            return database.escapeObjectName(obj, objectType);
         }
     }
 }

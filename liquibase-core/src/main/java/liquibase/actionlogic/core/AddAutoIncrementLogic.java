@@ -3,7 +3,8 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddAutoIncrementAction;
-import liquibase.action.core.AlterColumnAction;
+import liquibase.action.core.RedefineColumnAction;
+import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
@@ -11,19 +12,19 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import org.hamcrest.StringDescription;
 
 import java.math.BigInteger;
 
 public class AddAutoIncrementLogic extends AbstractActionLogic {
 
-    @Override
-    protected Class<? extends Action> getSupportedAction() {
-        return AddAutoIncrementAction.class;
+    public static enum Clauses {
+        autoIncrementDefinition, dataType
     }
 
     @Override
-    protected int getPriority() {
-        return PRIORITY_DEFAULT;
+    protected Class<? extends Action> getSupportedAction() {
+        return AddAutoIncrementAction.class;
     }
 
     @Override
@@ -43,17 +44,22 @@ public class AddAutoIncrementLogic extends AbstractActionLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-
-        String newDefinition = DataTypeFactory.getInstance().fromDescription(action.get(AddAutoIncrementAction.Attr.columnDataType, String.class) + "{autoIncrement:true}", database).toDatabaseDataType(database)
-                + " "
-                + database.getAutoIncrementClause(action.get(AddAutoIncrementAction.Attr.startWith, BigInteger.class), action.get(AddAutoIncrementAction.Attr.incrementBy, BigInteger.class));
-
-        return new RewriteResult(new AlterColumnAction(
+        return new RewriteResult(new RedefineColumnAction(
                 action.get(AddAutoIncrementAction.Attr.catalogName, String.class),
                 action.get(AddAutoIncrementAction.Attr.schemaName, String.class),
                 action.get(AddAutoIncrementAction.Attr.tableName, String.class),
                 action.get(AddAutoIncrementAction.Attr.columnName, String.class),
-                newDefinition));
+                getAlterColumnDefinition(action, scope)));
+    }
+
+    protected StringClauses getAlterColumnDefinition(Action action, Scope scope) {
+
+        Database database = scope.get(Scope.Attr.database, Database.class);
+
+        StringClauses clauses = new StringClauses();
+        clauses.append(Clauses.dataType, DataTypeFactory.getInstance().fromDescription(action.get(AddAutoIncrementAction.Attr.columnDataType, String.class) + "{autoIncrement:true}", database).toDatabaseDataType(database).toSql());
+        clauses.append(Clauses.autoIncrementDefinition, database.getAutoIncrementClause(action.get(AddAutoIncrementAction.Attr.startWith, BigInteger.class), action.get(AddAutoIncrementAction.Attr.incrementBy, BigInteger.class)));
+
+        return clauses;
     }
 }

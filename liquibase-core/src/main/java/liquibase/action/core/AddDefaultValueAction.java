@@ -11,11 +11,6 @@ public class AddDefaultValueAction extends AbstractAction {
         columnName,
         columnDataType,
         defaultValue,
-        defaultValueNumeric,
-        defaultValueDate,
-        defaultValueBoolean,
-        defaultValueComputed,
-        defaultValueSequenceNext,
     }
 
     public AddDefaultValueAction() {

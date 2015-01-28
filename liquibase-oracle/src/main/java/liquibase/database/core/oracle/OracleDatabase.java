@@ -12,6 +12,7 @@ import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
@@ -321,4 +322,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
         return super.generateDatabaseFunctionValue(databaseFunction);
     }
+
+    @Override
+    public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
+        return Index.class.isAssignableFrom(objectType);
+    }
+
 }

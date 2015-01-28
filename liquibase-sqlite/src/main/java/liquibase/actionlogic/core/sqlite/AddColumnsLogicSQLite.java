@@ -11,14 +11,10 @@ import liquibase.exception.ActionPerformException;
 public class AddColumnsLogicSQLite extends AddColumnsLogic {
 
     @Override
-     public int getPriority() {
-        return PRIORITY_SPECIALIZED;
+    protected Class<? extends Database> getRequiredDatabase() {
+        return SQLiteDatabase.class;
     }
 
-    @Override
-    protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database,Database.class) instanceof SQLiteDatabase;
-    }
 
 //    @Override
 //    public boolean generateStatementsIsVolatile(Database database) {
