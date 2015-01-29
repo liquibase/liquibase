@@ -6,7 +6,7 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateIndexAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.database.Database;
@@ -17,7 +17,7 @@ import liquibase.util.StringUtils;
 
 import java.util.List;
 
-public class CreateIndexLogic extends AbstractActionLogic {
+public class CreateIndexLogic extends AbstractSqlBuilderLogic {
 
     public static enum Clauses {
         indexName,
@@ -50,10 +50,11 @@ public class CreateIndexLogic extends AbstractActionLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new ExecuteSqlAction(getCreateIndexClauses(action, scope).toString()));
+        return new RewriteResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
     }
 
-    public StringClauses getCreateIndexClauses(Action action, Scope scope) {
+    @Override
+    protected StringClauses generateSql(Action action, Scope scope) {
         final Database database = scope.get(Scope.Attr.database, Database.class);
         final String tableCatalogName = action.get(CreateIndexAction.Attr.tableCatalogName, String.class);
         final String tableSchemaName = action.get(CreateIndexAction.Attr.tableSchemaName, String.class);

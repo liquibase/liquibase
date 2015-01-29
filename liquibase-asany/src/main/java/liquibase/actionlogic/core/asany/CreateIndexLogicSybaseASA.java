@@ -15,8 +15,8 @@ public class CreateIndexLogicSybaseASA extends CreateIndexLogic {
     }
 
     @Override
-    public StringClauses getCreateIndexClauses(Action action, Scope scope) {
-        StringClauses clauses = super.getCreateIndexClauses(action, scope);
+    protected StringClauses generateSql(Action action, Scope scope) {
+        StringClauses clauses = super.generateSql(action, scope);
 
         String tablespace = action.get(CreateIndexAction.Attr.tablespace, String.class);
         if (tablespace != null) {

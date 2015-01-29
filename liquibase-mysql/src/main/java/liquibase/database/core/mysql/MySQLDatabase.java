@@ -459,7 +459,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsDefiningColumnsAsNull() {
+    public boolean requiresDefiningColumnsAsNull() {
         return true;
     }
 }

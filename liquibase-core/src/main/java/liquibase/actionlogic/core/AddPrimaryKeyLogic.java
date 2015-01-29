@@ -5,17 +5,14 @@ import liquibase.action.Action;
 import liquibase.action.core.AddPrimaryKeyAction;
 import liquibase.action.core.RedefineTableAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.statement.core.AddPrimaryKeyStatement;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
-public class AddPrimaryKeyLogic extends AbstractActionLogic {
+public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic {
 
     public static enum Clauses {
         constraintName, columnNames, tablespace,
@@ -44,10 +41,11 @@ public class AddPrimaryKeyLogic extends AbstractActionLogic {
                 new RedefineTableAction(scope.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
                         scope.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
                         scope.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
-                        getAlterTableClauses(action, scope)));
+                        generateSql(action, scope)));
     }
 
-    protected StringClauses getAlterTableClauses(Action action, Scope scope) {
+    @Override
+    protected StringClauses generateSql(Action action, Scope scope) {
         Database database = scope.get(Scope.Attr.database, Database.class);
         StringClauses clauses = new StringClauses();
 
@@ -62,9 +60,5 @@ public class AddPrimaryKeyLogic extends AbstractActionLogic {
         }
 
         return clauses;
-    }
-
-    protected PrimaryKey getAffectedPrimaryKey(AddPrimaryKeyStatement statement) {
-        return new PrimaryKey().setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

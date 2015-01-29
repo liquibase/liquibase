@@ -16,8 +16,8 @@ public class CreateIndexLogicOracle extends CreateIndexLogic {
     }
 
     @Override
-    public StringClauses getCreateIndexClauses(Action action, Scope scope) {
-        StringClauses clauses = super.getCreateIndexClauses(action, scope);
+    protected StringClauses generateSql(Action action, Scope scope) {
+        StringClauses clauses = super.generateSql(action, scope);
 
         if (action.get(CreateIndexAction.Attr.clustered, false)) {
             clauses.insertAfter("ON", "CLUSTER");

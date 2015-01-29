@@ -21,9 +21,9 @@ public class CreateTableAction extends AbstractAction {
         autoIncrementColumnName,
         autoIncrementStartWith,
         autoIncrementBy,
-        primaryKeyDefinition,
+        primaryKeyName,
         foreignKeyDefinitions,
-        uniqueConstraintDefinitions
+        primaryKeyTablespace, uniqueConstraintDefinitions
     }
 
 

@@ -5,18 +5,17 @@ import liquibase.action.Action;
 import liquibase.action.core.AddAutoIncrementAction;
 import liquibase.action.core.RedefineColumnAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import org.hamcrest.StringDescription;
 
 import java.math.BigInteger;
 
-public class AddAutoIncrementLogic extends AbstractActionLogic {
+public class AddAutoIncrementLogic extends AbstractSqlBuilderLogic {
 
     public static enum Clauses {
         autoIncrementDefinition, dataType
@@ -49,10 +48,10 @@ public class AddAutoIncrementLogic extends AbstractActionLogic {
                 action.get(AddAutoIncrementAction.Attr.schemaName, String.class),
                 action.get(AddAutoIncrementAction.Attr.tableName, String.class),
                 action.get(AddAutoIncrementAction.Attr.columnName, String.class),
-                getAlterColumnDefinition(action, scope)));
+                generateSql(action, scope)));
     }
 
-    protected StringClauses getAlterColumnDefinition(Action action, Scope scope) {
+    protected StringClauses generateSql(Action action, Scope scope) {
 
         Database database = scope.get(Scope.Attr.database, Database.class);
 

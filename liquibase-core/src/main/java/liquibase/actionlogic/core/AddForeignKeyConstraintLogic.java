@@ -5,14 +5,14 @@ import liquibase.action.Action;
 import liquibase.action.core.AddForeignKeyConstraintAction;
 import liquibase.action.core.RedefineTableAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 
-public class AddForeignKeyConstraintLogic extends AbstractActionLogic {
+public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
 
     public static enum Clauses {
         constraintName,
@@ -44,7 +44,7 @@ public class AddForeignKeyConstraintLogic extends AbstractActionLogic {
         return validationErrors;
     }
 
-    public StringClauses getAlterTableClauses(Action action, Scope scope) throws ActionPerformException {
+    protected StringClauses generateSql(Action action, Scope scope) {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
         StringClauses clauses = new StringClauses()
@@ -88,7 +88,7 @@ public class AddForeignKeyConstraintLogic extends AbstractActionLogic {
                 action.get(AddForeignKeyConstraintAction.Attr.baseTableCatalogName, String.class),
                 action.get(AddForeignKeyConstraintAction.Attr.baseTableSchemaName, String.class),
                 action.get(AddForeignKeyConstraintAction.Attr.baseTableName, String.class),
-                getAlterTableClauses(action, scope)
+                generateSql(action, scope)
         ));
     }
 }

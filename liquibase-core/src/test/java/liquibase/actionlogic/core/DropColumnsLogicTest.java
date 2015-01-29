@@ -1,7 +1,8 @@
-package liquibase.sqlgenerator.core;
+package liquibase.actionlogic.core;
 
 import java.util.Arrays;
 
+import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
@@ -11,10 +12,10 @@ import liquibase.statement.core.DropColumnStatement;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DropColumnGeneratorTest extends AbstractSqlGeneratorTest<DropColumnStatement> {
+public class DropColumnsLogicTest extends AbstractSqlGeneratorTest<DropColumnStatement> {
 
-    public DropColumnGeneratorTest() throws Exception {
-        super(new DropColumnGenerator());
+    public DropColumnsLogicTest() throws Exception {
+        super(new DropColumnsLogic());
     }
 
     @Override

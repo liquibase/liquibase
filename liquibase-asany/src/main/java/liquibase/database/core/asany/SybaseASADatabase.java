@@ -258,7 +258,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public boolean supportsDefiningColumnsAsNull() {
+	public boolean requiresDefiningColumnsAsNull() {
 		return true;
 	}
 }

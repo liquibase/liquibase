@@ -832,7 +832,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean supportsDefiningColumnsAsNull() {
+    public boolean requiresDefiningColumnsAsNull() {
         return false;
     }
 

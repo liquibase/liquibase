@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.core.AddUniqueConstraintAction;
 import liquibase.action.core.RedefineTableAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.database.Database;
@@ -16,7 +16,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 
-public class AddUniqueConstraintLogic extends AbstractActionLogic {
+public class AddUniqueConstraintLogic extends AbstractSqlBuilderLogic {
 
     public static enum Clauses {
         constraintName,
@@ -42,11 +42,11 @@ public class AddUniqueConstraintLogic extends AbstractActionLogic {
                 action.get(AddUniqueConstraintAction.Attr.catalogName, String.class),
                 action.get(AddUniqueConstraintAction.Attr.schemaName, String.class),
                 action.get(AddUniqueConstraintAction.Attr.tableName, String.class),
-                getAlterTableClauses(action, scope)
+                generateSql(action, scope)
                 ));
     }
 
-    protected StringClauses getAlterTableClauses(Action action, Scope scope) {
+    protected StringClauses generateSql(Action action, Scope scope) {
         String constraintName = action.get(AddUniqueConstraintAction.Attr.constraintName, String.class);
         Database database = scope.get(Scope.Attr.database, Database.class);
 

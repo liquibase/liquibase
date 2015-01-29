@@ -122,7 +122,7 @@ public class AddColumnsLogic extends AbstractActionLogic {
         }
 
         if (nullable) {
-            if (database.supportsDefiningColumnsAsNull()) {
+            if (database.requiresDefiningColumnsAsNull()) {
                 clauses.append(Clauses.nullable, "NULL");
             }
         } else {

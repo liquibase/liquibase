@@ -17,8 +17,8 @@ public class AddForeignKeyConstraintLogicInformix extends AddForeignKeyConstrain
     }
 
     @Override
-    public StringClauses getAlterTableClauses(Action action, Scope scope) throws ActionPerformException {
-        StringClauses clauses = super.getAlterTableClauses(action, scope)
+    protected StringClauses generateSql(Action action, Scope scope)  {
+        StringClauses clauses = super.generateSql(action, scope)
                 .remove(Clauses.constraintName)
                 .remove("ON UPDATE")
                 .remove("ON DELETE CASCADE");

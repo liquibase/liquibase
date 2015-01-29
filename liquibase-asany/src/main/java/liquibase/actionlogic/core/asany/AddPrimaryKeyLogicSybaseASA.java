@@ -15,8 +15,8 @@ public class AddPrimaryKeyLogicSybaseASA extends AddPrimaryKeyLogic {
     }
 
     @Override
-    protected StringClauses getAlterTableClauses(Action action, Scope scope) {
-        StringClauses clauses = super.getAlterTableClauses(action, scope);
+    protected StringClauses generateSql(Action action, Scope scope) {
+        StringClauses clauses = super.generateSql(action, scope);
         clauses.replace("ADD CONSTRAINT", "ADD PRIMARY KEY");
         clauses.remove(Clauses.constraintName);
 

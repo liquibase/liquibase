@@ -16,8 +16,8 @@ public class AddForeignKeyConstraintLogicOracle extends AddForeignKeyConstraintL
     }
 
     @Override
-    public StringClauses getAlterTableClauses(Action action, Scope scope) throws ActionPerformException {
-        return super.getAlterTableClauses(action, scope)
+    protected StringClauses generateSql(Action action, Scope scope) {
+        return super.generateSql(action, scope)
                 .remove("ON UPDATE")
                 .remove("ON DELETE RESTRICT")
                 .remove("ON DELETE NO ACTION")

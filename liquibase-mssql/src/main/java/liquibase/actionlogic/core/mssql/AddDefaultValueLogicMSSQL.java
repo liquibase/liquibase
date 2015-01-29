@@ -15,7 +15,7 @@ public class AddDefaultValueLogicMSSQL extends AddDefaultValueLogic {
         return MSSQLDatabase.class;
     }
     @Override
-    protected String getDefaultValueClause(Action action, Scope scope) {
+    protected String generateSql(Action action, Scope scope) {
         MSSQLDatabase database = scope.get(Scope.Attr.database, MSSQLDatabase.class);
         Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
 

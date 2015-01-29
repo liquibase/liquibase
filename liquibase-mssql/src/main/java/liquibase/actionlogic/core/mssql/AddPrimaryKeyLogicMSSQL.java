@@ -24,8 +24,8 @@ public class AddPrimaryKeyLogicMSSQL extends AddPrimaryKeyLogic {
     }
 
     @Override
-    protected StringClauses getAlterTableClauses(Action action, Scope scope) {
-        StringClauses clauses = super.getAlterTableClauses(action, scope);
+    protected StringClauses generateSql(Action action, Scope scope) {
+        StringClauses clauses = super.generateSql(action, scope);
 
         if (action.get(AddPrimaryKeyAction.Attr.clustered, true)) {
             clauses.insertAfter("PRIMARY KEY", "CLUSTERED");

@@ -17,6 +17,10 @@ public class RewriteResult extends ActionResult {
 
     private ActionResult.Modifier modifier;
 
+    public RewriteResult(List<Action> actions) {
+        this(actions.toArray(new Action[actions.size()]));
+    }
+
     public RewriteResult(Action... actions) {
         this((Modifier) null, actions);
     }

@@ -1,9 +1,10 @@
-package liquibase.sqlgenerator.core;
+package liquibase.actionlogic.core;
 
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 
+import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -28,7 +29,7 @@ import liquibase.test.TestContext;
 
 import org.junit.Test;
 
-public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
+public class CreateTableLogicTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
 
     protected static final String TABLE_NAME = "TABLE_NAME";
     protected static final String CATALOG_NAME = "CATALOG_NAME";
@@ -36,8 +37,8 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
     protected static final String COLUMN_NAME1 = "COLUMN1_NAME";
 
-    public CreateTableGeneratorTest() throws Exception {
-        super(new CreateTableGenerator());
+    public CreateTableLogicTest() throws Exception {
+        super(new CreateTableLogic());
     }
 
     @Override

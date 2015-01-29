@@ -16,7 +16,7 @@ public class AddDefaultValueLogicDerby extends AddDefaultValueLogic {
     }
 
     @Override
-    protected String getDefaultValueClause(Action action, Scope scope) {
+    protected String generateSql(Action action, Scope scope) {
         Database database = scope.get(Scope.Attr.database, Database.class);
         Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
 

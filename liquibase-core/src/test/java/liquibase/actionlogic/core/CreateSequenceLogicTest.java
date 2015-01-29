@@ -1,6 +1,6 @@
-package liquibase.sqlgenerator.core;
+package liquibase.actionlogic.core;
 
-public abstract class CreateSequenceGeneratorTest {
+public abstract class CreateSequenceLogicTest {
 //    //    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {

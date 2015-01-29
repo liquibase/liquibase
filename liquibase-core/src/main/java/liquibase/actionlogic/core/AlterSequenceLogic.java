@@ -5,21 +5,16 @@ import liquibase.action.Action;
 import liquibase.action.core.AlterSequenceAction;
 import liquibase.action.core.RedefineSequenceAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.AlterSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
-public class AlterSequenceLogic extends AbstractActionLogic {
+public class AlterSequenceLogic extends AbstractSqlBuilderLogic {
 
     public static enum Clauses {
         incrementBy,
@@ -51,10 +46,11 @@ public class AlterSequenceLogic extends AbstractActionLogic {
                 action.get(AlterSequenceAction.Attr.catalogName, String.class),
                 action.get(AlterSequenceAction.Attr.schemaName, String.class),
                 action.get(AlterSequenceAction.Attr.sequenceName, String.class),
-                getAlterSequenceDefinition(action, scope)));
+                generateSql(action, scope)));
     }
 
-    protected StringClauses getAlterSequenceDefinition(Action action, Scope scope) {
+    @Override
+    protected StringClauses generateSql(Action action, Scope scope) {
         StringClauses clauses = new StringClauses();
 
         BigInteger incrementBy = action.get(AlterSequenceAction.Attr.incrementBy, BigInteger.class);
@@ -71,7 +67,7 @@ public class AlterSequenceLogic extends AbstractActionLogic {
         }
 
         if (maxValue != null) {
-            clauses.append(Clauses.maxValue, "MAXVALUE "+minValue);
+            clauses.append(Clauses.maxValue, "MAXVALUE " + minValue);
         }
 
         if (ordered) {

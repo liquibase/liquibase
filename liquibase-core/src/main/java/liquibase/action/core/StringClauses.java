@@ -1,5 +1,7 @@
 package liquibase.action.core;
 
+import liquibase.actionlogic.core.CreateTableLogic;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -65,6 +67,10 @@ public class StringClauses {
         return this;
     }
 
+    public StringClauses insertAfter(Enum existingKey, String newValue) {
+        return insertAfter(existingKey.name(), newValue);
+    }
+
     public StringClauses insertAfter(String existingKey, String newValue) {
         return insertAfter(existingKey, newValue, newValue);
 
@@ -81,5 +87,13 @@ public class StringClauses {
         this.clauses = newMap;
 
         return this;
+    }
+
+    public String get(Enum exitingKey) {
+        return this.clauses.get(exitingKey.name());
+    }
+
+    public String get(String exitingKey) {
+        return this.clauses.get(exitingKey);
     }
 }
