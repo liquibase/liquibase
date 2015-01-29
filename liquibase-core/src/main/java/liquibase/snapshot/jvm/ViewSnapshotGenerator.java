@@ -82,7 +82,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     // remove strange zero-termination seen on some Oracle view definitions
                     int length = definition.length();
                     if (definition.charAt(length-1) == 0) {
-                      definition = definition.substring(0, length-2);
+                      definition = definition.substring(0, length-1);
                     }
 
                     if (database instanceof InformixDatabase) {
