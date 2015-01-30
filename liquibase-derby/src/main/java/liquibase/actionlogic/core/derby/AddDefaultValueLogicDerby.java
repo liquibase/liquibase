@@ -3,6 +3,7 @@ package liquibase.actionlogic.core.derby;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
+import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.derby.DerbyDatabase;
@@ -16,10 +17,10 @@ public class AddDefaultValueLogicDerby extends AddDefaultValueLogic {
     }
 
     @Override
-    protected String generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(Action action, Scope scope) {
         Database database = scope.get(Scope.Attr.database, Database.class);
         Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
 
-        return "WITH DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
+        return new StringClauses().append("WITH DEFAULT").append(DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database));
     }
 }

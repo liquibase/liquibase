@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
 import liquibase.action.core.RedefineTableAction;
+import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.RewriteResult;
 import liquibase.actionlogic.core.AddDefaultValueLogic;
@@ -29,7 +30,11 @@ public class AddDefaultValueLogicSybase extends AddDefaultValueLogic {
                 action.get(AddDefaultValueAction.Attr.catalogName, String.class),
                 action.get(AddDefaultValueAction.Attr.schemaName, String.class),
                 action.get(AddDefaultValueAction.Attr.tableName, String.class),
-                "REPLACE " + database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, String.class), Column.class) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database)
+                new StringClauses()
+                        .append("REPLACE")
+                        .append(database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, String.class), Column.class))
+                        .append("DEFAULT")
+                        .append(DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
         ));
     }
 }

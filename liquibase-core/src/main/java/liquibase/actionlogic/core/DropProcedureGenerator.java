@@ -1,10 +1,11 @@
-package liquibase.sqlgenerator.core;
+package liquibase.actionlogic.core;
 
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.DropProcedureStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
