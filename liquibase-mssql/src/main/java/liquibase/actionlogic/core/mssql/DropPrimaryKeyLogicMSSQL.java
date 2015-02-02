@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropPrimaryKeyAction;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
@@ -36,7 +36,7 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
 
         String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
         if (constraintName == null) {
-            return new RewriteResult(new ExecuteSqlAction(
+            return new DelegateResult(new ExecuteSqlAction(
                     "DECLARE @pkname nvarchar(255)"
             +"\n"
             +"DECLARE @sql nvarchar(2048)"

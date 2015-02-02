@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropDefaultValueAction;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.DropDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
@@ -25,7 +25,7 @@ public class DropDefaultValueLogicMSSQL extends DropDefaultValueLogic {
                 action.get(DropDefaultValueAction.Attr.schemaName, String.class),
                 action.get(DropDefaultValueAction.Attr.tableName, String.class));
 
-        return new RewriteResult(new ExecuteSqlAction("DECLARE @default sysname\n"
+        return new DelegateResult(new ExecuteSqlAction("DECLARE @default sysname\n"
                 + "SELECT @default = object_name(default_object_id) FROM sys.columns WHERE object_id=object_id('" + escapedTableName + "') AND name='" + action.get(DropDefaultValueAction.Attr.columnName, String.class) + "'\n"
                 + "EXEC ('ALTER TABLE " + escapedTableName + " DROP CONSTRAINT ' + @default)"));
     }

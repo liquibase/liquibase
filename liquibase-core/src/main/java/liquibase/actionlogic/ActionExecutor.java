@@ -56,9 +56,9 @@ public class ActionExecutor {
 
         ActionResult result = actionLogic.execute(action, scope);
 
-        if (result instanceof RewriteResult) {
-            List<Action> actions = ((RewriteResult) result).getActions();
-            ActionResult.Modifier modifier = ((RewriteResult) result).getModifier();
+        if (result instanceof DelegateResult) {
+            List<Action> actions = ((DelegateResult) result).getActions();
+            ActionResult.Modifier modifier = ((DelegateResult) result).getModifier();
             if (actions.size() == 0) {
                 throw new ActionPerformException(actionLogic.getClass().getName()+" tried to handle '"+action.describe()+"' but returned no actions to run");
             } else {

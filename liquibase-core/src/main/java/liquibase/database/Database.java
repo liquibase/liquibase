@@ -344,5 +344,7 @@ public interface Database extends PrioritizedService {
     boolean requiresDefiningColumnsAsNull();
 
     public boolean supportsClustered(Class<? extends DatabaseObject> objectType);
+
+    public boolean looksLikeFunctionCall(String value);
 }
 

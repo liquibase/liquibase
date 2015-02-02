@@ -53,4 +53,13 @@ public interface ExtensibleObject {
     ExtensibleObject set(String attribute, Object value);
 
     ExtensibleObject set(Enum attribute, Object value);
+
+
+    /**
+     * Adds the value to the collection at the given attribute. If the attribute is not defined, a List is created at the attribute.
+     * If the attribute contains only a single value, it is converted to a List with the old value plus the new value.
+     */
+    ExtensibleObject add(String attribute, Object value);
+
+    ExtensibleObject add(Enum attribute, Object value);
 }

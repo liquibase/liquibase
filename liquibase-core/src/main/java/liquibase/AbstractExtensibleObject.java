@@ -2,6 +2,9 @@ package liquibase;
 
 import liquibase.util.SmartMap;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -60,5 +63,27 @@ public class AbstractExtensibleObject implements ExtensibleObject {
         attributes.set(attribute, value);
 
         return this;
+    }
+
+    @Override
+    public ExtensibleObject add(String attribute, Object value) {
+        Object existingValue = get(attribute, Object.class);
+        if (existingValue == null) {
+            existingValue = new ArrayList<>();
+            set(attribute, existingValue);
+        } else if (existingValue instanceof Collection) {
+            ((Collection) existingValue).add(value);
+        } else {
+            List newCollection = new ArrayList();
+            newCollection.add(existingValue);
+            set(attribute, existingValue);
+        }
+
+        return this;
+    }
+
+    @Override
+    public ExtensibleObject add(Enum attribute, Object value) {
+        return add(attribute.name(), value);
     }
 }

@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.core.*;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.datatype.DataTypeFactory;
@@ -86,7 +86,7 @@ public class AddColumnsLogic extends AbstractActionLogic {
         addUniqueConstraintActions(action, scope, actions);
         addForeignKeyStatements(action, scope, actions);
 
-        return new RewriteResult(actions.toArray(new Action[actions.size()]));
+        return new DelegateResult(actions.toArray(new Action[actions.size()]));
     }
 
     protected Action[] execute(ColumnDefinition column, Action action, Scope scope) {

@@ -6,7 +6,7 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropDefaultValueAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.DropDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
@@ -41,7 +41,7 @@ public class DropDefaultValueLogicInformix extends DropDefaultValueLogic {
          * TODO If dropped from a not null column the not null constraint will be dropped, too.
          * If the column is "NOT NULL" it has to be added behind the datatype.
          */
-        return new RewriteResult(new ExecuteSqlAction("ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeObjectName(columnName, Column.class) + " " + action.get(DropDefaultValueAction.Attr.columnDataType, String.class) + ")"));
+        return new DelegateResult(new ExecuteSqlAction("ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeObjectName(columnName, Column.class) + " " + action.get(DropDefaultValueAction.Attr.columnDataType, String.class) + ")"));
 
     }
 

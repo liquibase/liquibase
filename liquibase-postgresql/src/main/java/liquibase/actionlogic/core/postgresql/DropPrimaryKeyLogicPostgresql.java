@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropPrimaryKeyAction;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
@@ -36,7 +36,7 @@ public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
 
         String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
         if (constraintName == null) {
-            return new RewriteResult(
+            return new DelegateResult(
                     new ExecuteSqlAction(
                             "create or replace function __liquibase_drop_pk(schemaName text, tableName text) returns void as $$"
                                     + " declare"

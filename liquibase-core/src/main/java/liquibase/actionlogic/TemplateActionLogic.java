@@ -180,7 +180,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
             throw new ActionPerformException(e);
         }
 
-        return new RewriteResult(createRewriteAction(finalString));
+        return new DelegateResult(createRewriteAction(finalString));
     }
 
     protected ExecuteSqlAction createRewriteAction(String finalSql) {

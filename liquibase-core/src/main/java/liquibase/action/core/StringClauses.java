@@ -96,4 +96,21 @@ public class StringClauses {
     public String get(String exitingKey) {
         return this.clauses.get(exitingKey);
     }
+
+    public StringClauses prepend(Enum key, String clause) {
+        return prepend(key.name(), clause);
+    }
+
+    public StringClauses prepend(String key, String clause) {
+        LinkedHashMap<String, String> newMap = new LinkedHashMap<>();
+        newMap.put(key, clause);
+        newMap.putAll(this.clauses);
+        this.clauses = newMap;
+
+        return this;
+    }
+
+    public StringClauses prepend(String clause) {
+        return prepend(clause, clause);
+    }
 }

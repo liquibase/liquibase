@@ -6,13 +6,12 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateViewAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.firebird.FirebirdDatabase;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.exception.ValidationErrors;
 
 public class CreateViewLogicPostgresql extends CreateViewLogic {
     @Override
@@ -29,9 +28,9 @@ public class CreateViewLogicPostgresql extends CreateViewLogic {
             String schemaName = action.get(CreateViewAction.Attr.schemaName, String.class);
             String viewName = action.get(CreateViewAction.Attr.viewName, String.class);
 
-            return new RewriteResult(
+            return new DelegateResult(
                     new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeViewName(catalogName, schemaName, viewName)),
-                    ((RewriteResult) result).getActions().get(0));
+                    ((DelegateResult) result).getActions().get(0));
         }
 
         return result;

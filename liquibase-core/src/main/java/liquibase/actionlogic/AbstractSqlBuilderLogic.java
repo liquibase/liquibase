@@ -12,7 +12,7 @@ public abstract class AbstractSqlBuilderLogic extends AbstractActionLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
+        return new DelegateResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
     }
 
 }

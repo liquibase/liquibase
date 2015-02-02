@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropIndexAction;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.DropIndexLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
@@ -31,7 +31,7 @@ public class DropIndexLogicSybase extends DropIndexLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
-        return new RewriteResult(new ExecuteSqlAction(
+        return new DelegateResult(new ExecuteSqlAction(
                 "DROP INDEX "
                         + database.escapeTableName(null,
                         action.get(DropIndexAction.Attr.tableSchemaName, String.class),

@@ -1517,4 +1517,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
         return false;
     }
+
+    public boolean looksLikeFunctionCall(String value) {
+        return value.startsWith("\"SYSIBM\"") || value.startsWith("to_date(") || value.equalsIgnoreCase(getCurrentDateTimeFunction());
+    }
+
 }

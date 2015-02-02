@@ -6,7 +6,7 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CopyRowsAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -55,6 +55,6 @@ public class CopyRowsLogic extends AbstractActionLogic {
                 action.get(CopyRowsAction.Attr.sourceTableSchemaName, String.class),
                 action.get(CopyRowsAction.Attr.sourceTableName, String.class));
 
-        return new RewriteResult(new ExecuteSqlAction(sql));
+        return new DelegateResult(new ExecuteSqlAction(sql));
     }
 }

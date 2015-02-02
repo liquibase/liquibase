@@ -8,7 +8,7 @@ import liquibase.action.core.CreateSequenceAction;
 import liquibase.action.core.SetNullableAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
@@ -36,7 +36,7 @@ public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
         String columnName = action.get(AddAutoIncrementAction.Attr.columnName, String.class);
         String columnDataType = action.get(AddAutoIncrementAction.Attr.columnDataType, String.class);
 
-        return new RewriteResult(
+        return new DelegateResult(
                 new CreateSequenceAction(catalogName, schemaName, sequenceName),
                 new SetNullableAction(catalogName, schemaName, tableName, columnName, null, false),
                 new AddDefaultValueAction(catalogName, schemaName, tableName, columnName, columnDataType, new SequenceNextValueFunction((schemaName==null?"":schemaName+".")+sequenceName))

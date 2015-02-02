@@ -5,13 +5,12 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateProcedureAction;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateProcedureLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.UnparsedSql;
 import liquibase.structure.core.StoredProcedure;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class CreateProcedureLogicMSSQL extends CreateProcedureLogic {
         }
         actions.add(new ExecuteSqlAction(procedureText));
 
-        return new RewriteResult(actions.toArray(new Action[actions.size()]));
+        return new DelegateResult(actions.toArray(new Action[actions.size()]));
 
     }
 }

@@ -96,7 +96,7 @@ class ActionExecutorTest extends Specification {
         when:
         def factory = scope.getSingleton(ActionLogicFactory)
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
-            return new RewriteResult();
+            return new DelegateResult();
         }))
 
         def result = new ActionExecutor().execute(new MockAction(), scope)
@@ -110,7 +110,7 @@ class ActionExecutorTest extends Specification {
         when:
         def factory = scope.getSingleton(ActionLogicFactory)
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
-            return new RewriteResult(new UpdateSqlAction("sql action 1"));
+            return new DelegateResult(new UpdateSqlAction("sql action 1"));
         }))
         factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
@@ -130,7 +130,7 @@ class ActionExecutorTest extends Specification {
         when:
         def factory = scope.getSingleton(ActionLogicFactory)
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
-            return new RewriteResult(new UpdateSqlAction("sql action 1"), new UpdateSqlAction("sql action 2"));
+            return new DelegateResult(new UpdateSqlAction("sql action 1"), new UpdateSqlAction("sql action 2"));
         }))
         factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
@@ -156,7 +156,7 @@ class ActionExecutorTest extends Specification {
         when:
         def factory = scope.getSingleton(ActionLogicFactory)
         factory.register(new MockActionLogic("mock logic", 1, MockAction, {
-            return new RewriteResult(new UpdateSqlAction("sql action 1"), new ExecuteSqlAction("exec sql action"), new UpdateSqlAction("sql action 2"));
+            return new DelegateResult(new UpdateSqlAction("sql action 1"), new ExecuteSqlAction("exec sql action"), new UpdateSqlAction("sql action 2"));
         }))
         factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
@@ -168,7 +168,7 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockActionLogic("mock execute sql", 1, ExecuteSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new RewriteResult(new UpdateSqlAction("nested 1"), new UpdateSqlAction("nested 2"));
+                return new DelegateResult(new UpdateSqlAction("nested 1"), new UpdateSqlAction("nested 2"));
             }
         })
 

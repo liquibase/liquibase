@@ -6,7 +6,7 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.*;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -54,7 +54,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
+        return new DelegateResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
     }
 
     @Override

@@ -7,7 +7,7 @@ import liquibase.action.core.RedefineTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -28,7 +28,7 @@ public class DropForeignKeyConstraintLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new RedefineTableAction(
+        return new DelegateResult(new RedefineTableAction(
                 action.get(DropForeignKeyConstraintAction.Attr.baseTableCatalogName, String.class),
                 action.get(DropForeignKeyConstraintAction.Attr.baseTableSchemaName, String.class),
                 action.get(DropForeignKeyConstraintAction.Attr.baseTableName, String.class),

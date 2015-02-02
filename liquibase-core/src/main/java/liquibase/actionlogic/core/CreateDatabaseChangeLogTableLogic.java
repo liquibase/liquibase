@@ -7,7 +7,7 @@ import liquibase.action.core.CreateDatabaseChangeLogTableAction;
 import liquibase.action.core.CreateTableAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 
@@ -22,7 +22,7 @@ public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
-        return new RewriteResult((CreateTableAction) new CreateTableAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+        return new DelegateResult((CreateTableAction) new CreateTableAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .addColumn((ColumnDefinition) new ColumnDefinition("ID", "VARCHAR(255)").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("AUTHOR", "VARCHAR(255)").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("FILENAME", "VARCHAR(255)").set(ColumnDefinition.Attr.isNullable, false))

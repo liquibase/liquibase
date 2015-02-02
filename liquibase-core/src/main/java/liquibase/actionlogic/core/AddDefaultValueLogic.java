@@ -7,7 +7,7 @@ import liquibase.action.core.RedefineColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
@@ -62,7 +62,7 @@ public class AddDefaultValueLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new RedefineColumnAction(
+        return new DelegateResult(new RedefineColumnAction(
                 action.get(AddDefaultValueAction.Attr.catalogName, String.class),
                 action.get(AddDefaultValueAction.Attr.schemaName, String.class),
                 action.get(AddDefaultValueAction.Attr.tableName, String.class),

@@ -7,7 +7,7 @@ import liquibase.action.core.CreateViewAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -37,9 +37,9 @@ public class CreateViewLogic extends AbstractSqlBuilderLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         if (action.get(CreateViewAction.Attr.fullDefinition, false)) {
-            return new RewriteResult(new ExecuteSqlAction(action.get(CreateViewAction.Attr.selectQuery, String.class)));
+            return new DelegateResult(new ExecuteSqlAction(action.get(CreateViewAction.Attr.selectQuery, String.class)));
         } else {
-            return new RewriteResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
+            return new DelegateResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
         }
     }
 

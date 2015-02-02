@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Convenience abstract base class for {@link liquibase.action.core.SnapshotDatabaseObjectsAction} related logic.
- * Implementations should not directly execute the metadata read, but instead return a {@link liquibase.actionlogic.RewriteResult} that returns simple lower-level actions.
+ * Implementations should not directly execute the metadata read, but instead return a {@link liquibase.actionlogic.DelegateResult} that returns simple lower-level actions.
  * This pattern is built into this methods {@link #execute(liquibase.action.Action, liquibase.Scope)} method.
  */
 public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActionLogic {
@@ -55,12 +55,12 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
     abstract protected Class<? extends DatabaseObject>[] getSupportedRelatedTypes();
 
     /**
-     * Default implementation returns a {@link liquibase.actionlogic.RewriteResult} based on {@link #createSnapshotAction(liquibase.action.Action, liquibase.Scope)}  and {@link #createModifier(liquibase.action.Action, liquibase.Scope)}.
+     * Default implementation returns a {@link liquibase.actionlogic.DelegateResult} based on {@link #createSnapshotAction(liquibase.action.Action, liquibase.Scope)}  and {@link #createModifier(liquibase.action.Action, liquibase.Scope)}.
      */
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         try {
-            return new RewriteResult(createModifier(action, scope), createSnapshotAction(action, scope));
+            return new DelegateResult(createModifier(action, scope), createSnapshotAction(action, scope));
         } catch (DatabaseException e) {
             throw new ActionPerformException(e);
         }

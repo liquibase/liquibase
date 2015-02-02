@@ -7,7 +7,7 @@ import liquibase.action.core.RedefineTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -38,7 +38,7 @@ public class AddUniqueConstraintLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new RedefineTableAction(
+        return new DelegateResult(new RedefineTableAction(
                 action.get(AddUniqueConstraintAction.Attr.catalogName, String.class),
                 action.get(AddUniqueConstraintAction.Attr.schemaName, String.class),
                 action.get(AddUniqueConstraintAction.Attr.tableName, String.class),

@@ -10,17 +10,11 @@ import liquibase.action.core.DropColumnsAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
-import liquibase.statement.core.DropColumnStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class DropColumnsLogic extends AbstractActionLogic {
 
@@ -43,7 +37,7 @@ public class DropColumnsLogic extends AbstractActionLogic {
         for (String column : action.get(DropColumnsAction.Attr.columnNames, String[].class)) {
             actions.add(new ExecuteSqlAction(generateDropSql(column, action, scope).toString()));
         }
-        return new RewriteResult(actions);
+        return new DelegateResult(actions);
     }
 
     protected StringClauses generateDropSql(String column, Action action, Scope scope) {

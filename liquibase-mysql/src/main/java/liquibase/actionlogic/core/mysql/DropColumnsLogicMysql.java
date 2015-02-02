@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropColumnsAction;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
@@ -22,7 +22,7 @@ public class DropColumnsLogicMysql extends DropColumnsLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
-        return new RewriteResult(new ExecuteSqlAction(
+        return new DelegateResult(new ExecuteSqlAction(
                 "ALTER TABLE "
                         + database.escapeTableName(action.get(DropColumnsAction.Attr.catalogName, String.class), action.get(DropColumnsAction.Attr.schemaName, String.class), action.get(DropColumnsAction.Attr.tableName, String.class))
                         + " DROP "

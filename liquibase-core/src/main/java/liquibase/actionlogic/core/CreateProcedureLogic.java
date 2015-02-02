@@ -6,7 +6,7 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateProcedureAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -29,6 +29,6 @@ public class CreateProcedureLogic extends AbstractActionLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new RewriteResult(new ExecuteSqlAction(action.get(CreateProcedureAction.Attr.procedureText, String.class)));
+        return new DelegateResult(new ExecuteSqlAction(action.get(CreateProcedureAction.Attr.procedureText, String.class)));
     }
 }

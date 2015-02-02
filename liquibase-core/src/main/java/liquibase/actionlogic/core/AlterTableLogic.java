@@ -6,7 +6,7 @@ import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.RedefineTableAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.RewriteResult;
+import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -28,7 +28,7 @@ public class AlterTableLogic extends AbstractActionLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
-        return new RewriteResult(new ExecuteSqlAction("ALTER TABLE "
+        return new DelegateResult(new ExecuteSqlAction("ALTER TABLE "
                 + database.escapeTableName(action.get(RedefineTableAction.Attr.catalogName, String.class), action.get(RedefineTableAction.Attr.schemaName, String.class), action.get(RedefineTableAction.Attr.tableName, String.class))
                 + " "
                 + action.get(RedefineTableAction.Attr.newDefinition, String.class).trim()));

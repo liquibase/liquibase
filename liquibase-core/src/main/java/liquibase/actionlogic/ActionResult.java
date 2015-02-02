@@ -7,7 +7,7 @@ package liquibase.actionlogic;
  *     <li>{@link liquibase.actionlogic.ExecuteResult}</li>
  *     <li>{@link liquibase.actionlogic.QueryResult}</li>
  *     <li>{@link liquibase.actionlogic.UpdateResult}</li>
- *     <li>{@link liquibase.actionlogic.RewriteResult}</li>
+ *     <li>{@link DelegateResult}</li>
  * </ul>
  */
 public abstract class ActionResult {
