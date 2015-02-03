@@ -6,4 +6,8 @@ public abstract class AbstractSqlStatement implements SqlStatement {
     public boolean skipOnUnsupported() {
         return false;
     }
+    
+    public boolean skipVisitors() {
+    	return false;
+    }
 }

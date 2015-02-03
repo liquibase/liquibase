@@ -315,6 +315,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     public boolean skipOnUnsupported() {
 	    return false;
 	}
+	
+	@Override
+	public boolean skipVisitors() {
+		return false;
+	}
 
 	public String getCatalogName() {
 	    return catalogName;
