@@ -2,15 +2,10 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,10 +95,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         }
         
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-        }           
-        
+
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
@@ -143,34 +135,34 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //    	}
 		
 		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			@Override
-            public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			@Override
-            public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			@Override
-            public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getColumnName())) {
-					column.getConstraints().setNullable(false);
-				}
-				return true;
-			}
-			@Override
-            public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
+//		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+//			@Override
+//            public ColumnConfig[] getColumnsToAdd() {
+//				return new ColumnConfig[0];
+//			}
+//			@Override
+//            public boolean copyThisColumn(ColumnConfig column) {
+//				return true;
+//			}
+//			@Override
+//            public boolean createThisColumn(ColumnConfig column) {
+//				if (column.getName().equals(getColumnName())) {
+//					column.getConstraints().setNullable(false);
+//				}
+//				return true;
+//			}
+//			@Override
+//            public boolean createThisIndex(Index index) {
+//				return true;
+//			}
+//		};
     		
-		try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
-    	} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//    		// alter table
+//			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
+//    	} catch (Exception e) {
+//			e.printStackTrace();
+//		}
     	
     	return statements.toArray(new SqlStatement[statements.size()]);
     }

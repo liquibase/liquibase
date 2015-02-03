@@ -1,16 +1,14 @@
 package liquibase.test;
 
-import java.util.Set;
-
-import org.junit.ComparisonFailure;
-
 import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.MigrationFailedException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import org.junit.ComparisonFailure;
+
+import java.util.Set;
 
 public class DatabaseTestTemplate {
     public void testOnAvailableDatabases(DatabaseTest test) throws Exception {
@@ -23,9 +21,9 @@ public class DatabaseTestTemplate {
 
     private void test(DatabaseTest test, Set<Database> databasesToTestOn) throws Exception {
         for (Database database : databasesToTestOn) {
-            if (database instanceof SQLiteDatabase) {
-                continue; //todo: find how to get tests to run correctly on SQLite
-            }
+//            if (database instanceof SQLiteDatabase) {
+//                continue; //todo: find how to get tests to run correctly on SQLite
+//            }
             JdbcExecutor writeExecutor = new JdbcExecutor();
             writeExecutor.setDatabase(database);
             ExecutorService.getInstance().setExecutor(database, writeExecutor);

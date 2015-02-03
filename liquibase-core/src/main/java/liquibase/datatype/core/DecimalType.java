@@ -20,17 +20,17 @@ public class DecimalType  extends LiquibaseDataType {
 
   @Override
   public DatabaseDataType toDatabaseDataType(Database database) {
-    if (database instanceof InformixDatabase) {
-
-      if(getParameters() != null && getParameters().length == 2) {
-
-        // Don't use 255 as a scale because it is invalid, 
-        // use only 1 argument in this special case
-        if("255".equals(String.valueOf(getParameters()[1]))) {
-          return new DatabaseDataType(getName(), getParameters()[0]);
-        }
-      }
-    }
+//    if (database instanceof InformixDatabase) {
+//
+//      if(getParameters() != null && getParameters().length == 2) {
+//
+//        // Don't use 255 as a scale because it is invalid,
+//        // use only 1 argument in this special case
+//        if("255".equals(String.valueOf(getParameters()[1]))) {
+//          return new DatabaseDataType(getName(), getParameters()[0]);
+//        }
+//      }
+//    }
 
     return super.toDatabaseDataType(database);
   }

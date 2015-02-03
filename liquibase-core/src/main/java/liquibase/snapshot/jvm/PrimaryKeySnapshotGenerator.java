@@ -3,12 +3,10 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -51,9 +49,9 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     returnKey.setName(row.getString("PK_NAME"));
                 }
 
-                if (database instanceof SQLiteDatabase) { //SQLite is zero based position?
-                    position = (short) (position + 1);
-                }
+//todo: move for action logic                if (database instanceof SQLiteDatabase) { //SQLite is zero based position?
+//                    position = (short) (position + 1);
+//                }
 
                 returnKey.addColumn(position - 1, new Column(columnName).setRelation(((PrimaryKey) example).getTable()));
             }
@@ -61,9 +59,9 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             if (returnKey != null) {
                 Index exampleIndex = new Index().setTable(returnKey.getTable());
                 exampleIndex.setColumns(returnKey.getColumns());
-                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
-                    exampleIndex.setName(returnKey.getName());
-                }
+//todo: move for action logic                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
+//                    exampleIndex.setName(returnKey.getName());
+//                }
                 returnKey.setBackingIndex(exampleIndex);
             }
 

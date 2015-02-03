@@ -7,7 +7,7 @@ import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 public class UnlockDatabaseChangeLogGeneratorTest extends AbstractSqlGeneratorTest<UnlockDatabaseChangeLogStatement> {
 
     public UnlockDatabaseChangeLogGeneratorTest() throws Exception {
-        super(new UnlockDatabaseChangeLogLogic());
+        super(null); //new UnlockDatabaseChangeLogLogic());
     }
 
     @Override

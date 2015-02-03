@@ -5,7 +5,6 @@ import liquibase.LabelExpression;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -99,10 +98,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
             boolean liquibaseColumnNotRightSize = false;
-            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
-            }
+//todo: action            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
+//                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
+//                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
+//            }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!this.getDatabase().getConnection().getDatabaseProductName().equals("SQLite")) {

@@ -43,22 +43,22 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 CachedRow data = columnMetadataRs.get(0);
                 Column column = readColumn(data, relation, database);
 
-                if (column != null && database instanceof MSSQLDatabase) {
-                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
-                            " CAST(value as varchar(max)) as REMARKS\n" +
-                            " FROM\n" +
-                            " sys.extended_properties\n" +
-                            "  WHERE\n" +
-                            " name='MS_Description' " +
-                            " AND major_id = OBJECT_ID('"+column.getRelation().getName()+"')\n" +
-                            " AND\n" +
-                            " minor_id = COLUMNPROPERTY(major_id, '"+column.getName()+"', 'ColumnId')"), String.class);
-
-                    if (remarks != null && remarks.size() > 0) {
-                        column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
-                    }
-
-                }
+//todo: action refactoring                if (column != null && database instanceof MSSQLDatabase) {
+//                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
+//                            " CAST(value as varchar(max)) as REMARKS\n" +
+//                            " FROM\n" +
+//                            " sys.extended_properties\n" +
+//                            "  WHERE\n" +
+//                            " name='MS_Description' " +
+//                            " AND major_id = OBJECT_ID('"+column.getRelation().getName()+"')\n" +
+//                            " AND\n" +
+//                            " minor_id = COLUMNPROPERTY(major_id, '"+column.getName()+"', 'ColumnId')"), String.class);
+//
+//                    if (remarks != null && remarks.size() > 0) {
+//                        column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+//                    }
+//
+//                }
 
                 return column;
             } else {
@@ -114,14 +114,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setRelation(table);
         column.setRemarks(remarks);
 
-        if (database instanceof OracleDatabase) {
-            String nullable = columnMetadataResultSet.getString("NULLABLE");
-            if (nullable.equals("Y")) {
-                column.setNullable(true);
-            } else {
-                column.setNullable(false);
-            }
-        } else {
+//todo: action refactoring        if (database instanceof OracleDatabase) {
+//            String nullable = columnMetadataResultSet.getString("NULLABLE");
+//            if (nullable.equals("Y")) {
+//                column.setNullable(true);
+//            } else {
+//                column.setNullable(false);
+//            }
+//        } else {
             int nullable = columnMetadataResultSet.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
                 column.setNullable(false);
@@ -131,7 +131,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
                 column.setNullable(true);
             }
-        }
+//        }
 
         if (database.supportsAutoIncrement()) {
             if (table instanceof Table) {
@@ -203,80 +203,80 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
 
-        if (database instanceof OracleDatabase) {
-            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
-            dataType = dataType.replace("VARCHAR2", "VARCHAR");
-            dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
-
-            DataType type = new DataType(dataType);
-//            type.setDataTypeId(dataType);
-            if (dataType.equalsIgnoreCase("NUMBER")) {
-                type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
-//                if (type.getColumnSize() == null) {
-//                    type.setColumnSize(38);
+//todo: action refactoring        if (database instanceof OracleDatabase) {
+//            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
+//            dataType = dataType.replace("VARCHAR2", "VARCHAR");
+//            dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
+//
+//            DataType type = new DataType(dataType);
+////            type.setDataTypeId(dataType);
+//            if (dataType.equalsIgnoreCase("NUMBER")) {
+//                type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
+////                if (type.getColumnSize() == null) {
+////                    type.setColumnSize(38);
+////                }
+//                type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
+////                if (type.getDecimalDigits() == null) {
+////                    type.setDecimalDigits(0);
+////                }
+////            type.setRadix(10);
+//            } else {
+//                type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
+//
+//                if (dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
+//                    type.setColumnSize(null);
+//                } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
+//                    type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
+//                    type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
+//                } else {
+//                    String charUsed = columnMetadataResultSet.getString("CHAR_USED");
+//                    DataType.ColumnSizeUnit unit = null;
+//                    if ("C".equals(charUsed)) {
+//                        unit = DataType.ColumnSizeUnit.CHAR;
+//                        type.setColumnSize(type.getColumnSize());
+//                    }
+//                    type.setColumnSizeUnit(unit);
 //                }
-                type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
-//                if (type.getDecimalDigits() == null) {
-//                    type.setDecimalDigits(0);
-//                }
-//            type.setRadix(10);
-            } else {
-                type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
-
-                if (dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
-                    type.setColumnSize(null);
-                } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
-                    type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
-                    type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
-                } else {
-                    String charUsed = columnMetadataResultSet.getString("CHAR_USED");
-                    DataType.ColumnSizeUnit unit = null;
-                    if ("C".equals(charUsed)) {
-                        unit = DataType.ColumnSizeUnit.CHAR;
-                        type.setColumnSize(type.getColumnSize());
-                    }
-                    type.setColumnSizeUnit(unit);
-                }
-            }
-
-
-            return type;
-        }
+//            }
+//
+//
+//            return type;
+//        }
 
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
-        if (database instanceof FirebirdDatabase) {
-            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
-                columnTypeName = "BLOB";
-            }
-            if (columnTypeName.equals("BLOB SUB_TYPE 1")) {
-                columnTypeName = "CLOB";
-            }
-        }
-
-        if (database instanceof MySQLDatabase && (columnTypeName.equalsIgnoreCase("ENUM") || columnTypeName.equalsIgnoreCase("SET"))) {
-            try {
-                String boilerLength;
-                if (columnTypeName.equalsIgnoreCase("ENUM"))
-                    boilerLength = "7";
-                else // SET
-                    boilerLength = "6";
-                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength + ", LENGTH(COLUMN_TYPE) - " + boilerLength + " - 1 ), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
-                        "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
-                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-                        "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
-                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
-                String enumClause = "";
-                for (String enumValue : enumValues) {
-                    enumClause += "'"+enumValue+"', ";
-                }
-                enumClause = enumClause.replaceFirst(", $", "");
-                return new DataType(columnTypeName + "("+enumClause+")");
-            } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("Error fetching enum values", e);
-            }
-        }
+//todo: action refactoring        if (database instanceof FirebirdDatabase) {
+//            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
+//                columnTypeName = "BLOB";
+//            }
+//            if (columnTypeName.equals("BLOB SUB_TYPE 1")) {
+//                columnTypeName = "CLOB";
+//            }
+//        }
+//
+//        if (database instanceof MySQLDatabase && (columnTypeName.equalsIgnoreCase("ENUM") || columnTypeName.equalsIgnoreCase("SET"))) {
+//            try {
+//                String boilerLength;
+//                if (columnTypeName.equalsIgnoreCase("ENUM"))
+//                    boilerLength = "7";
+//                else // SET
+//                    boilerLength = "6";
+//                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength + ", LENGTH(COLUMN_TYPE) - " + boilerLength + " - 1 ), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
+//                        "FROM INFORMATION_SCHEMA.COLUMNS\n" +
+//                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
+//                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
+//                        "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
+//                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
+//                String enumClause = "";
+//                for (String enumValue : enumValues) {
+//                    enumClause += "'"+enumValue+"', ";
+//                }
+//                enumClause = enumClause.replaceFirst(", $", "");
+//                return new DataType(columnTypeName + "("+enumClause+")");
+//            } catch (DatabaseException e) {
+//                LogFactory.getLogger().warning("Error fetching enum values", e);
+//            }
+//        }
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
@@ -294,14 +294,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
 
-        if (database instanceof DB2Database) {
-            String typeName = columnMetadataResultSet.getString("TYPE_NAME");
-            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
-                if (columnSize != null) {
-                    columnSize = columnSize / 2; //Stored as double length chars
-                }
-            }
-        }
+//todo: action refactoring        if (database instanceof DB2Database) {
+//            String typeName = columnMetadataResultSet.getString("TYPE_NAME");
+//            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
+//                if (columnSize != null) {
+//                    columnSize = columnSize / 2; //Stored as double length chars
+//                }
+//            }
+//        }
 
 
         DataType type = new DataType(columnTypeName);
@@ -316,30 +316,30 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
-        if (database instanceof MSSQLDatabase) {
-            Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
-
-            if (defaultValue != null && defaultValue instanceof String) {
-                if (defaultValue.equals("(NULL)")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", null);
-                }
-            }
-        }
-
-        if (database instanceof OracleDatabase) {
-            if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
-                columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
-
-                if (columnMetadataResultSet.get("COLUMN_DEF") != null && ((String) columnMetadataResultSet.get("COLUMN_DEF")).equalsIgnoreCase("NULL")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", null);
-                }
-
-                if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+columnMetadataResultSet.get("COLUMN_DEF")+")");
-                }
-            }
-
-        }
+//todo: action refactoring        if (database instanceof MSSQLDatabase) {
+//            Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+//
+//            if (defaultValue != null && defaultValue instanceof String) {
+//                if (defaultValue.equals("(NULL)")) {
+//                    columnMetadataResultSet.set("COLUMN_DEF", null);
+//                }
+//            }
+//        }
+//
+//        if (database instanceof OracleDatabase) {
+//            if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
+//                columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
+//
+//                if (columnMetadataResultSet.get("COLUMN_DEF") != null && ((String) columnMetadataResultSet.get("COLUMN_DEF")).equalsIgnoreCase("NULL")) {
+//                    columnMetadataResultSet.set("COLUMN_DEF", null);
+//                }
+//
+//                if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
+//                    columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+columnMetadataResultSet.get("COLUMN_DEF")+")");
+//                }
+//            }
+//
+//        }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());
     }

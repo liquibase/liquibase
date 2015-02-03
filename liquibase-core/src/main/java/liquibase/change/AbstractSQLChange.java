@@ -1,15 +1,21 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
@@ -206,9 +212,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
-            if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\\n", "\r\n");
-             }
+//todo: move with action            if (database instanceof MSSQLDatabase) {
+//                 statement = statement.replaceAll("\\n", "\r\n");
+//             }
 
             String escapedStatement = statement;
             try {

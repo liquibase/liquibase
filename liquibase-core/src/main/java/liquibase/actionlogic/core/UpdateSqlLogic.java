@@ -18,12 +18,8 @@ import java.sql.Statement;
 public class UpdateSqlLogic extends AbstractSqlLogic {
 
     @Override
-    public int getPriority(Action action, Scope scope) {
-        if (action instanceof AbstractSqlAction && action instanceof UpdateAction) {
-            return super.getPriority(action, scope);
-        } else {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+    protected Class<? extends Action> getSupportedAction() {
+        return UpdateAction.class;
     }
 
     @Override

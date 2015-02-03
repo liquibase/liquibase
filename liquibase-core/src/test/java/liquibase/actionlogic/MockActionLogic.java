@@ -24,11 +24,8 @@ public class MockActionLogic extends AbstractActionLogic {
     }
 
     @Override
-    public int getPriority(Action action, Scope scope) {
-        if (supportedAction.isAssignableFrom(action.getClass())) {
-            return priority;
-        }
-        return PRIORITY_NOT_APPLICABLE;
+    protected Class<? extends Action> getSupportedAction() {
+        return supportedAction;
     }
 
     @Override

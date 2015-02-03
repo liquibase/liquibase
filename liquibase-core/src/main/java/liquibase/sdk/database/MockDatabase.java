@@ -769,4 +769,13 @@ public class MockDatabase implements Database, InternalDatabase {
         return true;
     }
 
+    @Override
+    public boolean requiresDefiningColumnsAsNull() {
+        return false;
+    }
+
+    @Override
+    public boolean looksLikeFunctionCall(String value) {
+        return false;
+    }
 }

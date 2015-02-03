@@ -20,9 +20,15 @@ import java.util.List;
 public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActionLogic {
 
     @Override
+    protected Class<? extends Action> getSupportedAction() {
+        return SnapshotDatabaseObjectsAction.class;
+    }
+
+    @Override
     public int getPriority(Action action, Scope scope) {
-        if (!(action instanceof SnapshotDatabaseObjectsAction)) {
-            return PRIORITY_NOT_APPLICABLE;
+        int priority = super.getPriority(action, scope);
+        if (priority == PRIORITY_NOT_APPLICABLE) {
+            return priority;
         }
 
         DatabaseObject relatedTo = action.get(SnapshotDatabaseObjectsAction.Attr.relatedTo, DatabaseObject.class);
@@ -34,7 +40,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
         if (typeToSnapshot.isAssignableFrom(getTypeToSnapshot())) {
             for (Class clazz : getSupportedRelatedTypes()) {
                 if (relatedTo.getClass().isAssignableFrom(clazz)) {
-                    return PRIORITY_DEFAULT;
+                    return priority;
                 }
             }
         }

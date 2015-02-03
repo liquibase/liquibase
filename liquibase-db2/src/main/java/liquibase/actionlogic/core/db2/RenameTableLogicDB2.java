@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.RenameTableAction;
+import liquibase.action.core.ReorganizeTableAction;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.RenameTableLogic;
@@ -29,6 +30,9 @@ public class RenameTableLogicDB2 extends RenameTableLogic {
                         action.get(RenameTableAction.Attr.oldTableName, String.class))
                         + " TO "
                         + database.escapeObjectName(action.get(RenameTableAction.Attr.catalogName, String.class), Table.class)
-        ));
+        ),
+                new ReorganizeTableAction(action.get(RenameTableAction.Attr.catalogName, String.class),
+                        action.get(RenameTableAction.Attr.schemaName, String.class),
+                        action.get(RenameTableAction.Attr.newTableName, String.class)));
     }
 }

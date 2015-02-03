@@ -4,7 +4,6 @@ import liquibase.change.Change;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
-import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
@@ -299,9 +298,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             for (String statement : applyVisitors(sql, sqlVisitors)) {
-                if (database instanceof OracleDatabase) {
-                    statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
-                }
+//TODO: move for action framework                if (database instanceof OracleDatabase) {
+//                    statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+//                }
 
                 log.debug("Executing EXECUTE database command: "+statement);
                 if (statement.contains("?")) {

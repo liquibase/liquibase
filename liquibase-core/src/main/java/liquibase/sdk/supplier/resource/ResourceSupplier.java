@@ -2,13 +2,15 @@ package liquibase.sdk.supplier.resource;
 
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.CreateProcedureChange;
-import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.UnsupportedDatabase;
 import liquibase.resource.ResourceAccessor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ResourceSupplier {
 
@@ -32,7 +34,7 @@ public class ResourceSupplier {
             if (path.toLowerCase().endsWith("csv")) {
                 stream = new ByteArrayInputStream(usersCsv.getBytes());
             } else if (path.toLowerCase().endsWith("my-logic.sql")) {
-                stream = new ByteArrayInputStream(((String)ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(new HsqlDatabase())).getBytes());
+                stream = new ByteArrayInputStream(((String)ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(new UnsupportedDatabase())).getBytes());
             } else if (path.toLowerCase().endsWith("sql")) {
                 stream =new ByteArrayInputStream(fileSql.getBytes());
             } else {

@@ -310,4 +310,5 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     public boolean requiresDefiningColumnsAsNull() {
         return true;
     }
+
 }

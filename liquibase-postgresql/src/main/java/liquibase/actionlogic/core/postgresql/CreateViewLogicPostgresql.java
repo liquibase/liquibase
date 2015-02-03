@@ -9,7 +9,6 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
-import liquibase.database.core.firebird.FirebirdDatabase;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 

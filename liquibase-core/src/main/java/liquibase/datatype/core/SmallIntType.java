@@ -1,7 +1,6 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -22,13 +21,13 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase || database instanceof MySQLDatabase) {
-            return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
-        }
-
-        if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 5);
-        }
+//        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase || database instanceof MySQLDatabase) {
+//            return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
+//        }
+//
+//        if (database instanceof OracleDatabase) {
+//            return new DatabaseDataType("NUMBER", 5);
+//        }
 
         return super.toDatabaseDataType(database);
     }

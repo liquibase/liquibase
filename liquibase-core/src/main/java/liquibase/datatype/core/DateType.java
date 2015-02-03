@@ -1,11 +1,10 @@
 package liquibase.datatype.core;
 
+import liquibase.database.Database;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
-import liquibase.database.Database;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -15,14 +14,14 @@ import java.text.SimpleDateFormat;
 public class DateType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof MSSQLDatabase) {
-            try {
-                if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
-                    return new DatabaseDataType("SMALLDATETIME");
-                }
-            } catch (DatabaseException ignore) { } //assuming it is a newer version
-
-        }
+//        if (database instanceof MSSQLDatabase) {
+//            try {
+//                if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
+//                    return new DatabaseDataType("SMALLDATETIME");
+//                }
+//            } catch (DatabaseException ignore) { } //assuming it is a newer version
+//
+//        }
         return new DatabaseDataType(getName());
     }
 
@@ -50,12 +49,12 @@ public class DateType extends LiquibaseDataType {
 
     @Override
     public Object sqlToObject(String value, Database database) {
-        if (database instanceof DB2Database) {
-            return value.replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
-        }
-        if (database instanceof DerbyDatabase) {
-            return value.replaceFirst("^DATE\\('", "").replaceFirst("'\\)", "");
-        }
+//        if (database instanceof DB2Database) {
+//            return value.replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
+//        }
+//        if (database instanceof DerbyDatabase) {
+//            return value.replaceFirst("^DATE\\('", "").replaceFirst("'\\)", "");
+//        }
 
         if (zeroTime(value)) {
             return value;
@@ -63,10 +62,10 @@ public class DateType extends LiquibaseDataType {
         try {
             DateFormat dateFormat = getDateFormat(database);
 
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+', 'YYYY\\-MM\\-DD'\\)")) {
-                dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
-            }
+//            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+', 'YYYY\\-MM\\-DD'\\)")) {
+//                dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//                value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
+//            }
 
             return new java.sql.Date(dateFormat.parse(value.trim()).getTime());
         } catch (ParseException e) {
@@ -79,11 +78,11 @@ public class DateType extends LiquibaseDataType {
     }
 
     protected DateFormat getDateFormat(Database database) {
-        if (database instanceof OracleDatabase) {
-            return new SimpleDateFormat("dd-MMM-yy");
-        } else {
+//        if (database instanceof OracleDatabase) {
+//            return new SimpleDateFormat("dd-MMM-yy");
+//        } else {
             return new SimpleDateFormat("yyyy-MM-dd");
-        }
+//        }
     }
 
 

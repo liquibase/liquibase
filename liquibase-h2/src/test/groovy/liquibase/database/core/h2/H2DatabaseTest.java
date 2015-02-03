@@ -2,7 +2,6 @@ package liquibase.database.core.h2;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import org.junit.Assert;
 import static org.junit.Assert.*;
 import org.junit.Test;

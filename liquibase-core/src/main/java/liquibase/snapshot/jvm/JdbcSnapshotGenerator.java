@@ -2,8 +2,6 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -115,12 +113,12 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (objectName == null) {
             return null;
         }
-        if (!(database instanceof InformixDatabase)) {
-            objectName = objectName.trim();
-        }
-        if (database instanceof PostgresDatabase) {
-            return objectName.replaceAll("\"", "");
-        }
+//TODO: move for action logic        if (!(database instanceof InformixDatabase)) {
+//            objectName = objectName.trim();
+//        }
+//        if (database instanceof PostgresDatabase) {
+//            return objectName.replaceAll("\"", "");
+//        }
         return objectName;
     }
 }

@@ -5,12 +5,9 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.DateTimeType;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
@@ -80,12 +77,12 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setPrimaryKey(true);
                 constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
-                // MySQL sets some primary key names as PRIMARY which is invalid
-                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
-                    constraintsConfig.setPrimaryKeyName(null);
-                } else  {
+//todo:         action refactoring MySQL sets some primary key names as PRIMARY which is invalid
+//                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
+//                    constraintsConfig.setPrimaryKeyName(null);
+//                } else  {
                     constraintsConfig.setPrimaryKeyName(primaryKey.getName());
-                }
+//                }
                 control.setAlreadyHandledMissing(primaryKey);
                 control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
             } else if (column.isNullable() != null && !column.isNullable()) {
@@ -131,32 +128,32 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             DatabaseFunction function = (DatabaseFunction) defaultValue;
             if ("current".equals(function.getValue())) {
-              if (database instanceof InformixDatabase) {
-                if (dataType instanceof DateTimeType) {
-                  if (dataType.getAdditionalInformation() == null || dataType.getAdditionalInformation().length() == 0) {
-                    if (dataType.getParameters() != null && dataType.getParameters().length > 0) {
-
-                      String parameter = String.valueOf(dataType.getParameters()[0]);
-
-                      if ("4365".equals(parameter)) {
-                        function = new DatabaseFunction("current year to fraction(3)");
-                      }
-
-                      if ("3594".equals(parameter)) {
-                        function = new DatabaseFunction("current year to second");
-                      }
-
-                      if ("3080".equals(parameter)) {
-                        function = new DatabaseFunction("current year to minute");
-                      }
-
-                      if ("2052".equals(parameter)) {
-                        function = new DatabaseFunction("current year to day");
-                      }
-                    }
-                  }
-                }
-              }
+//todo: action refactoring              if (database instanceof InformixDatabase) {
+//                if (dataType instanceof DateTimeType) {
+//                  if (dataType.getAdditionalInformation() == null || dataType.getAdditionalInformation().length() == 0) {
+//                    if (dataType.getParameters() != null && dataType.getParameters().length > 0) {
+//
+//                      String parameter = String.valueOf(dataType.getParameters()[0]);
+//
+//                      if ("4365".equals(parameter)) {
+//                        function = new DatabaseFunction("current year to fraction(3)");
+//                      }
+//
+//                      if ("3594".equals(parameter)) {
+//                        function = new DatabaseFunction("current year to second");
+//                      }
+//
+//                      if ("3080".equals(parameter)) {
+//                        function = new DatabaseFunction("current year to minute");
+//                      }
+//
+//                      if ("2052".equals(parameter)) {
+//                        function = new DatabaseFunction("current year to day");
+//                      }
+//                    }
+//                  }
+//                }
+//              }
             }
 
             columnConfig.setDefaultValueComputed(function);

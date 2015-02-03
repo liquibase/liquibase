@@ -163,8 +163,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         short type = row.getShort("TYPE");
                         if (type == DatabaseMetaData.tableIndexClustered) {
                             index.setClustered(true);
-                        } else if (database instanceof MSSQLDatabase) {
-                            index.setClustered(false);
+//todo: action refactoring                        } else if (database instanceof MSSQLDatabase) {
+//                            index.setClustered(false);
                         }
 
                         foundIndexes.put(indexName, index);
@@ -183,7 +183,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //        if (foundObject instanceof PrimaryKey) {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
-        if (foundObject instanceof UniqueConstraint && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+        if (foundObject instanceof UniqueConstraint) { //todo action refactor && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
             Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable()).setName(foundObject.getName());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
@@ -245,10 +245,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 * An identifier with a leading blank is not allowed.
                 * So here is it replaced.
                 */
-                if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
-                    //indexName = "_generated_index_" + indexName.substring(1);
-                    continue; // suppress creation of generated_index records
-                }
+//todo: action refactoring                if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
+//                    //indexName = "_generated_index_" + indexName.substring(1);
+//                    continue; // suppress creation of generated_index records
+//                }
                 short type = row.getShort("TYPE");
                 //                String tableName = rs.getString("TABLE_NAME");
                 Boolean nonUnique = row.getBoolean("NON_UNIQUE");
@@ -262,16 +262,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 * If this "if" is commented out ArrayOutOfBoundsException is thrown
                 * because it tries to access an element -1 of a List (position-1)
                 */
-                if (database instanceof InformixDatabase
-                        && type != DatabaseMetaData.tableIndexStatistic
-                        && position == 0) {
-                    System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
-                }
+//todo: action refactoring                if (database instanceof InformixDatabase
+//                        && type != DatabaseMetaData.tableIndexStatistic
+//                        && position == 0) {
+//                    System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
+//                }
                 String definition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
                 if (definition != null) {
-                    if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
+//todo: action refactoring                    if (!(database instanceof OracleDatabase)) { //TODO: this replaceAll code has been there for a long time but we don't know why. Investigate when it is ever needed and modify it to be smarter
                         definition = definition.replaceAll("\"", "");
-                    }
+//                    }
                 }
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {
@@ -294,8 +294,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     if (type == DatabaseMetaData.tableIndexClustered) {
                         returnIndex.setClustered(true);
-                    } else if (database instanceof MSSQLDatabase) {
-                        returnIndex.setClustered(false);
+//todo: action refactoring                    } else if (database instanceof MSSQLDatabase) {
+//                        returnIndex.setClustered(false);
                     }
 
                     foundIndexes.put(indexName, returnIndex);
@@ -319,11 +319,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
             // If we are informix then must alter the lookup if we get here
             // Wont get here now though due to the continue for generated indexes above
-            if(database instanceof InformixDatabase) {
-              index = foundIndexes.get("_generated_index_" + exampleName.substring(1));
-            } else {
+//todo: action refactoring            if(database instanceof InformixDatabase) {
+//              index = foundIndexes.get("_generated_index_" + exampleName.substring(1));
+//            } else {
               index = foundIndexes.get(exampleName);
-            }
+//            }
             
             return index;
         } else {

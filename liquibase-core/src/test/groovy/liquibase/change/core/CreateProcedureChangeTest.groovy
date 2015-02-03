@@ -1,7 +1,6 @@
 package liquibase.change.core
 
 import liquibase.change.StandardChangeTest
-import OracleDatabase
 import liquibase.parser.core.ParsedNode
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
@@ -34,7 +33,7 @@ public class CreateProcedureChangeTest extends StandardChangeTest {
         when:
         def change = new CreateProcedureChange()
         change.load(new ParsedNode(null, "createProcedure").setValue("create procedure sql"), new MockResourceAccessor())
-        change.validate(new OracleDatabase())
+        change.validate(new MockDatabase())
 
         then:
         change.serialize().toString() == "createProcedure[procedureBody=create procedure sql]"

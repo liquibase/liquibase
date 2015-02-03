@@ -2,9 +2,6 @@ package liquibase.executor;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -108,13 +105,13 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 output.write(statement);
 
 
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-                    output.write(StreamUtil.getLineSeparator());
-                    output.write("GO");
-    //            } else if (database instanceof OracleDatabase) {
-    //                output.write(StreamUtil.getLineSeparator());
-    //                output.write("/");
-                } else {
+//todo: move for action logic                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+//                    output.write(StreamUtil.getLineSeparator());
+//                    output.write("GO");
+//    //            } else if (database instanceof OracleDatabase) {
+//    //                output.write(StreamUtil.getLineSeparator());
+//    //                output.write("/");
+//                } else {
                     String endDelimiter = ";";
                     if (sql instanceof RawSqlStatement) {
                         endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
@@ -124,7 +121,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
                     }
-                }
+//                }
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }

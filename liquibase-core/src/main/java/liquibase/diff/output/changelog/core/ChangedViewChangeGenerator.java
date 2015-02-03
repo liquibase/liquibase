@@ -3,7 +3,6 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.CreateViewChange;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -51,26 +50,26 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
         boolean fullDefinitionOverridden = false;
         if (selectQuery == null) {
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
-        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
-            String viewName;
-            if (change.getCatalogName() == null && change.getSchemaName() == null) {
-                viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
-            } else {
-                viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
-        }
-            selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
-                    + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
-                @Override
-                public String toString(Object obj) {
-                    if (((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
-                        return ((Column) obj).getName();
-                    } else {
-                        return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
-                    }
-                }
-            }) + ") AS "+selectQuery;
-            change.setFullDefinition(true);
-            fullDefinitionOverridden = true;
+//todo: action refactoring        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
+//            String viewName;
+//            if (change.getCatalogName() == null && change.getSchemaName() == null) {
+//                viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
+//            } else {
+//                viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
+//        }
+//            selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
+//                    + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
+//                @Override
+//                public String toString(Object obj) {
+//                    if (((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+//                        return ((Column) obj).getName();
+//                    } else {
+//                        return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
+//                    }
+//                }
+//            }) + ") AS "+selectQuery;
+//            change.setFullDefinition(true);
+//            fullDefinitionOverridden = true;
 
         }
         change.setSelectQuery(selectQuery);

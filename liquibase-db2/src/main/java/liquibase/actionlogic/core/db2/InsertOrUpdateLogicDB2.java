@@ -2,7 +2,6 @@ package liquibase.actionlogic.core.db2;
 
 import liquibase.actionlogic.core.InsertOrUpdateLogic;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.statement.core.InsertOrUpdateStatement;
 

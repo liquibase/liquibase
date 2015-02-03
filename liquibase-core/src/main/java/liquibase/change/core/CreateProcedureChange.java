@@ -2,10 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.DB2Database;
+import liquibase.database.core.UnsupportedDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
@@ -16,8 +13,8 @@ import liquibase.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 @DatabaseChange(name = "createProcedure",
         description = "Defines the definition for a stored procedure. This command is better to use for creating procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\nOften times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it keeps your change log smaller and allows you to more easily see what has changed in your procedure code through your source control system's diff command.",
@@ -163,16 +160,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             validate.addError("Cannot specify either 'path' or a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
         }
 
-        if (this.getReplaceIfExists() != null) {
-            if (database instanceof MSSQLDatabase) {
-                if (this.getReplaceIfExists() && this.getProcedureName() == null) {
-                    validate.addError("procedureName is required if replaceIfExists = true");
-                }
-            } else {
-                validate.checkDisallowedField("replaceIfExists", this.getReplaceIfExists(), database);
-            }
-
-        }
 
 
         return validate;
@@ -230,11 +217,6 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     @Override
     public SqlStatement[] generateStatements(Database database) {
         String endDelimiter = ";";
-        if (database instanceof OracleDatabase) {
-            endDelimiter = "\n/";
-        } else if (database instanceof DB2Database) {
-            endDelimiter = "";
-        }
 
         String procedureText;
         String path = getPath();
@@ -282,7 +264,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         if (parameterName.equals("procedureText") || parameterName.equals("procedureBody")) {
             Map<String, Object> returnMap = super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
-            returnMap.put(new HsqlDatabase().getShortName(), "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
+            returnMap.put(new UnsupportedDatabase().getShortName(), "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
                     "   MODIFIES SQL DATA\n" +
                     "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)");
 

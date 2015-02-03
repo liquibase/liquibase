@@ -1,22 +1,16 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
-import liquibase.actionlogic.core.AddAutoIncrementLogic;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2;
-import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddAutoIncrementStatement;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.Collection;
-import java.util.SortedSet;
+
+import static org.junit.Assert.*;
 
 public class SqlGeneratorFactoryTest {
 
@@ -43,65 +37,65 @@ public class SqlGeneratorFactoryTest {
         assertEquals(1, SqlGeneratorFactory.getInstance().getGenerators().size());
     }
 
-    @Test
-    public void unregister_instance() {
-        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
-
-        factory.getGenerators().clear();
-
-        assertEquals(0, factory.getGenerators().size());
-
-        AddAutoIncrementGeneratorHsqlH2 sqlGenerator
-        	= new AddAutoIncrementGeneratorHsqlH2();
-
-        factory.register(new AddAutoIncrementLogic());
-        factory.register(sqlGenerator);
-        factory.register(new AddAutoIncrementGeneratorDB2());
-
-        assertEquals(3, factory.getGenerators().size());
-
-        factory.unregister(sqlGenerator);
-        assertEquals(2, factory.getGenerators().size());
-    }
-
-    @Test
-    public void unregister_class() {
-        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
-
-        factory.getGenerators().clear();
-
-        assertEquals(0, factory.getGenerators().size());
-
-        AddAutoIncrementGeneratorHsqlH2 sqlGenerator
-        			= new AddAutoIncrementGeneratorHsqlH2();
-
-        factory.register(new AddAutoIncrementLogic());
-        factory.register(sqlGenerator);
-        factory.register(new AddAutoIncrementGeneratorDB2());
-
-        assertEquals(3, factory.getGenerators().size());
-
-        factory.unregister(AddAutoIncrementGeneratorHsqlH2.class);
-        assertEquals(2, factory.getGenerators().size());
-    }
-
-     @Test
-    public void unregister_class_doesNotExist() {
-        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
-
-        factory.getGenerators().clear();
-
-        assertEquals(0, factory.getGenerators().size());
-
-        factory.register(new AddAutoIncrementLogic());
-        factory.register(new AddAutoIncrementGeneratorHsqlH2());
-        factory.register(new AddAutoIncrementGeneratorDB2());
-
-        assertEquals(3, factory.getGenerators().size());
-
-        factory.unregister(AddColumnsLogic.class);
-        assertEquals(3, factory.getGenerators().size());
-    }
+//    @Test
+//    public void unregister_instance() {
+//        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+//
+//        factory.getGenerators().clear();
+//
+//        assertEquals(0, factory.getGenerators().size());
+//
+//        AddAutoIncrementGeneratorHsqlH2 sqlGenerator
+//        	= new AddAutoIncrementGeneratorHsqlH2();
+//
+//        factory.register(new AddAutoIncrementLogic());
+//        factory.register(sqlGenerator);
+//        factory.register(new AddAutoIncrementGeneratorDB2());
+//
+//        assertEquals(3, factory.getGenerators().size());
+//
+//        factory.unregister(sqlGenerator);
+//        assertEquals(2, factory.getGenerators().size());
+//    }
+//
+//    @Test
+//    public void unregister_class() {
+//        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+//
+//        factory.getGenerators().clear();
+//
+//        assertEquals(0, factory.getGenerators().size());
+//
+//        AddAutoIncrementGeneratorHsqlH2 sqlGenerator
+//        			= new AddAutoIncrementGeneratorHsqlH2();
+//
+//        factory.register(new AddAutoIncrementLogic());
+//        factory.register(sqlGenerator);
+//        factory.register(new AddAutoIncrementGeneratorDB2());
+//
+//        assertEquals(3, factory.getGenerators().size());
+//
+//        factory.unregister(AddAutoIncrementGeneratorHsqlH2.class);
+//        assertEquals(2, factory.getGenerators().size());
+//    }
+//
+//     @Test
+//    public void unregister_class_doesNotExist() {
+//        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+//
+//        factory.getGenerators().clear();
+//
+//        assertEquals(0, factory.getGenerators().size());
+//
+//        factory.register(new AddAutoIncrementLogic());
+//        factory.register(new AddAutoIncrementGeneratorHsqlH2());
+//        factory.register(new AddAutoIncrementGeneratorDB2());
+//
+//        assertEquals(3, factory.getGenerators().size());
+//
+//        factory.unregister(AddColumnsLogic.class);
+//        assertEquals(3, factory.getGenerators().size());
+//    }
 
    @Test
     public void reset() {
@@ -117,13 +111,13 @@ public class SqlGeneratorFactoryTest {
         assertTrue(generators.size() > 10);
     }
 
-    @Test
-    public void getGenerators() {
-        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null), new H2Database());
-
-        assertNotNull(allGenerators);
-        assertEquals(1, allGenerators.size());        
-    }
+//    @Test
+//    public void getGenerators() {
+//        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null), new H2Database());
+//
+//        assertNotNull(allGenerators);
+//        assertEquals(1, allGenerators.size());
+//    }
 
     private SqlGenerator addGenerator(final Class<? extends SqlStatement> sqlStatementClass, final Class<? extends Database> sqlDatabaseClass, final int level) {
     	

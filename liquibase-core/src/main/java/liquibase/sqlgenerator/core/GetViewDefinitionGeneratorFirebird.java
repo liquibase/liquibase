@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -15,7 +14,7 @@ public class GetViewDefinitionGeneratorFirebird extends GetViewDefinitionGenerat
 
     @Override
     public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof FirebirdDatabase;
+        return false; //todo: action refactoring database instanceof FirebirdDatabase;
     }
 
     @Override

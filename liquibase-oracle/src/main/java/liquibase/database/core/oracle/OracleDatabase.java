@@ -328,4 +328,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return Index.class.isAssignableFrom(objectType);
     }
 
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        return true;
+    }
 }

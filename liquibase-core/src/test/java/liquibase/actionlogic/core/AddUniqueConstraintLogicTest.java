@@ -13,7 +13,7 @@ public class AddUniqueConstraintLogicTest extends AbstractSqlGeneratorTest<AddUn
     protected static final String CONSTRAINT_NAME = "UQ_TEST";
 
     public AddUniqueConstraintLogicTest() throws Exception {
-        this(new AddUniqueConstraintLogic());
+        this(null); //new AddUniqueConstraintLogic());
     }
 
     protected AddUniqueConstraintLogicTest(SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest) throws Exception {
@@ -27,13 +27,13 @@ public class AddUniqueConstraintLogicTest extends AbstractSqlGeneratorTest<AddUn
         return new AddUniqueConstraintStatement(null, null, TABLE_NAME, new ColumnConfig[] {new ColumnConfig().setName(COLUMN_NAME)}, null);
     }
 
-    @Override
-    protected boolean shouldBeImplementation(Database database) {
-        return !(database instanceof SQLiteDatabase)
-                && !(database instanceof MSSQLDatabase)
-                && !(database instanceof SybaseDatabase)
-                && !(database instanceof SybaseASADatabase)
-                && !(database instanceof InformixDatabase)
-        ;
-    }   
+//    @Override
+//    protected boolean shouldBeImplementation(Database database) {
+//        return !(database instanceof SQLiteDatabase)
+//                && !(database instanceof MSSQLDatabase)
+//                && !(database instanceof SybaseDatabase)
+//                && !(database instanceof SybaseASADatabase)
+//                && !(database instanceof InformixDatabase)
+//        ;
+//    }
 }

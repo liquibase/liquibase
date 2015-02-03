@@ -6,7 +6,6 @@ import liquibase.action.core.RenameColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
-import liquibase.database.core.derby.DerbyDatabase;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.structure.core.Column;
 

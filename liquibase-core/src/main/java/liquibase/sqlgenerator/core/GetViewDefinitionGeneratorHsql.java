@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.core.HsqlDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -16,7 +15,7 @@ public class GetViewDefinitionGeneratorHsql extends GetViewDefinitionGenerator {
 
     @Override
     public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof HsqlDatabase;
+        return false; //todo: action refactoring database instanceof HsqlDatabase;
     }
 
     @Override

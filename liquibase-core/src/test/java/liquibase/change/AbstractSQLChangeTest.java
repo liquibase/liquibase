@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -146,16 +145,16 @@ public class AbstractSQLChangeTest {
         assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
     }
 
-    @Test
-    public void generateStatements_convertsEndingsOnSqlServer() {
-        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\n--a comment\nLINE 2;\nLINE 3;");
-
-        change.setSplitStatements(false);
-        change.setStripComments(true);
-        SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
-        assertEquals(1, statements.length);
-        assertEquals("LINE 1;\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
-    }
+//    @Test
+//    public void generateStatements_convertsEndingsOnSqlServer() {
+//        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\n--a comment\nLINE 2;\nLINE 3;");
+//
+//        change.setSplitStatements(false);
+//        change.setStripComments(true);
+//        SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
+//        assertEquals(1, statements.length);
+//        assertEquals("LINE 1;\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+//    }
 
     @Test
     public void generateStatements_keepComments() {

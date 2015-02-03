@@ -2,8 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -32,29 +30,16 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            return true;
-        }
         return super.generateStatementsVolatile(database);
     }
 
     @Override
     public boolean supports(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            return true;
-        }
         return super.supports(database);
     }
 
     @Override
     public ValidationErrors validate(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            ValidationErrors validationErrors = new ValidationErrors();
-            validationErrors.checkRequiredField("tableName", tableName);
-            validationErrors.checkRequiredField("columnName", columnName);
-
-            return validationErrors;
-        }
         return super.validate(database);
     }
 
@@ -109,11 +94,11 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         List<DropColumnStatement> dropStatements = new ArrayList<DropColumnStatement>();
 
         for (ColumnConfig column : columns) {
-            if (database instanceof SQLiteDatabase) {
-                statements.addAll(Arrays.asList(generateStatementsForSQLiteDatabase(database, column.getName())));
-            } else {
+//            if (database instanceof SQLiteDatabase) {
+//                statements.addAll(Arrays.asList(generateStatementsForSQLiteDatabase(database, column.getName())));
+//            } else {
                 dropStatements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
-            }
+//            }
         }
 
         if (dropStatements.size() == 1) {
@@ -122,26 +107,14 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             statements.add(new DropColumnStatement(dropStatements));
         }
 
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-        }
-
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     private SqlStatement[] generateSingleColumn(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            // return special statements for SQLite databases
-            return generateStatementsForSQLiteDatabase(database, getColumnName());
-        }
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-        }
-
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
@@ -155,44 +128,44 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
 
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) {
-
-        // SQLite does not support this ALTER TABLE operation until now.
-        // For more information see: http://www.sqlite.org/omitted.html.
-        // This is a small work around...
-
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-
-        // define alter table logic
-        SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
-            public ColumnConfig[] getColumnsToAdd() {
-                return new ColumnConfig[0];
-            }
-
-            public boolean createThisColumn(ColumnConfig column) {
-                return !column.getName().equals(columnName);
-            }
-
-            public boolean copyThisColumn(ColumnConfig column) {
-                return !column.getName().equals(columnName);
-            }
-
-            public boolean createThisIndex(Index index) {
-                return !index.getColumns().contains(columnName);
-            }
-        };
-
-        try {
-            // alter table
-            statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,
-                    database, getCatalogName(), getSchemaName(), getTableName()));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
+//TODO    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database, final String columnName) {
+//
+//        // SQLite does not support this ALTER TABLE operation until now.
+//        // For more information see: http://www.sqlite.org/omitted.html.
+//        // This is a small work around...
+//
+//        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+//
+//        // define alter table logic
+//        SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
+//            public ColumnConfig[] getColumnsToAdd() {
+//                return new ColumnConfig[0];
+//            }
+//
+//            public boolean createThisColumn(ColumnConfig column) {
+//                return !column.getName().equals(columnName);
+//            }
+//
+//            public boolean copyThisColumn(ColumnConfig column) {
+//                return !column.getName().equals(columnName);
+//            }
+//
+//            public boolean createThisIndex(Index index) {
+//                return !index.getColumns().contains(columnName);
+//            }
+//        };
+//
+//        try {
+//            // alter table
+//            statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,
+//                    database, getCatalogName(), getSchemaName(), getTableName()));
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return statements.toArray(new SqlStatement[statements.size()]);
+//    }
 
     @Override
     public String getConfirmationMessage() {

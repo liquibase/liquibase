@@ -1,7 +1,6 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -22,25 +21,25 @@ public class BigIntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof InformixDatabase) {
-            if (isAutoIncrement()) {
-                return new DatabaseDataType("SERIAL8");
-            } else {
-                return new DatabaseDataType("INT8");
-            }
-        }
-        if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 38,0);
-        }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase
-                || database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof MySQLDatabase) {
-            return new DatabaseDataType("BIGINT");
-        }
-        if (database instanceof PostgresDatabase) {
-            if (isAutoIncrement()) {
-                return new DatabaseDataType("BIGSERIAL");
-            }
-        }
+//        if (database instanceof InformixDatabase) {
+//            if (isAutoIncrement()) {
+//                return new DatabaseDataType("SERIAL8");
+//            } else {
+//                return new DatabaseDataType("INT8");
+//            }
+//        }
+//        if (database instanceof OracleDatabase) {
+//            return new DatabaseDataType("NUMBER", 38,0);
+//        }
+//        if (database instanceof DB2Database || database instanceof DerbyDatabase
+//                || database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof MySQLDatabase) {
+//            return new DatabaseDataType("BIGINT");
+//        }
+//        if (database instanceof PostgresDatabase) {
+//            if (isAutoIncrement()) {
+//                return new DatabaseDataType("BIGSERIAL");
+//            }
+//        }
         return super.toDatabaseDataType(database);
     }
 

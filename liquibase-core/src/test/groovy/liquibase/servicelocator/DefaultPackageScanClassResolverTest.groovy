@@ -1,8 +1,6 @@
 package liquibase.servicelocator
 
 import liquibase.database.Database
-import MySQLDatabase
-import OracleDatabase
 import liquibase.logging.Logger
 import liquibase.logging.core.AbstractLogger
 import liquibase.logging.core.DefaultLogger

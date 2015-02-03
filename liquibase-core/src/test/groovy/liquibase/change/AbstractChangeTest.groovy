@@ -3,11 +3,10 @@ package liquibase.change
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
-import MSSQLDatabase
-import liquibase.sdk.database.MockDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.exception.ValidationErrors
+import liquibase.sdk.database.MockDatabase
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.SqlStatement
 import org.junit.Test
@@ -217,7 +216,7 @@ public class AbstractChangeTest extends Specification {
     def validate_missingRequiredValue() throws Exception {
         when:
         ExampleAbstractChange change = new ExampleAbstractChange();
-        ValidationErrors errors = change.validate(new MSSQLDatabase());
+        ValidationErrors errors = change.validate(new MockDatabase());
         then:
 
         errors.getErrorMessages().size() == 1
@@ -230,7 +229,7 @@ public class AbstractChangeTest extends Specification {
         change.setParamTwo(3);
 
         then:
-        ValidationErrors errors = change.validate(new MSSQLDatabase());
+        ValidationErrors errors = change.validate(new MockDatabase());
         assert !errors.hasErrors();
     }
 

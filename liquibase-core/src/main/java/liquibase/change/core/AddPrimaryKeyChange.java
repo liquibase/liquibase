@@ -2,11 +2,9 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 
@@ -94,15 +92,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
         statement.setTablespace(getTablespace());
         statement.setClustered(getClustered());
 
-        if (database instanceof DB2Database) {
-            return new SqlStatement[]{
-                    statement,
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
-            };
 //todo        } else if (database instanceof SQLiteDatabase) {
 //            // return special statements for SQLite databases
 //            return generateStatementsForSQLiteDatabase(database);
-        }
 
         return new SqlStatement[]{
                 statement

@@ -1,13 +1,11 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -112,54 +110,54 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected String getSelectSequenceSql(Schema schema, Database database) {
-        if (database instanceof DB2Database) {
-            if(database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")){
-                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
-            }
-            else{
-                return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
-            }
-            
-            //return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
-        } else if (database instanceof DerbyDatabase) {
-            return "SELECT " +
-                    "  seq.SEQUENCENAME AS SEQUENCE_NAME " +
-                    "FROM " +
-                    "  SYS.SYSSEQUENCES seq, " +
-                    "  SYS.SYSSCHEMAS sch " +
-                    "WHERE " +
-                    "  sch.SCHEMANAME = '" + new CatalogAndSchema(null, schema.getName()).customize(database).getSchemaName() + "' AND " +
-                    "  sch.SCHEMAID = seq.SCHEMAID";
-        } else if (database instanceof FirebirdDatabase) {
-            return "SELECT RDB$GENERATOR_NAME AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
-        } else if (database instanceof H2Database) {
-            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
-        } else if (database instanceof HsqlDatabase) {
-            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
-        } else if (database instanceof InformixDatabase) {
-            return "SELECT tabname AS SEQUENCE_NAME FROM systables t, syssequences s WHERE s.tabid = t.tabid AND t.owner = '" + schema.getName() + "'";
-        } else if (database instanceof OracleDatabase) {
-            return "SELECT SEQUENCE_NAME AS SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE, ORDER_FLAG AS IS_ORDERED, LAST_NUMBER as START_VALUE, CACHE_SIZE FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
-        } else if (database instanceof PostgresDatabase) {
-            return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
-                    "WHERE relkind='S' " +
-                    "AND pg_class.relnamespace = pg_namespace.oid " +
-                    "AND nspname = '" + schema.getName() + "' " +
-                    "AND 'nextval(''" + schema.getName() + "." + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
-                    "AND 'nextval(''" + schema.getName() + "." + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
-                    "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)" +
-                    "AND 'nextval(''\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)";
-        } else if (database instanceof MSSQLDatabase) {
-                return "SELECT SEQUENCE_NAME, " +
-                        "cast(START_VALUE AS BIGINT) AS START_VALUE, " +
-                        "cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, " +
-                        "cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, " +
-                        "CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, " +
-                        "CYCLE_OPTION AS WILL_CYCLE " +
-                        "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() +"'";
-        } else {
+//todo: move for action logic        if (database instanceof DB2Database) {
+//            if(database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")){
+//                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
+//            }
+//            else{
+//                return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
+//            }
+//
+//            //return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
+//        } else if (database instanceof DerbyDatabase) {
+//            return "SELECT " +
+//                    "  seq.SEQUENCENAME AS SEQUENCE_NAME " +
+//                    "FROM " +
+//                    "  SYS.SYSSEQUENCES seq, " +
+//                    "  SYS.SYSSCHEMAS sch " +
+//                    "WHERE " +
+//                    "  sch.SCHEMANAME = '" + new CatalogAndSchema(null, schema.getName()).customize(database).getSchemaName() + "' AND " +
+//                    "  sch.SCHEMAID = seq.SCHEMAID";
+//        } else if (database instanceof FirebirdDatabase) {
+//            return "SELECT RDB$GENERATOR_NAME AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
+//        } else if (database instanceof H2Database) {
+//            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
+//        } else if (database instanceof HsqlDatabase) {
+//            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
+//        } else if (database instanceof InformixDatabase) {
+//            return "SELECT tabname AS SEQUENCE_NAME FROM systables t, syssequences s WHERE s.tabid = t.tabid AND t.owner = '" + schema.getName() + "'";
+//        } else if (database instanceof OracleDatabase) {
+//            return "SELECT SEQUENCE_NAME AS SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE, ORDER_FLAG AS IS_ORDERED, LAST_NUMBER as START_VALUE, CACHE_SIZE FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
+//        } else if (database instanceof PostgresDatabase) {
+//            return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
+//                    "WHERE relkind='S' " +
+//                    "AND pg_class.relnamespace = pg_namespace.oid " +
+//                    "AND nspname = '" + schema.getName() + "' " +
+//                    "AND 'nextval(''" + schema.getName() + "." + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
+//                    "AND 'nextval(''" + schema.getName() + "." + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
+//                    "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)" +
+//                    "AND 'nextval(''\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)";
+//        } else if (database instanceof MSSQLDatabase) {
+//                return "SELECT SEQUENCE_NAME, " +
+//                        "cast(START_VALUE AS BIGINT) AS START_VALUE, " +
+//                        "cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, " +
+//                        "cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, " +
+//                        "CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, " +
+//                        "CYCLE_OPTION AS WILL_CYCLE " +
+//                        "FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() +"'";
+//        } else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
-        }
+//        }
 
     }
 

@@ -1,12 +1,5 @@
 package liquibase;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
-import java.text.DateFormat;
-import java.util.*;
-
 import liquibase.change.CheckSum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
@@ -15,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -40,7 +32,6 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LiquibaseUtil;
@@ -48,6 +39,12 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.util.*;
 
 /**
  * Primary facade class for interacting with Liquibase.
@@ -338,9 +335,9 @@ public class Liquibase {
         executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
 
-        if (database instanceof OracleDatabase) {
-            executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
-        }
+//TODO: move with action        if (database instanceof OracleDatabase) {
+//            executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
+//        }
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {

@@ -16,7 +16,7 @@ public class AddForeignKeyConstraintLogicMSSQL extends AddForeignKeyConstraintLo
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) throws ActionPerformException {
+    protected StringClauses generateSql(Action action, Scope scope) {
         return super.generateSql(action, scope)
                 .remove("ON DELETE RESTRICT");
     }

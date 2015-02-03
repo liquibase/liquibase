@@ -7,7 +7,6 @@ import liquibase.changelog.*;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -30,7 +29,8 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -823,12 +823,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean supportsDropTableCascadeConstraints() {
-        return (this instanceof SQLiteDatabase
-                || this instanceof SybaseDatabase
-                || this instanceof SybaseASADatabase
-                || this instanceof PostgresDatabase
-                || this instanceof OracleDatabase
-        );
+        return false;
     }
 
     @Override

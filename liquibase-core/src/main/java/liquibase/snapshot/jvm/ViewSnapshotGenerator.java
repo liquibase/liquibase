@@ -3,11 +3,10 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
@@ -79,16 +78,16 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                         view.setContainsFullDefinition(true);
                     }
 
-                    if (database instanceof InformixDatabase) {
-
-                        // Cleanup
-                        definition = definition.trim();
-                        definition = definition.replaceAll("\\s*,\\s*", ", ");
-                        definition = definition.replaceAll("\\s*;", "");
-
-                        // Strip the schema definition because it can optionally be included in the tag attribute
-                        definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
-                    }
+//todo: action refactoring                    if (database instanceof InformixDatabase) {
+//
+//                        // Cleanup
+//                        definition = definition.trim();
+//                        definition = definition.replaceAll("\\s*,\\s*", ", ");
+//                        definition = definition.replaceAll("\\s*;", "");
+//
+//                        // Strip the schema definition because it can optionally be included in the tag attribute
+//                        definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+//                    }
 
                     view.setDefinition(definition);
                 } catch (DatabaseException e) {

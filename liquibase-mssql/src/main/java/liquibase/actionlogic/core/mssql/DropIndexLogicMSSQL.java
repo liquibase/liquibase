@@ -36,7 +36,7 @@ public class DropIndexLogicMSSQL extends DropIndexLogic {
                         action.get(DropIndexAction.Attr.tableSchemaName, String.class),
                         action.get(DropIndexAction.Attr.tableName, String.class))
                         + "."
-                        + database.escapeObjectName(action.get(DropIndexAction.Attr.indexName, String.class), Index.class)
+                        + database.escapeObjectName(action.get(DropIndexAction.Attr.indexName, String.class), Index.class)));
 
 
     }

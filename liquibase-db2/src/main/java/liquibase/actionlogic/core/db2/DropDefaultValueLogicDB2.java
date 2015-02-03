@@ -6,7 +6,6 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
-import liquibase.database.core.mysql.MySQLDatabase;
 
 public class DropDefaultValueLogicDB2 extends DropDefaultValueLogic {
 

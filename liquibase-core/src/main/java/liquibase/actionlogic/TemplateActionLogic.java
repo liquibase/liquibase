@@ -64,6 +64,11 @@ public class TemplateActionLogic extends AbstractActionLogic {
         parseTemplate(template);
     }
 
+    @Override
+    protected Class<? extends Action> getSupportedAction() {
+        return Action.class;
+    }
+
     protected void parseTemplate(String spec) throws ParseException {
         if (spec == null) {
             throw new ParseException("Null specification");
@@ -165,7 +170,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
 
         if (unsupportedAttributes != null) {
             for (String attr : unsupportedAttributes) {
-                validate.checkDisallowedField(attr, action.get(attr, Object.class), scope.get(Scope.Attr.database, Database.class));
+                validate.checkDisallowedField(attr, action.get(attr, Object.class), scope.get(Scope.Attr.database, Database.class).getShortName());
             }
         }
         return validate;

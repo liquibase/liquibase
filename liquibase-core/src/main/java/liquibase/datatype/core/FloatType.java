@@ -1,9 +1,6 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -13,9 +10,9 @@ public class FloatType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
-            return new DatabaseDataType("FLOAT");
-        }
+//        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+//            return new DatabaseDataType("FLOAT");
+//        }
         return super.toDatabaseDataType(database);
     }
 

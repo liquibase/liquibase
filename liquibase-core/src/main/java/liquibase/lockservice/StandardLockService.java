@@ -3,7 +3,6 @@ package liquibase.lockservice;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
-import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -97,15 +96,15 @@ public class StandardLockService implements LockService {
             database.commit();
         }
 
-        if (executor.updatesDatabase() && database instanceof DerbyDatabase && ((DerbyDatabase) database).supportsBooleanDataType()) { //check if the changelog table is of an old smallint vs. boolean format
-            String lockTable = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
-            Object obj = executor.queryForObject(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only"), Object.class);
-            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
-                executor.execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            }
-        }
+//TODO: move for action logic        if (executor.updatesDatabase() && database instanceof DerbyDatabase && ((DerbyDatabase) database).supportsBooleanDataType()) { //check if the changelog table is of an old smallint vs. boolean format
+//            String lockTable = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
+//            Object obj = executor.queryForObject(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only"), Object.class);
+//            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+//                executor.execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
+//                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+//                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+//            }
+//        }
 
     }
 

@@ -2,15 +2,14 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.*;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
@@ -120,15 +119,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             }
         }
 
-        for (ColumnConfig column : getColumns()) {
-            String columnRemarks = StringUtils.trimToNull(column.getRemarks());
-            if (columnRemarks != null) {
-                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
-                    statements.add(remarksStatement);
-                }
-            }
-        }
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }

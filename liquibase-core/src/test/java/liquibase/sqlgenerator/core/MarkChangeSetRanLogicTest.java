@@ -14,7 +14,7 @@ import static junit.framework.Assert.assertTrue;
 
 public class MarkChangeSetRanLogicTest extends AbstractSqlGeneratorTest<MarkChangeSetRanStatement> {
     public MarkChangeSetRanLogicTest() throws Exception {
-        super(new MarkChangeSetRanLogic());
+        super(null);//new MarkChangeSetRanLogic());
     }
 
     @Override
@@ -22,10 +22,10 @@ public class MarkChangeSetRanLogicTest extends AbstractSqlGeneratorTest<MarkChan
         return new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null, null), ChangeSet.ExecType.EXECUTED);
     }
 
-    @Test
-    public void generateSql_markRan() {
-        Sql[] sqls = new MarkChangeSetRanLogic().generateSql(new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null, null), ChangeSet.ExecType.MARK_RAN), new MockDatabase(), new MockSqlGeneratorChain());
-        assertEquals(1, sqls.length);
-        assertTrue(sqls[0].toSql(), sqls[0].toSql().contains("MARK_RAN"));
-    }
+//    @Test
+//    public void generateSql_markRan() {
+//        Sql[] sqls = new MarkChangeSetRanLogic().generateSql(new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null, null), ChangeSet.ExecType.MARK_RAN), new MockDatabase(), new MockSqlGeneratorChain());
+//        assertEquals(1, sqls.length);
+//        assertTrue(sqls[0].toSql(), sqls[0].toSql().contains("MARK_RAN"));
+//    }
 }

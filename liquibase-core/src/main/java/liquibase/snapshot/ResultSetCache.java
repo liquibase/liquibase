@@ -1,7 +1,6 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
@@ -236,9 +235,9 @@ class ResultSetCache {
                         value = ((String) value).trim(); // Trim the value normally
                       } else {
                         boolean startsWithSpace = false;
-                        if(database instanceof InformixDatabase && ((String)value).matches("^ .*$")) {
-                          startsWithSpace = true; // Set the flag if the value started with a space
-                        }
+//TODO: move with action                        if(database instanceof InformixDatabase && ((String)value).matches("^ .*$")) {
+//                          startsWithSpace = true; // Set the flag if the value started with a space
+//                        }
                         value = ((String) value).trim(); // Trim the value normally
                         if(startsWithSpace == true) {
                           value = " "+value; // Put the space back at the beginning if the flag was set

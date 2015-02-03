@@ -1,10 +1,5 @@
 package liquibase.changelog.filter;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.database.core.MySQLDatabase;
-import static org.junit.Assert.*;
-import org.junit.Test;
-
 public class DbmsChangeSetFilterTest  {
 
 //    @Test
@@ -17,16 +12,16 @@ public class DbmsChangeSetFilterTest  {
 //        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
 //    }
 
-    @Test
-    public void singleDbms() {
-        DbmsChangeSetFilter filter = new DbmsChangeSetFilter(new MySQLDatabase());
-
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql", null)).isAccepted());
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql, oracle", null)).isAccepted());
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "oracle", null)).isAccepted());
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)).isAccepted());
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "h2,!mysql", null)).isAccepted());
-    }
+//    @Test
+//    public void singleDbms() {
+//        DbmsChangeSetFilter filter = new DbmsChangeSetFilter(new MySQLDatabase());
+//
+//        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql", null)).isAccepted());
+//        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql, oracle", null)).isAccepted());
+//        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "oracle", null)).isAccepted());
+//        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)).isAccepted());
+//        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "h2,!mysql", null)).isAccepted());
+//    }
 
 //    @Test
 //    public void multiContexts() {

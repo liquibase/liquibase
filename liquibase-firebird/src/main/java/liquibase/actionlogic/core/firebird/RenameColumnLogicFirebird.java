@@ -16,6 +16,6 @@ public class RenameColumnLogicFirebird extends RenameColumnLogic {
     @Override
     protected StringClauses generateSql(Action action, Scope scope) {
         return super.generateSql(action, scope)
-                .replace("RENAME COLUMN", "ALTER COLUMN")
+                .replace("RENAME COLUMN", "ALTER COLUMN");
     }
 }

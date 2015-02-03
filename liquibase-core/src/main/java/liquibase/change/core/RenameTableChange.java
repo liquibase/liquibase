@@ -2,11 +2,9 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -67,9 +65,6 @@ public class RenameTableChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
-        }
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }

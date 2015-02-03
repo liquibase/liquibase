@@ -2,8 +2,6 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.sdk.database.MockDatabase;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
@@ -37,10 +35,10 @@ public class TestContext {
 
             List<Database> toRemove = new ArrayList<Database>();
             for (Database database : allDatabases) {
-                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
-                        || database instanceof MockDatabase) {
-                    toRemove.add(database);
-                }
+//                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
+//                        || database instanceof MockDatabase) {
+//                    toRemove.add(database);
+//                }
 
                 database.setCanCacheLiquibaseTableInfo(false);
             }

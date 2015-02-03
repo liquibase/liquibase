@@ -6,7 +6,7 @@ import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 
 public class SelectFromDatabaseChangeLogLockLogicTest extends AbstractSqlGeneratorTest<SelectFromDatabaseChangeLogLockStatement> {
     public SelectFromDatabaseChangeLogLockLogicTest() throws Exception {
-        super( new SelectFromDatabaseChangeLogLockLogic());
+        super(null);// new SelectFromDatabaseChangeLogLockLogic());
     }
 
     @Override

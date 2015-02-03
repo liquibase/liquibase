@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -16,7 +15,7 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
 
     @Override
     public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof MSSQLDatabase;
+        return false; //todo: action refactoring database instanceof MSSQLDatabase;
     }
 
     @Override

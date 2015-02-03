@@ -5,7 +5,6 @@ import liquibase.action.Action;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.database.Database;
-import liquibase.database.core.h2.H2Database;
 import liquibase.database.core.hsql.HsqlDatabase;
 
 public class SetNullableLogicHsql extends SetNullableLogic {

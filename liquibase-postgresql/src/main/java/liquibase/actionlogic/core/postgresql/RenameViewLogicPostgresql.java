@@ -5,7 +5,6 @@ import liquibase.action.Action;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameViewLogic;
 import liquibase.database.Database;
-import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.database.core.postgresql.PostgresDatabase;
 
 public class RenameViewLogicPostgresql extends RenameViewLogic {

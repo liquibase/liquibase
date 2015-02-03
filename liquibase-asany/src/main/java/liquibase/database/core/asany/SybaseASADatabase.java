@@ -261,4 +261,8 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	public boolean requiresDefiningColumnsAsNull() {
 		return true;
 	}
-}
+
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        return true;
+    }}

@@ -2,13 +2,10 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameColumnStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -134,44 +131,44 @@ public class RenameColumnChange extends AbstractChange {
 		// This is a small work around...
     
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-    	// define alter table logic
-		AlterTableVisitor rename_alter_visitor = 
-		new AlterTableVisitor() {
-			@Override
-            public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			@Override
-            public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			@Override
-            public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getOldColumnName())) {
-					column.setName(getNewColumnName());
-				}
-				return true;
-			}
-			@Override
-            public boolean createThisIndex(Index index) {
-				if (index.getColumns().contains(getOldColumnName())) {
-					index.getColumns().remove(getOldColumnName());
-					index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
-				}
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
-		} catch (Exception e) {
-			System.err.println(e);
-			e.printStackTrace();
-		}
+//
+//    	// define alter table logic
+//		AlterTableVisitor rename_alter_visitor =
+//		new AlterTableVisitor() {
+//			@Override
+//            public ColumnConfig[] getColumnsToAdd() {
+//				return new ColumnConfig[0];
+//			}
+//			@Override
+//            public boolean copyThisColumn(ColumnConfig column) {
+//				return true;
+//			}
+//			@Override
+//            public boolean createThisColumn(ColumnConfig column) {
+//				if (column.getName().equals(getOldColumnName())) {
+//					column.setName(getNewColumnName());
+//				}
+//				return true;
+//			}
+//			@Override
+//            public boolean createThisIndex(Index index) {
+//				if (index.getColumns().contains(getOldColumnName())) {
+//					index.getColumns().remove(getOldColumnName());
+//					index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
+//				}
+//				return true;
+//			}
+//		};
+//
+//    	try {
+//    		// alter table
+//			statements.addAll(SQLiteDatabase.getAlterTableStatements(
+//					rename_alter_visitor,
+//					database,getCatalogName(), getSchemaName(),getTableName()));
+//		} catch (Exception e) {
+//			System.err.println(e);
+//			e.printStackTrace();
+//		}
     	
     	return statements.toArray(new SqlStatement[statements.size()]);
     }

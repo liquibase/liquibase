@@ -29,26 +29,24 @@ import java.util.List;
 public class QueryJdbcMetaDataLogic extends AbstractActionLogic implements ActionLogic.InteractsExternally {
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
-        ValidationErrors validate = super.validate(action, scope);
-        validate.checkForRequiredField(QueryJdbcMetaDataAction.Attr.method, action);
-        return validate;
+    protected Class<? extends Action> getSupportedAction() {
+        return QueryJdbcMetaDataAction.class;
     }
 
     @Override
-    public int getPriority(Action action, Scope scope) {
-        if (!(action instanceof QueryJdbcMetaDataAction)) {
-            return PRIORITY_NOT_APPLICABLE;
-        }
+    public ValidationErrors validate(Action action, Scope scope) {
+        return super.validate(action, scope)
+                .checkForRequiredField(QueryJdbcMetaDataAction.Attr.method, action);
+    }
 
+    @Override
+    protected boolean supportsScope(Scope scope) {
         Database database = scope.get(Scope.Attr.database, Database.class);
-        if (database != null && database instanceof AbstractJdbcDatabase) {
-            DatabaseConnection connection = database.getConnection();
-            if (connection != null && connection instanceof JdbcConnection && ((JdbcConnection) connection).getUnderlyingConnection() != null) {
-                return PRIORITY_DEFAULT;
-            }
-        }
-        return PRIORITY_NOT_APPLICABLE;
+
+        return super.supportsScope(scope)
+                && database instanceof AbstractJdbcDatabase
+                && database.getConnection() instanceof JdbcConnection
+                && ((JdbcConnection) database.getConnection()).getUnderlyingConnection() != null;
     }
 
     @Override
@@ -68,7 +66,7 @@ public class QueryJdbcMetaDataLogic extends AbstractActionLogic implements Actio
                 Validate.isTrue(arguments.size() == 4, "getColumns requires 4 arguments");
                 return new RowBasedQueryResult(JdbcUtils.extract(getMetaData(scope).getColumns((String) arguments.get(0), (String) arguments.get(1), (String) arguments.get(2), (String) arguments.get(3))));
             }
-            throw new ActionPerformException("Unknown method '"+method+"'");
+            throw new ActionPerformException("Unknown method '" + method + "'");
         } catch (Exception e) {
             throw new ActionPerformException(e);
         }

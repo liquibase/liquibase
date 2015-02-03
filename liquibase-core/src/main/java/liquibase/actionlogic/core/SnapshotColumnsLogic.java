@@ -277,14 +277,14 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 
         Integer characterOctetLength = row.get("CHAR_OCTET_LENGTH", Integer.class);
 
-        if (database instanceof DB2Database) {
-            String typeName = row.get("TYPE_NAME", String.class);
-            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
-                if (columnSize != null) {
-                    columnSize = columnSize / 2; //Stored as double length chars
-                }
-            }
-        }
+//TODO: refactor action        if (database instanceof DB2Database) {
+//            String typeName = row.get("TYPE_NAME", String.class);
+//            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
+//                if (columnSize != null) {
+//                    columnSize = columnSize / 2; //Stored as double length chars
+//                }
+//            }
+//        }
 
 
         DataType type = new DataType(columnTypeName);
@@ -299,30 +299,30 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     protected Object readDefaultValue(RowBasedQueryResult.Row row, Column columnInfo, Database database) {
-        if (database instanceof MSSQLDatabase) {
-            Object defaultValue = row.get("COLUMN_DEF", Object.class);
-
-            if (defaultValue != null && defaultValue instanceof String) {
-                if (defaultValue.equals("(NULL)")) {
-                    row.set("COLUMN_DEF", null);
-                }
-            }
-        }
-
-        if (database instanceof OracleDatabase) {
-            if (row.get("COLUMN_DEF", Object.class) == null) {
-                row.set("COLUMN_DEF", row.get("DATA_DEFAULT", Object.class));
-
-                if (row.get("COLUMN_DEF", Object.class) != null && ((String) row.get("COLUMN_DEF", String.class)).equalsIgnoreCase("NULL")) {
-                    row.set("COLUMN_DEF", null);
-                }
-
-                if (row.get("VIRTUAL_COLUMN", String.class).equals("YES")) {
-                    row.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+row.get("COLUMN_DEF", String.class)+")");
-                }
-            }
-
-        }
+//TODO: refactor action        if (database instanceof MSSQLDatabase) {
+//            Object defaultValue = row.get("COLUMN_DEF", Object.class);
+//
+//            if (defaultValue != null && defaultValue instanceof String) {
+//                if (defaultValue.equals("(NULL)")) {
+//                    row.set("COLUMN_DEF", null);
+//                }
+//            }
+//        }
+//
+//        if (database instanceof OracleDatabase) {
+//            if (row.get("COLUMN_DEF", Object.class) == null) {
+//                row.set("COLUMN_DEF", row.get("DATA_DEFAULT", Object.class));
+//
+//                if (row.get("COLUMN_DEF", Object.class) != null && ((String) row.get("COLUMN_DEF", String.class)).equalsIgnoreCase("NULL")) {
+//                    row.set("COLUMN_DEF", null);
+//                }
+//
+//                if (row.get("VIRTUAL_COLUMN", String.class).equals("YES")) {
+//                    row.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+row.get("COLUMN_DEF", String.class)+")");
+//                }
+//            }
+//
+//        }
 
         return SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.getType());
     }

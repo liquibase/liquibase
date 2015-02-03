@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.SybaseASADatabase;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
@@ -76,9 +75,9 @@ public class DropUniqueConstraintChange extends AbstractChange {
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
         DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
-    	if (database instanceof SybaseASADatabase) {
-    		statement.setUniqueColumns(ColumnConfig.arrayFromNames(uniqueColumns));
-    	}
+//    	if (database instanceof SybaseASADatabase) {
+//    		statement.setUniqueColumns(ColumnConfig.arrayFromNames(uniqueColumns));
+//    	}
     	return new SqlStatement[]{
 			statement
         };

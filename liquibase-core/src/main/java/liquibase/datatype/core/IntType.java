@@ -1,7 +1,6 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -23,26 +22,26 @@ public class IntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof InformixDatabase && isAutoIncrement()) {
-            return new DatabaseDataType("SERIAL");
-        }
-        if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 10);
-        }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase) {
-            return new DatabaseDataType("INTEGER");
-        }
-        if (database instanceof PostgresDatabase) {
-            if (autoIncrement) {
-                return new DatabaseDataType("SERIAL");
-            }
-        }
-        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase  || database instanceof MySQLDatabase) {
-            return new DatabaseDataType("INT");
-        }
-        if (database instanceof SQLiteDatabase) {
-        	return new DatabaseDataType("INTEGER");
-        }
+//        if (database instanceof InformixDatabase && isAutoIncrement()) {
+//            return new DatabaseDataType("SERIAL");
+//        }
+//        if (database instanceof OracleDatabase) {
+//            return new DatabaseDataType("NUMBER", 10);
+//        }
+//        if (database instanceof DB2Database || database instanceof DerbyDatabase) {
+//            return new DatabaseDataType("INTEGER");
+//        }
+//        if (database instanceof PostgresDatabase) {
+//            if (autoIncrement) {
+//                return new DatabaseDataType("SERIAL");
+//            }
+//        }
+//        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase  || database instanceof MySQLDatabase) {
+//            return new DatabaseDataType("INT");
+//        }
+//        if (database instanceof SQLiteDatabase) {
+//        	return new DatabaseDataType("INTEGER");
+//        }
         return super.toDatabaseDataType(database);
 
         //sqllite

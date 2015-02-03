@@ -1,19 +1,17 @@
 package liquibase.test;
 
-import liquibase.database.*;
-import liquibase.database.core.DB2Database;
-import liquibase.database.example.ExampleCustomDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ResourceAccessor;
 
-import java.util.*;
-import java.sql.SQLException;
-import java.sql.Driver;
 import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.*;
 
 public class DatabaseTestContext {
     private static DatabaseTestContext instance = new DatabaseTestContext();
@@ -107,11 +105,11 @@ public class DatabaseTestContext {
             try {
                 databaseConnection.rollback();
             } catch (DatabaseException e) {
-                if (database instanceof DB2Database) {
-//                    expected, there is a problem with it
-                } else {
-                    throw e;
-                }
+//                if (database instanceof DB2Database) {
+////                    expected, there is a problem with it
+//                } else {
+//                    throw e;
+//                }
             }
         }
 
@@ -209,11 +207,11 @@ public class DatabaseTestContext {
 
             List<Database> toRemove = new ArrayList<Database>();
             for (Database database : allDatabases) {
-                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
-                        || database instanceof MockDatabase
-                        || database instanceof ExampleCustomDatabase) {
-                    toRemove.add(database);
-                }
+//                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
+//                        || database instanceof MockDatabase
+//                        || database instanceof ExampleCustomDatabase) {
+//                    toRemove.add(database);
+//                }
             }
             allDatabases.removeAll(toRemove);
         }

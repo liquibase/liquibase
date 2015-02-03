@@ -9,11 +9,7 @@ import liquibase.database.Database;
 public abstract class AbstractSqlLogic extends AbstractActionLogic {
 
     @Override
-    public int getPriority(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        if (database != null && database instanceof AbstractJdbcDatabase) {
-            return PRIORITY_DEFAULT;
-        }
-        return PRIORITY_NOT_APPLICABLE;
+    protected boolean supportsScope(Scope scope) {
+        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class) instanceof AbstractJdbcDatabase;
     }
 }

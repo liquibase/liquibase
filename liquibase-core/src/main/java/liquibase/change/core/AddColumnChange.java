@@ -126,20 +126,16 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getRemarks(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
-            if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
-                addColumnStatement.setAddAfterColumn(column.getAfterColumn());
-            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
-                       && (column.getBeforeColumn() != null)) {
-                addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
-            } else if ((database instanceof FirebirdDatabase) && (column.getPosition() != null)) {
-                addColumnStatement.setAddAtPosition(column.getPosition());
-            }
+//            if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
+//                addColumnStatement.setAddAfterColumn(column.getAfterColumn());
+//            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
+//                       && (column.getBeforeColumn() != null)) {
+//                addColumnStatement.setAddBeforeColumn(column.getBeforeColumn());
+//            } else if ((database instanceof FirebirdDatabase) && (column.getPosition() != null)) {
+//                addColumnStatement.setAddAtPosition(column.getPosition());
+//            }
 
             addColumnStatements.add(addColumnStatement);
-
-            if (database instanceof DB2Database) {
-                sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-            }            
 
             if (column.getValueObject() != null) {
                 UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());

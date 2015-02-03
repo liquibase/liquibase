@@ -2,13 +2,9 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +27,7 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public boolean supports(Database database) {
-        return super.supports(database) && !(database instanceof DerbyDatabase);
+        return super.supports(database);
     }
 
     public String getCatalogName() {
@@ -106,9 +102,9 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
-            return true;
-        }
+//        if (database instanceof SQLiteDatabase) {
+//            return true;
+//        }
         return false;
     }
 
@@ -132,49 +128,49 @@ public class MergeColumnChange extends AbstractChange {
 
         statements.add(new RawSqlStatement(updateStatement));
         
-        if (database instanceof SQLiteDatabase) {
-            // SQLite does not support this ALTER TABLE operation until now.
-			// For more information see: http://www.sqlite.org/omitted.html
-			// This is a small work around...
-    		
-			// define alter table logic
-    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-    			@Override
-                public ColumnConfig[] getColumnsToAdd() {
-    				ColumnConfig[] new_columns = new ColumnConfig[1];
-    				ColumnConfig new_column = new ColumnConfig();
-    		        new_column.setName(getFinalColumnName());
-    		        new_column.setType(getFinalColumnType());
-    				new_columns[0] = new_column;
-    				return new_columns;
-    			}
-    			@Override
-                public boolean copyThisColumn(ColumnConfig column) {
-    				return !(column.getName().equals(getColumn1Name()) ||
-    						column.getName().equals(getColumn2Name()));
-    			}
-    			@Override
-                public boolean createThisColumn(ColumnConfig column) {
-    				return !(column.getName().equals(getColumn1Name()) ||
-    						column.getName().equals(getColumn2Name()));
-    			}
-    			@Override
-                public boolean createThisIndex(Index index) {
-    				return !(index.getColumns().contains(getColumn1Name()) ||
-    						index.getColumns().contains(getColumn2Name()));
-    			}
-    		};
-        	
-        	try {
-        		// alter table
-				statements.addAll(SQLiteDatabase.getAlterTableStatements(
-						rename_alter_visitor,
-						database,getCatalogName(), getSchemaName(),getTableName()));
-    		} catch (Exception e) {
-				e.printStackTrace();
-			}
-    		
-        } else {
+//        if (database instanceof SQLiteDatabase) {
+//            // SQLite does not support this ALTER TABLE operation until now.
+//			// For more information see: http://www.sqlite.org/omitted.html
+//			// This is a small work around...
+//
+//			// define alter table logic
+//    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+//    			@Override
+//                public ColumnConfig[] getColumnsToAdd() {
+//    				ColumnConfig[] new_columns = new ColumnConfig[1];
+//    				ColumnConfig new_column = new ColumnConfig();
+//    		        new_column.setName(getFinalColumnName());
+//    		        new_column.setType(getFinalColumnType());
+//    				new_columns[0] = new_column;
+//    				return new_columns;
+//    			}
+//    			@Override
+//                public boolean copyThisColumn(ColumnConfig column) {
+//    				return !(column.getName().equals(getColumn1Name()) ||
+//    						column.getName().equals(getColumn2Name()));
+//    			}
+//    			@Override
+//                public boolean createThisColumn(ColumnConfig column) {
+//    				return !(column.getName().equals(getColumn1Name()) ||
+//    						column.getName().equals(getColumn2Name()));
+//    			}
+//    			@Override
+//                public boolean createThisIndex(Index index) {
+//    				return !(index.getColumns().contains(getColumn1Name()) ||
+//    						index.getColumns().contains(getColumn2Name()));
+//    			}
+//    		};
+//
+//        	try {
+//        		// alter table
+//				statements.addAll(SQLiteDatabase.getAlterTableStatements(
+//						rename_alter_visitor,
+//						database,getCatalogName(), getSchemaName(),getTableName()));
+//    		} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//
+//        } else {
         	// ...if it is not a SQLite database 
         	
 	        DropColumnChange dropColumn1Change = new DropColumnChange();
@@ -189,7 +185,7 @@ public class MergeColumnChange extends AbstractChange {
 	        dropColumn2Change.setColumnName(getColumn2Name());
 	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
         
-        }
+//        }
         return statements.toArray(new SqlStatement[statements.size()]);
 
     }

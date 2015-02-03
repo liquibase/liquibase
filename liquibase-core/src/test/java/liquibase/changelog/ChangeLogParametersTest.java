@@ -4,7 +4,7 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.Labels;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.core.H2Database;
+import liquibase.sdk.database.MockDatabase;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class ChangeLogParametersTest {
 
     @Test
     public void setParameterValue_doubleSetButSecondWrongDatabase() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new MockDatabase());
 
         changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb");
         changeLogParameters.set("doubleSet", "newValue");
@@ -48,28 +48,28 @@ public class ChangeLogParametersTest {
 
     @Test
     public void setParameterValue_multiDatabase() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new MockDatabase());
 
-        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb, mock");
 
         assertEquals("originalValue", changeLogParameters.getValue("doubleSet"));
     }
 
     @Test
     public void setParameterValue_rightDBWrongContext() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new MockDatabase());
         changeLogParameters.setContexts(new Contexts("junit"));
 
-        changeLogParameters.set("doubleSet", "originalValue", "anotherContext", "anotherLabel", "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", "anotherContext", "anotherLabel", "baddb, mock");
 
         assertNull(changeLogParameters.getValue("doubleSet"));
     }
    @Test
     public void setParameterValue_rightDBRightContext() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new MockDatabase());
         changeLogParameters.setContexts(new Contexts("junit"));
 
-        changeLogParameters.set("doubleSet", "originalValue", "junit", "junitLabel", "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", "junit", "junitLabel", "baddb, mock");
 
         assertEquals("originalValue", changeLogParameters.getValue("doubleSet"));
     }

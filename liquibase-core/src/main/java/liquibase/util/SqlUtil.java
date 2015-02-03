@@ -1,9 +1,6 @@
 package liquibase.util;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
@@ -73,29 +70,29 @@ public class SqlUtil {
         }
 
 
-        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
-            //oracle returns functions without quotes
-            Object maybeDate = null;
-
-            if (liquibaseDataType instanceof DateType || typeId == Types.DATE) {
-                if (stringVal.endsWith("'HH24:MI:SS')")) {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
-                } else {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
-                }
-            } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
-                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
-                return new DatabaseFunction(stringVal);
-            }
-            if (maybeDate != null) {
-                if (maybeDate instanceof java.util.Date) {
-                    return maybeDate;
-                } else {
-                    return new DatabaseFunction(stringVal);
-                }
-            }
-        }
+//TODO: action refactoring        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
+//            //oracle returns functions without quotes
+//            Object maybeDate = null;
+//
+//            if (liquibaseDataType instanceof DateType || typeId == Types.DATE) {
+//                if (stringVal.endsWith("'HH24:MI:SS')")) {
+//                    maybeDate = DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
+//                } else {
+//                    maybeDate = DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
+//                }
+//            } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
+//                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
+//            } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
+//                return new DatabaseFunction(stringVal);
+//            }
+//            if (maybeDate != null) {
+//                if (maybeDate instanceof java.util.Date) {
+//                    return maybeDate;
+//                } else {
+//                    return new DatabaseFunction(stringVal);
+//                }
+//            }
+//        }
 
         if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
             stringVal = stringVal.substring(1, stringVal.length() - 1);
@@ -196,9 +193,9 @@ public class SqlUtil {
         } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
             return stringVal;
         } else if (typeId == Types.OTHER) {
-            if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
-                return new BigDecimal(stringVal);
-            }
+//TODO: action refactoring           if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
+//                return new BigDecimal(stringVal);
+//            }
             return new DatabaseFunction(stringVal);
         } else if (typeId == Types.REAL) {
             return new BigDecimal(stringVal.trim());
@@ -230,8 +227,8 @@ public class SqlUtil {
             return new DatabaseFunction(stringVal);
         } else if (liquibaseDataType instanceof VarcharType || typeId == Types.VARCHAR) {
             return stringVal;
-        } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
-            return stringVal;
+//todo: action refactoring        } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
+//            return stringVal;
         } else {
             LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
             return new DatabaseFunction(stringVal);

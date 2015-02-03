@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
@@ -93,9 +92,9 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
                 needsPreparedStatement = true;
             }
             // TODO: This could be changed to check the column data types to see if we need the prepared statement
-            if (/*column.getValueText() != null &&*/ database instanceof InformixDatabase) {
-                needsPreparedStatement = true;
-            }
+//todo: move with actions            if (/*column.getValueText() != null &&*/ database instanceof InformixDatabase) {
+//                needsPreparedStatement = true;
+//            }
         }
 
         if (needsPreparedStatement) {

@@ -19,6 +19,11 @@ import java.sql.Statement;
 public class ExecuteSqlLogic extends AbstractSqlLogic implements ActionLogic.InteractsExternally {
 
     @Override
+    protected Class<? extends Action> getSupportedAction() {
+        return ExecuteSqlAction.class;
+    }
+
+    @Override
     public int getPriority(Action action, Scope scope) {
         if (action instanceof ExecuteSqlAction) {
             Database database = scope.get(Scope.Attr.database, Database.class);
