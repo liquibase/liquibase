@@ -4,6 +4,7 @@ import liquibase.database.ConnectionSupplier;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.MockJdbcConnection;
 import liquibase.exception.DatabaseException;
+import testmd.logic.SetupResult;
 
 import java.sql.SQLException;
 
@@ -11,7 +12,7 @@ public class UnsupportedDatabaseSupplier extends ConnectionSupplier {
 
     @Override
     public String getDatabaseShortName() {
-        return null;
+        return "unsupported";
     }
 
     @Override
@@ -20,7 +21,7 @@ public class UnsupportedDatabaseSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public DatabaseConnection openConnection() throws DatabaseException {
+    public DatabaseConnection getConnection() throws SetupResult {
         return new MockJdbcConnection();
     }
 }

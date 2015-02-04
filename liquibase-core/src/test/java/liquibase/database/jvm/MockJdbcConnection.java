@@ -74,12 +74,12 @@ public class MockJdbcConnection extends JdbcConnection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws DatabaseException {
-        return null;
+        return new MockStatement();
     }
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws DatabaseException {
-        return null;
+        return new MockStatement();
     }
 
     @Override
@@ -454,7 +454,7 @@ public class MockJdbcConnection extends JdbcConnection {
     public static class MockConnection implements Connection {
         @Override
         public Statement createStatement() throws SQLException {
-            return null;
+            return new MockStatement();
         }
 
         @Override
@@ -549,7 +549,7 @@ public class MockJdbcConnection extends JdbcConnection {
 
         @Override
         public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-            return null;
+            return new MockStatement();
         }
 
         @Override
@@ -604,7 +604,7 @@ public class MockJdbcConnection extends JdbcConnection {
 
         @Override
         public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-            return null;
+            return new MockStatement();
         }
 
         @Override

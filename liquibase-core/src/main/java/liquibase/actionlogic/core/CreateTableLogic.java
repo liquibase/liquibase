@@ -23,7 +23,7 @@ import java.util.List;
 public class CreateTableLogic extends AbstractSqlBuilderLogic {
 
     public static enum Clauses {
-        tableName, definitionStart, postColumnListSeparator, primaryKey, tablespace,
+        tableName, columnsClause, primaryKey, tablespace, foreignKeyClauses, uniqueConstraintClauses, mainClauses,
     }
 
     public static enum ColumnClauses {
@@ -45,11 +45,9 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
-        ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkForRequiredField(CreateTableAction.Attr.tableName, action);
-        validationErrors.checkForRequiredField(CreateTableAction.Attr.columnDefinitions, action);
-
-        return validationErrors;
+        return super.validate(action, scope)
+                .checkForRequiredField(CreateTableAction.Attr.tableName, action)
+                .checkForRequiredField(CreateTableAction.Attr.columnDefinitions, action);
     }
 
     @Override
@@ -63,10 +61,11 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
 
         List<Action> additionalActions = new ArrayList<>();
 
-        StringClauses clauses = new StringClauses();
-        clauses.append("CREATE TABLE");
-        clauses.append(Clauses.tableName, database.escapeTableName(action.get(CreateTableAction.Attr.catalogName, String.class), action.get(CreateTableAction.Attr.schemaName, String.class), action.get(CreateTableAction.Attr.tableName, String.class)));
-        clauses.append(Clauses.definitionStart, "(");
+        StringClauses mainClause = new StringClauses();
+        mainClause.append("CREATE TABLE");
+        mainClause.append(Clauses.tableName, database.escapeTableName(action.get(CreateTableAction.Attr.catalogName, String.class), action.get(CreateTableAction.Attr.schemaName, String.class), action.get(CreateTableAction.Attr.tableName, String.class)));
+
+        StringClauses createTableClauses = new StringClauses(", ");
 
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<ColumnDefinition> columns = action.get(CreateTableAction.Attr.columnDefinitions, new ArrayList<ColumnDefinition>());
@@ -76,14 +75,14 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
             }
         }
 
-        int i=0;
+        StringClauses columnsClause = new StringClauses("(", ", ", ")");
         for (ColumnDefinition column : columns) {
             StringClauses columnClause = generateColumnSql(column, action, scope, additionalActions);
 
-            clauses.append("column "+column.get(ColumnDefinition.Attr.columnName, String.class), columnClause.toString()+(i++ == columns.size()?"":", "));
+            columnsClause.append(columnClause.toString());
         }
 
-        clauses.append(Clauses.postColumnListSeparator, ", ");
+        createTableClauses.append(Clauses.columnsClause, columnsClause);
 
 //        if (!( (database instanceof SQLiteDatabase) &&
 //                isSinglePrimaryKeyColumn &&
@@ -112,17 +111,21 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
                 primaryKey.append(database.escapeColumnNameList(StringUtils.join(primaryKeyColumnNames, ", ")));
                 primaryKey.append(")");
 
-                clauses.append(Clauses.primaryKey, primaryKey.toString()+",");
+                createTableClauses.append(Clauses.primaryKey, primaryKey.toString() + ",");
             }
 //        }
 
+        StringClauses foreignKeyClauses = new StringClauses(", ");
         for (ForeignKeyDefinition fk : action.get(CreateTableAction.Attr.foreignKeyDefinitions, new ArrayList<ForeignKeyDefinition>())) {
-            clauses.append("foreignKey "+fk.get(ForeignKeyDefinition.Attr.columnNames, String.class), generateForeignKeySql(fk, action, scope).toString()+", ");
+            foreignKeyClauses.append("foreignKey " + fk.get(ForeignKeyDefinition.Attr.columnNames, String.class), generateForeignKeySql(fk, action, scope));
         }
+        createTableClauses.append(Clauses.foreignKeyClauses, foreignKeyClauses);
 
+        StringClauses uniqueConstraintClauses = new StringClauses(", ");
         for (UniqueConstraintDefinition uniqueConstraint : action.get(CreateTableAction.Attr.uniqueConstraintDefinitions, new ArrayList<UniqueConstraintDefinition>())) {
-            clauses.append(generateUniqueConstraintSql(uniqueConstraint, action, scope).toString()+",");
+            uniqueConstraintClauses.append("uniqueConstraint "+uniqueConstraint.get(UniqueConstraintDefinition.Attr.columnNames, String.class), generateUniqueConstraintSql(uniqueConstraint, action, scope));
         }
+        createTableClauses.append(Clauses.uniqueConstraintClauses, uniqueConstraintClauses);
 //    }
 
 
@@ -144,12 +147,14 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
 //            }
 //        }
 
+        mainClause.append(Clauses.mainClauses, createTableClauses);
+
         String tablespace = action.get(CreateTableAction.Attr.tablespace, String.class);
         if (tablespace != null && database.supportsTablespaces()) {
-            clauses.append(Clauses.tablespace, "TABLESPACE "+tablespace);
+            mainClause.append(Clauses.tablespace, "TABLESPACE " + tablespace);
         }
 
-        return clauses;
+        return mainClause;
     }
 
     protected StringClauses generateUniqueConstraintSql(UniqueConstraintDefinition uniqueConstraint, Action action, Scope scope) {

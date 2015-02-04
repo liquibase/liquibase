@@ -9,5 +9,15 @@ public class DropTableAction extends AbstractAction {
         tableName,
         cascadeConstraints,
     }
-    
+
+    public DropTableAction() {
+    }
+
+    public DropTableAction(String catalogName, String schemaName, String tableName) {
+        set(Attr.catalogName, catalogName);
+        set(Attr.schemaName, schemaName);
+        set(Attr.tableName, tableName);
+    }
+
+
 }

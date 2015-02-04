@@ -6,6 +6,7 @@ import liquibase.util.SmartMap;
 import liquibase.util.Validate;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -141,9 +142,15 @@ public class Scope {
         T singleton = get(key, type);
         if (singleton == null) {
             try {
-                Constructor<T> constructor = type.getDeclaredConstructor(Scope.class);
-                constructor.setAccessible(true);
-                singleton = constructor.newInstance(this);
+                try {
+                    Constructor<T> constructor = type.getDeclaredConstructor(Scope.class);
+                    constructor.setAccessible(true);
+                    singleton = constructor.newInstance(this);
+                } catch (NoSuchMethodException e) { //try without scope
+                    Constructor<T> constructor = type.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    singleton = constructor.newInstance();
+                }
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }

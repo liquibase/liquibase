@@ -1,8 +1,12 @@
 package liquibase.database;
 
+import liquibase.JUnitScope;
+import liquibase.Scope;
+import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
+import testmd.logic.SetupResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +29,8 @@ public abstract class ConnectionSupplier implements Cloneable {
     private String version;
     private String ipAddress = "10.10.100.100";
     private String os = OS_LINUX;
+    private DatabaseConnection connection;
+    private SetupResult connectionResult;
 
     public abstract String getDatabaseShortName();
 
@@ -186,17 +192,47 @@ public abstract class ConnectionSupplier implements Cloneable {
         }
     }
 
-    public DatabaseConnection openConnection() throws DatabaseException {
-        try {
-            Connection connection = DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
-            return new JdbcConnection(connection);
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
+    protected DatabaseConnection getConnection() throws SetupResult {
+        if (connection == null && connectionResult == null) {
+            try {
+                Connection dbConn = DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
+                connection = new JdbcConnection(dbConn);
+
+                Database initDb = JUnitScope.getInstance().getSingleton(DatabaseFactory.class).findCorrectDatabaseImplementation(connection);
+                initDb.setConnection(connection);
+                initConnection(JUnitScope.getInstance(initDb));
+            } catch (Exception e) {
+                connectionResult = new SetupResult.CannotVerify("Cannot open connection: " + e.getMessage());
+            }
+        }
+        if (connection != null) {
+            return connection;
+        } else {
+            throw connectionResult;
         }
     }
 
+    protected void initConnection(Scope scope) {
+
+    }
+
+    public Database getDatabase() {
+        return DatabaseFactory.getInstance().getDatabase(getDatabaseShortName());
+    }
+
+    public Scope connect(Scope scope) throws DatabaseException {
+        DatabaseConnection databaseConnection = getConnection();
+        Database db = scope.get(Scope.Attr.database, Database.class);
+        if (!(db instanceof UnsupportedDatabase) && !db.isCorrectDatabaseImplementation(databaseConnection)) {
+            throw new DatabaseException("Incorrect db '"+db.getShortName()+"' for connection "+databaseConnection.getURL());
+        }
+        db.setConnection(databaseConnection);
+
+        return scope;
+    }
+
     public Database openDatabase() throws DatabaseException {
-        DatabaseConnection databaseConnection = openConnection();
+        DatabaseConnection databaseConnection = getConnection();
         Database db = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection);
         db.setConnection(databaseConnection);
 

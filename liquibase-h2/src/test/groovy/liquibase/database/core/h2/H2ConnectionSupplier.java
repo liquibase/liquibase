@@ -1,8 +1,14 @@
 package liquibase.database.core.h2;
 
+import liquibase.JUnitScope;
+import liquibase.Scope;
+import liquibase.action.ExecuteSqlAction;
+import liquibase.actionlogic.ActionExecutor;
 import liquibase.database.ConnectionSupplier;
-
-import java.util.Map;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.ActionPerformException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import testmd.logic.SetupResult;
 
 public class H2ConnectionSupplier extends ConnectionSupplier {
 
@@ -24,5 +30,13 @@ public class H2ConnectionSupplier extends ConnectionSupplier {
     @Override
     public String getPrimarySchema() {
         return "PUBLIC";
+    }
+
+    protected void initConnection(Scope scope) {
+        try {
+            new ActionExecutor().execute(new ExecuteSqlAction("CREATE SCHEMA "+getAlternateSchema()), scope);
+        } catch (ActionPerformException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 }

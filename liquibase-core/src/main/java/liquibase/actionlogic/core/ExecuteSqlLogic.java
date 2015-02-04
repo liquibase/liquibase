@@ -27,7 +27,7 @@ public class ExecuteSqlLogic extends AbstractSqlLogic implements ActionLogic.Int
     public int getPriority(Action action, Scope scope) {
         if (action instanceof ExecuteSqlAction) {
             Database database = scope.get(Scope.Attr.database, Database.class);
-            if (database == null || (!(database instanceof AbstractJdbcDatabase)) || ((JdbcConnection) database.getConnection()).getUnderlyingConnection() == null) {
+            if (database == null || (!(database instanceof AbstractJdbcDatabase))) {
                 return PRIORITY_NOT_APPLICABLE;
             }
 
