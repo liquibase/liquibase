@@ -1,8 +1,10 @@
 package liquibase.executor;
 
+import java.util.Locale;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
@@ -12,6 +14,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -105,6 +108,31 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 if (statement == null) {
                     continue;
                 }
+
+                String endDelimiter = ";";
+                String potentialDelimiter = null;
+                if (sql instanceof RawSqlStatement) {
+                    potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                } else if (sql instanceof CreateProcedureStatement) {
+                    potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
+                }
+                if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w]+")) {
+                    endDelimiter = potentialDelimiter;
+                }
+
+                boolean resetMySqlDelimiter = false;
+
+                if (database instanceof MySQLDatabase
+                        && endDelimiter.toLowerCase(Locale.ROOT).startsWith("delimiter")) {
+                    endDelimiter = endDelimiter.substring("delimiter".length());
+
+                    output.write("delimiter ");
+                    output.write(endDelimiter);
+                    output.write(StreamUtil.getLineSeparator());
+
+                    resetMySqlDelimiter = true;
+                }
+
                 output.write(statement);
 
 
@@ -115,22 +143,17 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     //                output.write(StreamUtil.getLineSeparator());
     //                output.write("/");
                 } else {
-                    String endDelimiter = ";";
-                    String potentialDelimiter = null;
-                    if (sql instanceof RawSqlStatement) {
-                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
-                    } else if (sql instanceof CreateProcedureStatement) {
-                        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
-                    }
-                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w]+")) {
-                        endDelimiter = potentialDelimiter;
-                    }
-
-
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
                     }
                 }
+
+                if (resetMySqlDelimiter) {
+                    output.write(StreamUtil.getLineSeparator());
+                    output.write("delimiter ;");
+                    output.write(StreamUtil.getLineSeparator());
+                }
+
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }
