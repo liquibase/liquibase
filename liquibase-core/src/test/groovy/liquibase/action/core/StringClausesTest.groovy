@@ -15,10 +15,10 @@ class StringClausesTest extends Specification {
         clauses                                                                           | expected
         new StringClauses()                                                               | ""
         new StringClauses().append("first")                                               | "first"
-        new StringClauses().append("first").append("second")                              | "first second"
-        new StringClauses().append("first").append("second").append("third")              | "first second third"
-        new StringClauses().append("first").append("second").append(null).append("third") | "first second third"
-        new StringClauses().append("first").append("second").append("  ").append("third") | "first second third"
+        new StringClauses().append("first").append("SECOND")                              | "first SECOND"
+        new StringClauses().append("first").append("SECOND").append("third")              | "first SECOND third"
+        new StringClauses().append("first").append("SECOND").append(null).append("third") | "first SECOND third"
+        new StringClauses().append("first").append("SECOND").append("  ").append("third") | "first SECOND third"
     }
 
     @Unroll
@@ -28,8 +28,8 @@ class StringClausesTest extends Specification {
 
         where:
         clauses                                                                                                                                    | expected
-        new StringClauses().append("first").append("innerClause", new StringClauses().append("inner first").append("inner second")).append("next") | "first inner first inner second next"
-        new StringClauses().append("first").append((String) null, new StringClauses().append("inner first").append("inner second")).append("next") | "first inner first inner second next"
+        new StringClauses().append("first").append("innerClause", new StringClauses().append("inner first").append("inner SECOND")).append("next") | "first inner first inner SECOND next"
+        new StringClauses().append("first").append((String) null, new StringClauses().append("inner first").append("inner SECOND")).append("next") | "first inner first inner SECOND next"
         new StringClauses().append("first").append("innerClause", new StringClauses()).append("next")                                              | "first next"
     }
 
@@ -45,8 +45,8 @@ class StringClausesTest extends Specification {
         new StringClauses().append("   first   ")                                     | "first"
         new StringClauses().append("key", "   first   ")                              | "first"
         new StringClauses().append(CreateTableLogic.Clauses.tableName, "   first   ") | "first"
-        new StringClauses().append("first   ").append("       second")                | "first second"
-        new StringClauses().append("first\n").append("second")                        | "first second"
+        new StringClauses().append("first   ").append("       SECOND")                | "first SECOND"
+        new StringClauses().append("first\n").append("SECOND")                        | "first SECOND"
     }
 
     @Unroll
@@ -57,13 +57,13 @@ class StringClausesTest extends Specification {
         where:
         clauses                                                                        | expected
         new StringClauses().prepend("first  ")                                         | "first"
-        new StringClauses().prepend("first").prepend("second").prepend("third")        | "third second first"
+        new StringClauses().prepend("first").prepend("SECOND").prepend("third")        | "third SECOND first"
         new StringClauses().prepend("   first")                                        | "first"
         new StringClauses().prepend("   first   ")                                     | "first"
         new StringClauses().prepend("  key", "   first   ")                            | "first"
         new StringClauses().prepend(CreateTableLogic.Clauses.tableName, "   first   ") | "first"
-        new StringClauses().prepend("first   ").prepend("       second")               | "second first"
-        new StringClauses().prepend("first\n").prepend("second")                       | "second first"
+        new StringClauses().prepend("first   ").prepend("       SECOND")               | "SECOND first"
+        new StringClauses().prepend("first\n").prepend("SECOND")                       | "SECOND first"
     }
 
     @Unroll
@@ -73,10 +73,10 @@ class StringClausesTest extends Specification {
 
         where:
         clauses                                                            | expected
-        new StringClauses().append("first").append("second")               | "first second"
-        new StringClauses(", ").append("first").append("second")           | "first, second"
-        new StringClauses("|").append("first").append("second")            | "first|second"
-        new StringClauses("(", ", ", ")").append("first").append("second") | "(first, second)"
+        new StringClauses().append("first").append("SECOND")               | "first SECOND"
+        new StringClauses(", ").append("first").append("SECOND")           | "first, SECOND"
+        new StringClauses("|").append("first").append("SECOND")            | "first|SECOND"
+        new StringClauses("(", ", ", ")").append("first").append("SECOND") | "(first, SECOND)"
         new StringClauses("(", ", ", ")")                                  | ""
     }
 
@@ -87,21 +87,21 @@ class StringClausesTest extends Specification {
         clauses.append("first", "first")
         clauses.toString() == "first"
 
-        clauses.append("second key", "second")
-        clauses.toString() == "first second"
+        clauses.append("SECOND key", "SECOND")
+        clauses.toString() == "first SECOND"
 
         clauses.append(CreateTableLogic.Clauses.tableName, "third")
-        clauses.toString() == "first second third"
+        clauses.toString() == "first SECOND third"
 
         clauses.get("first") == "first"
-        clauses.get("second key") == "second"
+        clauses.get("SECOND key") == "SECOND"
         clauses.get(CreateTableLogic.Clauses.tableName) == "third"
         clauses.get("tableName") == "third"
 
-        clauses.remove("second key")
+        clauses.remove("SECOND key")
         clauses.toString() == "first third"
 
-        clauses.remove("second key") //re-removing already gone key
+        clauses.remove("SECOND key") //re-removing already gone key
         clauses.toString() == "first third"
 
         clauses.remove("tableName") //can remove enum by name

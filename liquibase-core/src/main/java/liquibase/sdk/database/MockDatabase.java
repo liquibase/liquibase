@@ -32,6 +32,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 
@@ -777,5 +778,15 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public boolean looksLikeFunctionCall(String value) {
         return false;
+    }
+
+    @Override
+    public String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        return objectName.toString();
+    }
+
+    @Override
+    public int getMaxContainerDepth() {
+        return 2;
     }
 }

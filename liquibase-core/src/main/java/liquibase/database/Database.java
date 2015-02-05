@@ -11,6 +11,7 @@ import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.ObjectName;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -166,6 +167,8 @@ public interface Database extends PrioritizedService {
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
     String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
+
+    String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
@@ -346,5 +349,7 @@ public interface Database extends PrioritizedService {
     public boolean supportsClustered(Class<? extends DatabaseObject> objectType);
 
     public boolean looksLikeFunctionCall(String value);
+
+    public int getMaxContainerDepth();
 }
 

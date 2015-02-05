@@ -1,11 +1,10 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class DropTableAction extends AbstractAction {
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
         cascadeConstraints,
     }
@@ -13,9 +12,7 @@ public class DropTableAction extends AbstractAction {
     public DropTableAction() {
     }
 
-    public DropTableAction(String catalogName, String schemaName, String tableName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public DropTableAction(ObjectName tableName) {
         set(Attr.tableName, tableName);
     }
 

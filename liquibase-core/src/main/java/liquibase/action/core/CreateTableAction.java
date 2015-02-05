@@ -6,14 +6,13 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.UniqueConstraint;
+import liquibase.structure.ObjectName;
 
 import java.util.*;
 
 public class CreateTableAction extends AbstractAction {
 
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
         tablespace,
         remarks,
@@ -31,9 +30,7 @@ public class CreateTableAction extends AbstractAction {
     }
 
 
-    public CreateTableAction(String catalogName, String schemaName, String tableName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public CreateTableAction(ObjectName tableName) {
         set(Attr.tableName, tableName);
     }
 

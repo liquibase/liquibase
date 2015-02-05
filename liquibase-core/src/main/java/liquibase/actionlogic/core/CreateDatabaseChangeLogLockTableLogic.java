@@ -10,6 +10,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic {
 
@@ -21,7 +22,7 @@ public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
-        return new DelegateResult((CreateTableAction) new CreateTableAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+        return new DelegateResult((CreateTableAction) new CreateTableAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))
                 .addColumn((ColumnDefinition) new ColumnDefinition("ID", "int").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("LOCKED", "BOOLEAN").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn(new ColumnDefinition("LOCKGRANTED", "DATETIME"))

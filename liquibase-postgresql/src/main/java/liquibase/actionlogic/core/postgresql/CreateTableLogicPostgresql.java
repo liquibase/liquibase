@@ -6,6 +6,7 @@ import liquibase.action.core.*;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
+import liquibase.structure.ObjectName;
 
 import java.util.List;
 
@@ -23,9 +24,7 @@ public class CreateTableLogicPostgresql extends CreateTableLogic {
             String sequenceName = action.get(CreateTableAction.Attr.tableName, String.class)+"_"+column.get(ColumnDefinition.Attr.columnName, String.class)+"_seq";
 
             additionalActions.add((AlterSequenceAction) new AlterSequenceAction()
-                    .set(AlterSequenceAction.Attr.catalogName, action.get(CreateTableAction.Attr.catalogName, String.class))
-                    .set(AlterSequenceAction.Attr.schemaName, action.get(CreateTableAction.Attr.schemaName, String.class))
-                    .set(AlterSequenceAction.Attr.sequenceName, sequenceName)
+                    .set(AlterSequenceAction.Attr.sequenceName, new ObjectName(sequenceName, action.get(CreateTableAction.Attr.tableName, ObjectName.class).getContainer()))
                     .set(AlterSequenceAction.Attr.minValue, autoIncrementDefinition.get(AutoIncrementDefinition.Attr.startWith, String.class))
                     .set(AlterSequenceAction.Attr.incrementBy, autoIncrementDefinition.get(AutoIncrementDefinition.Attr.incrementBy, String.class))
             );

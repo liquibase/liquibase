@@ -6,16 +6,15 @@ import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import testmd.logic.SetupResult;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class ConnectionSupplier implements Cloneable {
 
@@ -237,6 +236,55 @@ public abstract class ConnectionSupplier implements Cloneable {
         db.setConnection(databaseConnection);
 
         return db;
+    }
+
+    public List<ObjectName> getObjectNames(Class<? extends DatabaseObject> type, boolean includePartials) {
+        List<ObjectName> returnList = new ArrayList<>();
+
+        for (String simpleName : getSimpleObjectNames(type)) {
+            for (ObjectName container : getContainers(includePartials)) {
+                returnList.add(new ObjectName(simpleName, container));
+            }
+        }
+
+
+        return returnList;
+    }
+
+    protected List<ObjectName> getContainers(boolean includeParials) {
+        List<ObjectName> containers = new ArrayList<>();
+
+        int maxDepth = getDatabase().getMaxContainerDepth();
+
+        containers.add(new ObjectName());
+
+        if (maxDepth == 0) {
+            return containers;
+        } else if (maxDepth == 1) {
+            containers.add(new ObjectName(getPrimaryCatalog()));
+            containers.add(new ObjectName(getAlternateCatalog()));
+        } else {
+            containers.add(new ObjectName(getPrimaryCatalog(), getPrimarySchema()));
+            containers.add(new ObjectName(getPrimaryCatalog(), getAlternateSchema()));
+            containers.add(new ObjectName(getAlternateCatalog(), getPrimarySchema()));
+            containers.add(new ObjectName(getAlternateCatalog(), getAlternateSchema()));
+        }
+
+        if (includeParials && maxDepth > 1) {
+            containers.add(new ObjectName(getPrimaryCatalog()));
+            containers.add(new ObjectName(getAlternateCatalog()));
+        }
+
+        return containers;
+    }
+
+    public List<String> getSimpleObjectNames(Class<? extends DatabaseObject> type) {
+        List<String> returnList = new ArrayList<>();
+        returnList.add("test_"+type.getSimpleName().toLowerCase());
+        returnList.add("TEST_"+type.getSimpleName().toUpperCase());
+        returnList.add("Test"+type.getSimpleName());
+
+        return returnList;
     }
 
     public static class ConfigTemplate {

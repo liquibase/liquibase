@@ -12,6 +12,7 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -63,7 +64,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
 
         StringClauses mainClause = new StringClauses();
         mainClause.append("CREATE TABLE");
-        mainClause.append(Clauses.tableName, database.escapeTableName(action.get(CreateTableAction.Attr.catalogName, String.class), action.get(CreateTableAction.Attr.schemaName, String.class), action.get(CreateTableAction.Attr.tableName, String.class)));
+        mainClause.append(Clauses.tableName, database.getQualifiedName(action.get(CreateTableAction.Attr.tableName, ObjectName.class), Table.class));
 
         StringClauses createTableClauses = new StringClauses(", ");
 
@@ -274,7 +275,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
 //                    }
 //                }
             } else {
-                LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(action.get(CreateTableAction.Attr.catalogName, String.class), action.get(CreateTableAction.Attr.schemaName, String.class), action.get(CreateTableAction.Attr.tableName, String.class))));
+                LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as requested for "+action.get(CreateTableAction.Attr.tableName, ObjectName.class));
             }
         }
 

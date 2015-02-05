@@ -58,7 +58,7 @@ public class StringClauses {
      */
     public StringClauses append(String key, String clause) {
         key = StringUtils.trimToEmpty(key).toLowerCase();
-        clause = StringUtils.trimToEmpty(clause).toLowerCase();
+        clause = StringUtils.trimToEmpty(clause);
         if (key.equals("")) {
             key = clause;
         }

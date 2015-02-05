@@ -1,10 +1,11 @@
 package liquibase.action.core
 
 import liquibase.JUnitScope
-import liquibase.Scope
-import liquibase.action.ExecuteSqlAction
 import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplierFactory
+import liquibase.structure.ObjectName
+import liquibase.structure.core.Table
+import liquibase.util.CollectionUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 import testmd.TestMD
@@ -19,50 +20,43 @@ class CreateTableActionTest extends Specification {
 
     def "parametrized constructor"() {
         expect:
-        new CreateTableAction("cat", "schem", "tab").describe() == "createTable(catalogName=cat, schemaName=schem, tableName=tab)"
+        new CreateTableAction(new ObjectName("cat", "schem", "tab")).describe() == "createTable(tableName=cat.schem.tab)"
     }
 
-    @Unroll
-    def "create simple table in different schemas"() {
+    @Unroll("#featureName #tableName")
+    def "create simple table"() {
         expect:
-        for (def conn : JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers) {
-            if (catalogName == "_primary") catalogName = conn.primaryCatalog
-            if (schemaName == "_primary") schemaName = conn.primarySchema
-            if (catalogName == "_alt") catalogName = conn.alternateCatalog
-            if (schemaName == "_alt") schemaName = conn.alternateSchema
 
-            def action = new CreateTableAction(catalogName, schemaName, tableName)
-                    .addColumn(new ColumnDefinition("id", "int"))
+        def action = new CreateTableAction(tableName)
+                .addColumn(new ColumnDefinition("id", "int"))
 
-            def scope = JUnitScope.getInstance(conn.getDatabase())
-            def plan = new ActionExecutor().createPlan(action, scope)
+        def scope = JUnitScope.getInstance(conn.getDatabase())
+        def plan = new ActionExecutor().createPlan(action, scope)
 
-            TestMD.test(this.class, "create simple table ${conn.databaseShortName}", conn.getDatabase().class)
-                    .permutation([connection: conn, catalogName: catalogName, schemaName: schemaName, tableName: tableName])
-                    .asTable("catalogName", "schemaName", "tableName")
-                    .addResult("plan", plan)
-                    .forceRun()
-                    .setup({
-                conn.connect(scope)
-                throw SetupResult.OK
-            })
-                    .cleanup({
-                new ActionExecutor().execute(new DropTableAction(catalogName, schemaName, tableName), scope)
-            })
-                    .run({
-                plan.execute(scope)
-            })
+        TestMD.test(this.class, "create simple table ${conn.databaseShortName}", conn.getDatabase().class)
+                .permutation([connection: conn, tableName: tableName.toString()])
+                .asTable("tableName")
+                .addResult("plan", plan)
+                .forceRun()
+                .setup({
+            conn.connect(scope)
+            throw SetupResult.OK
+        })
+                .cleanup({
+            new ActionExecutor().execute(new DropTableAction(tableName), scope)
+        })
+                .run({
+            plan.execute(scope)
 
-        }
+        })
 
 
         where:
-        catalogName | schemaName | tableName
-        null        | null       | "test_table"
-        null        | "_primary" | "test_table"
-        "_primary"  | "_primary" | "test_table"
-        null        | "_alt"     | "test_table"
-        "_primary"  | "_alt"     | "test_table"
-        "_alt"      | "_alt"     | "test_table"
+        [conn, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            return CollectionUtil.permutations([
+                    [it],
+                    it.getObjectNames(Table.class, true)
+            ])
+        }
     }
 }

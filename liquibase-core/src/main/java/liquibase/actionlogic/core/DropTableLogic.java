@@ -15,6 +15,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.DropTableStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
@@ -43,10 +44,7 @@ public class DropTableLogic extends AbstractSqlBuilderLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         StringClauses clauses = new StringClauses()
                 .append("DROP TABLE")
-                .append(database.escapeTableName(
-                        action.get(DropTableAction.Attr.catalogName, String.class),
-                        action.get(DropTableAction.Attr.schemaName, String.class),
-                        action.get(DropTableAction.Attr.tableName, String.class)));
+                .append(database.getQualifiedName(action.get(DropTableAction.Attr.tableName, ObjectName.class), Table.class));
 
         if (action.get(DropTableAction.Attr.cascadeConstraints, false) && database.supportsDropTableCascadeConstraints()) {
             clauses.append("CASCADE");

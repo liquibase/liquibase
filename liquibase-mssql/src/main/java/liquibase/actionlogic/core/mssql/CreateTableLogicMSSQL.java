@@ -9,6 +9,7 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
+import liquibase.structure.ObjectName;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
         String remarks = column.get(ColumnDefinition.Attr.remarks, String.class);
 
         if (remarks != null) {
-            String schemaName = action.get(CreateTableAction.Attr.schemaName, String.class);
+            String schemaName = action.get(CreateTableAction.Attr.tableName, ObjectName.class).get(ObjectName.Attr.container, String.class);
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }

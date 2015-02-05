@@ -32,6 +32,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
@@ -915,6 +916,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        String name = this.escapeObjectName(objectName.get(ObjectName.Attr.name, String.class), objectType);
+        ObjectName container = objectName.get(ObjectName.Attr.container, ObjectName.class);
+        while(container != null && container.getName() != null) {
+            name = this.escapeObjectName(container.get(ObjectName.Attr.name, String.class), Schema.class) + "."+name;
+            container = container.get(ObjectName.Attr.container, ObjectName.class);
+        }
+
+        return name;
+    }
+
+    @Override
     public String escapeTableName(final String catalogName, final String schemaName, final String tableName) {
         return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
@@ -1517,4 +1530,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         return value.startsWith("\"SYSIBM\"") || value.startsWith("to_date(") || value.equalsIgnoreCase(getCurrentDateTimeFunction());
     }
 
+    @Override
+    public int getMaxContainerDepth() {
+        return 1;
+    }
 }
