@@ -85,7 +85,7 @@ public class DiffToReport {
             for (DatabaseObject object : objects) {
                 if (getIncludeSchema() && object.getSchema() != null && (lastSchema == null || !lastSchema.equals(object.getSchema()))) {
                     lastSchema = object.getSchema();
-                    String schemaName = object.getSchema().getName();
+                    String schemaName = object.getSchema().getSimpleName();
                     if (schemaName == null) {
                         schemaName = object.getSchema().getCatalogName();
                     }

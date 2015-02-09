@@ -38,12 +38,12 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
         View view = (View) unexpectedObject;
 
         DropViewChange change = new DropViewChange();
-        change.setViewName(view.getName());
+        change.setViewName(view.getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(view.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(view.getSchema().getName());
+            change.setSchemaName(view.getSchema().getSimpleName());
         }
 
         for (Column column : view.getColumns()) {

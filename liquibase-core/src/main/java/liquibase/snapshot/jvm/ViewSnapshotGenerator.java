@@ -53,7 +53,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<CachedRow> viewsMetadataRs = null;
         try {
-            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName());
+            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getSimpleName());
             if (viewsMetadataRs.size() > 0) {
                 CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
@@ -71,7 +71,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
                 try {
-                    String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getName());
+                    String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getSimpleName());
 
                     if (definition.startsWith("FULL_DEFINITION: ")) {
                         definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
@@ -91,7 +91,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                     view.setDefinition(definition);
                 } catch (DatabaseException e) {
-                    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), e);
+                    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getSimpleName(), rawViewName), e);
                 }
 
                 return view;
@@ -116,7 +116,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
-                    schema.addDatabaseObject(new View().setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    schema.addDatabaseObject(new View(row.getString("TABLE_NAME")).setSchema(schema));
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

@@ -4,6 +4,10 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
+/**
+ * Fallback database when no others match. Should follow SQL standard as closely as possible.
+ * SQL reference: http://savage.net.au/SQL/sql-2003-2.bnf.html
+ */
 public class UnsupportedDatabase extends AbstractJdbcDatabase {
 
     @Override
@@ -129,4 +133,6 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
     public boolean supportsSequences() {
         return false;
     }
+
+
 }

@@ -75,8 +75,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             Set<String> seenConstraints = new HashSet<String>();
 
             for (CachedRow constraint : metadata) {
-                UniqueConstraint uq = new UniqueConstraint().setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
-                if (seenConstraints.add(uq.getName())) {
+                UniqueConstraint uq = new UniqueConstraint(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
+                if (seenConstraints.add(uq.getSimpleName())) {
                     table.getUniqueConstraints().add(uq);
                 }
             }
@@ -84,13 +84,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected List<CachedRow> listConstraints(Table table, DatabaseSnapshot snapshot, Schema schema) throws DatabaseException, SQLException {
-        return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
+        return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getSimpleName(), table.getSimpleName());
     }
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
-        String name = example.getName();
+        String name = example.getSimpleName();
 
         String sql = null;
 //todo: move for action logic        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
@@ -190,9 +190,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 //                    "and systable.table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
 //        } else {
             String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
-            String schemaName = database.correctObjectName(schema.getName(), Schema.class);
+            String schemaName = database.correctObjectName(schema.getSimpleName(), Schema.class);
             String constraintName = database.correctObjectName(name, UniqueConstraint.class);
-            String tableName = database.correctObjectName(table.getName(), Table.class);
+            String tableName = database.correctObjectName(table.getSimpleName(), Table.class);
             sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME "
                     + "from " + database.getSystemSchema() + ".constraints "
                     + "where constraint_type='UNIQUE' ";

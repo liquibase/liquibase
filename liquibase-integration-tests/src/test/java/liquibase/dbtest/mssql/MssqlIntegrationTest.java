@@ -39,10 +39,10 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
         for (Table table : snapshot.get(Table.class)) {
             for (Column column : table.getColumns()) {
-                if (column.getName().toLowerCase().endsWith("_default")) {
+                if (column.getSimpleName().toLowerCase().endsWith("_default")) {
                     Object defaultValue = column.getDefaultValue();
                     assertNotNull("Null default value for " + table.getName() + "." + column.getName(), defaultValue);
-                    if (column.getName().toLowerCase().contains("date") || column.getName().toLowerCase().contains("time")) {
+                    if (column.getSimpleName().toLowerCase().contains("date") || column.getSimpleName().toLowerCase().contains("time")) {
                         if (defaultValue instanceof DatabaseFunction) {
                             ((DatabaseFunction) defaultValue).getValue().contains("type datetimeoffset");
                         } else {
@@ -53,9 +53,9 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                             assertEquals(1, calendar.get(Calendar.MONTH));
                             assertEquals(2000, calendar.get(Calendar.YEAR));
                         }
-                    } else if (column.getName().toLowerCase().contains("char_")) {
+                    } else if (column.getSimpleName().toLowerCase().contains("char_")) {
                         assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof String);
-                    } else if (column.getName().toLowerCase().contains("binary_")) {
+                    } else if (column.getSimpleName().toLowerCase().contains("binary_")) {
                         assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof DatabaseFunction);
                     } else {
                         assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof Number);
@@ -82,7 +82,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                 continue;
             }
             for (Column column : table.getColumns()) {
-                String expectedType = column.getName().split("_")[0];
+                String expectedType = column.getSimpleName().split("_")[0];
 
                 if (expectedType.equalsIgnoreCase("text")) {
                     expectedType = "nvarchar";

@@ -3,9 +3,15 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
-import java.util.Date;
-
 public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends AbstractDatabaseObject {
+
+    public StoredDatabaseLogic() {
+    }
+
+    public StoredDatabaseLogic(String name) {
+        super(name);
+    }
+
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[]{
@@ -14,41 +20,30 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
     }
 
     @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-    @Override
-    public T setName(String name) {
-        setAttribute("name", name);
-        return (T) this;
-    }
-
-    @Override
     public Schema getSchema() {
-        return getAttribute("schema", Schema.class);
+        return get("schema", Schema.class);
     }
 
     public T setSchema(Schema schema) {
-        setAttribute("schema", schema);
+        set("schema", schema);
         return (T) this;
     }
 
     public Boolean isValid() {
-        return getAttribute("valid", Boolean.class);
+        return get("valid", Boolean.class);
     }
 
     public T setValid(Boolean valid) {
-        setAttribute("valid", valid);
+        set("valid", valid);
         return (T) this;
     }
 
     public String getBody() {
-        return getAttribute("body", String.class);
+        return get("body", String.class);
     }
 
     public T setBody(String body) {
-        setAttribute("body", body);
+        set("body", body);
         return (T) this;
     }
 }

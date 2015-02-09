@@ -46,14 +46,14 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
         };
 
         DropForeignKeyConstraintChange dropFkChange = new DropForeignKeyConstraintChange();
-        dropFkChange.setConstraintName(fk.getName());
-        dropFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
+        dropFkChange.setConstraintName(fk.getSimpleName());
+        dropFkChange.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
 
         AddForeignKeyConstraintChange addFkChange = new AddForeignKeyConstraintChange();
-        addFkChange.setConstraintName(fk.getName());
-        addFkChange.setBaseTableName(fk.getForeignKeyTable().getName());
+        addFkChange.setConstraintName(fk.getSimpleName());
+        addFkChange.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
         addFkChange.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", formatter));
-        addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getName());
+        addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getSimpleName());
         addFkChange.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", formatter));
 
         if (control.getIncludeCatalog()) {
@@ -63,10 +63,10 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
             addFkChange.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
 
-            addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
-            addFkChange.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
+            addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
+            addFkChange.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getSimpleName());
         }
 
         if (fk.getBackingIndex() != null) {

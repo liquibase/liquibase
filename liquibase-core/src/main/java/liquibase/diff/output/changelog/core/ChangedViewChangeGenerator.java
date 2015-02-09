@@ -39,12 +39,12 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
         View view = (View) changedObject;
 
         CreateViewChange change = new CreateViewChange();
-        change.setViewName(view.getName());
+        change.setViewName(view.getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(view.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(view.getSchema().getName());
+            change.setSchemaName(view.getSchema().getSimpleName());
         }
         String selectQuery = view.getDefinition();
         boolean fullDefinitionOverridden = false;

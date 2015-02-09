@@ -31,7 +31,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         Database database = snapshot.getDatabase();
         Catalog match = null;
-        String catalogName = example.getName();
+        String catalogName = example.getSimpleName();
         if (catalogName == null && database.supportsCatalogs()) {
             catalogName = database.getDefaultCatalogName();
         }
@@ -60,7 +60,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected boolean isDefaultCatalog(Catalog match, Database database) {
-        return (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultCatalogName()));
+        return (match.getName() == null || match.getName().equals(database.getDefaultCatalogName()));
     }
 
     @Override

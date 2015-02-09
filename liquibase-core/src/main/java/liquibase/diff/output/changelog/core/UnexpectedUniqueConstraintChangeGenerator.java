@@ -39,14 +39,14 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
         }
 
         DropUniqueConstraintChange change = new DropUniqueConstraintChange();
-        change.setTableName(uc.getTable().getName());
+        change.setTableName(uc.getTable().getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(uc.getTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(uc.getTable().getSchema().getName());
+            change.setSchemaName(uc.getTable().getSchema().getSimpleName());
         }
-        change.setConstraintName(uc.getName());
+        change.setConstraintName(uc.getSimpleName());
 
         Index backingIndex = uc.getBackingIndex();
 //        if (backingIndex == null) {

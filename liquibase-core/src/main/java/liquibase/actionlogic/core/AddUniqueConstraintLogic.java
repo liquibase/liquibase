@@ -81,15 +81,4 @@ public class AddUniqueConstraintLogic extends AbstractSqlBuilderLogic {
         return clauses;
 
     }
-
-    protected UniqueConstraint getAffectedUniqueConstraint(AddUniqueConstraintStatement statement) {
-        UniqueConstraint uniqueConstraint = new UniqueConstraint()
-                .setName(statement.getConstraintName())
-                .setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-        int i = 0;
-        for (Column column : Column.listFromNames(statement.getColumnNames())) {
-            uniqueConstraint.addColumn(i++, column);
-        }
-        return uniqueConstraint;
-    }
 }

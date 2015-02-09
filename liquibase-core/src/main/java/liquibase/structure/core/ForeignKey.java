@@ -62,27 +62,27 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public Table getPrimaryKeyTable() {
-        return getAttribute("primaryKeyTable", Table.class);
+        return get("primaryKeyTable", Table.class);
     }
 
     public ForeignKey setPrimaryKeyTable(Table primaryKeyTable) {
-        this.setAttribute("primaryKeyTable",primaryKeyTable);
+        this.set("primaryKeyTable", primaryKeyTable);
         return this;
     }
 
     public List<Column> getPrimaryKeyColumns() {
-        return getAttribute("primaryKeyColumns", List.class);
+        return get("primaryKeyColumns", List.class);
     }
 
     public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
-        this.getAttribute("primaryKeyColumns", List.class).add(primaryKeyColumn);
+        this.get("primaryKeyColumns", List.class).add(primaryKeyColumn);
         primaryKeyColumn.setRelation(getPrimaryKeyTable());
 
         return this;
     }
 
     public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
-        this.setAttribute("primaryKeyColumns", primaryKeyColumns);
+        this.set("primaryKeyColumns", primaryKeyColumns);
         for (Column column : getPrimaryKeyColumns()) {
             column.setRelation(getPrimaryKeyTable());
         }
@@ -90,25 +90,25 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     public Table getForeignKeyTable() {
-        return getAttribute("foreignKeyTable", Table.class);
+        return get("foreignKeyTable", Table.class);
     }
 
     public ForeignKey setForeignKeyTable(Table foreignKeyTable) {
-        this.setAttribute("foreignKeyTable", foreignKeyTable);
+        this.set("foreignKeyTable", foreignKeyTable);
         return this;
     }
 
     public List<Column> getForeignKeyColumns() {
-        return getAttribute("foreignKeyColumns", List.class);
+        return get("foreignKeyColumns", List.class);
     }
 
     public void addForeignKeyColumn(Column foreignKeyColumn) {
         foreignKeyColumn.setRelation(getForeignKeyTable());
-        getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
+        get("foreignKeyColumns", List.class).add(foreignKeyColumn);
     }
 
     public ForeignKey setForeignKeyColumns(List<Column> foreignKeyColumns) {
-        this.setAttribute("foreignKeyColumns", foreignKeyColumns);
+        this.set("foreignKeyColumns", foreignKeyColumns);
 
         for (Column column : getForeignKeyColumns()) {
             column.setRelation(getForeignKeyTable());
@@ -118,23 +118,11 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-    @Override
-    public ForeignKey setName(String name) {
-        this.setAttribute("name", name);
-        return this;
-    }
-
-
-    @Override
     public String toString() {
         StringUtils.StringUtilsFormatter<Column> columnFormatter = new StringUtils.StringUtilsFormatter<Column>() {
             @Override
             public String toString(Column obj) {
-                return obj.getName();
+                return obj.getName().toShortString();
             }
         };
         return getName() + "(" + getForeignKeyTable() + "." + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + " -> " + getPrimaryKeyTable() + "." + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + ")";
@@ -142,40 +130,40 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isDeferrable() {
-        return getAttribute("deferrable", false);
+        return get("deferrable", false);
     }
 
     public ForeignKey setDeferrable(boolean deferrable) {
-        this.setAttribute("deferrable", deferrable);
+        this.set("deferrable", deferrable);
         return this;
     }
 
 
     public boolean isInitiallyDeferred() {
-        return getAttribute("initiallyDeferred", false);
+        return get("initiallyDeferred", false);
     }
 
     public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {
-        this.setAttribute("initiallyDeferred", initiallyDeferred);
+        this.set("initiallyDeferred", initiallyDeferred);
         return this;
     }
 
     public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
-        this.setAttribute("updateRule", rule);
+        this.set("updateRule", rule);
         return this;
     }
 
     public ForeignKeyConstraintType getUpdateRule() {
-        return getAttribute("updateRule", ForeignKeyConstraintType.class);
+        return get("updateRule", ForeignKeyConstraintType.class);
     }
 
     public ForeignKey setDeleteRule(ForeignKeyConstraintType rule) {
-        this.setAttribute("deleteRule", rule);
+        this.set("deleteRule", rule);
         return this;
     }
 
     public ForeignKeyConstraintType getDeleteRule() {
-        return getAttribute("deleteRule", ForeignKeyConstraintType.class);
+        return get("deleteRule", ForeignKeyConstraintType.class);
     }
 
     @Override
@@ -186,7 +174,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         ForeignKey that = (ForeignKey) o;
 
         if (getForeignKeyColumns() == null) {
-            return this.getName().equalsIgnoreCase(that.getName());
+            return this.getName().equals(that.getName());
         }
 
         StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
@@ -196,9 +184,9 @@ public class ForeignKey extends AbstractDatabaseObject{
             }
         };
 
-        return (StringUtils.join(getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that.getForeignKeyColumns(), ",", formatter))
+        return (StringUtils.join(getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(that.getForeignKeyColumns(), ",", formatter))
                 && (getForeignKeyTable() != null && that.getForeignKeyTable() != null && getForeignKeyTable().equals(that.getForeignKeyTable()))
-                && (StringUtils.join(getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(that.getPrimaryKeyColumns(), ",", formatter)))
+                && (StringUtils.join(getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(that.getPrimaryKeyColumns(), ",", formatter)))
                 && (getPrimaryKeyTable() != null && that.getPrimaryKeyTable() != null && getPrimaryKeyTable().equals(that.getPrimaryKeyTable())));
     }
 
@@ -246,17 +234,17 @@ public class ForeignKey extends AbstractDatabaseObject{
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
         if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
-            returnValue = StringUtils.join(this.getForeignKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtils.join(o.getForeignKeyColumns(), ",", formatter));
+            returnValue = StringUtils.join(this.getForeignKeyColumns(), ",", formatter).compareTo(StringUtils.join(o.getForeignKeyColumns(), ",", formatter));
         }
         if (returnValue == 0 && this.getName() != null && o.getName() != null) {
-            returnValue = this.getName().compareToIgnoreCase(o.getName());
+            returnValue = this.getName().compareTo(o.getName());
         }
         if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
 
         if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
-            returnValue = StringUtils.join(this.getPrimaryKeyColumns(), ",", formatter).compareToIgnoreCase(StringUtils.join(o.getPrimaryKeyColumns(), ",", formatter));
+            returnValue = StringUtils.join(this.getPrimaryKeyColumns(), ",", formatter).compareTo(StringUtils.join(o.getPrimaryKeyColumns(), ",", formatter));
         }
         if (returnValue == 0 && this.getUpdateRule() != null && o.getUpdateRule() != null)
             returnValue = this.getUpdateRule().compareTo(o.getUpdateRule());
@@ -279,11 +267,11 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     public Index getBackingIndex() {
-        return getAttribute("backingIndex", Index.class);
+        return get("backingIndex", Index.class);
     }
 
     public ForeignKey setBackingIndex(Index backingIndex) {
-        this.setAttribute("backingIndex", backingIndex);
+        this.set("backingIndex", backingIndex);
         return this;
     }
 }

@@ -38,6 +38,8 @@ import liquibase.structure.core.Schema;
 
 public class MockDatabase implements Database, InternalDatabase {
 
+    private int maxReferenceContainerDepth = 2;
+    private int maxSnapshotContainerDepth = 2;
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
     private boolean supportsCatalogs = true;
@@ -76,7 +78,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     public boolean equals(final DatabaseObject otherObject, final Database accordingTo) {
-        return otherObject.getName().equalsIgnoreCase(this.getName());
+        return otherObject.getSimpleName().equalsIgnoreCase(this.getName());
     }
 
     @Override
@@ -134,6 +136,11 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type) {
+        return true;
+    }
+
+    @Override
+    public boolean canStoreObjectName(String name, Class<? extends DatabaseObject> type) {
         return true;
     }
 
@@ -680,7 +687,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     public String getJdbcSchemaName(final Schema schema) {
-        return schema.getName();
+        return schema.getSimpleName();
     }
 
     @Override
@@ -786,7 +793,22 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public int getMaxContainerDepth() {
-        return 2;
+    public int getMaxReferenceContainerDepth() {
+        return maxReferenceContainerDepth;
+    }
+
+    public MockDatabase setMaxReferenceContainerDepth(int maxReferenceContainerDepth) {
+        this.maxReferenceContainerDepth = maxReferenceContainerDepth;
+        return this;
+    }
+
+    @Override
+    public int getMaxSnapshotContainerDepth() {
+        return maxSnapshotContainerDepth;
+    }
+
+    public MockDatabase setMaxSnapshotContainerDepth(int maxSnapshotContainerDepth) {
+        this.maxSnapshotContainerDepth = maxSnapshotContainerDepth;
+        return this;
     }
 }

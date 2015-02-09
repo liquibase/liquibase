@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -190,11 +189,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     }
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
-            for (String field : new HashSet<String>(object.getAttributes())) {
-                Object fieldValue = object.getAttribute(field, Object.class);
+            for (String field : new HashSet<String>(object.getAttributeNames())) {
+                Object fieldValue = object.get(field, Object.class);
                 Object newFieldValue = replaceObject(fieldValue);
                 if (fieldValue != newFieldValue && newFieldValue != null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
-                    object.setAttribute(field, newFieldValue);
+                    object.set(field, newFieldValue);
                 }
 
             }

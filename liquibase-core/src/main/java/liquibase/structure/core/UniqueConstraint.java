@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -11,11 +12,16 @@ import java.util.List;
 public class UniqueConstraint extends AbstractDatabaseObject {
 
     public UniqueConstraint() {
-        setAttribute("columns", new ArrayList());
-        setAttribute("deferrable", false);
-        setAttribute("initiallyDeferred", false);
-        setAttribute("disabled", false);
+        set("columns", new ArrayList());
+        set("deferrable", false);
+        set("initiallyDeferred", false);
+        set("disabled", false);
     }
+
+    public UniqueConstraint(String name) {
+        setName(name);
+    }
+
 
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
         this();
@@ -31,18 +37,6 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return getColumns().toArray(new Column[getColumns().size()]);
 	}
 
-	@Override
-    public String getName() {
-		return getAttribute("name", String.class);
-	}
-
-	@Override
-    public UniqueConstraint setName(String constraintName) {
-        this.setAttribute("name", constraintName);
-        return this;
-
-    }
-
     @Override
     public Schema getSchema() {
         if (getTable() == null) {
@@ -53,20 +47,20 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     }
 
 	public Table getTable() {
-		return getAttribute("table", Table.class);
+		return get("table", Table.class);
 	}
 
 	public UniqueConstraint setTable(Table table) {
-		this.setAttribute("table", table);
+		this.set("table", table);
         return this;
     }
 
 	public List<Column> getColumns() {
-		return getAttribute("columns", List.class);
+		return get("columns", List.class);
 	}
 
     public UniqueConstraint setColumns(List<Column> columns) {
-        setAttribute("columns", columns);
+        set("columns", columns);
         for (Column column : getColumns()) {
             column.setRelation(getTable());
         }
@@ -85,20 +79,20 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     }
 
     public boolean isDeferrable() {
-		return getAttribute("deferrable", Boolean.class);
+		return get("deferrable", Boolean.class);
 	}
 
 	public UniqueConstraint setDeferrable(boolean deferrable) {
-		this.setAttribute("deferrable",  deferrable);
+		this.set("deferrable", deferrable);
         return this;
     }
 
 	public boolean isInitiallyDeferred() {
-		return getAttribute("initiallyDeferred", Boolean.class);
+		return get("initiallyDeferred", Boolean.class);
 	}
 
 	public UniqueConstraint setInitiallyDeferred(boolean initiallyDeferred) {
-		this.setAttribute("initiallyDeferred", initiallyDeferred);
+		this.set("initiallyDeferred", initiallyDeferred);
         return this;
     }
 
@@ -112,20 +106,20 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 	}
 
 	public UniqueConstraint setDisabled(boolean disabled) {
-		this.setAttribute("disabled", disabled);
+		this.set("disabled", disabled);
         return this;
     }
 
 	public boolean isDisabled() {
-		return getAttribute("disabled", Boolean.class);
+		return get("disabled", Boolean.class);
 	}
 
     public Index getBackingIndex() {
-        return getAttribute("backingIndex", Index.class);
+        return get("backingIndex", Index.class);
     }
 
     public UniqueConstraint setBackingIndex(Index backingIndex) {
-        this.setAttribute("backingIndex", backingIndex);
+        this.set("backingIndex", backingIndex);
         return this;
 
     }
@@ -167,11 +161,10 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     public int compareTo(Object other) {
         UniqueConstraint o = (UniqueConstraint) other;
 		// Need check for nulls here due to NullPointerException using Postgres
-		String thisTableName;
-		String thatTableName;
-		thisTableName = null == this.getTable() ? "" : this.getTable()
-				.getName();
-		thatTableName = null == o.getTable() ? "" : o.getTable().getName();
+		ObjectName thisTableName;
+        ObjectName thatTableName;
+		thisTableName = null == this.getTable() ? new ObjectName() : this.getTable().getName();
+		thatTableName = null == o.getTable() ? new ObjectName() : o.getTable().getName();
 		int returnValue = thisTableName.compareTo(thatTableName);
 		if (returnValue == 0) {
 			returnValue = this.getName().compareTo(o.getName());
@@ -189,7 +182,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 			result = this.getTable().hashCode();
 		}
 		if (this.getName() != null) {
-			result = 31 * result + this.getName().toUpperCase().hashCode();
+			result = 31 * result + this.getSimpleName().toUpperCase().hashCode();
 		}
 		if (getColumnNames() != null) {
 			result = 31 * result + getColumnNames().hashCode();

@@ -25,7 +25,7 @@ public class MySQLConnectionSupplier extends ConnectionSupplier {
 
     @Override
     public String getJdbcUrl() {
-        return "jdbc:mysql://"+ getIpAddress() +"/"+getPrimaryContainer(1);
+        return "jdbc:mysql://"+ getIpAddress() +"/"+getPrimaryCatalog();
     }
 
     @Override

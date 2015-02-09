@@ -142,7 +142,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @Override
     public ChangeStatus checkStatus(Database database) {
         try {
-            Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
+            Table example = (Table) new Table(getTableName()).setSchema(getCatalogName(), getSchemaName());
             ChangeStatus status = new ChangeStatus();
             Table tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             status.assertComplete(tableSnapshot != null, "Table does not exist");

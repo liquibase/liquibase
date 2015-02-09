@@ -42,12 +42,12 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         PrimaryKey pk = (PrimaryKey) changedObject;
 
         DropPrimaryKeyChange dropPkChange = new DropPrimaryKeyChange();
-        dropPkChange.setTableName(pk.getTable().getName());
+        dropPkChange.setTableName(pk.getTable().getSimpleName());
 
         AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange();
-        addPkChange.setTableName(pk.getTable().getName());
+        addPkChange.setTableName(pk.getTable().getSimpleName());
         addPkChange.setColumnNames(pk.getColumnNames());
-        addPkChange.setConstraintName(pk.getName());
+        addPkChange.setConstraintName(pk.getSimpleName());
 
 
         if (control.getIncludeCatalog()) {
@@ -55,8 +55,8 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
             addPkChange.setCatalogName(pk.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropPkChange.setSchemaName(pk.getSchema().getName());
-            addPkChange.setSchemaName(pk.getSchema().getName());
+            dropPkChange.setSchemaName(pk.getSchema().getSimpleName());
+            addPkChange.setSchemaName(pk.getSchema().getSimpleName());
         }
 
         List<Column> referenceColumns = (List<Column>) differences.getDifference("columns").getReferenceValue();

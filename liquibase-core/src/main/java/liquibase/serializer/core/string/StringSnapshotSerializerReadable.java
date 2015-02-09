@@ -87,7 +87,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             StringBuilder typeBuffer = new StringBuilder();
             for (DatabaseObject databaseObject : databaseObjects) {
                 typeBuffer.append(databaseObject.getName()).append("\n");
-                typeBuffer.append(StringUtils.indent(serialize(databaseObject, new HashSet<String>(), databaseObject.getName()), 4)).append("\n");
+                typeBuffer.append(StringUtils.indent(serialize(databaseObject, new HashSet<String>(), databaseObject.getSimpleName()), 4)).append("\n");
             }
 
             catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
@@ -102,7 +102,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
         final boolean expandContainedObjects = parentNames.size() <= getExpandDepth();
 
-        final List<String> attributes = sort(databaseObject.getAttributes());
+        final List<String> attributes = sort(databaseObject.getAttributeNames());
         for (String attribute : attributes) {
             if (attribute.equals("name")) {
                 continue;
@@ -113,7 +113,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             if (attribute.equals("catalog")) {
                 continue;
             }
-            Object value = databaseObject.getAttribute(attribute, Object.class);
+            Object value = databaseObject.get(attribute, Object.class);
 
             if (value instanceof Schema) {
                 continue;
@@ -123,7 +123,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                 if (parentNames.contains(((DatabaseObject) value).getName())) {
                     value = null;
                 } else if (expandContainedObjects) {
-                    value = ((DatabaseObject) value).getName()+"\n"+StringUtils.indent(serialize((DatabaseObject) value, parentNames, databaseObject.getName()), 4);
+                    value = ((DatabaseObject) value).getName()+"\n"+StringUtils.indent(serialize((DatabaseObject) value, parentNames, databaseObject.getSimpleName()), 4);
                 } else {
                     value = databaseObject.getSerializableFieldValue(attribute);
                 }
@@ -137,9 +137,9 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                             public String toString(Object obj) {
                                 if (obj instanceof DatabaseObject) {
                                     if (expandContainedObjects) {
-                                        return ((DatabaseObject) obj).getName()+"\n"+StringUtils.indent(serialize(((DatabaseObject) obj), parentNames, databaseObject.getName()), 4);
+                                        return ((DatabaseObject) obj).getSimpleName()+"\n"+StringUtils.indent(serialize(((DatabaseObject) obj), parentNames, databaseObject.getSimpleName()), 4);
                                     } else {
-                                        return ((DatabaseObject) obj).getName();
+                                        return ((DatabaseObject) obj).getSimpleName();
                                     }
                                 } else {
                                     return obj.toString();

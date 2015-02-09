@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 
 public class Data extends AbstractDatabaseObject {
 
@@ -11,11 +12,11 @@ public class Data extends AbstractDatabaseObject {
     }
 
     public Table getTable() {
-        return getAttribute("table", Table.class);
+        return get("table", Table.class);
     }
 
     public Data setTable(Table table) {
-        setAttribute("table", table);
+        set("table", table);
 
         return this;
     }
@@ -29,7 +30,7 @@ public class Data extends AbstractDatabaseObject {
     }
 
     @Override
-    public String getName() {
+    public ObjectName getName() {
         Table table = getTable();
         if (table == null) {
             return null;
@@ -41,7 +42,7 @@ public class Data extends AbstractDatabaseObject {
     public Data setName(String name) {
         Table table = getTable();
         if (table == null) {
-            setTable(new Table().setName(name));
+            setTable((Table) new Table().setName(name));
         } else {
             table.setName(name);
         }

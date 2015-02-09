@@ -32,7 +32,7 @@ public class PostgresqlConnectionSupplier extends ConnectionSupplier {
 
     @Override
     public String getJdbcUrl() {
-        return "jdbc:postgresql://"+ getIpAddress() +"/"+getPrimaryContainer(1);
+        return "jdbc:postgresql://"+ getIpAddress() +"/"+getPrimaryCatalog();
     }
 
     @Override

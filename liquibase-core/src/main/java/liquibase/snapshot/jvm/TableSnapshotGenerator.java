@@ -23,7 +23,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
-        String objectName = example.getName();
+        String objectName = example.getSimpleName();
         Schema schema = example.getSchema();
 
         List<CachedRow> rs = null;
@@ -60,7 +60,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
-                    Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
+                    Table tableExample = (Table) new Table(cleanNameFromDatabase(tableName, database)).setSchema(schema);
 
                     schema.addDatabaseObject(tableExample);
                 }
@@ -88,13 +88,13 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
         if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
-            table.setAttribute("temporary", "GLOBAL");
+            table.set("temporary", "GLOBAL");
 
             String duration = tableMetadataResultSet.getString("DURATION");
             if (duration != null && duration.equals("SYS$TRANSACTION")) {
-                table.setAttribute("duration", "ON COMMIT DELETE ROWS");
+                table.set("duration", "ON COMMIT DELETE ROWS");
             } else if (duration != null && duration.equals("SYS$SESSION")) {
-                table.setAttribute("duration", "ON COMMIT PRESERVE ROWS");
+                table.set("duration", "ON COMMIT PRESERVE ROWS");
             }
         }
 

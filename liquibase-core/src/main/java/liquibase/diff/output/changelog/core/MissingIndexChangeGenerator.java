@@ -39,7 +39,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         Index index = (Index) missingObject;
 
         CreateIndexChange change = createCreateIndexChange();
-        change.setTableName(index.getTable().getName());
+        change.setTableName(index.getTable().getSimpleName());
         if (control.getIncludeTablespace()) {
             change.setTablespace(index.getTablespace());
         }
@@ -47,9 +47,9 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
             change.setCatalogName(index.getTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(index.getTable().getSchema().getName());
+            change.setSchemaName(index.getTable().getSchema().getSimpleName());
         }
-        change.setIndexName(index.getName());
+        change.setIndexName(index.getSimpleName());
         change.setUnique(index.isUnique());
         change.setAssociatedWith(index.getAssociatedWithAsString());
         change.setClustered(index.getClustered());

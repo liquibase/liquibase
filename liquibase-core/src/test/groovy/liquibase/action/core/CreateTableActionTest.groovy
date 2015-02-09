@@ -3,7 +3,9 @@ package liquibase.action.core
 import liquibase.JUnitScope
 import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplierFactory
+import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.ObjectName
+import liquibase.structure.core.Relation
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
 import spock.lang.Specification
@@ -26,7 +28,6 @@ class CreateTableActionTest extends Specification {
     @Unroll("#featureName #tableName")
     def "create simple table"() {
         expect:
-
         def action = new CreateTableAction(tableName)
                 .addColumn(new ColumnDefinition("id", "int"))
 
@@ -43,10 +44,11 @@ class CreateTableActionTest extends Specification {
             throw SetupResult.OK
         })
                 .cleanup({
-            new ActionExecutor().execute(new DropTableAction(tableName), scope)
+            new ActionExecutor().execute(new DropTableAction(tableName as ObjectName), scope)
         })
                 .run({
             plan.execute(scope)
+            assert scope.getSingleton(SnapshotFactory.class).has(new Table().set(Relation.Attr.name, tableName), scope)
 
         })
 
@@ -55,7 +57,7 @@ class CreateTableActionTest extends Specification {
         [conn, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             return CollectionUtil.permutations([
                     [it],
-                    it.getObjectNames(Table.class, true)
+                    it.getReferenceObjectNames(Table.class, false, false)
             ])
         }
     }

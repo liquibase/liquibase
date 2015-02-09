@@ -101,7 +101,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
      * Default implementation trims object name to null.
      */
     protected void correctObject(DatabaseObject object) {
-        object.setName(StringUtils.trimToNull(object.getName()));
+        object.setName(StringUtils.trimToNull(object.getSimpleName()));
     }
 
     /**

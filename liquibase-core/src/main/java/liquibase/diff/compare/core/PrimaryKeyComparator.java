@@ -30,9 +30,9 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
             return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(), accordingTo);
         } else {
             if (pk.getTable() == null || pk.getTable().getName() == null) {
-                return new String[] {pk.getName().toLowerCase() };
+                return new String[] {pk.getSimpleName().toLowerCase() };
             } else {
-                return new String[] {pk.getName().toLowerCase(), pk.getTable().getName().toLowerCase()};
+                return new String[] {pk.getSimpleName().toLowerCase(), pk.getTable().getSimpleName().toLowerCase()};
             }
         }
     }
@@ -49,7 +49,7 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
         if (thisPrimaryKey.getTable() != null && thisPrimaryKey.getTable().getName() != null && otherPrimaryKey.getTable() != null && otherPrimaryKey.getTable().getName() != null) {
             return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
         } else {
-            return StringUtils.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
+            return StringUtils.trimToEmpty(thisPrimaryKey.getSimpleName()).equalsIgnoreCase(otherPrimaryKey.getSimpleName());
         }
     }
 

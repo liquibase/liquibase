@@ -1,5 +1,6 @@
 package liquibase.structure;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -12,15 +13,50 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public abstract class AbstractDatabaseObject implements DatabaseObject {
-
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject implements DatabaseObject {
 
     private String snapshotId;
 
     @Override
     public String getObjectTypeName() {
         return StringUtils.lowerCaseFirst(getClass().getSimpleName());
+    }
+
+    public AbstractDatabaseObject() {
+    }
+
+    public AbstractDatabaseObject(String name) {
+        setName(name);
+    }
+
+    public AbstractDatabaseObject(ObjectName name) {
+        setName(name);
+    }
+
+    public String getSimpleName() {
+        ObjectName name = getName();
+        if (name == null) {
+            return null;
+        } else {
+            return name.getName();
+        }
+    }
+
+    public ObjectName getName() {
+        return get(Attr.name, ObjectName.class);
+    }
+
+    @Override
+    public <T> T setName(String name) {
+        set(Attr.name, new ObjectName(name));
+        return (T) this;
+    }
+
+    @Override
+    public <T> T setName(ObjectName name) {
+        set(ObjectName.Attr.name, name);
+
+        return (T) this;
     }
 
     @Override
@@ -47,35 +83,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public Set<String> getAttributes() {
-        return attributes.keySet();
-    }
-
-    @Override
-    public <T> T getAttribute(String attribute, Class<T> type) {
-        return (T) attributes.get(attribute);
-    }
-
-    @Override
-    public <T> T getAttribute(String attribute, T defaultValue) {
-        T value = (T) attributes.get(attribute);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    @Override
-    public DatabaseObject setAttribute(String attribute, Object value) {
-        if (value == null) {
-            attributes.remove(attribute);
-        } else {
-            attributes.put(attribute, value);
-        }
-        return this;
-    }
-
-    @Override
     public String getSerializedObjectName() {
         return getObjectTypeName();
     }
@@ -92,7 +99,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public Set<String> getSerializableFields() {
-        TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
+        TreeSet<String> fields = new TreeSet<String>(getAttributeNames());
         fields.add("snapshotId");
         return fields;
     }
@@ -102,10 +109,10 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
         if (field.equals("snapshotId")) {
             return snapshotId;
         }
-        if (!attributes.containsKey(field)) {
+        if (!getAttributeNames().contains(field)) {
             throw new UnexpectedLiquibaseException("Unknown field "+field);
         }
-        Object value = attributes.get(field);
+        Object value = get(field, Object.class);
         if (value instanceof DatabaseObject) {
             try {
                 DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
@@ -140,6 +147,12 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public String toString() {
-        return getName();
+        return getName().toShortString();
     }
+
+    @Override
+    public int hashCode() {
+        return StringUtils.trimToEmpty(toString()).hashCode();
+    }
+
 }

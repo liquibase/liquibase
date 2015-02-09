@@ -29,7 +29,7 @@ public class DiffResultAssert {
      */
     public DiffResultAssert containsMissingForeignKeyWithName(String fkName) {
         for(ForeignKey fk:diff.getMissingObjects(ForeignKey.class)) {
-            if(fk.getName().equalsIgnoreCase(fkName))
+            if(fk.getSimpleName().equalsIgnoreCase(fkName))
                 return this;
         }
         fail("Foreign key with name "+fkName+" not found");

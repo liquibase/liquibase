@@ -46,6 +46,6 @@ public class AddForeignKeyConstraintChangeSupplier extends AbstractChangeSupplie
         Table baseTable = new Table(change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName());
         Table referencedTable = new Table(change.getReferencedTableCatalogName(), change.getReferencedTableSchemaName(), change.getReferencedTableName());
 
-        assertNotNull(diffResult.getUnexpectedObject(new ForeignKey().setName(change.getConstraintName()).setForeignKeyTable(baseTable).setPrimaryKeyTable(referencedTable).setForeignKeyColumns(Column.listFromNames(change.getBaseColumnNames())).setPrimaryKeyColumns(Column.listFromNames(change.getReferencedColumnNames()))));
+        assertNotNull(diffResult.getUnexpectedObject(new ForeignKey(change.getConstraintName()).setForeignKeyTable(baseTable).setPrimaryKeyTable(referencedTable).setForeignKeyColumns(Column.listFromNames(change.getBaseColumnNames())).setPrimaryKeyColumns(Column.listFromNames(change.getReferencedColumnNames()))));
     }
 }

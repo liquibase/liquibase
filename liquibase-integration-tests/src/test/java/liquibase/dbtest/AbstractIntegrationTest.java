@@ -891,10 +891,10 @@ public abstract class AbstractIntegrationTest {
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         SnapshotGeneratorFactory tableSnapshotGenerator = SnapshotGeneratorFactory.getInstance();
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table("hyphen_context"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table("camel_context"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table("bar_id"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table("foo_id"), database));
     }
 
     @Test

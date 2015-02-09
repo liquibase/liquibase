@@ -34,12 +34,12 @@ public class MissingSequenceChangeGenerator implements MissingObjectChangeGenera
         Sequence sequence = (Sequence) missingObject;
 
         CreateSequenceChange change = new CreateSequenceChange();
-        change.setSequenceName(sequence.getName());
+        change.setSequenceName(sequence.getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(sequence.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(sequence.getSchema().getName());
+            change.setSchemaName(sequence.getSchema().getSimpleName());
         }
         change.setStartValue(sequence.getStartValue());
         change.setIncrementBy(sequence.getIncrementBy());

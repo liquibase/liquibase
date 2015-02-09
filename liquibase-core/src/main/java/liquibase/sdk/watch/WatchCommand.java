@@ -313,8 +313,8 @@ public class WatchCommand extends AbstractCommand {
                         for (DatabaseObject databaseObject : databaseObjects) {
                             String id = databaseObject.getClass().getName() + "-" + databaseObject.getName();
                             id = cleanHtmlId(id);
-                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#" + id + "'>").append(StringUtils.escapeHtml(databaseObject.getName())).append("</a></li>\n");
-                            detailsBuilder.append(wrapDetails(id, type.getSimpleName()+" "+databaseObject.getName(), writeDatabaseObject(databaseObject, new HashSet<String>(), databaseObject.getName()))).append("\n");
+                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#" + id + "'>").append(StringUtils.escapeHtml(databaseObject.getSimpleName())).append("</a></li>\n");
+                            detailsBuilder.append(wrapDetails(id, type.getSimpleName()+" "+databaseObject.getName(), writeDatabaseObject(databaseObject, new HashSet<String>(), databaseObject.getSimpleName()))).append("\n");
                         }
 
                         catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
@@ -356,7 +356,7 @@ public class WatchCommand extends AbstractCommand {
 
             StringBuilder singleValueOut = new StringBuilder();
             StringBuilder multiValueOut = new StringBuilder();
-            final List<String> attributes = sort(databaseObject.getAttributes());
+            final List<String> attributes = sort(databaseObject.getAttributeNames());
             for (String attribute : attributes) {
                 if (attribute.equals("name")) {
                     continue;
@@ -365,7 +365,7 @@ public class WatchCommand extends AbstractCommand {
                     continue;
                 }
 
-                Object value = databaseObject.getAttribute(attribute, Object.class);
+                Object value = databaseObject.get(attribute, Object.class);
 
                 if (value instanceof Schema) {
                     continue;
@@ -388,9 +388,9 @@ public class WatchCommand extends AbstractCommand {
                             final List<String> rowAttributes = new ArrayList<String>();
                             rowAttributes.add("name");
                             for (DatabaseObject obj : ((Collection<DatabaseObject>) value)) {
-                                for (String rowAttribute : obj.getAttributes()) {
+                                for (String rowAttribute : obj.getAttributeNames()) {
                                     if (!rowAttributes.contains(rowAttribute)) {
-                                        Object cellValue = obj.getAttribute(rowAttribute, Object.class);
+                                        Object cellValue = obj.get(rowAttribute, Object.class);
                                         if (cellValue instanceof DatabaseObject && parentNames.contains(((DatabaseObject) cellValue).getName())) {
                                             continue;
                                         } else {
@@ -410,7 +410,7 @@ public class WatchCommand extends AbstractCommand {
                                     if (obj instanceof DatabaseObject) {
                                         String row = "<tr>";
                                         for (String attribute : rowAttributes) {
-                                            if (((DatabaseObject) obj).getAttributes().contains(attribute)) {
+                                            if (((DatabaseObject) obj).getAttributeNames().contains(attribute)) {
                                                 row += "<td>" + StringUtils.escapeHtml(((DatabaseObject) obj).getSerializableFieldValue(attribute).toString());
                                             } else {
                                                 row += "<td></td>";

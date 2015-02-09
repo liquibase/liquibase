@@ -39,14 +39,14 @@ public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGen
 //        }
 
         DropIndexChange change = new DropIndexChange();
-        change.setTableName(index.getTable().getName());
+        change.setTableName(index.getTable().getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(index.getTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(index.getTable().getSchema().getName());
+            change.setSchemaName(index.getTable().getSchema().getSimpleName());
         }
-        change.setIndexName(index.getName());
+        change.setIndexName(index.getSimpleName());
         change.setAssociatedWith(index.getAssociatedWithAsString());
 
         return new Change[] { change };

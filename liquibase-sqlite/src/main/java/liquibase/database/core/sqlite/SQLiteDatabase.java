@@ -130,7 +130,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
         Table table = null;
         try {
-            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(tableName).setSchema(new Schema(new Catalog(null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
             List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();
@@ -158,7 +158,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
             List<Index> newIndices = new ArrayList<Index>();
             for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
-                if (index.getTable().getName().equalsIgnoreCase(tableName)) {
+                if (index.getTable().getSimpleName().equalsIgnoreCase(tableName)) {
                     if (alterTableVisitor.createThisIndex(index)) {
                         newIndices.add(index);
                     }
@@ -191,7 +191,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
                 }
 
                 statements.addAll(Arrays.asList(new CreateIndexStatement(
-                        index_config.getName(),
+                        index_config.getSimpleName(),
                         catalogName, schemaName, tableName,
                         index_config.isUnique(),
                         index_config.getAssociatedWithAsString(),

@@ -4,7 +4,6 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
-import javax.swing.text.TableView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +11,11 @@ import java.util.List;
 public class PrimaryKey extends AbstractDatabaseObject {
 
     public PrimaryKey() {
-        setAttribute("columns", new ArrayList());
+        set("columns", new ArrayList());
+    }
+
+    public PrimaryKey(String name) {
+        setName(name);
     }
 
     public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, Column... columns) {
@@ -22,7 +25,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
             Table table = new Table(tableCatalogName, tableSchemaName, tableName);
 
             if (columns != null) {
-                setAttribute("columns", Arrays.asList(columns));
+                set("columns", Arrays.asList(columns));
                 for (Column column : getColumns()) {
                     column.setRelation(table);
                 }
@@ -37,17 +40,6 @@ public class PrimaryKey extends AbstractDatabaseObject {
         return new DatabaseObject[] {
                 getTable()
         };
-    }
-
-    @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-    @Override
-    public PrimaryKey setName(String name) {
-        this.setAttribute("name", name);
-        return this;
     }
 
     @Override
@@ -78,11 +70,11 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public Table getTable() {
-        return getAttribute("table", Table.class);
+        return get("table", Table.class);
     }
 
     public PrimaryKey setTable(Table table) {
-        this.setAttribute("table", table);
+        this.set("table", table);
         return this;
     }
 
@@ -124,48 +116,48 @@ public class PrimaryKey extends AbstractDatabaseObject {
     @Override
     public String toString() {
         if (getTable() == null) {
-            return getName();
+            return getName().toShortString();
         } else {
             return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
         }
     }
 
     public List<Column> getColumns() {
-        return getAttribute("columns", List.class);
+        return get("columns", List.class);
     }
 
     public List<String> getColumnNamesAsList() {
         List<String> names = new ArrayList<String>();
         for (Column col : getColumns()) {
-            names.add(col.getName());
+            names.add(col.getName().toShortString());
         }
         return names;
     }
 
     public boolean isCertainName() {
-        return getAttribute("certainName", Boolean.class);
+        return get("certainName", Boolean.class);
     }
 
     public PrimaryKey setCertainName(boolean certainName) {
-        setAttribute("certainName", certainName);
+        set("certainName", certainName);
         return this;
     }
 
 	public String getTablespace() {
-		return getAttribute("tablespace",String.class);
+		return get("tablespace", String.class);
 	}
 
 	public PrimaryKey setTablespace(String tablespace) {
-        setAttribute("tablespace", tablespace);
+        set("tablespace", tablespace);
         return this;
 	}
 
     public Index getBackingIndex() {
-        return getAttribute("backingIndex", Index.class);
+        return get("backingIndex", Index.class);
     }
 
     public PrimaryKey setBackingIndex(Index backingIndex) {
-        setAttribute("backingIndex", backingIndex);
+        set("backingIndex", backingIndex);
         return this;
     }
 }

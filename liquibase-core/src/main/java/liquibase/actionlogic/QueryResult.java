@@ -29,4 +29,6 @@ public abstract class QueryResult extends ActionResult {
      * Return a list of objects of the given type.
      */
     public abstract <T> List<T> asList(Class<T> elementType) throws IllegalArgumentException;
+
+    public abstract int size();
 }

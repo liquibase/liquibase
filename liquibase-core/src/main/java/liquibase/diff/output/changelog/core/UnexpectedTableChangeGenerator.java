@@ -33,12 +33,12 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
         Table unexpectedTable = (Table) unexpectedObject;
 
         DropTableChange change = new DropTableChange();
-        change.setTableName(unexpectedTable.getName());
+        change.setTableName(unexpectedTable.getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(unexpectedTable.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(unexpectedTable.getSchema().getName());
+            change.setSchemaName(unexpectedTable.getSchema().getSimpleName());
         }
 
         for (Column column : unexpectedTable.getColumns()) {

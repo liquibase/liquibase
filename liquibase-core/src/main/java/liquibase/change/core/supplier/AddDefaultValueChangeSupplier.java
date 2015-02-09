@@ -47,7 +47,7 @@ public class AddDefaultValueChangeSupplier extends AbstractChangeSupplier<AddDef
 
     @Override
     public void checkDiffResult(DiffResult diffResult, AddDefaultValueChange change) {
-        Column example = new Column().setName(change.getColumnName()).setRelation(new Table().setName(change.getTableName()).setSchema(new Schema(change.getCatalogName(), change.getSchemaName())));
+        Column example = new Column(change.getColumnName()).setRelation(new Table(change.getTableName()).setSchema(new Schema(change.getCatalogName(), change.getSchemaName())));
 
         ObjectDifferences diff = diffResult.getChangedObject(example);
         assertNotNull(diff);

@@ -49,12 +49,12 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 //        }
 
         CreateTableChange change = createCreateTableChange();
-        change.setTableName(missingTable.getName());
+        change.setTableName(missingTable.getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(missingTable.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(missingTable.getSchema().getName());
+            change.setSchemaName(missingTable.getSchema().getSimpleName());
         }
         if (missingTable.getRemarks() != null) {
             change.setRemarks(missingTable.getRemarks());
@@ -62,7 +62,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
-            columnConfig.setName(column.getName());
+            columnConfig.setName(column.getSimpleName());
             LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
             DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
             columnConfig.setType(ddt.toString());
@@ -81,7 +81,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 //                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
 //                    constraintsConfig.setPrimaryKeyName(null);
 //                } else  {
-                    constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                    constraintsConfig.setPrimaryKeyName(primaryKey.getSimpleName());
 //                }
                 control.setAlreadyHandledMissing(primaryKey);
                 control.setAlreadyHandledMissing(primaryKey.getBackingIndex());

@@ -43,7 +43,7 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         }
 
         AddUniqueConstraintChange change = new AddUniqueConstraintChange();
-        change.setTableName(uc.getTable().getName());
+        change.setTableName(uc.getTable().getSimpleName());
         if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
             change.setTablespace(uc.getBackingIndex().getTablespace());
         }
@@ -51,9 +51,9 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
             change.setCatalogName(uc.getTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(uc.getTable().getSchema().getName());
+            change.setSchemaName(uc.getTable().getSchema().getSimpleName());
         }
-        change.setConstraintName(uc.getName());
+        change.setConstraintName(uc.getSimpleName());
         change.setColumnNames(uc.getColumnNames());
         change.setDeferrable(uc.isDeferrable());
         change.setInitiallyDeferred(uc.isInitiallyDeferred());

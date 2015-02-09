@@ -44,17 +44,17 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         Index index = (Index) changedObject;
 
         DropIndexChange dropIndexChange = createDropIndexChange();
-        dropIndexChange.setTableName(index.getTable().getName());
-        dropIndexChange.setIndexName(index.getName());
+        dropIndexChange.setTableName(index.getTable().getSimpleName());
+        dropIndexChange.setIndexName(index.getSimpleName());
         
         CreateIndexChange addIndexChange = createCreateIndexChange();
-        addIndexChange.setTableName(index.getTable().getName());
+        addIndexChange.setTableName(index.getTable().getSimpleName());
         List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
         for (Column col : index.getColumns()) {
             columns.add(new AddColumnConfig(col));
         }
         addIndexChange.setColumns(columns);
-        addIndexChange.setIndexName(index.getName());
+        addIndexChange.setIndexName(index.getSimpleName());
 
 
         if (control.getIncludeCatalog()) {
@@ -62,8 +62,8 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
             addIndexChange.setCatalogName(index.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropIndexChange.setSchemaName(index.getSchema().getName());
-            addIndexChange.setSchemaName(index.getSchema().getName());
+            dropIndexChange.setSchemaName(index.getSchema().getSimpleName());
+            addIndexChange.setSchemaName(index.getSchema().getSimpleName());
         }
 
         Difference columnsDifference = differences.getDifference("columns");

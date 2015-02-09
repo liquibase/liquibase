@@ -52,7 +52,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Relation getRelation() {
-        return getAttribute("relation", Relation.class);
+        return get("relation", Relation.class);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Column setRelation(Relation relation) {
-        setAttribute("relation", relation);
+        set("relation", relation);
 
         return this;
     }
@@ -76,19 +76,6 @@ public class Column extends AbstractDatabaseObject {
             return null;
         }
         return relation.getSchema();
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Column setName(String name) {
-        this.name = name;
-        setAttribute("name", name);
-
-        return this;
     }
 
     public Column setName(String name, boolean computed) {
@@ -106,38 +93,38 @@ public class Column extends AbstractDatabaseObject {
 
     public Column setComputed(Boolean computed) {
         this.computed = computed;
-        setAttribute("computed", computed);
+        set("computed", computed);
 
         return this;
     }
 
     public Boolean isNullable() {
-        return getAttribute("nullable", Boolean.class);
+        return get("nullable", Boolean.class);
     }
 
     public Column setNullable(Boolean nullable) {
-        setAttribute("nullable", nullable);
+        set("nullable", nullable);
 
         return this;
     }
 
 
     public DataType getType() {
-        return getAttribute("type", DataType.class);
+        return get("type", DataType.class);
     }
 
     public Column setType(DataType type) {
-        setAttribute("type", type);
+        set("type", type);
 
         return this;
     }
 
     public Object getDefaultValue() {
-        return getAttribute("defaultValue", Object.class);
+        return get("defaultValue", Object.class);
     }
 
     public Column setDefaultValue(Object defaultValue) {
-        setAttribute("defaultValue", defaultValue);
+        set("defaultValue", defaultValue);
 
         return this;
     }
@@ -147,11 +134,11 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public AutoIncrementInformation getAutoIncrementInformation() {
-        return getAttribute("autoIncrementInformation", AutoIncrementInformation.class);
+        return get("autoIncrementInformation", AutoIncrementInformation.class);
     }
 
     public void setAutoIncrementInformation(AutoIncrementInformation autoIncrementInformation) {
-        setAttribute("autoIncrementInformation", autoIncrementInformation);
+        set("autoIncrementInformation", autoIncrementInformation);
     }
 
 
@@ -159,20 +146,20 @@ public class Column extends AbstractDatabaseObject {
         if (includeRelation) {
             return toString();
         } else {
-            return getName();
+            return getName().toShortString();
         }
     }
 
     @Override
     public String toString() {
         if (getComputed() != null && getComputed()) {
-            return getName();
+            return getName().toShortString();
         } else {
             if (getRelation() == null) {
-                return getName();
+                return getName().toShortString();
             } else {
-                String tableOrViewName = getRelation().getName();
-                return tableOrViewName + "." + getName();
+                String tableOrViewName = getRelation().getName().toShortString();
+                return tableOrViewName + "." + getName().toShortString();
             }
         }
     }
@@ -251,21 +238,21 @@ public class Column extends AbstractDatabaseObject {
 
 
     public boolean isCertainDataType() {
-        return getAttribute("certainDataType", Boolean.class);
+        return get("certainDataType", Boolean.class);
     }
 
     public Column setCertainDataType(boolean certainDataType) {
-        setAttribute("certainDataType", certainDataType);
+        set("certainDataType", certainDataType);
 
         return this;
     }
 
     public String getRemarks() {
-        return getAttribute("remarks", String.class);
+        return get("remarks", String.class);
     }
 
     public Column setRemarks(String remarks) {
-        setAttribute("remarks", remarks);
+        set("remarks", remarks);
 
         return this;
     }

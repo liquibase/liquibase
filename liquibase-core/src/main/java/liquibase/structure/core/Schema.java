@@ -3,6 +3,7 @@ package liquibase.structure.core;
 import liquibase.CatalogAndSchema;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -15,7 +16,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Schema() {
-        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        set("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Schema(String catalog, String schemaName) {
@@ -25,29 +26,17 @@ public class Schema extends AbstractDatabaseObject {
     public Schema(Catalog catalog, String schemaName) {
         schemaName = StringUtils.trimToNull(schemaName);
 
-        setAttribute("name", schemaName);
-        setAttribute("catalog", catalog);
-        setAttribute("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
-    }
-
-    @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-
-    @Override
-    public Schema setName(String name) {
-        setAttribute("name", name);
-        return this;
+        set("name", schemaName);
+        set("catalog", catalog);
+        set("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public boolean isDefault() {
-        return getAttribute("default", false);
+        return get("default", false);
     }
 
     public Schema setDefault(Boolean isDefault) {
-        setAttribute("default", isDefault);
+        set("default", isDefault);
         return this;
     }
 
@@ -58,7 +47,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Catalog getCatalog() {
-        return getAttribute("catalog", Catalog.class);
+        return get("catalog", Catalog.class);
     }
 
     @Override
@@ -85,23 +74,12 @@ public class Schema extends AbstractDatabaseObject {
         if (getCatalog() == null) {
             return null;
         }
-        return getCatalog().getName();
+        return getCatalog().getSimpleName();
     }
     
     @Override
     public String toString() {
-        String catalogName = getCatalogName();
-
-        String schemaName = getName();
-        if (schemaName == null) {
-            schemaName = "DEFAULT";
-        }
-
-        if (catalogName == null) {
-            return schemaName;
-        } else {
-            return catalogName +"."+ schemaName;
-        }
+        return getName().toString();
     }
 
     public CatalogAndSchema toCatalogAndSchema() {
@@ -116,13 +94,13 @@ public class Schema extends AbstractDatabaseObject {
         if (isDefault()) {
             schemaName = null;
         } else {
-            schemaName = getName();
+            schemaName = getSimpleName();
         }
         return new CatalogAndSchema(catalogName, schemaName);
     }
 
     protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {
-        return getAttribute("objects", Map.class);
+        return get("objects", Map.class);
     }
 
     public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {

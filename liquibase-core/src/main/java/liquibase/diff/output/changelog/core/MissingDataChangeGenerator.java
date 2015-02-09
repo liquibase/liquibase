@@ -56,7 +56,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
+            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(1000);
@@ -74,9 +74,9 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }
                 if (outputControl.getIncludeSchema()) {
-                    change.setSchemaName(table.getSchema().getName());
+                    change.setSchemaName(table.getSchema().getSimpleName());
                 }
-                change.setTableName(table.getName());
+                change.setTableName(table.getSimpleName());
 
                 // loop over all columns for this row
                 for (int i = 0; i < columnNames.size(); i++) {

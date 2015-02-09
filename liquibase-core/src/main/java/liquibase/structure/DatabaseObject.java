@@ -1,11 +1,12 @@
 package liquibase.structure;
 
+import liquibase.ExtensibleObject;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.core.Schema;
 
 import java.util.Set;
 
-public interface DatabaseObject extends Comparable, LiquibaseSerializable {
+public interface DatabaseObject extends Comparable, LiquibaseSerializable, ExtensibleObject {
 
     public String getSnapshotId();
 
@@ -15,21 +16,20 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
 
     String getObjectTypeName();
 
-    String getName();
+    ObjectName getName();
+
+    String getSimpleName();
 
     <T> T setName(String name);
+
+    <T> T setName(ObjectName name);
 
     Schema getSchema();
 
     boolean snapshotByDefault();
 
-    Set<String> getAttributes();
-
-    <T> T getAttribute(String attribute, Class<T> type);
-
-    <T> T getAttribute(String attribute, T defaultValue);
-
-    DatabaseObject setAttribute(String attribute, Object value);
-
+    public static enum Attr {
+        name
+    }
 }
 

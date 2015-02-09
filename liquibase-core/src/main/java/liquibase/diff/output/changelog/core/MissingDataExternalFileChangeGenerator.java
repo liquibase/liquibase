@@ -55,7 +55,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
+            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(100);
@@ -66,7 +66,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 columnNames.add(rs.getMetaData().getColumnName(i+1));
             }
 
-            String fileName = table.getName().toLowerCase() + ".csv";
+            String fileName = table.getSimpleName().toLowerCase() + ".csv";
             if (dataDir != null) {
                 fileName = dataDir + "/" + fileName;
             }
@@ -131,9 +131,9 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 change.setCatalogName(table.getSchema().getCatalogName());
             }
             if (outputControl.getIncludeSchema()) {
-                change.setSchemaName(table.getSchema().getName());
+                change.setSchemaName(table.getSchema().getSimpleName());
             }
-            change.setTableName(table.getName());
+            change.setTableName(table.getSimpleName());
 
             for (int i = 0; i < columnNames.size(); i++) {
                 String colName = columnNames.get(i);

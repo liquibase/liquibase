@@ -74,7 +74,7 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Table && example.getName().startsWith("RDB$")) {
+        if (example instanceof Table && example.getSimpleName().startsWith("RDB$")) {
             return true;
         }
         return super.isSystemObject(example);    //To change body of overridden methods use File | Settings | File Templates.

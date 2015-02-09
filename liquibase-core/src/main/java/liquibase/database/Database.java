@@ -276,6 +276,8 @@ public interface Database extends PrioritizedService {
     /**
      * Return true if the database is able to store the given name as is.
      */
+    public boolean canStoreObjectName(String name, Class<? extends DatabaseObject> type);
+
     public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type);
 
     public boolean isReservedWord(String string);
@@ -350,6 +352,8 @@ public interface Database extends PrioritizedService {
 
     public boolean looksLikeFunctionCall(String value);
 
-    public int getMaxContainerDepth();
+    public int getMaxReferenceContainerDepth();
+
+    public int getMaxSnapshotContainerDepth();
 }
 

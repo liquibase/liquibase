@@ -15,37 +15,30 @@ public class Sequence extends AbstractDatabaseObject {
         this.setName(sequenceName);
     }
 
+    public Sequence(String name) {
+        setName(name);
+    }
+
     @Override
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
 
-    @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-    @Override
-    public Sequence setName(String name) {
-        this.setAttribute("name", name);
-        return this;
-    }
-
     public BigInteger getStartValue() {
-        return getAttribute("startValue", BigInteger.class);
+        return get("startValue", BigInteger.class);
     }
 
     public Sequence setStartValue(BigInteger startValue) {
-        this.setAttribute("startValue", startValue);
+        this.set("startValue", startValue);
         return this;
     }
 
     public BigInteger getIncrementBy() {
-        return getAttribute("incrementBy", BigInteger.class);
+        return get("incrementBy", BigInteger.class);
     }
 
     public Sequence setIncrementBy(BigInteger incrementBy) {
-        this.setAttribute("incrementBy", incrementBy);
+        this.set("incrementBy", incrementBy);
         return this;
 
     }
@@ -61,30 +54,19 @@ public class Sequence extends AbstractDatabaseObject {
 
     }
 
-    @Override
-    public int hashCode() {
-        return (getName() != null ? getName().toUpperCase().hashCode() : 0);
-    }
-
-
-    @Override
-    public String toString() {
-        return getName();
-    }
-
 	/**
 	 * @return Returns the schema.
 	 */
 	@Override
     public Schema getSchema () {
-		return getAttribute("schema", Schema.class);
+		return get("schema", Schema.class);
 	}
 
 	/**
 	 * @param schema The schema to set.
 	 */
 	public Sequence setSchema (Schema schema) {
-		this.setAttribute("schema", schema);
+		this.set("schema", schema);
         return this;
 	}
 
@@ -93,59 +75,59 @@ public class Sequence extends AbstractDatabaseObject {
     }
 
     public BigInteger getMinValue() {
-        return getAttribute("minValue", BigInteger.class);
+        return get("minValue", BigInteger.class);
     }
 
     public Sequence setMinValue(BigInteger minValue) {
-        this.setAttribute("minValue", minValue);
+        this.set("minValue", minValue);
         return this;
     }
 
     public BigInteger getMaxValue() {
-        return getAttribute("maxValue", BigInteger.class);
+        return get("maxValue", BigInteger.class);
     }
 
     public Sequence setMaxValue(BigInteger maxValue) {
-        this.setAttribute("maxValue", maxValue);
+        this.set("maxValue", maxValue);
 
         return this;
     }
 
     public Boolean getWillCycle() {
-        return getAttribute("willCycle", Boolean.class);
+        return get("willCycle", Boolean.class);
     }
 
     public Sequence setWillCycle(Boolean willCycle) {
-        this.setAttribute("willCycle", willCycle);
+        this.set("willCycle", willCycle);
         return this;
     }
 
     public Boolean getOrdered() {
-        return getAttribute("ordered", Boolean.class);
+        return get("ordered", Boolean.class);
     }
 
     public Sequence setOrdered(Boolean isOrdered) {
-        this.setAttribute("ordered", isOrdered);
+        this.set("ordered", isOrdered);
 
         return this;
     }
 
     public BigInteger getLastReturnedValue() {
-        return getAttribute("lastReturnedValue", BigInteger.class);
+        return get("lastReturnedValue", BigInteger.class);
     }
 
     public Sequence setLastReturnedValue(BigInteger lastReturnedValue) {
-        this.setAttribute("lastReturnedValue", lastReturnedValue);
+        this.set("lastReturnedValue", lastReturnedValue);
 
         return this;
     }
 
     public BigInteger getCacheSize() {
-        return getAttribute("cacheSize", BigInteger.class);
+        return get("cacheSize", BigInteger.class);
     }
 
     public Sequence setCacheSize(BigInteger cacheSize) {
-        this.setAttribute("cacheSize", cacheSize);
+        this.set("cacheSize", cacheSize);
 
         return this;
     }

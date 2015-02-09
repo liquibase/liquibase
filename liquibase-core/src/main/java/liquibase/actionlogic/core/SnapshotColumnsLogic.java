@@ -47,28 +47,28 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         String columnName = null;
 
         if (relatedTo instanceof Catalog) {
-            catalogName = relatedTo.getName();
+            catalogName = relatedTo.getSimpleName();
         } else if (relatedTo instanceof Schema) {
             catalogName = ((Schema) relatedTo).getCatalogName();
-            schemaName = relatedTo.getName();
+            schemaName = relatedTo.getSimpleName();
         } else if (relatedTo instanceof Relation) {
-            relationName = relatedTo.getName();
+            relationName = relatedTo.getSimpleName();
 
             Schema schema = relatedTo.getSchema();
             if (schema != null) {
                 catalogName = schema.getCatalogName();
-                schemaName = schema.getName();
+                schemaName = schema.getSimpleName();
             }
         } else if (relatedTo instanceof Column) {
-            columnName = relatedTo.getName();
+            columnName = relatedTo.getSimpleName();
 
             Relation relation = ((Column) relatedTo).getRelation();
-            relationName = relation.getName();
+            relationName = relation.getSimpleName();
 
             Schema schema = relation.getSchema();
             if (schema != null) {
                 catalogName = schema.getCatalogName();
-                schemaName = schema.getName();
+                schemaName = schema.getSimpleName();
             }
         } else {
             throw Validate.failure("Unexpected type: "+relatedTo.getClass().getName());

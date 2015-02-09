@@ -69,7 +69,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtils.trimToNull(getTableName()) != null) {
-            example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));
+            example.setRelation(new Table(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));
         }
         example.setName(database.correctObjectName(getColumnName(), Column.class));
 

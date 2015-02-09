@@ -39,7 +39,7 @@ public class AddAutoIncrementChangeSupplier extends AbstractChangeSupplier<AddAu
 
     @Override
     public void checkDiffResult(DiffResult diffResult, AddAutoIncrementChange change) {
-        Column example = new Column().setName(change.getColumnName()).setRelation(new Table().setName(change.getTableName()).setSchema(new Schema(change.getCatalogName(), change.getSchemaName())));
+        Column example = new Column(change.getColumnName()).setRelation(new Table(change.getTableName()).setSchema(new Schema(change.getCatalogName(), change.getSchemaName())));
         ObjectDifferences changes = diffResult.getChangedObject(example);
         assertNotNull(changes);
         assertNull(changes.getDifference("autoIncrementInformation").getReferenceValue());

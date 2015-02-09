@@ -34,7 +34,7 @@ public class AddColumnChangeSupplier extends AbstractChangeSupplier<AddColumnCha
     @Override
     public void checkDiffResult(DiffResult diffResult, AddColumnChange change) {
         for (ColumnConfig column : change.getColumns()) {
-            Column example = new Column().setName(column.getName()).setRelation(new Table().setName(change.getTableName()).setSchema(new Schema(change.getCatalogName(), change.getSchemaName())));
+            Column example = new Column(column.getName()).setRelation(new Table(change.getTableName()).setSchema(new Schema(change.getCatalogName(), change.getSchemaName())));
             Column snapshot = diffResult.getUnexpectedObject(example);
             assertNotNull(snapshot);
             //todo assertEquals(column.getType(), snapshot.getType().toString());

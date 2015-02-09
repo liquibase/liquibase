@@ -1,9 +1,9 @@
 package liquibase.structure.core;
 
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -18,8 +18,8 @@ public class Index extends AbstractDatabaseObject {
 	public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
 
     public Index() {
-        setAttribute("columns", new ArrayList<String>());
-        setAttribute("associatedWith", new HashSet<String>());
+        set("columns", new ArrayList<String>());
+        set("associatedWith", new HashSet<String>());
     }
 
     public Index(String indexName) {
@@ -46,17 +46,6 @@ public class Index extends AbstractDatabaseObject {
     }
 
     @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-    @Override
-    public Index setName(String name) {
-        this.setAttribute("name", name);
-        return this;
-    }
-
-    @Override
     public Schema getSchema() {
         if (getTable() == null) {
             return null;
@@ -66,25 +55,25 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Table getTable() {
-        return getAttribute("table", Table.class);
+        return get("table", Table.class);
     }
 
     public Index setTable(Table table) {
-        this.setAttribute("table", table);
+        this.set("table", table);
         return this;
     }
 
 	public String getTablespace() {
-		return getAttribute("tablespace", String.class);
+		return get("tablespace", String.class);
 	}
 
 	public Index setTablespace(String tablespace) {
-        this.setAttribute("tablespace", tablespace);
+        this.set("tablespace", tablespace);
         return this;
 	}
 
     public List<Column> getColumns() {
-        return getAttribute("columns", List.class);
+        return get("columns", List.class);
     }
 
     public Index addColumn(Column column) {
@@ -98,7 +87,7 @@ public class Index extends AbstractDatabaseObject {
         for (Column column :columns) {
             column.setRelation(getTable());
         }
-        setAttribute("columns", columns);
+        set("columns", columns);
         return this;
     }
 
@@ -107,16 +96,16 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Index setUnique(Boolean value) {
-        this.setAttribute("unique", value);
+        this.set("unique", value);
         return this;
     }
 
     public Boolean isUnique() {
-        return getAttribute("unique", Boolean.class);
+        return get("unique", Boolean.class);
     }
 
 	public Set<String> getAssociatedWith() {
-		return getAttribute("associatedWith", Set.class);
+		return get("associatedWith", Set.class);
 	}
 
 	public String getAssociatedWithAsString() {
@@ -133,11 +122,11 @@ public class Index extends AbstractDatabaseObject {
 
 
     public Boolean getClustered() {
-        return getAttribute("clustered", Boolean.class);
+        return get("clustered", Boolean.class);
     }
 
     public Index setClustered(Boolean clustered) {
-        return (Index) setAttribute("clustered", clustered);
+        return (Index) set("clustered", clustered);
     }
 
 //    @Override
@@ -163,8 +152,8 @@ public class Index extends AbstractDatabaseObject {
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
 
         if (returnValue == 0) {
-            String thisName = StringUtils.trimToEmpty(this.getName());
-            String oName = StringUtils.trimToEmpty(o.getName());
+            ObjectName thisName = ObjectUtil.defaultIfEmpty(this.getName(), new ObjectName());
+            ObjectName oName = ObjectUtil.defaultIfEmpty(o.getName(), new ObjectName());
             returnValue = thisName.compareTo(oName);
         }
 

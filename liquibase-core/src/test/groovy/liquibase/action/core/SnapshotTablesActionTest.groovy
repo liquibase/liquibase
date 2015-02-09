@@ -18,64 +18,60 @@ import testmd.logic.SetupResult
 
 class SnapshotTablesActionTest extends Specification {
 
-    static testTables = ["TEST_TABLE", "test_table", "OTHER_TABLE"]
-
-    def setupDatabase(ConnectionSupplier connectionSupplier, scope) {
-        Database database = scope.get(Scope.Attr.database, Database)
+    def setupDatabase(ConnectionSupplier supplier, Scope scope) {
+        Database database = scope.database
         if (database instanceof UnsupportedDatabase) {
             throw SetupResult.OK;
         }
 
-        for (def tableName : testTables) {
-            if (!database.canStoreObjectName(tableName, false, Table)) {
+        for (def tableName : supplier.getReferenceObjectNames(Table.class, false, false)) {
+            if (!database.canStoreObjectName(tableName.getName(), Table)) {
                 continue;
             }
-            new ActionExecutor().execute(new ExecuteSqlAction("create table $tableName (id int, name varchar(255))"), scope)
+            new ActionExecutor().execute(new CreateTableAction(tableName).addColumn (new ColumnDefinition("id", "int")), scope)
         }
         throw SetupResult.OK
     }
 
-    def cleanupDatabase(ConnectionSupplier connectionSupplier, scope) {
+    def cleanupDatabase(ConnectionSupplier supplier, scope) {
         Database database = scope.get(Scope.Attr.database, Database)
         if (database instanceof UnsupportedDatabase) {
             return;
         }
 
-        for (def tableName : testTables) {
-            if (!database.canStoreObjectName(tableName, false, Table)) {
+        for (def tableName : supplier.getReferenceObjectNames(Table.class, false, false)) {
+            if (!database.canStoreObjectName(tableName.name, Table)) {
                 continue;
             }
-            new ActionExecutor().execute(new ExecuteSqlAction("drop table $tableName"), scope)
+            new ActionExecutor().execute(new DropTableAction(tableName), scope)
         }
     }
 
     @Unroll("#featureName against #tableName and #connectionSupplier")
-    def "can snapshot case sensitive table in primary catalog and schema"() {
+    def "can snapshot fully qualified table"() {
         expect:
-        def database = connectionSupplier.openDatabase()
-
-        def catalogName = ((ConnectionSupplier) connectionSupplier).getPrimaryCatalog()
-        def schemaName =  ((ConnectionSupplier) connectionSupplier).getPrimarySchema()
-
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table().setName(tableName).setSchema(catalogName, schemaName))
+        def action = new SnapshotDatabaseObjectsAction(Table, new Table(tableName))
+        def database = conn.database;
         def scope = JUnitScope.getInstance(database)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        TestMD.test(this.class, "case sensitive table in primary catalog and schema__${database.shortName}", database.class).permutation([database: database.class.name, catalogName: catalogName, schemaName: schemaName, tableName: tableName])
-                .asTable("catalogName", "schemaName", "tableName")
-                .addResult("actions", plan.describe())
+        TestMD.test(this.class, "${database.shortName}", database.class).permutation([database: database.class.name, tableName: tableName])
+                .asTable("tableName")
+                .addResult("plan", plan.describe())
                 .setup({
-                    if (!database.canStoreObjectName(tableName, false, Table)) {
-                        throw new SetupResult.Skip("Case Insensitive Database")
-                    }
-
-                    setupDatabase(connectionSupplier, scope)
-                }).cleanup({cleanupDatabase(connectionSupplier, scope)})
-                .run({
             if (database instanceof UnsupportedDatabase) {
-                return;
+                throw new SetupResult.CannotVerify("Unsupported Database");
             }
+
+            if (!scope.database.canStoreObjectName(tableName.name, Table)) {
+                throw new SetupResult.Skip("Case Insensitive Database")
+            }
+
+            conn.connect(scope)
+            setupDatabase(conn, scope)
+        }).cleanup({ cleanupDatabase(conn, scope) })
+                .run({
             QueryResult result = plan.execute(scope)
 
             assert result.asList(Table).size() == 1
@@ -84,9 +80,12 @@ class SnapshotTablesActionTest extends Specification {
         })
 
         where:
-        [connectionSupplier, tableName] << CollectionUtil.permutations([
-                JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers,
-                testTables])
+        [conn, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            return CollectionUtil.permutations([
+                    [it],
+                    it.getSnapshotObjectNames(Table.class, false, false)
+            ])
+        }
     }
 
 }

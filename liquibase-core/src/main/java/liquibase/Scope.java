@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.SmartMap;
@@ -159,4 +160,10 @@ public class Scope {
         }
         return singleton;
     }
+
+    public Database getDatabase() {
+        return get(Attr.database, Database.class);
+    }
+
+
 }

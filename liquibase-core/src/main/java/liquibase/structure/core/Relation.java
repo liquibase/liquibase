@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,23 +12,20 @@ import java.util.List;
  */
 public abstract class Relation extends AbstractDatabaseObject {
 
-    private String name;
+    public static enum Attr {
+        name,
+        columns,
+    }
 
     protected Relation() {
-        setAttribute("columns", new ArrayList());
     }
 
-    @Override
-    public String getName() {
-        return name;
+    protected Relation(String name) {
+        super(name);
     }
 
-    @Override
-    public Relation setName(String name) {
-        setAttribute("name", name);
-        this.name = name;
-
-        return this;
+    protected Relation(ObjectName name) {
+        super(name);
     }
 
     @Override
@@ -39,16 +37,16 @@ public abstract class Relation extends AbstractDatabaseObject {
     }
 
     public String getRemarks() {
-        return getAttribute("remarks", String.class);
+        return get("remarks", String.class);
     }
 
     public Relation setRemarks(String remarks) {
-        setAttribute("remarks", remarks);
+        set("remarks", remarks);
         return this;
     }
 
     public List<Column> getColumns() {
-        return getAttribute("columns", List.class);
+        return get("columns", List.class);
     }
 
     /**
@@ -57,7 +55,7 @@ public abstract class Relation extends AbstractDatabaseObject {
      */
     public Column getColumn(String columnName) {
         for (Column column : getColumns()) {
-            if (column.getName().equalsIgnoreCase(columnName)) {
+            if (column.getName().equals(columnName)) {
                 return column;
             }
         }
@@ -69,14 +67,14 @@ public abstract class Relation extends AbstractDatabaseObject {
      */
     @Override
     public Schema getSchema() {
-        return getAttribute("schema", Schema.class);
+        return get("schema", Schema.class);
     }
 
     /**
      * @param schema The schema to set.
      */
     public Relation setSchema(Schema schema) {
-        setAttribute("schema", schema);
+        set("schema", schema);
         return this;
     }
 
@@ -85,7 +83,7 @@ public abstract class Relation extends AbstractDatabaseObject {
     }
 
     public int compareTo(Object o) {
-        return this.getName().compareToIgnoreCase(((Relation) o).getName());
+        return this.getName().compareTo(((Relation) o).getName());
     }
 
 }

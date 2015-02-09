@@ -34,7 +34,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         Schema match = null;
 
         String catalogName = ((Schema) example).getCatalogName();
-        String schemaName = example.getName();
+        String schemaName = example.getSimpleName();
         if (database.supportsSchemas()) {
             if (catalogName == null) {
                 catalogName = database.getDefaultCatalogName();
@@ -86,7 +86,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             database.setObjectQuotingStrategy(currentStrategy);
         }
 
-        if (match != null && (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultSchemaName()))) {
+        if (match != null && (match.getName() == null || match.getName().equals(database.getDefaultSchemaName()))) {
             match.setDefault(true);
         }
         return match;

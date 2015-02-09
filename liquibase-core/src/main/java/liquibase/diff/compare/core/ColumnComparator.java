@@ -25,7 +25,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         Column column = (Column) databaseObject;
 
         if (column.getRelation() == null) {
-            return new String[] {(column.getName()).toLowerCase()};
+            return new String[] {(column.getSimpleName()).toLowerCase()};
         } else {
             return new String[] {(column.getRelation().getName() + ":" + column.getName()).toLowerCase()};
         }

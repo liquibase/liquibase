@@ -1,10 +1,12 @@
 package liquibase.util;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import liquibase.ContextExpression;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -199,6 +201,12 @@ public class ObjectUtil {
                 return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
             } else if (targetClass.isAssignableFrom(String.class)) {
                 return (T) object.toString();
+            } else if (targetClass.isAssignableFrom(ObjectName.class)) {
+                if (object instanceof String) {
+                    return (T) new ObjectName((String) object);
+                } else {
+                    throw new UnexpectedLiquibaseException("Cannot convert "+ object.getClass()+" to "+ObjectName.class.getName());
+                }
             } else if (targetClass.isAssignableFrom(List.class)) {
                 if (object instanceof List) {
                     return (T) object;
@@ -224,4 +232,11 @@ public class ObjectUtil {
         throw new IllegalArgumentException("Could not convert '" + number + "' of type " + number.getClass().getName() + " to target class " + targetClass.getName() + ": overflow");
     }
 
+    public static <T> T defaultIfEmpty(T value, T defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
 }

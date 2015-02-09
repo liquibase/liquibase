@@ -55,16 +55,16 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 
 
         AddColumnChange change = new AddColumnChange();
-        change.setTableName(column.getRelation().getName());
+        change.setTableName(column.getRelation().getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(column.getRelation().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(column.getRelation().getSchema().getName());
+            change.setSchemaName(column.getRelation().getSchema().getSimpleName());
         }
 
         AddColumnConfig columnConfig = new AddColumnConfig();
-        columnConfig.setName(column.getName());
+        columnConfig.setName(column.getSimpleName());
 
         String dataType = column.getType().toString();
 

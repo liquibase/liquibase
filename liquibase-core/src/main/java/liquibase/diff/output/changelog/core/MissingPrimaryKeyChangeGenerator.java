@@ -44,14 +44,14 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
         PrimaryKey pk = (PrimaryKey) missingObject;
 
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-        change.setTableName(pk.getTable().getName());
+        change.setTableName(pk.getTable().getSimpleName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(pk.getTable().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(pk.getTable().getSchema().getName());
+            change.setSchemaName(pk.getTable().getSchema().getSimpleName());
         }
-        change.setConstraintName(pk.getName());
+        change.setConstraintName(pk.getSimpleName());
         change.setColumnNames(pk.getColumnNames());
         if (control.getIncludeTablespace()) {
             change.setTablespace(pk.getTablespace());

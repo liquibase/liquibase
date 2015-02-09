@@ -7,22 +7,21 @@ public class View extends Relation {
     public View() {
     }
 
+    public View(String name) {
+        super(name);
+    }
+
     public View(String catalogName, String schemaName, String tableName) {
         this.setSchema(new Schema(catalogName, schemaName));
         setName(tableName);
     }
 
-    @Override
-    public Relation setSchema(Schema schema) {
-        return super.setSchema(schema);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
     public String getDefinition() {
-        return getAttribute("definition", String.class);
+        return get("definition", String.class);
     }
 
     public void setDefinition(String definition) {
-        this.setAttribute("definition", definition);
+        this.set("definition", definition);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class View extends Relation {
 
     @Override
     public int hashCode() {
-        return getName().toUpperCase().hashCode();
+        return getSimpleName().toUpperCase().hashCode();
     }
 
     @Override
@@ -54,12 +53,6 @@ public class View extends Relation {
         viewStr += ")";
         return viewStr;
     }
-
-    @Override
-    public View setName(String name) {
-        return (View) super.setName(name);
-    }
-
 
     public boolean getContainsFullDefinition() {
         return this.containsFullDefinition;

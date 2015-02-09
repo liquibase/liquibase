@@ -43,10 +43,7 @@ public class QueryJdbcMetaDataLogic extends AbstractActionLogic implements Actio
     protected boolean supportsScope(Scope scope) {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
-        return super.supportsScope(scope)
-                && database instanceof AbstractJdbcDatabase
-                && database.getConnection() instanceof JdbcConnection
-                && ((JdbcConnection) database.getConnection()).getUnderlyingConnection() != null;
+        return super.supportsScope(scope) && database instanceof AbstractJdbcDatabase;
     }
 
     @Override

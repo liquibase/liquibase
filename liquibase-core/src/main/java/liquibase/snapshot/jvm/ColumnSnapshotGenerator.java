@@ -37,7 +37,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), example.getSimpleName());
 
             if (columnMetadataRs.size() > 0) {
                 CachedRow data = columnMetadataRs.get(0);
@@ -85,7 +85,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 Schema schema;
 
                 schema = relation.getSchema();
-                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
+                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), null);
 
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column exampleColumn = new Column().setRelation(relation).setName(StringUtils.trimToNull(row.getString("COLUMN_NAME")));

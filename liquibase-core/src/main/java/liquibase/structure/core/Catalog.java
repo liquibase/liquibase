@@ -2,27 +2,28 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 
 import java.util.*;
 
 public class Catalog extends AbstractDatabaseObject {
 
     public Catalog() {
-        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        set("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Catalog(String name) {
         this();
-        setAttribute("name", name);
+        set("name", name);
     }
 
     @Override
     public String toString() {
-        String name = getName();
+        ObjectName name = getName();
         if (name == null) {
             return "DEFAULT";
         }
-        return name;
+        return name.getName();
     }
 
     @Override
@@ -35,28 +36,17 @@ public class Catalog extends AbstractDatabaseObject {
         return null;
     }
 
-    @Override
-    public String getName() {
-        return getAttribute("name", String.class);
-    }
-
-    @Override
-    public Catalog setName(String name) {
-        setAttribute("name", name);
-        return this;
-    }
-
     public boolean isDefault() {
-        return getAttribute("default", false);
+        return get("default", false);
     }
 
     public Catalog setDefault(Boolean isDefault) {
-        setAttribute("default", isDefault);
+        set("default", isDefault);
         return this;
     }
 
     protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {
-        return getAttribute("objects", Map.class);
+        return get("objects", Map.class);
     }
 
     public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {

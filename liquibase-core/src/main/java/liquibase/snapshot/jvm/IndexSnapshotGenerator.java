@@ -146,7 +146,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), null);
+                rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getSimpleName(), null);
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
                 for (CachedRow row : rs) {
                     String indexName = row.getString("INDEX_NAME");
@@ -198,7 +198,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         String tableName = null;
         Schema schema = null;
         if (exampleTable != null) {
-            tableName = exampleTable.getName();
+            tableName = exampleTable.getSimpleName();
             schema = exampleTable.getSchema();
         }
 
@@ -211,7 +211,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             ((Index) example).getColumns().set(i, ((Index) example).getColumns().get(i));
         }
 
-        String exampleName = example.getName();
+        String exampleName = example.getSimpleName();
         if (exampleName != null) {
             exampleName = database.correctObjectName(exampleName, Index.class);
         }
@@ -288,7 +288,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 Index returnIndex = foundIndexes.get(indexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
-                    returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    returnIndex.setTable((Table) new Table(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
 

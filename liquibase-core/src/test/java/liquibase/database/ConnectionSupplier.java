@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
 import testmd.logic.SetupResult;
 
 import java.io.File;
@@ -48,11 +49,11 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getPrimaryCatalog() {
-        return "lbcat";
+        return "LBCAT";
     }
 
     public String getPrimarySchema() {
-        return "lbschema";
+        return "LBSCHEMA";
     }
 
     public String getDatabaseUsername() {
@@ -72,11 +73,11 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getAlternateCatalog() {
-        return "lbcat2";
+        return "LBCAT2";
     }
 
     public String getAlternateSchema() {
-        return "lbschema2";
+        return "LBSCHEMA2";
     }
 
     public String getAlternateTablespace() {
@@ -85,7 +86,9 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     public String getAdminUsername() {
         return "lbadmin";
-    };
+    }
+
+    ;
 
     public String getAdminPassword() {
         return "lbadmin";
@@ -135,10 +138,9 @@ public abstract class ConnectionSupplier implements Cloneable {
         if (split.length == 1) {
             return split[0];
         } else {
-            return split[0]+"."+split[1];
+            return split[0] + "." + split[1];
         }
     }
-
 
 
     public void setVersion(String version) {
@@ -147,7 +149,7 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     @Override
     public String toString() {
-        return getDatabaseShortName()+"[config:"+getConfigurationName()+"]";
+        return getDatabaseShortName() + "[config:" + getConfigurationName() + "]";
     }
 
     public String getDescription() {
@@ -156,18 +158,18 @@ public abstract class ConnectionSupplier implements Cloneable {
             version = "LATEST";
         }
 
-        return "JDBC Url: "+ getJdbcUrl()+"\n"+
-                "Version: "+ version +"\n"+
-                "Standard User: "+ getDatabaseUsername()+"\n"+
-                "         Password: "+ getDatabasePassword()+"\n"+
-                "Primary Catalog: "+ getPrimaryCatalog()+"\n"+
-                "Primary Schema: "+ getPrimarySchema()+" (if applicable)\n"+
-                "\n"+
-                "Alternate User: "+ getAlternateUsername()+"\n"+
-                "          Password: "+ getAlternateUserPassword()+"\n"+
-                "Alternate Catalog: "+ getAlternateCatalog()+"\n"+
-                "Alternate Schema: "+ getAlternateSchema()+" (if applicable)\n"+
-                "Alternate Tablespace: "+ getAlternateTablespace()+"\n";
+        return "JDBC Url: " + getJdbcUrl() + "\n" +
+                "Version: " + version + "\n" +
+                "Standard User: " + getDatabaseUsername() + "\n" +
+                "         Password: " + getDatabasePassword() + "\n" +
+                "Primary Catalog: " + getPrimaryCatalog() + "\n" +
+                "Primary Schema: " + getPrimarySchema() + " (if applicable)\n" +
+                "\n" +
+                "Alternate User: " + getAlternateUsername() + "\n" +
+                "          Password: " + getAlternateUserPassword() + "\n" +
+                "Alternate Catalog: " + getAlternateCatalog() + "\n" +
+                "Alternate Schema: " + getAlternateSchema() + " (if applicable)\n" +
+                "Alternate Tablespace: " + getAlternateTablespace() + "\n";
     }
 
     public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
@@ -223,7 +225,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         DatabaseConnection databaseConnection = getConnection();
         Database db = scope.get(Scope.Attr.database, Database.class);
         if (!(db instanceof UnsupportedDatabase) && !db.isCorrectDatabaseImplementation(databaseConnection)) {
-            throw new DatabaseException("Incorrect db '"+db.getShortName()+"' for connection "+databaseConnection.getURL());
+            throw new DatabaseException("Incorrect db '" + db.getShortName() + "' for connection " + databaseConnection.getURL());
         }
         db.setConnection(databaseConnection);
 
@@ -238,11 +240,19 @@ public abstract class ConnectionSupplier implements Cloneable {
         return db;
     }
 
-    public List<ObjectName> getObjectNames(Class<? extends DatabaseObject> type, boolean includePartials) {
+    public List<ObjectName> getReferenceObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
+        return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
+    }
+
+    public List<ObjectName> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
+        return getObjectNames(type, getDatabase().getMaxSnapshotContainerDepth(), includePartials, includeNulls);
+    }
+
+    public List<ObjectName> getObjectNames(Class<? extends DatabaseObject> type, int maxDepth, boolean includePartials, boolean includeNulls) {
         List<ObjectName> returnList = new ArrayList<>();
 
         for (String simpleName : getSimpleObjectNames(type)) {
-            for (ObjectName container : getContainers(includePartials)) {
+            for (ObjectName container : getContainers(maxDepth, includePartials, includeNulls)) {
                 returnList.add(new ObjectName(simpleName, container));
             }
         }
@@ -251,38 +261,102 @@ public abstract class ConnectionSupplier implements Cloneable {
         return returnList;
     }
 
-    protected List<ObjectName> getContainers(boolean includeParials) {
-        List<ObjectName> containers = new ArrayList<>();
-
-        int maxDepth = getDatabase().getMaxContainerDepth();
-
-        containers.add(new ObjectName());
+    public List<ObjectName> getAllContainers() {
+        int maxDepth = getDatabase().getMaxSnapshotContainerDepth();
 
         if (maxDepth == 0) {
-            return containers;
+            return Arrays.asList();
         } else if (maxDepth == 1) {
-            containers.add(new ObjectName(getPrimaryCatalog()));
-            containers.add(new ObjectName(getAlternateCatalog()));
+            return Arrays.asList(new ObjectName(getPrimaryCatalog()), new ObjectName(getAlternateCatalog()));
         } else {
-            containers.add(new ObjectName(getPrimaryCatalog(), getPrimarySchema()));
-            containers.add(new ObjectName(getPrimaryCatalog(), getAlternateSchema()));
-            containers.add(new ObjectName(getAlternateCatalog(), getPrimarySchema()));
-            containers.add(new ObjectName(getAlternateCatalog(), getAlternateSchema()));
+            return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()),
+                    new ObjectName(getPrimaryCatalog(), getAlternateSchema()),
+                    new ObjectName(getAlternateCatalog(), getPrimarySchema()),
+                    new ObjectName(getAlternateCatalog(), getAlternateSchema()));
+        }
+    }
+
+
+    protected List<ObjectName> getContainers(int maxDepth, boolean includePartials, boolean includeNulls) {
+        LinkedHashSet<ObjectName> returnList = new LinkedHashSet<>();
+        for (ObjectName container : getAllContainers()) {
+            List<ObjectName> expandedList = new ArrayList<>();
+
+            List<String> name = container.getNameList();
+            name = name.subList(name.size() - maxDepth, name.size());
+            ObjectName shortened = new ObjectName(name.toArray(new String[name.size()]));
+            expandedList.add(shortened);
+
+            if (includePartials) {
+                expandedList.addAll(createPartials(expandedList));
+            }
+
+            if (includeNulls) {
+                expandedList.addAll(createNulls(expandedList));
+            }
+
+            returnList.addAll(expandedList);
         }
 
-        if (includeParials && maxDepth > 1) {
-            containers.add(new ObjectName(getPrimaryCatalog()));
-            containers.add(new ObjectName(getAlternateCatalog()));
+        return new ArrayList<>(returnList);
+    }
+
+    protected List<ObjectName> createPartials(List<ObjectName> originalList) {
+        List<ObjectName> returnList = new ArrayList<>();
+
+        for (ObjectName name : originalList) {
+            List<String> nameList = name.getNameList();
+            for (int i = nameList.size() - 1; i > 0; i--) {
+                ObjectName shortened = new ObjectName(nameList.subList(i, nameList.size()).toArray(new String[nameList.size() - i]));
+                returnList.add(shortened);
+
+//                if (shortened.getNameList().size() < maxDepth) {
+//                    ObjectName nullPadded = new ObjectName(name.subList(i, name.size()).toArray(new String[name.size() - i]));
+//                    ObjectName nullContainer = new ObjectName();
+//                    nullPadded.set(ObjectName.Attr.container, nullContainer);
+//
+//                    while (nullPadded.getNameList().size() < maxDepth) {
+//                        nullContainer.set(ObjectName.Attr.container, new ObjectName());
+//                        nullContainer = nullContainer.getContainer();
+//                    }
+//                    expandedList.add(nullPadded);
+//                }
+//
+//                expandedList.add(new ObjectName(name.subList(i, name.size()).toArray(new String[name.size() - i])));
+            }
         }
 
-        return containers;
+        return returnList;
+    }
+
+    protected List<ObjectName> createNulls(List<ObjectName> originalList) {
+        List<ObjectName> returnList = new ArrayList<>();
+
+        for (ObjectName name : originalList) {
+            List<String> nameList = name.getNameList();
+            Set<Integer> indexes = new HashSet<>();
+            for (int i=0; i<nameList.size(); i++) {
+                indexes.add(i);
+            }
+
+            for (Collection<Integer> toNull : CollectionUtil.powerSet(indexes)) {
+                List<String> modifiedNameList = new ArrayList<>(nameList);
+                for (int val : toNull) {
+                    modifiedNameList.set(val, null);
+                }
+
+                returnList.add(new ObjectName(modifiedNameList.toArray(new String[modifiedNameList.size()])));
+            }
+        }
+
+        return returnList;
     }
 
     public List<String> getSimpleObjectNames(Class<? extends DatabaseObject> type) {
         List<String> returnList = new ArrayList<>();
-        returnList.add("test_"+type.getSimpleName().toLowerCase());
-        returnList.add("TEST_"+type.getSimpleName().toUpperCase());
-        returnList.add("Test"+type.getSimpleName());
+        returnList.add("test_" + type.getSimpleName().toLowerCase());
+        returnList.add("TEST_" + type.getSimpleName().toUpperCase());
+        returnList.add("Test" + type.getSimpleName());
 
         return returnList;
     }

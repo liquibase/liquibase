@@ -302,7 +302,7 @@ public class ChangeParameterMetaData {
      * For example, in an addColumn Change, the "name" parameter would return "column.name" because if you know of an existing Column object, the "name" parameter needs to be set to the column's name.
      * In the addColumn's "tableName" parameter, this method would return "column.table.name".
      * <p></p>
-     * The values of the chain correspond to the {@link liquibase.structure.DatabaseObject#getObjectTypeName()} and {@link liquibase.structure.DatabaseObject#getAttributes()}
+     * The values of the chain correspond to the {@link liquibase.structure.DatabaseObject#getObjectTypeName()} and {@link liquibase.structure.DatabaseObject#getAttributeNames()}
      * <p></p>
      * This method is used by integrations that want to generate Change instances or configurations pre-filled with data required to apply to an existing database object.
      */

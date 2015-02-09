@@ -10,7 +10,9 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -44,17 +46,22 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
         String tableName = null;
 
         if (Catalog.class.isAssignableFrom(relatedTo.getClass())) {
-            catalogName = relatedTo.getName();
+            catalogName = relatedTo.getSimpleName();
         } else if (Schema.class.isAssignableFrom(relatedTo.getClass())) {
             catalogName = ((Schema) relatedTo).getCatalogName();
-            schemaName = relatedTo.getName();
+            schemaName = relatedTo.getSimpleName();
         } else if (Table.class.isAssignableFrom(relatedTo.getClass())) {
             Table table = (Table) relatedTo;
-            if (table.getSchema() != null) {
-                catalogName = table.getSchema().getCatalogName();
-                schemaName = table.getSchema().getName();
+            ObjectName name = table.get(Relation.Attr.name, ObjectName.class);
+            if (name != null) {
+                tableName = table.getSimpleName();
+                if (name.getContainer() != null) {
+                    schemaName = name.getContainer().getName();
+                    if (name.getContainer().getContainer() != null) {
+                        catalogName = name.getContainer().getContainer().getName();
+                    }
+                }
             }
-            tableName = table.getName();
         } else {
             throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass());
         }
@@ -80,13 +87,13 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
         if ("Y".equals(row.get("TEMPORARY", String.class))) {
-            table.setAttribute("temporary", "GLOBAL");
+            table.set("temporary", "GLOBAL");
 
             String duration = row.get("DURATION", String.class);
             if (duration != null && duration.equals("SYS$TRANSACTION")) {
-                table.setAttribute("duration", "ON COMMIT DELETE ROWS");
+                table.set("duration", "ON COMMIT DELETE ROWS");
             } else if (duration != null && duration.equals("SYS$SESSION")) {
-                table.setAttribute("duration", "ON COMMIT PRESERVE ROWS");
+                table.set("duration", "ON COMMIT PRESERVE ROWS");
             }
         }
 

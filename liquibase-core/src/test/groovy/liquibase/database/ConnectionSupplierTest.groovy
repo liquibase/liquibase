@@ -1,10 +1,10 @@
 package liquibase.database
 
 import liquibase.database.core.UnsupportedDatabaseSupplier
-import org.hamcrest.Matchers
+import liquibase.sdk.database.MockDatabase
+import liquibase.structure.core.Table
 import spock.lang.Specification
-
-import java.lang.reflect.Array
+import spock.lang.Unroll
 
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
@@ -12,27 +12,72 @@ import static spock.util.matcher.HamcrestSupport.that
 
 class ConnectionSupplierTest extends Specification {
 
+    @Unroll("#featureName (#depth, #includePartials, #includeNulls)")
     def "getContainers"() {
+        when:
+        def supplier = new UnsupportedDatabaseSupplier() {
+            @Override
+            Database getDatabase() {
+                return new MockDatabase().setMaxReferenceContainerDepth(1);
+            }
+        }
+
+        then:
+        that supplier.getContainers(depth, includePartials, includeNulls)*.toString(), containsInAnyOrder(expected.toArray())
+
+        where:
+        depth | includePartials | includeNulls | expected
+        1     | false            | false        | ["lbschema", "lbschema2"]
+        2     | false            | false        | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2"]
+        1     | true            | false        | ["lbschema", "lbschema2"]
+        2     | true            | false         | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2", "lbschema", "lbschema2"]
+        1     | true            | true         | ["lbschema", "lbschema2", "#DEFAULT"]
+        2     | true            | true         | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2", "lbschema", "lbschema2", "lbcat.#DEFAULT", "lbcat2.#DEFAULT", "#DEFAULT.lbschema", "#DEFAULT.lbschema2", "#DEFAULT.#DEFAULT", "#DEFAULT"]
+    }
+
+    def "getReferenceContainers: depth 2"() {
+        expect:
+        def supplier = new UnsupportedDatabaseSupplier() {
+            @Override
+            Database getDatabase() {
+                return new MockDatabase().setMaxReferenceContainerDepth(2);
+            }
+        }
+
+        that supplier.getReferenceContainers(true)*.toString(), containsInAnyOrder([
+                "lbschema",
+                "lbschema2",
+                "#DEFAULT",
+                "lbcat.lbschema",
+                "lbcat2.lbschema",
+                "lbcat.lbschema2",
+                "lbcat2.lbschema2",
+                "#DEFAULT.lbschema",
+                "#DEFAULT.lbschema2",
+                "#DEFAULT.#DEFAULT",
+        ].toArray())
+
+        that supplier.getReferenceContainers(false)*.toString(), containsInAnyOrder([
+                "lbcat.lbschema",
+                "lbcat.lbschema2",
+                "lbcat2.lbschema",
+                "lbcat2.lbschema2",
+        ].toArray())
+    }
+
+    def "getObjectNames"() {
         expect:
         def supplier = new UnsupportedDatabaseSupplier()
 
-        that supplier.getContainers(true)*.toString(), containsInAnyOrder([
-                "lbcat",
-                "lbcat2",
-                "#DEFAULT",
-                "lbschema.lbcat",
-                "lbschema.lbcat2",
-                "lbschema2.lbcat",
-                "lbschema2.lbcat2",
-                "#DEFAULT.lbcat2",
-                "#DEFAULT.lbcat",
-        ].toArray())
-
-        that supplier.getContainers(false)*.toString(), containsInAnyOrder([
-                "lbschema.lbcat",
-                "lbschema.lbcat2",
-                "lbschema2.lbcat",
-                "lbschema2.lbcat2",
-        ].toArray())
+        that supplier.getObjectNames(Table.class, true)*.toString(), containsInAnyOrder([
+                "lbschema.test_table",
+                "#DEFAULT.test_table",
+                "lbschema2.test_table",
+                "lbschema.TEST_TABLE",
+                "#DEFAULT.TEST_TABLE",
+                "lbschema2.TEST_TABLE",
+                "lbschema.TestTable",
+                "#DEFAULT.TestTable",
+                "lbschema2.TestTable"].toArray())
     }
 }

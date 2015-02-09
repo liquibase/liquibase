@@ -53,8 +53,8 @@ public class ObjectDifferences {
             return;
         }
 
-        Object referenceValue = referenceObject.getAttribute(attribute, Object.class);
-        Object compareValue = compareToObject.getAttribute(attribute, Object.class);
+        Object referenceValue = referenceObject.get(attribute, Object.class);
+        Object compareValue = compareToObject.get(attribute, Object.class);
 
         boolean different;
         if (referenceValue == null && compareValue == null) {
@@ -173,14 +173,14 @@ public class ObjectDifferences {
 
             String object1Name;
             if (referenceValue instanceof DatabaseObject) {
-                object1Name = accordingTo.correctObjectName(((DatabaseObject) referenceValue).getAttribute("name", String.class), type);
+                object1Name = accordingTo.correctObjectName(((DatabaseObject) referenceValue).get("name", String.class), type);
             } else {
                 object1Name = referenceValue.toString();
             }
 
             String object2Name;
             if (compareToValue instanceof DatabaseObject) {
-                object2Name = accordingTo.correctObjectName(((DatabaseObject) compareToValue).getAttribute("name", String.class), type);
+                object2Name = accordingTo.correctObjectName(((DatabaseObject) compareToValue).get("name", String.class), type);
             } else {
                 object2Name = compareToValue.toString();
             }

@@ -61,7 +61,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * It will attempt to set as much as possible based on the information in the snapshot.
      */
     public ColumnConfig(Column columnSnapshot) {
-        setName(columnSnapshot.getName());
+        setName(columnSnapshot.getSimpleName());
         setComputed(columnSnapshot.getComputed());
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
@@ -93,7 +93,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
                 constraints.setPrimaryKey(true);
-                constraints.setPrimaryKeyName(primaryKey.getName());
+                constraints.setPrimaryKeyName(primaryKey.getSimpleName());
                 constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
                 nonDefaultConstraints = true;
             }
@@ -103,7 +103,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if (constraint.getColumnNames().contains(getName())) {
                         constraints.setUnique(true);
-                        constraints.setUniqueConstraintName(constraint.getName());
+                        constraints.setUniqueConstraintName(constraint.getSimpleName());
                         nonDefaultConstraints = true;
                     }
                 }
@@ -113,7 +113,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             if (fks != null) {
                 for (ForeignKey fk : fks) {
                     if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
-                        constraints.setForeignKeyName(fk.getName());
+                        constraints.setForeignKeyName(fk.getSimpleName());
                         constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns().get(0).getName() + ")");
                         nonDefaultConstraints = true;
                     }

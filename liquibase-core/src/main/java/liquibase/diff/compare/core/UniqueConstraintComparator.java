@@ -29,7 +29,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         List<String> hashes = new ArrayList<String>();
         if (databaseObject.getName() != null) {
-            hashes.add(databaseObject.getName().toLowerCase());
+            hashes.add(databaseObject.getSimpleName().toLowerCase());
         }
 
         Table table = ((UniqueConstraint) databaseObject).getTable();

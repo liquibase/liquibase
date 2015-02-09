@@ -66,4 +66,8 @@ public class ObjectBasedQueryResult extends QueryResult {
         return resultSet.get(0);
     }
 
+    @Override
+    public int size() {
+        return resultSet.size();
+    }
 }

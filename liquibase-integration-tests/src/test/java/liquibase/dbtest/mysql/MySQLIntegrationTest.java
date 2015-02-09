@@ -64,7 +64,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
                 ")"));
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, getDatabase(), new SnapshotControl(getDatabase()));
-        Column createdColumn = snapshot.get(new Column().setRelation(new Table().setName("ad").setSchema(new Schema())).setName("created"));
+        Column createdColumn = snapshot.get(new Column("created").setRelation(new Table("ad").setSchema(new Schema())));
 
         Object defaultValue = createdColumn.getDefaultValue();
         assertNotNull(defaultValue);

@@ -11,6 +11,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
@@ -209,8 +210,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return false;
         }
 
+        String name = example.getSimpleName();
         if (example instanceof Schema) {
-            if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
+            if ("SYSTEM".equals(name) || "SYS".equals(name) || "CTXSYS".equals(name)|| "XDB".equals(name)) {
                 return true;
             }
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
@@ -220,27 +222,27 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return true;
         }
         if (example instanceof Catalog) {
-            if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
+            if (("SYSTEM".equals(name) || "SYS".equals(name) || "CTXSYS".equals(name) || "XDB".equals(name))) {
                 return true;
             }
-        } else if (example.getName() != null) {
-            if (example.getName().startsWith("BIN$")) { //oracle deleted table
+        } else if (name != null) {
+            if (name.startsWith("BIN$")) { //oracle deleted table
                 return true;
-            } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
+            } else if (name.startsWith("AQ$")) { //oracle AQ tables
                 return true;
-            } else if (example.getName().startsWith("DR$")) { //oracle index tables
+            } else if (name.startsWith("DR$")) { //oracle index tables
                 return true;
-            } else if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
+            } else if (name.startsWith("SYS_IOT_OVER")) { //oracle system table
                 return true;
-            } else if (example.getName().startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.
+            } else if (name.startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.
                 return true;
-            } else if (example.getName().startsWith("RUPD$_")) { //Created by materialized view log tables using primary keys. Not available for DDL operations.
+            } else if (name.startsWith("RUPD$_")) { //Created by materialized view log tables using primary keys. Not available for DDL operations.
                 return true;
-            } else if (example.getName().startsWith("WM$_")) { //Workspace Manager backup tables.
+            } else if (name.startsWith("WM$_")) { //Workspace Manager backup tables.
                 return true;
-            } else if (example.getName().equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
+            } else if (name.equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
                 return true;
-            } else if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
+            } else if (name.equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
                 return true;
             }
         }
