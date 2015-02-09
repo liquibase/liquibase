@@ -1,4 +1,11 @@
+7e6a094 substring is annoying. endindex is not index of last character, endindex-1 is
+6710edf be more selective about removing zero-terminator on view definition string
+5a46d69 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+fc58e82 DVONE-2422 when creating view definition, trim leading and trailing whitespace
+423ef7b CORE-2209 Oracle snapshot sometimes creates "GENERATED ALWAYS AS (null)"
+97f6780 Merge pull request #344 from Datical/ddb
 185ff39 switch from HashSet to LinkedHashSet so that the object retains ordering.
+0e26a08 Merge pull request #343 from Datical/ddb
 1414818 add a remove method to the Labels class for use in UI
 e19435a Cherry picked test fix from master
 d753a2d Fixed post-merge test failure
