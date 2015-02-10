@@ -256,4 +256,23 @@ class StringClausesTest extends Specification {
         clauses.getSubclause("subclause").toString() == "sub-1 sub-2"
     }
 
+    @Unroll
+    def "cannot add a duplicate key"() {
+        when:
+        testMethod.run()
+
+        then:
+        def e = thrown(IllegalArgumentException)
+        e.message == "Cannot add clause with key 'a' because it is already defined"
+
+        where:
+        testMethod << [
+                {new StringClauses().append("a").append("a")},
+                {new StringClauses().append("a").append("a", new StringClauses())},
+                {new StringClauses().append("a").prepend("a")},
+                {new StringClauses().append("a").prepend("a", new StringClauses())},
+                {new StringClauses().append("a").append("b").insertBefore("b", "a")},
+                {new StringClauses().append("a").append("b").insertAfter("b", "a")},
+        ]
+    }
 }

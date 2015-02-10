@@ -65,6 +65,9 @@ public class StringClauses {
         if (key.equals("") || clause.equals("")) {
             return this;
         }
+        if (clauses.containsKey(key)) {
+            throw new IllegalArgumentException("Cannot add clause with key '"+key+"' because it is already defined");
+        }
         clauses.put(key, clause.trim());
         return this;
     }
@@ -75,6 +78,10 @@ public class StringClauses {
     public StringClauses append(String key, StringClauses subclauses) {
         key = StringUtils.trimToEmpty(key).toLowerCase();
         Validate.notNull(key, "key must be a non-null, non-empty value");
+
+        if (clauses.containsKey(key)) {
+            throw new IllegalArgumentException("Cannot add clause with key '"+key+"' because it is already defined");
+        }
 
         clauses.put(key, subclauses);
         return this;
@@ -142,6 +149,10 @@ public class StringClauses {
         key = StringUtils.trimToEmpty(key).toLowerCase();
         if (key.equals("")) {
             throw new IllegalArgumentException("Cannot specify a null or empty key");
+        }
+
+        if (clauses.containsKey(key)) {
+            throw new IllegalArgumentException("Cannot add clause with key '"+key+"' because it is already defined");
         }
 
         LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
@@ -263,6 +274,10 @@ public class StringClauses {
             throw new IllegalArgumentException("New key cannot be null or empty");
         }
 
+        if (clauses.containsKey(newKey)) {
+            throw new IllegalArgumentException("Cannot add clause with key '" + newKey + "' because it is already defined");
+        }
+
         LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : clauses.entrySet()) {
             if (entry.getKey().equals(existingKey)) {
@@ -312,6 +327,9 @@ public class StringClauses {
         }
         if (newKey.equals("")) {
             throw new IllegalArgumentException("New key cannot be null or empty");
+        }
+        if (clauses.containsKey(newKey)) {
+            throw new IllegalArgumentException("Cannot add clause with key '" + newKey + "' because it is already defined");
         }
 
         LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();

@@ -16,6 +16,7 @@ import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 
 import java.sql.*;
+import java.util.List;
 
 /**
  * Logic to snapshot database column(s). Delegates to {@link QueryJdbcMetaDataAction} getColumns().
@@ -29,7 +30,7 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 
     @Override
     protected Class<? extends DatabaseObject>[] getSupportedRelatedTypes() {
-        return new Class[] {
+        return new Class[]{
                 Column.class,
                 Relation.class,
                 Schema.class,
@@ -62,16 +63,24 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         } else if (relatedTo instanceof Column) {
             columnName = relatedTo.getSimpleName();
 
-            Relation relation = ((Column) relatedTo).getRelation();
-            relationName = relation.getSimpleName();
-
-            Schema schema = relation.getSchema();
-            if (schema != null) {
-                catalogName = schema.getCatalogName();
-                schemaName = schema.getSimpleName();
+            List<String> relationNameList = ((Column) relatedTo).getRelation().getName().getNameList();
+            switch (relationNameList.size()) {
+                case 0:
+                    break; //everything stays null
+                case 1:
+                    relationName = relationNameList.get(0);
+                    break;
+                case 2:
+                    schemaName = relationNameList.get(0);
+                    relationName = relationNameList.get(1);
+                    break;
+                default:
+                    catalogName = relationNameList.get(0);
+                    schemaName = relationNameList.get(1);
+                    relationName = relationNameList.get(2);
             }
         } else {
-            throw Validate.failure("Unexpected type: "+relatedTo.getClass().getName());
+            throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }
 
         return new QueryJdbcMetaDataAction("getColumns", catalogName, schemaName, relationName, columnName);
@@ -105,34 +114,34 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 //                column.setNullable(false);
 //            }
 //        } else {
-            int nullable = row.get("NULLABLE", Integer.class);
-            if (nullable == DatabaseMetaData.columnNoNulls) {
-                column.setNullable(false);
-            } else if (nullable == DatabaseMetaData.columnNullable) {
-                column.setNullable(true);
-            } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
-                column.setNullable(true);
-            }
+        int nullable = row.get("NULLABLE", Integer.class);
+        if (nullable == DatabaseMetaData.columnNoNulls) {
+            column.setNullable(false);
+        } else if (nullable == DatabaseMetaData.columnNullable) {
+            column.setNullable(true);
+        } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
+            LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
+            column.setNullable(true);
+        }
 //        }
 
         if (database.supportsAutoIncrement()) {
 //            if (table instanceof Table) {
-                if (row.get("IS_AUTOINCREMENT", Object.class) != null) {
-                    String isAutoincrement = row.get("IS_AUTOINCREMENT", String.class);
-                    isAutoincrement = StringUtils.trimToNull(isAutoincrement);
-                    if (isAutoincrement == null) {
-                        column.setAutoIncrementInformation(null);
-                    } else if (isAutoincrement.equals("YES")) {
-                        column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                    } else if (isAutoincrement.equals("NO")) {
-                        column.setAutoIncrementInformation(null);
-                    } else if (isAutoincrement.equals("")) {
-                        LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                        column.setAutoIncrementInformation(null);
-                    } else {
-                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement+"'");
-                    }
+            if (row.get("IS_AUTOINCREMENT", Object.class) != null) {
+                String isAutoincrement = row.get("IS_AUTOINCREMENT", String.class);
+                isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                if (isAutoincrement == null) {
+                    column.setAutoIncrementInformation(null);
+                } else if (isAutoincrement.equals("YES")) {
+                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                } else if (isAutoincrement.equals("NO")) {
+                    column.setAutoIncrementInformation(null);
+                } else if (isAutoincrement.equals("")) {
+                    LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                    column.setAutoIncrementInformation(null);
+                } else {
+                    throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
+                }
 //                } else {
 //                    //probably older version of java, need to select from the column to find out if it is auto-increment
 //                    String selectStatement;

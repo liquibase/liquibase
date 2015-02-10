@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -18,8 +19,12 @@ public class Column extends AbstractDatabaseObject {
     public Column() {
     }
 
+    public Column(ObjectName columnName) {
+        super(columnName);
+    }
+
     public Column(String columnName) {
-        setName(columnName);
+        super(columnName);
     }
 
     public Column(Class<? extends Relation> relationType, String catalogName, String schemaName, String tableName, String columnName) {

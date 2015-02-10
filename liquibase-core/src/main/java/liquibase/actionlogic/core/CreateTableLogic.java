@@ -77,10 +77,11 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic {
         }
 
         StringClauses columnsClause = new StringClauses("(", ", ", ")");
+        int i=0;
         for (ColumnDefinition column : columns) {
             StringClauses columnClause = generateColumnSql(column, action, scope, additionalActions);
 
-            columnsClause.append(columnClause.toString());
+            columnsClause.append("column " + i++, columnClause);
         }
 
         createTableClauses.append(Clauses.columnsClause, columnsClause);

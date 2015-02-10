@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
 import liquibase.util.CollectionUtil;
 import testmd.logic.SetupResult;
 
@@ -241,10 +242,16 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public List<ObjectName> getReferenceObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
+        if (Column.class.isAssignableFrom(type)) {
+            return getObjectNames(type, 0, includePartials, includeNulls);
+        }
         return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
     }
 
     public List<ObjectName> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
+        if (Column.class.isAssignableFrom(type)) {
+            return getObjectNames(type, 0, includePartials, includeNulls);
+        }
         return getObjectNames(type, getDatabase().getMaxSnapshotContainerDepth(), includePartials, includeNulls);
     }
 
@@ -252,8 +259,12 @@ public abstract class ConnectionSupplier implements Cloneable {
         List<ObjectName> returnList = new ArrayList<>();
 
         for (String simpleName : getSimpleObjectNames(type)) {
-            for (ObjectName container : getContainers(maxDepth, includePartials, includeNulls)) {
-                returnList.add(new ObjectName(simpleName, container));
+            if (maxDepth == 0) {
+                returnList.add(new ObjectName(simpleName));
+            } else {
+                for (ObjectName container : getContainers(maxDepth, includePartials, includeNulls)) {
+                    returnList.add(new ObjectName(simpleName, container));
+                }
             }
         }
 
@@ -354,9 +365,12 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     public List<String> getSimpleObjectNames(Class<? extends DatabaseObject> type) {
         List<String> returnList = new ArrayList<>();
-        returnList.add("test_" + type.getSimpleName().toLowerCase());
-        returnList.add("TEST_" + type.getSimpleName().toUpperCase());
+        returnList.add("test" + type.getSimpleName().toLowerCase());
+        returnList.add("TEST" + type.getSimpleName().toUpperCase());
         returnList.add("Test" + type.getSimpleName());
+        returnList.add("99problems_" + type.getSimpleName());
+        returnList.add("99PROBLEMS_" + type.getSimpleName());
+        returnList.add("test!@#$%^&*()_+{}[]" + type.getSimpleName());
 
         return returnList;
     }

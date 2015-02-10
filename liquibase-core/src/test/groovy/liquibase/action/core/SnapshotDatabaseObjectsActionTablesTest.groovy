@@ -16,7 +16,7 @@ import spock.lang.Unroll
 import testmd.TestMD
 import testmd.logic.SetupResult
 
-class SnapshotTablesActionTest extends Specification {
+class SnapshotDatabaseObjectsActionTablesTest extends Specification {
 
     def setupDatabase(ConnectionSupplier supplier, Scope scope) {
         Database database = scope.database
@@ -28,7 +28,7 @@ class SnapshotTablesActionTest extends Specification {
             if (!database.canStoreObjectName(tableName.getName(), Table)) {
                 continue;
             }
-            new ActionExecutor().execute(new CreateTableAction(tableName).addColumn (new ColumnDefinition("id", "int")), scope)
+            new ActionExecutor().execute(new CreateTableAction(tableName).addColumn (new ColumnDefinition("ID", "int")), scope)
         }
         throw SetupResult.OK
     }
@@ -83,7 +83,7 @@ class SnapshotTablesActionTest extends Specification {
         [conn, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             return CollectionUtil.permutations([
                     [it],
-                    it.getSnapshotObjectNames(Table.class, false, false)
+                    it.getReferenceObjectNames(Table.class, false, false)
             ])
         }
     }
