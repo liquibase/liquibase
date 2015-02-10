@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.database.ConnectionSupplier;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.test.JUnitResourceAccessor;
@@ -30,5 +31,9 @@ public class JUnitScope extends Scope {
 
     public static Scope getInstance(Database database) {
         return instance.child(Attr.database, database);
+    }
+
+    public static Scope getInstance(ConnectionSupplier supplier) {
+        return instance.child(Attr.database, supplier.getDatabase());
     }
 }

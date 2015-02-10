@@ -2,7 +2,6 @@ package liquibase.action.core
 
 import liquibase.JUnitScope
 import liquibase.Scope
-import liquibase.action.ExecuteSqlAction
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplier
@@ -11,12 +10,10 @@ import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
-import spock.lang.Specification
 import spock.lang.Unroll
-import testmd.TestMD
 import testmd.logic.SetupResult
 
-class SnapshotDatabaseObjectsActionTablesTest extends Specification {
+class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
     def setupDatabase(ConnectionSupplier supplier, Scope scope) {
         Database database = scope.database
@@ -33,46 +30,18 @@ class SnapshotDatabaseObjectsActionTablesTest extends Specification {
         throw SetupResult.OK
     }
 
-    def cleanupDatabase(ConnectionSupplier supplier, scope) {
-        Database database = scope.get(Scope.Attr.database, Database)
-        if (database instanceof UnsupportedDatabase) {
-            return;
-        }
-
-        for (def tableName : supplier.getReferenceObjectNames(Table.class, false, false)) {
-            if (!database.canStoreObjectName(tableName.name, Table)) {
-                continue;
-            }
-            new ActionExecutor().execute(new DropTableAction(tableName), scope)
-        }
-    }
-
-    @Unroll("#featureName against #tableName and #connectionSupplier")
+    @Unroll("#featureName against #tableName on #conn")
     def "can snapshot fully qualified table"() {
         expect:
         def action = new SnapshotDatabaseObjectsAction(Table, new Table(tableName))
-        def database = conn.database;
-        def scope = JUnitScope.getInstance(database)
+        def scope = JUnitScope.getInstance(conn)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        TestMD.test(this.class, "${database.shortName}", database.class).permutation([database: database.class.name, tableName: tableName])
-                .asTable("tableName")
+        testMDPermutation(conn, scope).asTable([tableName:tableName])
                 .addResult("plan", plan.describe())
-                .setup({
-            if (database instanceof UnsupportedDatabase) {
-                throw new SetupResult.CannotVerify("Unsupported Database");
-            }
-
-            if (!scope.database.canStoreObjectName(tableName.name, Table)) {
-                throw new SetupResult.Skip("Case Insensitive Database")
-            }
-
-            conn.connect(scope)
-            setupDatabase(conn, scope)
-        }).cleanup({ cleanupDatabase(conn, scope) })
                 .run({
-            QueryResult result = plan.execute(scope)
+            def result = plan.execute(scope) as QueryResult
 
             assert result.asList(Table).size() == 1
             assert result.asObject(Object) instanceof Table
@@ -88,4 +57,32 @@ class SnapshotDatabaseObjectsActionTablesTest extends Specification {
         }
     }
 
+    @Unroll("#featureName against #tableName on #conn")
+    def "can snapshot all tables in a schema"() {
+        expect:
+        def action = new SnapshotDatabaseObjectsAction(Table, new Table(tableName))
+        def database = conn.database;
+        def scope = JUnitScope.getInstance(database)
+
+        def plan = new ActionExecutor().createPlan(action, scope)
+
+        testMDPermutation(conn, scope)
+                .asTable(tableName: tableName)
+                .addResult("plan", plan.describe())
+                .run({
+            def result = plan.execute(scope) as QueryResult
+
+            assert result.asList(Table).size() == 1
+            assert result.asObject(Object) instanceof Table
+            assert result.asObject(Table).getName() == tableName
+        })
+
+        where:
+        [conn, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            return CollectionUtil.permutations([
+                    [it],
+                    it.getReferenceObjectNames(Table.class, false, true)
+            ])
+        }
+    }
 }
