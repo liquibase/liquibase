@@ -397,7 +397,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database,changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
             try {
                 lockService.releaseLock();
