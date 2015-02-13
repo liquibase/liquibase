@@ -121,7 +121,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty
     public String getProcedureText() {
         return procedureText;
     }
