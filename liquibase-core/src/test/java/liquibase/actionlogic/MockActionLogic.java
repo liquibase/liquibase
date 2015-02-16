@@ -42,4 +42,14 @@ public class MockActionLogic extends AbstractActionLogic {
     public String toString() {
         return "Mock action logic '"+name+"'";
     }
+
+    @Override
+    public int getPriority(Action action, Scope scope) {
+        int parentPriority = super.getPriority(action, scope);
+        if (parentPriority < 0) {
+            return parentPriority;
+        } else {
+            return priority;
+        }
+    }
 }

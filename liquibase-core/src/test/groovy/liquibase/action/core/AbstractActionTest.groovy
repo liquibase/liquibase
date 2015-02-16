@@ -1,10 +1,14 @@
 package liquibase.action.core
 
 import liquibase.Scope
+import liquibase.action.Action
 import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplier
 import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
+import liquibase.diff.output.DiffOutputControl
+import liquibase.diff.output.changelog.ActionGeneratorFactory
+import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Table
 import spock.lang.Specification
 import testmd.Permutation
@@ -13,28 +17,46 @@ import testmd.logic.SetupResult
 
 abstract class AbstractActionTest extends Specification {
 
-    def testMDPermutation(ConnectionSupplier conn, Scope scope) {
+    def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
         def database = scope.database
 
-        def permutation = new ActionTestPermutation(this, conn, scope, [database: database.class.name])
+        def permutation = new ActionTestPermutation(this, snapshot, conn, scope, [database: database.class.name])
 
         return TestMD.test(this.class, "${database.shortName}", database.class)
                 .permutation(permutation)
     }
 
-    abstract def setupDatabase(ConnectionSupplier supplier, Scope scope);
+    def setupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {
+        Database database = scope.database
+        if (database instanceof UnsupportedDatabase) {
+            throw SetupResult.OK;
+        }
 
-    def cleanupDatabase(ConnectionSupplier supplier, scope) {
+        def control = new DiffOutputControl()
+        def executor = new ActionExecutor()
+
+        for (def obj : snapshot.get(Table.class)) {
+            for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, scope, scope)) {
+                println executor.createPlan(action, scope).describe()
+                executor.execute(action, scope)
+            }
+        }
+
+        throw SetupResult.OK
+    }
+
+
+
+    def cleanupDatabase(Snapshot snapshot, ConnectionSupplier supplier, scope) {
         Database database = scope.get(Scope.Attr.database, Database)
         if (database instanceof UnsupportedDatabase) {
             return;
         }
 
-        for (def tableName : supplier.getReferenceObjectNames(Table.class, false, false)) {
-            if (!database.canStoreObjectName(tableName.name, Table)) {
-                continue;
-            }
-            new ActionExecutor().execute(new DropTableAction(tableName), scope)
+        for (def obj : snapshot.get(Table.class)) {
+            def action = new DropTableAction(obj.getName())
+            println new ActionExecutor().createPlan(action, scope).describe()
+            new ActionExecutor().execute(action, scope)
         }
     }
 
@@ -43,17 +65,19 @@ abstract class AbstractActionTest extends Specification {
         Database database
         ConnectionSupplier conn
         AbstractActionTest test
+        Snapshot snapshot
 
-        ActionTestPermutation(AbstractActionTest test, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
+        ActionTestPermutation(AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
             super(parameters)
             this.scope = scope
             this.database = scope.database
             this.conn = connectionSupplier
+            this.snapshot = snapshot
             this.test = test;
 
             this.setup({throw SetupResult.OK})
             this.cleanup({
-                test.cleanupDatabase(connectionSupplier, scope)
+                test.cleanupDatabase(snapshot, connectionSupplier, scope)
             })
         }
 
@@ -65,7 +89,7 @@ abstract class AbstractActionTest extends Specification {
                 }
 
                 conn.connect(scope)
-                test.setupDatabase(conn, scope)
+                test.setupDatabase(snapshot, conn, scope)
                 setup.run();
             })
         }

@@ -1,5 +1,7 @@
 package liquibase.structure.core;
 
+import liquibase.structure.ObjectName;
+
 public class View extends Relation {
 
     private boolean containsFullDefinition;
@@ -7,6 +9,9 @@ public class View extends Relation {
     public View() {
     }
 
+    public View(ObjectName name) {
+        super(name);
+    }
     public View(String name) {
         super(name);
     }
@@ -22,22 +27,6 @@ public class View extends Relation {
 
     public void setDefinition(String definition) {
         this.set("definition", definition);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        View that = (View) o;
-
-        return getName().equalsIgnoreCase(that.getName());
-
-    }
-
-    @Override
-    public int hashCode() {
-        return getSimpleName().toUpperCase().hashCode();
     }
 
     @Override

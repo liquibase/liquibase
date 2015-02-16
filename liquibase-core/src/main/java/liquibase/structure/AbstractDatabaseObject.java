@@ -152,7 +152,12 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(toString()).hashCode();
+        return StringUtils.trimToEmpty(getName().toString()).hashCode();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof DatabaseObject
+                && StringUtils.trimToEmpty(getName().toString()).equals(((DatabaseObject) obj).getName().toString());
+    }
 }

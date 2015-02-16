@@ -14,7 +14,7 @@ class ActionExecutorTest extends Specification {
     def setup() {
         scope = new Scope(new JUnitResourceAccessor(), ["liquibase.actionlogic.ActionLogicFactory": new ActionLogicFactory(new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) {
             @Override
-            protected Class<? extends ActionLogic>[] getActionLogicClasses() {
+            protected Class<? extends ActionLogic>[] findAllServiceClasses(Scope scope) {
                 return new Class[0];
             }
 

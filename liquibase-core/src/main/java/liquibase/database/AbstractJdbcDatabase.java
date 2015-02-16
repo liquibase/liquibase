@@ -923,7 +923,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
         String name = this.escapeObjectName(objectName.get(ObjectName.Attr.name, String.class), objectType);
         ObjectName container = objectName.get(ObjectName.Attr.container, ObjectName.class);
-        while(container != null && container.getName() != null) {
+        int depth = 0;
+        while (depth++ < this.getMaxReferenceContainerDepth() && container != null && container.getName() != null) {
             name = this.escapeObjectName(container.get(ObjectName.Attr.name, String.class), Schema.class) + "."+name;
             container = container.get(ObjectName.Attr.container, ObjectName.class);
         }

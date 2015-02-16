@@ -157,14 +157,14 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
+        String name = getName().toShortString();
         if (getComputed() != null && getComputed()) {
-            return getName().toShortString();
+            return name;
         } else {
             if (getRelation() == null) {
-                return getName().toShortString();
+                return name;
             } else {
-                String tableOrViewName = getRelation().getName().toShortString();
-                return tableOrViewName + "." + getName().toShortString();
+                return getRelation().getName().toString()+"." + name;
             }
         }
     }
@@ -197,22 +197,15 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public boolean equals(Object o) {
-        try {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Column column = (Column) o;
-
-            return toString().equalsIgnoreCase(column.toString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (!(o instanceof Column)) {
+            return false;
         }
-
+        return this.toString().equals(o.toString());
     }
 
     @Override
     public int hashCode() {
-        return toString().toUpperCase().hashCode();
+        return toString().hashCode();
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {

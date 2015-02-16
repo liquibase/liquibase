@@ -50,14 +50,4 @@ public class Table extends Relation {
         return get("uniqueConstraints", List.class);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Table that = (Table) o;
-
-        return getName().equalsIgnoreCase(that.getName());
-
-    }
 }

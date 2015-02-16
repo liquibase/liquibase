@@ -13,7 +13,7 @@ public class SnapshotIdService {
         return instance;
     }
 
-    private SnapshotIdService() {
+    protected SnapshotIdService() {
 
     }
 

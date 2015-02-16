@@ -8,6 +8,8 @@ import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
+import liquibase.snapshot.Snapshot
+import liquibase.snapshot.TestSnapshotFactory
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
 import spock.lang.Unroll
@@ -15,22 +17,7 @@ import testmd.logic.SetupResult
 
 class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
-    def setupDatabase(ConnectionSupplier supplier, Scope scope) {
-        Database database = scope.database
-        if (database instanceof UnsupportedDatabase) {
-            throw SetupResult.OK;
-        }
-
-        for (def tableName : supplier.getReferenceObjectNames(Table.class, false, false)) {
-            if (!database.canStoreObjectName(tableName.getName(), Table)) {
-                continue;
-            }
-            new ActionExecutor().execute(new CreateTableAction(tableName).addColumn (new ColumnDefinition("ID", "int")), scope)
-        }
-        throw SetupResult.OK
-    }
-
-    @Unroll("#featureName against #tableName on #conn")
+    @Unroll("#featureName #tableName on #conn")
     def "can snapshot fully qualified table"() {
         expect:
         def action = new SnapshotDatabaseObjectsAction(Table, new Table(tableName))
@@ -38,7 +25,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        testMDPermutation(conn, scope).asTable([tableName:tableName])
+        testMDPermutation(snapshot, conn, scope).asTable([tableName:tableName])
                 .addResult("plan", plan.describe())
                 .run({
             def result = plan.execute(scope) as QueryResult
@@ -49,10 +36,12 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         })
 
         where:
-        [conn, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, snapshot, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
             return CollectionUtil.permutations([
                     [it],
-                    it.getReferenceObjectNames(Table.class, false, false)
+                    [snapshot],
+                    snapshot.get(Table)*.getName()
             ])
         }
     }

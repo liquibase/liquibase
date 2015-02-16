@@ -185,9 +185,17 @@ public class ServiceLocator {
         return uniqueClasses.toArray(new Class[uniqueClasses.size()]);
     }
 
-    public Object newInstance(Class requiredInterface) throws ServiceNotFoundException {
+    public <T> List<T> findInstances(Class<T> requiredInterface) throws ServiceNotFoundException {
+        List<T> returnList = new ArrayList<>();
+        for (Class<? extends T> clazz : findClasses(requiredInterface)) {
+            returnList.add(newInstance(clazz));
+        }
+        return Collections.unmodifiableList(returnList);
+    }
+
+    public <T> T newInstance(Class<T> requiredInterface) throws ServiceNotFoundException {
         try {
-            return findClass(requiredInterface).newInstance();
+            return (T) findClass(requiredInterface).newInstance();
         } catch (Exception e) {
             throw new ServiceNotFoundException(e);
         }

@@ -273,17 +273,28 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public List<ObjectName> getAllContainers() {
-        int maxDepth = getDatabase().getMaxSnapshotContainerDepth();
+        int snapDepth = getDatabase().getMaxSnapshotContainerDepth();
+        int refDepth = getDatabase().getMaxReferenceContainerDepth();
 
-        if (maxDepth == 0) {
+        if (snapDepth == 0) {
             return Arrays.asList();
-        } else if (maxDepth == 1) {
-            return Arrays.asList(new ObjectName(getPrimaryCatalog()), new ObjectName(getAlternateCatalog()));
+        } else if (snapDepth == 1) {
+            if (refDepth == 0) {
+                return Arrays.asList(new ObjectName(getPrimaryCatalog()));
+            } else {
+                return Arrays.asList(new ObjectName(getPrimaryCatalog()), new ObjectName(getAlternateCatalog()));
+            }
         } else {
-            return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()),
-                    new ObjectName(getPrimaryCatalog(), getAlternateSchema()),
-                    new ObjectName(getAlternateCatalog(), getPrimarySchema()),
-                    new ObjectName(getAlternateCatalog(), getAlternateSchema()));
+            if (refDepth == 0) {
+                return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()));
+            } else if (refDepth == 1) {
+                return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()), new ObjectName(getPrimaryCatalog(), getAlternateSchema()));
+            } else {
+                return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()),
+                        new ObjectName(getPrimaryCatalog(), getAlternateSchema()),
+                        new ObjectName(getAlternateCatalog(), getPrimarySchema()),
+                        new ObjectName(getAlternateCatalog(), getAlternateSchema()));
+            }
         }
     }
 

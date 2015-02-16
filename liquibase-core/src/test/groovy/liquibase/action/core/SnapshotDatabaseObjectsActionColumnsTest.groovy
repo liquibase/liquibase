@@ -8,17 +8,16 @@ import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
+import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
-import spock.lang.Specification
 import spock.lang.Unroll
-import testmd.TestMD
 import testmd.logic.SetupResult
 
 class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
-    def setupDatabase(ConnectionSupplier supplier, Scope scope) {
+    def setupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {
         Database database = scope.database
         if (database instanceof UnsupportedDatabase) {
             throw SetupResult.OK;

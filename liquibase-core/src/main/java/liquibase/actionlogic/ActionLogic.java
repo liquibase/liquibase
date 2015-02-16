@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.servicelocator.Service;
 
 /**
  * Implementations of this interface contain the logic to handle an {@link liquibase.action.Action} object.
@@ -11,11 +12,7 @@ import liquibase.exception.ValidationErrors;
  * For convenience, consider extending {@link AbstractActionLogic}.
  * If this ActionLogic interacts with an external system, implement {@link liquibase.actionlogic.ActionLogic.InteractsExternally}
  */
-public interface ActionLogic {
-
-    public static final int PRIORITY_NOT_APPLICABLE = -1;
-    public static final int PRIORITY_DEFAULT = 1;
-    public static final int PRIORITY_SPECIALIZED = 10;
+public interface ActionLogic extends Service{
 
     /**
      * Returns the priority for this ActionLogic implementation for the given Action and Scope.
