@@ -25,6 +25,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
+    private String forIndexName;
+    private String forIndexSchemaName;
+    private String forIndexCatalogName;
+
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -105,6 +109,30 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.disabled = disabled;
     }
 
+    public String getForIndexName() {
+        return forIndexName;
+    }
+
+    public void setForIndexName(String forIndexName) {
+        this.forIndexName = forIndexName;
+    }
+
+    public String getForIndexSchemaName() {
+        return forIndexSchemaName;
+    }
+
+    public void setForIndexSchemaName(String forIndexSchemaName) {
+        this.forIndexSchemaName = forIndexSchemaName;
+    }
+
+    public String getForIndexCatalogName() {
+        return forIndexCatalogName;
+    }
+
+    public void setForIndexCatalogName(String forIndexCatalogName) {
+        this.forIndexCatalogName = forIndexCatalogName;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
@@ -132,6 +160,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
                         .setDisabled(disabled);
+
+        statement.setForIndexName(getForIndexName());
+        statement.setForIndexSchemaName(getForIndexSchemaName());
+        statement.setForIndexCatalogName(getForIndexCatalogName());
 
         return new SqlStatement[] { statement };
     }

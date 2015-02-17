@@ -440,7 +440,10 @@
 			<xsd:attribute name="disabled" type="booleanExp" />
 			<xsd:attribute name="deferrable" type="booleanExp" />
 			<xsd:attribute name="initiallyDeferred" type="booleanExp" />
-		</xsd:complexType>
+            <xsd:attribute name="forIndexCatalogName" type="xsd:string" />
+            <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
+            <xsd:attribute name="forIndexName" type="xsd:string" />
+        </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="dropUniqueConstraint">
