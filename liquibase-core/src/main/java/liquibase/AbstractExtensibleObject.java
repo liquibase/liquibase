@@ -71,13 +71,14 @@ public class AbstractExtensibleObject implements ExtensibleObject {
         if (existingValue == null) {
             existingValue = new ArrayList<>();
             set(attribute, existingValue);
-        } else if (existingValue instanceof Collection) {
-            ((Collection) existingValue).add(value);
-        } else {
+        } else if (!(existingValue instanceof Collection)) {
             List newCollection = new ArrayList();
             newCollection.add(existingValue);
-            set(attribute, existingValue);
+            set(attribute, newCollection);
+            existingValue = newCollection;
         }
+
+        ((Collection) existingValue).add(value);
 
         return this;
     }

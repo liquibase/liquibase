@@ -304,7 +304,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         for (ObjectName container : getAllContainers()) {
             List<ObjectName> expandedList = new ArrayList<>();
 
-            List<String> name = container.getNameList();
+            List<String> name = container.asList();
             name = name.subList(name.size() - maxDepth, name.size());
             ObjectName shortened = new ObjectName(name.toArray(new String[name.size()]));
             expandedList.add(shortened);
@@ -327,17 +327,17 @@ public abstract class ConnectionSupplier implements Cloneable {
         List<ObjectName> returnList = new ArrayList<>();
 
         for (ObjectName name : originalList) {
-            List<String> nameList = name.getNameList();
+            List<String> nameList = name.asList();
             for (int i = nameList.size() - 1; i > 0; i--) {
                 ObjectName shortened = new ObjectName(nameList.subList(i, nameList.size()).toArray(new String[nameList.size() - i]));
                 returnList.add(shortened);
 
-//                if (shortened.getNameList().size() < maxDepth) {
+//                if (shortened.asList().size() < maxDepth) {
 //                    ObjectName nullPadded = new ObjectName(name.subList(i, name.size()).toArray(new String[name.size() - i]));
 //                    ObjectName nullContainer = new ObjectName();
 //                    nullPadded.set(ObjectName.Attr.container, nullContainer);
 //
-//                    while (nullPadded.getNameList().size() < maxDepth) {
+//                    while (nullPadded.asList().size() < maxDepth) {
 //                        nullContainer.set(ObjectName.Attr.container, new ObjectName());
 //                        nullContainer = nullContainer.getContainer();
 //                    }
@@ -355,7 +355,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         List<ObjectName> returnList = new ArrayList<>();
 
         for (ObjectName name : originalList) {
-            List<String> nameList = name.getNameList();
+            List<String> nameList = name.asList();
             Set<Integer> indexes = new HashSet<>();
             for (int i=0; i<nameList.size(); i++) {
                 indexes.add(i);

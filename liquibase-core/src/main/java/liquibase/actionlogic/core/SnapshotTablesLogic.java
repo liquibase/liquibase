@@ -79,12 +79,8 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
-        Table table = new Table().setName(rawTableName);
+        Table table = new Table().setName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName));
         table.setRemarks(remarks);
-
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
-        table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
         if ("Y".equals(row.get("TEMPORARY", String.class))) {
             table.set("temporary", "GLOBAL");

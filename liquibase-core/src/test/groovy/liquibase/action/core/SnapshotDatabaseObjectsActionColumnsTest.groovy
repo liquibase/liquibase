@@ -9,6 +9,7 @@ import liquibase.database.ConnectionSupplierFactory
 import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.snapshot.Snapshot
+import liquibase.snapshot.TestSnapshotFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
@@ -17,53 +18,33 @@ import testmd.logic.SetupResult
 
 class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
-    def setupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {
-        Database database = scope.database
-        if (database instanceof UnsupportedDatabase) {
-            throw SetupResult.OK;
-        }
-
-        for (def tableName : supplier.getReferenceObjectNames(Table.class, false, false)) {
-            if (!database.canStoreObjectName(tableName.getName(), Table)) {
-                continue;
-            }
-            def createTableAction = new CreateTableAction(tableName).addColumn(new ColumnDefinition("ID", "int"))
-
-            for (def columnName : supplier.getReferenceObjectNames(Column.class, false, false)) {
-                createTableAction.addColumn(new ColumnDefinition(columnName, "int"))
-            }
-            new ActionExecutor().execute(createTableAction, scope)
-        }
-        throw SetupResult.OK
-    }
-
-    @Unroll("#featureName against: #tableName . #columnName")
-    def "can snapshot fully qualified columns"() {
+    @Unroll("#featureName: #column on #conn")
+    def "can snapshot fully qualified column"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, new Column(columnName).setRelation(new Table(tableName)))
-        def database = conn.database;
-        def scope = JUnitScope.getInstance(database)
+        def action = new SnapshotDatabaseObjectsAction(Column, new Column(column.getName()).setRelation(new Table(column.getRelation().getName())))
+        def scope = JUnitScope.getInstance(conn)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        testMDPermutation(conn, scope)
-                .asTable([tableName: tableName, columnName: columnName])
+        testMDPermutation(snapshot, conn, scope)
+                .asTable([tableName: column.getRelation().getName(), columnName: column.getName().getName()])
                 .addResult("plan", plan.describe())
                 .run({
             QueryResult result = plan.execute(scope)
 
             assert result.asList(Column).size() == 1
             assert result.asObject(Object) instanceof Column
-            assert result.asObject(Column).getName() == columnName
-            assert result.asObject(Column).getRelation().getName() == tableName
+            assert result.asObject(Column).getName().toShortString() == column.getName().toShortString()
+            assert result.asObject(Column).getRelation().getName() == column.getRelation().getName()
         })
 
         where:
-        [conn, tableName, columnName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, snapshot, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
             return CollectionUtil.permutations([
                     [it],
-                    it.getReferenceObjectNames(Table.class, false, false),
-                    it.getReferenceObjectNames(Column.class, false, false)
+                    [snapshot],
+                    new ArrayList(snapshot.get(Column)),
             ])
         }
     }

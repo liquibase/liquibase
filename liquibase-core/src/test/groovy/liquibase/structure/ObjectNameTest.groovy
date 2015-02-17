@@ -22,7 +22,7 @@ class ObjectNameTest extends Specification {
     @Unroll("#featureName: #expected")
     def "getNameList"() {
         expect:
-        objectName.getNameList() == expected
+        objectName.asList() == expected
 
         where:
         objectName                     | expected

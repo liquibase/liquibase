@@ -63,7 +63,7 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         } else if (relatedTo instanceof Column) {
             columnName = relatedTo.getSimpleName();
 
-            List<String> relationNameList = ((Column) relatedTo).getRelation().getName().getNameList();
+            List<String> relationNameList = ((Column) relatedTo).getRelation().getName().asList();
             switch (relationNameList.size()) {
                 case 0:
                     break; //everything stays null

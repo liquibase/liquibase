@@ -7,6 +7,7 @@ import liquibase.actionlogic.*;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -101,7 +102,11 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
      * Default implementation trims object name to null.
      */
     protected void correctObject(DatabaseObject object) {
-        object.setName(StringUtils.trimToNull(object.getSimpleName()));
+        ObjectName name = object.getName();
+        while (name != null) {
+            name.set(ObjectName.Attr.name, StringUtils.trimToNull(name.get(ObjectName.Attr.name, String.class)));
+            name = name.get(ObjectName.Attr.container, ObjectName.class);
+        }
     }
 
     /**

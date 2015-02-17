@@ -1,7 +1,6 @@
 package liquibase.structure;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.database.core.UnsupportedDatabase;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return get(Attr.name, String.class);
     }
 
-    public List<String> getNameList() {
+    public List<String> asList() {
         List<String> list = new ArrayList<>();
         list.add(this.getName());
         ObjectName container = this.getContainer();
@@ -59,7 +58,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
 
     @Override
     public String toString() {
-        return StringUtils.join(getNameList(), ".", new StringUtils.StringUtilsFormatter<String>() {
+        return StringUtils.join(asList(), ".", new StringUtils.StringUtilsFormatter<String>() {
             @Override
             public String toString(String obj) {
                 return StringUtils.defaultIfEmpty(obj, "#DEFAULT");
