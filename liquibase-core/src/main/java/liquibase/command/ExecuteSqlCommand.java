@@ -19,6 +19,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
     private Database database;
     private String sql;
     private String sqlFile;
+    private String delimiter;
 
     @Override
     public String getName() {
@@ -49,6 +50,10 @@ public class ExecuteSqlCommand extends AbstractCommand {
         this.sqlFile = sqlFile;
     }
 
+    public void setDelimiter(String delimiter) {
+      this.delimiter = delimiter;
+    }
+    
     @Override
     public CommandValidationErrors validate() {
         CommandValidationErrors commandValidationErrors = new CommandValidationErrors(this);
@@ -70,7 +75,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
         }
 
         String out = "";
-        String[] sqlStrings = StringUtils.processMutliLineSQL(sqlText, true, true, ";");
+        String[] sqlStrings = StringUtils.processMutliLineSQL(sqlText, true, true, delimiter);
         for (String sql : sqlStrings) {
             if (sql.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sql));
@@ -100,4 +105,5 @@ public class ExecuteSqlCommand extends AbstractCommand {
         database.commit();
         return out.trim();
     }
+
 }
