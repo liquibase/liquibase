@@ -8,22 +8,21 @@ import java.util.*;
 
 public class Catalog extends AbstractDatabaseObject {
 
+    public static enum Attr {
+        isDefault, objects
+    }
+
     public Catalog() {
-        set("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        set(Attr.objects, new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+    }
+
+    public Catalog(ObjectName name) {
+        super(name);
+        set(Attr.objects, new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Catalog(String name) {
-        this();
-        set("name", name);
-    }
-
-    @Override
-    public String toString() {
-        ObjectName name = getName();
-        if (name == null) {
-            return "DEFAULT";
-        }
-        return name.getName();
+        this(new ObjectName(name));
     }
 
     @Override
@@ -37,11 +36,11 @@ public class Catalog extends AbstractDatabaseObject {
     }
 
     public boolean isDefault() {
-        return get("default", false);
+        return get(Attr.isDefault, false);
     }
 
     public Catalog setDefault(Boolean isDefault) {
-        set("default", isDefault);
+        set(Attr.isDefault, isDefault);
         return this;
     }
 

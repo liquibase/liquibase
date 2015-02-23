@@ -17,6 +17,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 
@@ -130,7 +131,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
         Table table = null;
         try {
-            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(tableName).setSchema(new Schema(new Catalog((ObjectName) null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
             List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();

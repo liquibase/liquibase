@@ -38,7 +38,6 @@ class DropTableActionTest extends Specification {
                     .permutation([connection: conn, catalogName: catalogName, schemaName: schemaName, tableName: tableName])
                     .asTable("catalogName", "schemaName", "tableName")
                     .addResult("plan", plan)
-                    .forceRun()
                     .setup({
                 conn.connect(scope)
                 new ActionExecutor().execute(new CreateTableAction(catalogName, schemaName, tableName).addColumn(new ColumnDefinition("id", "int")), scope)

@@ -10,25 +10,30 @@ import java.util.*;
 
 public class Schema extends AbstractDatabaseObject {
 
+    public static enum Attr {
+        objects
+    }
+
     @Override
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
 
     public Schema() {
-        set("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        set(Attr.objects, new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+    }
+
+    public Schema(ObjectName name) {
+        super(name);
+        set(Attr.objects, new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Schema(String catalog, String schemaName) {
-        this(new Catalog(catalog), schemaName);
+        this(new ObjectName(catalog, schemaName));
     }
     
     public Schema(Catalog catalog, String schemaName) {
-        schemaName = StringUtils.trimToNull(schemaName);
-
-        set("name", schemaName);
-        set("catalog", catalog);
-        set("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        this(catalog.getName().getName(), schemaName);
     }
 
     public boolean isDefault() {
@@ -47,27 +52,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Catalog getCatalog() {
-        return get("catalog", Catalog.class);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Schema schema = (Schema) o;
-
-        if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
-        if (getName() != null ? !getName().equals(schema.getName()) : schema.getName() != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getCatalog() != null ? getCatalog().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
-        return result;
+        return new Catalog(getName().getContainer().getName());
     }
 
     public String getCatalogName() {

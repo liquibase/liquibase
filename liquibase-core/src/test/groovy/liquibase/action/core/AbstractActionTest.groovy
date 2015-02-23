@@ -10,6 +10,9 @@ import liquibase.diff.output.DiffOutputControl
 import liquibase.diff.output.changelog.ActionGeneratorFactory
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Table
+import org.codehaus.groovy.runtime.StackTraceUtils
+import org.spockframework.runtime.model.FeatureInfo
+import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 import testmd.Permutation
 import testmd.TestMD
@@ -20,9 +23,11 @@ abstract class AbstractActionTest extends Specification {
     def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
         def database = scope.database
 
-        def permutation = new ActionTestPermutation(this, snapshot, conn, scope, [database: database.class.name])
+        def testName = specificationContext.iterationInfo.parent.name
 
-        return TestMD.test(this.class, "${database.shortName}", database.class)
+        def permutation = new ActionTestPermutation(testName, this, snapshot, conn, scope, [:])
+
+        return TestMD.test("${this.class.name}_${database.shortName}", testName, database.class)
                 .permutation(permutation)
     }
 
@@ -67,8 +72,8 @@ abstract class AbstractActionTest extends Specification {
         AbstractActionTest test
         Snapshot snapshot
 
-        ActionTestPermutation(AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
-            super(parameters)
+        ActionTestPermutation(String testName, AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
+            super(testName, parameters)
             this.scope = scope
             this.database = scope.database
             this.conn = connectionSupplier

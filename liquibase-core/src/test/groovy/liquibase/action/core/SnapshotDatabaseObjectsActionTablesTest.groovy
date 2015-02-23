@@ -6,6 +6,8 @@ import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.TestSnapshotFactory
 import liquibase.structure.ObjectName
+import liquibase.structure.core.Catalog
+import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
 import spock.lang.Unroll
@@ -23,7 +25,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        testMDPermutation(snapshot, conn, scope).asTable([tableName:tableName])
+        testMDPermutation(snapshot, conn, scope).asTable([tableName: tableName])
                 .addResult("plan", plan.describe())
                 .run({
             def result = plan.execute(scope) as QueryResult
@@ -58,7 +60,9 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
                 .run({
             def result = plan.execute(scope) as QueryResult
 
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({it.getName().asList()[1] == schemaName}).toArray() )
+            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
+                it.getName().asList()[1] == schemaName
+            }).toArray())
         })
 
         where:
@@ -86,7 +90,9 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
                 .run({
             def result = plan.execute(scope) as QueryResult
 
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({it.getName().asList()[2] == catalogName}).toArray() )
+            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
+                it.getName().asList()[2] == catalogName
+            }).toArray())
         })
 
         where:
@@ -99,4 +105,95 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             ])
         }
     }
+
+    @Unroll("#featureName: #tableName on #conn")
+    def "can snapshot tables of the same name regardless of schema/catalog"() {
+        expect:
+        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(tableName, null)))
+        def scope = JUnitScope.getInstance(conn)
+
+        def plan = new ActionExecutor().createPlan(action, scope)
+
+        testMDPermutation(snapshot, conn, scope)
+                .asTable(tableName: tableName)
+                .addResult("plan", plan.describe())
+                .run({
+            def result = plan.execute(scope) as QueryResult
+
+            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
+                it.getName().getName() == tableName
+            }).toArray())
+        })
+
+        where:
+        [conn, snapshot, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
+            return CollectionUtil.permutations([
+                    [it],
+                    [snapshot],
+                    snapshot.get(Table)*.getName()*.getName().unique()
+            ])
+        }
+    }
+
+    @Unroll("#featureName: #schemaName on #conn")
+    def "can snapshot tables related to a schema"() {
+        expect:
+        def action = new SnapshotDatabaseObjectsAction(Table, new Schema(schemaName))
+        def scope = JUnitScope.getInstance(conn)
+
+        def plan = new ActionExecutor().createPlan(action, scope)
+
+        testMDPermutation(snapshot, conn, scope)
+                .asTable(schemaName: schemaName)
+                .addResult("plan", plan.describe())
+                .run({
+            def result = plan.execute(scope) as QueryResult
+
+            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
+                it.getName().getContainer() == schemaName
+            }).toArray())
+        })
+
+        where:
+        [conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
+            return CollectionUtil.permutations([
+                    [it],
+                    [snapshot],
+                    snapshot.get(Table)*.getName()*.getContainer().unique()
+            ])
+        }
+    }
+
+    @Unroll("#featureName: #catalogName on #conn")
+    def "can snapshot tables related to a catalog"() {
+        expect:
+        def action = new SnapshotDatabaseObjectsAction(Table, new Catalog(catalogName))
+        def scope = JUnitScope.getInstance(conn)
+
+        def plan = new ActionExecutor().createPlan(action, scope)
+
+        testMDPermutation(snapshot, conn, scope)
+                .asTable(catalogName: catalogName)
+                .addResult("plan", plan.describe())
+                .run({
+            def result = plan.execute(scope) as QueryResult
+
+            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
+                it.getName().getContainer().getContainer() == catalogName
+            }).toArray())
+        })
+
+        where:
+        [conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
+            return CollectionUtil.permutations([
+                    [it],
+                    [snapshot],
+                    snapshot.get(Table)*.getName()*.getContainer()*.getContainer().unique()
+            ])
+        }
+    }
+
 }
