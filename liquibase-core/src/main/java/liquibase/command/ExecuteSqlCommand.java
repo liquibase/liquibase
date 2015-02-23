@@ -19,7 +19,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
     private Database database;
     private String sql;
     private String sqlFile;
-    private String delimiter;
+    private String delimiter = ";";
 
     @Override
     public String getName() {
