@@ -1,3 +1,11 @@
+a09f200 CORE-2228 New usingIndexName attribute on addPrimaryKey and addUniqueConstraint
+66d1204 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+a118560 DVONE-2415 Liquibase: Oracle: Not capturing default CURRENT_TIMESTAMP value for column of type TIMESTAMP.
+1867799 Improve usage of UpdateVisitor and RollbackVistor - deprecate single-arg constructors - use constructors that take a ChangeExecListener, which can be null, to ensure that if a ChangeExecListener is set, it gets used.
+04a00ac Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+895db3e add changeExecListener to RollbackVisitor constructor so it gets used during rollback
+54b862b CORE-2228 New usingIndexName attribute on addPrimaryKey
+dd8e512 Merge pull request #352 from Datical/ddb
 7e6a094 substring is annoying. endindex is not index of last character, endindex-1 is
 6710edf be more selective about removing zero-terminator on view definition string
 5a46d69 Merge branch 'ddb' of github.com:Datical/liquibase into ddb

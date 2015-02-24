@@ -9,6 +9,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
@@ -30,6 +31,10 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
+
+        if (!(database instanceof OracleDatabase)) {
+            validationErrors.checkDisallowedField("forIndexName", addUniqueConstraintStatement.getForIndexName(), database);
+        }
         return validationErrors;
     }
 
@@ -74,6 +79,10 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             } else {
                 sql += " USING INDEX TABLESPACE " + statement.getTablespace();
             }
+        }
+
+        if (statement.getForIndexName() != null) {
+            sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
 
         return new Sql[] {

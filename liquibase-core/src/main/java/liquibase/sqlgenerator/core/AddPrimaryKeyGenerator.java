@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddPrimaryKeyStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -29,6 +30,10 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             if (!addPrimaryKeyStatement.isClustered()) {
                 validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
             }
+        }
+
+        if (!(database instanceof OracleDatabase)) {
+            validationErrors.checkDisallowedField("forIndexName", addPrimaryKeyStatement.getForIndexName(), database);
         }
 
         return validationErrors;
@@ -59,6 +64,10 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             } else {
                 sql += " USING INDEX TABLESPACE "+statement.getTablespace();
             }
+        }
+
+        if (statement.getForIndexName() != null) {
+            sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
 
         return new Sql[] {
