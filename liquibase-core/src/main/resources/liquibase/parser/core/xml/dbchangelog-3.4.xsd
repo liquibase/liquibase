@@ -857,10 +857,10 @@
 	<!-- Children for createTable -->
 	<xsd:element name="createTable">
 		<xsd:complexType>
-			<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
 				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
-			</xsd:sequence>
+			</xsd:choice>
 			<xsd:attributeGroup ref="tableNameAttribute" />
             <xsd:attribute name="tablespace" type="xsd:string" />            
 			<xsd:attribute name="remarks" type="xsd:string" />
@@ -1133,10 +1133,10 @@
 
 	<xsd:element name="createIndex">
 		<xsd:complexType>
-			<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
 				<xsd:element ref="column" maxOccurs="unbounded" />
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
-            </xsd:sequence>
+            </xsd:choice>
 			<xsd:attributeGroup ref="createIndex" />
 		</xsd:complexType>
 	</xsd:element>
