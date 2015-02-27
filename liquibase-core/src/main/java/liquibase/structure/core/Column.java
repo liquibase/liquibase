@@ -2,6 +2,9 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -290,6 +293,16 @@ public class Column extends AbstractDatabaseObject {
         return Arrays.asList(arrayFromNames(columnNames));
     }
 
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, resourceAccessor);
+        ParsedNode typeNode = parsedNode.getChild(null, "type");
+        if (typeNode != null) {
+            DataType type = new DataType();
+            type.load(typeNode, resourceAccessor);
+            setType(type);
+        }
+    }
 
     public static class AutoIncrementInformation {
         private BigInteger startWith;

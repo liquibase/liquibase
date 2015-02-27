@@ -7,6 +7,7 @@ import liquibase.serializer.LiquibaseSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.core.DataType;
 import liquibase.util.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -80,6 +81,9 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
         for (String field : object.getSerializableFields()) {
             Object value = object.getSerializableFieldValue(field);
             if (value != null) {
+                if (value instanceof DataType) {
+                    value = ((Map) toMap((DataType) value)).values().iterator().next();
+                }
                 if (value instanceof LiquibaseSerializable) {
                     value = toMap((LiquibaseSerializable) value);
                 }

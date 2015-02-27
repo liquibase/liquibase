@@ -21,6 +21,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
+    private String snapshotFile = null;
     private boolean outputLiquibaseSql = false;
     private String changeLogFile = "databasechangelog.csv";
     private Boolean caseSensitive = false;
@@ -31,6 +32,7 @@ public class OfflineConnection implements DatabaseConnection {
     private String catalog;
 
     private final Map<String, String> databaseParams = new HashMap<String, String>();
+    private String connectionUserName;
 
     public OfflineConnection(String url) {
         this.url = url;
@@ -73,6 +75,8 @@ public class OfflineConnection implements DatabaseConnection {
                 this.changeLogFile = paramEntry.getValue();
             } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
                 this.outputLiquibaseSql = Boolean.valueOf(paramEntry.getValue());
+            } else if (paramEntry.getKey().equals("snapshot")) {
+                this.snapshotFile = paramEntry.getValue();
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
             }
@@ -101,6 +105,10 @@ public class OfflineConnection implements DatabaseConnection {
 
     protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
         return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql);
+    }
+
+    public String getSnapshotFile() {
+        return snapshotFile;
     }
 
     @Override
@@ -153,6 +161,22 @@ public class OfflineConnection implements DatabaseConnection {
         return databaseMajorVersion;
     }
 
+    public void setDatabaseMajorVersion(int databaseMajorVersion) {
+        this.databaseMajorVersion = databaseMajorVersion;
+    }
+
+    public void setDatabaseMinorVersion(int databaseMinorVersion) {
+        this.databaseMinorVersion = databaseMinorVersion;
+    }
+
+    public void setProductVersion(String productVersion) {
+        this.productVersion = productVersion;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
     @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         return databaseMinorVersion;
@@ -165,7 +189,11 @@ public class OfflineConnection implements DatabaseConnection {
 
     @Override
     public String getConnectionUserName() {
-        return null;
+        return connectionUserName;
+    }
+
+    public void setConnectionUserName(String connectionUserName) {
+        this.connectionUserName = connectionUserName;
     }
 
     @Override

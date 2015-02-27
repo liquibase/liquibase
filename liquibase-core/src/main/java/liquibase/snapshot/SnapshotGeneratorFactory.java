@@ -5,7 +5,11 @@ import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.SnapshotParser;
+import liquibase.parser.SnapshotParserFactory;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -121,7 +125,19 @@ public class SnapshotGeneratorFactory {
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         if (database.getConnection() instanceof OfflineConnection) {
-            throw new DatabaseException("Cannot snapshot offline database");
+            String snapshotFile = ((OfflineConnection) database.getConnection()).getSnapshotFile();
+            if (snapshotFile == null) {
+                throw new DatabaseException("No snapshotFile parameter specified for offline database");
+            }
+            try {
+                FileSystemResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
+                SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
+                return parser.parse(snapshotFile, database, resourceAccessor);
+            } catch (LiquibaseException e) {
+                throw new DatabaseException(e);
+            }
+
+
         }
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }
