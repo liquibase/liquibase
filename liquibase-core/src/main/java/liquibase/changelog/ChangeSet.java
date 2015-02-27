@@ -604,7 +604,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
-            
+
+            database.setObjectQuotingStrategy(objectQuotingStrategy);
+
             // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
