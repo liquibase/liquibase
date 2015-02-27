@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChangeLogParameters {
-	
+
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
@@ -190,7 +190,7 @@ public class ChangeLogParameters {
             boolean isValid = validContexts == null || validContexts.matches(ChangeLogParameters.this.currentContexts);
 
             if (isValid) {
-                isValid = labels == null || currentLabelExpression.matches(labels);
+                isValid = labels == null || currentLabelExpression == null || currentLabelExpression.matches(labels);
             }
 
             if (isValid) {
@@ -221,20 +221,20 @@ public class ChangeLogParameters {
                 String expressionString = originalText.substring(matcher.start(), matcher.end());
                 String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
-                Object value = enableEscaping && valueTolookup.startsWith(":") 
-                		? null 
+                Object value = enableEscaping && valueTolookup.startsWith(":")
+                		? null
                 		: changeLogParameters.getValue(valueTolookup);
 
                 if (value != null) {
                     text = text.replace(expressionString, value.toString());
                 }
             }
-            
+
             // replace all escaped expressions with its literal
             if (enableEscaping) {
             	text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
             }
-            
+
             return text;
         }
     }

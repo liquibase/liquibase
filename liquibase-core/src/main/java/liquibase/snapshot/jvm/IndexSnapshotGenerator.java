@@ -228,18 +228,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             for (CachedRow row : rs) {
                 String rawIndexName = row.getString("INDEX_NAME");
                 String indexName = cleanNameFromDatabase(rawIndexName, database);
+                String correctedIndexName = database.correctObjectName(indexName, Index.class);
 
                 if (indexName == null) {
                     continue;
                 }
-                if (database.isCaseSensitive()) {
-                    if (exampleName != null && !exampleName.equals(indexName)) {
-                        continue;
-                    }
-                } else {
-                    if (exampleName != null && !exampleName.equalsIgnoreCase(indexName)) {
-                        continue;
-                    }
+                if (exampleName != null && !exampleName.equals(correctedIndexName)) {
+                    continue;
                 }
                 /*
                 * TODO Informix generates indexnames with a leading blank if no name given.
@@ -286,7 +281,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
-                Index returnIndex = foundIndexes.get(indexName);
+                Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
@@ -299,7 +294,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         returnIndex.setClustered(false);
                     }
 
-                    foundIndexes.put(indexName, returnIndex);
+                    foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
                 for (int i = returnIndex.getColumns().size(); i < position; i++) {
@@ -325,7 +320,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
               index = foundIndexes.get(exampleName);
             }
-            
+
             return index;
         } else {
             for (Index index : foundIndexes.values()) {
