@@ -45,8 +45,20 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) changedObject;
 
-        if (index.getTable() != null && index.getTable().getPrimaryKey() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().getPrimaryKey().getBackingIndex(), changedObject, comparisonDatabase)) {
-            return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+        if (index.getTable() != null) {
+            if (index.getTable().getPrimaryKey() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().getPrimaryKey().getBackingIndex(), changedObject, comparisonDatabase)) {
+                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+            }
+
+            List<UniqueConstraint> uniqueConstraints = index.getTable().getUniqueConstraints();
+            if (uniqueConstraints != null) {
+                for (UniqueConstraint constraint : uniqueConstraints) {
+                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, comparisonDatabase)) {
+                        return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
+                    }
+
+                }
+            }
         }
 
         DropIndexChange dropIndexChange = createDropIndexChange();
