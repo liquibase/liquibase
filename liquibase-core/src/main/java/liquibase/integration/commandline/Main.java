@@ -566,6 +566,9 @@ public class Main {
         stream.println("                                            ChangeSet to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
+        stream.println(" --delimiter=<string>                       Used with executeSql command to set");
+        stream.println("                                            the string used to break up files");
+        stream.println("                                            that consist of multiple statements.");
         stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
         stream.println("                                            to be set on the JDBC connection");
         stream.println("                                            to be created");
@@ -949,6 +952,7 @@ public class Main {
                 command.setDatabase(database);
                 command.setSql(getCommandParam("sql", null));
                 command.setSqlFile(getCommandParam("sqlFile", null));
+                command.setDelimiter(getCommandParam("delimiter", ";"));
                 System.out.println(command.execute());
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {

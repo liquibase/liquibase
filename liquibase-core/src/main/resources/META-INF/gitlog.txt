@@ -1,3 +1,19 @@
+e13a8b7 CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
+37079a3 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
+df2ac6d CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
+f6818f3 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
+bea3582 CORE-2272 DiffChangeLog must drop foreign keys before primary keys
+b708f19 CORE-2271 CLONE - DiffChangeLog: Invalid changelog when a unique constraint backing index is changed
+7a6fa1c CORE-2267 Rollback fails for mixed-case objects created with QUOTE_ALL_OBJECTS
+0766491 CORE-2266 DiffChangeLog: Invalid changelog when a primary key backing index is changed
+0058847 Need to support extension elements in any order
+e89ab8f Error parsing complex labels with nested parentheses
+3ec33b1 Merge branch 'CORE-2253_clob_conversion' into ddb
+e104c79 CORE-2253 Handle oracle varchar <-> clob conversions in diffChangeLog
+6dda4b0 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+17b650a CORE-2249 Index and UniqueConstraint equivalence check should take name into account
+871b75e ensure default delimiter is set
+abd1010 add a new command line option to set the delimiter used when using command line 'executeSql' command
 a09f200 CORE-2228 New usingIndexName attribute on addPrimaryKey and addUniqueConstraint
 66d1204 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 a118560 DVONE-2415 Liquibase: Oracle: Not capturing default CURRENT_TIMESTAMP value for column of type TIMESTAMP.

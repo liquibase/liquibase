@@ -50,23 +50,34 @@ public class IndexComparator implements DatabaseObjectComparator {
         int thisIndexSize = thisIndex.getColumns().size();
         int otherIndexSize = otherIndex.getColumns().size();
 
-        if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
-            return false;
-        }
-
-        if (thisIndex.getTable() != null && otherIndex.getTable() != null && thisIndexSize > 0 && otherIndexSize > 0) {
+        if (thisIndex.getTable() != null && otherIndex.getTable() != null) {
             if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
                 return false;
             }
-
-            for (int i=0; i< otherIndexSize; i++) {
-                if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getColumns().get(i), otherIndex.getColumns().get(i), accordingTo)) {
-                    return false;
-                }
+            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+                return false;
             }
 
-            return true;
+            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+                return true;
+            } else {
+                if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+                    return false;
+                }
+
+
+                for (int i = 0; i < otherIndexSize; i++) {
+                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getColumns().get(i), otherIndex.getColumns().get(i), accordingTo)) {
+                        return false;
+                    }
+                }
+                return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
+            }
         } else {
+            if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+                return false;
+            }
+
             if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
                 return false;
             }

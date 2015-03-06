@@ -101,7 +101,7 @@ public class LabelExpression {
         }
 
         while (expression.contains("(")) {
-            Pattern pattern = Pattern.compile("(.*?)\\((.*?)\\)(.*)");
+            Pattern pattern = Pattern.compile("(.*?)\\(([^\\(\\)]*?)\\)(.*)");
             Matcher matcher = pattern.matcher(expression);
             if (!matcher.matches()) {
                 throw new UnexpectedLiquibaseException("Cannot parse label pattern "+expression);

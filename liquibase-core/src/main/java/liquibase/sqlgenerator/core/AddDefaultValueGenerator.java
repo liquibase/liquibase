@@ -50,7 +50,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
                     typeMismatch = true;
                 }
             } else if (dataType instanceof CharType) {
-                if (!(defaultValue instanceof String)) {
+                if (!(defaultValue instanceof String) && !(defaultValue instanceof DatabaseFunction)) {
                     typeMismatch = true;
                 }
             }
