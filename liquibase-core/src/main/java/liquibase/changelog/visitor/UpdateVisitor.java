@@ -42,6 +42,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         log.debug("Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ExecType execType = null;
+        ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
         try {
             execType = changeSet.execute(databaseChangeLog, execListener, this.database);
         } catch (MigrationFailedException e) {
@@ -53,7 +54,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         }
         fireRan(changeSet, databaseChangeLog, database, execType);
         // reset object quoting strategy after running changeset
-        this.database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        this.database.setObjectQuotingStrategy(previousStr);
         this.database.markChangeSetExecStatus(changeSet, execType);
 
         this.database.commit();
