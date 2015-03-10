@@ -6,17 +6,21 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 @DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
@@ -27,11 +31,30 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            if ((getParameters().length > 0 && "16".equals(getParameters()[0])) || "SMALLDATETIME".equalsIgnoreCase(getRawDefinition())) {
-                   return new DatabaseDataType("SMALLDATETIME");
-            } else if (getRawDefinition().toLowerCase().startsWith("datetime2")) {
-                return new DatabaseDataType(getRawDefinition());
+            Object[] parameters = getParameters();
+            if (originalDefinition.equalsIgnoreCase("smalldatetime")
+                    || originalDefinition.equals("[smalldatetime]")) {
+
+                return new DatabaseDataType("[smalldatetime]");
+            } else if (originalDefinition.equalsIgnoreCase("datetime2")
+                    || originalDefinition.equals("[datetime2]")
+                    || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
+                    || originalDefinition.matches("\\[datetime2\\]\\s*\\(.+")) {
+
+                try {
+                    if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
+                        return new DatabaseDataType("[datetime]");
+                    }
+                } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+                if (parameters.length == 0) {
+                    parameters = new Object[] { 7 };
+                } else if (parameters.length > 1) {
+                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+                }
+                return new DatabaseDataType("[datetime2]", parameters);
             }
+            return new DatabaseDataType("[datetime]");
         }
         if (database instanceof InformixDatabase) {
 
@@ -61,13 +84,13 @@ public class DateTimeType extends LiquibaseDataType {
 
           // From changelog to the database
           if (getAdditionalInformation() != null && getAdditionalInformation().length() > 0) {
-            return new DatabaseDataType(getRawDefinition());
+            return new DatabaseDataType(originalDefinition);
           }
 
           return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
         }
         if (database instanceof PostgresDatabase) {
-            String rawDefinition = getRawDefinition().toLowerCase();
+            String rawDefinition = originalDefinition.toLowerCase();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
                 return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
             } else {

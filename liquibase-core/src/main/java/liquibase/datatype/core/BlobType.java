@@ -1,13 +1,18 @@
 package liquibase.datatype.core;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Locale;
+
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
 
     @Override
@@ -23,14 +28,56 @@ public class BlobType extends LiquibaseDataType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            String param = "MAX";
-            if (this.getParameters().length > 0) {
-                param = this.getParameters()[0].toString();
+            Object[] parameters = getParameters();
+            if (originalDefinition.equalsIgnoreCase("varbinary")
+                    || originalDefinition.equals("[varbinary]")
+                    || originalDefinition.matches("(?i)varbinary\\s*\\(.+")
+                    || originalDefinition.matches("\\[varbinary\\]\\s*\\(.+")) {
+
+                if (parameters.length < 1) {
+                    parameters = new Object[] { 1 };
+                } else if (parameters.length > 1) {
+                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+                }
+                return new DatabaseDataType("[varbinary]", parameters);
             }
-            if (param.equals("2147483647")) {
-                param = "MAX";
+            if (originalDefinition.equalsIgnoreCase("binary")
+                    || originalDefinition.equals("[binary]")
+                    || originalDefinition.matches("(?i)binary\\s*\\(.+")
+                    || originalDefinition.matches("\\[binary\\]\\s*\\(.+")) {
+
+                if (parameters.length < 1) {
+                    parameters = new Object[] { 1 };
+                } else if (parameters.length > 1) {
+                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+                }
+                return new DatabaseDataType("[binary]", parameters);
             }
-            return new DatabaseDataType("VARBINARY", param);
+            if (originalDefinition.equalsIgnoreCase("image")
+                    || originalDefinition.equals("[image]")) {
+
+                return new DatabaseDataType("[image]");
+            }
+            boolean max = true;
+            if (parameters.length > 0) {
+                String param1 = parameters[0].toString();
+                max = !param1.matches("\\d+")
+                        || new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0;
+            }
+            if (max) {
+                try {
+                    if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
+                        return new DatabaseDataType("[image]");
+                    }
+                } catch (DatabaseException ignore) {
+                } //assuming it is a newer version
+
+                return new DatabaseDataType("[varbinary]", "MAX");
+            }
+            if (parameters.length > 1) {
+                parameters = Arrays.copyOfRange(parameters, 0, 1);
+            }
+            return new DatabaseDataType("[varbinary]", parameters);
         }
         if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
