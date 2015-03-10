@@ -10,7 +10,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Locale;
 
 public class UnknownType extends LiquibaseDataType {
 
@@ -49,17 +49,15 @@ public class UnknownType extends LiquibaseDataType {
             parameters = new Object[0];
         }
 
-        if (database instanceof MSSQLDatabase && (
-                getName().equalsIgnoreCase("REAL")
-                || getName().equalsIgnoreCase("XML")
-                || getName().equalsIgnoreCase("HIERARCHYID")
-                || getName().equalsIgnoreCase("DATETIMEOFFSET")
-                || getName().equalsIgnoreCase("IMAGE")
-                || getName().equalsIgnoreCase("NTEXT")
-                || getName().equalsIgnoreCase("SYSNAME")
-                || getName().equalsIgnoreCase("SMALLMONEY")
-        )) {
-            parameters = new Object[0];
+        if (database instanceof MSSQLDatabase) {
+            String name = getName();
+            if (name.matches("(?i)[a-z0-9]+")) {
+            	name = ((MSSQLDatabase) database).delimitIdentifier(name.toLowerCase(Locale.ENGLISH));
+            }
+            if (dataTypeMaxParameters < parameters.length) {
+                parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
+            }
+            return new DatabaseDataType(name, parameters);
         }
 
         if (database instanceof OracleDatabase) {

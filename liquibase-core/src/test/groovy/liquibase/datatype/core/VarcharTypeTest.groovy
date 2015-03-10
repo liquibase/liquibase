@@ -33,8 +33,9 @@ class VarcharTypeTest extends Specification {
         [13]         | new HsqlDatabase()     | true              | "VARCHAR2(13)"
         [13]         | new PostgresDatabase() | false             | "VARCHAR(13)"
         [13]         | new OracleDatabase()   | false             | "VARCHAR2(13)"
-        [13]         | new MSSQLDatabase()    | false             | "VARCHAR(13)"
-        [2147483647] | new MSSQLDatabase()    | false             | "VARCHAR(MAX)"
+        []           | new MSSQLDatabase()    | false             | "[varchar](1)"
+        [13]         | new MSSQLDatabase()    | false             | "[varchar](13)"
+        [2147483647] | new MSSQLDatabase()    | false             | "[varchar](MAX)"
         [13]         | new MySQLDatabase()    | false             | "VARCHAR(13)"
     }
 }

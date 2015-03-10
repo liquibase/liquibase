@@ -33,6 +33,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+	protected String quotingEndReplacement = "]]";
+
     @Override
     public String getShortName() {
         return "mssql";
@@ -365,4 +367,64 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return caseSensitive.booleanValue();
         }
     }
+
+    @Override
+    public int getDataTypeMaxParameters(String dataTypeName) {
+        if ("bigint".equalsIgnoreCase(dataTypeName)
+                || "bit".equalsIgnoreCase(dataTypeName)
+                || "date".equalsIgnoreCase(dataTypeName)
+                || "datetime".equalsIgnoreCase(dataTypeName)
+                || "geography".equalsIgnoreCase(dataTypeName)
+                || "geometry".equalsIgnoreCase(dataTypeName)
+                || "hierarchyid".equalsIgnoreCase(dataTypeName)
+                || "image".equalsIgnoreCase(dataTypeName)
+                || "int".equalsIgnoreCase(dataTypeName)
+                || "money".equalsIgnoreCase(dataTypeName)
+                || "ntext".equalsIgnoreCase(dataTypeName)
+                || "real".equalsIgnoreCase(dataTypeName)
+                || "smalldatetime".equalsIgnoreCase(dataTypeName)
+                || "smallint".equalsIgnoreCase(dataTypeName)
+                || "smallmoney".equalsIgnoreCase(dataTypeName)
+                || "text".equalsIgnoreCase(dataTypeName)
+                || "timestamp".equalsIgnoreCase(dataTypeName)
+                || "tinyint".equalsIgnoreCase(dataTypeName)
+                || "rowversion".equalsIgnoreCase(dataTypeName)
+                || "sql_variant".equalsIgnoreCase(dataTypeName)
+                || "uniqueidentifier".equalsIgnoreCase(dataTypeName)) {
+
+            return 0;
+        }
+
+        if ("binary".equalsIgnoreCase(dataTypeName)
+                || "char".equalsIgnoreCase(dataTypeName)
+                || "datetime2".equalsIgnoreCase(dataTypeName)
+                || "datetimeoffset".equalsIgnoreCase(dataTypeName)
+                || "float".equalsIgnoreCase(dataTypeName)
+                || "nchar".equalsIgnoreCase(dataTypeName)
+                || "nvarchar".equalsIgnoreCase(dataTypeName)
+                || "time".equalsIgnoreCase(dataTypeName)
+                || "varbinary".equalsIgnoreCase(dataTypeName)
+                || "varchar".equalsIgnoreCase(dataTypeName)
+                || "xml".equalsIgnoreCase(dataTypeName)) {
+
+            return 1;
+        }
+
+        return 2;
+    }
+
+	/**
+	 *
+	 * @param identifier
+	 * @return
+	 */
+	public String delimitIdentifier(String identifier) {
+		if (identifier == null) {
+			return null;
+		}
+
+		return quotingStartCharacter
+				+ identifier.replace(quotingEndCharacter, quotingEndReplacement)
+				+ quotingEndCharacter;
+	}
 }

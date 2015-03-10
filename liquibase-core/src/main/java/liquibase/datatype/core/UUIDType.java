@@ -21,7 +21,10 @@ public class UUIDType extends LiquibaseDataType {
             // fall back
         }
 
-        if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        if (database instanceof MSSQLDatabase) {
+            return new DatabaseDataType("[uniqueidentifier]");
+        }
+        if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("UNIQUEIDENTIFIER");
         }
         if (database instanceof OracleDatabase) {

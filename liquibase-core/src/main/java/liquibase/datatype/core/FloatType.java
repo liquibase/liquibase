@@ -1,19 +1,39 @@
 package liquibase.datatype.core;
 
+import java.util.Arrays;
+
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="float", aliases = {"java.sql.Types.FLOAT","java.lang.Float"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="float", aliases = {"java.sql.Types.FLOAT", "java.lang.Float", "real", "java.sql.Types.REAL"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class FloatType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        if (database instanceof MSSQLDatabase) {
+            if ("real".equalsIgnoreCase(originalDefinition)
+                    || "[real]".equals(originalDefinition)
+                    || "java.lang.Float".equals(originalDefinition)
+                    || "java.sql.Types.REAL".equals(originalDefinition)) {
+
+                return new DatabaseDataType("[real]");
+            }
+            Object[] parameters = getParameters();
+            if (parameters.length == 0) {
+                parameters = new Object[] { 53 };
+            }
+            else if (parameters.length > 1) {
+                parameters = Arrays.copyOfRange(parameters, 0, 1);
+            }
+            return new DatabaseDataType("[float]", parameters);
+        }
         if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("FLOAT");
         }

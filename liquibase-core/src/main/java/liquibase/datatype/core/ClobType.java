@@ -1,14 +1,18 @@
 package liquibase.datatype.core;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB", "ntext", "java.sql.Types.NCLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
     @Override
@@ -40,7 +44,36 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");
         } else if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("NVARCHAR", "MAX");
+            if (originalDefinition.equalsIgnoreCase("text")
+                    || originalDefinition.equals("[text]")) {
+
+                return new DatabaseDataType("[text]");
+            }
+            if (originalDefinition.equalsIgnoreCase("ntext")
+                    || originalDefinition.equals("[ntext]")) {
+
+                return new DatabaseDataType("[ntext]");
+            }
+            Object[] parameters = getParameters();
+            boolean max = true;
+            if (parameters.length > 0) {
+                String param1 = parameters[0].toString();
+                max = !param1.matches("\\d+")
+                        || new BigInteger(param1).compareTo(BigInteger.valueOf(4000L)) > 0;
+            }
+            if (max) {
+                try {
+                    if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
+                        return new DatabaseDataType("[ntext]");
+                    }
+                } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+                return new DatabaseDataType("[nvarchar]", "MAX");
+            }
+            if (parameters.length > 1) {
+                parameters = Arrays.copyOfRange(parameters, 0, 1);
+            }
+            return new DatabaseDataType("[nvarchar]", parameters);
         } else if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("text")) {
                 return new DatabaseDataType("TEXT");

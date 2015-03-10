@@ -1,15 +1,40 @@
 package liquibase.datatype.core;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
 @DataTypeInfo(name="char", aliases = "java.sql.Types.CHAR", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CharType extends LiquibaseDataType {
+    @Override
+    public DatabaseDataType toDatabaseDataType(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            Object[] parameters = getParameters();
+            if (parameters.length > 0) {
+                String param1 = parameters[0].toString();
+                if (!param1.matches("\\d+")
+                        || new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0) {
+
+                    return new DatabaseDataType("[char]", 8000); 
+                }
+            }
+            if (parameters.length == 0) {
+                parameters = new Object[] { 1 };
+            } else if (parameters.length > 1) {
+                parameters = Arrays.copyOfRange(parameters, 0, 1);
+            }
+            return new DatabaseDataType("[char]", parameters);
+        }
+        return super.toDatabaseDataType(database);
+    }
 
     @Override
     public String objectToSql(Object value, Database database) {
