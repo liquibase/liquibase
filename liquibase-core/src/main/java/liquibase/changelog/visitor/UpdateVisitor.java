@@ -22,6 +22,10 @@ public class UpdateVisitor implements ChangeSetVisitor {
     
     private ChangeExecListener execListener;
 
+    /**
+     * @deprecated - please use the constructor with ChangeExecListener, which can be null.
+     */
+    @Deprecated
     public UpdateVisitor(Database database) {
         this.database = database;
     }

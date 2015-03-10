@@ -9,12 +9,15 @@ import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
+    private final static int FETCH_SIZE = 1000;
     private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
     private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
 
@@ -182,8 +185,10 @@ class ResultSetCache {
             Statement statement = null;
             ResultSet resultSet = null;
             try {
-                statement = ((JdbcConnection) database.getConnection()).createStatement();
+                JdbcConnection connection = (JdbcConnection) database.getConnection();
+                statement = connection.createStatement();
                 resultSet = statement.executeQuery(sql);
+                resultSet.setFetchSize(FETCH_SIZE);
                 return extract(resultSet);
             } finally {
                 JdbcUtils.close(resultSet, statement);
@@ -219,6 +224,7 @@ class ResultSetCache {
         }
 
         protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint) throws SQLException {
+            resultSet.setFetchSize(FETCH_SIZE);
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {
