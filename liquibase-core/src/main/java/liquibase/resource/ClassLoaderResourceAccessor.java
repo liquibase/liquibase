@@ -56,6 +56,10 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         Set<String> returnSet = new HashSet<String>();
 
+        if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:"))) {
+            fileUrls = new Vector<URL>(Arrays.asList(new URL(path))).elements();
+        }
+
         while (fileUrls.hasMoreElements()) {
             URL fileUrl = fileUrls.nextElement();
             if (!fileUrl.toExternalForm().startsWith("file:")) {
@@ -64,7 +68,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                         || fileUrl.toExternalForm().startsWith("zip:")) {
 
                     String file = fileUrl.getFile();
-                    String splitPath = file.split("!")[0];
+                    String[] zipAndFile = file.split("!");
+                    String splitPath = zipAndFile[0];
                     if (splitPath.matches("file:\\/[A-Za-z]:\\/.*")) {
                         splitPath = splitPath.replaceFirst("file:\\/", "");
                     } else {
@@ -81,7 +86,11 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     if (path.startsWith("classpath*:")) {
                         path = path.replaceFirst("classpath\\*:", "");
                     }
-                    URI fileUri = new File(zipFileDir, path).toURI();
+                    File dirInZip = new File(zipFileDir, zipAndFile[1]);
+                    if (!dirInZip.exists()) {
+                        dirInZip = new File(zipFileDir, path);
+                    }
+                    URI fileUri = dirInZip.toURI();
                     fileUrl = fileUri.toURL();
                 }
             }

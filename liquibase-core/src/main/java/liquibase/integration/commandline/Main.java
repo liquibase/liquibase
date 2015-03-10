@@ -12,10 +12,8 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.ValidationFailedException;
+import liquibase.diff.output.StandardObjectChangeFilter;
+import liquibase.exception.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
@@ -300,6 +298,8 @@ public class Main {
                       && !cmdParm.startsWith("--includeTablespace")
                       && !cmdParm.startsWith("--schemas")
                       && !cmdParm.startsWith("--referenceUrl")
+                      && !cmdParm.startsWith("--excludeObjects")
+                      && !cmdParm.startsWith("--includeObjects")
                       && !cmdParm.startsWith("--diffTypes")) {
                       messages.add("unexpected command parameter: "+cmdParm);
                     }
@@ -894,7 +894,19 @@ public class Main {
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
             boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
             boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
+            String excludeObjects = StringUtils.trimToNull(getCommandParam("excludeObjects", null));
+            String includeObjects = StringUtils.trimToNull(getCommandParam("includeObjects", null));
             DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+
+            if (excludeObjects != null && includeObjects != null) {
+                throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
+            }
+            if (excludeObjects != null) {
+                diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, excludeObjects));
+            }
+            if (includeObjects != null) {
+                diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, includeObjects));
+            }
 
             String referenceSchemaNames = getCommandParam("schemas", null);
             CompareControl.SchemaComparison[] finalSchemaComparisons;

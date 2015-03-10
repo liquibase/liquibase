@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
@@ -37,6 +38,12 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 
         if (database instanceof MSSQLDatabase) {
 			if (statement.getConstraintName() == null) {
+				String schemaName = statement.getSchemaName();
+				if (schemaName == null) {
+					schemaName = database.getDefaultSchemaName();
+				}
+				schemaName = StringUtils.trimToNull(schemaName);
+
 				StringBuilder query = new StringBuilder();
 				query.append("DECLARE @pkname nvarchar(255)");
 				query.append("\n");
@@ -47,7 +54,9 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 				query.append(" join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'");
 				query.append(" join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid");
 				query.append(" join syscolumns c ON ik.id = c.id AND ik.colid = c.colid");
+				query.append(" INNER JOIN sysusers su ON o.uid = su.uid");
 				query.append(" where o.name = '").append(statement.getTableName()).append("'");
+				query.append(" and su.name='").append(schemaName).append("'");
 				query.append("\n");
 				query.append("set @sql='alter table ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" drop constraint ' + @pkname");
 				query.append("\n");

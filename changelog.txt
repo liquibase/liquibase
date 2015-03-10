@@ -1,6 +1,21 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.3.2 (2015.01.08)
+- Support for ignoring objects in diffChangeLog and generateChangeLog
+- Bugfixes
+
+- [CORE-875] - Ignore tables for diffs and generateChangelog
+- [CORE-1877] - SQLOutput prints endDelimiter regexes
+- [CORE-2114] - AddAutoIncrement on Postgres does not work when changes are applied on a specific schema
+- [CORE-2141] - handling dependencies and WAR as classpath
+- [CORE-2166] - SpringLiquibase: includeAll within jar causes SetupException
+- [CORE-2172] - dropPrimaryKey without constraint name on sql server doesn't honour schema information
+- [CORE-2174] - Bad exception handling in OracleDatabase.setConnection
+- [CORE-2180] - NPE with bad name
+- [CORE-2182] - ClassLoader leak due to shutdown hooks
+
+
 Changes in version 3.3.1 (2014.12.08)
 - IncludeAll bugfixes
 - Performance improvements

@@ -5,6 +5,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
@@ -15,8 +16,10 @@ import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -50,20 +53,33 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
+        Connection sqlConn = null;
         try {
             Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
             wrappedConn.setAccessible(true);
-            Connection sqlConn = (Connection) wrappedConn.invoke(conn);
-            Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
-            method.setAccessible(true);
-            method.invoke(sqlConn, true);
-
-            reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
+            sqlConn = (Connection) wrappedConn.invoke(conn);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
-            ; //cannot set it. That is OK
+            throw new UnexpectedLiquibaseException(e);
         }
+
+        if (sqlConn != null) {
+            try {
+                Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
+                method.setAccessible(true);
+                method.invoke(sqlConn, true);
+            } catch (Exception e) {
+                LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                ; //cannot set it. That is OK
+            }
+
+            try {
+                reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+            } catch (SQLException e) {
+                LogFactory.getLogger().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                //can not get keywords. Continue on
+            }
+        }
+        reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
         super.setConnection(conn);
     }
 

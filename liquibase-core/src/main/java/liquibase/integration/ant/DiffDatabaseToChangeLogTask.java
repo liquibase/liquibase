@@ -2,8 +2,10 @@ package liquibase.integration.ant;
 
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
@@ -27,6 +29,8 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
     private boolean includeSchema = true;
     private boolean includeCatalog = true;
     private boolean includeTablespace = true;
+    private String includeObjects;
+    private String excludeObjects;
 
     @Override
     protected void executeWithLiquibaseClassloader() throws BuildException {
@@ -70,7 +74,19 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
     }
 
     private DiffOutputControl getDiffOutputControl() {
-        return new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+        DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+
+        if (excludeObjects != null && includeObjects != null) {
+            throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
+        }
+        if (excludeObjects != null) {
+            diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, excludeObjects));
+        }
+        if (includeObjects != null) {
+            diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, includeObjects));
+        }
+
+        return diffOutputControl;
     }
 
     public void addConfiguredJson(ChangeLogOutputFile changeLogOutputFile) {
@@ -115,6 +131,22 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
 
     public void setIncludeTablespace(boolean includeTablespace) {
         this.includeTablespace = includeTablespace;
+    }
+
+    public String getIncludeObjects() {
+        return includeObjects;
+    }
+
+    public void setIncludeObjects(String includeObjects) {
+        this.includeObjects = includeObjects;
+    }
+
+    public String getExcludeObjects() {
+        return excludeObjects;
+    }
+
+    public void setExcludeObjects(String excludeObjects) {
+        this.excludeObjects = excludeObjects;
     }
 
     /**

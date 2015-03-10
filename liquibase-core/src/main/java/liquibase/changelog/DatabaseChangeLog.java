@@ -240,6 +240,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.addChangeSet(createChangeSet(node, resourceAccessor));
         } else if (nodeName.equals("include")) {
             String path = node.getChildValue(null, "file", String.class);
+            if (path == null) {
+                throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
+            }
             path = path.replace('\\', '/');
             try {
                 include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor);
