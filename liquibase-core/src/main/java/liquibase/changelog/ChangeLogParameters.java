@@ -190,7 +190,7 @@ public class ChangeLogParameters {
             boolean isValid = validContexts == null || validContexts.matches(ChangeLogParameters.this.currentContexts);
 
             if (isValid) {
-                isValid = labels == null || currentLabelExpression.matches(labels);
+                isValid = labels == null || currentLabelExpression == null || currentLabelExpression.matches(labels);
             }
 
             if (isValid) {
