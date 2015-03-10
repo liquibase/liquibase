@@ -13,6 +13,11 @@ class VarcharTypeTest extends Specification {
     @Unroll
     def "toDatabaseType"() {
         when:
+        if (database instanceof HsqlDatabase && usingOracleSyntax) {
+            database = Mock(HsqlDatabase) {
+                isUsingOracleSyntax() >> true
+            }
+        }
         def type = new VarcharType()
         for (param in params) {
             type.addParameter(param)
@@ -22,13 +27,14 @@ class VarcharTypeTest extends Specification {
         type.toDatabaseDataType(database).toString() == expected
 
         where:
-        params       | database               | expected
-        [13]         | new DerbyDatabase()    | "VARCHAR(13)"
-        [13]         | new HsqlDatabase()     | "VARCHAR(13)"
-        [13]         | new PostgresDatabase() | "VARCHAR(13)"
-        [13]         | new OracleDatabase()   | "VARCHAR2(13)"
-        [13]         | new MSSQLDatabase()    | "VARCHAR(13)"
-        [2147483647] | new MSSQLDatabase()    | "VARCHAR(MAX)"
-        [13]         | new MySQLDatabase()    | "VARCHAR(13)"
+        params       | database               | usingOracleSyntax | expected
+        [13]         | new DerbyDatabase()    | false             | "VARCHAR(13)"
+        [13]         | new HsqlDatabase()     | false             | "VARCHAR(13)"
+        [13]         | new HsqlDatabase()     | true              | "VARCHAR2(13)"
+        [13]         | new PostgresDatabase() | false             | "VARCHAR(13)"
+        [13]         | new OracleDatabase()   | false             | "VARCHAR2(13)"
+        [13]         | new MSSQLDatabase()    | false             | "VARCHAR(13)"
+        [2147483647] | new MSSQLDatabase()    | false             | "VARCHAR(MAX)"
+        [13]         | new MySQLDatabase()    | false             | "VARCHAR(13)"
     }
 }

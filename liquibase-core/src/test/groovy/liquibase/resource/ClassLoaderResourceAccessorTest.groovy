@@ -12,7 +12,7 @@ class ClassLoaderResourceAccessorTest extends Specification {
         ))
 
         then:
-        accessor.getRootPaths().size() == 3
+        accessor.getRootPaths().size() >= 3
         accessor.getRootPaths().findAll({ it.endsWith("/test-classes/") }).size() == 1
         accessor.getRootPaths().findAll({ it.endsWith("/classes/") }).size() == 1
     }
