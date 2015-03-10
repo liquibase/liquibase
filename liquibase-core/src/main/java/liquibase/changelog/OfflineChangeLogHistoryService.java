@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.change.CheckSum;
+import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -349,12 +350,35 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     @Override
-    public void tag(String tagString) throws DatabaseException {
+    public void tag(final String tagString) throws DatabaseException {
+        RanChangeSet last = null;
+        List<RanChangeSet> ranChangeSets = getRanChangeSets();
+        if (ranChangeSets.isEmpty()) {
+            ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, getDatabase().getObjectQuotingStrategy(), null);
+            appendChangeSet(emptyChangeSet, ExecType.EXECUTED);
+            last = new RanChangeSet(emptyChangeSet);
+        } else {
+            last = ranChangeSets.get(ranChangeSets.size() - 1);
+        }
 
+        ChangeSet lastChangeSet = new ChangeSet(last.getId(), last.getAuthor(), false, false, last.getChangeLog(), null, null, true, null, null);
+        replaceChangeSet(lastChangeSet, new ReplaceChangeSetLogic() {
+            @Override
+            public String[] execute(String[] line) {
+                line[COLUMN_TAG] = tagString;
+                return line;
+            }
+        });
     }
 
     @Override
     public boolean tagExists(String tag) throws DatabaseException {
+        List<RanChangeSet> ranChangeSets = getRanChangeSets();
+        for (RanChangeSet changeset : ranChangeSets) {
+            if (tag.equals(changeset.getTag())) {
+                return true;
+            }
+        }
         return false;
     }
 
