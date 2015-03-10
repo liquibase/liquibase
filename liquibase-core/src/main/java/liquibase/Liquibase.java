@@ -771,6 +771,17 @@ public class Liquibase {
         }
     }
 
+    public boolean tagExists(String tagString) throws LiquibaseException {
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        lockService.waitForLock();
+
+        try {
+            checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
+            return getDatabase().doesTagExist(tagString);
+        } finally {
+            lockService.releaseLock();
+        }
+    }
 
     public void updateTestingRollback(String contexts) throws LiquibaseException {
         updateTestingRollback(new Contexts(contexts), new LabelExpression());
