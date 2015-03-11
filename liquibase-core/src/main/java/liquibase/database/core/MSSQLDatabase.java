@@ -462,4 +462,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
          return schemaName + "." + dataTypeName;
     }
+
+    public String unescapeDataTypeString(String dataTypeString) {
+        int indexOfLeftParen = dataTypeString.indexOf('(');
+        if (indexOfLeftParen < 0) {
+            return unescapeDataTypeName(dataTypeString);
+        }
+
+        return unescapeDataTypeName(dataTypeString.substring(0, indexOfLeftParen))
+                + dataTypeString.substring(indexOfLeftParen);
+    }
 }

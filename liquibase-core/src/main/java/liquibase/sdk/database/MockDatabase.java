@@ -767,4 +767,9 @@ public class MockDatabase implements Database, InternalDatabase {
     public String unescapeDataTypeName(String dataTypeName) {
         return dataTypeName;
     }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        return dataTypeString;
+    }
 }
