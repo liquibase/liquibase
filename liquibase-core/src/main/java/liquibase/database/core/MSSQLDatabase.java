@@ -419,7 +419,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         
         if (indexOfPeriod < 0) {
             if (!dataTypeName.startsWith(quotingStartCharacter)) {
-                dataTypeName = escapeObjectName(dataTypeName, DataType.class);
+                dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
             }
             
             return dataTypeName;
@@ -432,7 +432,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
         if (!dataTypeName.startsWith(quotingStartCharacter)) {
-            dataTypeName = escapeObjectName(dataTypeName, DataType.class);
+            dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
         }
 
         return schemaName + "." + dataTypeName;

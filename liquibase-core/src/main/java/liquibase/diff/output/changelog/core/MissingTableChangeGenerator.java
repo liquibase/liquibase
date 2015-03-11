@@ -6,6 +6,7 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
@@ -68,7 +69,11 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             columnConfig.setName(column.getName());
             LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
             DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
-            columnConfig.setType(ddt.toString());
+            String typeString = ddt.toString();
+            if (referenceDatabase instanceof MSSQLDatabase) {
+                typeString = typeString.replace("[", "").replace("]", "");
+            }
+            columnConfig.setType(typeString);
 
             if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);
