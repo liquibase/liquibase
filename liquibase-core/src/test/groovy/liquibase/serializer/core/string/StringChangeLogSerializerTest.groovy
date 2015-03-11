@@ -226,14 +226,17 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
+                "    outputDelimiter=\"false\"\n" +
                 "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n]"
+                "    stripComments=\"false\"\n" +
+                "]"
 
         when:
         change.setPath("PATH/TO/File.txt");
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
+                "    outputDelimiter=\"false\"\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n" +
@@ -246,13 +249,16 @@ public class StringChangeLogSerializerTest extends Specification {
 
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    outputDelimiter=\"false\"\n" +
                 "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n]"
+                "    stripComments=\"false\"\n" +
+                "]"
 
         when:
         change.setSql("some SQL Here");
         then:
         new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
+                "    outputDelimiter=\"false\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    sql=\"some SQL Here\"\n" +
                 "    stripComments=\"false\"\n" +

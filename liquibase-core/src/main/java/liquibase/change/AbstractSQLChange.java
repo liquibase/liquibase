@@ -21,6 +21,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     private boolean stripComments;
     private boolean splitStatements;
+    private boolean outputDelimiter;
     private String endDelimiter;
     private String sql;
     private String dbms;
@@ -152,6 +153,21 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         this.endDelimiter = endDelimiter;
     }
 
+    @DatabaseChangeProperty(since = "3.4",
+            description = "Whether to output a delimiter statement in updateSQL/rollbackSQL",
+            supportsDatabase = "mysql")
+    public Boolean isOutputDelimiter() {
+        return outputDelimiter;
+    }
+
+    public void setOutputDelimiter(Boolean outputDelimiter) {
+        if (outputDelimiter == null) {
+            this.outputDelimiter = false;
+        } else {
+            this.outputDelimiter = outputDelimiter;
+        }
+    }
+
     /**
      * Calculates the checksum based on the contained SQL.
      *
@@ -219,7 +235,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 				escapedStatement = statement;
 			}
 
-            returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
+            RawSqlStatement rawStatement = new RawSqlStatement(escapedStatement, getEndDelimiter());
+            rawStatement.setOutputDelimiter(isOutputDelimiter());
+            returnStatements.add(rawStatement);
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
