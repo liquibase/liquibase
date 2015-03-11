@@ -131,7 +131,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     if( autoIncrementConstraint.getStartWith() != null ){
 	                    if (database instanceof PostgresDatabase) {
 	                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
-	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" restart with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
 	                    }else if(database instanceof MySQLDatabase){
 	                    	mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
 	                    }
