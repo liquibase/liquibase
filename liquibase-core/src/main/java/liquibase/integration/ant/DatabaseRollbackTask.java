@@ -54,7 +54,7 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
                 throw new BuildException("Unable to rollback database. No count, tag, or date set.");
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to rollback database.", e);
+            throw new BuildException("Unable to rollback database. " + e.toString(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate rollback SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);
         } catch (IOException e) {
