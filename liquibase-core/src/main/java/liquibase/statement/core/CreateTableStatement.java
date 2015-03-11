@@ -21,6 +21,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private Set<String> notNullColumns = new HashSet<String>();
     private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
+    private Set<CheckConstraint> checkConstraints = new HashSet<CheckConstraint>();
 
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
@@ -192,6 +193,15 @@ public class CreateTableStatement extends AbstractSqlStatement {
     public CreateTableStatement addColumnConstraint(AutoIncrementConstraint autoIncrementConstraint) {
         getAutoIncrementConstraints().add(autoIncrementConstraint);
         return this;
+    }
+    
+    public CreateTableStatement addColumnConstraint(CheckConstraint checkConstraint) {
+        getCheckConstraints().add(checkConstraint);
+        return this;
+    }
+    
+    public Set<CheckConstraint> getCheckConstraints() {
+        return checkConstraints;
     }
 
     public Set<AutoIncrementConstraint> getAutoIncrementConstraints() {

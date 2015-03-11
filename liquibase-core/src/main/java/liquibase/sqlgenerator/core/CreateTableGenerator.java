@@ -10,6 +10,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.CheckConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.UniqueConstraint;
@@ -151,6 +152,23 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
             if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
                 //buffer.append(" PRIMARY KEY");
+            }
+            
+            if(!statement.getCheckConstraints().isEmpty()) {
+                CheckConstraint checkConstraint = null;
+                // find matching check constraint
+                for (CheckConstraint currentCheckConstraint : statement.getCheckConstraints()) {
+                    if (column.equals(currentCheckConstraint.getColumnName())) {
+                        checkConstraint = currentCheckConstraint;
+                        break;
+                    }
+                }
+                // act on it
+                if(checkConstraint != null) {
+                    buffer.append(" CHECK(");
+                    buffer.append(checkConstraint.getConstraint());
+                    buffer.append(")");
+                }
             }
 
             if(statement.getColumnRemarks(column) != null){

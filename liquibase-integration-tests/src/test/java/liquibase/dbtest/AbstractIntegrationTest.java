@@ -43,6 +43,7 @@ import liquibase.util.FileUtil;
 import liquibase.util.RegexMatcher;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,6 +54,7 @@ import java.util.*;
 
 import static junit.framework.Assert.*;
 import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -944,6 +946,22 @@ public abstract class AbstractIntegrationTest {
         assertFalse("the scheame name '"+schemaName+"' should be ignored\n\n"+outputResult, outputResult.contains(schemaName+"."));
 //        System.out.println("expected    : " + expected);
 //        System.out.println("outputResult: " + outputResult);
+    }
+    
+    @Test
+    public void testCheckConstraintOnColumn() throws Exception {
+        StringWriter output = new StringWriter();
+        Liquibase liquibase = createLiquibase(includedChangeLog);
+        clearDatabase(liquibase);
+
+        liquibase = createLiquibase("changelogs/common/checkConstraint.tests.changelog.xml");
+        liquibase.update(new Contexts(), output);
+
+        String outputResult = output.getBuffer().toString();
+        assertNotNull(outputResult);
+        String expected = "colors VARCHAR(50) NOT NULL CHECK(colors IN ('red', 'green', 'blue'))";
+        Assert.assertThat(outputResult, containsString(expected));
+        
     }
 
     @Test

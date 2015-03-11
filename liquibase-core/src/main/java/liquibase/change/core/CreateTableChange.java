@@ -86,6 +86,10 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     statement.addColumnConstraint(new NotNullConstraint(column.getName()));
                 }
+                
+                if(constraints.getCheckConstraint() != null) {
+                    statement.addColumnConstraint(new CheckConstraint(column.getName(), constraints.getCheckConstraint()));
+                }
 
                 if (constraints.getReferences() != null ||
                         (constraints.getReferencedTableName() != null && constraints.getReferencedColumnNames() != null)) {
