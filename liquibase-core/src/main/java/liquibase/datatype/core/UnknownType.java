@@ -10,7 +10,6 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 public class UnknownType extends LiquibaseDataType {
 
@@ -50,10 +49,7 @@ public class UnknownType extends LiquibaseDataType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            String name = getName();
-            if (name.matches("(?i)[a-z0-9]+")) {
-            	name = ((MSSQLDatabase) database).delimitIdentifier(name.toLowerCase(Locale.ENGLISH));
-            }
+            String name = database.escapeDataTypeName(getName());
             if (dataTypeMaxParameters < parameters.length) {
                 parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
             }

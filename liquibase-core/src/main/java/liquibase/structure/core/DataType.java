@@ -1,14 +1,9 @@
 package liquibase.structure.core;
 
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.util.ObjectUtil;
+import liquibase.structure.AbstractDatabaseObject;
+import liquibase.structure.DatabaseObject;
 
-import java.util.Set;
-
-public class DataType extends AbstractLiquibaseSerializable {
+public class DataType extends AbstractDatabaseObject {
 
     private String typeName;
 
@@ -133,5 +128,26 @@ public class DataType extends AbstractLiquibaseSerializable {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_SNAPSHOT_NAMESPACE;
+    }
+
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return getAttribute("name", String.class);
+    }
+
+    @Override
+    public DataType setName(String name) {
+        setAttribute("name", name);
+        typeName = name;
+        return this;
+    }
+
+    @Override
+    public Schema getSchema() {
+        return null;
     }
 }

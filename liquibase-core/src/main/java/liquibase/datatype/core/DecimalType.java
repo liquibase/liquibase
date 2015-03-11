@@ -32,7 +32,7 @@ public class DecimalType  extends LiquibaseDataType {
       } else if (parameters.length > 2) {
         parameters = Arrays.copyOfRange(parameters, 0, 2);
       }
-      return new DatabaseDataType("[decimal]", parameters);
+      return new DatabaseDataType(database.escapeDataTypeName("decimal"), parameters);
     }
     if (database instanceof InformixDatabase) {
 

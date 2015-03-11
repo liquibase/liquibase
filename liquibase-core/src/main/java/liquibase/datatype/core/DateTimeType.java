@@ -40,7 +40,7 @@ public class DateTimeType extends LiquibaseDataType {
             if (originalDefinition.equalsIgnoreCase("smalldatetime")
                     || originalDefinition.equals("[smalldatetime]")) {
 
-                return new DatabaseDataType("[smalldatetime]");
+                return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
             } else if (originalDefinition.equalsIgnoreCase("datetime2")
                     || originalDefinition.equals("[datetime2]")
                     || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
@@ -48,7 +48,7 @@ public class DateTimeType extends LiquibaseDataType {
 
                 try {
                     if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
-                        return new DatabaseDataType("[datetime]");
+                        return new DatabaseDataType(database.escapeDataTypeName("datetime"));
                     }
                 } catch (DatabaseException ignore) { } //assuming it is a newer version
 
@@ -57,9 +57,9 @@ public class DateTimeType extends LiquibaseDataType {
                 } else if (parameters.length > 1) {
                     parameters = Arrays.copyOfRange(parameters, 0, 1);
                 }
-                return new DatabaseDataType("[datetime2]", parameters);
+                return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
             }
-            return new DatabaseDataType("[datetime]");
+            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
         if (database instanceof InformixDatabase) {
 

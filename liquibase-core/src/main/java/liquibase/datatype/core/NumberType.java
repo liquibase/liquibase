@@ -32,7 +32,7 @@ public class NumberType extends LiquibaseDataType {
             } else if (parameters.length > 2) {
                 parameters = Arrays.copyOfRange(parameters, 0, 2);
             }
-            return new DatabaseDataType("[numeric]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("numeric"), parameters);
         } else if (database instanceof MySQLDatabase
                 || database instanceof DB2Database
                 || database instanceof HsqlDatabase

@@ -23,7 +23,7 @@ public class MediumIntType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("[int]");
+            return new DatabaseDataType(database.escapeDataTypeName("int"));
         }
         if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MySQLDatabase) {
             return new DatabaseDataType("MEDIUMINT"); //always smallint regardless of parameters passed

@@ -27,7 +27,7 @@ public class TimeType  extends LiquibaseDataType {
             Object[] parameters = getParameters();
             try {
                 if (database.getDatabaseMajorVersion() <= 9) {
-                    return new DatabaseDataType("[datetime]");
+                    return new DatabaseDataType(database.escapeDataTypeName("datetime"));
                 }
             } catch (DatabaseException e) {
                 //assume greater than sql 2008 and TIME will work
@@ -37,7 +37,7 @@ public class TimeType  extends LiquibaseDataType {
             } else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[time]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("time"), parameters);
         }
 
         if (database instanceof MySQLDatabase) {

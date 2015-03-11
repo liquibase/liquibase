@@ -8,7 +8,9 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DataType;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.exception.DatabaseException;
@@ -19,7 +21,6 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import liquibase.logging.LogFactory;
@@ -32,8 +33,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-	protected String quotingEndReplacement = "]]";
 
     @Override
     public String getShortName() {
@@ -69,8 +68,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
 
-        super.quotingStartCharacter ="[";
-        super.quotingEndCharacter="]";
+        super.quotingStartCharacter = "[";
+        super.quotingEndCharacter = "]";
+        super.quotingEndReplacement = "]]";
     }
 
 
@@ -279,7 +279,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (objectName.contains("(")) { //probably a function
             return objectName;
         }
-        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+
+        return quoteObject(objectName, objectType);
     }
 
     @Override
@@ -390,6 +391,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 || "tinyint".equalsIgnoreCase(dataTypeName)
                 || "rowversion".equalsIgnoreCase(dataTypeName)
                 || "sql_variant".equalsIgnoreCase(dataTypeName)
+                || "sysname".equalsIgnoreCase(dataTypeName)
                 || "uniqueidentifier".equalsIgnoreCase(dataTypeName)) {
 
             return 0;
@@ -413,18 +415,28 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return 2;
     }
 
-	/**
-	 *
-	 * @param identifier
-	 * @return
-	 */
-	public String delimitIdentifier(String identifier) {
-		if (identifier == null) {
-			return null;
-		}
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        int indexOfPeriod = dataTypeName.indexOf('.');
+        
+        if (indexOfPeriod < 0) {
+            if (!dataTypeName.startsWith(quotingStartCharacter)) {
+                dataTypeName = escapeObjectName(dataTypeName, DataType.class);
+            }
+            
+            return dataTypeName;
+        }
 
-		return quotingStartCharacter
-				+ identifier.replace(quotingEndCharacter, quotingEndReplacement)
-				+ quotingEndCharacter;
-	}
+        String schemaName = dataTypeName.substring(0, indexOfPeriod);
+        if (!schemaName.startsWith(quotingStartCharacter)) {
+            schemaName = escapeObjectName(schemaName, Schema.class);
+        }
+
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        if (!dataTypeName.startsWith(quotingStartCharacter)) {
+            dataTypeName = escapeObjectName(dataTypeName, DataType.class);
+        }
+
+        return schemaName + "." + dataTypeName;
+    }
 }

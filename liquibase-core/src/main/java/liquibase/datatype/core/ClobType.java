@@ -47,12 +47,12 @@ public class ClobType extends LiquibaseDataType {
             if (originalDefinition.equalsIgnoreCase("text")
                     || originalDefinition.equals("[text]")) {
 
-                return new DatabaseDataType("[text]");
+                return new DatabaseDataType(database.escapeDataTypeName("text"));
             }
             if (originalDefinition.equalsIgnoreCase("ntext")
                     || originalDefinition.equals("[ntext]")) {
 
-                return new DatabaseDataType("[ntext]");
+                return new DatabaseDataType(database.escapeDataTypeName("ntext"));
             }
             Object[] parameters = getParameters();
             boolean max = true;
@@ -64,16 +64,16 @@ public class ClobType extends LiquibaseDataType {
             if (max) {
                 try {
                     if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                        return new DatabaseDataType("[ntext]");
+                        return new DatabaseDataType(database.escapeDataTypeName("ntext"));
                     }
                 } catch (DatabaseException ignore) { } //assuming it is a newer version
 
-                return new DatabaseDataType("[nvarchar]", "MAX");
+                return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
             }
             if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[nvarchar]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), parameters);
         } else if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("text")) {
                 return new DatabaseDataType("TEXT");

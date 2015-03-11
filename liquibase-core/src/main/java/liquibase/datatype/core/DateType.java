@@ -19,10 +19,10 @@ public class DateType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             try {
                 if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
-                    return new DatabaseDataType("[datetime]");
+                    return new DatabaseDataType(database.escapeDataTypeName("datetime"));
                 }
             } catch (DatabaseException ignore) { } //assuming it is a newer version
-            return new DatabaseDataType("[date]");
+            return new DatabaseDataType(database.escapeDataTypeName("date"));
         }
         return new DatabaseDataType(getName());
     }

@@ -33,7 +33,7 @@ public class BigIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 38,0);
         }
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("[bigint]");
+            return new DatabaseDataType(database.escapeDataTypeName("bigint"));
         }
         if (database instanceof DB2Database || database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof MySQLDatabase) {
