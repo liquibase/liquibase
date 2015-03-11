@@ -870,16 +870,21 @@ public class Liquibase {
         return getChangeSetStatuses(contexts, new LabelExpression());
     }
 
-    /**
-     * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they would be ran.
-     */
     public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        return getChangeSetStatuses(contexts, labelExpression, true);
+    }
+        /**
+         * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they would be ran.
+         */
+    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
         DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
-        checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+        if (checkLiquibaseTables) {
+            checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+        }
 
         changeLog.validate(database, contexts, labelExpression);
 
