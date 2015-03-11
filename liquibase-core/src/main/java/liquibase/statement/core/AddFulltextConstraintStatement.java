@@ -77,5 +77,10 @@ public class AddFulltextConstraintStatement extends AbstractSqlStatement {
     public boolean isDisabled() {
         return disabled;
     }
+    
+    @Override
+    public boolean skipOnUnsupported() {
+        return true;
+    }
 
 }

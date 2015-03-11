@@ -11,6 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
 public class MissingUniqueConstraintChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -53,7 +54,20 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         if (control.getIncludeSchema()) {
             change.setSchemaName(uc.getTable().getSchema().getName());
         }
-        change.setConstraintName(uc.getName());
+        
+        String columnNames = uc.getColumnNames().replace(" ", "");
+        
+        if( columnNames.contains(",") ){
+            
+            String[] column_names = columnNames.split(",");
+            columnNames = column_names[0]+"__";
+            
+        }
+        
+        String columnName = columnNames;        
+        String indexName = StringUtils.oracleName( uc.getTable().getName(), columnName.trim() )+"_UDX";
+        
+        change.setConstraintName(indexName);
         change.setColumnNames(uc.getColumnNames());
         change.setDeferrable(uc.isDeferrable());
         change.setInitiallyDeferred(uc.isInitiallyDeferred());

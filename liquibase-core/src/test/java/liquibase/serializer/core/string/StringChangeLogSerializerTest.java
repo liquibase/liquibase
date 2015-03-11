@@ -338,7 +338,7 @@ public class StringChangeLogSerializerTest {
                             collection.add(createString());
                             collection.add(createString());
                         } else {
-                            throw new RuntimeException("Unknown generic type for " + clazz.getName() + "." + field.getName() + ": " + typeToCreate.getName());
+//                            throw new RuntimeException("Unknown generic type for " + clazz.getName() + "." + field.getName() + ": " + typeToCreate.getName());
                         }
                         field.set(object, collection);
                     } else {

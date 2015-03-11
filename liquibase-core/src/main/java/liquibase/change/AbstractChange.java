@@ -305,8 +305,10 @@ public abstract class AbstractChange implements Change {
             return true;
         }
         for (SqlStatement statement : statements) {
-            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
-                return false;
+            if( !statement.skipOnUnsupported() ){
+                if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
+                    return false;
+                }
             }
         }
         return true;

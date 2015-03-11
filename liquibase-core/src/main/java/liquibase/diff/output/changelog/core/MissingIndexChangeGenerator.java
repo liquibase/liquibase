@@ -48,7 +48,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         }
         if (control.getIncludeSchema()) {
             change.setSchemaName(index.getTable().getSchema().getName());
-        }
+        }        
         change.setIndexName(index.getName());
         change.setUnique(index.isUnique());
         change.setAssociatedWith(index.getAssociatedWithAsString());

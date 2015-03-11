@@ -14,6 +14,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.database.ObjectQuotingStrategy;
+import liquibase.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -104,6 +106,43 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
+    }
+
+	@Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+       
+       if ( objectType.getName().endsWith(".Column") || objectType.getName().endsWith(".Table") || objectType.getName().endsWith(".Catalog")) {
+            return "\"" + objectName + "\"";
+        } else {
+            return super.escapeObjectName(objectName, objectType);
+        }
+        
+    }
+
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null ){ // || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
+            return super.correctObjectName(objectName, objectType);
+        }
+       // if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+            return objectName;
+        //} else {
+        //    return objectName.toLowerCase();
+        //}
+    }
+
+    /*
+    * Check if given string has case problems according to postgresql documentation.
+    * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped.
+    *
+    * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards compatibility.
+    * Method is public so a subclass extension can override it to always return false.
+    */
+    protected boolean hasMixedCase(String tableName) {
+        if (tableName == null) {
+            return false;
+        }
+        return StringUtils.hasUpperCase(tableName) && StringUtils.hasLowerCase(tableName);
     }
 
     @Override
@@ -244,7 +283,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsAutoIncrement() {
-        return false;
+        return true;
     }
 
 

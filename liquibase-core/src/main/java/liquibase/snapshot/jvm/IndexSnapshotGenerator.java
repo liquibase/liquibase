@@ -172,6 +172,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if( isfulltext ){
                         continue;
                     }
+                    
+                   String columnName = row.getString("COLUMN_NAME");
+                   indexName = table.getName()+"_"+columnName+"_IDX";
 
                      Index index = foundIndexes.get(indexName);
                     if (index == null) {
@@ -180,7 +183,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         index.setTable(table);
                         foundIndexes.put(indexName, index);
                     }
-                    index.getColumns().add(row.getString("COLUMN_NAME"));
+                    index.getColumns().add(columnName);
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {
@@ -292,6 +295,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
+                
+                indexName = tableName+"_"+columnName+"_IDX";
+                
                 Index returnIndex = foundIndexes.get(indexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
@@ -309,7 +315,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-
+        exampleName = null;
         if (exampleName != null) {
             return foundIndexes.get(exampleName);
         } else {

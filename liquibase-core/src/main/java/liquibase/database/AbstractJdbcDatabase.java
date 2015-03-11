@@ -116,7 +116,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         if( include_tables.size() > 0 ){
             
             for( int x=0; x<include_tables.size(); x++ ){
-                if( include_tables.get(x).equals(table)  ){
+                Pattern tablename = Pattern.compile(include_tables.get(x));
+                if( tablename.matcher(table).matches()  ){
                     return true;
                 }
             }
@@ -126,7 +127,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         }else if( exclude_tables.size() > 0 ){
             
             for( int x=0; x<exclude_tables.size(); x++ ){
-                if( exclude_tables.get(x).equals(table)  ){
+                Pattern tablename = Pattern.compile(exclude_tables.get(x));
+                if( tablename.matcher(table).matches()  ){
                     return false;
                 }
             }

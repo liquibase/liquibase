@@ -3,6 +3,7 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.AddFulltextConstraintChange;
 import liquibase.database.Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
@@ -11,6 +12,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.FulltextConstraint;
+import liquibase.util.StringUtils;
 
 public class MissingFulltextConstraintChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -36,6 +38,11 @@ public class MissingFulltextConstraintChangeGenerator implements MissingObjectCh
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+        
+        if( !( referenceDatabase instanceof MySQLDatabase ) ){
+            return null;
+        }
+        
         FulltextConstraint uc = (FulltextConstraint) missingObject;
 
         if (uc.getTable() == null) {
@@ -53,7 +60,11 @@ public class MissingFulltextConstraintChangeGenerator implements MissingObjectCh
         if (control.getIncludeSchema()) {
             change.setSchemaName(uc.getTable().getSchema().getName());
         }
-        change.setConstraintName(uc.getName());
+        
+        String columnName = uc.getColumnNames().replace(",", "_").replace(" ", "");
+        String indexName = StringUtils.oracleName( uc.getTable().getName(), columnName.trim() )+"_FDX";
+        
+        change.setConstraintName(indexName);
         change.setColumnNames(uc.getColumnNames());
         change.setDeferrable(uc.isDeferrable());
         change.setInitiallyDeferred(uc.isInitiallyDeferred());

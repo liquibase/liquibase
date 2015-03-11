@@ -38,10 +38,17 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
-    	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
-    	}
-    	
+        if (database instanceof InformixDatabase) {
+                return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
+        }
+    
+       if ( database instanceof OracleDatabase ) {
+           
+           String viewselect = statement.getSelectQuery().replace("`", "\"");
+           statement = new CreateViewStatement( statement.getCatalogName(), statement.getSchemaName(), statement.getViewName(), viewselect, statement.isReplaceIfExists() );
+           
+       }
+        
         String createClause;
 
         List<Sql> sql = new ArrayList<Sql>();

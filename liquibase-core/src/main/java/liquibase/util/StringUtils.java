@@ -12,6 +12,7 @@ public class StringUtils {
     private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final Pattern islowerCasePattern = Pattern.compile("[a-z]");
 
 
     /**
@@ -233,6 +234,55 @@ public class StringUtils {
 
     public static boolean hasLowerCase(String string) {
         return lowerCasePattern.matcher(string).matches();
+    }   
+    
+    public static String oracleName( String tablename, String columnname ){
+        
+        // _ ___UDX = 7
+         String name = tablename+columnname;
+        
+        if( name.length() > 22 ){
+            int split = (name.length()/22)+1;
+            String newname = "";
+            
+            for( int x=0; x<name.length(); x++ ){
+            
+                if( x%split==0 ){
+                    newname += name.substring(x, x+1);
+                }
+                
+            }
+            
+            name = newname;            
+        }else{
+            name = tablename+"_"+columnname;
+        }
+        
+        return name;
+        
+    }
+    
+    
+    public static boolean isLowerCase(String string) {
+        
+        if( string != null ){
+            if( string.length() > 0 ){
+                for( int x=0; x<string.length(); x++ ){
+                    if( !Character.isLowerCase( string.charAt(x) ) ){
+                        return false;
+                    }
+                }
+            }else{
+            
+                    return false;
+            
+            }
+        }else{
+            
+            return false;
+            
+        }
+        return true;
     }
 
     public static String standardizeLineEndings(String string) {
