@@ -1480,4 +1480,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeDataTypeName(String dataTypeName) {
         return dataTypeName;
     }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
 }

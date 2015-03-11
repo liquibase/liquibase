@@ -8,7 +8,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.DataType;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -418,12 +417,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String escapeDataTypeName(String dataTypeName) {
         int indexOfPeriod = dataTypeName.indexOf('.');
-        
+
         if (indexOfPeriod < 0) {
             if (!dataTypeName.startsWith(quotingStartCharacter)) {
                 dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
             }
-            
+
             return dataTypeName;
         }
 
@@ -438,5 +437,29 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
 
         return schemaName + "." + dataTypeName;
+    }
+
+    public String unescapeDataTypeName(String dataTypeName) {
+         int indexOfPeriod = dataTypeName.indexOf('.');
+
+         if (indexOfPeriod < 0) {
+             if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
+                 dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+             }
+
+             return dataTypeName;
+         }
+
+         String schemaName = dataTypeName.substring(0, indexOfPeriod);
+         if (schemaName.matches("\\[[^]\\[]++\\]")) {
+             schemaName = schemaName.substring(1, schemaName.length() - 1);
+         }
+
+         dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+         if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
+             dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+         }
+
+         return schemaName + "." + dataTypeName;
     }
 }

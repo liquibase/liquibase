@@ -1,8 +1,6 @@
 package liquibase.structure.core;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
 
 public class DataType extends AbstractLiquibaseSerializable {
 
