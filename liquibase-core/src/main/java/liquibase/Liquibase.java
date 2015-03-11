@@ -395,7 +395,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database,changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
             try {
                 lockService.releaseLock();
@@ -464,7 +464,7 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
             lockService.releaseLock();
         }
@@ -520,7 +520,7 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
             lockService.releaseLock();
         }
@@ -702,7 +702,7 @@ public class Liquibase {
                         });
             }
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
             lockService.releaseLock();
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
@@ -771,6 +771,17 @@ public class Liquibase {
         }
     }
 
+    public boolean tagExists(String tagString) throws LiquibaseException {
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        lockService.waitForLock();
+
+        try {
+            checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
+            return getDatabase().doesTagExist(tagString);
+        } finally {
+            lockService.releaseLock();
+        }
+    }
 
     public void updateTestingRollback(String contexts) throws LiquibaseException {
         updateTestingRollback(new Contexts(contexts), new LabelExpression());
@@ -839,12 +850,18 @@ public class Liquibase {
     }
 
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels) throws LiquibaseException {
+        return listUnrunChangeSets(contexts, labels, true);
+    }
+
+    protected List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
 
         DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
-        checkLiquibaseTables(true, changeLog, contexts, labels);
+        if (checkLiquibaseTables) {
+            checkLiquibaseTables(true, changeLog, contexts, labels);
+        }
 
         changeLog.validate(database, contexts, labels);
 
@@ -895,7 +912,7 @@ public class Liquibase {
         changeLogParameters.setLabels(labels);
 
         try {
-            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels);
+            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels, false);
             if (unrunChangeSets.size() == 0) {
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");

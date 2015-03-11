@@ -30,9 +30,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public void setSnapshotId(String snapshotId) {
-        if (snapshotId == null) {
-            throw new UnexpectedLiquibaseException("Must be a non null snapshot id");
-        }
         if (this.snapshotId != null) {
             throw new UnexpectedLiquibaseException("snapshotId already set");
         }

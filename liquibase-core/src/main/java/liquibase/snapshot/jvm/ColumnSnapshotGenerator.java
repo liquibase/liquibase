@@ -9,6 +9,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -335,8 +336,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     columnMetadataResultSet.set("COLUMN_DEF", null);
                 }
 
+                Object columnDef = columnMetadataResultSet.get("COLUMN_DEF");
+                if (columnInfo.getType().getTypeName().equalsIgnoreCase("CHAR") && columnDef instanceof String && !((String) columnDef).startsWith("'") && !((String) columnDef).endsWith("'")) {
+                    return new DatabaseFunction((String) columnDef);
+                }
+
                 if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+columnMetadataResultSet.get("COLUMN_DEF")+")");
+                    Object column_def = columnMetadataResultSet.get("COLUMN_DEF");
+                    if (column_def != null && !column_def.equals("null")) {
+                        columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+ column_def +")");
+                    }
                 }
             }
 

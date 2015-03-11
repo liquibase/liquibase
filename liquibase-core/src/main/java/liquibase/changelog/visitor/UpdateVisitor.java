@@ -8,6 +8,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
@@ -21,6 +22,10 @@ public class UpdateVisitor implements ChangeSetVisitor {
     
     private ChangeExecListener execListener;
 
+    /**
+     * @deprecated - please use the constructor with ChangeExecListener, which can be null.
+     */
+    @Deprecated
     public UpdateVisitor(Database database) {
         this.database = database;
     }
@@ -40,25 +45,38 @@ public class UpdateVisitor implements ChangeSetVisitor {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
-        ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, execListener, this.database);
+        ExecType execType = null;
+        ObjectQuotingStrategy previousStr = this.database.getObjectQuotingStrategy();
+        try {
+            execType = changeSet.execute(databaseChangeLog, execListener, this.database);
+        } catch (MigrationFailedException e) {
+            fireRunFailed(changeSet, databaseChangeLog, database, e);
+            throw e;
+        }
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
         fireRan(changeSet, databaseChangeLog, database, execType);
         // reset object quoting strategy after running changeset
-        this.database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        this.database.setObjectQuotingStrategy(previousStr);
         this.database.markChangeSetExecStatus(changeSet, execType);
 
         this.database.commit();
     }
 
-    private void fireWillRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, RunStatus runStatus) {
+    protected void fireRunFailed(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, MigrationFailedException e) {
+        if (execListener != null) {
+            execListener.runFailed(changeSet, databaseChangeLog, database, e);
+        }
+    }
+
+    protected void fireWillRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, RunStatus runStatus) {
       if (execListener != null) {
         execListener.willRun(changeSet, databaseChangeLog, database, runStatus);
       }      
     }
 
-    private void fireRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, ExecType execType) {
+    protected void fireRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, ExecType execType) {
       if (execListener != null) {
         execListener.ran(changeSet, databaseChangeLog, database, execType);
       }

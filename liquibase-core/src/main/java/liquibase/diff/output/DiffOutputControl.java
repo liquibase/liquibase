@@ -1,6 +1,8 @@
 package liquibase.diff.output;
 
 import liquibase.CatalogAndSchema;
+import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.database.Database;
 import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
@@ -26,6 +28,9 @@ public class DiffOutputControl {
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
     private ObjectQuotingStrategy objectQuotingStrategy = null;
+
+    private ContextExpression context = null;
+    private Labels labels = null;
 
     private ObjectChangeFilter objectChangeFilter;
 
@@ -134,6 +139,24 @@ public class DiffOutputControl {
 
     public DiffOutputControl setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
         this.objectChangeFilter = objectChangeFilter;
+        return this;
+    }
+
+    public ContextExpression getContext() {
+        return context;
+    }
+
+    public DiffOutputControl setContext(ContextExpression contextExpression) {
+        this.context = contextExpression;
+        return this;
+    }
+
+    public Labels getLabels() {
+        return labels;
+    }
+
+    public DiffOutputControl setLabels(Labels labels) {
+        this.labels = labels;
         return this;
     }
 

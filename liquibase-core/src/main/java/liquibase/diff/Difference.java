@@ -1,6 +1,6 @@
 package liquibase.diff;
 
-public class Difference {
+public class Difference implements Comparable {
     private String message;
     private String field;
     private Object referenceValue;
@@ -12,7 +12,13 @@ public class Difference {
 
     public Difference(String message, String field, Object referenceValue, Object comparedValue) {
         if (message == null) {
-            message = field+" changed from '"+referenceValue+"' to '"+comparedValue+"'";
+            if (referenceValue instanceof String) {
+                referenceValue = "'"+referenceValue+"'";
+            }
+            if (comparedValue instanceof String) {
+                comparedValue = "'"+comparedValue+"'";
+            }
+            message = field+" changed from "+referenceValue+" to "+comparedValue;
         }
         this.message = message;
         this.field = field;
@@ -39,5 +45,10 @@ public class Difference {
     @Override
     public String toString() {
         return message;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return this.getField().compareTo(((Difference) o).getField());
     }
 }

@@ -21,9 +21,12 @@ public class DateTimeType extends LiquibaseDataType {
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
                 || database instanceof H2Database
-                || database instanceof HsqlDatabase
-                || database instanceof OracleDatabase) {
+                || database instanceof HsqlDatabase) {
             return new DatabaseDataType("TIMESTAMP");
+        }
+
+        if (database instanceof OracleDatabase) {
+            return new DatabaseDataType("TIMESTAMP", getParameters());
         }
 
         if (database instanceof MSSQLDatabase) {

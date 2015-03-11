@@ -604,7 +604,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
-            
+
+            database.setObjectQuotingStrategy(objectQuotingStrategy);
+
             // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
@@ -921,6 +923,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 "comment",
                 "changes",
                 "rollback",
+                "labels",
                 "objectQuotingStrategy"));
 
     }
@@ -956,7 +959,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         if (field.equals("context")) {
             if (!this.getContexts().isEmpty()) {
-                return this.getContexts().toString();
+                return this.getContexts().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             } else {
                 return null;
             }

@@ -571,7 +571,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         else {
                             sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME from syscat.keycoluse k, syscat.tabconst t "
                                     + "where k.constname = t.constname "
-                                    + "and t.tabschema = '" + jdbcCatalogName + "' "
+                                    + "and t.tabschema = '" + jdbcSchemaName + "' "
                                     + "and t.type='U'";
                             if (tableName != null) {
                                 sql += " and t.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";

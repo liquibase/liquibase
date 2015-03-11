@@ -12,6 +12,7 @@ import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
+import liquibase.structure.core.Schema;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
@@ -28,7 +29,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             validationErrors.checkRequiredField("constraintName", dropPrimaryKeyStatement.getConstraintName());
         }
-		
+
         return validationErrors;
     }
 
@@ -68,28 +69,20 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 			}
         } else if (database instanceof PostgresDatabase) {
 			if (statement.getConstraintName() == null) {
-                String schemaName = new CatalogAndSchema(null, statement.getSchemaName()).customize(database).getSchemaName();
+				String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
+				schemaName = database.correctObjectName(schemaName, Schema.class);
+				String tableName = database.correctObjectName(statement.getTableName(), Table.class);
 
-                StringBuilder query = new StringBuilder();
-				query.append("create or replace function __liquibase_drop_pk(schemaName text, tableName text) returns void as $$");
-				query.append(" declare");
-				query.append(" pkname text;");
-				query.append(" sql text;");
-				query.append(" begin");
-				query.append(" pkname = c.conname");
-				query.append(" from pg_class r, pg_constraint c, pg_catalog.pg_namespace n");
-				query.append(" where r.oid = c.conrelid");
-				query.append(" and contype = 'p'");
-                query.append(" and n.oid = r.relnamespace");
-                query.append(" and nspname ilike schemaName");
-				query.append(" and relname ilike tableName;");
-				query.append(" sql = 'alter table ' || schemaName || '.' || tableName || ' drop constraint ' || pkname;");
-				query.append(" execute sql;");
-				query.append(" end;");
-				query.append(" $$ language plpgsql;");
-                query.append(" select __liquibase_drop_pk('").append(schemaName).append("', '").append(statement.getTableName()).append("');");
-				query.append(" drop function __liquibase_drop_pk(schemaName text, tableName text);");
-				sql = query.toString();			
+				sql = String.format(""
+						+ "DO $$ DECLARE constraint_name varchar;\n"
+						+ "BEGIN\n"
+						+ "  SELECT tc.CONSTRAINT_NAME into strict constraint_name\n"
+						+ "    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc\n"
+						+ "    WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'\n"
+						+ "      AND TABLE_NAME = '%2$s' AND TABLE_SCHEMA = '%1$s';\n"
+						+ "    EXECUTE 'alter table %1$s.%2$s drop constraint ' || constraint_name;\n"
+						+ "END $$;"
+						, schemaName, tableName);
 			} else {
 				sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
 			}

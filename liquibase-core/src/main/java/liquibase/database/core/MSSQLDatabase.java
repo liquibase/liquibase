@@ -337,7 +337,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null) {
+        if (schemaName != null && ! isCaseSensitive()) {
             schemaName = schemaName.toLowerCase();
         }
         return schemaName;
@@ -349,8 +349,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (caseSensitive == null) {
             try {
                 if (getConnection() != null) {
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
-                    caseSensitive = ! collation.contains("_CI_");
+                  String catalog = getConnection().getCatalog();
+                  String sql = String.format("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('%s', 'COLLATION'))", catalog);
+                  String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+                  caseSensitive = ! collation.contains("_CI_");
                 }
             } catch (Exception e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);

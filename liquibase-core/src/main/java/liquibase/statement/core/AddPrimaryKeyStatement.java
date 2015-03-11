@@ -12,6 +12,11 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     private String constraintName;
     private Boolean clustered;
 
+    private String forIndexName;
+    private String forIndexSchemaName;
+    private String forIndexCatalogName;
+
+
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
@@ -62,4 +67,27 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
         return this;
     }
 
+    public String getForIndexName() {
+        return forIndexName;
+    }
+
+    public void setForIndexName(String forIndexName) {
+        this.forIndexName = forIndexName;
+    }
+
+    public String getForIndexSchemaName() {
+        return forIndexSchemaName;
+    }
+
+    public void setForIndexSchemaName(String forIndexSchemaName) {
+        this.forIndexSchemaName = forIndexSchemaName;
+    }
+
+    public String getForIndexCatalogName() {
+        return forIndexCatalogName;
+    }
+
+    public void setForIndexCatalogName(String forIndexCatalogName) {
+        this.forIndexCatalogName = forIndexCatalogName;
+    }
 }

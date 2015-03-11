@@ -142,7 +142,7 @@ public class ChangeSetTest extends Specification {
         then:
         for (param in fields) {
             if (param == "context") {
-                assert changeSet.getSerializableFieldValue(param).toString() == "(${testValue[param]})"
+                assert changeSet.getSerializableFieldValue(param).toString() == "${testValue[param]}"
             } else if (param in testValue.keySet()) {
                 assert changeSet.getSerializableFieldValue(param).toString() == testValue[param]
             }
@@ -370,12 +370,12 @@ public class ChangeSetTest extends Specification {
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).with == "b"
 
         that(((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "(live), (test)"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "live, test"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).replace == "x1"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).with == "y1"
 
         that(((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "(live), (test)"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "live, test"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).replace == "x2"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).with == "y2"
     }

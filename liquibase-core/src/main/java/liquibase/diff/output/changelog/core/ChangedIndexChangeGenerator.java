@@ -7,8 +7,10 @@ import liquibase.change.core.DropIndexChange;
 import liquibase.database.Database;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
@@ -43,11 +45,27 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) changedObject;
 
-        DropIndexChange dropIndexChange = new DropIndexChange();
+        if (index.getTable() != null) {
+            if (index.getTable().getPrimaryKey() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().getPrimaryKey().getBackingIndex(), changedObject, comparisonDatabase)) {
+                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+            }
+
+            List<UniqueConstraint> uniqueConstraints = index.getTable().getUniqueConstraints();
+            if (uniqueConstraints != null) {
+                for (UniqueConstraint constraint : uniqueConstraints) {
+                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, comparisonDatabase)) {
+                        return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
+                    }
+
+                }
+            }
+        }
+
+        DropIndexChange dropIndexChange = createDropIndexChange();
         dropIndexChange.setTableName(index.getTable().getName());
         dropIndexChange.setIndexName(index.getName());
         
-        CreateIndexChange addIndexChange = new CreateIndexChange();
+        CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
         List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
         for (Column col : index.getColumns()) {
@@ -93,5 +111,13 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         }
 
         return new Change[] { dropIndexChange, addIndexChange };
+    }
+
+    protected DropIndexChange createDropIndexChange() {
+        return new DropIndexChange();
+    }
+
+    protected CreateIndexChange createCreateIndexChange() {
+        return new CreateIndexChange();
     }
 }

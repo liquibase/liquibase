@@ -46,6 +46,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
         ObjectDifferences differences = new ObjectDifferences(compareControl);
 
+        exclude.add("schema");
+        exclude.add("catalog");
+
         for (String attribute : attributes) {
             if (exclude.contains(attribute)) {
                 continue;

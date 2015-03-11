@@ -274,7 +274,8 @@ public class Main {
             || "rollbackCountSQL".equalsIgnoreCase(command)
             || "calculateCheckSum".equalsIgnoreCase(command)
             || "dbDoc".equalsIgnoreCase(command)
-            || "tag".equalsIgnoreCase(command)) {
+            || "tag".equalsIgnoreCase(command)
+            || "tagExists".equalsIgnoreCase(command)) {
 
             if (commandParams.size() > 0 && commandParams.iterator().next().startsWith("-")) {
                 messages.add("unexpected command parameters: "+commandParams);
@@ -368,6 +369,7 @@ public class Main {
                 || "futureRollbackCountSQL".equalsIgnoreCase(arg)
                 || "updateTestingRollback".equalsIgnoreCase(arg)
                 || "tag".equalsIgnoreCase(arg)
+                || "tagExists".equalsIgnoreCase(arg)
                 || "listLocks".equalsIgnoreCase(arg)
                 || "dropAll".equalsIgnoreCase(arg)
                 || "releaseLocks".equalsIgnoreCase(arg)
@@ -523,6 +525,7 @@ public class Main {
         stream.println("");
         stream.println("Maintenance Commands");
         stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
+        stream.println(" tagExists <tag string>    Checks whether the given tag is already existing");
         stream.println(" status [--verbose]        Outputs count (list if --verbose) of unrun changesets");
         stream.println(" unexpectedChangeSets [--verbose]");
         stream.println("                           Outputs count (list if --verbose) of changesets run");
@@ -566,6 +569,9 @@ public class Main {
         stream.println("                                            ChangeSet to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
+        stream.println(" --delimiter=<string>                       Used with executeSql command to set");
+        stream.println("                                            the string used to break up files");
+        stream.println("                                            that consist of multiple statements.");
         stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
         stream.println("                                            to be set on the JDBC connection");
         stream.println("                                            to be created");
@@ -961,6 +967,7 @@ public class Main {
                 command.setDatabase(database);
                 command.setSql(getCommandParam("sql", null));
                 command.setSqlFile(getCommandParam("sqlFile", null));
+                command.setDelimiter(getCommandParam("delimiter", ";"));
                 System.out.println(command.execute());
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {
@@ -990,6 +997,15 @@ public class Main {
             } else if ("tag".equalsIgnoreCase(command)) {
                 liquibase.tag(commandParams.iterator().next());
                 System.err.println("Successfully tagged " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                return;
+            } else if ("tagExists".equalsIgnoreCase(command)) {
+                String tag = commandParams.iterator().next();
+                boolean exists = liquibase.tagExists(tag);
+                if (exists) {
+                    System.err.println("The tag " + tag + " already exists in " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                } else {
+                    System.err.println("The tag " + tag + " does not exist in " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                }
                 return;
             } else if ("dropAll".equals(command)) {
                 liquibase.dropAll();

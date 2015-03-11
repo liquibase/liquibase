@@ -17,6 +17,10 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean initiallyDeferred;
     private boolean disabled;
 
+    private String forIndexName;
+    private String forIndexSchemaName;
+    private String forIndexCatalogName;
+
     public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, ColumnConfig[] columns, String constraintName) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
@@ -88,4 +92,27 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return disabled;
     }
 
+    public String getForIndexName() {
+        return forIndexName;
+    }
+
+    public void setForIndexName(String forIndexName) {
+        this.forIndexName = forIndexName;
+    }
+
+    public String getForIndexSchemaName() {
+        return forIndexSchemaName;
+    }
+
+    public void setForIndexSchemaName(String forIndexSchemaName) {
+        this.forIndexSchemaName = forIndexSchemaName;
+    }
+
+    public String getForIndexCatalogName() {
+        return forIndexCatalogName;
+    }
+
+    public void setForIndexCatalogName(String forIndexCatalogName) {
+        this.forIndexCatalogName = forIndexCatalogName;
+    }
 }
