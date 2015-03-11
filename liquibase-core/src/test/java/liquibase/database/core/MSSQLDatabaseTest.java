@@ -118,4 +118,22 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     	Database database =getADatabaseWithCollation("Latin1_General_CS_AI");    	
     	assertTrue( "Should be case sensitive", database.isCaseSensitive() );
     }
+
+    @Test
+    public void testEscapeDataTypeName() {
+        Database database = getDatabase();
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("MySchema.MyUDT"));
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("MySchema.[MyUDT]"));
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("[MySchema].MyUDT"));
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("[MySchema].[MyUDT]"));
+    }
+
+    @Test
+    public void testUnescapeDataTypeName() {
+        Database database = getDatabase();
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("MySchema.MyUDT"));
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("MySchema.[MyUDT]"));
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("[MySchema].MyUDT"));
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("[MySchema].[MyUDT]"));
+    }
 }

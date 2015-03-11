@@ -1,8 +1,5 @@
 package liquibase.structure.core;
 
-import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
-
 public class DataType {
 
     private String typeName;
