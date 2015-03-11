@@ -34,7 +34,7 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
                 liquibase.update(new Contexts(getContexts()), getLabels());
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to update database.", e);
+            throw new BuildException("Unable to update database. " + e.toString(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate update SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);
         } catch (IOException e) {

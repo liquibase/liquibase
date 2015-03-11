@@ -82,7 +82,7 @@ public abstract class BaseLiquibaseTask extends Task {
                 executeWithLiquibaseClassloader();
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to initialize Liquibase.", e);
+            throw new BuildException("Unable to initialize Liquibase. " + e.toString(), e);
         } finally {
             closeDatabase(database);
             classLoader.resetThreadContextLoader();

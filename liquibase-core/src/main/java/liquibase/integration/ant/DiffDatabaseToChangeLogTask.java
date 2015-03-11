@@ -52,7 +52,7 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
             } catch (ParserConfigurationException e) {
                 throw new BuildException("Unable to diff databases to change log file. Error configuring parser.", e);
             } catch (DatabaseException e) {
-                throw new BuildException("Unable to diff databases to change log file.", e);
+                throw new BuildException("Unable to diff databases to change log file. " + e.toString(), e);
             } finally {
                 FileUtils.close(printStream);
             }
