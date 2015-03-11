@@ -16,7 +16,7 @@ public class TimestampType extends DateTimeType {
             if (getRawDefinition().contains(" ")) {
                 return new DatabaseDataType(getRawDefinition());
             }
-            return new DatabaseDataType("TIMESTAMP");
+            return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("DATETIME");
