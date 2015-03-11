@@ -136,4 +136,13 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("[MySchema].MyUDT"));
         assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("[MySchema].[MyUDT]"));
     }
+
+    @Test
+    public void testUnescapeDataTypeString() {
+        Database database = getDatabase();
+        assertEquals("int", database.unescapeDataTypeString("int"));
+        assertEquals("int", database.unescapeDataTypeString("[int]"));
+        assertEquals("decimal(19, 2)", database.unescapeDataTypeString("decimal(19, 2)"));
+        assertEquals("decimal(19, 2)", database.unescapeDataTypeString("[decimal](19, 2)"));
+    }
 }

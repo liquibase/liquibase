@@ -71,7 +71,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
             String typeString = ddt.toString();
             if (referenceDatabase instanceof MSSQLDatabase) {
-                typeString = referenceDatabase.unescapeDataTypeName(typeString);
+                typeString = referenceDatabase.unescapeDataTypeString(typeString);
             }
             columnConfig.setType(typeString);
 

@@ -338,5 +338,7 @@ public interface Database extends PrioritizedService {
     String escapeDataTypeName(String dataTypeName);
 
     String unescapeDataTypeName(String dataTypeName);
+
+	String unescapeDataTypeString(String dataTypeString);
 }
 
