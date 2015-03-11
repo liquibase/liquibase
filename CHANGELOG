@@ -1,0 +1,16 @@
+# liquibase
+Main Liquibase Source
+
+This branch deals specifically with Mysql dump and MySQL to Oracle Migration issues.
+Here is a changelog so far:
+
+Changelog specific changes and features: 
+Creating multiple changelog files at once, Including or Excluding only certain tables in data or creation dump.
+
+For Data Dump
+Heapspace issue encountered when dumping large tables. 
+
+For MySQL dump
+Fulltext Index, SQL escape, Table Engine, Column Datatype replicated exactly as created. 
+
+
