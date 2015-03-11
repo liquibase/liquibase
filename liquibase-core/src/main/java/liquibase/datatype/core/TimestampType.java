@@ -21,7 +21,7 @@ public class TimestampType extends DateTimeType {
             return new DatabaseDataType("TIMESTAMP");
         }
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("[datetime]");
+            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
         return super.toDatabaseDataType(database);
     }

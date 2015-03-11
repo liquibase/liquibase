@@ -23,7 +23,7 @@ public class CharType extends LiquibaseDataType {
                 if (!param1.matches("\\d+")
                         || new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0) {
 
-                    return new DatabaseDataType("[char]", 8000); 
+                    return new DatabaseDataType(database.escapeDataTypeName("char"), 8000);
                 }
             }
             if (parameters.length == 0) {
@@ -31,7 +31,7 @@ public class CharType extends LiquibaseDataType {
             } else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[char]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("char"), parameters);
         }
         return super.toDatabaseDataType(database);
     }

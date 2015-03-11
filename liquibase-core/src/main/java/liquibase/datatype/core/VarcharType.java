@@ -36,11 +36,11 @@ public class VarcharType extends CharType {
 
                     try {
                         if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                            return new DatabaseDataType("[varchar]", "8000");
+                            return new DatabaseDataType(database.escapeDataTypeName("varchar"), "8000");
                         }
                     } catch (DatabaseException ignore) { } //assuming it is a newer version
 
-                    return new DatabaseDataType("[varchar]", "MAX");
+                    return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
                 }
             }
             if (parameters.length == 0) {
@@ -48,7 +48,7 @@ public class VarcharType extends CharType {
             } else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[varchar]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("varchar"), parameters);
         }
 
         return super.toDatabaseDataType(database);

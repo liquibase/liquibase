@@ -1,8 +1,9 @@
 package liquibase.structure.core;
 
-import java.math.BigInteger;
+import liquibase.structure.AbstractDatabaseObject;
+import liquibase.structure.DatabaseObject;
 
-public class DataType {
+public class DataType extends AbstractDatabaseObject {
 
     private String typeName;
 
@@ -110,5 +111,27 @@ public class DataType {
     public static enum ColumnSizeUnit {
         BYTE,
         CHAR,
+    }
+
+    @Override
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return getAttribute("name", String.class);
+    }
+
+    @Override
+    public DataType setName(String name) {
+        setAttribute("name", name);
+        typeName = name;
+        return this;
+    }
+
+    @Override
+    public Schema getSchema() {
+        return null;
     }
 }

@@ -23,7 +23,7 @@ public class FloatType  extends LiquibaseDataType {
                     || "java.lang.Float".equals(originalDefinition)
                     || "java.sql.Types.REAL".equals(originalDefinition)) {
 
-                return new DatabaseDataType("[real]");
+                return new DatabaseDataType(database.escapeDataTypeName("real"));
             }
             Object[] parameters = getParameters();
             if (parameters.length == 0) {
@@ -32,7 +32,7 @@ public class FloatType  extends LiquibaseDataType {
             else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[float]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("float"), parameters);
         }
         if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("FLOAT");

@@ -163,5 +163,9 @@ public class DataTypeFactoryTest extends Specification {
         "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | new MSSQLDatabase()   | "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | UnknownType   | false
         "xml(DOCUMENT [MySchema].[MyXmlSchemaCollection])"   | new MSSQLDatabase()   | "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | UnknownType   | false
         "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | new MSSQLDatabase()   | "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | UnknownType   | false
+        "MySchema.MyUDT"                                     | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
+        "MySchema.[MyUDT]"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
+        "[MySchema].MyUDT"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
+        "[MySchema].[MyUDT]"                                 | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
     }
 }

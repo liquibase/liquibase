@@ -2,7 +2,6 @@ package liquibase.datatype.core;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Locale;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -39,7 +38,7 @@ public class BlobType extends LiquibaseDataType {
                 } else if (parameters.length > 1) {
                     parameters = Arrays.copyOfRange(parameters, 0, 1);
                 }
-                return new DatabaseDataType("[varbinary]", parameters);
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), parameters);
             }
             if (originalDefinition.equalsIgnoreCase("binary")
                     || originalDefinition.equals("[binary]")
@@ -51,12 +50,12 @@ public class BlobType extends LiquibaseDataType {
                 } else if (parameters.length > 1) {
                     parameters = Arrays.copyOfRange(parameters, 0, 1);
                 }
-                return new DatabaseDataType("[binary]", parameters);
+                return new DatabaseDataType(database.escapeDataTypeName("binary"), parameters);
             }
             if (originalDefinition.equalsIgnoreCase("image")
                     || originalDefinition.equals("[image]")) {
 
-                return new DatabaseDataType("[image]");
+                return new DatabaseDataType(database.escapeDataTypeName("image"));
             }
             boolean max = true;
             if (parameters.length > 0) {
@@ -67,17 +66,17 @@ public class BlobType extends LiquibaseDataType {
             if (max) {
                 try {
                     if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                        return new DatabaseDataType("[image]");
+                        return new DatabaseDataType(database.escapeDataTypeName("image"));
                     }
                 } catch (DatabaseException ignore) {
                 } //assuming it is a newer version
 
-                return new DatabaseDataType("[varbinary]", "MAX");
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), "MAX");
             }
             if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[varbinary]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("varbinary"), parameters);
         }
         if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {

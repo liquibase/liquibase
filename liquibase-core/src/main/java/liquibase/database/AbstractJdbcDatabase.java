@@ -69,6 +69,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected String sequenceCurrentValueFunction;
     protected String quotingStartCharacter = "\"";
     protected String quotingEndCharacter = "\"";
+    protected String quotingEndReplacement = "\"\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -972,7 +973,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return quotingStartCharacter + escapeStringForDatabase(objectName) + quotingEndCharacter;
+        if (objectName == null) {
+            return null;
+        }
+
+        return quotingStartCharacter
+                + objectName.replace(quotingEndCharacter, quotingEndReplacement)
+                + quotingEndCharacter;
     }
 
     @Override
@@ -1467,5 +1474,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
 	public String getSystemSchema(){
     	return "information_schema";
+    }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
     }
 }

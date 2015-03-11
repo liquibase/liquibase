@@ -11,7 +11,7 @@ public class DoubleType  extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("[float](53)");
+            return new DatabaseDataType(database.escapeDataTypeName("float"), 53);
         }
         if (database instanceof MySQLDatabase) {
             return new DatabaseDataType("DOUBLE", getParameters());

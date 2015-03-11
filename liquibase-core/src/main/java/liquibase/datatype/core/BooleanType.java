@@ -28,7 +28,7 @@ public class BooleanType extends LiquibaseDataType {
         if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("[bit]");
+            return new DatabaseDataType(database.escapeDataTypeName("bit"));
         } else if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());

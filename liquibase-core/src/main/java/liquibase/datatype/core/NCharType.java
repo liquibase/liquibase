@@ -29,7 +29,7 @@ public class NCharType extends CharType {
                 if (!param1.matches("\\d+")
                         || new BigInteger(param1).compareTo(BigInteger.valueOf(4000)) > 0) {
 
-                    return new DatabaseDataType("[nchar]", 4000);
+                    return new DatabaseDataType(database.escapeDataTypeName("nchar"), 4000);
                 }
             }
             if (parameters.length == 0) {
@@ -37,7 +37,7 @@ public class NCharType extends CharType {
             } else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType("[nchar]", parameters);
+            return new DatabaseDataType(database.escapeDataTypeName("nchar"), parameters);
         }
         return super.toDatabaseDataType(database);
     }

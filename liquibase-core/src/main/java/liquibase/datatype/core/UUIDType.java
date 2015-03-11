@@ -21,7 +21,7 @@ public class UUIDType extends LiquibaseDataType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("[uniqueidentifier]");
+            return new DatabaseDataType(database.escapeDataTypeName("uniqueidentifier"));
         }
         if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("UNIQUEIDENTIFIER");
