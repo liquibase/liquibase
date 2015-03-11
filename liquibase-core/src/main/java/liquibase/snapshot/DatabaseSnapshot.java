@@ -403,7 +403,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                             object.setAttribute(attr, newList);
                         }
                     } else {
-                        if (ObjectUtil.hasProperty(object, attr)) {
+                        if (value != null && ObjectUtil.hasProperty(object, attr)) {
                             object.setAttribute(attr, null);
                             ObjectUtil.setProperty(object, attr, value);
                         }

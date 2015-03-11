@@ -88,6 +88,11 @@ public class ObjectUtil {
         }
 
         try {
+            if (!method.getParameterTypes()[0].isAssignableFrom(propertyValue.getClass())) {
+                setProperty(object, propertyName, propertyValue.toString());
+                return;
+            }
+
             method.invoke(object, propertyValue);
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseException(e);
