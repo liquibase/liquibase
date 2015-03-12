@@ -439,6 +439,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return schemaName + "." + dataTypeName;
     }
 
+    @Override
     public String unescapeDataTypeName(String dataTypeName) {
          int indexOfPeriod = dataTypeName.indexOf('.');
 
@@ -463,6 +464,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
          return schemaName + "." + dataTypeName;
     }
 
+    @Override
     public String unescapeDataTypeString(String dataTypeString) {
         int indexOfLeftParen = dataTypeString.indexOf('(');
         if (indexOfLeftParen < 0) {
