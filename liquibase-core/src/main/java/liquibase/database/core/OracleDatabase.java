@@ -111,11 +111,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 	@Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
        
-       if ( objectType.getName().endsWith(".Column") || objectType.getName().endsWith(".Table") || objectType.getName().endsWith(".Catalog")) {
+        if ( !StringUtils.isUpperCase( objectName ) && ( objectType.getName().endsWith(".Column") || objectType.getName().endsWith(".Table") || objectType.getName().endsWith(".Catalog") ) ) {
             return "\"" + objectName + "\"";
-        } else {
-            return super.escapeObjectName(objectName, objectType);
-        }
+         } else {
+             return super.escapeObjectName(objectName, objectType);
+         }
         
     }
 
@@ -341,5 +341,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
 
         return userDefinedTypes;
+    }
+    
+    @Override
+    protected String getAutoIncrementClause() {
+        return "";
     }
 }

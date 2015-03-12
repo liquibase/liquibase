@@ -13,6 +13,8 @@ public class StringUtils {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final Pattern islowerCasePattern = Pattern.compile("[a-z]");
+    private static final Pattern isupperCasePattern = Pattern.compile("[A-Z]");
+    private static final Pattern isAlphabetPattern = Pattern.compile("[A-Za-z]");
 
 
     /**
@@ -263,13 +265,67 @@ public class StringUtils {
     }
     
     
+    public static String oracleTriggerName( String name, String trigger ){
+        
+        // _ ___UDX = 7
+         String combined = name+trigger;
+        
+        if( name.length() > (29-trigger.length()) ){
+            int split = (name.length()/(29-trigger.length()))+1;
+            String newname = "";
+            
+            for( int x=0; x<name.length(); x++ ){
+            
+                if( x%split==0 ){
+                    newname += name.substring(x, x+1);
+                }
+                
+            }
+            
+            name = newname+trigger;            
+        }else{
+            name = combined;
+        }
+        
+        return name;
+        
+    }
+    
+    
     public static boolean isLowerCase(String string) {
         
         if( string != null ){
             if( string.length() > 0 ){
                 for( int x=0; x<string.length(); x++ ){
-                    if( !Character.isLowerCase( string.charAt(x) ) ){
-                        return false;
+                    if( isAlphabetPattern.matcher( String.valueOf(string.charAt(x) ) ).matches() ){
+                        if( !Character.isLowerCase( string.charAt(x) ) ){
+                            return false;
+                        }
+                    }
+                }
+            }else{
+            
+                    return false;
+            
+            }
+        }else{
+            
+            return false;
+            
+        }
+        return true;
+    }
+    
+     
+    public static boolean isUpperCase(String string) {
+        
+        if( string != null ){
+            if( string.length() > 0 ){
+                for( int x=0; x<string.length(); x++ ){
+                    if( isAlphabetPattern.matcher( String.valueOf(string.charAt(x) ) ).matches() ){
+                        if( !Character.isUpperCase( string.charAt(x) ) ){
+                            return false;
+                        }
                     }
                 }
             }else{

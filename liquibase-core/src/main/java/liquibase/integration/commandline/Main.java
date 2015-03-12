@@ -185,6 +185,7 @@ public class Main {
             }
         } catch (Throwable e) {
             String message = e.getMessage();
+            System.out.println(e);
 	        if ( e.getCause() != null ) {
 		        message = e.getCause().getMessage();
 	        }

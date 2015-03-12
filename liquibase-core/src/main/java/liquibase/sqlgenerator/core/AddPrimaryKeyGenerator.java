@@ -46,11 +46,18 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
                     sql += " USING INDEX TABLESPACE "+statement.getTablespace();
                 }
             }
+            
+            return new Sql[] {
+                    new UnparsedSql(sql, getAffectedPrimaryKey(statement))
+            };
+            
+        }else{
+            
+            return null;
+            
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedPrimaryKey(statement))
-        };
+        
     }
 
     protected PrimaryKey getAffectedPrimaryKey(AddPrimaryKeyStatement statement) {
