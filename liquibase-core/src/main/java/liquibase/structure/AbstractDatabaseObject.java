@@ -5,12 +5,11 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.structure.core.Column;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
@@ -130,7 +129,23 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
+        for (ParsedNode child : parsedNode.getChildren()) {
+            String name = child.getName();
+            if (name.equals("snapshotId")) {
+                this.snapshotId = child.getValue(String.class);
+                continue;
+            }
+
+            Class propertyType = ObjectUtil.getPropertyType(this, name);
+            if (propertyType != null && Collection.class.isAssignableFrom(propertyType) && !(child.getValue() instanceof Collection)) {
+                if (this.attributes.get(name) == null) {
+                    this.setAttribute(name, new ArrayList<Column>());
+                }
+                this.getAttribute(name, List.class).add(child.getValue());
+            } else {
+                this.attributes.put(name, child.getValue());
+            }
+        }
     }
 
     @Override

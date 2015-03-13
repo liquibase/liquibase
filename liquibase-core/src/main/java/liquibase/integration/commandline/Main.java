@@ -945,6 +945,7 @@ public class Main {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
+                command.setSerializerFormat(getCommandParam("snapshotFormat", null));
                 System.out.println(command.execute());
                 return;
             } else if ("executeSql".equalsIgnoreCase(command)) {
