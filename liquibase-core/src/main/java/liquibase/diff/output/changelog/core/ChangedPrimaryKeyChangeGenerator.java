@@ -57,7 +57,10 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = pk.getBackingIndex();
             if (backingIndex != null && backingIndex.getName() != null) {
-                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+                Change[] indexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+                if (indexChanges != null) {
+                    returnList.addAll(Arrays.asList(indexChanges));
+                }
 
                 addPkChange.setForIndexName(backingIndex.getName());
                 Schema schema = backingIndex.getSchema();

@@ -841,12 +841,18 @@ public class Liquibase {
     }
 
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels) throws LiquibaseException {
+        return listUnrunChangeSets(contexts, labels, true);
+    }
+
+    protected List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
 
         DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
-        checkLiquibaseTables(true, changeLog, contexts, labels);
+        if (checkLiquibaseTables) {
+            checkLiquibaseTables(true, changeLog, contexts, labels);
+        }
 
         changeLog.validate(database, contexts, labels);
 
@@ -864,16 +870,21 @@ public class Liquibase {
         return getChangeSetStatuses(contexts, new LabelExpression());
     }
 
-    /**
-     * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they would be ran.
-     */
     public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        return getChangeSetStatuses(contexts, labelExpression, true);
+    }
+        /**
+         * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they would be ran.
+         */
+    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
         DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
-        checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+        if (checkLiquibaseTables) {
+            checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+        }
 
         changeLog.validate(database, contexts, labelExpression);
 
@@ -897,7 +908,7 @@ public class Liquibase {
         changeLogParameters.setLabels(labels);
 
         try {
-            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels);
+            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts, labels, false);
             if (unrunChangeSets.size() == 0) {
                 out.append(getDatabase().getConnection().getConnectionUserName());
                 out.append("@");

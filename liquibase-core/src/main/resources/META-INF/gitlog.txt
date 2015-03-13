@@ -1,3 +1,9 @@
+8bc8e46 Include ran changeSet in ChangeSetStatus
+09a5c7e CORE-2288 Do not check/updatedatabasechangelog table on status
+1171f91 CORE-2288 Do not check/updatedatabasechangelog table on status
+3770fc6 Increase fetch size for potentially faster access
+489a4ba CORE-2266 DiffChangeLog: Invalid changelog when a primary key backing index is changed.
+07cae38 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 e13a8b7 CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
 37079a3 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 df2ac6d CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'

@@ -71,7 +71,7 @@ public class IndexComparator implements DatabaseObjectComparator {
                         return false;
                     }
                 }
-                return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
+                return true;
             }
         } else {
             if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
