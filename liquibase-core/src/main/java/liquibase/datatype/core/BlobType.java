@@ -11,7 +11,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "blob", aliases = { "longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
 
     @Override
@@ -83,6 +83,10 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType("BLOB");
             } else if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.equals("java.sql.Types.VARBINARY")) {
                 return new DatabaseDataType("VARBINARY", getParameters());
+            } else if (originalDefinition.toLowerCase().startsWith("tinyblob")) {
+                return new DatabaseDataType("TINYBLOB");
+            } else if (originalDefinition.toLowerCase().startsWith("mediumblob")) {
+                return new DatabaseDataType("MEDIUMBLOB");
             } else {
                 return new DatabaseDataType("LONGBLOB");
             }
