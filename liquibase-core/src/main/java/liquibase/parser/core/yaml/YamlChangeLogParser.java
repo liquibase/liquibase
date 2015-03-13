@@ -16,28 +16,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.util.*;
 
-public class YamlChangeLogParser implements ChangeLogParser {
-
-    protected Logger log = LogFactory.getLogger();
-
-    @Override
-    public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        for (String extension : getSupportedFileExtensions()) {
-            if (changeLogFile.toLowerCase().endsWith("." + extension)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected String[] getSupportedFileExtensions() {
-        return new String[] {"yaml", "yml"};
-    }
-
-    @Override
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {

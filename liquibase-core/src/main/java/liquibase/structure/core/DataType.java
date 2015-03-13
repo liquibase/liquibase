@@ -1,8 +1,14 @@
 package liquibase.structure.core;
 
-import java.math.BigInteger;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.util.ObjectUtil;
 
-public class DataType {
+import java.util.Set;
+
+public class DataType extends AbstractLiquibaseSerializable {
 
     private String typeName;
 
@@ -14,12 +20,19 @@ public class DataType {
     private Integer radix;
     private Integer characterOctetLength;
 
+    public DataType() {
+    }
+
     public DataType(String typeName) {
         this.typeName = typeName;
     }
 
     public String getTypeName() {
         return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public Integer getDataTypeId() {
@@ -110,5 +123,15 @@ public class DataType {
     public static enum ColumnSizeUnit {
         BYTE,
         CHAR,
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+        return "dataType";
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_SNAPSHOT_NAMESPACE;
     }
 }
