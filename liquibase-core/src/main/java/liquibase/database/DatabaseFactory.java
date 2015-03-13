@@ -161,7 +161,7 @@ public class DatabaseFactory {
                                              String propertyProviderClass,
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
         if (url.startsWith("offline:")) {
-            return new OfflineConnection(url);
+            return new OfflineConnection(url, resourceAccessor);
         }
 
         driver = StringUtils.trimToNull(driver);

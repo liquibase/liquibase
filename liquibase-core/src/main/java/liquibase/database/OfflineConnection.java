@@ -4,16 +4,24 @@ import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
+import liquibase.parser.SnapshotParser;
+import liquibase.parser.SnapshotParserFactory;
+import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +29,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
-    private String snapshotFile = null;
+    private DatabaseSnapshot snapshot = null;
     private boolean outputLiquibaseSql = false;
     private String changeLogFile = "databasechangelog.csv";
     private Boolean caseSensitive = false;
@@ -34,7 +42,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final Map<String, String> databaseParams = new HashMap<String, String>();
     private String connectionUserName;
 
-    public OfflineConnection(String url) {
+    public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
         Matcher matcher = Pattern.compile("offline:(\\w+)\\??(.*)").matcher(url);
         if (!matcher.matches()) {
@@ -76,7 +84,20 @@ public class OfflineConnection implements DatabaseConnection {
             } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
                 this.outputLiquibaseSql = Boolean.valueOf(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("snapshot")) {
-                this.snapshotFile = paramEntry.getValue();
+                String snapshotFile = paramEntry.getValue();
+                try {
+                    SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
+                    this.snapshot = parser.parse(snapshotFile, resourceAccessor);
+                    this.snapshot.getDatabase().setConnection(this);
+
+                    for (Catalog catalog : this.snapshot.get(Catalog.class)) {
+                        if (catalog.isDefault()) {
+                            this.catalog = catalog.getName();
+                        }
+                    }
+                } catch (LiquibaseException e) {
+                    throw new UnexpectedLiquibaseException("Cannot parse snapshot", e);
+                }
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
             }
@@ -107,8 +128,8 @@ public class OfflineConnection implements DatabaseConnection {
         return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql);
     }
 
-    public String getSnapshotFile() {
-        return snapshotFile;
+    public DatabaseSnapshot getSnapshot() {
+        return snapshot;
     }
 
     @Override

@@ -125,19 +125,11 @@ public class SnapshotGeneratorFactory {
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         if (database.getConnection() instanceof OfflineConnection) {
-            String snapshotFile = ((OfflineConnection) database.getConnection()).getSnapshotFile();
-            if (snapshotFile == null) {
+            DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot();
+            if (snapshot == null) {
                 throw new DatabaseException("No snapshotFile parameter specified for offline database");
             }
-            try {
-                FileSystemResourceAccessor resourceAccessor = new FileSystemResourceAccessor();
-                SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
-                return parser.parse(snapshotFile, database, resourceAccessor);
-            } catch (LiquibaseException e) {
-                throw new DatabaseException(e);
-            }
-
-
+            return snapshot;
         }
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }

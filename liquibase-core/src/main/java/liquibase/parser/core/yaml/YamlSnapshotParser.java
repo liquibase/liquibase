@@ -1,6 +1,7 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseParseException;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.core.ParsedNode;
@@ -18,7 +19,7 @@ import java.util.Map;
 public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
 
     @Override
-    public DatabaseSnapshot parse(String path, Database database, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
+    public DatabaseSnapshot parse(String path, ResourceAccessor resourceAccessor) throws LiquibaseParseException {
         Yaml yaml = new Yaml();
 
         try {
@@ -39,6 +40,9 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
                 throw new LiquibaseParseException("Could not find root snapshot node");
             }
 
+            String shortName = (String) ((Map) rootList.get("database")).get("shortName");
+
+            Database database = DatabaseFactory.getInstance().getDatabase(shortName);
             DatabaseSnapshot snapshot = new RestoredDatabaseSnapshot(database);
             ParsedNode snapshotNode = new ParsedNode(null, "snapshot");
             snapshotNode.setValue(rootList);

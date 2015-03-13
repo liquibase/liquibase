@@ -5,6 +5,7 @@ import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
+import liquibase.structure.DatabaseObjectComparator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -50,9 +51,11 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             }
         }
         if (object instanceof DatabaseObjectCollection) {
-            Map<String, Object> returnMap = new HashMap<String, Object>();
+            SortedMap<String, Object> returnMap = new TreeMap<String, Object>();
             for (Map.Entry<Class<? extends DatabaseObject>,Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
-                returnMap.put(entry.getKey().getName(), new ArrayList(entry.getValue()));
+                ArrayList value = new ArrayList(entry.getValue());
+                Collections.sort(value, new DatabaseObjectComparator());
+                returnMap.put(entry.getKey().getName(), value);
             }
             return returnMap;
         }
