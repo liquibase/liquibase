@@ -2,18 +2,27 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Column extends AbstractDatabaseObject {
+
+    private static final Pattern OBJECT_DATA_TYPE_PATTERN = Pattern.compile("(.*)#\\{(.*)\\}");
 
     private String name;
     private Boolean computed;
@@ -302,6 +311,32 @@ public class Column extends AbstractDatabaseObject {
             type.load(typeNode, resourceAccessor);
             setType(type);
         }
+
+        ParsedNode defaultValueNode = parsedNode.getChild(null, "defaultValue");
+        try {
+            if (defaultValueNode != null) {
+                Object value = defaultValueNode.getValue();
+                if (value instanceof String) {
+                    Matcher matcher = OBJECT_DATA_TYPE_PATTERN.matcher((String) value);
+                    if (matcher.matches()) {
+                        String stringValue = matcher.group(1);
+                        Class<?> aClass = Class.forName(matcher.group(2));
+                        Object defaultValue;
+                        if (Date.class.isAssignableFrom(aClass)) {
+                            Date date = new ISODateFormat().parse(stringValue);
+                            defaultValue = aClass.getConstructor(long.class).newInstance(date.getTime());
+                        } else {
+                            defaultValue = aClass.getConstructor(String.class).newInstance(stringValue);
+                        }
+                        defaultValueNode.setValue(defaultValue);
+                        this.setDefaultValue(defaultValue);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
     }
 
     public static class AutoIncrementInformation {

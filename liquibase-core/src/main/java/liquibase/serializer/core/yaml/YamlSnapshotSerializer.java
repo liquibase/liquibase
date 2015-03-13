@@ -3,9 +3,16 @@ package liquibase.serializer.core.yaml;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
+import liquibase.util.ISODateFormat;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -61,4 +68,35 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         }
         return super.toMap(object);
     }
+
+    protected LiquibaseRepresenter getLiquibaseRepresenter() {
+        return new SnapshotLiquibaseRepresenter();
+    }
+
+    public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
+
+        protected void init() {
+            multiRepresenters.put(DatabaseFunction.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(SequenceNextValueFunction.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(SequenceCurrentValueFunction.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(java.util.Date.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(java.sql.Date.class, new TypeStoringAsStringRepresenter());
+        }
+
+        private class TypeStoringAsStringRepresenter implements Represent {
+            @Override
+            public Node representData(Object data) {
+                String value;
+                if (data instanceof Date) {
+                    value = new ISODateFormat().format((Date) data);
+                } else {
+                    value = data.toString();
+                }
+
+
+                return representScalar(Tag.STR, value + "#{" + data.getClass().getName() + "}");
+            }
+        }
+    }
+
 }

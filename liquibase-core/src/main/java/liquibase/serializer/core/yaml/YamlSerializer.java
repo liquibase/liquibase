@@ -40,13 +40,17 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
             dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 
-            return new Yaml(new LiquibaseRepresenter(), dumperOptions);
+            return new Yaml(getLiquibaseRepresenter(), dumperOptions);
         }
 
 
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        return new Yaml(new LiquibaseRepresenter(), dumperOptions);
+        return new Yaml(getLiquibaseRepresenter(), dumperOptions);
+    }
+
+    protected LiquibaseRepresenter getLiquibaseRepresenter() {
+        return new LiquibaseRepresenter();
     }
 
     protected boolean isJson() {
@@ -67,6 +71,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             out = out.replaceAll("!!int \"(\\d+)\"", "$1");
             out = out.replaceAll("!!bool \"(\\w+)\"", "$1");
             out = out.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
+            out = out.replaceAll("!!float \"([^\"]*)\"", "$1");
             return out;
         } else {
             return yaml.dumpAsMap(toMap(object));
@@ -146,6 +151,10 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     public static class LiquibaseRepresenter extends Representer {
 
         public LiquibaseRepresenter() {
+            init();
+        }
+
+        protected void init() {
             multiRepresenters.put(DatabaseFunction.class, new AsStringRepresenter());
             multiRepresenters.put(SequenceNextValueFunction.class, new AsStringRepresenter());
             multiRepresenters.put(SequenceCurrentValueFunction.class, new AsStringRepresenter());
