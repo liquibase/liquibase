@@ -22,8 +22,6 @@ import java.util.regex.Pattern;
 
 public class Column extends AbstractDatabaseObject {
 
-    private static final Pattern OBJECT_DATA_TYPE_PATTERN = Pattern.compile("(.*)#\\{(.*)\\}");
-
     private String name;
     private Boolean computed;
 
@@ -311,32 +309,6 @@ public class Column extends AbstractDatabaseObject {
             type.load(typeNode, resourceAccessor);
             setType(type);
         }
-
-        ParsedNode defaultValueNode = parsedNode.getChild(null, "defaultValue");
-        try {
-            if (defaultValueNode != null) {
-                Object value = defaultValueNode.getValue();
-                if (value instanceof String) {
-                    Matcher matcher = OBJECT_DATA_TYPE_PATTERN.matcher((String) value);
-                    if (matcher.matches()) {
-                        String stringValue = matcher.group(1);
-                        Class<?> aClass = Class.forName(matcher.group(2));
-                        Object defaultValue;
-                        if (Date.class.isAssignableFrom(aClass)) {
-                            Date date = new ISODateFormat().parse(stringValue);
-                            defaultValue = aClass.getConstructor(long.class).newInstance(date.getTime());
-                        } else {
-                            defaultValue = aClass.getConstructor(String.class).newInstance(stringValue);
-                        }
-                        defaultValueNode.setValue(defaultValue);
-                        this.setDefaultValue(defaultValue);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
     }
 
     public static class AutoIncrementInformation {

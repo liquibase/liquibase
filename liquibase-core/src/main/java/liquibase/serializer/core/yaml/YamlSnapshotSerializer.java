@@ -81,6 +81,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             multiRepresenters.put(SequenceCurrentValueFunction.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(java.util.Date.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(java.sql.Date.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(Enum.class, new TypeStoringAsStringRepresenter());
         }
 
         private class TypeStoringAsStringRepresenter implements Represent {
@@ -89,6 +90,8 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                 String value;
                 if (data instanceof Date) {
                     value = new ISODateFormat().format((Date) data);
+                } else if (data instanceof Enum) {
+                    value = ((Enum) data).name();
                 } else {
                     value = data.toString();
                 }
