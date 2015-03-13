@@ -7,6 +7,8 @@ import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
@@ -64,8 +66,18 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
                 StringBuilder catalogBuffer = new StringBuilder();
                 for (Class type : includedTypes) {
-                    outputObjects(schema.getCatalog().getDatabaseObjects(type), type, catalogBuffer);
-                    outputObjects(schema.getDatabaseObjects(type), type, catalogBuffer);
+                    if (type.equals(Schema.class) || type.equals(Catalog.class) || type.equals(Column.class)) {
+                        continue;
+                    }
+                    List<DatabaseObject> objects = new ArrayList<DatabaseObject>(snapshot.get(type));
+                    ListIterator<DatabaseObject> iterator = objects.listIterator();
+                    while (iterator.hasNext()) {
+                        Schema objectSchema = iterator.next().getSchema();
+                        if (objectSchema == null || !objectSchema.equals(schema)) {
+                            iterator.remove();
+                        }
+                    }
+                    outputObjects(objects, type, catalogBuffer);
                 }
                 buffer.append(StringUtils.indent(catalogBuffer.toString(), 4));
 

@@ -28,7 +28,7 @@ public class DatabaseSupplier {
                         break;
                     } catch (SQLException e) {
                         System.out.println("Cannot connect to "+connectionSupplier.getJdbcUrl());
-                        database.setConnection(new OfflineConnection("offline:"+database.getShortName()));
+                        database.setConnection(new OfflineConnection("offline:"+database.getShortName(), null));
                     }
                 }
             }
