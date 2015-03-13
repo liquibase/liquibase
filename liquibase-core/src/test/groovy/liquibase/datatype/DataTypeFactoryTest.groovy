@@ -1,30 +1,8 @@
 package liquibase.datatype
 
 import liquibase.database.DatabaseFactory
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.datatype.core.BigIntType
-import liquibase.datatype.core.BlobType
-import liquibase.datatype.core.BooleanType
-import liquibase.datatype.core.CharType
-import liquibase.datatype.core.ClobType
-import liquibase.datatype.core.CurrencyType
-import liquibase.datatype.core.DateTimeType
-import liquibase.datatype.core.DateType
-import liquibase.datatype.core.DecimalType
-import liquibase.datatype.core.DoubleType
-import liquibase.datatype.core.FloatType;
-import liquibase.datatype.core.IntType
-import liquibase.datatype.core.MediumIntType
-import liquibase.datatype.core.NCharType
-import liquibase.datatype.core.NVarcharType
-import liquibase.datatype.core.NumberType
-import liquibase.datatype.core.SmallIntType
-import liquibase.datatype.core.TimeType
-import liquibase.datatype.core.TimestampType
-import liquibase.datatype.core.TinyIntType
-import liquibase.datatype.core.UUIDType
-import liquibase.datatype.core.UnknownType;
-import liquibase.datatype.core.VarcharType
+import liquibase.database.core.*
+import liquibase.datatype.core.*
 import liquibase.sdk.database.MockDatabase
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -57,6 +35,7 @@ public class DataTypeFactoryTest extends Specification {
         "serial8"                                            | new MockDatabase()    | "BIGINT"                                             | BigIntType    | true
         "int4"                                               | new MockDatabase()    | "INT"                                                | IntType       | false
         "serial4"                                            | new MockDatabase()    | "INT"                                                | IntType       | true
+        "real"                                               | new DB2Database()     | "REAL"                                               | FloatType     | false
         "bigint"                                             | new MSSQLDatabase()   | "[bigint]"                                           | BigIntType    | false
         "[bigint]"                                           | new MSSQLDatabase()   | "[bigint]"                                           | BigIntType    | false
         "binary"                                             | new MSSQLDatabase()   | "[binary](1)"                                        | BlobType      | false
@@ -71,7 +50,7 @@ public class DataTypeFactoryTest extends Specification {
         "[char]"                                             | new MSSQLDatabase()   | "[char](1)"                                          | CharType      | false
         "char(8000)"                                         | new MSSQLDatabase()   | "[char](8000)"                                       | CharType      | false
         "[char](8000)"                                       | new MSSQLDatabase()   | "[char](8000)"                                       | CharType      | false
-        "clob"                                               | new MSSQLDatabase()   | "[nvarchar](MAX)"                                    | ClobType      | false
+        "clob"                                               | new MSSQLDatabase()   | "[varchar](MAX)"                                     | ClobType      | false
         "currency"                                           | new MSSQLDatabase()   | "[money]"                                            | CurrencyType  | false
         "date"                                               | new MSSQLDatabase()   | "[date]"                                             | DateType      | false
         "[date]"                                             | new MSSQLDatabase()   | "[date]"                                             | DateType      | false
@@ -104,6 +83,7 @@ public class DataTypeFactoryTest extends Specification {
         "[nchar]"                                            | new MSSQLDatabase()   | "[nchar](1)"                                         | NCharType     | false
         "nchar(4000)"                                        | new MSSQLDatabase()   | "[nchar](4000)"                                      | NCharType     | false
         "[nchar](4000)"                                      | new MSSQLDatabase()   | "[nchar](4000)"                                      | NCharType     | false
+        "nclob"                                              | new MSSQLDatabase()   | "[nvarchar](MAX)"                                    | ClobType      | false
         "ntext"                                              | new MSSQLDatabase()   | "[ntext]"                                            | ClobType      | false
         "[ntext]"                                            | new MSSQLDatabase()   | "[ntext]"                                            | ClobType      | false
         "number"                                             | new MSSQLDatabase()   | "[numeric](18, 0)"                                   | NumberType    | false
@@ -167,5 +147,11 @@ public class DataTypeFactoryTest extends Specification {
         "MySchema.[MyUDT]"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].MyUDT"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].[MyUDT]"                                 | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
+        "tinyblob"                                           | new MySQLDatabase()   | "TINYBLOB"                                           | BlobType      | false
+        "tinytext"                                           | new MySQLDatabase()   | "TINYTEXT"                                           | ClobType      | false
+        "mediumblob"                                         | new MySQLDatabase()   | "MEDIUMBLOB"                                         | BlobType      | false
+        "mediumtext"                                         | new MySQLDatabase()   | "MEDIUMTEXT"                                         | ClobType      | false
+        "real"                                               | new MySQLDatabase()   | "REAL"                                               | FloatType     | false
+        "nclob"                                              | new OracleDatabase()  | "NCLOB"                                              | ClobType      | false
     }
 }

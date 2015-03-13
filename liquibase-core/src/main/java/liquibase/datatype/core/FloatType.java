@@ -3,9 +3,7 @@ package liquibase.datatype.core;
 import java.util.Arrays;
 
 import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -33,6 +31,11 @@ public class FloatType  extends LiquibaseDataType {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
             return new DatabaseDataType(database.escapeDataTypeName("float"), parameters);
+        }
+        if (database instanceof MySQLDatabase || database instanceof DB2Database) {
+            if (originalDefinition.equalsIgnoreCase("REAL")) {
+                return new DatabaseDataType("REAL");
+            }
         }
         if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("FLOAT");

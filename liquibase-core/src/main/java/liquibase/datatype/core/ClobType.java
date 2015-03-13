@@ -1,8 +1,5 @@
 package liquibase.datatype.core;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -12,7 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB", "ntext", "java.sql.Types.NCLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "clob", aliases = { "longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB", "nclob", "longnvarchar", "ntext", "java.sql.Types.LONGNVARCHAR", "java.sql.Types.NCLOB", "tinytext", "mediumtext" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
     @Override
@@ -31,6 +28,10 @@ public class ClobType extends LiquibaseDataType {
         if (val.startsWith("'")) {
             return val;
         } else {
+            if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
+                return "N'"+database.escapeStringForDatabase(val)+"'";
+            }
+
             return "'"+database.escapeStringForDatabase(val)+"'";
         }
     }
@@ -54,29 +55,23 @@ public class ClobType extends LiquibaseDataType {
 
                 return new DatabaseDataType(database.escapeDataTypeName("ntext"));
             }
-            Object[] parameters = getParameters();
-            boolean max = true;
-            if (parameters.length > 0) {
-                String param1 = parameters[0].toString();
-                max = !param1.matches("\\d+")
-                        || new BigInteger(param1).compareTo(BigInteger.valueOf(4000L)) > 0;
-            }
-            if (max) {
-                try {
-                    if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                        return new DatabaseDataType(database.escapeDataTypeName("ntext"));
-                    }
-                } catch (DatabaseException ignore) { } //assuming it is a newer version
-
+            if (originalDefinition.equalsIgnoreCase("nclob")) {
                 return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
             }
-            if (parameters.length > 1) {
-                parameters = Arrays.copyOfRange(parameters, 0, 1);
-            }
-            return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), parameters);
+            try {
+                if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
+                    return new DatabaseDataType(database.escapeDataTypeName("text"));
+                }
+            } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+            return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
         } else if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("text")) {
                 return new DatabaseDataType("TEXT");
+            } else if (originalDefinition.toLowerCase().startsWith("tinytext")) {
+                return new DatabaseDataType("TINYTEXT");
+            } else if (originalDefinition.toLowerCase().startsWith("mediumtext")) {
+                return new DatabaseDataType("MEDIUMTEXT");
             } else {
                 return new DatabaseDataType("LONGTEXT");
             }
@@ -89,6 +84,9 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
+            if (originalDefinition.equalsIgnoreCase("nclob")) {
+                return new DatabaseDataType("NCLOB");
+            }
             return new DatabaseDataType("CLOB");
         } else if (database instanceof InformixDatabase) {
             if (originalDefinition.toLowerCase().startsWith("text")) {
