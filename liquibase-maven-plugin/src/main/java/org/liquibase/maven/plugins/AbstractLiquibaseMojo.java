@@ -305,7 +305,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        configureFieldsAndValues(getFileOpener(artifactClassLoader));
+        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
+        configureFieldsAndValues(fileOpener);
 
         LogFactory.getInstance().setDefaultLoggingLevel(logging);
 
@@ -318,7 +319,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         Database database = null;
         try {
             String dbPassword = emptyPassword || password == null ? "" : password;
-            database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
+            database = CommandLineUtils.createDatabaseObject(fileOpener,
                     url,
                     username,
                     dbPassword,
@@ -332,7 +333,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     propertyProviderClass,
                     changelogCatalogName,
                     changelogSchemaName);
-            liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
+            liquibase = createLiquibase(fileOpener, database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 
