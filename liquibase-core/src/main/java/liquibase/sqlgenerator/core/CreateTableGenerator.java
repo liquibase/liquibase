@@ -134,15 +134,21 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                         buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                     }
 
+                    buffer.append(" DEFAULT ");
+                    
                     if ( database instanceof OracleDatabase) {
-                        if( !defaultValue.equals("0000-00-00 00:00:00") &&  !defaultValue.equals("0000-00-00") &&  !defaultValue.equals("00:00:00") ){
-                            buffer.append(" DEFAULT ");
+                        if( defaultValue.equals("0000-00-00 00:00:00") || defaultValue.equals("0000-00-00")  || defaultValue.equals("00:00:00") ){
+                            defaultValue = "to_date('0001-01-01 00:00:00', 'yyyy-mm-dd hh24:mi:ss')";
+                            buffer.append(defaultValue);
+                        }else{
                             buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
                         }
-                    }else{
-                        buffer.append(" DEFAULT ");
+                    }else{                        
                         buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
                     }
+                    
+                    
+                    
                 }
 
                 if (isAutoIncrementColumn) {
@@ -192,7 +198,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                                                         "end;";
                              
                              
-                             
+                             //additionalSql.add(new UnparsedSql(sequence_drop));
                              additionalSql.add(new UnparsedSql(sequence));
                              additionalSql.add(new UnparsedSql(trigger));
                              
