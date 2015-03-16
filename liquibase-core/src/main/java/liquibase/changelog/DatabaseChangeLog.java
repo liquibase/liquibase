@@ -9,7 +9,11 @@ import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.*;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnknownChangelogFormatException;
+import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
@@ -19,14 +23,20 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
-import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Encapsulates the information stored in the change log XML file.
@@ -261,7 +271,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter, getStandardChangeLogComparator(), resourceAccessor);
+            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
+                    node.getChildValue(null, "ignoreMissingOrEmptyDirectory", false),
+                    getStandardChangeLogComparator(), resourceAccessor);
         } else if (nodeName.equals("preConditions")) {
             this.preconditionContainer = new PreconditionContainer();
             try {
@@ -297,7 +309,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter, Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
+    public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,
+                           boolean ignoreMissingOrEmptyDirectory,
+                           Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
         try {
             pathName = pathName.replace('\\', '/');
 
@@ -313,7 +327,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 relativeTo = this.getPhysicalFilePath();
             }
 
-            Set<String> unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
+            Set<String> unsortedResources = null;
+            try {
+                unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
+            } catch (FileNotFoundException e) {
+                if (!ignoreMissingOrEmptyDirectory){
+                    throw e;
+                }
+            }
             SortedSet<String> resources = new TreeSet<String>(resourceComparator);
             if (unsortedResources != null) {
                 for (String resourcePath : unsortedResources) {
@@ -323,7 +344,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            if (resources.size() == 0) {
+            if (resources.size() == 0 && !ignoreMissingOrEmptyDirectory) {
                 throw new SetupException("Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 
