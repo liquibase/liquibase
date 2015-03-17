@@ -18,8 +18,6 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
-    protected static final Pattern OBJECT_DATA_TYPE_PATTERN = Pattern.compile("(.*)#\\{(.*)\\}");
-
     private Map<String, Object> attributes = new HashMap<String, Object>();
 
     private String snapshotId;
@@ -152,7 +150,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             } else {
                 Object childValue = child.getValue();
                 if (childValue != null && childValue instanceof String) {
-                    Matcher matcher = OBJECT_DATA_TYPE_PATTERN.matcher((String) childValue);
+                    Matcher matcher = Pattern.compile("(.*)#\\{(.*)\\}").matcher((String) childValue);
                     if (matcher.matches()) {
                         String stringValue = matcher.group(1);
                         try {
