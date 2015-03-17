@@ -57,6 +57,9 @@ public class ObjectDifferences {
         Object referenceValue = referenceObject.getAttribute(attribute, Object.class);
         Object compareValue = compareToObject.getAttribute(attribute, Object.class);
 
+        referenceValue = undoCollection(referenceValue, compareValue);
+        compareValue = undoCollection(compareValue, referenceValue);
+
         boolean different;
         if (referenceValue == null && compareValue == null) {
             different = false;
@@ -71,6 +74,21 @@ public class ObjectDifferences {
         }
 
     }
+
+    /**
+     * Sometimes an attribute in one object is a single-entity collection and on the other it is just the object.
+     * Check the passed potentialCollection and if it is a single-entry collection of the same type as the otherObject, return just the collection element.
+     * Otherwise, return the original collection.
+     */
+    protected Object undoCollection(Object potentialCollection, Object otherObject) {
+        if (potentialCollection != null && otherObject != null && potentialCollection instanceof Collection && !(otherObject instanceof Collection)) {
+            if (((Collection) potentialCollection).size() == 1 && ((Collection) potentialCollection).iterator().next().getClass().equals(otherObject.getClass())) {
+                potentialCollection = ((Collection) potentialCollection).iterator().next();
+            }
+        }
+        return potentialCollection;
+    }
+
 
     public boolean removeDifference(String attribute) {
         return differences.remove(attribute) != null;
@@ -107,10 +125,6 @@ public class ObjectDifferences {
                 }
                 return referenceValue.equals(compareToValue);
             }
-
-
-
-
         }
     }
 
