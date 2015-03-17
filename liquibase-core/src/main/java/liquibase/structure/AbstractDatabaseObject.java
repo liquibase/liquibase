@@ -150,7 +150,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             } else {
                 Object childValue = child.getValue();
                 if (childValue != null && childValue instanceof String) {
-                    Matcher matcher = Pattern.compile("(.*)#\\{(.*)\\}").matcher((String) childValue);
+                    Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) childValue);
                     if (matcher.matches()) {
                         String stringValue = matcher.group(1);
                         try {

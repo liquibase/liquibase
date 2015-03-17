@@ -49,7 +49,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
     }
 
     protected Object convertEscaped(Object value) {
-        Matcher matcher = Pattern.compile("(.*)#\\{(.*)\\}").matcher((String) value);
+        Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) value);
         if (matcher.matches()) {
             String stringValue = matcher.group(1);
             try {

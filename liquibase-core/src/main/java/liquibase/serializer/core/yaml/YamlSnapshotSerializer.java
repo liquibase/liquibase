@@ -97,7 +97,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                 }
 
 
-                return representScalar(Tag.STR, value + "#{" + data.getClass().getName() + "}");
+                return representScalar(Tag.STR, value + "!{" + data.getClass().getName() + "}");
             }
         }
     }
