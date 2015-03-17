@@ -6,6 +6,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DataType;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class ObjectDifferences {
@@ -99,6 +100,11 @@ public class ObjectDifferences {
             if (referenceValue instanceof DatabaseObject && compareToValue instanceof DatabaseObject) {
                 return DatabaseObjectComparatorFactory.getInstance().isSameObject((DatabaseObject) referenceValue, (DatabaseObject) compareToValue, accordingTo);
             } else {
+                if ((referenceValue instanceof Number) && (compareToValue instanceof Number)
+                        && !referenceValue.getClass().equals(compareToValue.getClass())) { //standardize on a common number type
+                    referenceValue = new BigDecimal(referenceValue.toString());
+                    compareToValue = new BigDecimal(compareToValue.toString());
+                }
                 return referenceValue.equals(compareToValue);
             }
 
