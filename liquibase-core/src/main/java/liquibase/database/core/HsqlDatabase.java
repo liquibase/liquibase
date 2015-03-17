@@ -87,7 +87,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
      */
     public static boolean supportsDefaultValueComputed(String columnType, String defaultValue){
     	HashSet<String> possibleComputedValues = SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP.get(columnType);
-    	return (possibleComputedValues!=null) ? possibleComputedValues.contains(defaultValue) : false;
+    	return (possibleComputedValues!=null) && possibleComputedValues.contains(defaultValue);
     }
 
     @Override
