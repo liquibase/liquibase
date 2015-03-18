@@ -37,5 +37,7 @@ public class DataTypeFactoryTest extends Specification {
         "varchar(255) COLLATE Latin1_General_BIN" | null           | VarcharType.class | false
         "character varying(256)"                  | "varchar(256)" | VarcharType.class | false
         "serial8"                                 | "bigint"       | BigIntType        | true
+        "int4"                                    | "int"          | IntType.class     | false
+        "serial4"                                 | "int"          | IntType.class     | true
     }
 }
