@@ -96,7 +96,7 @@ public class OfflineConnection implements DatabaseConnection {
                         }
                     }
                 } catch (LiquibaseException e) {
-                    throw new UnexpectedLiquibaseException("Cannot parse snapshot", e);
+                    throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
                 }
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
