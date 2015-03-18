@@ -26,7 +26,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "utf-8"));
         writer.write(serialize(snapshot, true));
     }
 
@@ -97,7 +97,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
                 }
 
 
-                return representScalar(Tag.STR, value + "#{" + data.getClass().getName() + "}");
+                return representScalar(Tag.STR, value + "!{" + data.getClass().getName() + "}");
             }
         }
     }
