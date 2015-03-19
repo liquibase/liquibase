@@ -365,8 +365,6 @@ public class MainTest {
         }
         
         String[] singleArgCommand = { "updateCount", "updateCountSQL",
-                "rollback", "rollbackToDate", "rollbackCount",
-                "rollbackSQL", "rollbackToDateSQL", "rollbackCountSQL",
                 "tag", "dbDoc"
         };
         
