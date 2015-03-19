@@ -141,7 +141,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     value = null;
                 } else {
                     if (((Collection) value).iterator().next() instanceof DatabaseObject) {
-                        value = StringUtils.join((Collection) value, "\n", new StringUtils.StringUtilsFormatter() {
+                        value = StringUtils.join(new TreeSet<DatabaseObject>((Collection<DatabaseObject>) value), "\n", new StringUtils.StringUtilsFormatter() {
                             @Override
                             public String toString(Object obj) {
                                 if (obj instanceof DatabaseObject) {
