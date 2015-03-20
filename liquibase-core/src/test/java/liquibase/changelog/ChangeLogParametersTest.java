@@ -26,33 +26,33 @@ public class ChangeLogParametersTest {
         changeLogParameters.set("doubleSet", "originalValue");
         changeLogParameters.set("doubleSet", "newValue");
 
-        assertEquals("re-setting a param should not overwrite the value (like how ant works)", "originalValue", changeLogParameters.getValue("doubleSet"));
+        assertEquals("re-setting a param should not overwrite the value (like how ant works)", "originalValue", changeLogParameters.getValue("doubleSet", null));
     }
 
     @Test
     public void getParameterValue_systemProperty() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters();
 
-        assertEquals(System.getProperty("user.name"), changeLogParameters.getValue("user.name"));
+        assertEquals(System.getProperty("user.name"), changeLogParameters.getValue("user.name", null));
     }
 
     @Test
     public void setParameterValue_doubleSetButSecondWrongDatabase() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
-        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb");
+        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb", true, null);
         changeLogParameters.set("doubleSet", "newValue");
 
-        assertEquals("newValue", changeLogParameters.getValue("doubleSet"));
+        assertEquals("newValue", changeLogParameters.getValue("doubleSet", null));
     }
 
     @Test
     public void setParameterValue_multiDatabase() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
-        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), new Labels(), "baddb, h2", true, null);
 
-        assertEquals("originalValue", changeLogParameters.getValue("doubleSet"));
+        assertEquals("originalValue", changeLogParameters.getValue("doubleSet", null));
     }
 
     @Test
@@ -60,17 +60,17 @@ public class ChangeLogParametersTest {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
         changeLogParameters.setContexts(new Contexts("junit"));
 
-        changeLogParameters.set("doubleSet", "originalValue", "anotherContext", "anotherLabel", "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", "anotherContext", "anotherLabel", "baddb, h2", true, null);
 
-        assertNull(changeLogParameters.getValue("doubleSet"));
+        assertNull(changeLogParameters.getValue("doubleSet", null));
     }
    @Test
     public void setParameterValue_rightDBRightContext() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
         changeLogParameters.setContexts(new Contexts("junit"));
 
-        changeLogParameters.set("doubleSet", "originalValue", "junit", "junitLabel", "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", "junit", "junitLabel", "baddb, h2", true, null);
 
-        assertEquals("originalValue", changeLogParameters.getValue("doubleSet"));
+        assertEquals("originalValue", changeLogParameters.getValue("doubleSet", null));
     }
 }
