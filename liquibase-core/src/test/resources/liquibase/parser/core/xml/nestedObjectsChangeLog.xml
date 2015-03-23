@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="a">
+        <ext:createTableExample schemaName="dbo" tableName="Test" decimalValue="3.14159">
+            <ext:column name="id" type="bigint" nullable="false">
+                <ext:identity seed="1" increment="1" />
+            </ext:column>
+            <ext:column name="key1" type="nvarchar(40)" nullable="false" />
+            <ext:column name="key2" type="nvarchar(20)" nullable="false" />
+            <ext:column name="key3" type="nvarchar(10)" nullable="true" />
+            <ext:column name="value" type="nvarchar(MAX)" nullable="false" />
+            <ext:column name="lastUpdateDate" type="datetime2" nullable="false">
+                <ext:defaultConstraint name="DF_Test_lastUpdateDate">GETDATE()</ext:defaultConstraint>
+            </ext:column>
+            <ext:column name="partition" nullable="false">
+                <ext:computed persisted="true">[id] % 5</ext:computed>
+            </ext:column>
+            <ext:primaryKey name="PK_Test_id">
+                <ext:keyColumn name="id" />
+            </ext:primaryKey>
+            <ext:uniqueConstraint name="UQ_Test_key1">
+                <ext:keyColumn name="key1" />
+            </ext:uniqueConstraint>
+            <ext:uniqueConstraint name="UQ_Test_key2_key3_DESC">
+                <ext:keyColumn name="key2" />
+                <ext:keyColumn name="key3" descending="true" />
+            </ext:uniqueConstraint>
+        </ext:createTableExample>
+    </changeSet>
+
+</databaseChangeLog>
