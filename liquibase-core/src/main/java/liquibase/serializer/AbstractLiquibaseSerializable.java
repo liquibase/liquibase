@@ -62,7 +62,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                         childObject.load(childNode, resourceAccessor);
                         setSerializableFieldValue(childNode.getName(), childObject);
                     } else if (childNode.getValue() != null) {
-                        ObjectUtil.setProperty(this, childNode.getName(), childNode.getValue().toString());
+                        ObjectUtil.setProperty(this, childNode.getName(), convertEscaped(childNode.getValue().toString()));
                     }
                 } else {
                     for (String field : this.getSerializableFields()) {
