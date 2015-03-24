@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,8 +16,8 @@ import liquibase.statement.core.AddColumnStatement;
 
 public class OfflineDatabaseTest {
 
-	private Database createOfflineDatabase(String url) throws DatabaseException {
-		DatabaseConnection databaseConnection = new OfflineConnection(url);
+	private Database createOfflineDatabase(String url) throws Exception {
+		DatabaseConnection databaseConnection = new OfflineConnection(url, new JUnitResourceAccessor());
 		return DatabaseFactory.getInstance().openDatabase(url, null, null, null, null);
 	}
 
@@ -27,7 +28,7 @@ public class OfflineDatabaseTest {
 	 * @see <a href="https://liquibase.jira.com/browse/CORE-2192">CORE-2192</a>
 	 */
 	@Test
-	public void canOutputSQLFromOfflineOracleDB() {
+	public void canOutputSQLFromOfflineOracleDB() throws Exception {
 		AddColumnChange change = new AddColumnChange();
 		AddColumnConfig column1 = new AddColumnConfig();
 		column1.setName("column1");

@@ -70,7 +70,7 @@ public class CommandLineUtils {
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
 
-            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, new ClassLoaderResourceAccessor(classLoader));
+            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
             if (!database.supportsSchemas()) {
                 if (defaultSchemaName != null && defaultCatalogName == null) {
