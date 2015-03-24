@@ -22,6 +22,7 @@ import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
@@ -887,12 +888,13 @@ public class Main {
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url,
+        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
+
+        Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
             this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
         try {
 
 
-            CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
             boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
@@ -936,10 +938,10 @@ public class Main {
             }
 
             if ("diff".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons);
+                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams, fileOpener), database, StringUtils.trimToNull(diffTypes), finalSchemaComparisons);
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes), finalSchemaComparisons);
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams, fileOpener), database, diffOutputControl,  StringUtils.trimToNull(diffTypes), finalSchemaComparisons);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
                 String changeLogFile = this.changeLogFile;
@@ -973,7 +975,7 @@ public class Main {
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
-                Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams);
+                Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 command.setDatabase(referenceDatabase);
                 command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
                 System.out.println(command.execute());
@@ -1145,7 +1147,7 @@ public class Main {
         return defaultValue;
     }
 
-    private Database createReferenceDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, DatabaseException {
+    private Database createReferenceDatabaseFromCommandParams(Set<String> commandParams, ResourceAccessor resourceAccessor) throws CommandLineParsingException, DatabaseException {
         String driver = referenceDriver;
         String url = referenceUrl;
         String username = referenceUsername;
@@ -1183,7 +1185,7 @@ public class Main {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
-        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
+        return CommandLineUtils.createDatabaseObject(resourceAccessor, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();

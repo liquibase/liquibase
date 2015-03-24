@@ -13,9 +13,11 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.util.StringUtils;
 
+import javax.annotation.Resource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
@@ -27,7 +29,28 @@ import java.io.IOException;
  */
 public class CommandLineUtils {
 
+    /**
+     * @deprecated Use ResourceAccessor version
+     */
     public static Database createDatabaseObject(ClassLoader classLoader,
+                                                String url,
+                                                String username,
+                                                String password,
+                                                String driver,
+                                                String defaultCatalogName,
+                                                String defaultSchemaName,
+                                                boolean outputDefaultCatalog,
+                                                boolean outputDefaultSchema,
+                                                String databaseClass,
+                                                String driverPropertiesFile,
+                                                String propertyProviderClass,
+                                                String liquibaseCatalogName,
+                                                String liquibaseSchemaName) throws DatabaseException {
+
+            return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName);
+    }
+
+        public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
                                                 String url,
                                                 String username,
                                                 String password,
