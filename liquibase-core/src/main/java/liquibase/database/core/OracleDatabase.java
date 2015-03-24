@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -55,9 +56,16 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public void setConnection(DatabaseConnection conn) {
         Connection sqlConn = null;
         try {
-            Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-            wrappedConn.setAccessible(true);
-            sqlConn = (Connection) wrappedConn.invoke(conn);
+            /**
+             * Don't try to call getWrappedConnection if the conn instance is
+             * is not a JdbcConnection. This happens for OfflineConnection.
+             * @see <a href="https://liquibase.jira.com/browse/CORE-2192">CORE-2192</a>
+             **/
+            if (conn instanceof JdbcConnection) {
+                Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+                wrappedConn.setAccessible(true);
+                sqlConn = (Connection) wrappedConn.invoke(conn);
+            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

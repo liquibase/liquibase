@@ -235,7 +235,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     DataType.ColumnSizeUnit unit = null;
                     if ("C".equals(charUsed)) {
                         unit = DataType.ColumnSizeUnit.CHAR;
-                        type.setColumnSize(type.getColumnSize());
+                        type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
                     }
                     type.setColumnSizeUnit(unit);
                 }
