@@ -516,4 +516,29 @@ public class MainTest {
 
 		assertEquals(argValue, tested.password);
 	}
+
+    @Test
+    public void testDatabaseChangeLogTableName_Properties() throws IOException, CommandLineParsingException {
+        Main main = new Main();
+        Properties props = new Properties();
+        props.setProperty("databaseChangeLogTableName", "PROPSCHANGELOG");
+        props.setProperty("databaseChangeLogLockTableName", "PROPSCHANGELOGLOCK");
+        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
+        props.store(propFile, "");
+        main.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
+
+        assertEquals("PROPSCHANGELOG", main.databaseChangeLogTableName);
+        assertEquals("PROPSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+    }
+
+    @Test
+    public void testDatabaseChangeLogTableName_Options() throws IOException, CommandLineParsingException {
+        Main main = new Main();
+        String[] opts = {
+                "--databaseChangeLogTableName=OPTSCHANGELOG",
+                "--databaseChangeLogLockTableName=OPTSCHANGELOGLOCK"};
+        main.parseOptions(opts);
+        assertEquals("OPTSCHANGELOG", main.databaseChangeLogTableName);
+        assertEquals("OPTSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+    }
 }

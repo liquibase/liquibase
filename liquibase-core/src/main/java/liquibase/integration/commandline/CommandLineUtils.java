@@ -45,7 +45,9 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String propertyProviderClass,
                                                 String liquibaseCatalogName,
-                                                String liquibaseSchemaName) throws DatabaseException {
+                                                String liquibaseSchemaName,
+                                                String databaseChangeLogTableName,
+                                                String databaseChangeLogLockTableName) throws DatabaseException {
 
             return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName);
     }
@@ -63,12 +65,19 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String propertyProviderClass,
                                                 String liquibaseCatalogName,
-                                                String liquibaseSchemaName) throws DatabaseException {
+                                                String liquibaseSchemaName,
+                                                String databaseChangeLogTableName,
+                                                String databaseChangeLogLockTableName) throws DatabaseException {
+                                                String liquibaseSchemaName,
+                                                String databaseChangeLogTableName,
+                                                String databaseChangeLogLockTableName) throws DatabaseException {
         try {
             liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
             liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+            databaseChangeLogTableName = StringUtils.trimToNull(databaseChangeLogTableName);
+            databaseChangeLogLockTableName = StringUtils.trimToNull(databaseChangeLogLockTableName);
 
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
@@ -87,6 +96,14 @@ public class CommandLineUtils {
             database.setOutputDefaultSchema(outputDefaultSchema);
             database.setLiquibaseCatalogName(liquibaseCatalogName);
             database.setLiquibaseSchemaName(liquibaseSchemaName);
+            if (databaseChangeLogTableName!=null) {
+                database.setDatabaseChangeLogTableName(databaseChangeLogTableName);
+                if (databaseChangeLogLockTableName!=null) {
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogLockTableName);
+                } else {
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogTableName+"LOCK");
+                }
+            }
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);
