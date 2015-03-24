@@ -272,7 +272,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
-                    node.getChildValue(null, "ignoreMissingOrEmptyDirectory", false),
+                    node.getChildValue(null, "errorIfMissingOrEmpty", true),
                     getStandardChangeLogComparator(), resourceAccessor);
         } else if (nodeName.equals("preConditions")) {
             this.preconditionContainer = new PreconditionContainer();
@@ -310,7 +310,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,
-                           boolean ignoreMissingOrEmptyDirectory,
+                           boolean errorIfMissingOrEmpty,
                            Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
         try {
             pathName = pathName.replace('\\', '/');
@@ -331,7 +331,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             try {
                 unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
             } catch (FileNotFoundException e) {
-                if (!ignoreMissingOrEmptyDirectory){
+                if (errorIfMissingOrEmpty){
                     throw e;
                 }
             }
@@ -344,7 +344,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            if (resources.size() == 0 && !ignoreMissingOrEmptyDirectory) {
+            if (resources.size() == 0 && errorIfMissingOrEmpty) {
                 throw new SetupException("Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 

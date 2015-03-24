@@ -199,7 +199,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
 
         then:
         changeLogFile.changeSets.collect { it.filePath } == [ "com/example/children/file1.sql",
@@ -216,7 +216,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
 
         then:
         SetupException e = thrown()
@@ -224,7 +224,7 @@ create view sql_view as select * from sql_table;'''
 
     }
 
-    def "includeAll throws no exception when directory not found and ignoreMissingEmptyDirectory is true"() {
+    def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {
         when:
         def resourceAccessor = new MockResourceAccessor([
                 "com/example/children/file2.sql": "file 2",
@@ -233,7 +233,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
         then:
         changeLogFile.changeSets.collect {it.filePath } == []
 
