@@ -49,7 +49,7 @@ public class CommandLineUtils {
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {
 
-            return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName);
+            return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, databaseChangeLogLockTableName);
     }
 
         public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
@@ -65,9 +65,6 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String propertyProviderClass,
                                                 String liquibaseCatalogName,
-                                                String liquibaseSchemaName,
-                                                String databaseChangeLogTableName,
-                                                String databaseChangeLogLockTableName) throws DatabaseException {
                                                 String liquibaseSchemaName,
                                                 String databaseChangeLogTableName,
                                                 String databaseChangeLogLockTableName) throws DatabaseException {

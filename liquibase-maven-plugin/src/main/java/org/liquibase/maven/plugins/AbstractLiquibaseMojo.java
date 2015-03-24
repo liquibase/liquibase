@@ -261,6 +261,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.changelogCatalogName}"
      */
     protected String changelogCatalogName;
+
     /**
      * Schema against which Liquibase changelog tables will be created.
      *
@@ -274,6 +275,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter
      */
     private File driverPropertiesFile;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogTableName}"
+     */
+    protected String databaseChangeLogTableName;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogLockTableName}"
+     */
+    protected String databaseChangeLogLockTableName;
 
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -340,7 +355,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     driverPropsFile,
                     propertyProviderClass,
                     changelogCatalogName,
-                    changelogSchemaName);
+                    changelogSchemaName,
+                    databaseChangeLogTableName,
+                    databaseChangeLogLockTableName);
             liquibase = createLiquibase(fileOpener, database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
