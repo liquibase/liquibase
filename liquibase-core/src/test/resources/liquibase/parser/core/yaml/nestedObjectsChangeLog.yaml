@@ -1,0 +1,65 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: a
+        changes:
+            - createTableExample:
+                schemaName: dbo
+                tableName: Test
+                columns:
+                    - column:
+                        name: id
+                        type: bigint
+                        nullable: false
+                        identity:
+                            seed: 1
+                            increment: 1
+                    - column:
+                        name: key1
+                        type: nvarchar(40)
+                        nullable: false
+                    - column:
+                        name: key2
+                        type: nvarchar(20)
+                        nullable: false
+                    - column:
+                        name: key3
+                        type: nvarchar(10)
+                        nullable: true
+                    - column:
+                        name: value
+                        type: nvarchar(MAX)
+                        nullable: false
+                    - column:
+                        name: lastUpdateDate
+                        type: datetime2
+                        nullable: false
+                        defaultConstraint:
+                            name: DF_Test_lastUpdateDate
+                            expression: GETDATE()
+                    - column:
+                        name: partition
+                        nullable: false
+                        computed:
+                            expression: "[id] % 5"
+                            persisted: true
+                primaryKey:
+                    name: PK_Test_id
+                    keyColumns:
+                        - keyColumn:
+                            name: id
+                uniqueConstraints:
+                    - uniqueConstraint:
+                        name: UQ_Test_key1
+                        keyColumns:
+                        - keyColumn:
+                                name: key1
+                    - uniqueConstraint:
+                        name: UQ_Test_key2_key3_DESC
+                        keyColumns:
+                            - keyColumn:
+                                name: key2
+                            - keyColumn:
+                                name: key3
+                                descending: true
+                decimalValue: 3.14159
