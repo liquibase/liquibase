@@ -35,4 +35,27 @@ public class DataTypeFactoryTest extends Specification {
         "int4"                                               | new MockDatabase()    | "INT"                                                | IntType       | false
         "serial4"                                            | new MockDatabase()    | "INT"                                                | IntType       | true
     }
+
+    @Unroll("#featureName: #object for #database")
+    public void fromObject() throws Exception {
+        when:
+        def liquibaseType = DataTypeFactory.getInstance().fromObject(object, database)
+
+        then:
+        liquibaseType.objectToSql(object, database) == expectedSql
+        liquibaseType.getClass() == expectedType
+
+        where:
+        object                       | database           | expectedType | expectedSql
+        Integer.valueOf("10000000")  | new MockDatabase() | IntType      | "10000000"
+        Long.valueOf("10000000")     | new MockDatabase() | BigIntType   | "10000000"
+        new BigInteger("10000000")   | new MockDatabase() | BigIntType   | "10000000"
+        Float.valueOf("10000000.0")  | new MockDatabase() | FloatType    | "1.0E7"
+        Float.valueOf("10000000.1")  | new MockDatabase() | FloatType    | "1.0E7"
+        Double.valueOf("10000000.0") | new MockDatabase() | DoubleType   | "1.0E7"
+        Double.valueOf("10000000.1") | new MockDatabase() | DoubleType   | "1.00000001E7"
+        new BigDecimal("10000000.0") | new MockDatabase() | DecimalType  | "10000000"
+        new BigDecimal("10000000.1") | new MockDatabase() | DecimalType  | "10000000.1"
+        "10000000"                   | new MockDatabase() | VarcharType  | "'10000000'"
+    }
 }
