@@ -38,7 +38,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setNullable("").isNullable() == null
         new ConstraintsConfig().setNullable("null").isNullable() == null
         new ConstraintsConfig().setNullable("NULL").isNullable() == null
-        new ConstraintsConfig().setNullable((String) null).isNullable() == null
+        def constraint = new ConstraintsConfig().setNullable((String) null)
+        constraint.isNullable() == null
     }
 
 
@@ -61,7 +62,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setDeleteCascade("").isDeleteCascade() == null
         new ConstraintsConfig().setDeleteCascade("null").isDeleteCascade() == null
         new ConstraintsConfig().setDeleteCascade("NULL").isDeleteCascade() == null
-        new ConstraintsConfig().setDeleteCascade((String) null).isDeleteCascade() == null
+        def constraint = new ConstraintsConfig().setDeleteCascade((String) null)
+        constraint.isDeleteCascade() == null
     }
 
 
@@ -84,7 +86,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setInitiallyDeferred("").isInitiallyDeferred() == null
         new ConstraintsConfig().setInitiallyDeferred("null").isInitiallyDeferred() == null
         new ConstraintsConfig().setInitiallyDeferred("NULL").isInitiallyDeferred() == null
-        new ConstraintsConfig().setInitiallyDeferred((String) null).isInitiallyDeferred() == null
+        def constraint = new ConstraintsConfig().setInitiallyDeferred((String) null)
+        constraint.isInitiallyDeferred() == null
     }
 
 
@@ -107,7 +110,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setPrimaryKey("").isPrimaryKey() == null
         new ConstraintsConfig().setPrimaryKey("null").isPrimaryKey() == null
         new ConstraintsConfig().setPrimaryKey("NULL").isPrimaryKey() == null
-        new ConstraintsConfig().setPrimaryKey((String) null).isPrimaryKey() == null
+        def constraint = new ConstraintsConfig().setPrimaryKey((String) null)
+        constraint.isPrimaryKey() == null
     }
 
 
@@ -130,7 +134,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setUnique("").isUnique() == null
         new ConstraintsConfig().setUnique("null").isUnique() == null
         new ConstraintsConfig().setUnique("NULL").isUnique() == null
-        new ConstraintsConfig().setUnique((String) null).isUnique() == null
+        def constraint = new ConstraintsConfig().setUnique((String) null)
+        constraint.isUnique() == null
     }
 
 
@@ -153,7 +158,8 @@ public class ConstraintsConfigTest extends Specification {
         new ConstraintsConfig().setDeferrable("").isDeferrable() == null
         new ConstraintsConfig().setDeferrable("null").isDeferrable() == null
         new ConstraintsConfig().setDeferrable("NULL").isDeferrable() == null
-        new ConstraintsConfig().setDeferrable((String) null).isDeferrable() == null
+        def constraint = new ConstraintsConfig().setDeferrable((String) null)
+        constraint.isDeferrable() == null
     }
 
     def setDeferrable_badString() {

@@ -41,7 +41,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         assert statements[0] instanceof InsertOrUpdateStatement
     }
 
-    @Override
     def "generateChecksum produces different values with each field"() {
         LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
