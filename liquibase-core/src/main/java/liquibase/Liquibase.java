@@ -311,6 +311,43 @@ public class Liquibase {
         }
     }
 
+    public void update(String tag, String contexts) throws LiquibaseException {
+        update(tag, new Contexts(contexts), new LabelExpression());
+    }
+
+    public void update(String tag, Contexts contexts) throws LiquibaseException {
+        update(tag, contexts, new LabelExpression());
+    }
+
+    public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        changeLogParameters.setContexts(contexts);
+        changeLogParameters.setLabels(labelExpression);
+
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+        lockService.waitForLock();
+
+        try {
+
+            DatabaseChangeLog changeLog = getDatabaseChangeLog();
+
+            checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            changeLog.validate(database, contexts, labelExpression);
+
+            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
+                    new ContextChangeSetFilter(contexts),
+                    new LabelChangeSetFilter(labelExpression),
+                    new DbmsChangeSetFilter(database),
+                    new UpToTagChangeSetFilter(tag, ranChangeSetList));
+
+            logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+        } finally {
+            lockService.releaseLock();
+            resetServices();
+        }
+    }
+
     public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
         this.update(changesToApply, new Contexts(contexts), new LabelExpression(), output);
     }
@@ -326,6 +363,36 @@ public class Liquibase {
         outputHeader("Update " + changesToApply + " Change Sets Database Script");
 
         update(changesToApply, contexts, labelExpression);
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+
+        resetServices();
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
+    }
+
+    public void update(String tag, String contexts, Writer output) throws LiquibaseException {
+        update(tag, new Contexts(contexts), new LabelExpression(), output);
+    }
+
+    public void update(String tag, Contexts contexts, Writer output) throws LiquibaseException {
+        update(tag, contexts, new LabelExpression(), output);
+    }
+
+    public void update(String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(contexts);
+        changeLogParameters.setLabels(labelExpression);
+
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+
+        outputHeader("Update to '" + tag + "' Database Script");
+
+        update(tag, contexts, labelExpression);
 
         try {
             output.flush();
