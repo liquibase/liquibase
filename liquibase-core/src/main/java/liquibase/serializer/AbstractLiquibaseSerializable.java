@@ -5,9 +5,12 @@ import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializable {
 
@@ -24,7 +27,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                     if (value != null) {
                         value = value.toString();
                     }
-                    ObjectUtil.setProperty(this, childNode.getName(), (String) value);
+                    ObjectUtil.setProperty(this, childNode.getName(), convertEscaped(value));
                 }
             } catch (Exception e) {
                 throw new ParsedNodeException("Error setting property", e);
@@ -34,10 +37,36 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
         if (parsedNode.getValue() != null) {
             for (String field : this.getSerializableFields()) {
                 if (this.getSerializableFieldType(field) == SerializationType.DIRECT_VALUE) {
-                    ObjectUtil.setProperty(this, field, parsedNode.getValue(String.class));
+                    Object value = parsedNode.getValue(String.class);
+
+                    value = convertEscaped(value);
+
+
+                    ObjectUtil.setProperty(this, field, value);
                 }
             }
         }
+    }
+
+    protected Object convertEscaped(Object value) {
+        Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) value);
+        if (matcher.matches()) {
+            String stringValue = matcher.group(1);
+            try {
+                Class<?> aClass = Class.forName(matcher.group(2));
+                if (Date.class.isAssignableFrom(aClass)) {
+                    Date date = new ISODateFormat().parse(stringValue);
+                    value = aClass.getConstructor(long.class).newInstance(date.getTime());
+                } else if (Enum.class.isAssignableFrom(aClass)) {
+                    value = Enum.valueOf((Class<? extends Enum>)aClass, stringValue);
+                } else {
+                    value = aClass.getConstructor(String.class).newInstance(stringValue);
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return value;
     }
 
     protected boolean shouldAutoLoad(ParsedNode node) {

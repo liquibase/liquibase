@@ -5,12 +5,16 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.structure.core.Column;
+import liquibase.util.ISODateFormat;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
@@ -130,7 +134,44 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
+        for (ParsedNode child : parsedNode.getChildren()) {
+            String name = child.getName();
+            if (name.equals("snapshotId")) {
+                this.snapshotId = child.getValue(String.class);
+                continue;
+            }
+
+            Class propertyType = ObjectUtil.getPropertyType(this, name);
+            if (propertyType != null && Collection.class.isAssignableFrom(propertyType) && !(child.getValue() instanceof Collection)) {
+                if (this.attributes.get(name) == null) {
+                    this.setAttribute(name, new ArrayList<Column>());
+                }
+                this.getAttribute(name, List.class).add(child.getValue());
+            } else {
+                Object childValue = child.getValue();
+                if (childValue != null && childValue instanceof String) {
+                    Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) childValue);
+                    if (matcher.matches()) {
+                        String stringValue = matcher.group(1);
+                        try {
+                            Class<?> aClass = Class.forName(matcher.group(2));
+                            if (Date.class.isAssignableFrom(aClass)) {
+                                Date date = new ISODateFormat().parse(stringValue);
+                                childValue = aClass.getConstructor(long.class).newInstance(date.getTime());
+                            } else if (Enum.class.isAssignableFrom(aClass)) {
+                                childValue = Enum.valueOf((Class<? extends Enum>)aClass, stringValue);
+                            } else {
+                                childValue = aClass.getConstructor(String.class).newInstance(stringValue);
+                            }
+                        } catch (Exception e) {
+                            throw new UnexpectedLiquibaseException(e);
+                        }
+                    }
+                }
+
+                this.attributes.put(name, childValue);
+            }
+        }
     }
 
     @Override

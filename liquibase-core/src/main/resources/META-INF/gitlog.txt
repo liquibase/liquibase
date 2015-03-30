@@ -1,4 +1,30 @@
+fe28da3 DVONE-2617 Give update for Gen SQL ability to skip checkLiquibaseTables
+b482cc8 CORE-2254 Ability to save snapshot for later comparison
+dc08e6d Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+6eb3e4c Sort dependent objects for more consistant results
+09fbbc7 Unique constraint backing index names don't always match the unique constraint name
+bfd54ec Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+a99a332 additional diagnostic output
+40cf26b CORE-2254 Ability to save snapshot for later comparison
+1ec960b Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+ee49ed4 CORE-2305 Snapshot output too verbose
+a40a4cc CORE-2254 Ability to save snapshot for later comparison
+62c3a02 debugging issues with logging and database factory
+cd80282 debugging issues with logging and database factory
+bf2b9f8 CORE-2254 Ability to save snapshot for later comparison
+8cdaad4 CORE-2254 Ability to save snapshot for later comparison
+83f61cd CORE-2254 Ability to save snapshot for later comparison
+5c97335 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+d30bd69 Fixed issue with diff report where null values in the reference field caused a NullPointerException
+f83057a CORE-2254 Ability to save snapshot for later comparison
+fe9eb43 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+de184d2 CORE-2254 Ability to save snapshot for later comparison
+e78c2f4 Merge branch 'CORE-2254_save_snapshot' into ddb
+06d7d41 Merge remote-tracking branch 'lblb/CORE-2254_save_snapshot' into ddb
+db9bf83 CORE-2254 Ability to save snapshot for later comparison
+2026838 CORE-2254 Ability to save snapshot for later comparison
 8bc8e46 Include ran changeSet in ChangeSetStatus
+f0c3e1f CORE-2257 Ability to use a previously saved database snapshot in diff and generateChangeLog
 09a5c7e CORE-2288 Do not check/updatedatabasechangelog table on status
 1171f91 CORE-2288 Do not check/updatedatabasechangelog table on status
 3770fc6 Increase fetch size for potentially faster access
@@ -10,10 +36,12 @@ df2ac6d CORE-2273 Oracle char column snapshot not differentiating between a defa
 f6818f3 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 bea3582 CORE-2272 DiffChangeLog must drop foreign keys before primary keys
 b708f19 CORE-2271 CLONE - DiffChangeLog: Invalid changelog when a unique constraint backing index is changed
+b013390 CORE-2257 Ability to use a previously saved database snapshot in diff and generateChangeLog
 7a6fa1c CORE-2267 Rollback fails for mixed-case objects created with QUOTE_ALL_OBJECTS
 0766491 CORE-2266 DiffChangeLog: Invalid changelog when a primary key backing index is changed
 0058847 Need to support extension elements in any order
 e89ab8f Error parsing complex labels with nested parentheses
+9c4d803 CORE-2254 Ability to save snapshot for later comparison
 3ec33b1 Merge branch 'CORE-2253_clob_conversion' into ddb
 e104c79 CORE-2253 Handle oracle varchar <-> clob conversions in diffChangeLog
 6dda4b0 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb

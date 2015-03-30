@@ -12,6 +12,7 @@ import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -132,16 +133,21 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         ClassLoader cl = null;
+        ResourceAccessor fileOpener;
         try {
             cl = getClassLoaderIncludingProjectClasspath();
             Thread.currentThread().setContextClassLoader(cl);
+
+            ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
+            fileOpener = getFileOpener(artifactClassLoader);
         }
         catch (MojoExecutionException e) {
             throw new LiquibaseException("Could not create the class loader, " + e, e);
         }
 
         Database db = liquibase.getDatabase();
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null);
+
+        Database referenceDatabase = CommandLineUtils.createDatabaseObject(fileOpener, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null);
 
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {

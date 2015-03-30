@@ -164,4 +164,13 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
         throw new RuntimeException("TODO");
     }
 
+    public Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> toMap() {
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> returnMap = new HashMap<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>>();
+        for (Class<? extends DatabaseObject> type : this.cache.keySet()) {
+            returnMap.put(type, get(type));
+        }
+
+        return returnMap;
+    }
+
 }
