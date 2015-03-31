@@ -468,7 +468,8 @@ public class Liquibase {
         try {
             executor.execute(rollbackChange);
         } catch (DatabaseException e) {
-            log.warning("Error executing rollback script. ChangeSets will still be marked as rolled back", e);
+            System.err.println("Error executing rollback script. ChangeSets will still be marked as rolled back: "+e.getMessage());
+            log.severe("Error executing rollback script", e);
         }
         database.commit();
     }
