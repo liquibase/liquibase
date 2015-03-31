@@ -12,6 +12,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
 
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
@@ -43,7 +44,8 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                 ") AS D " +
                                 "ON C.DATEEXECUTED = D.MAXDATE " +
                                 "SET C.TAG = " + tagEscaped + " " +
-                                "WHERE D.MAXDATE IS NOT NULL")
+                                "WHERE D.MAXDATE IS NOT NULL " +
+                                "AND C.TAG IS NULL")
                     };
                 }
             } catch (DatabaseException e) {
@@ -56,7 +58,8 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                             "SELECT DATEEXECUTED " +
                             "FROM " + tableNameEscaped +
                         ") AS X" +
-                    ")");
+                    ") " +
+                    "AND TAG IS NULL");
         } else if (database instanceof InformixDatabase) {
             return new Sql[] {
                     new UnparsedSql(
@@ -69,16 +72,18 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                             "WHERE DATEEXECUTED = (" +
                                 "SELECT max_date " +
                                 "FROM max_date_temp" +
-                            ");"),
+                            ") " +
+                            "AND tag IS NULL;"),
                     new UnparsedSql(
                             "DROP TABLE max_date_temp;")
             };
         } else {
             updateStatement.setWhereClause(
-                    "DATEEXECUTED = (" +
-                        "SELECT MAX(DATEEXECUTED) " +
+                    database.escapeObjectName("DATEEXECUTED", Column.class) + " = (" +
+                        "SELECT MAX(" + database.escapeObjectName("DATEEXECUTED", Column.class) + ") " +
                         "FROM " + tableNameEscaped +
-                    ")");
+                    ") " +
+                    "AND " + database.escapeObjectName("TAG", Column.class) + " IS NULL");
         }
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);

@@ -18,6 +18,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
@@ -46,7 +47,9 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
+                        .setWhereClause(database.escapeObjectName("ID", Column.class) + " = ? " +
+                                "AND " + database.escapeObjectName("AUTHOR", Column.class) + " = ? " +
+                                "AND " + database.escapeObjectName("FILENAME", Column.class) + " = ?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
             } else {
                 runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
