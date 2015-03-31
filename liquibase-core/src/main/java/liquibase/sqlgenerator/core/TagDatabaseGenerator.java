@@ -12,6 +12,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
 
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
@@ -78,11 +79,11 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             };
         } else {
             updateStatement.setWhereClause(
-                    "DATEEXECUTED = (" +
-                        "SELECT MAX(DATEEXECUTED) " +
+                    database.escapeObjectName("DATEEXECUTED", Column.class) + " = (" +
+                        "SELECT MAX(" + database.escapeObjectName("DATEEXECUTED", Column.class) + ") " +
                         "FROM " + tableNameEscaped +
                     ") " +
-                    "AND TAG IS NULL");
+                    "AND " + database.escapeObjectName("TAG", Column.class) + " IS NULL");
         }
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
