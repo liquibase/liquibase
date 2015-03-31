@@ -713,15 +713,23 @@ public class Liquibase {
         }
     }
 
-    public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
-        futureRollbackSQL(null, contexts, output);
+    public void futureRollbackSQL(Writer output) throws LiquibaseException {
+        futureRollbackSQL(null, null, new Contexts(), new LabelExpression(), output);
     }
 
-    public void futureRollbackSQL(Integer count, String contexts, Writer output) throws LiquibaseException {
-        futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output);
+    public void futureRollbackSQL(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        futureRollbackSQL(null, null, contexts, labelExpression, output);
     }
 
     public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        futureRollbackSQL(count, null, contexts, labelExpression, output);
+    }
+
+    public void futureRollbackSQL(String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        futureRollbackSQL(null, tag, contexts, labelExpression, output);
+    }
+
+    protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -740,13 +748,13 @@ public class Liquibase {
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator;
-            if (count == null) {
+            if (count == null && tag == null) {
                 logIterator = new ChangeLogIterator(changeLog,
                         new NotRanChangeSetFilter(database.getRanChangeSetList()),
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
                         new DbmsChangeSetFilter(database));
-            } else {
+            } else if (count != null) {
                 ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
                         new NotRanChangeSetFilter(database.getRanChangeSetList()),
                         new ContextChangeSetFilter(contexts),
@@ -758,6 +766,28 @@ public class Liquibase {
 
                 logIterator = new ChangeLogIterator(changeLog,
                         new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                        new ContextChangeSetFilter(contexts),
+                        new LabelChangeSetFilter(labelExpression),
+                        new DbmsChangeSetFilter(database),
+                        new ChangeSetFilter() {
+                            @Override
+                            public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+                                return new ChangeSetFilterResult(listVisitor.getSeenChangeSets().contains(changeSet), null, null);
+                            }
+                        });
+            } else {
+                List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
+                ChangeLogIterator forwardIterator = new ChangeLogIterator(changeLog,
+                        new NotRanChangeSetFilter(ranChangeSetList),
+                        new ContextChangeSetFilter(contexts),
+                        new LabelChangeSetFilter(labelExpression),
+                        new DbmsChangeSetFilter(database),
+                        new UpToTagChangeSetFilter(tag, ranChangeSetList));
+                final ListVisitor listVisitor = new ListVisitor();
+                forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+
+                logIterator = new ChangeLogIterator(changeLog,
+                        new NotRanChangeSetFilter(ranChangeSetList),
                         new ContextChangeSetFilter(contexts),
                         new LabelChangeSetFilter(labelExpression),
                         new DbmsChangeSetFilter(database),
