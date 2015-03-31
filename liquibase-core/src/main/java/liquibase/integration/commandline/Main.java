@@ -1113,7 +1113,7 @@ public class Main {
     private String getCommandParam(String paramName, String defaultValue) throws CommandLineParsingException {
         for (String param : commandParams) {
             if (!param.contains("=")) {
-                return null;
+                continue;
             }
             String[] splitArg = splitArg(param);
 
