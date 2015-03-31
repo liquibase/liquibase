@@ -454,7 +454,7 @@ public class Liquibase {
             if (streams == null || streams.size() == 0) {
                 throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
             } else if (streams.size() > 1) {
-                throw new LiquibaseException("Found multiple rollbackScripts named"+rollbackScript);
+                throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
             }
             rollbackScriptContents = StreamUtil.getStreamContents(streams.iterator().next());
         } catch (IOException e) {
@@ -465,7 +465,11 @@ public class Liquibase {
         rollbackChange.setSplitStatements(true);
         rollbackChange.setStripComments(true);
 
-        executor.execute(rollbackChange);
+        try {
+            executor.execute(rollbackChange);
+        } catch (DatabaseException e) {
+            log.warning("Error executing rollback script. ChangeSets will still be marked as rolled back", e);
+        }
         database.commit();
     }
 
