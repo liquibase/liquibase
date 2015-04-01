@@ -13,6 +13,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
@@ -28,62 +29,58 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
         UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
         updateStatement.addNewColumnValue("TAG", statement.getTag());
         String tableNameEscaped = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+        String orderColumnNameEscaped = database.escapeObjectName("ORDEREXECUTED", Column.class);
+        String tagColumnNameEscaped = database.escapeObjectName("TAG", Column.class);
         String tagEscaped = DataTypeFactory.getInstance().fromObject(statement.getTag(), database).objectToSql(statement.getTag(), database);
         if (database instanceof MySQLDatabase) {
             try {
                 if (database.getDatabaseMajorVersion() < 5) {
                     return new Sql[] {
                         new UnparsedSql(
-                                "UPDATE " + tableNameEscaped + " C " +
-                                "LEFT JOIN (" +
-                                    "SELECT MAX(DATEEXECUTED) as MAXDATE " +
-                                    "FROM (" +
-                                        "SELECT DATEEXECUTED " +
-                                        "FROM " + tableNameEscaped +
-                                    ") AS X" +
+                                "UPDATE " + tableNameEscaped + " AS C " +
+                                "INNER JOIN (" +
+                                    "SELECT MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
+                                    "FROM " + tableNameEscaped +
                                 ") AS D " +
-                                "ON C.DATEEXECUTED = D.MAXDATE " +
-                                "SET C.TAG = " + tagEscaped + " " +
-                                "WHERE D.MAXDATE IS NOT NULL " +
-                                "AND C.TAG IS NULL")
+                                "ON C." + orderColumnNameEscaped + " = D." + orderColumnNameEscaped + " " +
+                                "SET C." + tagColumnNameEscaped + " = " + tagEscaped + " " +
+                                "WHERE C." + tagColumnNameEscaped + " IS NULL")
                     };
                 }
             } catch (DatabaseException e) {
                 //assume it is version 5 or greater
             }
             updateStatement.setWhereClause(
-                    "DATEEXECUTED = (" +
-                        "SELECT MAX(DATEEXECUTED) " +
-                        "FROM (" +
-                            "SELECT DATEEXECUTED " +
-                            "FROM " + tableNameEscaped +
-                        ") AS X" +
+                    orderColumnNameEscaped + " = (" +
+                        "SELECT MAX(" + orderColumnNameEscaped + ") " +
+                        "FROM " + tableNameEscaped +
                     ") " +
-                    "AND TAG IS NULL");
+                    "AND " + tagColumnNameEscaped + " IS NULL");
         } else if (database instanceof InformixDatabase) {
-            return new Sql[] {
+            String tempTableNameEscaped = database.escapeObjectName("max_order_temp", Table.class);
+			return new Sql[] {
                     new UnparsedSql(
-                            "SELECT MAX(dateexecuted) max_date " +
+                            "SELECT MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
                             "FROM " + tableNameEscaped + " " +
-                            "INTO TEMP max_date_temp WITH NO LOG"),
+                            "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
                     new UnparsedSql(
                             "UPDATE " + tableNameEscaped + " " +
                             "SET TAG = " + tagEscaped + " " +
-                            "WHERE DATEEXECUTED = (" +
-                                "SELECT max_date " +
-                                "FROM max_date_temp" +
+                            "WHERE " + orderColumnNameEscaped + " = (" +
+                                "SELECT " + orderColumnNameEscaped + " " +
+                                "FROM " + tempTableNameEscaped +
                             ") " +
-                            "AND tag IS NULL;"),
+                            "AND " + tagColumnNameEscaped + " IS NULL;"),
                     new UnparsedSql(
-                            "DROP TABLE max_date_temp;")
+                            "DROP TABLE " + tempTableNameEscaped + ";")
             };
         } else {
             updateStatement.setWhereClause(
-                    database.escapeObjectName("DATEEXECUTED", Column.class) + " = (" +
-                        "SELECT MAX(" + database.escapeObjectName("DATEEXECUTED", Column.class) + ") " +
+                    orderColumnNameEscaped + " = (" +
+                        "SELECT MAX(" + orderColumnNameEscaped + ") " +
                         "FROM " + tableNameEscaped +
                     ") " +
-                    "AND " + database.escapeObjectName("TAG", Column.class) + " IS NULL");
+                    "AND " + tagColumnNameEscaped + " IS NULL");
         }
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
