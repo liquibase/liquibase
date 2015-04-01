@@ -1,13 +1,11 @@
 package liquibase;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.*;
 
 import liquibase.change.CheckSum;
+import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
@@ -346,13 +344,25 @@ public class Liquibase {
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
-        rollback(changesToRollback, new Contexts(contexts), output);
+        rollback(changesToRollback, null, contexts, output);
     }
 
     public void rollback(int changesToRollback, Contexts contexts, Writer output) throws LiquibaseException {
-        rollback(changesToRollback, contexts, new LabelExpression(), output);
+        rollback(changesToRollback, null, contexts, output);
     }
+
     public void rollback(int changesToRollback, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        rollback(changesToRollback, null, contexts, labelExpression, output);
+    }
+
+    public void rollback(int changesToRollback, String rollbackScript, String contexts, Writer output) throws LiquibaseException {
+        rollback(changesToRollback, rollbackScript, new Contexts(contexts), output);
+    }
+
+    public void rollback(int changesToRollback, String rollbackScript, Contexts contexts, Writer output) throws LiquibaseException {
+        rollback(changesToRollback, rollbackScript, contexts, new LabelExpression(), output);
+    }
+    public void rollback(int changesToRollback, String rollbackScript, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -361,7 +371,7 @@ public class Liquibase {
 
         outputHeader("Rollback " + changesToRollback + " Change(s) Script");
 
-        rollback(changesToRollback, contexts, labelExpression);
+        rollback(changesToRollback, rollbackScript, contexts, labelExpression);
 
         try {
             output.flush();
@@ -373,10 +383,18 @@ public class Liquibase {
     }
 
     public void rollback(int changesToRollback, String contexts) throws LiquibaseException {
-        rollback(changesToRollback, new Contexts(contexts), new LabelExpression());
+        rollback(changesToRollback, null, contexts);
     }
 
     public void rollback(int changesToRollback, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        rollback(changesToRollback, null, contexts, labelExpression);
+    }
+
+    public void rollback(int changesToRollback, String rollbackScript, String contexts) throws LiquibaseException {
+        rollback(changesToRollback, rollbackScript, new Contexts(contexts), new LabelExpression());
+    }
+
+    public void rollback(int changesToRollback, String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -397,7 +415,12 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
 
-            logIterator.run(new RollbackVisitor(database,changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            if (rollbackScript == null) {
+                logIterator.run(new RollbackVisitor(database,changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            } else {
+                executeRollbackScript(rollbackScript, contexts, labelExpression);
+                removeRunStatus(logIterator, contexts, labelExpression);
+            }
         } finally {
             try {
                 lockService.releaseLock();
@@ -408,15 +431,70 @@ public class Liquibase {
         }
     }
 
+    protected void removeRunStatus(ChangeLogIterator logIterator, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        logIterator.run(new ChangeSetVisitor() {
+            @Override
+            public Direction getDirection() {
+                return Direction.REVERSE;
+            }
+
+            @Override
+            public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+                database.removeRanStatus(changeSet);
+                database.commit();
+            }
+        }, new RuntimeEnvironment(database, contexts, labelExpression));
+    }
+
+    protected void executeRollbackScript(String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        final Executor executor = ExecutorService.getInstance().getExecutor(database);
+        String rollbackScriptContents;
+        try {
+            Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
+            if (streams == null || streams.size() == 0) {
+                throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
+            } else if (streams.size() > 1) {
+                throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
+            }
+            rollbackScriptContents = StreamUtil.getStreamContents(streams.iterator().next());
+        } catch (IOException e) {
+            throw new LiquibaseException("Error reading rollbackScript "+executor+": "+e.getMessage());
+        }
+
+        RawSQLChange rollbackChange = new RawSQLChange(rollbackScriptContents);
+        rollbackChange.setSplitStatements(true);
+        rollbackChange.setStripComments(true);
+
+        try {
+            executor.execute(rollbackChange);
+        } catch (DatabaseException e) {
+            System.err.println("Error executing rollback script. ChangeSets will still be marked as rolled back: "+e.getMessage());
+            log.severe("Error executing rollback script", e);
+        }
+        database.commit();
+    }
+
     public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
-        rollback(tagToRollBackTo, new Contexts(contexts), output);
+        rollback(tagToRollBackTo, null, contexts, output);
     }
 
     public void rollback(String tagToRollBackTo, Contexts contexts, Writer output) throws LiquibaseException {
-        rollback(tagToRollBackTo, contexts, new LabelExpression(), output);
+        rollback(tagToRollBackTo, null, contexts, output);
     }
 
     public void rollback(String tagToRollBackTo, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        rollback(tagToRollBackTo, null, contexts, labelExpression, output);
+    }
+
+    public void rollback(String tagToRollBackTo, String rollbackScript, String contexts, Writer output) throws LiquibaseException {
+        rollback(tagToRollBackTo, rollbackScript, new Contexts(contexts), output);
+    }
+
+    public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts, Writer output) throws LiquibaseException {
+        rollback(tagToRollBackTo, rollbackScript, contexts, new LabelExpression(), output);
+    }
+
+    public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -437,13 +515,25 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String contexts) throws LiquibaseException {
-        rollback(tagToRollBackTo, new Contexts(contexts));
+        rollback(tagToRollBackTo, null, contexts);
     }
 
     public void rollback(String tagToRollBackTo, Contexts contexts) throws LiquibaseException {
+        rollback(tagToRollBackTo, null, contexts);
+    }
+
+    public void rollback(String tagToRollBackTo, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        rollback(tagToRollBackTo, null, contexts, labelExpression);
+    }
+
+    public void rollback(String tagToRollBackTo, String rollbackScript, String contexts) throws LiquibaseException {
+        rollback(tagToRollBackTo, new Contexts(contexts));
+    }
+
+    public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts) throws LiquibaseException {
         rollback(tagToRollBackTo, contexts, new LabelExpression());
     }
-    public void rollback(String tagToRollBackTo, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -466,7 +556,12 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            if (rollbackScript == null) {
+                logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            } else {
+                executeRollbackScript(rollbackScript, contexts, labelExpression);
+                removeRunStatus(logIterator, contexts, labelExpression);
+            }
         } finally {
             lockService.releaseLock();
         }
@@ -474,10 +569,18 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+        rollback(dateToRollBackTo, null, contexts, output);
+    }
+
+    public void rollback(Date dateToRollBackTo, String rollbackScript, String contexts, Writer output) throws LiquibaseException {
         rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression(), output);
     }
 
     public void rollback(Date dateToRollBackTo, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        rollback(dateToRollBackTo, null, contexts, labelExpression, output);
+    }
+
+    public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -498,10 +601,18 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
-        rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression());
+        rollback(dateToRollBackTo, null, contexts);
     }
 
     public void rollback(Date dateToRollBackTo, Contexts contexts,  LabelExpression labelExpression) throws LiquibaseException {
+        rollback(dateToRollBackTo, null, contexts, labelExpression);
+    }
+
+    public void rollback(Date dateToRollBackTo, String rollbackScript, String contexts) throws LiquibaseException {
+        rollback(dateToRollBackTo, new Contexts(contexts), new LabelExpression());
+    }
+
+    public void rollback(Date dateToRollBackTo, String rollbackScript, Contexts contexts,  LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -522,7 +633,12 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            if (rollbackScript == null) {
+                logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            } else {
+                executeRollbackScript(rollbackScript, contexts, labelExpression);
+                removeRunStatus(logIterator, contexts, labelExpression);
+            }
         } finally {
             lockService.releaseLock();
         }
@@ -783,7 +899,7 @@ public class Liquibase {
 
         Date baseDate = new Date();
         update(contexts, labelExpression);
-        rollback(baseDate, contexts, labelExpression);
+        rollback(baseDate, null, contexts, labelExpression);
         update(contexts, labelExpression);
     }
 
