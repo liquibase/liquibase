@@ -26,8 +26,6 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
 
     @Override
     public Sql[] generateSql(TagDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
-        updateStatement.addNewColumnValue("TAG", statement.getTag());
         String tableNameEscaped = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
         String orderColumnNameEscaped = database.escapeObjectName("ORDEREXECUTED", Column.class);
         String tagColumnNameEscaped = database.escapeObjectName("TAG", Column.class);
@@ -43,45 +41,38 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                                     "FROM " + tableNameEscaped +
                                 ") AS D " +
                                 "ON C." + orderColumnNameEscaped + " = D." + orderColumnNameEscaped + " " +
-                                "SET C." + tagColumnNameEscaped + " = " + tagEscaped + " " +
-                                "WHERE C." + tagColumnNameEscaped + " IS NULL")
+                                "SET C." + tagColumnNameEscaped + " = " + tagEscaped)
                     };
                 }
             } catch (DatabaseException e) {
                 //assume it is version 5 or greater
             }
-            updateStatement.setWhereClause(
-                    orderColumnNameEscaped + " = (" +
-                        "SELECT MAX(" + orderColumnNameEscaped + ") " +
-                        "FROM " + tableNameEscaped +
-                    ") " +
-                    "AND " + tagColumnNameEscaped + " IS NULL");
         } else if (database instanceof InformixDatabase) {
             String tempTableNameEscaped = database.escapeObjectName("max_order_temp", Table.class);
-			return new Sql[] {
-                    new UnparsedSql(
-                            "SELECT MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
-                            "FROM " + tableNameEscaped + " " +
-                            "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
-                    new UnparsedSql(
-                            "UPDATE " + tableNameEscaped + " " +
-                            "SET TAG = " + tagEscaped + " " +
-                            "WHERE " + orderColumnNameEscaped + " = (" +
-                                "SELECT " + orderColumnNameEscaped + " " +
-                                "FROM " + tempTableNameEscaped +
-                            ") " +
-                            "AND " + tagColumnNameEscaped + " IS NULL;"),
-                    new UnparsedSql(
-                            "DROP TABLE " + tempTableNameEscaped + ";")
+            return new Sql[] {
+                new UnparsedSql(
+                        "SELECT MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
+                        "FROM " + tableNameEscaped + " " +
+                        "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
+                new UnparsedSql(
+                        "UPDATE " + tableNameEscaped + " " +
+                        "SET TAG = " + tagEscaped + " " +
+                        "WHERE " + orderColumnNameEscaped + " = (" +
+                            "SELECT " + orderColumnNameEscaped + " " +
+                            "FROM " + tempTableNameEscaped +
+                        ");"),
+                new UnparsedSql(
+                        "DROP TABLE " + tempTableNameEscaped + ";")
             };
-        } else {
-            updateStatement.setWhereClause(
+        }
+
+        UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+            .addNewColumnValue("TAG", statement.getTag())
+            .setWhereClause(
                     orderColumnNameEscaped + " = (" +
                         "SELECT MAX(" + orderColumnNameEscaped + ") " +
                         "FROM " + tableNameEscaped +
-                    ") " +
-                    "AND " + tagColumnNameEscaped + " IS NULL");
-        }
+                    ")");
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 
