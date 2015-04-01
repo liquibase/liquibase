@@ -1016,6 +1016,7 @@
 	<xsd:element name="tagDatabase">
 		<xsd:complexType>
 			<xsd:attribute name="tag" type="xsd:string" use="required" />
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
