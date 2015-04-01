@@ -2,7 +2,14 @@ package liquibase;
 
 import java.io.*;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import liquibase.change.CheckSum;
 import liquibase.change.core.RawSQLChange;
@@ -44,8 +51,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Primary facade class for interacting with Liquibase.
@@ -180,6 +185,9 @@ public class Liquibase {
     }
 
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    	update(contexts, labelExpression, true);
+    }
+    public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
@@ -188,8 +196,10 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
-
-            checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            
+            if (checkLiquibaseTables) {
+                checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            }
 
             changeLog.validate(database, contexts, labelExpression);
 
@@ -239,6 +249,11 @@ public class Liquibase {
     }
 
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        update(contexts, labelExpression, output, true);	
+    }
+    
+    public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables) 
+    		throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -253,7 +268,7 @@ public class Liquibase {
 
         try {
 
-            update(contexts, labelExpression);
+            update(contexts, labelExpression, checkLiquibaseTables);
 
             output.flush();
         } catch (IOException e) {
