@@ -59,6 +59,18 @@ public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenera
             changes.add(change);
         }
 
+        if (differences.isDifferent("cacheSize")) {
+            AlterSequenceChange change = createAlterSequenceChange(sequence, control);
+            change.setCacheSize(sequence.getCacheSize());
+            changes.add(change);
+        }
+
+        if (differences.isDifferent("willCycle")) {
+            AlterSequenceChange change = createAlterSequenceChange(sequence, control);
+            change.setWillCycle(sequence.getWillCycle());
+            changes.add(change);
+        }
+
         if (changes.size() == 0) {
             return null;
         } else {
