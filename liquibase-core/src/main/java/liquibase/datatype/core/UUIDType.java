@@ -1,5 +1,7 @@
 package liquibase.datatype.core;
 
+import java.util.Locale;
+
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -33,10 +35,13 @@ public class UUIDType extends LiquibaseDataType {
     }
 
     @Override
-    public String objectToSql(Object value, Database database) {
-        if (database instanceof MSSQLDatabase) {
-            return "'"+value+"'";
+    protected String otherToSql(Object value, Database database) {
+        if (value == null) {
+            return null;
         }
-        return super.objectToSql(value, database);
+        if (database instanceof MSSQLDatabase) {
+            return "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
+        }
+        return super.otherToSql(value, database);
     }
 }
