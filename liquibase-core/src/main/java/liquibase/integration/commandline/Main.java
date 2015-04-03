@@ -266,6 +266,8 @@ public class Main {
     private void checkForUnexpectedCommandParameter(List<String> messages) {
         if ("updateCount".equalsIgnoreCase(command)
             || "updateCountSQL".equalsIgnoreCase(command)
+            || "updateToTag".equalsIgnoreCase(command)
+            || "updateToTagSQL".equalsIgnoreCase(command)
             || "rollback".equalsIgnoreCase(command)
             || "rollbackToDate".equalsIgnoreCase(command)
             || "rollbackCount".equalsIgnoreCase(command)
@@ -358,6 +360,8 @@ public class Main {
                 || "updateSQL".equalsIgnoreCase(arg)
                 || "updateCount".equalsIgnoreCase(arg)
                 || "updateCountSQL".equalsIgnoreCase(arg)
+                || "updateToTag".equalsIgnoreCase(arg)
+                || "updateToTagSQL".equalsIgnoreCase(arg)
                 || "rollback".equalsIgnoreCase(arg)
                 || "rollbackToDate".equalsIgnoreCase(arg)
                 || "rollbackCount".equalsIgnoreCase(arg)
@@ -366,6 +370,7 @@ public class Main {
                 || "rollbackCountSQL".equalsIgnoreCase(arg)
                 || "futureRollbackSQL".equalsIgnoreCase(arg)
                 || "futureRollbackCountSQL".equalsIgnoreCase(arg)
+                || "futureRollbackToTagSQL".equalsIgnoreCase(arg)
                 || "updateTestingRollback".equalsIgnoreCase(arg)
                 || "tag".equalsIgnoreCase(arg)
                 || "listLocks".equalsIgnoreCase(arg)
@@ -478,6 +483,9 @@ public class Main {
         stream.println(" updateCount <num>              Applies next NUM changes to the database");
         stream.println(" updateCountSQL <num>           Writes SQL to apply next NUM changes");
         stream.println("                                to the database");
+        stream.println(" updateToTag <tag>              Updates the database to the specified tag");
+        stream.println(" updateToTagSQL <tag>           Writes (to standard out) the SQL to update the");
+        stream.println("                                database to the specified tag");
         stream.println(" rollback <tag>                 Rolls back the database to the the state is was");
         stream.println("                                when the tag was applied");
         stream.println(" rollbackSQL <tag>              Writes SQL to roll back the database to that");
@@ -500,6 +508,10 @@ public class Main {
         stream.println(" futureRollbackSQL <value>      Writes SQL to roll back the database to the ");
         stream.println("                                current state after <value> changes in the ");
         stream.println("                                changeslog have been applied");
+        stream.println(" futureRollbackFromTagSQL <tag> Writes (to standard out) the SQL to roll back");
+        stream.println("                                the database to its current state after the");
+        stream.println("                                changes up to the specified tag have been");
+        stream.println("                                applied");
         stream.println(" updateTestingRollback          Updates database, then rolls back changes before");
         stream.println("                                updating again. Useful for testing");
         stream.println("                                rollback support");
@@ -1054,6 +1066,18 @@ public class Main {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels));
                 } else if ("updateCountSQL".equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                } else if ("updateToTag".equalsIgnoreCase(command)) {
+                    if (commandParams == null || commandParams.size() == 0) {
+                        throw new CommandLineParsingException("updateToTag requires a tag");
+                    }
+
+                    liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels));
+                } else if ("updateToTagSQL".equalsIgnoreCase(command)) {
+                    if (commandParams == null || commandParams.size() == 0) {
+                        throw new CommandLineParsingException("updateToTagSQL requires a tag");
+                    }
+
+                    liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("updateSQL".equalsIgnoreCase(command)) {
                     liquibase.update(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
@@ -1081,18 +1105,24 @@ public class Main {
                     liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
-                        throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");
+                        throw new CommandLineParsingException("rollbackCountSQL requires a rollback count");
                     }
 
                     liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
-                    liquibase.futureRollbackSQL(null, new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                    liquibase.futureRollbackSQL(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("futureRollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("futureRollbackCountSQL requires a rollback count");
                     }
 
                     liquibase.futureRollbackSQL(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                } else if ("futureRollbackFromTagSQL".equalsIgnoreCase(command)) {
+                    if (commandParams == null || commandParams.size() == 0) {
+                        throw new CommandLineParsingException("futureRollbackFromTagSQL requires a tag");
+                    }
+
+                    liquibase.futureRollbackSQL(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("updateTestingRollback".equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else {

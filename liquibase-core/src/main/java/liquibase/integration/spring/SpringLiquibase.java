@@ -13,9 +13,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -146,6 +144,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected String contexts;
 
     protected String labels;
+
+    protected String tag;
 
 	protected Map<String, String> parameters;
 
@@ -284,6 +284,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.labels = labels;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     public String getDefaultSchema() {
 		return defaultSchema;
 	}
@@ -334,7 +342,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             FileWriter output = null;
             try {
                 output = new FileWriter(rollbackFile);
-                liquibase.futureRollbackSQL(null, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                if (tag != null) {
+                    liquibase.futureRollbackSQL(tag, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                } else {
+                    liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                }
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
             } finally {
@@ -349,9 +361,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
     }
 
-	protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-		liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
-	}
+    protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
+        if (tag != null) {
+            liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+        } else {
+            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+        }
+    }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
