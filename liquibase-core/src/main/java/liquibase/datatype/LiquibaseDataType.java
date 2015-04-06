@@ -1,11 +1,13 @@
 package liquibase.datatype;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -109,6 +111,16 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            String name = database.escapeDataTypeName(getName());
+            int dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
+            Object[] parameters = getParameters();
+            if (dataTypeMaxParameters < parameters.length) {
+                parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
+            }
+            return new DatabaseDataType(name, parameters);
+        }
+
         DatabaseDataType type = new DatabaseDataType(name.toUpperCase(), getParameters());
         type.addAdditionalInformation(additionalInformation);
 

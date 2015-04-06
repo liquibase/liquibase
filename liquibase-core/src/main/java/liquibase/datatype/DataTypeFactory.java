@@ -91,15 +91,23 @@ public class DataTypeFactory {
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;
         if (dataTypeName.matches(".+\\(.*\\).*")) {
-            dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\(.*\\)", "");
+            dataTypeName = dataTypeName.replaceFirst("\\s*\\(.*\\)", "");
         }
         if (dataTypeName.matches(".+\\{.*")) {
             dataTypeName = dataTypeName.replaceFirst("\\s*\\{.*", "");
         }
-        boolean primaryKey = false;
+        boolean autoIncrement = false;
         if (dataTypeName.endsWith(" identity")) {
             dataTypeName = dataTypeName.replaceFirst(" identity$", "");
-            primaryKey = true;
+            autoIncrement = true;
+        }
+        // unquote delimited identifiers
+        if (dataTypeName.matches("\"[^\"]++\"") // surrounded with double quotes
+                || dataTypeName.matches("\\[[^]\\[]++\\]") // surrounded with square brackets (a la mssql)
+                || dataTypeName.matches("`[^`]++`") // surrounded with backticks (a la mysql)
+                || dataTypeName.matches("'[^']++'")) { // surrounded with single quotes
+
+            dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
         }
 
         String additionalInfo = null;
@@ -181,10 +189,10 @@ public class DataTypeFactory {
             }
         }
 
-        if (primaryKey && liquibaseDataType instanceof IntType) {
+        if (autoIncrement && liquibaseDataType instanceof IntType) {
             ((IntType) liquibaseDataType).setAutoIncrement(true);
         }
-        if (primaryKey && liquibaseDataType instanceof BigIntType) {
+        if (autoIncrement && liquibaseDataType instanceof BigIntType) {
             ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 
