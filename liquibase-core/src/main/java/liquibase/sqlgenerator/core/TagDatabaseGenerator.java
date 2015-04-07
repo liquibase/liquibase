@@ -96,8 +96,8 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                     .addNewColumnValue("TAG", statement.getTag())
                     .setWhereClause(
-                            orderColumnNameEscaped + " = (" +
-                                    "SELECT MAX(" + orderColumnNameEscaped + ") " +
+                            dateColumnNameEscaped + " = (" +
+                                    "SELECT MAX(" + dateColumnNameEscaped + ") " +
                                     "FROM " + tableNameEscaped +
                                     ")");
 
