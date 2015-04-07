@@ -169,7 +169,7 @@
 
 							</xsd:sequence>
 							<xsd:attributeGroup ref="changeSetAttributes" />
-							<xsd:anyAttribute namespace="##other" />
+							<xsd:anyAttribute namespace="##other" processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 
@@ -178,7 +178,7 @@
 						<xsd:complexType>
 							<xsd:attribute name="file" type="xsd:string" use="required" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-							<xsd:anyAttribute namespace="##other" />
+							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
@@ -187,13 +187,13 @@
 							<xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="false" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
                             <xsd:attribute name="resourceFilter" type="xsd:string" />
-							<xsd:anyAttribute namespace="##other" />
+							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 				</xsd:choice>
 			</xsd:sequence>
 			<xsd:attributeGroup ref="changeLogAttributes" />
-			<xsd:anyAttribute namespace="##other" />
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -1017,6 +1017,7 @@
 	<xsd:element name="tagDatabase">
 		<xsd:complexType>
 			<xsd:attribute name="tag" type="xsd:string" use="required" />
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
