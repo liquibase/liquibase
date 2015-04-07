@@ -70,16 +70,44 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                     new UnparsedSql(
                             "DROP TABLE " + tempTableNameEscaped + ";")
             };
-        } else if (database instanceof OracleDatabase || database instanceof MSSQLDatabase || database instanceof DB2Database) {
+        } else if (database instanceof MSSQLDatabase) {
+            String changelogAliasEscaped = database.escapeObjectName("changelog", Table.class);
+            String latestAliasEscaped = database.escapeObjectName("latest", Table.class);
+            String idColumnEscaped = database.escapeObjectName("ID", Column.class);
+            String authorColumnEscaped = database.escapeObjectName("AUTHOR", Column.class);
+            String filenameColumnEscaped = database.escapeObjectName("FILENAME", Column.class);
+
+            String topClause = "TOP (1)";
+            try {
+                if (database.getDatabaseMajorVersion() < 10) {
+                    // SQL Server 2005 or earlier
+                    topClause = "TOP 1";
+                }
+            } catch (DatabaseException ignored) {
+                // assume SQL Server 2008 or later
+            }
+
+            return new Sql[] {
+                    new UnparsedSql(
+                            "UPDATE " + changelogAliasEscaped + " " +
+                            "SET " + tagColumnNameEscaped + " = " + tagEscaped + " " +
+                            "FROM " + tableNameEscaped + " AS " + changelogAliasEscaped + " "  +
+                            "INNER JOIN (" +
+                                "SELECT " + topClause + " " + idColumnEscaped + ", " + authorColumnEscaped + ", " + filenameColumnEscaped + " " +
+                                "FROM " + tableNameEscaped + " " +
+                                "ORDER BY " + dateColumnNameEscaped + " DESC, " + orderColumnNameEscaped + " DESC" +
+                            ") AS " + latestAliasEscaped + " " +
+                            "ON " + latestAliasEscaped + "." + idColumnEscaped + " = " + changelogAliasEscaped + "." + idColumnEscaped + " " +
+                            "AND " + latestAliasEscaped + "." + authorColumnEscaped + " = " + changelogAliasEscaped + "." + authorColumnEscaped + " " +
+                            "AND " + latestAliasEscaped + "." + filenameColumnEscaped + " = " + changelogAliasEscaped + "." + filenameColumnEscaped)
+                };
+        } else if (database instanceof OracleDatabase || database instanceof DB2Database) {
             String selectClause = "SELECT";
             String endClause = ")";
             String delimiter = "";
             if (database instanceof OracleDatabase) {
                 selectClause = "SELECT * FROM (SELECT";
                 endClause = ") where rownum=1)";
-            } else if (database instanceof MSSQLDatabase) {
-                selectClause = "SELECT TOP 1";
-                delimiter = ";";
             } else if (database instanceof DB2Database) {
                 endClause = " FETCH FIRST 1 ROWS ONLY)";
             }
