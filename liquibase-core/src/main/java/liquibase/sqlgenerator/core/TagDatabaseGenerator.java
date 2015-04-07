@@ -93,6 +93,9 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             };
         } else {
 
+            //Only uses dateexecuted as a default. Depending on the timestamp resolution, multiple rows may be tagged which normally works fine but can cause confusion and some issues.
+            //We cannot use orderexecuted alone because it is only guaranteed to be incrementing per update call.
+            //TODO: Better handle other databases to use dateexecuted desc, orderexecuted desc.
             UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                     .addNewColumnValue("TAG", statement.getTag())
                     .setWhereClause(
