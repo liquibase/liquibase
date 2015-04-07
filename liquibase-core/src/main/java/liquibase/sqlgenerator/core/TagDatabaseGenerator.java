@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
@@ -28,53 +27,82 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
     public Sql[] generateSql(TagDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String tableNameEscaped = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
         String orderColumnNameEscaped = database.escapeObjectName("ORDEREXECUTED", Column.class);
+        String dateColumnNameEscaped = database.escapeObjectName("DATEEXECUTED", Column.class);
         String tagColumnNameEscaped = database.escapeObjectName("TAG", Column.class);
         String tagEscaped = DataTypeFactory.getInstance().fromObject(statement.getTag(), database).objectToSql(statement.getTag(), database);
         if (database instanceof MySQLDatabase) {
-            try {
-                if (database.getDatabaseMajorVersion() < 5) {
-                    return new Sql[] {
-                        new UnparsedSql(
-                                "UPDATE " + tableNameEscaped + " AS C " +
-                                "INNER JOIN (" +
-                                    "SELECT MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
+            return new Sql[]{
+                    new UnparsedSql(
+                            "UPDATE " + tableNameEscaped + " AS C " +
+                                    "INNER JOIN (" +
+                                    "SELECT " + orderColumnNameEscaped + ", " + dateColumnNameEscaped + " " +
                                     "FROM " + tableNameEscaped +
-                                ") AS D " +
-                                "ON C." + orderColumnNameEscaped + " = D." + orderColumnNameEscaped + " " +
-                                "SET C." + tagColumnNameEscaped + " = " + tagEscaped)
-                    };
-                }
-            } catch (DatabaseException e) {
-                //assume it is version 5 or greater
-            }
+                                    " order by " + dateColumnNameEscaped + " desc, " + orderColumnNameEscaped + " desc limit 1) AS D " +
+                                    "ON C." + orderColumnNameEscaped + " = D." + orderColumnNameEscaped + " " +
+                                    "SET C." + tagColumnNameEscaped + " = " + tagEscaped)
+            };
+        } else if (database instanceof PostgresDatabase) {
+            return new Sql[]{
+                    new UnparsedSql(
+                            "UPDATE " + tableNameEscaped + " t SET TAG=" + tagEscaped +
+                                    " FROM (SELECT " + dateColumnNameEscaped + ", " + orderColumnNameEscaped + " FROM " + tableNameEscaped + " ORDER BY " + dateColumnNameEscaped + " DESC, " + orderColumnNameEscaped + " DESC LIMIT 1) sub " +
+                                    "WHERE t." + dateColumnNameEscaped + "=sub." + dateColumnNameEscaped + " AND t." + orderColumnNameEscaped + "=sub." + orderColumnNameEscaped)
+            };
         } else if (database instanceof InformixDatabase) {
             String tempTableNameEscaped = database.escapeObjectName("max_order_temp", Table.class);
-            return new Sql[] {
-                new UnparsedSql(
-                        "SELECT MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
-                        "FROM " + tableNameEscaped + " " +
-                        "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
-                new UnparsedSql(
-                        "UPDATE " + tableNameEscaped + " " +
-                        "SET TAG = " + tagEscaped + " " +
-                        "WHERE " + orderColumnNameEscaped + " = (" +
-                            "SELECT " + orderColumnNameEscaped + " " +
-                            "FROM " + tempTableNameEscaped +
-                        ");"),
-                new UnparsedSql(
-                        "DROP TABLE " + tempTableNameEscaped + ";")
+            return new Sql[]{
+                    new UnparsedSql(
+                            "SELECT MAX(" + dateColumnNameEscaped + ") AS " + dateColumnNameEscaped +
+                                    ", MAX(" + orderColumnNameEscaped + ") AS " + orderColumnNameEscaped + " " +
+                                    "FROM " + tableNameEscaped + " " +
+                                    "INTO TEMP " + tempTableNameEscaped + " WITH NO LOG"),
+                    new UnparsedSql(
+                            "UPDATE " + tableNameEscaped + " " +
+                                    "SET TAG = " + tagEscaped + " " +
+                                    "WHERE " + dateColumnNameEscaped + " = (" +
+                                    "SELECT " + dateColumnNameEscaped + " " +
+                                    "FROM " + tempTableNameEscaped +
+                                    ") AND " +
+                                    orderColumnNameEscaped + " = (" +
+                                    "SELECT " + orderColumnNameEscaped + " " +
+                                    "FROM " + tempTableNameEscaped +
+                                    ");"),
+                    new UnparsedSql(
+                            "DROP TABLE " + tempTableNameEscaped + ";")
             };
+        } else if (database instanceof OracleDatabase || database instanceof MSSQLDatabase || database instanceof DB2Database) {
+            String selectClause = "SELECT";
+            String endClause = ")";
+            String delimiter = "";
+            if (database instanceof OracleDatabase) {
+                selectClause = "SELECT * FROM (SELECT";
+                endClause = ") where rownum=1)";
+            } else if (database instanceof MSSQLDatabase) {
+                selectClause = "SELECT TOP 1";
+                delimiter = ";";
+            } else if (database instanceof DB2Database) {
+                endClause = " FETCH FIRST 1 ROWS ONLY)";
+            }
+
+            return new Sql[]{
+                    new UnparsedSql("MERGE INTO " + tableNameEscaped + " a " +
+                            "USING (" + selectClause + " " + orderColumnNameEscaped + ", " + dateColumnNameEscaped + " from " + tableNameEscaped + " order by " + dateColumnNameEscaped + " desc, " + orderColumnNameEscaped + " desc" + endClause + " b " +
+                            "ON ( a." + dateColumnNameEscaped + " = b." + dateColumnNameEscaped + " and a." + orderColumnNameEscaped + "=b." + orderColumnNameEscaped + " ) " +
+                            "WHEN MATCHED THEN " +
+                            "UPDATE SET  a.tag=" + tagEscaped + delimiter)
+            };
+        } else {
+
+            UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                    .addNewColumnValue("TAG", statement.getTag())
+                    .setWhereClause(
+                            orderColumnNameEscaped + " = (" +
+                                    "SELECT MAX(" + orderColumnNameEscaped + ") " +
+                                    "FROM " + tableNameEscaped +
+                                    ")");
+
+            return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
         }
-
-        UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-            .addNewColumnValue("TAG", statement.getTag())
-            .setWhereClause(
-                    orderColumnNameEscaped + " = (" +
-                        "SELECT MAX(" + orderColumnNameEscaped + ") " +
-                        "FROM " + tableNameEscaped +
-                    ")");
-
-        return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 
     }
 }
