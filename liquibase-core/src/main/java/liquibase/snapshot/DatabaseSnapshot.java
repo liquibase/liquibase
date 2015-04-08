@@ -430,8 +430,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         }
     }
 
-    protected void loadObjects(Map<String, DatabaseObject> objectMap, Map<String, DatabaseObject> allObjects, ParsedNode referencedObjectsNode, ResourceAccessor resourceAccessor) throws ClassNotFoundException, InstantiationException, IllegalAccessException, ParsedNodeException {
-        for (ParsedNode typeNode : referencedObjectsNode.getChildren()) {
+    protected void loadObjects(Map<String, DatabaseObject> objectMap, Map<String, DatabaseObject> allObjects, ParsedNode node, ResourceAccessor resourceAccessor) throws ClassNotFoundException, InstantiationException, IllegalAccessException, ParsedNodeException {
+        if (node == null) {
+            return;
+        }
+        for (ParsedNode typeNode : node.getChildren()) {
             Class<? extends DatabaseObject> objectType = (Class<? extends DatabaseObject>) Class.forName(typeNode.getName());
             for (ParsedNode objectNode : typeNode.getChildren()) {
                 DatabaseObject databaseObject = objectType.newInstance();
