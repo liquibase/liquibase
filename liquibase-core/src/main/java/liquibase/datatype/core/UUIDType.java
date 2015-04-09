@@ -44,7 +44,7 @@ public class UUIDType extends LiquibaseDataType {
             return null;
         }
         if (database instanceof MSSQLDatabase) {
-			 return (value instanceof DatabaseFunction) ? database.generateDatabaseFunctionValue((DatabaseFunction) value) : "'" + value + "'";
+			 return (value instanceof DatabaseFunction) ? database.generateDatabaseFunctionValue((DatabaseFunction) value) : "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
         }
         return super.otherToSql(value, database);
     }
