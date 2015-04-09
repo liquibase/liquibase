@@ -482,9 +482,10 @@ public class Main {
         stream.println(" updateCount <num>              Applies next NUM changes to the database");
         stream.println(" updateCountSQL <num>           Writes SQL to apply next NUM changes");
         stream.println("                                to the database");
-        stream.println(" updateToTag <tag>              Updates the database to the specified tag");
-        stream.println(" updateToTagSQL <tag>           Writes (to standard out) the SQL to update the");
-        stream.println("                                database to the specified tag");
+        stream.println(" updateToTag <tag>              Updates the database to the changeSet with the");
+        stream.println("                                specified tag");
+        stream.println(" updateToTagSQL <tag>           Writes (to standard out) the SQL to update to");
+        stream.println("                                the changeSet with the specified tag");
         stream.println(" rollback <tag>                 Rolls back the database to the the state is was");
         stream.println("                                when the tag was applied");
         stream.println(" rollbackSQL <tag>              Writes SQL to roll back the database to that");

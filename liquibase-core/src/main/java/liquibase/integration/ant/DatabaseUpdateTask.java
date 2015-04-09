@@ -17,6 +17,7 @@ import java.io.Writer;
  */
 public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
     private boolean dropFirst = false;
+    private String toTag;
 
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
@@ -26,12 +27,12 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
             FileResource outputFile = getOutputFile();
             if(outputFile != null) {
                 writer = getOutputFileWriter();
-                liquibase.update(new Contexts(getContexts()), getLabels(), writer);
+                liquibase.update(toTag, new Contexts(getContexts()), getLabels(), writer);
             } else {
                 if(dropFirst) {
                     liquibase.dropAll();
                 }
-                liquibase.update(new Contexts(getContexts()), getLabels());
+                liquibase.update(toTag, new Contexts(getContexts()), getLabels());
             }
         } catch (LiquibaseException e) {
             throw new BuildException("Unable to update database. " + e.toString(), e);
@@ -50,5 +51,13 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
 
     public void setDropFirst(boolean dropFirst) {
         this.dropFirst = dropFirst;
+    }
+
+    public String getToTag() {
+        return toTag;
+    }
+
+    public void setToTag(String toTag) {
+        this.toTag = toTag;
     }
 }

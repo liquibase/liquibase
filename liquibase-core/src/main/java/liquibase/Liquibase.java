@@ -320,6 +320,9 @@ public class Liquibase {
     }
 
     public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        if (tag == null) {
+            update(contexts, labelExpression);
+        }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -383,6 +386,9 @@ public class Liquibase {
     }
 
     public void update(String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        if (tag == null) {
+            update(contexts, labelExpression, output);
+        }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -1018,14 +1024,19 @@ public class Liquibase {
     public void updateTestingRollback(String contexts) throws LiquibaseException {
         updateTestingRollback(new Contexts(contexts), new LabelExpression());
     }
+
     public void updateTestingRollback(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+        updateTestingRollback(null, contexts, labelExpression);
+
+    }
+    public void updateTestingRollback(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
         Date baseDate = new Date();
-        update(contexts, labelExpression);
+        update(tag, contexts, labelExpression);
         rollback(baseDate, null, contexts, labelExpression);
-        update(contexts, labelExpression);
+        update(tag, contexts, labelExpression);
     }
 
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
