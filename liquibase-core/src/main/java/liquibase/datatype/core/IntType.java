@@ -40,7 +40,12 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("int"));
         }
-        if (database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase  || database instanceof MySQLDatabase) {
+        if (database instanceof MySQLDatabase) {
+            DatabaseDataType type = new DatabaseDataType("INT", getParameters());
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
+        }
+        if (database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase) {

@@ -30,7 +30,9 @@ public class TinyIntType  extends LiquibaseDataType {
             return new DatabaseDataType("SMALLINT");
         }
         if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType("TINYINT");
+            DatabaseDataType type = new DatabaseDataType("TINYINT", getParameters());
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
         }
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER",3);
