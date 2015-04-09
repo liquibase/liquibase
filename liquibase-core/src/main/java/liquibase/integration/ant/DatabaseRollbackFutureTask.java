@@ -1,7 +1,6 @@
 package liquibase.integration.ant;
 
 import liquibase.Contexts;
-import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -13,7 +12,7 @@ public class DatabaseRollbackFutureTask extends AbstractChangeLogBasedTask {
     public void executeWithLiquibaseClassloader() throws BuildException {
         Liquibase liquibase = getLiquibase();
         try {
-            liquibase.futureRollbackSQL(null, new Contexts(getContexts()), getLabels(), getOutputFileWriter());
+            liquibase.futureRollbackSQL(new Contexts(getContexts()), getLabels(), getOutputFileWriter());
         } catch (LiquibaseException e) {
             throw new BuildException("Unable to generate future rollback SQL. " + e.toString(), e);
         } catch (IOException e) {

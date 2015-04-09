@@ -18,6 +18,12 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
    */
   protected int changesToApply;
 
+  /**
+   * Update to the changeSet with the given tag command.
+   * @parameter expression="${liquibase.toTag}"
+   */
+  protected String toTag;
+
   @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     super.performLiquibaseTask(liquibase);

@@ -396,7 +396,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.futureRollbackSQL(this.contexts, writer);
+        liquibase.futureRollbackSQL(new Contexts(this.contexts), new LabelExpression(), writer);
 
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
