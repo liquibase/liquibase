@@ -134,13 +134,25 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         } else if (value instanceof DatabaseFunction) {
-            return database.generateDatabaseFunctionValue((DatabaseFunction) value);
+            return functionToSql((DatabaseFunction) value, database);
         } else if (value instanceof Number) {
-            return formatNumber(value.toString());
+            return numberToSql((Number) value, database);
         }
-        return value.toString();
+        return otherToSql(value, database);
     }
-    
+
+    protected String functionToSql(DatabaseFunction function, Database database) {
+        return function == null ? null : database.generateDatabaseFunctionValue(function);
+    }
+
+    protected String numberToSql(Number number, Database database) {
+        return number == null ? null : formatNumber(number.toString());
+    }
+
+    protected String otherToSql(Object value, Database database) {
+        return value == null ? null : value.toString();
+    }
+
     public Object sqlToObject(String value, Database database) {
         return value;
     }
