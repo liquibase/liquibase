@@ -322,6 +322,7 @@ public class Liquibase {
     public void update(String tag, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         if (tag == null) {
             update(contexts, labelExpression);
+            return;
         }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -388,6 +389,7 @@ public class Liquibase {
     public void update(String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         if (tag == null) {
             update(contexts, labelExpression, output);
+            return;
         }
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
