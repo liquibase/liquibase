@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -569,51 +570,59 @@ public abstract class AbstractChange implements Change {
                                 }
                             }
                         } else if (LiquibaseSerializable.class.isAssignableFrom(collectionType)) {
-                            String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
-                            List<ParsedNode> nodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
-                            nodes.addAll(parsedNode.getChildren(null, elementName));
+                            if(!collectionType.isInterface()
+                                    && !Modifier.isAbstract(collectionType.getModifiers())) {
 
-                            Object nodeValue = parsedNode.getValue();
-                            if (nodeValue instanceof ParsedNode) {
-                                nodes.add((ParsedNode) nodeValue);
-                            } else if (nodeValue instanceof Collection) {
-                                for (Object nodeValueChild : ((Collection) nodeValue)) {
-                                    if (nodeValueChild instanceof ParsedNode) {
-                                        nodes.add((ParsedNode) nodeValueChild);
-                                    }
-                                }
-                            }
+                                 String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
+                                 List<ParsedNode> nodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                                 nodes.addAll(parsedNode.getChildren(null, elementName));
 
-                            for (ParsedNode node : nodes) {
-                                if (node.getName().equals(elementName) || node.getName().equals(param.getParameterName())) {
-                                    List<ParsedNode> childNodes = node.getChildren(null, elementName);
-                                    if (childNodes != null && childNodes.size() > 0) {
-                                        for (ParsedNode childNode : childNodes) {
-                                            LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
-                                            childObject.load(childNode, resourceAccessor);
-                                            ((Collection) param.getCurrentValue(this)).add(childObject);
-                                        }
-                                    } else {
-                                        LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
-                                        childObject.load(node, resourceAccessor);
-                                        ((Collection) param.getCurrentValue(this)).add(childObject);
-                                    }
-                                }
+                                 Object nodeValue = parsedNode.getValue();
+                                 if (nodeValue instanceof ParsedNode) {
+                                     nodes.add((ParsedNode) nodeValue);
+                                 } else if (nodeValue instanceof Collection) {
+                                     for (Object nodeValueChild : ((Collection) nodeValue)) {
+                                         if (nodeValueChild instanceof ParsedNode) {
+                                             nodes.add((ParsedNode) nodeValueChild);
+                                         }
+                                     }
+                                 }
+
+                                 for (ParsedNode node : nodes) {
+                                     if (node.getName().equals(elementName) || node.getName().equals(param.getParameterName())) {
+                                         List<ParsedNode> childNodes = node.getChildren(null, elementName);
+                                         if (childNodes != null && childNodes.size() > 0) {
+                                             for (ParsedNode childNode : childNodes) {
+                                                 LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                                 childObject.load(childNode, resourceAccessor);
+                                                 ((Collection) param.getCurrentValue(this)).add(childObject);
+                                             }
+                                         } else {
+                                             LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                             childObject.load(node, resourceAccessor);
+                                             ((Collection) param.getCurrentValue(this)).add(childObject);
+                                         }
+                                     }
+                                 }
                             }
                         }
                     }
                 } else if (LiquibaseSerializable.class.isAssignableFrom(param.getDataTypeClass())) {
-                    try {
-                        ParsedNode child = parsedNode.getChild(null, param.getParameterName());
-                        if (child != null) {
-                            LiquibaseSerializable serializableChild = (LiquibaseSerializable) param.getDataTypeClass().newInstance();
-                            serializableChild.load(child, resourceAccessor);
-                            param.setValue(this, serializableChild);
+                    if (!param.getDataTypeClass().isInterface()
+                            && !Modifier.isAbstract(param.getDataTypeClass().getModifiers())) {
+
+                        try {
+                            ParsedNode child = parsedNode.getChild(null, param.getParameterName());
+                            if (child != null) {
+                                LiquibaseSerializable serializableChild = (LiquibaseSerializable) param.getDataTypeClass().newInstance();
+                                serializableChild.load(child, resourceAccessor);
+                                param.setValue(this, serializableChild);
+                            }
+                        } catch (InstantiationException e) {
+                            throw new UnexpectedLiquibaseException(e);
+                        } catch (IllegalAccessException e) {
+                            throw new UnexpectedLiquibaseException(e);
                         }
-                    } catch (InstantiationException e) {
-                        throw new UnexpectedLiquibaseException(e);
-                    } catch (IllegalAccessException e) {
-                        throw new UnexpectedLiquibaseException(e);
                     }
                 } else {
                     Object childValue = parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass());
