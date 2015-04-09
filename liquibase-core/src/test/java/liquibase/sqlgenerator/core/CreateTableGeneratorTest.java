@@ -597,7 +597,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-    			assertEquals("Error on "+database, "CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (1, 1) NOT NULL)", generatedSql[0].toSql());
+    			assertEquals("Error on "+database, "CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] [bigint] IDENTITY (1, 1) NOT NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -618,7 +618,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (0, 1) NOT NULL)", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] [bigint] IDENTITY (0, 1) NOT NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -639,7 +639,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-				assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (0, 10) NOT NULL)", generatedSql[0].toSql());
+				assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] [bigint] IDENTITY (0, 10) NOT NULL)", generatedSql[0].toSql());
     		}
     	}
     }

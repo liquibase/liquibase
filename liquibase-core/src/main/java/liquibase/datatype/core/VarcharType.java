@@ -1,5 +1,8 @@
 package liquibase.datatype.core;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.InformixDatabase;
@@ -8,6 +11,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 
 @DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
@@ -24,15 +28,27 @@ public class VarcharType extends CharType {
         }
 
         if (database instanceof MSSQLDatabase) {
-            if (getParameters() != null && getParameters().length > 0) {
-                Object param1 = getParameters()[0];
-                if (param1.toString().matches("\\d+")) {
-                    if (Long.valueOf(param1.toString()) > 8000) {
-                        return new DatabaseDataType("VARCHAR", "MAX");
-                    }
+            Object[] parameters = getParameters();
+            if (parameters.length > 0) {
+                String param1 = parameters[0].toString();
+                if (!param1.matches("\\d+")
+                        || new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0) {
+
+                    try {
+                        if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
+                            return new DatabaseDataType(database.escapeDataTypeName("varchar"), "8000");
+                        }
+                    } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+                    return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
                 }
             }
-            return new DatabaseDataType("VARCHAR", getParameters());
+            if (parameters.length == 0) {
+                parameters = new Object[] { 1 };
+            } else if (parameters.length > 1) {
+                parameters = Arrays.copyOfRange(parameters, 0, 1);
+            }
+            return new DatabaseDataType(database.escapeDataTypeName("varchar"), parameters);
         }
 
         return super.toDatabaseDataType(database);

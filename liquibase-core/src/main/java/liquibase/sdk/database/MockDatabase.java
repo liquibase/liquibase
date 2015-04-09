@@ -757,4 +757,19 @@ public class MockDatabase implements Database, InternalDatabase {
     public String toString() {
         return "Mock database";
     }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        return dataTypeString;
+    }
 }
