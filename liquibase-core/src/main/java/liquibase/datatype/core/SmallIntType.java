@@ -25,7 +25,12 @@ public class SmallIntType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("smallint")); //always smallint regardless of parameters passed
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase || database instanceof MySQLDatabase) {
+        if (database instanceof MySQLDatabase) {
+            DatabaseDataType type = new DatabaseDataType("SMALLINT", getParameters());
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
+        }
+        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 

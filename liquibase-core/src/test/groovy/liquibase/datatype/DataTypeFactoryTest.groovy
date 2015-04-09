@@ -146,6 +146,18 @@ public class DataTypeFactoryTest extends Specification {
         "MySchema.[MyUDT]"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].MyUDT"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].[MyUDT]"                                 | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
+        "INT"                                                | new MySQLDatabase()   | "INT"                                                | IntType       | false
+        "INT UNSIGNED"                                       | new MySQLDatabase()   | "INT UNSIGNED"                                       | IntType       | false
+        "INT(11) UNSIGNED"                                   | new MySQLDatabase()   | "INT(11) UNSIGNED"                                   | IntType       | false
+        "TINYINT"                                            | new MySQLDatabase()   | "TINYINT"                                            | TinyIntType   | false
+        "TINYINT UNSIGNED"                                   | new MySQLDatabase()   | "TINYINT UNSIGNED"                                   | TinyIntType   | false
+        "TINYINT(1) UNSIGNED"                                | new MySQLDatabase()   | "TINYINT(1) UNSIGNED"                                | TinyIntType   | false
+        "SMALLINT"                                           | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
+        "SMALLINT UNSIGNED"                                  | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
+        "MEDIUMINT"                                          | new MySQLDatabase()   | "MEDIUMINT UNSIGNED"                                 | MediumIntType | false
+        "MEDIUMINT UNSIGNED"                                 | new MySQLDatabase()   | "MEDIUMINT UNSIGNED"                                 | MediumIntType | false
+        "BIGINT"                                             | new MySQLDatabase()   | "BIGINT UNSIGNED"                                    | BigIntType    | false
+        "BIGINT UNSIGNED"                                    | new MySQLDatabase()   | "BIGINT UNSIGNED"                                    | BigIntType    | false
         "tinyblob"                                           | new MySQLDatabase()   | "TINYBLOB"                                           | BlobType      | false
         "tinytext"                                           | new MySQLDatabase()   | "TINYTEXT"                                           | ClobType      | false
         "mediumblob"                                         | new MySQLDatabase()   | "MEDIUMBLOB"                                         | BlobType      | false
