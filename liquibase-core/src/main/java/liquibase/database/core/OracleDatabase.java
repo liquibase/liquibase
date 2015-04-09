@@ -50,20 +50,22 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
-        try {
-            Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-            wrappedConn.setAccessible(true);
-            Connection sqlConn = (Connection) wrappedConn.invoke(conn);
+        if (!(conn instanceof OfflineConnection)) {
+            try {
+                Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+                wrappedConn.setAccessible(true);
+                Connection sqlConn = (Connection) wrappedConn.invoke(conn);
 
-            reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
+                reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+                reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
 
-            Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
-            method.setAccessible(true);
-            method.invoke(sqlConn, true);
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
-            ; //cannot set it. That is OK
+                Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
+                method.setAccessible(true);
+                method.invoke(sqlConn, true);
+            } catch (Exception e) {
+                LogFactory.getLogger().info("Error configuring OracleDatabase connection: " + e.getMessage(), e);
+                ; //cannot set it. That is OK
+            }
         }
         super.setConnection(conn);
     }
