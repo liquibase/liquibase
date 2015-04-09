@@ -5,10 +5,11 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "clob", aliases = { "longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB", "nclob", "longnvarchar", "ntext", "java.sql.Types.LONGNVARCHAR", "java.sql.Types.NCLOB", "tinytext", "mediumtext" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
     @Override
@@ -27,6 +28,10 @@ public class ClobType extends LiquibaseDataType {
         if (val.startsWith("'")) {
             return val;
         } else {
+            if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
+                return "N'"+database.escapeStringForDatabase(val)+"'";
+            }
+
             return "'"+database.escapeStringForDatabase(val)+"'";
         }
     }
@@ -40,10 +45,33 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");
         } else if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("NVARCHAR", "MAX");
+            if (originalDefinition.equalsIgnoreCase("text")
+                    || originalDefinition.equals("[text]")) {
+
+                return new DatabaseDataType(database.escapeDataTypeName("text"));
+            }
+            if (originalDefinition.equalsIgnoreCase("ntext")
+                    || originalDefinition.equals("[ntext]")) {
+
+                return new DatabaseDataType(database.escapeDataTypeName("ntext"));
+            }
+            if (originalDefinition.equalsIgnoreCase("nclob")) {
+                return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
+            }
+            try {
+                if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
+                    return new DatabaseDataType(database.escapeDataTypeName("text"));
+                }
+            } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+            return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
         } else if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("text")) {
                 return new DatabaseDataType("TEXT");
+            } else if (originalDefinition.toLowerCase().startsWith("tinytext")) {
+                return new DatabaseDataType("TINYTEXT");
+            } else if (originalDefinition.toLowerCase().startsWith("mediumtext")) {
+                return new DatabaseDataType("MEDIUMTEXT");
             } else {
                 return new DatabaseDataType("LONGTEXT");
             }
@@ -56,6 +84,9 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
+            if (originalDefinition.equalsIgnoreCase("nclob")) {
+                return new DatabaseDataType("NCLOB");
+            }
             return new DatabaseDataType("CLOB");
         } else if (database instanceof InformixDatabase) {
             if (originalDefinition.toLowerCase().startsWith("text")) {
