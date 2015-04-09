@@ -58,9 +58,13 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                             }
                         }
                     } if (LiquibaseSerializable.class.isAssignableFrom(dataTypeClass)) {
-                        LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.newInstance();
-                        childObject.load(childNode, resourceAccessor);
-                        setSerializableFieldValue(childNode.getName(), childObject);
+                        if (!dataTypeClass.isInterface()
+                                && !Modifier.isAbstract(dataTypeClass.getModifiers())) {
+
+                            LiquibaseSerializable childObject = (LiquibaseSerializable) dataTypeClass.newInstance();
+                            childObject.load(childNode, resourceAccessor);
+                            setSerializableFieldValue(childNode.getName(), childObject);
+                        }
                     } else if (childNode.getValue() != null) {
                         ObjectUtil.setProperty(this, childNode.getName(), convertEscaped(childNode.getValue().toString()));
                     }
