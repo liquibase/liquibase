@@ -17,10 +17,12 @@ import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
+
 import org.apache.velocity.runtime.directive.Parse;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -255,7 +257,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             //
             //                }
         } else if (fieldValue instanceof Collection) {
-            Iterator fieldValueIterator = ((Collection) fieldValue).iterator();
+            Iterator fieldValueIterator = new CopyOnWriteArrayList((Collection) fieldValue).iterator();
             List newValues = new ArrayList();
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
