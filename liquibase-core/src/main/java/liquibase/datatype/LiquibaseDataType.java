@@ -5,6 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,6 +124,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return functionToSql((DatabaseFunction) value, database);
+        } else if (value instanceof BigDecimal) {
+            return formatNumber(((BigDecimal) value).toPlainString());
         } else if (value instanceof Number) {
             return numberToSql((Number) value, database);
         }
