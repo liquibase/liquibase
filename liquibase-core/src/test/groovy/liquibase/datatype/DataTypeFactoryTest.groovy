@@ -152,11 +152,11 @@ public class DataTypeFactoryTest extends Specification {
         "TINYINT"                                            | new MySQLDatabase()   | "TINYINT"                                            | TinyIntType   | false
         "TINYINT UNSIGNED"                                   | new MySQLDatabase()   | "TINYINT UNSIGNED"                                   | TinyIntType   | false
         "TINYINT(1) UNSIGNED"                                | new MySQLDatabase()   | "TINYINT(1) UNSIGNED"                                | TinyIntType   | false
-        "SMALLINT"                                           | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
+        "SMALLINT"                                           | new MySQLDatabase()   | "SMALLINT"                                           | SmallIntType  | false
         "SMALLINT UNSIGNED"                                  | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
-        "MEDIUMINT"                                          | new MySQLDatabase()   | "MEDIUMINT UNSIGNED"                                 | MediumIntType | false
+        "MEDIUMINT"                                          | new MySQLDatabase()   | "MEDIUMINT"                                          | MediumIntType | false
         "MEDIUMINT UNSIGNED"                                 | new MySQLDatabase()   | "MEDIUMINT UNSIGNED"                                 | MediumIntType | false
-        "BIGINT"                                             | new MySQLDatabase()   | "BIGINT UNSIGNED"                                    | BigIntType    | false
+        "BIGINT"                                             | new MySQLDatabase()   | "BIGINT"                                             | BigIntType    | false
         "BIGINT UNSIGNED"                                    | new MySQLDatabase()   | "BIGINT UNSIGNED"                                    | BigIntType    | false
         "tinyblob"                                           | new MySQLDatabase()   | "TINYBLOB"                                           | BlobType      | false
         "tinytext"                                           | new MySQLDatabase()   | "TINYTEXT"                                           | ClobType      | false
