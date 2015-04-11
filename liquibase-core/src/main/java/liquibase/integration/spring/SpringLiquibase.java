@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -106,7 +107,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
             for (Resource resource : resources) {
-                returnSet.add(resource.getURL().openStream());
+            	URLConnection connection = resource.getURL().openConnection();
+            	connection.setUseCaches(false);
+            	returnSet.add(connection.getInputStream());
             }
 
             return returnSet;

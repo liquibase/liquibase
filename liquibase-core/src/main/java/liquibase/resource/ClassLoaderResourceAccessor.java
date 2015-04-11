@@ -39,7 +39,9 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 continue;
             }
             seenUrls.add(url.toExternalForm());
-            InputStream resourceAsStream = url.openStream();
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(false);
+            InputStream resourceAsStream = connection.getInputStream();
             if (resourceAsStream != null) {
                 returnSet.add(resourceAsStream);
             }

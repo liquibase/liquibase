@@ -3,6 +3,7 @@ package liquibase.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Properties;
 
 public class LiquibaseUtil {
@@ -15,7 +16,9 @@ public class LiquibaseUtil {
         InputStream in = null;
         try {
             if (buildInfoFile != null) {
-                in = buildInfoFile.openStream();
+            	URLConnection connection = buildInfoFile.openConnection();
+            	connection.setUseCaches(false);
+                in = connection.getInputStream();
                 buildInfo.load(in);
                 String o = (String) buildInfo.get("build.version");
 
