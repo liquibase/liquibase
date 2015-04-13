@@ -8,7 +8,6 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.DatabaseFunction;
 
 @DataTypeInfo(name = "uuid", aliases = { "uniqueidentifier", "java.util.UUID" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class UUIDType extends LiquibaseDataType {
@@ -44,7 +43,7 @@ public class UUIDType extends LiquibaseDataType {
             return null;
         }
         if (database instanceof MSSQLDatabase) {
-			 return (value instanceof DatabaseFunction) ? database.generateDatabaseFunctionValue((DatabaseFunction) value) : "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
+            return "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
         }
         return super.otherToSql(value, database);
     }
