@@ -105,13 +105,25 @@ public class DataTypeFactory {
             dataTypeName = dataTypeName.replaceFirst(" identity$", "");
             autoIncrement = true;
         }
-        // unquote delimited identifiers
-        if (dataTypeName.matches("\"[^\"]++\"") // surrounded with double quotes
-                || dataTypeName.matches("\\[[^]\\[]++\\]") // surrounded with square brackets (a la mssql)
-                || dataTypeName.matches("`[^`]++`") // surrounded with backticks (a la mysql)
-                || dataTypeName.matches("'[^']++'")) { // surrounded with single quotes
 
-            dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+        // unquote delimited identifiers
+        final String[][] quotePairs = new String[][] {
+            { "\"", "\"" }, // double quotes
+            { "[",  "]"  }, // square brackets (a la mssql)
+            { "`",  "`"  }, // backticks (a la mysql)
+            { "'",  "'"  }  // single quotes
+        };
+        for (String[] quotePair : quotePairs) {
+            String openQuote = quotePair[0];
+            String closeQuote = quotePair[1];
+            if (dataTypeName.startsWith(openQuote)) {
+                int indexOfCloseQuote = dataTypeName.indexOf(closeQuote, openQuote.length());
+                if (indexOfCloseQuote != -1 && dataTypeName.indexOf(closeQuote, indexOfCloseQuote + closeQuote.length()) == -1) {
+                    dataTypeName = dataTypeName.substring(openQuote.length(), indexOfCloseQuote) +
+                            dataTypeName.substring(indexOfCloseQuote + closeQuote.length(), dataTypeName.length());
+                    break;
+                }
+            }
         }
 
         String additionalInfo = null;

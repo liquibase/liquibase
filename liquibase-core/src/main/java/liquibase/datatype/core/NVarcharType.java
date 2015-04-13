@@ -33,11 +33,15 @@ public class NVarcharType extends CharType {
 
                     try {
                         if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                            return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "4000");
+                            DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "4000");
+                            type.addAdditionalInformation(getAdditionalInformation());
+                            return type;
                         }
                     } catch (DatabaseException ignore) { } //assuming it is a newer version
 
-                    return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
+                    DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
+                    type.addAdditionalInformation(getAdditionalInformation());
+                    return type;
                 }
             }
             if (parameters.length == 0) {
@@ -45,7 +49,9 @@ public class NVarcharType extends CharType {
             } else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), parameters);
+            DatabaseDataType type =  new DatabaseDataType(database.escapeDataTypeName("nvarchar"), parameters);
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
         }
         return super.toDatabaseDataType(database);
     }

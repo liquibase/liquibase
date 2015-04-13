@@ -28,8 +28,6 @@ public class DataTypeFactoryTest extends Specification {
         "int{autoIncrement:true}"                            | new MockDatabase()    | "INT"                                                | IntType       | true
         "int{autoIncrement:false}"                           | new MockDatabase()    | "INT"                                                | IntType       | false
         "int{}"                                              | new MockDatabase()    | "INT"                                                | IntType       | false
-        "varchar COLLATE Latin1_General_BIN"                 | new MockDatabase()    | "VARCHAR COLLATE Latin1_General_BIN"                 | VarcharType   | false
-        "varchar(255) COLLATE Latin1_General_BIN"            | new MockDatabase()    | "VARCHAR(255) COLLATE Latin1_General_BIN"            | VarcharType   | false
         "character varying(256)"                             | new MockDatabase()    | "VARCHAR(256)"                                       | VarcharType   | false
         "serial8"                                            | new MockDatabase()    | "BIGINT"                                             | BigIntType    | true
         "int4"                                               | new MockDatabase()    | "INT"                                                | IntType       | false
@@ -146,6 +144,30 @@ public class DataTypeFactoryTest extends Specification {
         "MySchema.[MyUDT]"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].MyUDT"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].[MyUDT]"                                 | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
+        "char COLLATE Latin1_General_BIN"                    | new MSSQLDatabase()   | "[char](1) COLLATE Latin1_General_BIN"               | CharType      | false
+        "[char] COLLATE Latin1_General_BIN"                  | new MSSQLDatabase()   | "[char](1) COLLATE Latin1_General_BIN"               | CharType      | false
+        "char(255) COLLATE Latin1_General_BIN"               | new MSSQLDatabase()   | "[char](255) COLLATE Latin1_General_BIN"             | CharType      | false
+        "[char](255) COLLATE Latin1_General_BIN"             | new MSSQLDatabase()   | "[char](255) COLLATE Latin1_General_BIN"             | CharType      | false
+        "nchar COLLATE Latin1_General_BIN"                   | new MSSQLDatabase()   | "[nchar](1) COLLATE Latin1_General_BIN"              | NCharType     | false
+        "[nchar] COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[nchar](1) COLLATE Latin1_General_BIN"              | NCharType     | false
+        "nchar(255) COLLATE Latin1_General_BIN"              | new MSSQLDatabase()   | "[nchar](255) COLLATE Latin1_General_BIN"            | NCharType     | false
+        "[nchar](255) COLLATE Latin1_General_BIN"            | new MSSQLDatabase()   | "[nchar](255) COLLATE Latin1_General_BIN"            | NCharType     | false
+        "ntext COLLATE Latin1_General_BIN"                   | new MSSQLDatabase()   | "[ntext] COLLATE Latin1_General_BIN"                 | ClobType      | false
+        "[ntext] COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[ntext] COLLATE Latin1_General_BIN"                 | ClobType      | false
+        "nvarchar COLLATE Latin1_General_BIN"                | new MSSQLDatabase()   | "[nvarchar](1) COLLATE Latin1_General_BIN"           | NVarcharType  | false
+        "[nvarchar] COLLATE Latin1_General_BIN"              | new MSSQLDatabase()   | "[nvarchar](1) COLLATE Latin1_General_BIN"           | NVarcharType  | false
+        "nvarchar(255) COLLATE Latin1_General_BIN"           | new MSSQLDatabase()   | "[nvarchar](255) COLLATE Latin1_General_BIN"         | NVarcharType  | false
+        "[nvarchar](255) COLLATE Latin1_General_BIN"         | new MSSQLDatabase()   | "[nvarchar](255) COLLATE Latin1_General_BIN"         | NVarcharType  | false
+        "nvarchar(MAX) COLLATE Latin1_General_BIN"           | new MSSQLDatabase()   | "[nvarchar](MAX) COLLATE Latin1_General_BIN"         | NVarcharType  | false
+        "[nvarchar](MAX) COLLATE Latin1_General_BIN"         | new MSSQLDatabase()   | "[nvarchar](MAX) COLLATE Latin1_General_BIN"         | NVarcharType  | false
+        "text COLLATE Latin1_General_BIN"                    | new MSSQLDatabase()   | "[text] COLLATE Latin1_General_BIN"                  | ClobType      | false
+        "[text] COLLATE Latin1_General_BIN"                  | new MSSQLDatabase()   | "[text] COLLATE Latin1_General_BIN"                  | ClobType      | false
+        "varchar COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[varchar](1) COLLATE Latin1_General_BIN"            | VarcharType   | false
+        "[varchar] COLLATE Latin1_General_BIN"               | new MSSQLDatabase()   | "[varchar](1) COLLATE Latin1_General_BIN"            | VarcharType   | false
+        "varchar(255) COLLATE Latin1_General_BIN"            | new MSSQLDatabase()   | "[varchar](255) COLLATE Latin1_General_BIN"          | VarcharType   | false
+        "[varchar](255) COLLATE Latin1_General_BIN"          | new MSSQLDatabase()   | "[varchar](255) COLLATE Latin1_General_BIN"          | VarcharType   | false
+        "varchar(MAX) COLLATE Latin1_General_BIN"            | new MSSQLDatabase()   | "[varchar](MAX) COLLATE Latin1_General_BIN"          | VarcharType   | false
+        "[varchar](MAX) COLLATE Latin1_General_BIN"          | new MSSQLDatabase()   | "[varchar](MAX) COLLATE Latin1_General_BIN"          | VarcharType   | false
         "INT"                                                | new MySQLDatabase()   | "INT"                                                | IntType       | false
         "INT UNSIGNED"                                       | new MySQLDatabase()   | "INT UNSIGNED"                                       | IntType       | false
         "INT(11) UNSIGNED"                                   | new MySQLDatabase()   | "INT(11) UNSIGNED"                                   | IntType       | false

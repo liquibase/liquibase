@@ -40,7 +40,9 @@ public class VarcharType extends CharType {
                         }
                     } catch (DatabaseException ignore) { } //assuming it is a newer version
 
-                    return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
+                    DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
+                    type.addAdditionalInformation(getAdditionalInformation());
+                    return type;
                 }
             }
             if (parameters.length == 0) {
@@ -48,7 +50,9 @@ public class VarcharType extends CharType {
             } else if (parameters.length > 1) {
                 parameters = Arrays.copyOfRange(parameters, 0, 1);
             }
-            return new DatabaseDataType(database.escapeDataTypeName("varchar"), parameters);
+            DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"), parameters);
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
         }
 
         return super.toDatabaseDataType(database);
