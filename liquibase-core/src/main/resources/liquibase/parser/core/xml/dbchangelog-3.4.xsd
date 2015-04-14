@@ -93,6 +93,7 @@
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
                         <xsd:attribute name="labels" type="xsd:string" />
+                        <xsd:attribute name="global" type="xsd:boolean" />
 					</xsd:complexType>
 				</xsd:element>
 
