@@ -46,21 +46,39 @@ public class ClobType extends LiquibaseDataType {
             return new DatabaseDataType("LONG VARCHAR");
         } else if (database instanceof MSSQLDatabase) {
             if (originalDefinition.equalsIgnoreCase("text")
-                    || originalDefinition.equals("[text]")) {
+                    || originalDefinition.equals("[text]")
+                    || originalDefinition.matches("(?i)text .+")
+                    || originalDefinition.matches("\\[text\\] .+")) {
 
-                return new DatabaseDataType(database.escapeDataTypeName("text"));
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("text"));
+                type.addAdditionalInformation(getAdditionalInformation());
+                return type;
             }
             if (originalDefinition.equalsIgnoreCase("ntext")
-                    || originalDefinition.equals("[ntext]")) {
+                    || originalDefinition.equals("[ntext]")
+                    || originalDefinition.matches("(?i)ntext .+")
+                    || originalDefinition.matches("\\[ntext\\] .+")) {
 
-                return new DatabaseDataType(database.escapeDataTypeName("ntext"));
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("ntext"));
+                type.addAdditionalInformation(getAdditionalInformation());
+                return type;
             }
             if (originalDefinition.equalsIgnoreCase("nclob")) {
+                try {
+                    if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
+                        DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("ntext"));
+                        type.addAdditionalInformation(getAdditionalInformation());
+                        return type;
+                    }
+                } catch (DatabaseException ignore) { } //assuming it is a newer version
+
                 return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
             }
             try {
                 if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                    return new DatabaseDataType(database.escapeDataTypeName("text"));
+                    DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("text"));
+                    type.addAdditionalInformation(getAdditionalInformation());
+                    return type;
                 }
             } catch (DatabaseException ignore) { } //assuming it is a newer version
 

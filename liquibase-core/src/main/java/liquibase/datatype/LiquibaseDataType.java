@@ -136,8 +136,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return functionToSql((DatabaseFunction) value, database);
-        } else if (value instanceof BigDecimal) {
-            return formatNumber(((BigDecimal) value).toPlainString());
         } else if (value instanceof Number) {
             return numberToSql((Number) value, database);
         }
@@ -149,7 +147,13 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     protected String numberToSql(Number number, Database database) {
-        return number == null ? null : formatNumber(number.toString());
+        if (number == null) {
+            return null;
+        }
+        if (number instanceof BigDecimal) {
+            return formatNumber(((BigDecimal) number).toPlainString());
+        }
+        return formatNumber(number.toString());
     }
 
     protected String otherToSql(Object value, Database database) {
