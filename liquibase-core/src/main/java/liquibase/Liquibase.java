@@ -747,11 +747,7 @@ public class Liquibase {
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
-            try {
-                LockServiceFactory.getInstance().getLockService(database).releaseLock();
-            } catch (LockException e) {
-                log.severe("Unable to release lock: " + e.getMessage());
-            }
+            LockServiceFactory.getInstance().getLockService(database).destroy();
             resetServices();
         }
     }
