@@ -13,7 +13,7 @@ public class TimestampType extends DateTimeType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MySQLDatabase) {
-            if (getRawDefinition().contains(" ")) {
+            if (getRawDefinition().contains(" ") || getRawDefinition().contains("(")) {
                 return new DatabaseDataType(getRawDefinition());
             }
             return new DatabaseDataType("TIMESTAMP");
