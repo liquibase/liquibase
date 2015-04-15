@@ -23,6 +23,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
@@ -31,6 +33,8 @@ import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
+
+  private Logger log = LogFactory.getLogger();
 
 	protected Database database;
 	private String catalogName;
@@ -89,11 +93,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	
 	private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException, DatabaseException {
 		if(col.getValue() != null) {
+        log.debug("value is string = "+col.getValue());
 		    stmt.setString(i, col.getValue());
 		} else if(col.getValueBoolean() != null) {
+        log.debug("value is boolean = "+col.getValueBoolean());
 		    stmt.setBoolean(i, col.getValueBoolean());
 		} else if(col.getValueNumeric() != null) {
+        log.debug("value is numeric = "+col.getValueNumeric());
 		    Number number = col.getValueNumeric();
+        if(number instanceof ColumnConfig.ValueNumeric) {
+            ColumnConfig.ValueNumeric valueNumeric = (ColumnConfig.ValueNumeric) number;
+            number = valueNumeric.getDelegate();
+        }
 		    if(number instanceof Long) {
 		        stmt.setLong(i, number.longValue());
 		    } else if(number instanceof Integer) {
@@ -106,10 +117,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		        stmt.setBigDecimal(i, (BigDecimal)number);
 		    } else if(number instanceof BigInteger) {
 		        stmt.setInt(i, number.intValue());
-		    }
+		    } else {
+            // TODO: Consider throwing an exception here
+        }
 		} else if(col.getValueDate() != null) {
+        log.debug("value is date = "+col.getValueDate());
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
 		} else if (col.getValueBlobFile() != null) {
+        log.debug("value is blob = "+col.getValueBlobFile());
 			try {
 				LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
 				if (lob.length <= Integer.MAX_VALUE) {
@@ -122,6 +137,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 			}
 		} else if(col.getValueClobFile() != null) {
 			try {
+        log.debug("value is clob = "+col.getValueClobFile());
 				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
 				if (lob.length <= Integer.MAX_VALUE) {
 					stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -132,7 +148,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 				throw new DatabaseException(e.getMessage(), e); // wrap
 			}
 		} else {
-			// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
+      // NULL values might intentionally be set into a change, we must also add them to the prepared statement
+      log.debug("value is explicit null");
 			stmt.setNull(i, java.sql.Types.NULL);
 		}
 	}
