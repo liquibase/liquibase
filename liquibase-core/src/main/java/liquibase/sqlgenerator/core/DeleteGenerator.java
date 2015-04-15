@@ -24,8 +24,8 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
     public Sql[] generateSql(DeleteStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
-        if (statement.getWhereClause() != null) {
-            String fixedWhereClause = " WHERE " + statement.getWhereClause();
+        if (statement.getWhere() != null) {
+            String fixedWhereClause = "WHERE " + statement.getWhere();
             for (String columnName : statement.getWhereColumnNames()) {
                 if (columnName == null) {
                     continue;

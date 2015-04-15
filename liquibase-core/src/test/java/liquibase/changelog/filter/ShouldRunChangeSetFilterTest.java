@@ -82,8 +82,8 @@ public class ShouldRunChangeSetFilterTest  {
 
     private Database given_a_database_with_two_executed_changesets() throws DatabaseException {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
-        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null, null));
-        ranChanges.add(new RanChangeSet("classpath:path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null, null));
+        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null, null, null, null));
+        ranChanges.add(new RanChangeSet("classpath:path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null, null, null, null));
 
         expect(database.getRanChangeSetList()).andReturn(ranChanges);
         expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();

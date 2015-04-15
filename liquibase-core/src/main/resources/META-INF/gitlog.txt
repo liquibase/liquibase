@@ -1,5 +1,33 @@
+46049ad CORE-2254 Ability to save snapshot for later comparison
+4ada136 CORE-2321 Update MSSQL query to use a safer, backward-compatible UPDATE statement rather than a MERGE (cherry picked from commit fafc0aa)
+5344eff CORE-2321 Fix compile error on Oracle JDK 6 (cherry picked from commit 9b0e219)
+2b6b05d CORE-2254 Ability to save snapshot for later comparison
+d47a9ab Improved failed SQL error message
+375facc Log SQL with exception (cherry picked from commit 8ca9d02)
+37de7cb CORE-2321 Liquibase tag command tags too much
+9ff0170 CORE-2321 Liquibase tag command tags too much
+72233d5 CORE-2321 Liquibase tag command tags too much
+f09e6a2 CORE-2321 Liquibase tag command tags too much
+da8fd98 CORE-2321 Improve flow control and remove now-unneeded TAG IS NULL from the WHERE clause (cherry picked from commit 0902201)
+30fd36b CORE-2321 Modify logic so that MarkChangeSetRanGenerator can be solely responsible for tagging when executing a change log, while still allowing the database to be tagged outside of that scenario using the necessary update statement with subqueries and aggregate expressions. This can improve performance of executing change logs by eliminating the need to execute unnecessary update statements with subqueries and aggregate expressions. Improve the update statement to use the more-unique ORDEREXECUTED column rather than potentially less unique DATEEXECUTED to ensure that only the minimum number of records get updated. (cherry picked from commit 4014314)
+ea41af7 CORE-2321 Escape column names consistently across change log table-related SQL statements (cherry picked from commit 2128615)
+ad0a020 CORE-2321 Improve robustness and readability (cherry picked from commit 25a7cc6)
+d21da1b CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
+a9ff062 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
+aecd9a4 CORE-2324 diffChangeLog does not handle changes in sequence incrementBy, maxValue or ordered
+7ab5460 Allow ##other attributes in tagDatabase
+5aa46a8 CORE-2324 diffChangeLog does not handle changes in sequence incrementBy, maxValue or ordered
+c43a4aa CORE-2308 Track changeSet contexts and labels in databasechangelog table
+31e632a ##other namespace in XSD should be processContents="lax"
+914ed3f Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+0842e96 Merge branch 'CORE-2306_rollbackScript' into ddb
+93e3669 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
+06db228 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
+def9df2 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
 fe28da3 DVONE-2617 Give update for Gen SQL ability to skip checkLiquibaseTables
 b482cc8 CORE-2254 Ability to save snapshot for later comparison
+b7ec604 CORE-2308 Track changeSet contexts and labels in databasechangelog table
+5741070 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
 dc08e6d Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 6eb3e4c Sort dependent objects for more consistant results
 09fbbc7 Unique constraint backing index names don't always match the unique constraint name

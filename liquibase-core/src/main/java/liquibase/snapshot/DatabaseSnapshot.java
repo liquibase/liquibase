@@ -6,7 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -17,12 +16,9 @@ import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
-import org.apache.velocity.runtime.directive.Parse;
 
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable{
 
@@ -31,6 +27,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     private SnapshotControl snapshotControl;
     private Database database;
     private DatabaseObjectCollection allFound;
+    private DatabaseObjectCollection referencedObjects;
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
     private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
@@ -38,6 +35,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
         allFound = new DatabaseObjectCollection(database);
+        referencedObjects = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
         this.originalExamples = examples;
@@ -47,6 +45,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         this.serializableFields =  new HashSet<String>();
         this.serializableFields.add("snapshotControl");
         this.serializableFields.add("objects");
+        this.serializableFields.add("referencedObjects");
         this.serializableFields.add("database");
         this.serializableFields.add("created");
     }
@@ -107,6 +106,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             return snapshotControl;
         } else if (field.equals("objects")) {
             return allFound;
+        } else if (field.equals("referencedObjects")) {
+            return referencedObjects;
         } else if (field.equals("created")) {
             return new ISODateFormat().format(new Timestamp(new Date().getTime()));
         } else if (field.equals("database")) {
@@ -133,6 +134,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         if (field.equals("snapshotControl")) {
             return SerializationType.NESTED_OBJECT;
         } else if (field.equals("objects")) {
+            return SerializationType.NESTED_OBJECT;
+        } else if (field.equals("referencedObjects")) {
             return SerializationType.NESTED_OBJECT;
         } else {
             throw new UnexpectedLiquibaseException("Unknown field: "+field);
@@ -240,7 +243,16 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             }
 
             if (isWrongSchema(((DatabaseObject) fieldValue))) {
-                return fieldValue;
+                DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue);
+                if (savedFieldValue == null) {
+                    savedFieldValue = (DatabaseObject) fieldValue;
+                    savedFieldValue.setSnapshotId(SnapshotIdService.getInstance().generateId());
+                    includeNestedObjects(savedFieldValue);
+
+                    referencedObjects.add(savedFieldValue);
+                }
+
+                return savedFieldValue;
             }
 
             if (((DatabaseObject) fieldValue).getSnapshotId() == null) {
@@ -364,7 +376,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         try {
+            Map<String, DatabaseObject> referencedObjects = new HashMap<String, DatabaseObject>();
             Map<String, DatabaseObject> objects = new HashMap<String, DatabaseObject>();
+            Map<String, DatabaseObject> allObjects = new HashMap<String, DatabaseObject>();
             ParsedNode databaseNode = parsedNode.getChild(null, "database");
             DatabaseConnection connection = getDatabase().getConnection();
             if (databaseNode != null && connection instanceof OfflineConnection) {
@@ -374,28 +388,22 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                 ((OfflineConnection) connection).setConnectionUserName(databaseNode.getChildValue(null, "user", String.class));
             }
 
-            for (ParsedNode typeNode : parsedNode.getChild(null, "objects").getChildren()) {
-                Class<? extends DatabaseObject> objectType = (Class<? extends DatabaseObject>) Class.forName(typeNode.getName());
-                for (ParsedNode objectNode : typeNode.getChildren()) {
-                    DatabaseObject databaseObject = objectType.newInstance();
-                    databaseObject.load(objectNode, resourceAccessor);
-                    objects.put(objectType.getName() + "#" + databaseObject.getSnapshotId(), databaseObject);
-                }
-            }
+            loadObjects(referencedObjects, allObjects, parsedNode.getChild(null, "referencedObjects"), resourceAccessor);
+            loadObjects(objects, allObjects, parsedNode.getChild(null, "objects"), resourceAccessor);
 
-            for (DatabaseObject object : objects.values()) {
+            for (DatabaseObject object : allObjects.values()) {
                 for (String attr : new ArrayList<String>(object.getAttributes())) {
                     Object value = object.getAttribute(attr, Object.class);
-                    if (value instanceof String && objects.containsKey(value)) {
+                    if (value instanceof String && allObjects.containsKey(value)) {
                         if (ObjectUtil.hasProperty(object, attr)) {
-                            ObjectUtil.setProperty(object, attr, objects.get(value));
+                            ObjectUtil.setProperty(object, attr, allObjects.get(value));
                         } else {
-                            object.setAttribute(attr, objects.get(value));
+                            object.setAttribute(attr, allObjects.get(value));
                         }
-                    } else if (value instanceof Collection && ((Collection) value).size() > 0 && objects.containsKey(((Collection) value).iterator().next())) {
+                    } else if (value instanceof Collection && ((Collection) value).size() > 0 && allObjects.containsKey(((Collection) value).iterator().next())) {
                         List newList = new ArrayList();
                         for (String element : (Collection<String>) value) {
-                            newList.add(objects.get(element));
+                            newList.add(allObjects.get(element));
                         }
                         if (ObjectUtil.hasProperty(object, attr)) {
                             ObjectUtil.setProperty(object, attr, newList);
@@ -414,8 +422,27 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             for (DatabaseObject object : objects.values()) {
                 this.allFound.add(object);
             }
+            for (DatabaseObject object : referencedObjects.values()) {
+                this.referencedObjects.add(object);
+            }
         } catch (Exception e) {
             throw new ParsedNodeException(e);
+        }
+    }
+
+    protected void loadObjects(Map<String, DatabaseObject> objectMap, Map<String, DatabaseObject> allObjects, ParsedNode node, ResourceAccessor resourceAccessor) throws ClassNotFoundException, InstantiationException, IllegalAccessException, ParsedNodeException {
+        if (node == null) {
+            return;
+        }
+        for (ParsedNode typeNode : node.getChildren()) {
+            Class<? extends DatabaseObject> objectType = (Class<? extends DatabaseObject>) Class.forName(typeNode.getName());
+            for (ParsedNode objectNode : typeNode.getChildren()) {
+                DatabaseObject databaseObject = objectType.newInstance();
+                databaseObject.load(objectNode, resourceAccessor);
+                String key = objectType.getName() + "#" + databaseObject.getSnapshotId();
+                objectMap.put(key, databaseObject);
+                allObjects.put(key, databaseObject);
+            }
         }
     }
 

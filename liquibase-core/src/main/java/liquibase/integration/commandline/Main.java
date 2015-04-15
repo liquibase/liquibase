@@ -92,7 +92,7 @@ public class Main {
 
     protected String outputFile;
 
-	public static void main(String args[]) throws CommandLineParsingException, IOException {
+    public static void main(String args[]) throws CommandLineParsingException, IOException {
 		try {
 			run(args);
 		} catch (LiquibaseException e) {
@@ -269,12 +269,6 @@ public class Main {
     private void checkForUnexpectedCommandParameter(List<String> messages) {
         if ("updateCount".equalsIgnoreCase(command)
             || "updateCountSQL".equalsIgnoreCase(command)
-            || "rollback".equalsIgnoreCase(command)
-            || "rollbackToDate".equalsIgnoreCase(command)
-            || "rollbackCount".equalsIgnoreCase(command)
-            || "rollbackSQL".equalsIgnoreCase(command)
-            || "rollbackToDateSQL".equalsIgnoreCase(command)
-            || "rollbackCountSQL".equalsIgnoreCase(command)
             || "calculateCheckSum".equalsIgnoreCase(command)
             || "dbDoc".equalsIgnoreCase(command)
             || "tag".equalsIgnoreCase(command)) {
@@ -983,7 +977,7 @@ public class Main {
                 System.err.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {
-                liquibase.tag(commandParams.iterator().next());
+                liquibase.tag(getCommandArgument());
                 System.err.println("Successfully tagged " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("dropAll".equals(command)) {
@@ -1052,42 +1046,42 @@ public class Main {
                 } else if ("updateSQL".equalsIgnoreCase(command)) {
                     liquibase.update(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.size() == 0) {
+                    if (getCommandArgument() == null) {
                         throw new CommandLineParsingException("rollback requires a rollback tag");
                     }
-                    liquibase.rollback(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels));
+                    liquibase.rollback(getCommandArgument(), getCommandParam("rollbackScript", null), new Contexts(contexts), new LabelExpression(labels));
                 } else if ("rollbackToDate".equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.size() == 0) {
+                    if (getCommandArgument() == null) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
-                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels));
+                    liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam("rollbackScript", null), new Contexts(contexts), new LabelExpression(labels));
                 } else if ("rollbackCount".equalsIgnoreCase(command)) {
-                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels));
+                    liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam("rollbackScript", null), new Contexts(contexts), new LabelExpression(labels));
 
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.size() == 0) {
+                    if (getCommandArgument() == null) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
-                    liquibase.rollback(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                    liquibase.rollback(getCommandArgument(), getCommandParam("rollbackScript", null), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.size() == 0) {
+                    if (getCommandArgument() == null) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
-                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                    liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam("rollbackScript", null), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.size() == 0) {
+                    if (getCommandArgument() == null) {
                         throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");
                     }
 
-                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                    liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam("rollbackScript", null), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
                     liquibase.futureRollbackSQL(null, new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("futureRollbackCountSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.size() == 0) {
+                    if (getCommandArgument() == null) {
                         throw new CommandLineParsingException("futureRollbackCountSQL requires a rollback count");
                     }
 
-                    liquibase.futureRollbackSQL(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
+                    liquibase.futureRollbackSQL(Integer.parseInt(getCommandArgument()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("updateTestingRollback".equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else {
@@ -1106,10 +1100,20 @@ public class Main {
         }
     }
 
+    private String getCommandArgument() {
+        for (String param : commandParams) {
+            if (!param.contains("=")) {
+                return param;
+            }
+        }
+
+        return null;
+    }
+
     private String getCommandParam(String paramName, String defaultValue) throws CommandLineParsingException {
         for (String param : commandParams) {
             if (!param.contains("=")) {
-                return null;
+                continue;
             }
             String[] splitArg = splitArg(param);
 
