@@ -4,8 +4,8 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -13,10 +13,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
+import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -32,7 +31,9 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -85,11 +86,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         @Override
         public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
             Set<String> returnSet = new HashSet<String>();
+            
+            String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
 
-			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
+			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(tempFile));
 
 			for (Resource res : resources) {
-				Set<String> list = super.list(relativeTo, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
+				Set<String> list = super.list(null, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
 				if (list != null) {
 					returnSet.addAll(list);
 				}
