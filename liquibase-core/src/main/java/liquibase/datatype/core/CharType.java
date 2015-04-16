@@ -22,17 +22,11 @@ public class CharType extends LiquibaseDataType {
         }
 
         String val = String.valueOf(value);
-        // postgres type character varying gets identified as a char type
-        // simple sanity check to avoid double quoting a value
-        if (database instanceof PostgresDatabase && val.startsWith("'") && val.endsWith("'")) {
-            return val;
-        } else {
-            if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
-                return "N'"+database.escapeStringForDatabase(val)+"'";
-            }
-
-            return "'"+database.escapeStringForDatabase(val)+"'";
+        if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
+            return "N'"+database.escapeStringForDatabase(val)+"'";
         }
+
+        return "'"+database.escapeStringForDatabase(val)+"'";
     }
 
     /**
