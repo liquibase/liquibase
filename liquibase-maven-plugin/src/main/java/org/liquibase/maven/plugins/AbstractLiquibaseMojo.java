@@ -235,12 +235,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Properties expressionVars;
 
     /**
-     * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
+     * Set this to 'true' to liquibaseShouldRun running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
      * @parameter expression="${liquibase.should.run}"
      */
-    protected boolean skip;
+    protected boolean liquibaseShouldRun;
 
     /**
      * Array to put a expression variable to maven plugin.
@@ -299,7 +299,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
 
-        if (skip) {
+        if (!liquibaseShouldRun) {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
