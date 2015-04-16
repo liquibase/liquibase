@@ -56,6 +56,10 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
             }
 
+            if (parsedYaml == null || parsedYaml.size() == 0) {
+                throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
+            }
+
             List rootList = (List) parsedYaml.get("databaseChangeLog");
             if (rootList == null) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
