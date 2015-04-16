@@ -44,21 +44,34 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 CachedRow data = columnMetadataRs.get(0);
                 Column column = readColumn(data, relation, database);
 
-                if (column != null && database instanceof MSSQLDatabase) {
-                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
-                            " CAST(value as varchar(max)) as REMARKS\n" +
-                            " FROM\n" +
-                            " sys.extended_properties\n" +
-                            "  WHERE\n" +
-                            " name='MS_Description' " +
-                            " AND major_id = OBJECT_ID('"+column.getRelation().getName()+"')\n" +
-                            " AND\n" +
-                            " minor_id = COLUMNPROPERTY(major_id, '"+column.getName()+"', 'ColumnId')"), String.class);
+                if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+                    String sql;
+                    if (database.getDatabaseMajorVersion() >= 9) {
+                        // SQL Server 2005 or later
+                        // https://technet.microsoft.com/en-us/library/ms177541.aspx
+                        sql =
+                                "SELECT CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS] " +
+                                "FROM [sys].[extended_properties] AS [ep] " +
+                                "WHERE [ep].[class] = 1 " +
+                                "AND [ep].[major_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
+                                "AND [ep].[minor_id] = COLUMNPROPERTY([ep].[major_id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
+                                "AND [ep].[name] = 'MS_Description'";
+                    } else {
+                        // SQL Server 2000
+                        // https://technet.microsoft.com/en-us/library/aa224810%28v=sql.80%29.aspx
+                        sql =
+                                "SELECT CAST([p].[value] AS [ntext]) AS [REMARKS] " +
+                                "FROM [dbo].[sysproperties] AS [p] " +
+                                "WHERE [p].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
+                                "AND [p].[smallid] = COLUMNPROPERTY([p].[id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
+                                "AND [p].[type] = 4 " +
+                                "AND [p].[name] = 'MS_Description'";
+                    }
 
+                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
                     if (remarks != null && remarks.size() > 0) {
                         column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
                     }
-
                 }
 
                 return column;
