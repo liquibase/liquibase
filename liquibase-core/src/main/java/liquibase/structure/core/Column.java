@@ -175,15 +175,11 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
-        if (getComputed() != null && getComputed()) {
+        if (getRelation() == null) {
             return getName();
         } else {
-            if (getRelation() == null) {
-                return getName();
-            } else {
-                String tableOrViewName = getRelation().getName();
-                return tableOrViewName + "." + getName();
-            }
+            String tableOrViewName = getRelation().getName();
+            return tableOrViewName + "." + getName();
         }
     }
 
