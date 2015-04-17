@@ -22,12 +22,16 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
 
     @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        writer.write("databaseChangeLog:\n");
+        List<Object> maps = new ArrayList<Object>();
         for (ChangeSet changeSet : changeSets) {
-            writer.write(StringUtils.indent(serialize(changeSet, true), 2));
-            writer.write("\n");
+            maps.add(toMap(changeSet));
         }
+        Map<String, Object> containerMap = new HashMap<String, Object>();
+        containerMap.put("databaseChangeLog", maps);
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        writer.write(yaml.dumpAsMap(containerMap));
+        writer.write("\n");
         writer.flush();
     }
 
