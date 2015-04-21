@@ -38,6 +38,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         List<Object> columns = new ArrayList<Object>();
         List<Object> columnvalues = new ArrayList<Object>();
         
+        List<String> largestr = new ArrayList<String>();
+        int largeint = 0;
+        
         for (String column : statement.getColumnValues().keySet()) {
             
             Object newValue = statement.getColumnValues().get(column);
@@ -70,12 +73,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                 
                if ( database instanceof OracleDatabase) {
                    if( String.valueOf(value).length()-2 > 4000 ){ // minus the two quotes
-                       //to_clob( 'value of 4000 characters' ) || to_clob( 'value of 1500 characters' )
-                        StringBuffer stringvalue = new StringBuffer( String.valueOf(value) );
-                        stringvalue.deleteCharAt(stringvalue.indexOf("'"));
-                        stringvalue.deleteCharAt(stringvalue.lastIndexOf("'"));
-                        
-                        value = "'"+stringvalue.substring(0, 2000)+"'";  //for now                        
+                       largestr.add(String.valueOf(value));                       
+                       value = "__LARGE#CLOB#"+String.valueOf(largeint)+"";
+                       largeint++;
                    }
                }
                 
@@ -110,6 +110,61 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         }
         
         sql.append(")");
+        
+        if( largeint > 0 ){
+            
+            String query = "DECLARE\n__DECLARE#TEXT#";
+            String declaretxt = "";
+            
+            for( int x=0; x<largeint; x++ ){
+                declaretxt += "clobtext"+String.valueOf(x)+" CLOB;\n";
+            }
+            
+                query += "BEGIN\n";
+                String newsql = sql.toString();
+            
+            for( int x=0; x<largeint; x++ ){
+                
+                if( largestr.get(x).length() > 30000 ){
+                    
+                    String clobtext = "clobtext"+String.valueOf(x);
+                    String clobtextis = clobtext+" := "+clobtext+"subclob0";
+                    String substr = clobtext+"subclob0 := ";
+                    declaretxt += clobtext+"subclob0 CLOB;\n";
+                    StringBuffer newsubstr = new StringBuffer( largestr.get(x) );
+                    int a = 1;
+                    for( int i=0; i<largestr.get(x).length(); i++ ){
+                        
+                        substr += newsubstr.charAt(i);
+                        if( i>0 && i%30000==0 ){
+                            substr += "';\n"+clobtext+"subclob"+String.valueOf(a)+" := '";
+                            declaretxt += clobtext+"subclob"+String.valueOf(a)+" CLOB;\n";
+                            clobtextis += " || "+clobtext+"subclob"+String.valueOf(a);
+                            a++;
+                        }
+                        
+                    }
+                    query += substr + ";\n"+clobtextis+";\n";                    
+                    
+                }else{
+                    
+                    query += "clobtext"+String.valueOf(x)+" := "+largestr.get(x)+";\n";
+                    
+                }
+                
+                query = query.replace( "__DECLARE#TEXT#", declaretxt );                
+                newsql = newsql.replace( "__LARGE#CLOB#"+String.valueOf(x), "clobtext"+String.valueOf(x) );
+                
+            }
+            
+            query += newsql + ";\nEND;";
+            
+            return new Sql[] {
+                    new UnparsedSql(query, getAffectedTable(statement))
+            };
+            
+        
+        }
 
         return new Sql[] {
                 new UnparsedSql(sql.toString(), getAffectedTable(statement))

@@ -15,6 +15,7 @@ public class StringUtils {
     private static final Pattern islowerCasePattern = Pattern.compile("[a-z]");
     private static final Pattern isupperCasePattern = Pattern.compile("[A-Z]");
     private static final Pattern isAlphabetPattern = Pattern.compile("[A-Za-z]");
+    private static int it = 0;
 
 
     /**
@@ -254,8 +255,13 @@ public class StringUtils {
                 }
                 
             }
+            it++;
+            String count = String.valueOf(it);
             
-            name = newname;            
+            if( newname.length() + count.length() > 22 ){
+                newname = newname.substring(0, newname.length() - count.length());
+            }
+            name = newname + count;            
         }else{
             name = tablename+"_"+columnname;
         }

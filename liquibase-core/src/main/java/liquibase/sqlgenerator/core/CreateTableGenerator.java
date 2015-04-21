@@ -174,25 +174,25 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                              String sequencename = StringUtils.oracleTriggerName( statement.getTableName(), "_SEQ" );
                              String triggername = StringUtils.oracleTriggerName( statement.getTableName(), "_TRIGGER" );
                              
-                             String sequence = "CREATE SEQUENCE \""+sequencename+"\"  MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
+                             String sequence = "CREATE SEQUENCE "+sequencename+"  MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE";
                              
-                             String trigger = "create or replace trigger \""+triggername+"\"\n" +
-                                                        "before insert on \""+statement.getTableName()+"\"\n" +
+                             String trigger = "create or replace trigger "+triggername+"\n" +
+                                                        "before insert on "+statement.getTableName()+"\n" +
                                                         "for each row\n" +
                                                         "declare\n" +
                                                         "    max_id number;\n" +
                                                         "    cur_seq number;\n" +
                                                         "begin\n" +
-                                                        "    if :new.\""+column+"\" is null then\n" +
+                                                        "    if :new."+column+" is null then\n" +
                                                         "        -- No ID passed, get one from the sequence\n" +
-                                                        "        select \""+sequencename+"\".nextval into :new.\""+column+"\" from dual;\n" +
+                                                        "        select "+sequencename+".nextval into :new."+column+" from dual;\n" +
                                                         "    else\n" +
                                                         "        -- ID was set via insert, so update the sequence\n" +
-                                                        "        select greatest(nvl(max(\""+column+"\"),0), :new.\"id\") into max_id from \""+statement.getTableName()+"\";\n" +
-                                                        "        select \""+sequencename+"\".nextval into cur_seq from dual;\n" +
+                                                        "        select greatest(nvl(max("+column+"),0), :new.id) into max_id from "+statement.getTableName()+";\n" +
+                                                        "        select "+sequencename+".nextval into cur_seq from dual;\n" +
                                                         "        while cur_seq < max_id\n" +
                                                         "        loop\n" +
-                                                        "            select \""+sequencename+"\".nextval into cur_seq from dual;\n" +
+                                                        "            select "+sequencename+".nextval into cur_seq from dual;\n" +
                                                         "        end loop;\n" +
                                                         "    end if;\n" +
                                                         "end;";

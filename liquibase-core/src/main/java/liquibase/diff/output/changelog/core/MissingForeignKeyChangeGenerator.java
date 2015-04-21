@@ -8,6 +8,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.StringUtils;
 
 public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -39,7 +40,10 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         ForeignKey fk = (ForeignKey) missingObject;
 
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
-        change.setConstraintName(fk.getName());
+        
+        String indexName = StringUtils.oracleName( "", fk.getName() )+"_FKX";
+        
+        change.setConstraintName(indexName);
 
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
         if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.getIncludeCatalog()) {

@@ -91,6 +91,8 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 }
 
                 if( referenceDatabase.getConnection().getURL().contains(":oracle:") ){
+                    System.out.println("OOPS, select query not written yet for oracle.");
+                    System.exit(0);
                     //sql = "SELECT ROWNUM \"nums\","+referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName())+".* FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
                     //sql = "SELECT * FROM ( "+sql+" ) WHERE '.self::limit( $count['from'], $count['count'] );
                 }
