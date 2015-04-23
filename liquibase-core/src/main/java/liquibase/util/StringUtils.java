@@ -41,7 +41,17 @@ public class StringUtils {
      */
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
 
-        boolean defaultDelimiter = endDelimiter == null;
+        if (endDelimiter != null && StringUtils.trimToNull(endDelimiter.toLowerCase()
+                .replace("\\r", "")
+                .replace("\\n", "")
+                .replace(";", "")
+                .replace(" ", "")
+                .replace("go", "")) == null) {
+            endDelimiter = null;
+        }
+
+
+        boolean useDefaultDelimiter = endDelimiter == null;
 
         StringClauses[] parsedList = SqlParser.parse(multiLineSQL, splitStatements, true, !stripComments, !splitStatements);
 
@@ -49,7 +59,7 @@ public class StringUtils {
 
         for (StringClauses parsed : parsedList) {
             String currentString;
-            if (defaultDelimiter) {
+            if (useDefaultDelimiter) {
                 currentString = parsed.toString();
             } else {
                 currentString = "";
