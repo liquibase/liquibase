@@ -235,7 +235,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Properties expressionVars;
 
     /**
-     * Set this to 'true' to liquibaseShouldRun running liquibase. Its use is NOT RECOMMENDED, but quite
+     * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
      * @parameter expression="${liquibase.should.run}"
