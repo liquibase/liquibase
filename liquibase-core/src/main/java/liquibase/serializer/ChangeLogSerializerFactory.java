@@ -1,18 +1,15 @@
 package liquibase.serializer;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ChangeLogSerializerFactory {
     private static ChangeLogSerializerFactory instance;
 
-    private Map<String, ChangeLogSerializer> serializers = new HashMap<String, ChangeLogSerializer>();
-
+    private Map<String, List<ChangeLogSerializer>> serializers = new HashMap<String, List<ChangeLogSerializer>>();
 
     public static void reset() {
         instance = new ChangeLogSerializerFactory();
@@ -20,7 +17,7 @@ public class ChangeLogSerializerFactory {
 
     public static ChangeLogSerializerFactory getInstance() {
         if (instance == null) {
-             instance = new ChangeLogSerializerFactory();
+            instance = new ChangeLogSerializerFactory();
         }
 
         return instance;
@@ -32,45 +29,51 @@ public class ChangeLogSerializerFactory {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
 
             for (Class<? extends ChangeLogSerializer> clazz : classes) {
-                    register((ChangeLogSerializer) clazz.getConstructor().newInstance());
+                register((ChangeLogSerializer) clazz.getConstructor().newInstance());
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-
     }
 
-    public Map<String, ChangeLogSerializer> getSerializers() {
+    public Map<String, List<ChangeLogSerializer>> getSerializers() {
         return serializers;
     }
 
     public ChangeLogSerializer getSerializer(String fileNameOrExtension) {
         fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
-        ChangeLogSerializer changeLogSerializer = serializers.get(fileNameOrExtension);
-        if (changeLogSerializer == null) {
-			throw new RuntimeException("No serializer associated with the filename or extension '" + fileNameOrExtension + "'");
-		}
-        return changeLogSerializer;
+        List<ChangeLogSerializer> changeLogSerializers = serializers.get(fileNameOrExtension);
+        if (changeLogSerializers == null || changeLogSerializers.isEmpty()) {
+            throw new RuntimeException("No serializers associated with the filename or extension '" + fileNameOrExtension + "'");
+        }
+        return changeLogSerializers.get(0);
     }
 
     public void register(ChangeLogSerializer changeLogSerializer) {
         for (String extension : changeLogSerializer.getValidFileExtensions()) {
-            serializers.put(extension, changeLogSerializer);
+            List<ChangeLogSerializer> changeLogSerializers = serializers.get(extension);
+            if (changeLogSerializers == null) {
+                changeLogSerializers = new ArrayList<ChangeLogSerializer>();
+                serializers.put(extension, changeLogSerializers);
+            }
+            changeLogSerializers.add(changeLogSerializer);
+            Collections.sort(changeLogSerializers, PrioritizedService.COMPARATOR);
         }
     }
 
     public void unregister(ChangeLogSerializer changeLogSerializer) {
-        List<Map.Entry<String, ChangeLogSerializer>> entrysToRemove = new ArrayList<Map.Entry<String, ChangeLogSerializer>>();
-        for (Map.Entry<String, ChangeLogSerializer> entry : serializers.entrySet()) {
-            if (entry.getValue().equals(changeLogSerializer)) {
-                entrysToRemove.add(entry);
+        for (Iterator<Map.Entry<String, List<ChangeLogSerializer>>> entryIterator = serializers.entrySet().iterator(); entryIterator.hasNext();) {
+            Map.Entry<String, List<ChangeLogSerializer>> entry = entryIterator.next();
+            List<ChangeLogSerializer> changeLogSerializers = entry.getValue();
+            for (Iterator<ChangeLogSerializer> iterator = changeLogSerializers.iterator(); iterator.hasNext();) {
+                ChangeLogSerializer value = iterator.next();
+                if (value.equals(changeLogSerializer)) {
+                    iterator.remove();
+                }
+            }
+            if (changeLogSerializers.isEmpty()) {
+                entryIterator.remove();
             }
         }
-
-        for (Map.Entry<String, ChangeLogSerializer> entry : entrysToRemove) {
-            serializers.remove(entry.getKey());
-        }
-
     }
-
 }
