@@ -7,9 +7,9 @@ import java.util.List;
 
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
+import liquibase.servicelocator.PrioritizedService;
 
-public interface ChangeLogSerializer extends LiquibaseSerializer {
-
+public interface ChangeLogSerializer extends LiquibaseSerializer, PrioritizedService {
     <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException;
 
     void append(ChangeSet changeSet, File changeLogFile) throws IOException;

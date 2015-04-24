@@ -68,4 +68,8 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
         }
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 }

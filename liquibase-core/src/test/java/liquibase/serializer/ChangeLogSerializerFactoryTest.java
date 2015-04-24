@@ -60,8 +60,7 @@ public class ChangeLogSerializerFactoryTest {
         assertFalse(instance1 == ChangeLogSerializerFactory.getInstance());
     }
 
-    @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void builtInGeneratorsAreFound() {
         Map<String, ChangeLogSerializer> generators = ChangeLogSerializerFactory.getInstance().getSerializers();
         assertEquals(5, generators.size());

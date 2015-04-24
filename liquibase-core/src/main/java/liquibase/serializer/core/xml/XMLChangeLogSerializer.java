@@ -386,4 +386,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 }

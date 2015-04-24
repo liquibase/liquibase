@@ -96,4 +96,9 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
     }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 }

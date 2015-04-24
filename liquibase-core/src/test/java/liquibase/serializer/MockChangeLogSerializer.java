@@ -34,4 +34,9 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         return null;
     }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
 }

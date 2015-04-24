@@ -162,6 +162,11 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public static class FieldFilter {
         public boolean include(Object obj, String field, Object value) {
             return true;
