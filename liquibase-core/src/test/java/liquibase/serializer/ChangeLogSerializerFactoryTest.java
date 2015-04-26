@@ -79,7 +79,7 @@ public class ChangeLogSerializerFactoryTest {
 
         assertNotNull(serializer);
         assertSame(XMLChangeLogSerializer.class, serializer.getClass());
-        assertEquals(1, ChangeLogSerializerFactory.getInstance().getSerializers().get("xml").size());
+        assertEquals(1, ChangeLogSerializerFactory.getInstance().getSerializers("xml").size());
     }
 
     @Test

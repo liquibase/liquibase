@@ -40,10 +40,18 @@ public class ChangeLogSerializerFactory {
         return serializers;
     }
 
-    public ChangeLogSerializer getSerializer(String fileNameOrExtension) {
+    public List<ChangeLogSerializer> getSerializers(String fileNameOrExtension) {
         fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
         List<ChangeLogSerializer> changeLogSerializers = serializers.get(fileNameOrExtension);
-        if (changeLogSerializers == null || changeLogSerializers.isEmpty()) {
+        if (changeLogSerializers == null) {
+            return Collections.emptyList();
+        }
+        return changeLogSerializers;
+    }
+
+    public ChangeLogSerializer getSerializer(String fileNameOrExtension) {
+        List<ChangeLogSerializer> changeLogSerializers = getSerializers(fileNameOrExtension);
+        if (changeLogSerializers.isEmpty()) {
             throw new RuntimeException("No serializers associated with the filename or extension '" + fileNameOrExtension + "'");
         }
         return changeLogSerializers.get(0);
