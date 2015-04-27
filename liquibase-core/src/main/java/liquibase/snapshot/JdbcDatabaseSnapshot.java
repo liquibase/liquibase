@@ -254,6 +254,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     //seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
                     //return seenTables.size() > 2;
+                    if (System.getProperty("NO_BULK_SELECT") != null) {
+                       return false;
+                    }
                     return true;
                 }
 
