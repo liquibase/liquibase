@@ -226,6 +226,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             if (changeSet != null) {
                 change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString())));
 
+                if (StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
+                    change.setEndDelimiter("\n/");
+                }
+
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
                     if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
                         changeSet.addRollbackChange(new EmptyChange());
