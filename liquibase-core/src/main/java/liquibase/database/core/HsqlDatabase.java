@@ -2,8 +2,10 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -496,5 +498,17 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             }
         }
         return oracleSyntax;
+    }
+
+
+    @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return super.escapeObjectName(objectName, objectType);
+        }
+        if (objectName != null && quotingStrategy != ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && isReservedWord(objectName.toUpperCase())) {
+                return "\""+objectName.toUpperCase()+"\"";
+        }
+        return objectName;
     }
 }

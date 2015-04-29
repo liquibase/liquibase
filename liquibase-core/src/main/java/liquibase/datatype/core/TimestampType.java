@@ -15,7 +15,7 @@ public class TimestampType extends DateTimeType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MySQLDatabase) {
-            if (originalDefinition.contains(" ")) {
+            if (getRawDefinition().contains(" ") || getRawDefinition().contains("(")) {
                 return new DatabaseDataType(getRawDefinition());
             }
             return super.toDatabaseDataType(database);

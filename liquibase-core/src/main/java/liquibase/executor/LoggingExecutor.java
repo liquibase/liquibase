@@ -122,7 +122,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                     } else if (sql instanceof CreateProcedureStatement) {
                         potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
-                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w]+")) {
+                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n]+")) {
                         endDelimiter = potentialDelimiter;
                     }
 

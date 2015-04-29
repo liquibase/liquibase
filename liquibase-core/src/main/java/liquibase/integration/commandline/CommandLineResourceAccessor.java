@@ -36,7 +36,10 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
         Set<String> contents = new HashSet<String>();
-        contents.addAll(super.list(relativeTo, path, includeFiles, includeDirectories, recursive));
+        Set<String> superList = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
+        if (superList != null) {
+            contents.addAll(superList);
+        }
         for (String altPath : getAlternatePaths(path)) {
             contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
