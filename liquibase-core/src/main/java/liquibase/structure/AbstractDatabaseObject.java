@@ -6,6 +6,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -107,19 +108,24 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             return snapshotId;
         }
         if (!attributes.containsKey(field)) {
-            throw new UnexpectedLiquibaseException("Unknown field "+field);
+            throw new UnexpectedLiquibaseException("Unknown field " + field);
         }
         Object value = attributes.get(field);
-        if (value instanceof DatabaseObject) {
-            try {
+        try {
+            if (value instanceof Schema) {
+                Schema clone = new Schema(((Schema) value).getCatalogName(), ((Schema) value).getName());
+                clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
+                return clone;
+            } else if (value instanceof DatabaseObject) {
                 DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
                 clone.setName(((DatabaseObject) value).getName());
                 clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
                 return clone;
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
             }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
+
         return value;
     }
 
@@ -159,7 +165,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
                                 Date date = new ISODateFormat().parse(stringValue);
                                 childValue = aClass.getConstructor(long.class).newInstance(date.getTime());
                             } else if (Enum.class.isAssignableFrom(aClass)) {
-                                childValue = Enum.valueOf((Class<? extends Enum>)aClass, stringValue);
+                                childValue = Enum.valueOf((Class<? extends Enum>) aClass, stringValue);
                             } else {
                                 childValue = aClass.getConstructor(String.class).newInstance(stringValue);
                             }

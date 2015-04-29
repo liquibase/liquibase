@@ -980,7 +980,10 @@ public class Main {
                 command.setDatabase(database);
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
                 command.setSerializerFormat(getCommandParam("snapshotFormat", null));
-                System.out.println(command.execute());
+                Writer outputWriter = getOutputWriter();
+                outputWriter.write(command.execute().toString());
+                outputWriter.flush();
+                outputWriter.close();
                 return;
             } else if ("executeSql".equalsIgnoreCase(command)) {
                 ExecuteSqlCommand command = new ExecuteSqlCommand();
@@ -988,14 +991,21 @@ public class Main {
                 command.setSql(getCommandParam("sql", null));
                 command.setSqlFile(getCommandParam("sqlFile", null));
                 command.setDelimiter(getCommandParam("delimiter", ";"));
-                System.out.println(command.execute());
+                Writer outputWriter = getOutputWriter();
+                outputWriter.write(command.execute().toString());
+                outputWriter.flush();
+                outputWriter.close();
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 command.setDatabase(referenceDatabase);
                 command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
-                System.out.println(command.execute());
+                Writer outputWriter = getOutputWriter();
+                outputWriter.write(command.execute().toString());
+                outputWriter.flush();
+                outputWriter.close();
+
                 return;
             }
 

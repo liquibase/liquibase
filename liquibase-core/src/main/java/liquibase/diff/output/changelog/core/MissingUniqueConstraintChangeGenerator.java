@@ -67,16 +67,19 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = uc.getBackingIndex();
             if (backingIndex != null && backingIndex.getName() != null) {
-                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+                Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+                if (changes != null) {
+                    returnList.addAll(Arrays.asList(changes));
 
-                change.setForIndexName(backingIndex.getName());
-                Schema schema = backingIndex.getSchema();
-                if (schema != null) {
-                    if (control.getIncludeCatalog()) {
-                        change.setForIndexCatalogName(schema.getCatalogName());
-                    }
-                    if (control.getIncludeSchema()) {
-                        change.setForIndexSchemaName(schema.getName());
+                    change.setForIndexName(backingIndex.getName());
+                    Schema schema = backingIndex.getSchema();
+                    if (schema != null) {
+                        if (control.getIncludeCatalog()) {
+                            change.setForIndexCatalogName(schema.getCatalogName());
+                        }
+                        if (control.getIncludeSchema()) {
+                            change.setForIndexSchemaName(schema.getName());
+                        }
                     }
                 }
             }
