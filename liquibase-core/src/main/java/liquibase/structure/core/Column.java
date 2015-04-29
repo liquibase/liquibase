@@ -174,17 +174,17 @@ public class Column extends AbstractDatabaseObject {
         if (includeRelation) {
             return toString();
         } else {
-            return getName();
+            return getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         }
     }
 
     @Override
     public String toString() {
         if (getRelation() == null) {
-            return getName();
+            return getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         } else {
             String tableOrViewName = getRelation().getName();
-            return tableOrViewName + "." + getName();
+            return tableOrViewName + "." + getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         }
     }
 

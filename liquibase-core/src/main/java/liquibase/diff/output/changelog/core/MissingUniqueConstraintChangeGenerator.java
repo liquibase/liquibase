@@ -60,9 +60,9 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         }
         change.setConstraintName(uc.getName());
         change.setColumnNames(uc.getColumnNames());
-        change.setDeferrable(uc.isDeferrable());
-        change.setInitiallyDeferred(uc.isInitiallyDeferred());
-        change.setDisabled(uc.isDisabled());
+        change.setDeferrable(uc.isDeferrable() ? Boolean.TRUE : null);
+        change.setInitiallyDeferred(uc.isInitiallyDeferred() ? Boolean.TRUE : null);
+        change.setDisabled(uc.isDisabled() ? Boolean.TRUE : null);
 
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = uc.getBackingIndex();

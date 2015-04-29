@@ -1,6 +1,5 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -45,7 +44,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         constraint.setName(example.getName());
         constraint.setBackingIndex(exampleConstraint.getBackingIndex());
         for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setRelation(table));
+            String ascOrDesc = (String) col.get("ASC_OR_DESC");
+            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
         }
 
         return constraint;
@@ -119,12 +120,70 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
                     + "order by ordinal_position";
         } else if (database instanceof MSSQLDatabase) {
-            sql = "select TC.CONSTRAINT_NAME as CONSTRAINT_NAME, CC.COLUMN_NAME as COLUMN_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC "
-                    + "inner join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC on TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME "
-                    + "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "' "
-                    + "and TC.TABLE_NAME='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
-                    + "and TC.CONSTRAINT_NAME='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
-                    + "order by TC.CONSTRAINT_NAME";
+            if (database.getDatabaseMajorVersion() >= 9) {
+                sql =
+                        "SELECT " +
+                            "[kc].[name] AS [CONSTRAINT_NAME], " +
+                            "[c].[name] AS [COLUMN_NAME], " +
+                            "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
+                        "FROM [sys].[schemas] AS [s] " +
+                        "INNER JOIN [sys].[tables] AS [t] " +
+                        "ON [t].[schema_id] = [s].[schema_id] " +
+                        "INNER JOIN [sys].[key_constraints] AS [kc] " +
+                        "ON [kc].[parent_object_id] = [t].[object_id] " +
+                        "INNER JOIN [sys].[indexes] AS [i] " +
+                        "ON [i].[object_id] = [kc].[parent_object_id] " +
+                        "AND [i].[index_id] = [kc].[unique_index_id] " +
+                        "INNER JOIN [sys].[index_columns] AS [ic] " +
+                        "ON [ic].[object_id] = [i].[object_id] " +
+                        "AND [ic].[index_id] = [i].[index_id] " +
+                        "INNER JOIN [sys].[columns] AS [c] " +
+                        "ON [c].[object_id] = [ic].[object_id] " +
+                        "AND [c].[column_id] = [ic].[column_id] " +
+                        "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                        "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                        "ORDER BY " +
+                            "[ic].[key_ordinal]";
+            } else if (database.getDatabaseMajorVersion() >= 8) {
+                sql =
+                        "SELECT " +
+                            "[kc].[name] AS [CONSTRAINT_NAME], " +
+                            "[c].[name] AS [COLUMN_NAME], " +
+                            "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
+                        "FROM [dbo].[sysusers] AS [s] " +
+                        "INNER JOIN [dbo].[sysobjects] AS [t] " +
+                        "ON [t].[uid] = [s].[uid] " +
+                        "INNER JOIN [dbo].[sysobjects] AS [kc] " +
+                        "ON [kc].[parent_obj] = [t].[id] " +
+                        "INNER JOIN [dbo].[sysindexes] AS [i] " +
+                        "ON [i].[id] = [kc].[parent_obj] " +
+                        "AND [i].[name] = [kc].[name] " +
+                        "INNER JOIN [dbo].[sysindexkeys] AS [ic] " +
+                        "ON [ic].[id] = [i].[id] " +
+                        "AND [ic].[indid] = [i].[indid] " +
+                        "INNER JOIN [dbo].[syscolumns] AS [c] " +
+                        "ON [c].[id] = [ic].[id] " +
+                        "AND [c].[colid] = [ic].[colid] " +
+                        "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                        "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                        "ORDER BY " +
+                            "[ic].[keyno]";
+            } else {
+                sql =
+                        "SELECT " +
+                            "[TC].[CONSTRAINT_NAME], " +
+                            "[KCU].[COLUMN_NAME] " +
+                        "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
+                        "INNER JOIN [INFORMATION_SCHEMA].[KEY_COLUMN_USAGE] AS [KCU] " +
+                        "ON [KCU].[CONSTRAINT_NAME] = [TC].[CONSTRAINT_NAME] " +
+                        "WHERE [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                        "AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                        "AND [TC].[CONSTRAINT_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                        "ORDER BY " +
+                            "[KCU].[ORDINAL_POSITION]";
+            }
         } else if (database instanceof OracleDatabase) {
             sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' order by ucc.position";
         } else if (database instanceof DB2Database) {
