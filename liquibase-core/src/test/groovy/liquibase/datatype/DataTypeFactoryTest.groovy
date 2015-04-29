@@ -32,7 +32,9 @@ public class DataTypeFactoryTest extends Specification {
         "serial8"                                            | new MockDatabase()    | "BIGINT"                                             | BigIntType    | true
         "int4"                                               | new MockDatabase()    | "INT"                                                | IntType       | false
         "serial4"                                            | new MockDatabase()    | "INT"                                                | IntType       | true
+        "xml"                                                | new MockDatabase()    | "XML"                                                | XMLType       | false
         "real"                                               | new DB2Database()     | "REAL"                                               | FloatType     | false
+        "xml"                                                | new DB2Database()     | "XML"                                                | XMLType       | false
         "bigint"                                             | new MSSQLDatabase()   | "[bigint]"                                           | BigIntType    | false
         "[bigint]"                                           | new MSSQLDatabase()   | "[bigint]"                                           | BigIntType    | false
         "binary"                                             | new MSSQLDatabase()   | "[binary](1)"                                        | BlobType      | false
@@ -128,18 +130,18 @@ public class DataTypeFactoryTest extends Specification {
         "[varchar](8000)"                                    | new MSSQLDatabase()   | "[varchar](8000)"                                    | VarcharType   | false
         "varchar(MAX)"                                       | new MSSQLDatabase()   | "[varchar](MAX)"                                     | VarcharType   | false
         "[varchar](MAX)"                                     | new MSSQLDatabase()   | "[varchar](MAX)"                                     | VarcharType   | false
-        "xml"                                                | new MSSQLDatabase()   | "[xml]"                                              | UnknownType   | false
-        "[xml]"                                              | new MSSQLDatabase()   | "[xml]"                                              | UnknownType   | false
-        "xml(CONTENT)"                                       | new MSSQLDatabase()   | "[xml](CONTENT)"                                     | UnknownType   | false
-        "[xml](CONTENT)"                                     | new MSSQLDatabase()   | "[xml](CONTENT)"                                     | UnknownType   | false
-        "xml(DOCUMENT)"                                      | new MSSQLDatabase()   | "[xml](DOCUMENT)"                                    | UnknownType   | false
-        "[xml](DOCUMENT)"                                    | new MSSQLDatabase()   | "[xml](DOCUMENT)"                                    | UnknownType   | false
-        "xml([MySchema].[MyXmlSchemaCollection])"            | new MSSQLDatabase()   | "[xml]([MySchema].[MyXmlSchemaCollection])"          | UnknownType   | false
-        "[xml]([MySchema].[MyXmlSchemaCollection])"          | new MSSQLDatabase()   | "[xml]([MySchema].[MyXmlSchemaCollection])"          | UnknownType   | false
-        "xml(CONTENT [MySchema].[MyXmlSchemaCollection])"    | new MSSQLDatabase()   | "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | UnknownType   | false
-        "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | new MSSQLDatabase()   | "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | UnknownType   | false
-        "xml(DOCUMENT [MySchema].[MyXmlSchemaCollection])"   | new MSSQLDatabase()   | "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | UnknownType   | false
-        "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | new MSSQLDatabase()   | "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | UnknownType   | false
+        "xml"                                                | new MSSQLDatabase()   | "[xml]"                                              | XMLType       | false
+        "[xml]"                                              | new MSSQLDatabase()   | "[xml]"                                              | XMLType       | false
+        "xml(CONTENT)"                                       | new MSSQLDatabase()   | "[xml](CONTENT)"                                     | XMLType       | false
+        "[xml](CONTENT)"                                     | new MSSQLDatabase()   | "[xml](CONTENT)"                                     | XMLType       | false
+        "xml(DOCUMENT)"                                      | new MSSQLDatabase()   | "[xml](DOCUMENT)"                                    | XMLType       | false
+        "[xml](DOCUMENT)"                                    | new MSSQLDatabase()   | "[xml](DOCUMENT)"                                    | XMLType       | false
+        "xml([MySchema].[MyXmlSchemaCollection])"            | new MSSQLDatabase()   | "[xml]([MySchema].[MyXmlSchemaCollection])"          | XMLType       | false
+        "[xml]([MySchema].[MyXmlSchemaCollection])"          | new MSSQLDatabase()   | "[xml]([MySchema].[MyXmlSchemaCollection])"          | XMLType       | false
+        "xml(CONTENT [MySchema].[MyXmlSchemaCollection])"    | new MSSQLDatabase()   | "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | XMLType       | false
+        "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | new MSSQLDatabase()   | "[xml](CONTENT [MySchema].[MyXmlSchemaCollection])"  | XMLType       | false
+        "xml(DOCUMENT [MySchema].[MyXmlSchemaCollection])"   | new MSSQLDatabase()   | "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | XMLType       | false
+        "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | new MSSQLDatabase()   | "[xml](DOCUMENT [MySchema].[MyXmlSchemaCollection])" | XMLType       | false
         "MySchema.MyUDT"                                     | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "MySchema.[MyUDT]"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
         "[MySchema].MyUDT"                                   | new MSSQLDatabase()   | "[MySchema].[MyUDT]"                                 | UnknownType   | false
@@ -186,6 +188,9 @@ public class DataTypeFactoryTest extends Specification {
         "mediumtext"                                         | new MySQLDatabase()   | "MEDIUMTEXT"                                         | ClobType      | false
         "real"                                               | new MySQLDatabase()   | "REAL"                                               | FloatType     | false
         "nclob"                                              | new OracleDatabase()  | "NCLOB"                                              | ClobType      | false
+        "xml"                                                | new OracleDatabase()  | "XMLTYPE"                                            | XMLType       | false
+        "xmltype"                                            | new OracleDatabase()  | "XMLTYPE"                                            | XMLType       | false
+        "xml"                                                | new PostgresDatabase()| "XML"                                                | XMLType       | false
     }
 
     @Unroll("#featureName: #object for #database")
