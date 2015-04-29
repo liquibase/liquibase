@@ -54,40 +54,43 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
+        reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
+
         Connection sqlConn = null;
-        try {
-            /**
-             * Don't try to call getWrappedConnection if the conn instance is
-             * is not a JdbcConnection. This happens for OfflineConnection.
-             * @see <a href="https://liquibase.jira.com/browse/CORE-2192">CORE-2192</a>
-             **/
-            if (conn instanceof JdbcConnection) {
-                Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-                wrappedConn.setAccessible(true);
-                sqlConn = (Connection) wrappedConn.invoke(conn);
-            }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        if (sqlConn != null) {
+        if (!(conn instanceof OfflineConnection)) {
             try {
-                Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
-                method.setAccessible(true);
-                method.invoke(sqlConn, true);
+                /**
+                 * Don't try to call getWrappedConnection if the conn instance is
+                 * is not a JdbcConnection. This happens for OfflineConnection.
+                 * @see <a href="https://liquibase.jira.com/browse/CORE-2192">CORE-2192</a>
+                 **/
+                if (conn instanceof JdbcConnection) {
+                    Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+                    wrappedConn.setAccessible(true);
+                    sqlConn = (Connection) wrappedConn.invoke(conn);
+                }
             } catch (Exception e) {
-                LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
-                ; //cannot set it. That is OK
+                throw new UnexpectedLiquibaseException(e);
             }
 
-            try {
-                reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            } catch (SQLException e) {
-                LogFactory.getLogger().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
-                //can not get keywords. Continue on
+            if (sqlConn != null) {
+                try {
+                    reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+                } catch (SQLException e) {
+                    LogFactory.getLogger().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    //can not get keywords. Continue on
+                }
+                try {
+                    Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
+                    method.setAccessible(true);
+                    method.invoke(sqlConn, true);
+                } catch (Exception e) {
+                    LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    ; //cannot set it. That is OK
+                }
+
             }
         }
-        reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
         super.setConnection(conn);
     }
 
