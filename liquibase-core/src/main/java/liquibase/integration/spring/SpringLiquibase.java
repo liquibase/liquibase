@@ -16,6 +16,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
@@ -232,7 +233,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      *      &lt;/bean&gt;
      * </code>
      *
-     * {@link Liquibase#listUnrunChangeSets(String)} will
+     * {@link Liquibase#listUnrunChangeSets(Contexts, )} will
      * always, by default, return changesets, regardless of their
      * execution by Maven.
      * Maven-executed changeset path name are not be prepended by
@@ -421,7 +422,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-		Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
+		SpringResourceOpener resourceAccessor = createResourceOpener();
+		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
         liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
@@ -444,12 +446,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 * @return a Database implementation retrieved from the {@link DatabaseFactory}.
 	 * @throws DatabaseException
 	 */
-	protected Database createDatabase(Connection c) throws DatabaseException {
+	protected Database createDatabase(Connection c, ResourceAccessor resourceAccessor) throws DatabaseException {
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
             log.warning("Null connection returned by liquibase datasource. Using offline unknown database");
-            liquibaseConnection = new OfflineConnection("offline:unknown");
+            liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
             liquibaseConnection = new JdbcConnection(c);
