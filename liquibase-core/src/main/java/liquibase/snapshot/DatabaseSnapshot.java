@@ -222,6 +222,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<String>(object.getAttributes())) {
+            if (object.getClass() == Index.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == PrimaryKey.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == UniqueConstraint.class && field.equals("columns")) {
+                continue;
+            }
             Object fieldValue = object.getAttribute(field, Object.class);
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
