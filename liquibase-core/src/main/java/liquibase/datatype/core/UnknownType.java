@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
@@ -30,36 +31,20 @@ public class UnknownType extends LiquibaseDataType {
             dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
         }
         Object[] parameters = getParameters();
-//        if (database instanceof MySQLDatabase && (
-//                getName().equalsIgnoreCase("TINYBLOB")
-//                        || getName().equalsIgnoreCase("MEDIUMBLOB")
-//                        || getName().equalsIgnoreCase("TINYTEXT")
-//                        || getName().equalsIgnoreCase("MEDIUMTEXT")
-//                        || getName().equalsIgnoreCase("REAL")
-//        )) {
+//        if (database instanceof DB2Database && getName().equalsIgnoreCase("XML")) {
 //            parameters = new Object[0];
 //        }
 //
-//        if (database instanceof DB2Database && (getName().equalsIgnoreCase("REAL") || getName().equalsIgnoreCase("XML"))) {
-//            parameters = new Object[0];
-//        }
-//
-//        if (database instanceof MSSQLDatabase && (
-//                getName().equalsIgnoreCase("REAL")
-//                || getName().equalsIgnoreCase("XML")
-//                || getName().equalsIgnoreCase("HIERARCHYID")
-//                || getName().equalsIgnoreCase("DATETIMEOFFSET")
-//                || getName().equalsIgnoreCase("IMAGE")
-//                || getName().equalsIgnoreCase("NTEXT")
-//                || getName().equalsIgnoreCase("SYSNAME")
-//                || getName().equalsIgnoreCase("SMALLMONEY")
-//        )) {
-//            parameters = new Object[0];
+//        if (database instanceof MSSQLDatabase) {
+//            String name = database.escapeDataTypeName(getName());
+//            if (dataTypeMaxParameters < parameters.length) {
+//                parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
+//            }
+//            return new DatabaseDataType(name, parameters);
 //        }
 //
 //        if (database instanceof OracleDatabase) {
 //            if (getName().equalsIgnoreCase("LONG")
-//                    || getName().equalsIgnoreCase("NCLOB")
 //                    || getName().equalsIgnoreCase("BFILE")
 //                    || getName().equalsIgnoreCase("ROWID")
 //                    || getName().equalsIgnoreCase("XMLTYPE")

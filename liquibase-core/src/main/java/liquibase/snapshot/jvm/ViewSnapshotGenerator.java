@@ -1,5 +1,8 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.SQLException;
+import java.util.List;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
@@ -13,9 +16,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
-
-import java.sql.SQLException;
-import java.util.List;
 
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -78,8 +78,13 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                         view.setContainsFullDefinition(true);
                     }
 
+                    // remove strange zero-termination seen on some Oracle view definitions
+                    int length = definition.length();
+                    if (definition.charAt(length-1) == 0) {
+                      definition = definition.substring(0, length-1);
+                    }
+
 //todo: action refactoring                    if (database instanceof InformixDatabase) {
-//
 //                        // Cleanup
 //                        definition = definition.trim();
 //                        definition = definition.replaceAll("\\s*,\\s*", ", ");

@@ -6,6 +6,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DataType;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class ObjectDifferences {
@@ -56,6 +57,9 @@ public class ObjectDifferences {
         Object referenceValue = referenceObject.get(attribute, Object.class);
         Object compareValue = compareToObject.get(attribute, Object.class);
 
+        referenceValue = undoCollection(referenceValue, compareValue);
+        compareValue = undoCollection(compareValue, referenceValue);
+
         boolean different;
         if (referenceValue == null && compareValue == null) {
             different = false;
@@ -70,6 +74,21 @@ public class ObjectDifferences {
         }
 
     }
+
+    /**
+     * Sometimes an attribute in one object is a single-entity collection and on the other it is just the object.
+     * Check the passed potentialCollection and if it is a single-entry collection of the same type as the otherObject, return just the collection element.
+     * Otherwise, return the original collection.
+     */
+    protected Object undoCollection(Object potentialCollection, Object otherObject) {
+        if (potentialCollection != null && otherObject != null && potentialCollection instanceof Collection && !(otherObject instanceof Collection)) {
+            if (((Collection) potentialCollection).size() == 1 && ((Collection) potentialCollection).iterator().next().getClass().equals(otherObject.getClass())) {
+                potentialCollection = ((Collection) potentialCollection).iterator().next();
+            }
+        }
+        return potentialCollection;
+    }
+
 
     public boolean removeDifference(String attribute) {
         return differences.remove(attribute) != null;
@@ -99,12 +118,13 @@ public class ObjectDifferences {
             if (referenceValue instanceof DatabaseObject && compareToValue instanceof DatabaseObject) {
                 return DatabaseObjectComparatorFactory.getInstance().isSameObject((DatabaseObject) referenceValue, (DatabaseObject) compareToValue, accordingTo);
             } else {
+                if ((referenceValue instanceof Number) && (compareToValue instanceof Number)
+                        && !referenceValue.getClass().equals(compareToValue.getClass())) { //standardize on a common number type
+                    referenceValue = new BigDecimal(referenceValue.toString());
+                    compareToValue = new BigDecimal(compareToValue.toString());
+                }
                 return referenceValue.equals(compareToValue);
             }
-
-
-
-
         }
     }
 

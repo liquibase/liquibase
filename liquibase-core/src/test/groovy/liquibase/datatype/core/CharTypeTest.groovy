@@ -20,8 +20,9 @@ class CharTypeTest extends Specification {
 //        [13]         | new HsqlDatabase()     | "CHAR(13)"
 //        [13]         | new PostgresDatabase() | "CHAR(13)"
 //        [13]         | new OracleDatabase()   | "CHAR(13)"
-//        [13]         | new MSSQLDatabase()    | "CHAR(13)"
-//        [2147483647] | new MSSQLDatabase()    | "CHAR(2147483647)"
+//        []           | new MSSQLDatabase()    | "[char](1)"
+//        [13]         | new MSSQLDatabase()    | "[char](13)"
+//        [2147483647] | new MSSQLDatabase()    | "[char](8000)"
 //        [13]         | new MySQLDatabase()    | "CHAR(13)"
 //    }
 

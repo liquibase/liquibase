@@ -91,7 +91,7 @@ public class LiquibaseFutureRollbackSQL extends LiquibaseRollback {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        liquibase.futureRollbackSQL(null, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+        liquibase.futureRollbackSQL(new Contexts(contexts), new LabelExpression(labels), outputWriter);
     }
 
     @Override

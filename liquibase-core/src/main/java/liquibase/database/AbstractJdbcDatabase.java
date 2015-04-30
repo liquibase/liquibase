@@ -70,6 +70,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected String sequenceCurrentValueFunction;
     protected String quotingStartCharacter = "\"";
     protected String quotingEndCharacter = "\"";
+    protected String quotingEndReplacement = "\"\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -1038,7 +1039,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return quotingStartCharacter + escapeStringForDatabase(objectName) + quotingEndCharacter;
+        if (objectName == null) {
+            return null;
+        }
+
+        return quotingStartCharacter
+                + objectName.replace(quotingEndCharacter, quotingEndReplacement)
+                + quotingEndCharacter;
     }
 
     @Override
@@ -1446,13 +1453,22 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            String sequenceName = databaseFunction.getValue();
+            if (!sequenceNextValueFunction.contains("'")) {
+                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+            }
+            return String.format(sequenceNextValueFunction, sequenceName);
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+
+            String sequenceName = databaseFunction.getValue();
+            if (!sequenceCurrentValueFunction.contains("'")) {
+                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+            }
+            return String.format(sequenceCurrentValueFunction, sequenceName);
         } else {
             return databaseFunction.getValue();
         }
@@ -1524,6 +1540,21 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
 	public String getSystemSchema(){
     	return "information_schema";
+    }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        return dataTypeString;
     }
 
     @Override

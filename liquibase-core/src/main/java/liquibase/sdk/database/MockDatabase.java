@@ -811,4 +811,19 @@ public class MockDatabase implements Database, InternalDatabase {
         this.maxSnapshotContainerDepth = maxSnapshotContainerDepth;
         return this;
     }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        return dataTypeString;
+    }
 }

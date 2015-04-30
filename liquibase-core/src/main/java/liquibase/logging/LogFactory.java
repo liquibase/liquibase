@@ -1,6 +1,7 @@
 package liquibase.logging;
 
 import liquibase.exception.ServiceNotFoundException;
+import liquibase.logging.core.DefaultLogger;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class LogFactory {
             try {
                 value = (Logger) ServiceLocator.getInstance().newInstance(Logger.class);
             } catch (Exception e) {
-                throw new ServiceNotFoundException(e);
+                value = new DefaultLogger();
             }
             value.setName(name);
             if (defaultLoggingLevel != null) {

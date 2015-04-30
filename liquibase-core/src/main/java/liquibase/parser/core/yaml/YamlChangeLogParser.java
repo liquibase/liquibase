@@ -16,28 +16,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.util.*;
 
-public class YamlChangeLogParser implements ChangeLogParser {
-
-    protected Logger log = LogFactory.getLogger();
-
-    @Override
-    public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        for (String extension : getSupportedFileExtensions()) {
-            if (changeLogFile.toLowerCase().endsWith("." + extension)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected String[] getSupportedFileExtensions() {
-        return new String[] {"yaml", "yml"};
-    }
-
-    @Override
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
     @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
@@ -56,6 +35,12 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
             }
 
+            if (parsedYaml == null || parsedYaml.size() == 0) {
+                throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
+            }
+
+            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+
             List rootList = (List) parsedYaml.get("databaseChangeLog");
             if (rootList == null) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
@@ -65,12 +50,16 @@ public class YamlChangeLogParser implements ChangeLogParser {
                     Map property = (Map) ((Map) obj).get("property");
                     ContextExpression context = new ContextExpression((String) property.get("context"));
                     Labels labels = new Labels((String) property.get("labels"));
+
+                    Boolean global = getGlobalParam(property);
+
                     if (property.containsKey("name")) {
                         Object value = property.get("value");
                         if (value != null) {
-                            value = value.toString();
+                            value = value.toString(); // TODO: not nice...
                         }
-                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"));
+
+                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
                     } else if (property.containsKey("file")) {
                         Properties props = new Properties();
                         InputStream propertiesStream = StreamUtil.singleInputStream((String) property.get("file"), resourceAccessor);
@@ -80,7 +69,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                             props.load(propertiesStream);
 
                             for (Map.Entry entry : props.entrySet()) {
-                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"));
+                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"), global, changeLog);
                             }
                         }
                     }
@@ -88,9 +77,8 @@ public class YamlChangeLogParser implements ChangeLogParser {
             }
 
 
-            replaceParameters(parsedYaml, changeLogParameters);
+            replaceParameters(parsedYaml, changeLogParameters, changeLog);
 
-            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
             changeLog.setChangeLogParameters(changeLogParameters);
             ParsedNode databaseChangeLogNode = new ParsedNode(null, "databaseChangeLog");
             databaseChangeLogNode.setValue(rootList);
@@ -106,13 +94,31 @@ public class YamlChangeLogParser implements ChangeLogParser {
         }
     }
 
-    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters) {
+	/**
+	 * Extract the global parameter from the properties.
+	 * 
+	 * @param property the map of props
+	 * @return the global param
+	 */
+	private Boolean getGlobalParam(Map property) {
+		Boolean global = null;
+		Object globalObj = property.get("global");
+		if (globalObj == null) {
+			// default behaviour before liquibase 3.4
+			global = true;
+		} else {
+			global = (Boolean) globalObj;
+		}
+		return global;
+	}
+
+    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) {
         if (obj instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
                 if (entry.getValue() instanceof Map || entry.getValue() instanceof Collection) {
-                    replaceParameters(entry.getValue(), changeLogParameters);
+                    replaceParameters(entry.getValue(), changeLogParameters, changeLog);
                 } else if (entry.getValue() instanceof String) {
-                    entry.setValue(changeLogParameters.expandExpressions((String) entry.getValue()));
+                    entry.setValue(changeLogParameters.expandExpressions((String) entry.getValue(), changeLog));
                 }
             }
         } else if (obj instanceof Collection) {
@@ -120,9 +126,9 @@ public class YamlChangeLogParser implements ChangeLogParser {
             while (iterator.hasNext()) {
                 Object child = iterator.next();
                 if (child instanceof Map || child instanceof Collection) {
-                    replaceParameters(child, changeLogParameters);
+                    replaceParameters(child, changeLogParameters, changeLog);
                 } else if (child instanceof String) {
-                    iterator.set(changeLogParameters.expandExpressions((String) child));
+                    iterator.set(changeLogParameters.expandExpressions((String) child, changeLog));
                 }
             }
         }

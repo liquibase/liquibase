@@ -1,7 +1,9 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -97,6 +99,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
+            boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
+            boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
             boolean liquibaseColumnNotRightSize = false;
 //todo: action            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
 //                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
@@ -147,6 +151,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
                 statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
+            }
+
+            if (!hasContexts) {
+                executor.comment("Adding missing databasechangelog.contexts column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", "VARCHAR(255)", null));
+            }
+            if (!hasLabels) {
+                executor.comment("Adding missing databasechangelog.labels column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", "VARCHAR(255)", null));
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")));
@@ -219,8 +232,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     }
                     String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                     String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
+                    ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
+                    Labels labels = new Labels((String) rs.get("LABELS"));
+
                     try {
-                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments);
+                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
                         LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
@@ -235,7 +251,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
-        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE", "LABELS", "CONTEXTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
         return ExecutorService.getInstance().getExecutor(database).queryForList(select);
     }
 
@@ -263,7 +279,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         ExecutorService.getInstance().getExecutor(database).execute(new MarkChangeSetRanStatement(changeSet, execType));
         getDatabase().commit();
         if (this.ranChangeSetList != null) {
-            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType));
+            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
         }
 
     }

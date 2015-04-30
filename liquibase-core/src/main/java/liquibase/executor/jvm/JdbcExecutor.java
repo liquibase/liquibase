@@ -309,7 +309,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                 try {
                     stmt.execute(statement);
                 } catch (Throwable e) {
-                    throw new DatabaseException(e);
+                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
             }
             return null;

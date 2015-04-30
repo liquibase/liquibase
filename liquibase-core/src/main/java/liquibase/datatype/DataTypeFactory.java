@@ -18,7 +18,7 @@ public class DataTypeFactory {
 
     private static DataTypeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends LiquibaseDataType>>>();
+    private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, List<Class<? extends LiquibaseDataType>>>();
 
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
@@ -55,21 +55,25 @@ public class DataTypeFactory {
             names.add(example.getName());
             names.addAll(Arrays.asList(example.getAliases()));
 
+            Comparator<Class<? extends LiquibaseDataType>> comparator = new Comparator<Class<? extends LiquibaseDataType>>() {
+                @Override
+                public int compare(Class<? extends LiquibaseDataType> o1, Class<? extends LiquibaseDataType> o2) {
+                    try {
+                        return -1 * new Integer(o1.newInstance().getPriority()).compareTo(o2.newInstance().getPriority());
+                    } catch (Exception e) {
+                        throw new UnexpectedLiquibaseException(e);
+                    }
+                }
+            };
+
             for (String name : names) {
                 name = name.toLowerCase();
                 if (registry.get(name) == null) {
-                    registry.put(name, new TreeSet<Class<? extends LiquibaseDataType>>(new Comparator<Class<? extends LiquibaseDataType>>() {
-                        @Override
-                        public int compare(Class<? extends LiquibaseDataType> o1, Class<? extends LiquibaseDataType> o2) {
-                            try {
-                                return -1 * new Integer(o1.newInstance().getPriority()).compareTo(o2.newInstance().getPriority());
-                            } catch (Exception e) {
-                                throw new UnexpectedLiquibaseException(e);
-                            }
-                        }
-                    }));
+                    registry.put(name, new ArrayList<Class<? extends LiquibaseDataType>>());
                 }
-                registry.get(name).add(dataTypeClass);
+                List<Class<? extends LiquibaseDataType>> classes = registry.get(name);
+                classes.add(dataTypeClass);
+                Collections.sort(classes, comparator);
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -80,9 +84,9 @@ public class DataTypeFactory {
         registry.remove(name.toLowerCase());
     }
 
-    public Map<String, SortedSet<Class<? extends LiquibaseDataType>>> getRegistry() {
-        return registry;
-    }
+//    public Map<String, SortedSet<Class<? extends LiquibaseDataType>>> getRegistry() {
+//        return registry;
+//    }
 
 //    public LiquibaseDataType fromDescription(String dataTypeDefinition) {
 //        return fromDescription(dataTypeDefinition, null);
@@ -91,15 +95,35 @@ public class DataTypeFactory {
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;
         if (dataTypeName.matches(".+\\(.*\\).*")) {
-            dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\(.*\\)", "");
+            dataTypeName = dataTypeName.replaceFirst("\\s*\\(.*\\)", "");
         }
         if (dataTypeName.matches(".+\\{.*")) {
             dataTypeName = dataTypeName.replaceFirst("\\s*\\{.*", "");
         }
-        boolean primaryKey = false;
+        boolean autoIncrement = false;
         if (dataTypeName.endsWith(" identity")) {
             dataTypeName = dataTypeName.replaceFirst(" identity$", "");
-            primaryKey = true;
+            autoIncrement = true;
+        }
+
+        // unquote delimited identifiers
+        final String[][] quotePairs = new String[][] {
+            { "\"", "\"" }, // double quotes
+            { "[",  "]"  }, // square brackets (a la mssql)
+            { "`",  "`"  }, // backticks (a la mysql)
+            { "'",  "'"  }  // single quotes
+        };
+        for (String[] quotePair : quotePairs) {
+            String openQuote = quotePair[0];
+            String closeQuote = quotePair[1];
+            if (dataTypeName.startsWith(openQuote)) {
+                int indexOfCloseQuote = dataTypeName.indexOf(closeQuote, openQuote.length());
+                if (indexOfCloseQuote != -1 && dataTypeName.indexOf(closeQuote, indexOfCloseQuote + closeQuote.length()) == -1) {
+                    dataTypeName = dataTypeName.substring(openQuote.length(), indexOfCloseQuote) +
+                            dataTypeName.substring(indexOfCloseQuote + closeQuote.length(), dataTypeName.length());
+                    break;
+                }
+            }
         }
 
         String additionalInfo = null;
@@ -113,7 +137,7 @@ public class DataTypeFactory {
             }
         }
 
-        SortedSet<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
+        Collection<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
 
         LiquibaseDataType liquibaseDataType = null;
         if (classes == null) {
@@ -181,10 +205,10 @@ public class DataTypeFactory {
             }
         }
 
-        if (primaryKey && liquibaseDataType instanceof IntType) {
+        if (autoIncrement && liquibaseDataType instanceof IntType) {
             ((IntType) liquibaseDataType).setAutoIncrement(true);
         }
-        if (primaryKey && liquibaseDataType instanceof BigIntType) {
+        if (autoIncrement && liquibaseDataType instanceof BigIntType) {
             ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 

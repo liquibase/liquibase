@@ -13,7 +13,7 @@ public class SnapshotCommand extends AbstractCommand {
 
     private Database database;
     private CatalogAndSchema[] schemas;
-    private String serializerFormat = "txt";
+    private String serializerFormat;
     private SnapshotListener snapshotListener;
 
     @Override
@@ -82,7 +82,11 @@ public class SnapshotCommand extends AbstractCommand {
         }
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
-        return SnapshotSerializerFactory.getInstance().getSerializer(getSerializerFormat()).serialize(snapshot, true);
+        String format = getSerializerFormat();
+        if (format == null) {
+            format = "txt";
+        }
+        return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
     }
 
     @Override

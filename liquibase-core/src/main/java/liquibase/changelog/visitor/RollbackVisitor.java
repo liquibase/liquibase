@@ -15,6 +15,10 @@ public class RollbackVisitor implements ChangeSetVisitor {
     
     private ChangeExecListener execListener;
 
+    /**
+     * @deprecated - please use the constructor with ChangeExecListener, which can be null.
+     */
+    @Deprecated
     public RollbackVisitor(Database database) {
         this.database = database;
     }

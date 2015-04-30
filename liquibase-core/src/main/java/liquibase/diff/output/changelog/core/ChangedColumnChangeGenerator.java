@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
@@ -17,6 +18,7 @@ import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -121,7 +123,8 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
     protected void handleTypeDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
         Difference typeDifference = differences.getDifference("type");
         if (typeDifference != null) {
-            ModifyDataTypeChange change = new ModifyDataTypeChange();
+            String catalogName = null;
+            String schemaName = null;
             if (control.getIncludeCatalog()) {
                 change.setCatalogName(column.getRelation().getSchema().getCatalog().getSimpleName());
             }
@@ -133,7 +136,54 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             DataType referenceType = (DataType) typeDifference.getReferenceValue();
             change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
 
-            changes.add(change);
+
+            String tableName = column.getRelation().getName();
+
+//            if (comparisonDatabase instanceof OracleDatabase && (((DataType) typeDifference.getReferenceValue()).getTypeName().equalsIgnoreCase("clob") || ((DataType) typeDifference.getComparedValue()).getTypeName().equalsIgnoreCase("clob"))) {
+//                String tempColName = "TEMP_CLOB_CONVERT";
+//                OutputChange outputChange = new OutputChange();
+//                outputChange.setMessage("Cannot convert directly from " + ((DataType) typeDifference.getComparedValue()).getTypeName()+" to "+((DataType) typeDifference.getReferenceValue()).getTypeName()+". Instead a new column will be created and the data transferred. This may cause unexpected side effects including constraint issues and/or table locks.");
+//                changes.add(outputChange);
+//
+//                AddColumnChange addColumn = new AddColumnChange();
+//                addColumn.setCatalogName(catalogName);
+//                addColumn.setSchemaName(schemaName);
+//                addColumn.setTableName(tableName);
+//                AddColumnConfig addColumnConfig = new AddColumnConfig(column);
+//                addColumnConfig.setName(tempColName);
+//                addColumnConfig.setType(typeDifference.getReferenceValue().toString());
+//                addColumnConfig.setAfterColumn(column.getName());
+//                addColumn.setColumns(Arrays.asList(addColumnConfig));
+//                changes.add(addColumn);
+//
+//                changes.add(new RawSQLChange("UPDATE "+referenceDatabase.escapeObjectName(tableName, Table.class)+" SET "+tempColName+"="+referenceDatabase.escapeObjectName(column.getName(), Column.class)));
+//
+//                DropColumnChange dropColumnChange = new DropColumnChange();
+//                dropColumnChange.setCatalogName(catalogName);
+//                dropColumnChange.setSchemaName(schemaName);
+//                dropColumnChange.setTableName(tableName);
+//                dropColumnChange.setColumnName(column.getName());
+//                changes.add(dropColumnChange);
+//
+//                RenameColumnChange renameColumnChange = new RenameColumnChange();
+//                renameColumnChange.setCatalogName(catalogName);
+//                renameColumnChange.setSchemaName(schemaName);
+//                renameColumnChange.setTableName(tableName);
+//                renameColumnChange.setOldColumnName(tempColName);
+//                renameColumnChange.setNewColumnName(column.getName());
+//                changes.add(renameColumnChange);
+//
+//            } else {
+                ModifyDataTypeChange change = new ModifyDataTypeChange();
+                change.setCatalogName(catalogName);
+                change.setSchemaName(schemaName);
+                change.setTableName(tableName);
+                change.setColumnName(column.getName());
+                DataType referenceType = (DataType) typeDifference.getReferenceValue();
+                change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
+
+                changes.add(change);
+//            }
         }
     }
 
