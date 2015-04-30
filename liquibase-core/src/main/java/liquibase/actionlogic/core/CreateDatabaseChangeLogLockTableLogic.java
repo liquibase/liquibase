@@ -25,8 +25,8 @@ public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic {
         return new DelegateResult((CreateTableAction) new CreateTableAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))
                 .addColumn((ColumnDefinition) new ColumnDefinition("ID", "int").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("LOCKED", "BOOLEAN").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn(new ColumnDefinition("LOCKGRANTED", "DATETIME"))
-                .addColumn(new ColumnDefinition("LOCKEDBY", "VARCHAR(255)"))
+                .addColumn("LOCKGRANTED", "DATETIME")
+                .addColumn("LOCKEDBY", "VARCHAR(255)")
                 .set(CreateTableAction.Attr.tablespace, database.getLiquibaseTablespaceName()));
     }
 }

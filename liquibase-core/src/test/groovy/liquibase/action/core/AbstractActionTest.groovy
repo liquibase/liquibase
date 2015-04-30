@@ -28,7 +28,7 @@ abstract class AbstractActionTest extends Specification {
         def permutation = new ActionTestPermutation(testName, this, snapshot, conn, scope, [:])
 
         return TestMD.test("${this.class.name}_${database.shortName}", testName, database.class)
-                .permutation(permutation)
+                .withPermutation(permutation)
     }
 
     def setupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {

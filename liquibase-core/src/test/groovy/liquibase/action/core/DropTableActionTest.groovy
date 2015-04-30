@@ -35,12 +35,11 @@ class DropTableActionTest extends Specification {
             def plan = new ActionExecutor().createPlan(action, scope)
 
             TestMD.test(this.class, "create simple table ${conn.databaseShortName}", conn.getDatabase().class)
-                    .permutation([connection: conn, catalogName: catalogName, schemaName: schemaName, tableName: tableName])
-                    .asTable("catalogName", "schemaName", "tableName")
-                    .addResult("plan", plan)
+                    .withPermutation([connection: conn, catalogName_asTable: catalogName, schemaName_asTable: schemaName, tableName_asTable: tableName])
+                    .addOperations(plan: plan)
                     .setup({
                 conn.connect(scope)
-                new ActionExecutor().execute(new CreateTableAction(catalogName, schemaName, tableName).addColumn(new ColumnDefinition("id", "int")), scope)
+                new ActionExecutor().execute(new CreateTableAction(catalogName, schemaName, tableName).addColumn("id", "int"), scope)
                 throw SetupResult.OK
             })
                     .run({

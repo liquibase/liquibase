@@ -25,8 +25,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        testMDPermutation(snapshot, conn, scope).asTable([tableName: tableName])
-                .addResult("plan", plan.describe())
+        testMDPermutation(snapshot, conn, scope).addParameters([tableName_asTable: tableName])
+                .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 
@@ -55,8 +55,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
-                .asTable(schemaName: schemaName)
-                .addResult("plan", plan.describe())
+                .addParameters(schemaName_asTable: schemaName)
+                .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 
@@ -85,8 +85,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
-                .asTable(catalogName: catalogName)
-                .addResult("plan", plan.describe())
+                .addParameters(catalogName_asTable: catalogName)
+                .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 
@@ -115,8 +115,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
-                .asTable(tableName: tableName)
-                .addResult("plan", plan.describe())
+                .addParameters(tableName_asTable: tableName)
+                .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 
@@ -145,8 +145,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
-                .asTable(schemaName: schemaName)
-                .addResult("plan", plan.describe())
+                .addParameters(schemaName_asTable: schemaName)
+                .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 
@@ -175,8 +175,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
-                .asTable(catalogName: catalogName)
-                .addResult("plan", plan.describe())
+                .addParameters(catalogName_asTable: catalogName)
+                .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 

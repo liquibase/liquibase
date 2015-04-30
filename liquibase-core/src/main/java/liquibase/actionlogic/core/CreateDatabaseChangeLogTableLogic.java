@@ -30,11 +30,11 @@ public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic {
                 .addColumn((ColumnDefinition) new ColumnDefinition("DATEEXECUTED", "DATETIME").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("ORDEREXECUTED", "INT").set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("EXECTYPE", "VARCHAR(10)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn(new ColumnDefinition("MD5SUM", "VARCHAR(35)"))
-                .addColumn(new ColumnDefinition("DESCRIPTION", "VARCHAR(255)"))
-                .addColumn(new ColumnDefinition("COMMENTS", "VARCHAR(255)"))
-                .addColumn(new ColumnDefinition("TAG", "VARCHAR(255)"))
-                .addColumn(new ColumnDefinition("LIQUIBASE", "VARCHAR(20)"))
+                .addColumn("MD5SUM", "VARCHAR(35)")
+                .addColumn("DESCRIPTION", "VARCHAR(255)")
+                .addColumn("COMMENTS", "VARCHAR(255)")
+                .addColumn("TAG", "VARCHAR(255)")
+                .addColumn("LIQUIBASE", "VARCHAR(20)")
                 .set(CreateTableAction.Attr.tablespace, database.getLiquibaseTablespaceName())
         );
     }

@@ -34,6 +34,14 @@ public class CreateTableAction extends AbstractAction {
         set(Attr.tableName, tableName);
     }
 
+    public CreateTableAction addColumn(ObjectName columnName, String type) {
+        return addColumn(new ColumnDefinition(columnName, type));
+    }
+
+    public CreateTableAction addColumn(String columnName, String type) {
+        return addColumn(new ColumnDefinition(columnName, type));
+    }
+
     public CreateTableAction addColumn(ColumnDefinition columnDefinition) {
         if (!has(Attr.columnDefinitions)) {
             set(Attr.columnDefinitions, new ArrayList<ColumnDefinition>());

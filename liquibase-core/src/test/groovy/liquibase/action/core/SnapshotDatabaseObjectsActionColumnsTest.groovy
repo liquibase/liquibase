@@ -27,8 +27,8 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
-                .asTable([tableName: column.getRelation().getName(), columnName: column.getName().getName()])
-                .addResult("plan", plan.describe())
+                .addParameters([tableName_asTable: column.getRelation().getName(), columnName_asTable: column.getName().getName()])
+                .addOperations(plan: plan)
                 .run({
             QueryResult result = plan.execute(scope)
 

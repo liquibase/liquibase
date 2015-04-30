@@ -26,19 +26,17 @@ class CreateTableActionTest extends Specification {
         new CreateTableAction(new ObjectName("cat", "schem", "tab")).describe() == "createTable(tableName=cat.schem.tab)"
     }
 
-    @Unroll("#featureName #tableName . #columnName")
+    @Unroll("#featureName #tableName.#columnName")
     def "create simple table"() {
         expect:
-        def action = new CreateTableAction(tableName)
-                .addColumn(new ColumnDefinition(columnName, "int"))
+        def action = new CreateTableAction(tableName).addColumn(columnName, "int")
 
         def scope = JUnitScope.getInstance(conn.getDatabase())
         def plan = new ActionExecutor().createPlan(action, scope)
 
         TestMD.test(this.class, conn.databaseShortName, conn.getDatabase().class)
-                .permutation([connection: conn, tableName: tableName.toString(), columnName: columnName.toString()])
-                .asTable("tableName", "columnName")
-                .addResult("plan", plan)
+                .withPermutation([connection: conn, tableName_asTable: tableName.toString(), columnName_asTable: columnName.toString()])
+                .addOperations(plan: plan)
                 .setup({
             conn.connect(scope)
             throw SetupResult.OK
@@ -49,7 +47,7 @@ class CreateTableActionTest extends Specification {
                 .run({
             plan.execute(scope)
             assert scope.getSingleton(SnapshotFactory.class).has(new Table(tableName), scope)
-            assert scope.getSingleton(SnapshotFactory.class).has(new Column(columnName).setRelation(new Table(tableName), scope))
+            assert scope.getSingleton(SnapshotFactory.class).has(new Column(columnName).setRelation(new Table(tableName)), scope)
 
         })
 
