@@ -2,13 +2,23 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Column extends AbstractDatabaseObject {
 
@@ -165,15 +175,11 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
-        if (getComputed() != null && getComputed()) {
+        if (getRelation() == null) {
             return getName();
         } else {
-            if (getRelation() == null) {
-                return getName();
-            } else {
-                String tableOrViewName = getRelation().getName();
-                return tableOrViewName + "." + getName();
-            }
+            String tableOrViewName = getRelation().getName();
+            return tableOrViewName + "." + getName();
         }
     }
 
@@ -290,6 +296,16 @@ public class Column extends AbstractDatabaseObject {
         return Arrays.asList(arrayFromNames(columnNames));
     }
 
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, resourceAccessor);
+        ParsedNode typeNode = parsedNode.getChild(null, "type");
+        if (typeNode != null) {
+            DataType type = new DataType();
+            type.load(typeNode, resourceAccessor);
+            setType(type);
+        }
+    }
 
     public static class AutoIncrementInformation {
         private BigInteger startWith;

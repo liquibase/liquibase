@@ -143,10 +143,25 @@ public class DiffToReport {
         if (string.areEqual()) {
             out.println(" EQUAL");
         } else {
+            String referenceVersion = string.getReferenceVersion();
+            if (referenceVersion == null) {
+                referenceVersion = "NULL";
+            } else {
+                referenceVersion = "'"+referenceVersion+"'";
+            }
+
+            String targetVersion = string.getTargetVersion();
+            if (targetVersion == null) {
+                targetVersion = "NULL";
+            } else {
+                targetVersion = "'"+targetVersion+"'";
+            }
+
+
             out.println();
-            out.println("     Reference:   '"
-                    + string.getReferenceVersion() + "'");
-            out.println("     Target: '" + string.getTargetVersion() + "'");
+            out.println("     Reference:   "
+                    + referenceVersion);
+            out.println("     Target: " + targetVersion);
         }
 
     }

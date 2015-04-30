@@ -1,4 +1,6 @@
 package liquibase.parser;
 
-public interface LiquibaseParser {
+import liquibase.servicelocator.PrioritizedService;
+
+public interface LiquibaseParser extends PrioritizedService {
 }

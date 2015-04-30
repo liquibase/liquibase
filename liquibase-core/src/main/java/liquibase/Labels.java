@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Labels {
 
-    private HashSet<String> labels = new HashSet<String>();
+    private Set<String> labels = new LinkedHashSet<String>();
 
     public Labels() {
     }
@@ -50,11 +50,14 @@ public class Labels {
         return this.labels.add(label.toLowerCase());
     }
 
-    @Override
-    public String toString() {
-        return StringUtils.join(new TreeSet(this.labels),",");
+    public boolean remove(String label) {
+      return this.labels.remove(label.toLowerCase());
     }
 
+    @Override
+    public String toString() {
+        return StringUtils.join(new LinkedHashSet<String>(this.labels),",");
+    }
 
     public boolean isEmpty() {
         return this.labels == null || this.labels.isEmpty();

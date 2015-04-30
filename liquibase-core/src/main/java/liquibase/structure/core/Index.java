@@ -95,8 +95,10 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Index setColumns(List<Column> columns) {
-        for (Column column :columns) {
-            column.setRelation(getTable());
+        if (getAttribute("table", Object.class) instanceof Table) {
+            for (Column column :columns) {
+                column.setRelation(getTable());
+            }
         }
         setAttribute("columns", columns);
         return this;

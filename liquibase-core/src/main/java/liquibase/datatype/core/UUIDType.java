@@ -1,14 +1,15 @@
 package liquibase.datatype.core;
 
+import java.util.Locale;
+
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.DatabaseFunction;
 
-@DataTypeInfo(name="uuid", aliases = {"uniqueidentifier"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "uuid", aliases = { "uniqueidentifier", "java.util.UUID" }, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class UUIDType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -21,7 +22,10 @@ public class UUIDType extends LiquibaseDataType {
             // fall back
         }
 
-        if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        if (database instanceof MSSQLDatabase) {
+            return new DatabaseDataType(database.escapeDataTypeName("uniqueidentifier"));
+        }
+        if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("UNIQUEIDENTIFIER");
         }
         if (database instanceof OracleDatabase) {
@@ -34,10 +38,13 @@ public class UUIDType extends LiquibaseDataType {
     }
 
     @Override
-    public String objectToSql(Object value, Database database) {
-        if (database instanceof MSSQLDatabase) {
-			 return (value instanceof DatabaseFunction) ? database.generateDatabaseFunctionValue((DatabaseFunction) value) : "'" + value + "'";
+    protected String otherToSql(Object value, Database database) {
+        if (value == null) {
+            return null;
         }
-        return super.objectToSql(value, database);
+        if (database instanceof MSSQLDatabase) {
+            return "'" + value.toString().toUpperCase(Locale.ENGLISH) + "'";
+        }
+        return super.otherToSql(value, database);
     }
 }

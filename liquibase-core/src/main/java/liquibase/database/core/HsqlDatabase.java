@@ -2,8 +2,10 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -11,14 +13,23 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
-
+    private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
+    static {
+        Map<String, HashSet<String>> tempMap = new HashMap<String, HashSet<String>>();
+        tempMap.put("datetime", new HashSet<String>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW")));
+        SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP = Collections.unmodifiableMap(tempMap);
+    }
     private Boolean oracleSyntax;
 
     public HsqlDatabase() {
@@ -66,6 +77,19 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         return true;
+    }
+    
+    /**
+     * Checks to see if the string is an acceptable computed value for HSQL
+     *    "datetime" columns are the only columns for which HSQL supports computer values.
+     *
+     * @param columnType String of the column's data type
+     * @param defaultValue String to be checked for valid valueComputed in HSQL
+     * @return boolean True if the string represents a function supported by HSQL for default values
+     */
+    public static boolean supportsDefaultValueComputed(String columnType, String defaultValue){
+    	HashSet<String> possibleComputedValues = SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP.get(columnType);
+    	return (possibleComputedValues!=null) && possibleComputedValues.contains(defaultValue);
     }
 
     @Override
@@ -474,5 +498,17 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             }
         }
         return oracleSyntax;
+    }
+
+
+    @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return super.escapeObjectName(objectName, objectType);
+        }
+        if (objectName != null && quotingStrategy != ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && isReservedWord(objectName.toUpperCase())) {
+                return "\""+objectName.toUpperCase()+"\"";
+        }
+        return objectName;
     }
 }

@@ -26,7 +26,7 @@ public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
             log("Writing diff report " + outputFile.toString(), Project.MSG_INFO);
             diffReport.print();
         } catch (DatabaseException e) {
-            throw new BuildException("Unable to make diff report.", e);
+            throw new BuildException("Unable to make diff report. " + e.toString(), e);
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to make diff report. Encoding [" + outputEncoding + "] is not supported.", e);
         } catch (IOException e) {

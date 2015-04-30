@@ -1,6 +1,6 @@
 package liquibase.exception;
 
-public class ChangeLogParseException extends LiquibaseException {
+public class ChangeLogParseException extends LiquibaseParseException {
 
     public ChangeLogParseException(Throwable cause) {
         super(cause);

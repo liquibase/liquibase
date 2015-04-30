@@ -1,30 +1,15 @@
-
-
 !!! update project.version in liquibase-core/pom.xml !!!
 release version in jira
 update changelog.txt
 
-set java home
-set path=%path%;gpg
-set path=%PATH%;git
+Manually run branch in the "Release" buildserver project
 
-close intellij so .iml files aren't changed on the fly
-
-mvn -Darguments="-DskipTests=true" release:prepare
-
-do git push
-git push --tags
-
-mvn -Darguments="-DskipTests=true" release:perform
-
-upload target/checkout/liquibase-core/target/liquibase-3.0.0-*.zip and *-.tar.gz to sourceforge
+Download liquibase-X.Y.Z-*.zip and *-.tar.gz artifacts from the buildserver and upload to sourceforge
 
 upload target/checkout/liquibase-maven-plugin/target/site to liquibase.org/documentation\maven\generated
 copy target/checkout/liquibase-core/target/site/apidocs to liquibase.org/javadoc
 update version info and links in liquibase.org/download/index.md
 commit and push liquibase.org
-
-release version on jira
 
 release on sonatype
 - log in to oss.sonatype.org

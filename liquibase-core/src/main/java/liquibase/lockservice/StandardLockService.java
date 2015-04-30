@@ -25,9 +25,9 @@ import java.util.Map;
 
 public class StandardLockService implements LockService {
 
-    private Database database;
+    protected Database database;
 
-    private boolean hasChangeLogLock = false;
+    protected boolean hasChangeLogLock = false;
 
     private Long changeLogLockPollRate;
     private long changeLogLocRecheckTime;

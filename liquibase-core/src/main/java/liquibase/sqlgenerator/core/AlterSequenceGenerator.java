@@ -9,6 +9,8 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.structure.core.Sequence;
 
+import java.math.BigInteger;
+
 public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
 
     @Override
@@ -55,6 +57,22 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
                 buffer.append(" ORDER");
+            }
+        }
+
+        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
+            if (statement.getCacheSize().equals(BigInteger.ZERO)) {
+                buffer.append(" NOCACHE ");
+            } else {
+                buffer.append(" CACHE ").append(statement.getCacheSize());
+            }
+        }
+
+        if (statement.getWillCycle() != null && database instanceof OracleDatabase) {
+            if (statement.getWillCycle()) {
+                buffer.append(" CYCLE ");
+            } else {
+                buffer.append(" NOCYCLE ");
             }
         }
 

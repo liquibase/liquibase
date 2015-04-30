@@ -1,5 +1,14 @@
 package liquibase.parser.core.yaml
 
+import com.example.liquibase.change.ColumnConfig
+import com.example.liquibase.change.ComputedConfig
+import com.example.liquibase.change.CreateTableExampleChange
+import com.example.liquibase.change.DefaultConstraintConfig
+import com.example.liquibase.change.IdentityConfig
+import com.example.liquibase.change.KeyColumnConfig
+import com.example.liquibase.change.PrimaryKeyConfig
+import com.example.liquibase.change.UniqueConstraintConfig
+
 import liquibase.Contexts
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
@@ -572,5 +581,86 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((StopChange) changeLog.getChangeSet(path, "nvoxland", "stop change").changes[0]).message == "Stop message!"
     }
 
+    def "nested objects are parsed"() {
+        setup:
+        ChangeFactory.getInstance().register(CreateTableExampleChange)
 
+        when:
+        def path = "liquibase/parser/core/yaml/nestedObjectsChangeLog.yaml"
+        def changeLog = new YamlChangeLogParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getChanges().size() == 1
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        changeLog.getChangeSets().get(0).getChanges().get(0).getClass() == CreateTableExampleChange
+        change1.getClass() == CreateTableExampleChange
+        change1.getSchemaName() == "dbo"
+        change1.getTableName() == "Test"
+        change1.getDecimalValue() == 3.14159
+        change1.getColumns().size() == 7
+        change1.getColumns().get(0).getClass() == com.example.liquibase.change.ColumnConfig
+        change1.getColumns().get(0).getName() == "id"
+        change1.getColumns().get(0).getType() == "bigint"
+        change1.getColumns().get(0).getNullable() == false
+        change1.getColumns().get(0).getIdentity().getClass() == IdentityConfig
+        change1.getColumns().get(0).getIdentity().getSeed() == 1
+        change1.getColumns().get(0).getIdentity().getIncrement() == 1
+        change1.getColumns().get(1).getClass() == ColumnConfig
+        change1.getColumns().get(1).getName() == "key1"
+        change1.getColumns().get(1).getType() == "nvarchar(40)"
+        change1.getColumns().get(1).getNullable() == false
+        change1.getColumns().get(1).getIdentity() == null
+        change1.getColumns().get(1).getDefaultConstraint() == null
+        change1.getColumns().get(1).getComputed() == null
+        change1.getColumns().get(2).getClass() == ColumnConfig
+        change1.getColumns().get(2).getName() == "key2"
+        change1.getColumns().get(2).getType() == "nvarchar(20)"
+        change1.getColumns().get(2).getNullable() == false
+        change1.getColumns().get(3).getClass() == ColumnConfig
+        change1.getColumns().get(3).getName() == "key3"
+        change1.getColumns().get(3).getType() == "nvarchar(10)"
+        change1.getColumns().get(3).getNullable() == true
+        change1.getColumns().get(4).getClass() == ColumnConfig
+        change1.getColumns().get(4).getName() == "value"
+        change1.getColumns().get(4).getType() == "nvarchar(MAX)"
+        change1.getColumns().get(4).getNullable() == false
+        change1.getColumns().get(5).getClass() == ColumnConfig
+        change1.getColumns().get(5).getName() == "lastUpdateDate"
+        change1.getColumns().get(5).getType() == "datetime2"
+        change1.getColumns().get(5).getNullable() == false
+        change1.getColumns().get(5).getDefaultConstraint().getClass() == DefaultConstraintConfig
+        change1.getColumns().get(5).getDefaultConstraint().getName() == "DF_Test_lastUpdateDate"
+        change1.getColumns().get(5).getDefaultConstraint().getExpression() == "GETDATE()"
+        change1.getColumns().get(6).getClass() == ColumnConfig
+        change1.getColumns().get(6).getName() == "partition"
+        change1.getColumns().get(6).getType() == null
+        change1.getColumns().get(6).getNullable() == false
+        change1.getColumns().get(6).getComputed().getClass() == ComputedConfig
+        change1.getColumns().get(6).getComputed().getExpression() == "[id] % 5"
+        change1.getColumns().get(6).getComputed().getPersisted() == true
+        change1.getPrimaryKey().getClass() == PrimaryKeyConfig
+        change1.getPrimaryKey().getName() == "PK_Test_id"
+        change1.getPrimaryKey().getKeyColumns().size() == 1
+        change1.getPrimaryKey().getKeyColumns().get(0).getClass() == KeyColumnConfig
+        change1.getPrimaryKey().getKeyColumns().get(0).getName() == "id"
+        change1.getUniqueConstraints().size() == 2
+        change1.getUniqueConstraints().get(0).getClass() == UniqueConstraintConfig
+        change1.getUniqueConstraints().get(0).getName() == "UQ_Test_key1"
+        change1.getUniqueConstraints().get(0).getKeyColumns().size() == 1
+        change1.getUniqueConstraints().get(0).getKeyColumns().get(0).getClass() == KeyColumnConfig
+        change1.getUniqueConstraints().get(0).getKeyColumns().get(0).getName() == "key1"
+        change1.getUniqueConstraints().get(1).getClass() == UniqueConstraintConfig
+        change1.getUniqueConstraints().get(1).getName() == "UQ_Test_key2_key3_DESC"
+        change1.getUniqueConstraints().get(1).getKeyColumns().size() == 2
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(0).getClass() == KeyColumnConfig
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(0).getName() == "key2"
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(0).getDescending() == null
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getClass() == KeyColumnConfig
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getName() == "key3"
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
+
+        cleanup:
+        ChangeFactory.getInstance().unregister("createTableExample");
+    }
 }

@@ -340,5 +340,11 @@ public interface Database extends PrioritizedService {
     public String getSystemSchema();
 
     public void addReservedWords(Collection<String> words);
+
+    String escapeDataTypeName(String dataTypeName);
+
+    String unescapeDataTypeName(String dataTypeName);
+
+    String unescapeDataTypeString(String dataTypeString);
 }
 

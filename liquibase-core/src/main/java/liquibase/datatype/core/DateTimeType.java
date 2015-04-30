@@ -6,32 +6,60 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
+import liquibase.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 @DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        boolean allowFractional = supportsFractionalDigits(database);
         if (database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
-                || database instanceof H2DatabaseTemp
-                || database instanceof HsqlDatabase
-                || database instanceof OracleDatabase) {
+                || database instanceof H2Database
+                || database instanceof HsqlDatabase) {
             return new DatabaseDataType("TIMESTAMP");
         }
 
+        if (database instanceof OracleDatabase) {
+            return new DatabaseDataType("TIMESTAMP", getParameters());
+        }
+
         if (database instanceof MSSQLDatabase) {
-            if ((getParameters().length > 0 && "16".equals(getParameters()[0])) || "SMALLDATETIME".equalsIgnoreCase(getRawDefinition())) {
-                   return new DatabaseDataType("SMALLDATETIME");
-            } else if (getRawDefinition().toLowerCase().startsWith("datetime2")) {
-                return new DatabaseDataType(getRawDefinition());
+            Object[] parameters = getParameters();
+            if (originalDefinition.equalsIgnoreCase("smalldatetime")
+                    || originalDefinition.equals("[smalldatetime]")) {
+
+                return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
+            } else if (originalDefinition.equalsIgnoreCase("datetime2")
+                    || originalDefinition.equals("[datetime2]")
+                    || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
+                    || originalDefinition.matches("\\[datetime2\\]\\s*\\(.+")) {
+
+                try {
+                    if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
+                        return new DatabaseDataType(database.escapeDataTypeName("datetime"));
+                    }
+                } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+                if (parameters.length == 0) {
+                    parameters = new Object[] { 7 };
+                } else if (parameters.length > 1) {
+                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+                }
+                return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
             }
+            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
         if (database instanceof InformixDatabase) {
 
@@ -61,17 +89,26 @@ public class DateTimeType extends LiquibaseDataType {
 
           // From changelog to the database
           if (getAdditionalInformation() != null && getAdditionalInformation().length() > 0) {
-            return new DatabaseDataType(getRawDefinition());
+            return new DatabaseDataType(originalDefinition);
           }
 
           return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
         }
         if (database instanceof PostgresDatabase) {
-            String rawDefinition = getRawDefinition().toLowerCase();
+            String rawDefinition = originalDefinition.toLowerCase();
+            Object[] params = getParameters();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
-                return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
+                if (params.length == 0 || !allowFractional) {
+                    return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
+                } else {
+                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITH TIME ZONE");
+                }
             } else {
-                return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
+                if (params.length == 0 || !allowFractional) {
+                    return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
+                } else {
+                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITHOUT TIME ZONE");
+                }
             }
         }
         if (database instanceof SQLiteDatabase) {
@@ -79,21 +116,76 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            boolean supportsParameters = true;
-            try {
-                supportsParameters = database.getDatabaseMajorVersion() >= 5
-                        && database.getDatabaseMinorVersion() >= 6
-                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
-            } catch (Exception ignore) {
-                //assume supports parameters
-            }
-            if (supportsParameters && getParameters().length > 0 && Integer.valueOf(getParameters()[0].toString()) <= 6) {
-                return new DatabaseDataType(getName(), getParameters());
-            } else {
+            if (getParameters().length == 0 || !allowFractional) {
+                // fast out...
                 return new DatabaseDataType(getName());
-            }        }
+            }
+
+            Object[] params = getParameters();
+            Integer precision = Integer.valueOf(params[0].toString());
+            if (precision > 6) {
+                LogFactory.getInstance().getLog().warning(
+                        "MySQL does not support a timestamp precision"
+                                + " of '" + precision + "' - resetting to"
+                                + " the maximum of '6'");
+                params = new Object[] {6};
+            }
+            return new DatabaseDataType(getName(), params);
+        }
 
         return new DatabaseDataType(getName());
+    }
+
+    protected boolean supportsFractionalDigits(Database database) {
+        if (database.getConnection() == null) {
+            // if no connection is there we cannot do anything...
+            LogFactory.getInstance().getLog().warning(
+                    "No database connection available - specified"
+                            + " DATETIME/TIMESTAMP precision will be tried");
+            return true;
+        }
+
+        try {
+            String minimumVersion = "0";
+            int major = database.getDatabaseMajorVersion();
+            int minor = database.getDatabaseMinorVersion();
+            int patch = 0;
+
+            if (MySQLDatabase.class.isInstance(database)) {
+                patch = ((MySQLDatabase) database).getDatabasePatchVersion();
+
+                // MySQL 5.6.4 introduced fractional support...
+                minimumVersion = "5.6.4";
+            } else if (PostgresDatabase.class.isInstance(database)) {
+                // PostgreSQL 7.2 introduced fractional support...
+                minimumVersion = "7.2";
+            }
+
+            return isMinimumVersion(minimumVersion, major, minor, patch);
+        } catch (DatabaseException x) {
+            LogFactory.getInstance().getLog().warning(
+                    "Unable to determine exact database server version"
+                            + " - specified TIMESTAMP precision"
+                            + " will not be set: ", x);
+            return false;
+        }
+    }
+
+    protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
+        String[] parts = minimumVersion.split("\\.", 3);
+        int minMajor = Integer.valueOf(parts[0]);
+        int minMinor = parts.length > 1 ? Integer.valueOf(parts[1]) : 0;
+        int minPatch = parts.length > 2 ? Integer.valueOf(parts[2]) : 0;
+        
+        if (minMajor > major) {
+            return false;
+        }
+
+        if (minMajor == major && minMinor > minor) {
+            return false;
+        }
+
+        return !(minMajor == major && minMinor == minor && minPatch > patch);
     }
 
     @Override

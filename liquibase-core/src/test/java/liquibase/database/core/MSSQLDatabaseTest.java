@@ -81,6 +81,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 		expect(connection.getConnectionUserName()).andReturn("user").anyTimes();
 		expect(connection.getURL()).andReturn("URL").anyTimes();
 		expect(connection.getAutoCommit()).andReturn(getDatabase().getAutoCommitMode()).anyTimes();
+    expect(connection.getCatalog()).andReturn("catalog").anyTimes();
 
 		Connection sqlConnection = createMock(Connection.class);
 		Statement statement = createMock(Statement.class);
@@ -89,7 +90,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
 		expect(connection.getUnderlyingConnection()).andReturn(sqlConnection).anyTimes();
 		expect( sqlConnection.createStatement()).andReturn(statement);
-		expect( statement.executeQuery("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))")).andReturn(resultSet);
+		expect( statement.executeQuery("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('catalog', 'COLLATION'))")).andReturn(resultSet);
 		expect( resultSet.next() ).andReturn(true);
 		expect( resultSet.getMetaData() ).andReturn(metadata);
 		expect( metadata.getColumnCount() ).andReturn(1);
@@ -117,5 +118,32 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     public void caseSensitiveCSCollation() throws Exception {
     	Database database =getADatabaseWithCollation("Latin1_General_CS_AI");    	
     	assertTrue( "Should be case sensitive", database.isCaseSensitive() );
+    }
+
+    @Test
+    public void testEscapeDataTypeName() {
+        Database database = getDatabase();
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("MySchema.MyUDT"));
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("MySchema.[MyUDT]"));
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("[MySchema].MyUDT"));
+        assertEquals("[MySchema].[MyUDT]", database.escapeDataTypeName("[MySchema].[MyUDT]"));
+    }
+
+    @Test
+    public void testUnescapeDataTypeName() {
+        Database database = getDatabase();
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("MySchema.MyUDT"));
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("MySchema.[MyUDT]"));
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("[MySchema].MyUDT"));
+        assertEquals("MySchema.MyUDT", database.unescapeDataTypeName("[MySchema].[MyUDT]"));
+    }
+
+    @Test
+    public void testUnescapeDataTypeString() {
+        Database database = getDatabase();
+        assertEquals("int", database.unescapeDataTypeString("int"));
+        assertEquals("int", database.unescapeDataTypeString("[int]"));
+        assertEquals("decimal(19, 2)", database.unescapeDataTypeString("decimal(19, 2)"));
+        assertEquals("decimal(19, 2)", database.unescapeDataTypeString("[decimal](19, 2)"));
     }
 }
