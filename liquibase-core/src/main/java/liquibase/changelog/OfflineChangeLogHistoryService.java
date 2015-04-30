@@ -1,6 +1,9 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.change.CheckSum;
+import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -14,6 +17,7 @@ import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
@@ -21,9 +25,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @LiquibaseService(skip = true)
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
@@ -41,6 +43,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private int COLUMN_COMMENTS = 8;
     private int COLUMN_TAG = 9;
     private int COLUMN_LIQUIBASE = 10;
+    private int COLUMN_CONTEXTS = 11;
+    private int COLUMN_LABELS = 12;
     private Integer lastChangeSetSequenceValue;
 
     public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeAgainstDatabase) {
@@ -147,6 +151,15 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
             List<RanChangeSet> returnList = new ArrayList<RanChangeSet>();
             while ((line = csvReader.readNext()) != null) {
+                ContextExpression contexts = new ContextExpression();
+                if (line.length > COLUMN_CONTEXTS) {
+                    contexts = new ContextExpression(line[COLUMN_CONTEXTS]);
+                }
+                Labels labels = new Labels();
+                if (line.length > COLUMN_LABELS) {
+                    labels = new Labels(line[COLUMN_LABELS]);
+                }
+
                 returnList.add(new RanChangeSet(
                         line[COLUMN_FILENAME],
                         line[COLUMN_ID],
@@ -156,7 +169,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                         line[COLUMN_TAG],
                         ChangeSet.ExecType.valueOf(line[COLUMN_EXECTYPE]),
                         line[COLUMN_DESCRIPTION],
-                        line[COLUMN_COMMENTS]));
+                        line[COLUMN_COMMENTS],
+                        contexts,
+                        labels));
             }
 
             return returnList;
@@ -249,6 +264,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[COLUMN_COMMENTS] = changeSet.getComments();
             newLine[COLUMN_TAG] = "";
             newLine[COLUMN_LIQUIBASE] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
+            newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
+            newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
 
             csvWriter.writeNext(newLine);
 
@@ -349,12 +366,35 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     @Override
-    public void tag(String tagString) throws DatabaseException {
+    public void tag(final String tagString) throws DatabaseException {
+        RanChangeSet last = null;
+        List<RanChangeSet> ranChangeSets = getRanChangeSets();
+        if (ranChangeSets.isEmpty()) {
+            ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, getDatabase().getObjectQuotingStrategy(), null);
+            appendChangeSet(emptyChangeSet, ExecType.EXECUTED);
+            last = new RanChangeSet(emptyChangeSet);
+        } else {
+            last = ranChangeSets.get(ranChangeSets.size() - 1);
+        }
 
+        ChangeSet lastChangeSet = new ChangeSet(last.getId(), last.getAuthor(), false, false, last.getChangeLog(), null, null, true, null, null);
+        replaceChangeSet(lastChangeSet, new ReplaceChangeSetLogic() {
+            @Override
+            public String[] execute(String[] line) {
+                line[COLUMN_TAG] = tagString;
+                return line;
+            }
+        });
     }
 
     @Override
     public boolean tagExists(String tag) throws DatabaseException {
+        List<RanChangeSet> ranChangeSets = getRanChangeSets();
+        for (RanChangeSet changeset : ranChangeSets) {
+            if (tag.equals(changeset.getTag())) {
+                return true;
+            }
+        }
         return false;
     }
 

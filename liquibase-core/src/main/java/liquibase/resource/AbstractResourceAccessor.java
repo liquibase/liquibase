@@ -129,12 +129,14 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         if (baseUrl.toExternalForm().startsWith("file:")) {
             File baseFile = new File(baseUrl.getPath());
             if (!baseFile.exists()) {
-                throw new UnexpectedLiquibaseException("Base file '"+baseFile.getAbsolutePath()+"' does not exist");
+                throw new UnexpectedLiquibaseException("Base file '" + baseFile.getAbsolutePath() + "' does not exist");
             }
             if (baseFile.isFile()) {
                 baseFile = baseFile.getParentFile();
             }
             base = baseFile.toURI().getPath();
+        } else if (baseUrl.toExternalForm().startsWith("jar:file:")) {
+                return convertToPath(new File(relativeTo).getParent() + '/' + path);
         } else {
             base = relativeTo;
         }

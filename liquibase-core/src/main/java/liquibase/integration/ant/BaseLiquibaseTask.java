@@ -68,8 +68,7 @@ public abstract class BaseLiquibaseTask extends Task {
         try {
             ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
             database = createDatabaseFromType(databaseType);
-            String changeLogFilePath = getChangeLogFilePath();
-            liquibase = new Liquibase(changeLogFilePath, resourceAccessor, database);
+            liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database);
             if(changeLogParameters != null) {
                 changeLogParameters.applyParameters(liquibase);
             }
@@ -82,7 +81,7 @@ public abstract class BaseLiquibaseTask extends Task {
                 executeWithLiquibaseClassloader();
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to initialize Liquibase.", e);
+            throw new BuildException("Unable to initialize Liquibase. " + e.toString(), e);
         } finally {
             closeDatabase(database);
             classLoader.resetThreadContextLoader();
@@ -107,7 +106,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return Returns null in this implementation. Subclasses that need a change log should implement.
      * @see AbstractChangeLogBasedTask#getChangeLogFile()
      */
-    protected FileResource getChangeLogFile() {
+    protected String getChangeLogFile() {
         return null;
     }
 
@@ -146,16 +145,6 @@ public abstract class BaseLiquibaseTask extends Task {
         FileSystemResourceAccessor fileSystemResourceAccessor = new FileSystemResourceAccessor();
         ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(classLoader);
         return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
-    }
-
-    /**
-     * Convenience method to get the change log file path from the change log file resource if it exists.
-     *
-     * @return The change log file path string.
-     */
-    private String getChangeLogFilePath() {
-        FileResource changeLogFile = getChangeLogFile();
-        return (changeLogFile != null) ? changeLogFile.toString() : null;
     }
 
     /**
@@ -318,7 +307,7 @@ public abstract class BaseLiquibaseTask extends Task {
         getDatabaseType().setPassword(password);
     }
 
-    public void setChangeLogFile(FileResource changeLogFile) {
+    public void setChangeLogFile(String changeLogFile) {
         // This method is deprecated. Use child implementation.
     }
 

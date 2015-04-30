@@ -32,6 +32,8 @@ public class DiffOutputControl {
     private ContextExpression context = null;
     private Labels labels = null;
 
+    private ObjectChangeFilter objectChangeFilter;
+
     public DiffOutputControl() {
         includeSchema = true;
         includeCatalog = true;
@@ -129,6 +131,15 @@ public class DiffOutputControl {
         } else {
             return true;
         }
+    }
+
+    public ObjectChangeFilter getObjectChangeFilter() {
+        return objectChangeFilter;
+    }
+
+    public DiffOutputControl setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
+        this.objectChangeFilter = objectChangeFilter;
+        return this;
     }
 
     public ContextExpression getContext() {

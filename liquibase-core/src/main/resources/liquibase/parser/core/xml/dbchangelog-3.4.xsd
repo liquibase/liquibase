@@ -93,6 +93,7 @@
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
                         <xsd:attribute name="labels" type="xsd:string" />
+                        <xsd:attribute name="global" type="xsd:boolean" />
 					</xsd:complexType>
 				</xsd:element>
 
@@ -169,7 +170,7 @@
 
 							</xsd:sequence>
 							<xsd:attributeGroup ref="changeSetAttributes" />
-							<xsd:anyAttribute namespace="##other" />
+							<xsd:anyAttribute namespace="##other" processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 
@@ -178,21 +179,22 @@
 						<xsd:complexType>
 							<xsd:attribute name="file" type="xsd:string" use="required" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-							<xsd:anyAttribute namespace="##other" />
+							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
 						<xsd:complexType>
 							<xsd:attribute name="path" type="xsd:string" use="required" />
+							<xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="false" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-                            <xsd:attribute name="filter" type="xsd:string" />
-							<xsd:anyAttribute namespace="##other" />
+                            <xsd:attribute name="resourceFilter" type="xsd:string" />
+							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 				</xsd:choice>
 			</xsd:sequence>
 			<xsd:attributeGroup ref="changeLogAttributes" />
-			<xsd:anyAttribute namespace="##other" />
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -417,6 +419,9 @@
 			<xsd:attribute name="constraintName" type="xsd:string" />
 			<xsd:attribute name="tablespace" type="xsd:string" />
             <xsd:attribute name="clustered" type="booleanExp" />
+            <xsd:attribute name="forIndexCatalogName" type="xsd:string" />
+            <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
+            <xsd:attribute name="forIndexName" type="xsd:string" />
         </xsd:complexType>
 	</xsd:element>
 
@@ -437,7 +442,10 @@
 			<xsd:attribute name="disabled" type="booleanExp" />
 			<xsd:attribute name="deferrable" type="booleanExp" />
 			<xsd:attribute name="initiallyDeferred" type="booleanExp" />
-		</xsd:complexType>
+            <xsd:attribute name="forIndexCatalogName" type="xsd:string" />
+            <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
+            <xsd:attribute name="forIndexName" type="xsd:string" />
+        </xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="dropUniqueConstraint">
@@ -851,10 +859,10 @@
 	<!-- Children for createTable -->
 	<xsd:element name="createTable">
 		<xsd:complexType>
-			<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
 				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
-			</xsd:sequence>
+			</xsd:choice>
 			<xsd:attributeGroup ref="tableNameAttribute" />
             <xsd:attribute name="tablespace" type="xsd:string" />            
 			<xsd:attribute name="remarks" type="xsd:string" />
@@ -1010,6 +1018,7 @@
 	<xsd:element name="tagDatabase">
 		<xsd:complexType>
 			<xsd:attribute name="tag" type="xsd:string" use="required" />
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -1127,10 +1136,10 @@
 
 	<xsd:element name="createIndex">
 		<xsd:complexType>
-			<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
 				<xsd:element ref="column" maxOccurs="unbounded" />
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
-            </xsd:sequence>
+            </xsd:choice>
 			<xsd:attributeGroup ref="createIndex" />
 		</xsd:complexType>
 	</xsd:element>

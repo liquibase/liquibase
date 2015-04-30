@@ -145,4 +145,11 @@ public class Schema extends AbstractDatabaseObject {
         objects.add(databaseObject);
 
     }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> fields = super.getSerializableFields();
+        fields.remove("objects");
+        return fields;
+    }
 }

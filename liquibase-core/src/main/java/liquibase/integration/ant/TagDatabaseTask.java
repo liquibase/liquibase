@@ -14,7 +14,7 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
         try {
             liquibase.tag(tag);
         } catch (LiquibaseException e) {
-            throw new BuildException("Unable to tag database.", e);
+            throw new BuildException("Unable to tag database. " + e.toString(), e);
         }
     }
 

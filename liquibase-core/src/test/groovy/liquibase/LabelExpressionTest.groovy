@@ -158,6 +158,10 @@ class LabelExpressionTest extends Specification {
         "a and (b or c)"  | "a,b"         | true
         "a and (b or c)"  | "a,c"         | true
         "a and (b or c)"  | "a,b,c"       | true
+        "(a or b) and (c or d)"  | "a"           | false
+        "(a or b) and (c or d)"  | "a,b"           | false
+        "(a or b) and (c or d)"  | "a,b,c"           | true
+        "((a or b) and (c or d))"  | "a,b,c"           | true
         "a or b and c"    | "a"           | true
         "a or b and c"    | "b"           | false
         "a or b and c"    | "b,c"         | true

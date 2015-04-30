@@ -1,11 +1,14 @@
 package liquibase.datatype;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -109,6 +112,16 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            String name = database.escapeDataTypeName(getName());
+            int dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
+            Object[] parameters = getParameters();
+            if (dataTypeMaxParameters < parameters.length) {
+                parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
+            }
+            return new DatabaseDataType(name, parameters);
+        }
+
         DatabaseDataType type = new DatabaseDataType(name.toUpperCase(), getParameters());
         type.addAdditionalInformation(additionalInformation);
 
@@ -122,13 +135,31 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         } else if (value instanceof DatabaseFunction) {
-            return database.generateDatabaseFunctionValue((DatabaseFunction) value);
+            return functionToSql((DatabaseFunction) value, database);
         } else if (value instanceof Number) {
-            return formatNumber(value.toString());
+            return numberToSql((Number) value, database);
         }
-        return value.toString();
+        return otherToSql(value, database);
     }
-    
+
+    protected String functionToSql(DatabaseFunction function, Database database) {
+        return function == null ? null : database.generateDatabaseFunctionValue(function);
+    }
+
+    protected String numberToSql(Number number, Database database) {
+        if (number == null) {
+            return null;
+        }
+        if (number instanceof BigDecimal) {
+            return formatNumber(((BigDecimal) number).toPlainString());
+        }
+        return formatNumber(number.toString());
+    }
+
+    protected String otherToSql(Object value, Database database) {
+        return value == null ? null : value.toString();
+    }
+
     public Object sqlToObject(String value, Database database) {
         return value;
     }

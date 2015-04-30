@@ -116,11 +116,17 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     //                output.write("/");
                 } else {
                     String endDelimiter = ";";
+                    String potentialDelimiter = null;
                     if (sql instanceof RawSqlStatement) {
-                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
                     } else if (sql instanceof CreateProcedureStatement) {
-                        endDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
+                        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
+                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n]+")) {
+                        endDelimiter = potentialDelimiter;
+                    }
+
+
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
                     }

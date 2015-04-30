@@ -41,6 +41,8 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                 "COMMENTS VARCHAR(255) NULL, " +
                 "TAG VARCHAR(255) NULL, " +
                 "LIQUIBASE VARCHAR(20) NULL, " +
+                "CONTEXTS VARCHAR(255) NULL, " +
+                "LABELS VARCHAR(255) NULL, " +
                 "PRIMARY KEY(ID, AUTHOR, FILENAME))",
                         getAffectedTable(database))
         };  //To change body of implemented methods use File | Settings | File Templates.

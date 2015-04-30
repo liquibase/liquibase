@@ -3,6 +3,8 @@ package liquibase.serializer.core.formattedsql;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.OracleDatabase;
@@ -88,7 +90,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append("\n");
         }
 
-        out.write(builder.toString().getBytes("UTF-8"));
+        out.write(builder.toString().getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
 
     }
 

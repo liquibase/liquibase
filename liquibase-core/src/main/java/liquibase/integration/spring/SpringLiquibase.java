@@ -4,19 +4,21 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.configuration.ConfigurationProperty;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
+import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -29,9 +31,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -73,9 +80,48 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             super.init();
             try {
                 Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources("");
-                for (Resource res : resources) {
-                    addRootPath(res.getURL());
-                }
+				if (resources.length == 0 || resources.length == 1 && !resources[0].exists()) { //sometimes not able to look up by empty string, try all the liquibase packages
+					Set<String> liquibasePackages = new HashSet<String>();
+					for (Resource manifest : ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources("META-INF/MANIFEST.MF")) {
+						if (manifest.exists()) {
+							InputStream inputStream = null;
+							try {
+								inputStream = manifest.getInputStream();
+								Manifest manifestObj = new Manifest(inputStream);
+								Attributes attributes = manifestObj.getAttributes("Liquibase-Package");
+								if (attributes != null) {
+									for (Object attr : attributes.values()) {
+										String packages = "\\s*,\\s*";
+										;
+										for (String fullPackage : attr.toString().split(packages)) {
+											liquibasePackages.add(fullPackage.split("\\.")[0]);
+										}
+                                    }
+								}
+							} finally {
+								if (inputStream != null) {
+									inputStream.close();
+								}
+							}
+						}
+					}
+
+                    if (liquibasePackages.size() == 0) {
+                        LogFactory.getInstance().getLog().warning("No Liquibase-Packages entry found in MANIFEST.MF. Using fallback of entire 'liquibase' package");
+                        liquibasePackages.add("liquibase");
+                    }
+
+                    for (String foundPackage : liquibasePackages) {
+						resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(foundPackage);
+						for (Resource res : resources) {
+							addRootPath(res.getURL());
+						}
+					}
+				} else {
+					for (Resource res : resources) {
+						addRootPath(res.getURL());
+					}
+				}
             } catch (IOException e) {
                 LogFactory.getInstance().getLog().warning("Error initializing SpringLiquibase", e);
             }
@@ -84,11 +130,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         @Override
         public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
             Set<String> returnSet = new HashSet<String>();
+            
+            String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
 
-			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
+			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(tempFile));
 
 			for (Resource res : resources) {
-				Set<String> list = super.list(relativeTo, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
+				Set<String> list = super.list(null, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
 				if (list != null) {
 					returnSet.addAll(list);
 				}
@@ -106,7 +154,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
             for (Resource resource : resources) {
-                returnSet.add(resource.getURL().openStream());
+            	URLConnection connection = resource.getURL().openConnection();
+            	connection.setUseCaches(false);
+            	returnSet.add(connection.getInputStream());
             }
 
             return returnSet;
@@ -147,6 +197,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     protected String labels;
 
+    protected String tag;
+
 	protected Map<String, String> parameters;
 
 	protected String defaultSchema;
@@ -181,7 +233,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      *      &lt;/bean&gt;
      * </code>
      *
-     * {@link Liquibase#listUnrunChangeSets(String)} will
+     * {@link Liquibase#listUnrunChangeSets(Contexts, )} will
      * always, by default, return changesets, regardless of their
      * execution by Maven.
      * Maven-executed changeset path name are not be prepended by
@@ -284,6 +336,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.labels = labels;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     public String getDefaultSchema() {
 		return defaultSchema;
 	}
@@ -312,7 +372,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		Liquibase liquibase = null;
 		try {
 			c = getDataSource().getConnection();
-			liquibase = createLiquibase(c);
+            liquibase = createLiquibase(c);
 			generateRollbackFile(liquibase);
 			performUpdate(liquibase);
 		} catch (SQLException e) {
@@ -334,7 +394,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             FileWriter output = null;
             try {
                 output = new FileWriter(rollbackFile);
-                liquibase.futureRollbackSQL(null, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                if (tag != null) {
+                    liquibase.futureRollbackSQL(tag, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                } else {
+                    liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabels()), output);
+                }
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
             } finally {
@@ -349,12 +413,17 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
     }
 
-	protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-		liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
-	}
+    protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
+        if (tag != null) {
+            liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+        } else {
+            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+        }
+    }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-		Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
+		SpringResourceOpener resourceAccessor = createResourceOpener();
+		Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
         liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
@@ -377,8 +446,18 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 * @return a Database implementation retrieved from the {@link DatabaseFactory}.
 	 * @throws DatabaseException
 	 */
-	protected Database createDatabase(Connection c) throws DatabaseException {
-		Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
+	protected Database createDatabase(Connection c, ResourceAccessor resourceAccessor) throws DatabaseException {
+
+        DatabaseConnection liquibaseConnection;
+        if (c == null) {
+            log.warning("Null connection returned by liquibase datasource. Using offline unknown database");
+            liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
+
+        } else {
+            liquibaseConnection = new JdbcConnection(c);
+        }
+
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
 		if (StringUtils.trimToNull(this.defaultSchema) != null) {
 			database.setDefaultSchemaName(this.defaultSchema);
 		}

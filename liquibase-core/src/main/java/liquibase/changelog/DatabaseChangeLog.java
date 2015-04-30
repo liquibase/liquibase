@@ -9,7 +9,11 @@ import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.*;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnknownChangelogFormatException;
+import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
@@ -19,14 +23,20 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
-import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Encapsulates the information stored in the change log XML file.
@@ -135,9 +145,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     && changeSet.getId().equalsIgnoreCase(id)
                     && (changeSet.getDbmsSet() == null
                     || changeLogParameters == null
-                    || changeLogParameters.getValue("database.typeName") == null
+                    || changeLogParameters.getValue("database.typeName", this) == null
                     || changeSet.getDbmsSet().isEmpty()
-                    || changeSet.getDbmsSet().contains(changeLogParameters.getValue("database.typeName").toString()))) {
+                    || changeSet.getDbmsSet().contains(changeLogParameters.getValue("database.typeName", this).toString()))) {
                 return changeSet;
             }
         }
@@ -219,7 +229,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         try {
             Object value = parsedNode.getValue();
             if (value != null && value instanceof String) {
-                parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class)));
+                parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class), this));
             }
 
             List<ParsedNode> children = parsedNode.getChildren();
@@ -240,6 +250,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.addChangeSet(createChangeSet(node, resourceAccessor));
         } else if (nodeName.equals("include")) {
             String path = node.getChildValue(null, "file", String.class);
+            if (path == null) {
+                throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
+            }
             path = path.replace('\\', '/');
             try {
                 include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor);
@@ -258,7 +271,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter, getStandardChangeLogComparator(), resourceAccessor);
+            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
+                    node.getChildValue(null, "errorIfMissingOrEmpty", true),
+                    getStandardChangeLogComparator(), resourceAccessor);
         } else if (nodeName.equals("preConditions")) {
             this.preconditionContainer = new PreconditionContainer();
             try {
@@ -271,19 +286,31 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 String context = node.getChildValue(null, "context", String.class);
                 String dbms = node.getChildValue(null, "dbms", String.class);
                 String labels = node.getChildValue(null, "labels", String.class);
+                Boolean global = node.getChildValue(null, "global", Boolean.class);
+                if (global == null) {
+                	// okay behave like liquibase < 3.4 and set global == true
+                	global = true;
+                }
 
-                if (node.getChildValue(null, "file", String.class) == null) {
-                    this.changeLogParameters.set(node.getChildValue(null, "name", String.class), node.getChildValue(null, "value", String.class), context, labels, dbms);
+                String file = node.getChildValue(null, "file", String.class);
+                
+                if (file == null) {
+                	// direct referenced property, no file
+                	String name = node.getChildValue(null, "name", String.class);
+                	String value = node.getChildValue(null, "value", String.class);
+                	
+                    this.changeLogParameters.set(name, value, context, labels, dbms, global, this);
                 } else {
+                	// read properties from the file
                     Properties props = new Properties();
-                    InputStream propertiesStream = StreamUtil.singleInputStream(node.getChildValue(null, "file", String.class), resourceAccessor);
+                    InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
                     if (propertiesStream == null) {
-                        LogFactory.getInstance().getLog().info("Could not open properties file " + node.getChildValue(null, "file", String.class));
+                        LogFactory.getInstance().getLog().info("Could not open properties file " + file);
                     } else {
                         props.load(propertiesStream);
 
                         for (Map.Entry entry : props.entrySet()) {
-                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms);
+                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms, global, this);
                         }
                     }
                 }
@@ -294,7 +321,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter, Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
+    public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,
+                           boolean errorIfMissingOrEmpty,
+                           Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
         try {
             pathName = pathName.replace('\\', '/');
 
@@ -310,7 +339,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 relativeTo = this.getPhysicalFilePath();
             }
 
-            Set<String> unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
+            Set<String> unsortedResources = null;
+            try {
+                unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
+            } catch (FileNotFoundException e) {
+                if (errorIfMissingOrEmpty){
+                    throw e;
+                }
+            }
             SortedSet<String> resources = new TreeSet<String>(resourceComparator);
             if (unsortedResources != null) {
                 for (String resourcePath : unsortedResources) {
@@ -320,7 +356,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            if (resources.size() == 0) {
+            if (resources.size() == 0 && errorIfMissingOrEmpty) {
                 throw new SetupException("Could not find directory or directory was empty for includeAll '" + pathName + "'");
             }
 
