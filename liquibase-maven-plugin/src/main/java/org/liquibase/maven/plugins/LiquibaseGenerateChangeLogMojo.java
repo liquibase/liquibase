@@ -7,7 +7,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtils;
 
@@ -65,7 +67,23 @@ public class LiquibaseGenerateChangeLogMojo extends
      */
     protected String outputChangeLogFile;
 
-	@Override
+
+    /**
+     * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
+     *
+     * @parameter expression="${liquibase.diffExcludeObjects}"
+     */
+    protected String diffExcludeObjects;
+
+    /**
+     * Objects to be included in the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
+     *
+     * @parameter expression="${liquibase.diffIncludeObjects}"
+     */
+    protected String diffIncludeObjects;
+
+
+    @Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
 
@@ -82,8 +100,19 @@ public class LiquibaseGenerateChangeLogMojo extends
 
         getLog().info("Generating Change Log from database " + database.toString());
         try {
+            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true);
+            if (diffExcludeObjects != null && diffIncludeObjects != null) {
+                throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
+            }
+            if (diffExcludeObjects != null) {
+                diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects));
+            }
+            if (diffIncludeObjects != null) {
+                diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
+            }
+
             CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes),
-                    StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true));
+                    StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), diffOutputControl);
             getLog().info("Output written to Change Log file, " + outputChangeLogFile);
         }
         catch (IOException e) {

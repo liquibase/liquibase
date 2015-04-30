@@ -6,12 +6,21 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 
 
-@DataTypeInfo(name="currency", aliases = "money", minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="currency", aliases = {"money", "smallmoney"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CurrencyType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-//        if (database instanceof InformixDatabase || database instanceof MSSQLDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+//        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+//        if (database instanceof MSSQLDatabase) {
+//            if (originalDefinition.equalsIgnoreCase("smallmoney")
+//                    || originalDefinition.equals("[smallmoney]")) {
+//
+//                return new DatabaseDataType(database.escapeDataTypeName("smallmoney"));
+//            }
+//            return new DatabaseDataType(database.escapeDataTypeName("money"));
+//        }
+//        if (database instanceof InformixDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
 //            return new DatabaseDataType("MONEY");
 //        }
 //        if (database instanceof OracleDatabase) {

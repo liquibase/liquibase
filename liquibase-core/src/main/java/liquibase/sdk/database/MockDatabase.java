@@ -778,4 +778,19 @@ public class MockDatabase implements Database, InternalDatabase {
     public boolean looksLikeFunctionCall(String value) {
         return false;
     }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        return dataTypeString;
+    }
 }

@@ -196,9 +196,16 @@
             </dependency>
 
             <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.3.10</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.spockframework</groupId>
                 <artifactId>spock-core</artifactId>
-                <version>0.7-groovy-2.0</version>
+                <version>1.0-groovy-2.3</version>
                 <scope>test</scope>
             </dependency>
 
@@ -273,14 +280,14 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.4</version>
+                    <version>1.9.1</version>
                 </plugin>
 
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.2.2</version>
+                    <version>2.5.2</version>
                     <configuration>
                         <stagingRepository>/tmp/maven-snapshot</stagingRepository>
                         <mavenExecutorId>forked-path</mavenExecutorId>
@@ -346,7 +353,7 @@
                         <dependency>
                             <groupId>org.codehaus.groovy</groupId>
                             <artifactId>groovy-all</artifactId>
-                            <version>2.1.5</version>
+                            <version>2.3.10</version>
                         </dependency>
                     </dependencies>
                 </plugin>

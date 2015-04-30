@@ -50,6 +50,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
                 status.setPreviouslyRan(true);
                 status.setDateLastExecuted(ranChangeSet.getDateExecuted());
                 status.setStoredCheckSum(ranChangeSet.getLastCheckSum());
+                status.setRanChangeSet(ranChangeSet);
 
                 ranChangeSetToRemove = ranChangeSet;
 
@@ -89,6 +90,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
             status.setDescription(changeSet.getDescription());
             status.setWillRun(false);
             status.setFilterResults(new HashSet<ChangeSetFilterResult>(Arrays.asList(new ChangeSetFilterResult(false, "Change set is not in change log", NotInChangeLogChangeSetFilter.class))));
+            status.setRanChangeSet(changeSet);
 
             returnList.add(status);
         }

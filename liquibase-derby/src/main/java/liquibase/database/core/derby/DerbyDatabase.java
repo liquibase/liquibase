@@ -139,7 +139,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (driverName.toLowerCase().contains("embedded")) {
+        if (driverName != null && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
                     url = url.substring(0, url.indexOf(";")) + ";shutdown=true";

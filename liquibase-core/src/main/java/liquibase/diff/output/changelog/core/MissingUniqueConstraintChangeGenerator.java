@@ -3,14 +3,17 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MissingUniqueConstraintChangeGenerator implements MissingObjectChangeGenerator {
     @Override
@@ -36,6 +39,8 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+        List<Change> returnList = new ArrayList<Change>();
+
         UniqueConstraint uc = (UniqueConstraint) missingObject;
 
         if (uc.getTable() == null) {
@@ -59,6 +64,28 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         change.setInitiallyDeferred(uc.isInitiallyDeferred());
         change.setDisabled(uc.isDisabled());
 
+        if (comparisonDatabase instanceof OracleDatabase) {
+            Index backingIndex = uc.getBackingIndex();
+            if (backingIndex != null && backingIndex.getName() != null) {
+                Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+                if (changes != null) {
+                    returnList.addAll(Arrays.asList(changes));
+
+                    change.setForIndexName(backingIndex.getName());
+                    Schema schema = backingIndex.getSchema();
+                    if (schema != null) {
+                        if (control.getIncludeCatalog()) {
+                            change.setForIndexCatalogName(schema.getCatalogName());
+                        }
+                        if (control.getIncludeSchema()) {
+                            change.setForIndexSchemaName(schema.getName());
+                        }
+                    }
+                }
+            }
+        }
+
+
         Index backingIndex = uc.getBackingIndex();
 //        if (backingIndex == null) {
 //            Index exampleIndex = new Index().setTable(uc.getTable());
@@ -70,8 +97,9 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
             control.setAlreadyHandledMissing(backingIndex);
 //        }
 
+        returnList.add(change);
 
-        return new Change[]{change};
+        return returnList.toArray(new Change[returnList.size()]);
 
 
     }

@@ -21,6 +21,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String columnNames;
     private String constraintName;
     private Boolean clustered;
+    private String forIndexName;
+    private String forIndexSchemaName;
+    private String forIndexCatalogName;
 
     @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
     public String getTableName() {
@@ -67,6 +70,29 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    public String getForIndexName() {
+        return forIndexName;
+    }
+
+    public void setForIndexName(String forIndexName) {
+        this.forIndexName = forIndexName;
+    }
+
+    public String getForIndexSchemaName() {
+        return forIndexSchemaName;
+    }
+
+    public void setForIndexSchemaName(String forIndexSchemaName) {
+        this.forIndexSchemaName = forIndexSchemaName;
+    }
+
+    public String getForIndexCatalogName() {
+        return forIndexCatalogName;
+    }
+
+    public void setForIndexCatalogName(String forIndexCatalogName) {
+        this.forIndexCatalogName = forIndexCatalogName;
+    }
 
     public String getTablespace() {
         return tablespace;
@@ -91,6 +117,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
         statement.setClustered(getClustered());
+        statement.setForIndexName(getForIndexName());
+        statement.setForIndexSchemaName(getForIndexSchemaName());
+        statement.setForIndexCatalogName(getForIndexCatalogName());
 
 //todo        } else if (database instanceof SQLiteDatabase) {
 //            // return special statements for SQLite databases

@@ -18,7 +18,15 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
+import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
@@ -49,15 +57,31 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
 
         Action runAction;
         try {
-            if (execType.equals(ChangeSet.ExecType.FAILED) || execType.equals(ChangeSet.ExecType.SKIPPED)) {
-                return new NoOpResult(); //don't mark
-            } else  if (execType.ranBefore) {
-                runAction = (UpdateDataAction) new UpdateDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+            if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
+                return new Sql[0]; //don't mark
+            }
+
+            String tag = null;
+            for (Change change : changeSet.getChanges()) {
+                if (change instanceof TagDatabaseChange) {
+                    TagDatabaseChange tagChange = (TagDatabaseChange) change;
+                    tag = tagChange.getTag();
+                }
+            }
+
+            if (statement.getExecType().ranBefore) {
+                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
-                        .addNewColumnValue("EXECTYPE", execType.value)
-                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
-                        .set(UpdateDataAction.Attr.whereClause, "ID=? AND AUTHOR=? AND FILENAME=?");
+                        .addNewColumnValue("EXECTYPE", statement.getExecType().value)
+                        .setWhereClause(database.escapeObjectName("ID", Column.class) + " = ? " +
+                                "AND " + database.escapeObjectName("AUTHOR", Column.class) + " = ? " +
+                                "AND " + database.escapeObjectName("FILENAME", Column.class) + " = ?")
+                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+
+                if (tag != null) {
+                    ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
+                }
             } else {
                 runAction = new InsertDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addColumnValue("ID", changeSet.getId())
@@ -68,18 +92,11 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
-                        .addColumnValue("EXECTYPE", execType.value)
+                        .addColumnValue("EXECTYPE", statement.getExecType().value)
+                        .addColumnValue("CONTEXTS", changeSet.getContexts() == null || changeSet.getContexts().isEmpty()? null : changeSet.getContexts().toString())
+                        .addColumnValue("LABELS", changeSet.getLabels() == null || changeSet.getLabels().isEmpty() ? null : changeSet.getLabels().toString())
                         .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"));
 
-                String tag = null;
-                List<Change> changes = changeSet.getChanges();
-                if (changes != null && changes.size() == 1) {
-                    Change change = changes.get(0);
-                    if (change instanceof TagDatabaseChange) {
-                        TagDatabaseChange tagChange = (TagDatabaseChange) change;
-                        tag = tagChange.getTag();
-                    }
-                }
                 if (tag != null) {
                     ((InsertDataAction) runAction).addColumnValue("TAG", tag);
                 }

@@ -9,6 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
@@ -245,7 +246,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
-        return "public";
+        try {
+            String currentSchema = ExecutorService.getInstance().getExecutor(this)
+                    .queryForObject(new RawCallStatement("select current_schema"), String.class);
+            return currentSchema;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get current schema", e);
+        }
     }
 
     private boolean catalogExists(String catalogName) throws DatabaseException {

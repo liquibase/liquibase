@@ -5,27 +5,37 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
+import liquibase.database.Database;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 @DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time", "timetz"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimeType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+//        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 //        if (database instanceof InformixDatabase) {
 //            return new DatabaseDataType("INTERVAL HOUR TO FRACTION", 5);
 //        }
 //        if (database instanceof MSSQLDatabase) {
+//            Object[] parameters = getParameters();
 //            try {
 //                if (database.getDatabaseMajorVersion() <= 9) {
-//                    return new DatabaseDataType("DATETIME");
+//                    return new DatabaseDataType(database.escapeDataTypeName("datetime"));
 //                }
 //            } catch (DatabaseException e) {
 //                //assume greater than sql 2008 and TIME will work
 //            }
+//            if (parameters.length == 0) {
+//                parameters = new Object[] { 7 };
+//            } else if (parameters.length > 1) {
+//                parameters = Arrays.copyOfRange(parameters, 0, 1);
+//            }
+//            return new DatabaseDataType(database.escapeDataTypeName("time"), parameters);
 //        }
 //
 //        if (database instanceof MySQLDatabase) {
@@ -48,7 +58,7 @@ public class TimeType  extends LiquibaseDataType {
 //        }
 //
 //        if (database instanceof PostgresDatabase) {
-//            String rawDefinition = getRawDefinition().toLowerCase();
+//            String rawDefinition = originalDefinition.toLowerCase();
 //            if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
 //                return new DatabaseDataType("TIME WITH TIME ZONE");
 //            } else {

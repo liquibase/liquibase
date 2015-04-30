@@ -21,8 +21,9 @@ class NVarcharTypeTest extends Specification {
 //        [13]         | new HsqlDatabase()     | "VARCHAR(13)"
 //        [13]         | new PostgresDatabase() | "VARCHAR(13)"
 //        [13]         | new OracleDatabase()   | "NVARCHAR2(13)"
-//        [13]         | new MSSQLDatabase()    | "NVARCHAR(13)"
-//        [2147483647] | new MSSQLDatabase()    | "NVARCHAR(MAX)"
+//        []           | new MSSQLDatabase()    | "[nvarchar](1)"
+//        [13]         | new MSSQLDatabase()    | "[nvarchar](13)"
+//        [2147483647] | new MSSQLDatabase()    | "[nvarchar](MAX)"
 //        [13]         | new MySQLDatabase()    | "NVARCHAR(13)"
 //    }
 

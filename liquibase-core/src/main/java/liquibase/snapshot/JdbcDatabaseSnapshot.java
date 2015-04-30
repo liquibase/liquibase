@@ -549,7 +549,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 //                            sql += " and TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
 //                        }
 //                    } else if (database instanceof OracleDatabase) {
-//                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_indexes ui "
+//                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG from all_constraints uc, all_indexes ui "
 //                                + "where uc.constraint_type='U' and uc.index_name = ui.index_name "
 //                                + "and uc.owner = '" + jdbcSchemaName + "' "
 //                                + "and ui.table_owner = '" + jdbcSchemaName + "' ";

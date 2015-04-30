@@ -28,7 +28,8 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
         return new Class[] {
                 Table.class,
                 Index.class,
-                UniqueConstraint.class
+                UniqueConstraint.class,
+                PrimaryKey.class,
         };
     }
 

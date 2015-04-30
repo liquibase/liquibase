@@ -341,6 +341,12 @@ public interface Database extends PrioritizedService {
 
     public void addReservedWords(Collection<String> words);
 
+    String escapeDataTypeName(String dataTypeName);
+
+    String unescapeDataTypeName(String dataTypeName);
+
+    String unescapeDataTypeString(String dataTypeString);
+
     boolean requiresDefiningColumnsAsNull();
 
     public boolean supportsClustered(Class<? extends DatabaseObject> objectType);
