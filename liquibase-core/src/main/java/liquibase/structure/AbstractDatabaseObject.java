@@ -115,26 +115,23 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
             return snapshotId;
         }
         if (!getAttributeNames().contains(field)) {
-            throw new UnexpectedLiquibaseException("Unknown field "+field);
-        if (!attributes.containsKey(field)) {
             throw new UnexpectedLiquibaseException("Unknown field " + field);
         }
-        Object value = get(field, Object.class);
+            Object value = get(field, Object.class);
             if (value instanceof Schema) {
-                Schema clone = new Schema(((Schema) value).getCatalogName(), ((Schema) value).getName());
+                Schema clone = new Schema(((Schema) value).getName());
                 clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
                 return clone;
             } else if (value instanceof DatabaseObject) {
-            try {
-                DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
-                clone.setName(((DatabaseObject) value).getName());
-                clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
-                return clone;
+                try {
+                    DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
+                    clone.setName(((DatabaseObject) value).getName());
+                    clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
+                    return clone;
+                } catch (Exception e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
             }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
         return value;
     }
 
@@ -158,10 +155,10 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
             Class propertyType = ObjectUtil.getPropertyType(this, name);
             if (propertyType != null && Collection.class.isAssignableFrom(propertyType) && !(child.getValue() instanceof Collection)) {
-                if (this.attributes.get(name) == null) {
-                    this.setAttribute(name, new ArrayList<Column>());
+                if (!this.getAttributeNames().contains(name)) {
+                    this.set(name, new ArrayList<Column>());
                 }
-                this.getAttribute(name, List.class).add(child.getValue());
+                this.get(name, List.class).add(child.getValue());
             } else {
                 Object childValue = child.getValue();
                 if (childValue != null && childValue instanceof String) {
@@ -184,7 +181,7 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
                     }
                 }
 
-                this.attributes.put(name, childValue);
+                this.set(name, childValue);
             }
         }
     }

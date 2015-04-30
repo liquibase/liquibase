@@ -81,9 +81,9 @@ public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenera
             change.setCatalogName(sequence.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(sequence.getSchema().getName());
+            change.setSchemaName(sequence.getSchema().getSimpleName());
         }
-        change.setSequenceName(sequence.getName());
+        change.setSequenceName(sequence.getSimpleName());
         return change;
     }
 }

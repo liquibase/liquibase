@@ -259,9 +259,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (name.startsWith("DR$")) { //oracle index tables
                 return true;
-            } else if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
+            } else if (example.getSimpleName().startsWith("SYS_IOT_OVER")) { //oracle system table
                 return true;
-            } else if ((example.getName().startsWith("MDRT_") || example.getName().startsWith("MDRS_")) && example.getName().endsWith("$")) {
+            } else if ((example.getSimpleName().startsWith("MDRT_") || example.getSimpleName().startsWith("MDRS_")) && example.getSimpleName().endsWith("$")) {
                 // CORE-1768 - Oracle creates these for spatial indices and will remove them when the index is removed.
                 return true;
             } else if (name.startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.

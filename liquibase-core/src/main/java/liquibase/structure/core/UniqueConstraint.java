@@ -64,7 +64,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     public UniqueConstraint setColumns(List<Column> columns) {
         set("columns", columns);
-		if (getAttribute("table", Object.class) instanceof Table) {
+		if (get("table", Object.class) instanceof Table) {
 			for (Column column : getColumns()) {
 				column.setRelation(getTable());
 			}
@@ -202,7 +202,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 	@Override
 	public String toString() {
         if (getTable() == null) {
-            return getName();
+            return getSimpleName();
         } else {
             return getName() + " on " + getTable().getName() + "("
                     + getColumnNames() + ")";

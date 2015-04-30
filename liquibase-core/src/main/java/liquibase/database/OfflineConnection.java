@@ -92,7 +92,7 @@ public class OfflineConnection implements DatabaseConnection {
 
                     for (Catalog catalog : this.snapshot.get(Catalog.class)) {
                         if (catalog.isDefault()) {
-                            this.catalog = catalog.getName();
+                            this.catalog = catalog.getSimpleName();
                         }
                     }
                 } catch (LiquibaseException e) {

@@ -126,18 +126,13 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             String catalogName = null;
             String schemaName = null;
             if (control.getIncludeCatalog()) {
-                change.setCatalogName(column.getRelation().getSchema().getCatalog().getSimpleName());
+                catalogName = column.getRelation().getSchema().getCatalog().getSimpleName();
             }
             if (control.getIncludeSchema()) {
-                change.setSchemaName(column.getRelation().getSchema().getSimpleName());
+                schemaName = column.getRelation().getSchema().getSimpleName();
             }
-            change.setTableName(column.getRelation().getSimpleName());
-            change.setColumnName(column.getSimpleName());
-            DataType referenceType = (DataType) typeDifference.getReferenceValue();
-            change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
 
-
-            String tableName = column.getRelation().getName();
+            String tableName = column.getRelation().getSimpleName();
 
 //            if (comparisonDatabase instanceof OracleDatabase && (((DataType) typeDifference.getReferenceValue()).getTypeName().equalsIgnoreCase("clob") || ((DataType) typeDifference.getComparedValue()).getTypeName().equalsIgnoreCase("clob"))) {
 //                String tempColName = "TEMP_CLOB_CONVERT";
@@ -178,7 +173,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 change.setCatalogName(catalogName);
                 change.setSchemaName(schemaName);
                 change.setTableName(tableName);
-                change.setColumnName(column.getName());
+                change.setColumnName(column.getSimpleName());
                 DataType referenceType = (DataType) typeDifference.getReferenceValue();
                 change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
 

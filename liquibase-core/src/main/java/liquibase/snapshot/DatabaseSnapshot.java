@@ -396,13 +396,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             loadObjects(objects, allObjects, parsedNode.getChild(null, "objects"), resourceAccessor);
 
             for (DatabaseObject object : allObjects.values()) {
-                for (String attr : new ArrayList<String>(object.getAttributes())) {
-                    Object value = object.getAttribute(attr, Object.class);
+                for (String attr : new ArrayList<String>(object.getAttributeNames())) {
+                    Object value = object.get(attr, Object.class);
                     if (value instanceof String && allObjects.containsKey(value)) {
                         if (ObjectUtil.hasProperty(object, attr)) {
                             ObjectUtil.setProperty(object, attr, allObjects.get(value));
                         } else {
-                            object.setAttribute(attr, allObjects.get(value));
+                            object.set(attr, allObjects.get(value));
                         }
                     } else if (value instanceof Collection && ((Collection) value).size() > 0 && allObjects.containsKey(((Collection) value).iterator().next())) {
                         List newList = new ArrayList();
@@ -412,11 +412,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                         if (ObjectUtil.hasProperty(object, attr)) {
                             ObjectUtil.setProperty(object, attr, newList);
                         } else {
-                            object.setAttribute(attr, newList);
+                            object.set(attr, newList);
                         }
                     } else {
                         if (value != null && ObjectUtil.hasProperty(object, attr)) {
-                            object.setAttribute(attr, null);
+                            object.set(attr, null);
                             ObjectUtil.setProperty(object, attr, value);
                         }
                     }

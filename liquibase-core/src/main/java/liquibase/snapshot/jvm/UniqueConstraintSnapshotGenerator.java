@@ -78,7 +78,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             for (CachedRow constraint : metadata) {
                 UniqueConstraint uq = new UniqueConstraint(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
                 if (constraint.containsColumn("INDEX_NAME")) {
-                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getName()));
+                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
                 }
                 if (seenConstraints.add(uq.getSimpleName())) {
                     table.getUniqueConstraints().add(uq);

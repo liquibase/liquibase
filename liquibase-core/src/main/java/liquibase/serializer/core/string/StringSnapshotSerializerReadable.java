@@ -96,7 +96,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             StringBuilder typeBuffer = new StringBuilder();
             for (DatabaseObject databaseObject : databaseObjects) {
                 typeBuffer.append(databaseObject.getName()).append("\n");
-                typeBuffer.append(StringUtils.indent(serialize(databaseObject, new HashSet<String>(), databaseObject.getSimpleName()), 4)).append("\n");
+                typeBuffer.append(StringUtils.indent(serialize(databaseObject, null), 4)).append("\n");
             }
 
             catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), INDENT_LENGTH)).append("\n");
@@ -106,8 +106,6 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
     private String serialize(final DatabaseObject databaseObject, final DatabaseObject parentObject) {
 
         StringBuilder buffer = new StringBuilder();
-
-        final boolean expandContainedObjects = parentNames.size() <= getExpandDepth();
 
         final List<String> attributes = sort(databaseObject.getAttributeNames());
         for (String attribute : attributes) {

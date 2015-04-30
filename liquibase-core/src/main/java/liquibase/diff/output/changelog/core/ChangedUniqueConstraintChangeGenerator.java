@@ -48,12 +48,12 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
-        dropUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getName());
-        dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
+        dropUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
+        dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getSimpleName());
 
         AddUniqueConstraintChange addUniqueConstraintChange = createAddUniqueConstraintChange();
-        addUniqueConstraintChange.setConstraintName(uniqueConstraint.getName());
-        addUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getName());
+        addUniqueConstraintChange.setConstraintName(uniqueConstraint.getSimpleName());
+        addUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
         addUniqueConstraintChange.setColumnNames(uniqueConstraint.getColumnNames());
 
         returnList.add(dropUniqueConstraintChange);
@@ -63,8 +63,8 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
             addUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            dropUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
-            addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getName());
+            dropUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getSimpleName());
+            addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getSimpleName());
         }
 
         Index backingIndex = uniqueConstraint.getBackingIndex();
