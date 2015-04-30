@@ -1,7 +1,7 @@
 #! /bin/sh
 
 if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
-  echo "Liquibase Home is not set."
+  # echo "Liquibase Home is not set."
 
   ## resolve links - $0 may be a symlink
   PRG="$0"
@@ -36,12 +36,17 @@ if [ -f /usr/bin/cygpath ]; then
     CP="$CP;$i"
   done
 else
+  if [[ $(uname) = MINGW* ]]; then
+    CP_SEPARATOR=";"
+  else
+    CP_SEPARATOR=":"
+  fi
   CP=.
   for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
-    CP="$CP":"$i"
+    CP="$CP""$CP_SEPARATOR""$i"
   done
   for i in "$LIQUIBASE_HOME"/lib/*.jar; do
-    CP="$CP":"$i"
+    CP="$CP""$CP_SEPARATOR""$i"
   done
 fi
 

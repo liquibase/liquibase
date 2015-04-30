@@ -1,6 +1,63 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.3.3 (2015.04.28)
+
+[CORE-1768] - Oracle dropAll fails on spatial tables and sequences
+[CORE-1840] - Liquibase fails when run on a computer that can't connect to the internet
+[CORE-1857] - Wrong column size detection on varchar2 fields with char as datatype
+[CORE-1866] - Filtering changelog list by includeAll tag is not working
+[CORE-1943] - Handle Error: InetAddress.getLocalHost().getHostName() UnknownHostException results in NoClassDefFoundError
+[CORE-1958] - Column type of "TIMESTAMP(6)" under MySql converted to TIMESTAMP dropping fractional seconds
+[CORE-1967] - includeAll uses full file path for sql changelogs
+[CORE-2023] - Problem using includeAll with SpringLiquibase
+[CORE-2126] - Postgres 9.3 - Drop table With Cascade - Not Supported
+[CORE-2156] - Resource loader can't load changelog file
+[CORE-2186] - AbstractResourceAccessor#convertToPath(String, String) fails for processing includeAll from Classpath
+[CORE-2192] - NoSuchMethodException when generating offline Oracle migration script
+[CORE-2199] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
+[CORE-2202] - liquibase.should.run inverted boolean
+[CORE-2204] - valueNumeric not being set when using prepared statements
+[CORE-2206] - diffChangeLog with JPA-annotated entities causes ConcurrentModificationException
+[CORE-2208] - Typo in message
+[CORE-2210] - java.lang.NullPointerException when file is empty
+[CORE-2214] - When inserting string value starting and ending with apostrophes (quotes) the value is not quoted in the generated SQL
+[CORE-2218] - Regression on modifyDataType : VARCHAR2 was supported on 3.2...and fails on 3.3
+[CORE-2239] - Remarks attribute in renameColumn causes parse error
+[CORE-2240] - setDropFirst(true) still broken on empty database
+[CORE-2262] - 3.3.2 ant task dies on NPE in ChangeLogParameters
+[CORE-2263] - Index Snapshot - doesn't include upper cased name indexes when db is NOT case sensitive
+[CORE-2274] - Ant Upade Task does not consider changeLogFile correctly if it is contained in a JAR
+[CORE-2279] - Rollback fails in MS SQL 2008 using liquibase 3.3.2
+[CORE-2284] - Creating a DatabaseChangeLog() results in NPE
+[CORE-2290] - Liquibase gives different results from Ant and the command line
+[CORE-2301] - Regression from 3.2.3 in mssql 2000 unsupported usage of varchar(max) and sys.extenden_properties
+[CORE-2304] - Autoincrement on type INT4 fails
+[CORE-2310] - IncludeAll Fails with Unknown Reason Error
+[CORE-2315] - NPE in CommandlineResourceAccessor
+[CORE-2325] - Liquibase - New versions break DB create
+[CORE-2329] - Escaped reserved keywords in HSQL are stored in lower case instead of upper case.
+[CORE-2330] - includeAll uses full file path with includeAll
+[CORE-2261] - UpdateSQL needs to append a "/" to the end of createProcedure for Oracle
+[CORE-2287] - Improve support for Groovy-based tests in Eclipse
+[CORE-2296] - Upgrade Groovy and Spock to maintained versions
+[CORE-2318] - Add support for converting BigDecimal objects to a SQL string via DataTypeFactory
+
+Changes in version 3.3.2 (2015.01.08)
+- Support for ignoring objects in diffChangeLog and generateChangeLog
+- Bugfixes
+
+- [CORE-875] - Ignore tables for diffs and generateChangelog
+- [CORE-1877] - SQLOutput prints endDelimiter regexes
+- [CORE-2114] - AddAutoIncrement on Postgres does not work when changes are applied on a specific schema
+- [CORE-2141] - handling dependencies and WAR as classpath
+- [CORE-2166] - SpringLiquibase: includeAll within jar causes SetupException
+- [CORE-2172] - dropPrimaryKey without constraint name on sql server doesn't honour schema information
+- [CORE-2174] - Bad exception handling in OracleDatabase.setConnection
+- [CORE-2180] - NPE with bad name
+- [CORE-2182] - ClassLoader leak due to shutdown hooks
+
+
 Changes in version 3.3.1 (2014.12.08)
 - IncludeAll bugfixes
 - Performance improvements

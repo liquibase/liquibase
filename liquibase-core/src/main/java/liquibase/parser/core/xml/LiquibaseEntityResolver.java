@@ -57,9 +57,6 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
            }
             resolved=tryResolveLiquibaseSchema(systemId, publicId);
        }
-       if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
-            resolved=tryResolveFromResourceAccessor(systemId);
-       }
 
        if (resolved == null) {
            log.debug("Unable to resolve XML entity locally. Will load from network.");

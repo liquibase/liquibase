@@ -235,12 +235,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Properties expressionVars;
 
     /**
-     * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
+     * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
      * @parameter expression="${liquibase.should.run}"
      */
-    protected boolean skip;
+    protected boolean liquibaseShouldRun;
 
     /**
      * Array to put a expression variable to maven plugin.
@@ -261,6 +261,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.changelogCatalogName}"
      */
     protected String changelogCatalogName;
+
     /**
      * Schema against which Liquibase changelog tables will be created.
      *
@@ -274,6 +275,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter
      */
     private File driverPropertiesFile;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogTableName}"
+     */
+    protected String databaseChangeLogTableName;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogLockTableName}"
+     */
+    protected String databaseChangeLogLockTableName;
 
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -306,13 +321,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
 
-        if (skip) {
+        if (!liquibaseShouldRun) {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        configureFieldsAndValues(getFileOpener(artifactClassLoader));
+        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
+        configureFieldsAndValues(fileOpener);
 
         LogFactory.getInstance().setDefaultLoggingLevel(logging);
 
@@ -339,8 +355,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     driverPropsFile,
                     propertyProviderClass,
                     changelogCatalogName,
-                    changelogSchemaName);
-            liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
+                    changelogSchemaName,
+                    databaseChangeLogTableName,
+                    databaseChangeLogLockTableName);
+            liquibase = createLiquibase(fileOpener, database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 

@@ -45,7 +45,10 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   /** The type of the rollback that is being performed. */
   protected RollbackType type;
 
-  @Override
+    /** External script containing rollback logic. Set to override the rollback logic contained in the changelog*/
+    protected String rollbackScript;
+
+    @Override
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     super.checkRequiredParametersAreSpecified();
 
@@ -97,13 +100,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     switch (type) {
       case COUNT: {
-        liquibase.rollback(rollbackCount, new Contexts(contexts), new LabelExpression(labels));
+        liquibase.rollback(rollbackCount, rollbackScript, new Contexts(contexts), new LabelExpression(labels));
         break;
       }
       case DATE: {
         DateFormat format = DateFormat.getDateInstance();
         try {
-          liquibase.rollback(format.parse(rollbackDate), new Contexts(contexts), new LabelExpression(labels));
+          liquibase.rollback(format.parse(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
         }
         catch (ParseException e) {
           String message = "Error parsing rollbackDate: " + e.getMessage();
@@ -115,7 +118,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         break;
       }
       case TAG: {
-        liquibase.rollback(rollbackTag, new Contexts(contexts), new LabelExpression(labels));
+        liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels));
         break;
       }
       default: {

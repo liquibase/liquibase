@@ -46,7 +46,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 		if (changesToApply > 0) {
 			liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 		} else {
-			liquibase.update(new Contexts(contexts), new LabelExpression(labels), outputWriter);
+			liquibase.update(toTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 		}
 	}
 

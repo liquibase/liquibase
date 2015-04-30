@@ -120,7 +120,7 @@ public class LiquibaseTest {
         assertSame(resourceAccessor, liquibase.getResourceAccessor());
 
         assertNotNull(liquibase.getChangeLogParameters());
-        assertEquals("Standard database changelog parameters were not set", "DATABASECHANGELOGLOCK", liquibase.getChangeLogParameters().getValue("database.databaseChangeLogLockTableName"));
+        assertEquals("Standard database changelog parameters were not set", "DATABASECHANGELOGLOCK", liquibase.getChangeLogParameters().getValue("database.databaseChangeLogLockTableName", null));
 
         assertSame(database, liquibase.getDatabase());
     }

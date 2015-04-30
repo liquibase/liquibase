@@ -1,14 +1,13 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.MarkChangeSetRanGenerator;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.TagDatabaseStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
 
 @DatabaseChange(name="tagDatabase", description = "Applies a tag to the database for future rollback", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.6")
 public class TagDatabaseChange extends AbstractChange {
@@ -24,11 +23,13 @@ public class TagDatabaseChange extends AbstractChange {
         this.tag = tag;
     }
 
+    /**
+     * {@inheritDoc}
+     * @see MarkChangeSetRanGenerator#generateSql(MarkChangeSetRanStatement, Database, SqlGeneratorChain)
+     */
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
-                new TagDatabaseStatement(tag)
-        };
+        return new SqlStatement[0];
     }
 
     @Override

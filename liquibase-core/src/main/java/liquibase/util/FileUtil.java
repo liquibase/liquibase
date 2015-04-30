@@ -1,42 +1,25 @@
 package liquibase.util;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipInputStream;
 
 public class FileUtil {
+
     /**
      * Schedule a file to be deleted when JVM exits.
      * If file is directory delete it and all sub-directories.
      */
-    public static void forceDeleteOnExit( final File file ) {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    FileUtil.deleteDirectory(file);
-                } catch (IOException e) {
-                    e.printStackTrace();
+    public static void deleteOnExit(final File file) {
+        file.deleteOnExit();
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File child  : files) {
+                    deleteOnExit(child);
                 }
             }
-        });
-    }
-
-    /**
-     * Recursively schedule directory for deletion on JVM exit.
-     */
-    private static void deleteDirectory( final File directory ) throws IOException {
-        if ( !directory.exists() ) {
-            return;
-        }
-
-        cleanDirectory(directory);
-        if (!directory.delete()) {
-            throw new IOException("Cannot delete "+directory.getAbsolutePath());
         }
     }
 
@@ -106,7 +89,7 @@ public class FileUtil {
                 }
             }
 
-            FileUtil.forceDeleteOnExit(tempDir);
+            FileUtil.deleteOnExit(tempDir);
         } finally {
             jarFile.close();
         }

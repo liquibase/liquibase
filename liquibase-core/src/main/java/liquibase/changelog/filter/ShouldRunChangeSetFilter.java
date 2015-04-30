@@ -53,7 +53,13 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     }
 
     private boolean pathsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        return getPath(ranChangeSet).equalsIgnoreCase(getPath(changeSet));
+        String ranChangeSetPath = getPath(ranChangeSet);
+        String changeSetPath = getPath(changeSet);
+        if (ranChangeSetPath == null) {
+            return changeSetPath == null;
+        } else {
+            return ranChangeSetPath.equalsIgnoreCase(changeSetPath);
+        }
     }
 
     protected boolean checksumChanged(ChangeSet changeSet, RanChangeSet ranChangeSet) {
@@ -70,6 +76,9 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     }
 
     protected String normalizePath(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
         if (ignoreClasspathPrefix) {
             return filePath.replaceFirst("^classpath:", "");
         }
