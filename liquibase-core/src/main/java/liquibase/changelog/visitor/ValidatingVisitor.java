@@ -73,9 +73,33 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    @Override
+    private RanChangeSet findChangeSet(ChangeSet changeSet) {
+        RanChangeSet result = ranIndex.get(changeSet.toString(false));
+        if (result == null) {
+            for (RanChangeSet ranChangeSet : ranIndex.values()) {
+                if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())) {
+                    if (ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())) {
+                        String changeSetPath = normalizePath(changeSet.getFilePath());
+                        String ranChangeSetPath = normalizePath(ranChangeSet.getChangeLog());
+                        if (ranChangeSetPath.equalsIgnoreCase(changeSetPath)
+                            || ranChangeSetPath.endsWith(changeSetPath) || changeSetPath.endsWith(ranChangeSetPath)) {
+                            result = ranChangeSet;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+        
+    private String normalizePath(String filePath) {
+        return filePath.replaceFirst("^classpath:", "");
+    }
+        
+
+        @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        RanChangeSet ranChangeSet = ranIndex.get(changeSet.toString(false));
+        RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
         for (Change change : changeSet.getChanges()) {
