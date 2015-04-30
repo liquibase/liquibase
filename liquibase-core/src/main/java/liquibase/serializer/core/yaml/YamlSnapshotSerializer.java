@@ -1,5 +1,7 @@
 package liquibase.serializer.core.yaml;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -26,7 +28,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "utf-8"));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
         writer.write(serialize(snapshot, true));
     }
 

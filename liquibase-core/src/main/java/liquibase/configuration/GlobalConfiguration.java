@@ -55,7 +55,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
         getContainer().addProperty(OUTPUT_ENCODING, String.class)
                 .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
-                .setDefaultValue(System.getProperty("file.encoding") == null ? "UTF-8" : System.getProperty("file.encoding"))
+                .setDefaultValue("UTF-8")
                 .addAlias("file.encoding");
     }
 

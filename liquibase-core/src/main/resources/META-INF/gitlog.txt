@@ -1,3 +1,11 @@
+1438fa2 DVONE-2578 Added system property to turn off bulk select.  This helps DaticalDB performance when calling ChangeLogHistoryService.init(), as in the status logic
+6be0580 CORE-2228 New usingIndexName attribute on addPrimaryKey and addUniqueConstraint
+613b3da CORE-2254 Ability to save snapshot for later comparison
+c7590fb Use UTF-8 or an overwritted liquibase file.encoding more consistantly
+97de2f3 CORE-2254 Ability to save snapshot for later comparison
+888f6c1 Load yaml as utf-8
+5d2c0d2 Don't throw method errors if using an offline connection and updated error message
+a4bb430 Set reserved words before setRemarksReporting in case there is a problem calling setRemarksReporting, such as when using OfflineConnection
 46049ad CORE-2254 Ability to save snapshot for later comparison
 4ada136 CORE-2321 Update MSSQL query to use a safer, backward-compatible UPDATE statement rather than a MERGE (cherry picked from commit fafc0aa)
 5344eff CORE-2321 Fix compile error on Oracle JDK 6 (cherry picked from commit 9b0e219)
