@@ -3,7 +3,6 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
@@ -64,26 +63,26 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         change.setInitiallyDeferred(uc.isInitiallyDeferred());
         change.setDisabled(uc.isDisabled());
 
-        if (comparisonDatabase instanceof OracleDatabase) {
-            Index backingIndex = uc.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
-                Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
-                if (changes != null) {
-                    returnList.addAll(Arrays.asList(changes));
-
-                    change.setForIndexName(backingIndex.getName());
-                    Schema schema = backingIndex.getSchema();
-                    if (schema != null) {
-                        if (control.getIncludeCatalog()) {
-                            change.setForIndexCatalogName(schema.getCatalogName());
-                        }
-                        if (control.getIncludeSchema()) {
-                            change.setForIndexSchemaName(schema.getName());
-                        }
-                    }
-                }
-            }
-        }
+//        if (comparisonDatabase instanceof OracleDatabase) {
+//            Index backingIndex = uc.getBackingIndex();
+//            if (backingIndex != null && backingIndex.getName() != null) {
+//                Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+//                if (changes != null) {
+//                    returnList.addAll(Arrays.asList(changes));
+//
+//                    change.setForIndexName(backingIndex.getName());
+//                    Schema schema = backingIndex.getSchema();
+//                    if (schema != null) {
+//                        if (control.getIncludeCatalog()) {
+//                            change.setForIndexCatalogName(schema.getCatalogName());
+//                        }
+//                        if (control.getIncludeSchema()) {
+//                            change.setForIndexSchemaName(schema.getName());
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
 
         Index backingIndex = uc.getBackingIndex();

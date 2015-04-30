@@ -57,8 +57,8 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
 
         Action runAction;
         try {
-            if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
-                return new Sql[0]; //don't mark
+            if (execType.equals(ChangeSet.ExecType.FAILED) || execType.equals(ChangeSet.ExecType.SKIPPED)) {
+                return new NoOpResult(); //don't mark
             }
 
             String tag = null;
@@ -69,18 +69,16 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
                 }
             }
 
-            if (statement.getExecType().ranBefore) {
-                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+            if (execType.ranBefore) {
+                runAction = (UpdateDataAction) new UpdateDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
-                        .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .setWhereClause(database.escapeObjectName("ID", Column.class) + " = ? " +
-                                "AND " + database.escapeObjectName("AUTHOR", Column.class) + " = ? " +
-                                "AND " + database.escapeObjectName("FILENAME", Column.class) + " = ?")
-                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+                        .addNewColumnValue("EXECTYPE", execType.value)
+                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
+                        .set(UpdateDataAction.Attr.whereClause, "ID=? AND AUTHOR=? AND FILENAME=?");
 
                 if (tag != null) {
-                    ((UpdateStatement) runStatement).addNewColumnValue("TAG", tag);
+                    ((UpdateDataAction) runAction).addNewColumnValue("TAG", tag);
                 }
             } else {
                 runAction = new InsertDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
@@ -92,7 +90,7 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
-                        .addColumnValue("EXECTYPE", statement.getExecType().value)
+                        .addColumnValue("EXECTYPE", execType.value)
                         .addColumnValue("CONTEXTS", changeSet.getContexts() == null || changeSet.getContexts().isEmpty()? null : changeSet.getContexts().toString())
                         .addColumnValue("LABELS", changeSet.getLabels() == null || changeSet.getLabels().isEmpty() ? null : changeSet.getLabels().toString())
                         .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"));

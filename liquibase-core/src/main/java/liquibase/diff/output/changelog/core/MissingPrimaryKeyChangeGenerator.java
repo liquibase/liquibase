@@ -68,23 +68,23 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 //            change.setClustered(false);
 //        }
 
-        if (comparisonDatabase instanceof OracleDatabase) {
-            Index backingIndex = pk.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
-                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
-
-                change.setForIndexName(backingIndex.getName());
-                Schema schema = backingIndex.getSchema();
-                if (schema != null) {
-                    if (control.getIncludeCatalog()) {
-                        change.setForIndexCatalogName(schema.getCatalogName());
-                    }
-                    if (control.getIncludeSchema()) {
-                        change.setForIndexSchemaName(schema.getName());
-                    }
-                }
-            }
-        }
+//        if (comparisonDatabase instanceof OracleDatabase) {
+//            Index backingIndex = pk.getBackingIndex();
+//            if (backingIndex != null && backingIndex.getName() != null) {
+//                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+//
+//                change.setForIndexName(backingIndex.getName());
+//                Schema schema = backingIndex.getSchema();
+//                if (schema != null) {
+//                    if (control.getIncludeCatalog()) {
+//                        change.setForIndexCatalogName(schema.getCatalogName());
+//                    }
+//                    if (control.getIncludeSchema()) {
+//                        change.setForIndexSchemaName(schema.getName());
+//                    }
+//                }
+//            }
+//        }
 
         control.setAlreadyHandledMissing(pk.getBackingIndex());
         returnList.add(change);

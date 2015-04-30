@@ -4,7 +4,6 @@ import liquibase.change.Change;
 import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.DropPrimaryKeyChange;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
@@ -54,26 +53,26 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         addPkChange.setColumnNames(pk.getColumnNames());
         addPkChange.setConstraintName(pk.getName());
 
-        if (comparisonDatabase instanceof OracleDatabase) {
-            Index backingIndex = pk.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
-                Change[] indexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
-                if (indexChanges != null) {
-                    returnList.addAll(Arrays.asList(indexChanges));
-                }
-
-                addPkChange.setForIndexName(backingIndex.getName());
-                Schema schema = backingIndex.getSchema();
-                if (schema != null) {
-                    if (control.getIncludeCatalog()) {
-                        addPkChange.setForIndexCatalogName(schema.getCatalogName());
-                    }
-                    if (control.getIncludeSchema()) {
-                        addPkChange.setForIndexSchemaName(schema.getName());
-                    }
-                }
-            }
-        }
+//        if (comparisonDatabase instanceof OracleDatabase) {
+//            Index backingIndex = pk.getBackingIndex();
+//            if (backingIndex != null && backingIndex.getName() != null) {
+//                Change[] indexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+//                if (indexChanges != null) {
+//                    returnList.addAll(Arrays.asList(indexChanges));
+//                }
+//
+//                addPkChange.setForIndexName(backingIndex.getName());
+//                Schema schema = backingIndex.getSchema();
+//                if (schema != null) {
+//                    if (control.getIncludeCatalog()) {
+//                        addPkChange.setForIndexCatalogName(schema.getCatalogName());
+//                    }
+//                    if (control.getIncludeSchema()) {
+//                        addPkChange.setForIndexSchemaName(schema.getName());
+//                    }
+//                }
+//            }
+//        }
         returnList.add(addPkChange);
 
         if (control.getIncludeCatalog()) {

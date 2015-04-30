@@ -4,7 +4,6 @@ import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.diff.Difference;
@@ -136,41 +135,41 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
 
             String tableName = column.getRelation().getName();
 
-            if (comparisonDatabase instanceof OracleDatabase && (((DataType) typeDifference.getReferenceValue()).getTypeName().equalsIgnoreCase("clob") || ((DataType) typeDifference.getComparedValue()).getTypeName().equalsIgnoreCase("clob"))) {
-                String tempColName = "TEMP_CLOB_CONVERT";
-                OutputChange outputChange = new OutputChange();
-                outputChange.setMessage("Cannot convert directly from " + ((DataType) typeDifference.getComparedValue()).getTypeName()+" to "+((DataType) typeDifference.getReferenceValue()).getTypeName()+". Instead a new column will be created and the data transferred. This may cause unexpected side effects including constraint issues and/or table locks.");
-                changes.add(outputChange);
-
-                AddColumnChange addColumn = new AddColumnChange();
-                addColumn.setCatalogName(catalogName);
-                addColumn.setSchemaName(schemaName);
-                addColumn.setTableName(tableName);
-                AddColumnConfig addColumnConfig = new AddColumnConfig(column);
-                addColumnConfig.setName(tempColName);
-                addColumnConfig.setType(typeDifference.getReferenceValue().toString());
-                addColumnConfig.setAfterColumn(column.getName());
-                addColumn.setColumns(Arrays.asList(addColumnConfig));
-                changes.add(addColumn);
-
-                changes.add(new RawSQLChange("UPDATE "+referenceDatabase.escapeObjectName(tableName, Table.class)+" SET "+tempColName+"="+referenceDatabase.escapeObjectName(column.getName(), Column.class)));
-
-                DropColumnChange dropColumnChange = new DropColumnChange();
-                dropColumnChange.setCatalogName(catalogName);
-                dropColumnChange.setSchemaName(schemaName);
-                dropColumnChange.setTableName(tableName);
-                dropColumnChange.setColumnName(column.getName());
-                changes.add(dropColumnChange);
-
-                RenameColumnChange renameColumnChange = new RenameColumnChange();
-                renameColumnChange.setCatalogName(catalogName);
-                renameColumnChange.setSchemaName(schemaName);
-                renameColumnChange.setTableName(tableName);
-                renameColumnChange.setOldColumnName(tempColName);
-                renameColumnChange.setNewColumnName(column.getName());
-                changes.add(renameColumnChange);
-
-            } else {
+//            if (comparisonDatabase instanceof OracleDatabase && (((DataType) typeDifference.getReferenceValue()).getTypeName().equalsIgnoreCase("clob") || ((DataType) typeDifference.getComparedValue()).getTypeName().equalsIgnoreCase("clob"))) {
+//                String tempColName = "TEMP_CLOB_CONVERT";
+//                OutputChange outputChange = new OutputChange();
+//                outputChange.setMessage("Cannot convert directly from " + ((DataType) typeDifference.getComparedValue()).getTypeName()+" to "+((DataType) typeDifference.getReferenceValue()).getTypeName()+". Instead a new column will be created and the data transferred. This may cause unexpected side effects including constraint issues and/or table locks.");
+//                changes.add(outputChange);
+//
+//                AddColumnChange addColumn = new AddColumnChange();
+//                addColumn.setCatalogName(catalogName);
+//                addColumn.setSchemaName(schemaName);
+//                addColumn.setTableName(tableName);
+//                AddColumnConfig addColumnConfig = new AddColumnConfig(column);
+//                addColumnConfig.setName(tempColName);
+//                addColumnConfig.setType(typeDifference.getReferenceValue().toString());
+//                addColumnConfig.setAfterColumn(column.getName());
+//                addColumn.setColumns(Arrays.asList(addColumnConfig));
+//                changes.add(addColumn);
+//
+//                changes.add(new RawSQLChange("UPDATE "+referenceDatabase.escapeObjectName(tableName, Table.class)+" SET "+tempColName+"="+referenceDatabase.escapeObjectName(column.getName(), Column.class)));
+//
+//                DropColumnChange dropColumnChange = new DropColumnChange();
+//                dropColumnChange.setCatalogName(catalogName);
+//                dropColumnChange.setSchemaName(schemaName);
+//                dropColumnChange.setTableName(tableName);
+//                dropColumnChange.setColumnName(column.getName());
+//                changes.add(dropColumnChange);
+//
+//                RenameColumnChange renameColumnChange = new RenameColumnChange();
+//                renameColumnChange.setCatalogName(catalogName);
+//                renameColumnChange.setSchemaName(schemaName);
+//                renameColumnChange.setTableName(tableName);
+//                renameColumnChange.setOldColumnName(tempColName);
+//                renameColumnChange.setNewColumnName(column.getName());
+//                changes.add(renameColumnChange);
+//
+//            } else {
                 ModifyDataTypeChange change = new ModifyDataTypeChange();
                 change.setCatalogName(catalogName);
                 change.setSchemaName(schemaName);
@@ -180,7 +179,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
 
                 changes.add(change);
-            }
+//            }
         }
     }
 

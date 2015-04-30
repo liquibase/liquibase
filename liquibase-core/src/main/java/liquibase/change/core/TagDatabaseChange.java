@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.MarkChangeSetRanGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 
@@ -23,10 +22,6 @@ public class TagDatabaseChange extends AbstractChange {
         this.tag = tag;
     }
 
-    /**
-     * {@inheritDoc}
-     * @see MarkChangeSetRanGenerator#generateSql(MarkChangeSetRanStatement, Database, SqlGeneratorChain)
-     */
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[0];

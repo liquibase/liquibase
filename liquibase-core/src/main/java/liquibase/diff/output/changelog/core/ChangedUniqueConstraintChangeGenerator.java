@@ -5,7 +5,6 @@ import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.change.core.DropUniqueConstraintChange;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
@@ -69,22 +68,22 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
         }
 
         Index backingIndex = uniqueConstraint.getBackingIndex();
-        if (comparisonDatabase instanceof OracleDatabase) {
-            if (backingIndex != null && backingIndex.getName() != null) {
-                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
-
-                addUniqueConstraintChange.setForIndexName(backingIndex.getName());
-                Schema schema = backingIndex.getSchema();
-                if (schema != null) {
-                    if (control.getIncludeCatalog()) {
-                        addUniqueConstraintChange.setForIndexCatalogName(schema.getCatalogName());
-                    }
-                    if (control.getIncludeSchema()) {
-                        addUniqueConstraintChange.setForIndexSchemaName(schema.getName());
-                    }
-                }
-            }
-        }
+//        if (comparisonDatabase instanceof OracleDatabase) {
+//            if (backingIndex != null && backingIndex.getName() != null) {
+//                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+//
+//                addUniqueConstraintChange.setForIndexName(backingIndex.getName());
+//                Schema schema = backingIndex.getSchema();
+//                if (schema != null) {
+//                    if (control.getIncludeCatalog()) {
+//                        addUniqueConstraintChange.setForIndexCatalogName(schema.getCatalogName());
+//                    }
+//                    if (control.getIncludeSchema()) {
+//                        addUniqueConstraintChange.setForIndexSchemaName(schema.getName());
+//                    }
+//                }
+//            }
+//        }
 
         control.setAlreadyHandledChanged(backingIndex);
 

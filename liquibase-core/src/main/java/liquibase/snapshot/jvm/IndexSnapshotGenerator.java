@@ -183,7 +183,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //        if (foundObject instanceof PrimaryKey) {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
-        if (foundObject instanceof UniqueConstraint { //todo action refactor && ((UniqueConstraint) foundObject).getBackingIndex() == null && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+        if (foundObject instanceof UniqueConstraint) { //todo action refactor && ((UniqueConstraint) foundObject).getBackingIndex() == null && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
             Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);

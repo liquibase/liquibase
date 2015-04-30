@@ -66,9 +66,9 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
             DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
             String typeString = ddt.toString();
-            if (referenceDatabase instanceof MSSQLDatabase) {
-                typeString = referenceDatabase.unescapeDataTypeString(typeString);
-            }
+//            if (referenceDatabase instanceof MSSQLDatabase) {
+//                typeString = referenceDatabase.unescapeDataTypeString(typeString);
+//            }
             columnConfig.setType(typeString);
 
             if (column.isAutoIncrement()) {
