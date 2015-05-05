@@ -289,6 +289,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         boolean isAutoIncrementSupported = false;
 
         try {
+            // TODO Check if this works at all
             if (getDatabaseMajorVersion() >= 12) {
                 isAutoIncrementSupported = true;
             }
