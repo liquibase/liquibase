@@ -19,6 +19,7 @@ import liquibase.structure.core.Table;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -284,7 +285,18 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsAutoIncrement() {
-        return false;
+        // Oracle supports Identity beginning with version 12c
+        boolean isAutoIncrementSupported = false;
+
+        try {
+            if (getDatabaseMajorVersion() >= 12) {
+                isAutoIncrementSupported = true;
+            }
+        } catch (DatabaseException ex) {
+            isAutoIncrementSupported = false;
+        }
+
+        return isAutoIncrementSupported;
     }
 
 
@@ -350,5 +362,53 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return databaseFunction.toString();
         }
         return super.generateDatabaseFunctionValue(databaseFunction);
+    }
+
+    @Override
+    public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
+        // TODO Check / Reimplement
+        return super.getAutoIncrementClause(startWith, incrementBy);
+    }
+
+    @Override
+    protected String getAutoIncrementClause() {
+        // TODO Check / Reimplement
+        return super.getAutoIncrementClause();
+    }
+
+    @Override
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+        // TODO Check / Reimplement
+        return super.generateAutoIncrementStartWith(startWith);
+    }
+
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+        // TODO Check / Reimplement
+        return super.generateAutoIncrementBy(incrementBy);
+    }
+
+    @Override
+    protected String getAutoIncrementOpening() {
+        // TODO Check / Reimplement
+        return super.getAutoIncrementOpening();
+    }
+
+    @Override
+    protected String getAutoIncrementClosing() {
+        // TODO Check / Reimplement
+        return super.getAutoIncrementClosing();
+    }
+
+    @Override
+    protected String getAutoIncrementStartWithClause() {
+        // TODO Check / Reimplement
+        return super.getAutoIncrementStartWithClause();
+    }
+
+    @Override
+    protected String getAutoIncrementByClause() {
+        // TODO Check / Reimplement
+        return super.getAutoIncrementByClause();
     }
 }
