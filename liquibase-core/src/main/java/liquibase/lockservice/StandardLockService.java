@@ -32,7 +32,7 @@ public class StandardLockService implements LockService {
     private Long changeLogLockPollRate;
     private long changeLogLocRecheckTime;
 
-    private boolean hasDatabaseChangeLogLockTable = false;
+    private Boolean hasDatabaseChangeLogLockTable = false;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     public StandardLockService() {
@@ -133,7 +133,7 @@ public class StandardLockService implements LockService {
     }
 
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        if (!hasDatabaseChangeLogLockTable) {
+        if (hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(database);
             } catch (LiquibaseException e) {
@@ -294,7 +294,7 @@ public class StandardLockService implements LockService {
     @Override
     public void reset() {
         hasChangeLogLock = false;
-        hasDatabaseChangeLogLockTable = false;
+        hasDatabaseChangeLogLockTable = null;
         isDatabaseChangeLogLockTableInitialized = false;
     }
 
@@ -303,7 +303,7 @@ public class StandardLockService implements LockService {
         try {
             if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
-                hasDatabaseChangeLogLockTable = false;
+                hasDatabaseChangeLogLockTable = null;
             }
             reset();
         } catch (InvalidExampleException e) {

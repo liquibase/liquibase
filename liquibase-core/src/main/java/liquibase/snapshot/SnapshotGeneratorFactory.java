@@ -7,10 +7,12 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -89,7 +91,17 @@ public class SnapshotGeneratorFactory {
         List<Class<? extends DatabaseObject>> types = new ArrayList<Class<? extends DatabaseObject>>(getContainerTypes(example.getClass(), database));
         types.add(example.getClass());
 
-        if (createSnapshot(example, database, new SnapshotControl(database,  types.toArray(new Class[types.size()]))) != null) {
+        //workaround for common check for databasechangelog/lock table to not snapshot the whole database like we have to in order to handle case issues
+        if (example instanceof Table && (example.getName().equals(database.getDatabaseChangeLogTableName()) || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
+            try {
+                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), example.getName(), Table.class)));
+                return true;
+            } catch (DatabaseException e) {
+                return false;
+            }
+        }
+
+        if (createSnapshot(example, database, new SnapshotControl(database, types.toArray(new Class[types.size()]))) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;
