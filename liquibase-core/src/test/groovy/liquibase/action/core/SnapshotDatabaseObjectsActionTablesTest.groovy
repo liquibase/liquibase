@@ -10,6 +10,7 @@ import liquibase.structure.core.Catalog
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
+import org.junit.Assume
 import spock.lang.Unroll
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -97,6 +98,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxContainerDepth(Table) >= 2);
+
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
             return CollectionUtil.permutations([
                     [it],

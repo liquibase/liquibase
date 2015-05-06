@@ -719,7 +719,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isCaseSensitive() {
+    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
     	if (caseSensitive == null) {
             if (connection != null && connection instanceof JdbcConnection) {
                 try {
@@ -731,7 +731,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
     	if (caseSensitive == null) {
-            return false;
+            return true;
     	} else {
     		return caseSensitive.booleanValue();
     	}
@@ -925,7 +925,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         String name = this.escapeObjectName(objectName.get(ObjectName.Attr.name, String.class), objectType);
         ObjectName container = objectName.get(ObjectName.Attr.container, ObjectName.class);
         int depth = 0;
-        while (depth++ < this.getMaxReferenceContainerDepth() && container != null && container.getName() != null) {
+        while (depth++ < this.getMaxContainerDepth(objectType) && container != null && container.getName() != null) {
             name = this.escapeObjectName(container.get(ObjectName.Attr.name, String.class), Schema.class) + "."+name;
             container = container.get(ObjectName.Attr.container, ObjectName.class);
         }
@@ -1100,12 +1100,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean supportsSchemas() {
-        return true;
+        return getMaxContainerDepth(Table.class) > 0;
     }
 
     @Override
     public boolean supportsCatalogs() {
-        return true;
+        return getMaxContainerDepth(Table.class) > 1;
     }
 
     public boolean jdbcCallsCatalogsSchemas() {
@@ -1567,12 +1567,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public int getMaxReferenceContainerDepth() {
+    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
         return 1;
-    }
-
-    @Override
-    public int getMaxSnapshotContainerDepth() {
-        return Math.min(getMaxReferenceContainerDepth() + 1, 2);
     }
 }

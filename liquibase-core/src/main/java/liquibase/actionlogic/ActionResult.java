@@ -1,5 +1,7 @@
 package liquibase.actionlogic;
 
+import liquibase.exception.ActionPerformException;
+
 /**
  * Base class for results of {@link ActionLogic#execute(liquibase.action.Action, liquibase.Scope)}.
  * Actual implementation returned will be one of:
@@ -34,7 +36,7 @@ public abstract class ActionResult {
      */
     public static interface Modifier {
 
-        public ActionResult rewrite(ActionResult result);
+        public ActionResult rewrite(ActionResult result) throws ActionPerformException;
 
     }
 }

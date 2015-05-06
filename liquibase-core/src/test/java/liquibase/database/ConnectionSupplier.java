@@ -9,7 +9,9 @@ import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
+import org.slf4j.LoggerFactory;
 import testmd.logic.SetupResult;
 
 import java.io.File;
@@ -28,7 +30,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     public String VAGRANT_BOX_NAME_LINUX_STANDARD = "liquibase.linux.centos.x64";
 
     private String version;
-    private String ipAddress = "10.10.100.100";
+    private String ipAddress = "vagrant";
     private String os = OS_LINUX;
     private DatabaseConnection connection;
     private SetupResult connectionResult;
@@ -196,6 +198,7 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     protected DatabaseConnection getConnection() throws SetupResult {
         if (connection == null && connectionResult == null) {
+            LoggerFactory.getLogger(getClass()).info("Opening connection as "+this.getDatabaseUsername()+" to "+this.getJdbcUrl());
             try {
                 Connection dbConn = DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
                 connection = new JdbcConnection(dbConn);
@@ -241,18 +244,22 @@ public abstract class ConnectionSupplier implements Cloneable {
         return db;
     }
 
+    public List<ObjectName> getReferenceObjectNames(Class<? extends DatabaseObject> type) {
+        return getReferenceObjectNames(type, false, false);
+    }
+
     public List<ObjectName> getReferenceObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
         if (Column.class.isAssignableFrom(type)) {
             return getObjectNames(type, 0, includePartials, includeNulls);
         }
-        return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
+        return getObjectNames(type, getDatabase().getMaxContainerDepth(type), includePartials, includeNulls);
     }
 
     public List<ObjectName> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
         if (Column.class.isAssignableFrom(type)) {
             return getObjectNames(type, 0, includePartials, includeNulls);
         }
-        return getObjectNames(type, getDatabase().getMaxSnapshotContainerDepth(), includePartials, includeNulls);
+        return getObjectNames(type, getDatabase().getMaxContainerDepth(type), includePartials, includeNulls);
     }
 
     public List<ObjectName> getObjectNames(Class<? extends DatabaseObject> type, int maxDepth, boolean includePartials, boolean includeNulls) {
@@ -273,28 +280,17 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public List<ObjectName> getAllContainers() {
-        int snapDepth = getDatabase().getMaxSnapshotContainerDepth();
-        int refDepth = getDatabase().getMaxReferenceContainerDepth();
+        int depth = getDatabase().getMaxContainerDepth(Table.class);
 
-        if (snapDepth == 0) {
+        if (depth == 0) {
             return Arrays.asList();
-        } else if (snapDepth == 1) {
-            if (refDepth == 0) {
-                return Arrays.asList(new ObjectName(getPrimaryCatalog()));
-            } else {
-                return Arrays.asList(new ObjectName(getPrimaryCatalog()), new ObjectName(getAlternateCatalog()));
-            }
+        } else if (depth== 1) {
+            return Arrays.asList(new ObjectName(getPrimarySchema()), new ObjectName(getAlternateSchema()));
         } else {
-            if (refDepth == 0) {
-                return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()));
-            } else if (refDepth == 1) {
-                return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()), new ObjectName(getPrimaryCatalog(), getAlternateSchema()));
-            } else {
-                return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()),
-                        new ObjectName(getPrimaryCatalog(), getAlternateSchema()),
-                        new ObjectName(getAlternateCatalog(), getPrimarySchema()),
-                        new ObjectName(getAlternateCatalog(), getAlternateSchema()));
-            }
+            return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()),
+                    new ObjectName(getPrimaryCatalog(), getAlternateSchema()),
+                    new ObjectName(getAlternateCatalog(), getPrimarySchema()),
+                    new ObjectName(getAlternateCatalog(), getAlternateSchema()));
         }
     }
 
@@ -379,8 +375,8 @@ public abstract class ConnectionSupplier implements Cloneable {
         returnList.add("test" + type.getSimpleName().toLowerCase());
         returnList.add("TEST" + type.getSimpleName().toUpperCase());
         returnList.add("Test" + type.getSimpleName());
-        returnList.add("99problems_" + type.getSimpleName());
-        returnList.add("99PROBLEMS_" + type.getSimpleName());
+        returnList.add("12numbers_" + type.getSimpleName());
+        returnList.add("12NUMBERS_" + type.getSimpleName());
         returnList.add("test!@#$%^&*()_+{}[]" + type.getSimpleName());
 
         return returnList;

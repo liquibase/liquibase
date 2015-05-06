@@ -33,13 +33,11 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 
 public class MockDatabase implements Database, InternalDatabase {
 
-    private int maxReferenceContainerDepth = 2;
-    private int maxSnapshotContainerDepth = 2;
+    private int maxContainerDepth = 2;
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
     private boolean supportsCatalogs = true;
@@ -130,7 +128,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
 
     @Override
-    public boolean isCaseSensitive() {
+    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
         return caseSensitive;
     }
 
@@ -793,22 +791,12 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public int getMaxReferenceContainerDepth() {
-        return maxReferenceContainerDepth;
+    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
+        return maxContainerDepth;
     }
 
-    public MockDatabase setMaxReferenceContainerDepth(int maxReferenceContainerDepth) {
-        this.maxReferenceContainerDepth = maxReferenceContainerDepth;
-        return this;
-    }
-
-    @Override
-    public int getMaxSnapshotContainerDepth() {
-        return maxSnapshotContainerDepth;
-    }
-
-    public MockDatabase setMaxSnapshotContainerDepth(int maxSnapshotContainerDepth) {
-        this.maxSnapshotContainerDepth = maxSnapshotContainerDepth;
+    public MockDatabase setMaxContainerDepth(int maxContainerDepth) {
+        this.maxContainerDepth = maxContainerDepth;
         return this;
     }
 

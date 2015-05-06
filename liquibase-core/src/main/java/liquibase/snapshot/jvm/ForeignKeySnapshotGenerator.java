@@ -106,7 +106,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             ForeignKey foreignKey = null;
             for (CachedRow row : importedKeyMetadataResultSet) {
                 String fk_name = cleanNameFromDatabase(row.getString("FK_NAME"), database);
-                if (snapshot.getDatabase().isCaseSensitive()) {
+                if (snapshot.getDatabase().isCaseSensitive(ForeignKey.class)) {
                     if (!fk_name.equals(example.getName())) {
                         continue;
                     } else if (!fk_name.equalsIgnoreCase(example.getSimpleName())) {

@@ -171,7 +171,7 @@ public class DiffOutputControl {
 
     private static class DatabaseForHash extends UnsupportedDatabase implements InternalDatabase {
         @Override
-        public boolean isCaseSensitive() {
+        public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
             return true;
         }
     }

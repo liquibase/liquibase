@@ -30,4 +30,10 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
     Set<Class<? extends DatabaseObject>> requires(ConnectionSupplier conn, Scope scope) {
         return [Table] as Set
     }
+
+    @Override
+    protected List<ObjectName> getObjectContainers(Class objectType, ConnectionSupplier conn) {
+        return [new ObjectName()];
+    }
+
 }

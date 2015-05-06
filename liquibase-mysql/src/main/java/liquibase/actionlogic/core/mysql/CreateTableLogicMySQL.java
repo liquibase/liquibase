@@ -15,6 +15,7 @@ import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CreateTableLogicMySQL extends CreateTableLogic {
@@ -27,7 +28,7 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         DelegateResult result = (DelegateResult) super.execute(action, scope);
 
-        for (ColumnDefinition column : action.get(CreateTableAction.Attr.columnDefinitions, new ColumnDefinition[0])) {
+        for (ColumnDefinition column : action.get(CreateTableAction.Attr.columnDefinitions, new ArrayList<ColumnDefinition>())) {
             String columnRemarks = column.get(ColumnDefinition.Attr.remarks, String.class);
             if (columnRemarks != null) {
                 SetColumnRemarksAction remarksAction = (SetColumnRemarksAction) new SetColumnRemarksAction()

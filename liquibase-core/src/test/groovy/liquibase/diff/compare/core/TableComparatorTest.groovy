@@ -1,5 +1,6 @@
 package liquibase.diff.compare.core
 
+import liquibase.database.Database
 import liquibase.sdk.database.MockDatabase
 import liquibase.diff.compare.DatabaseObjectComparatorFactory
 import liquibase.structure.core.Table

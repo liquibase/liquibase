@@ -475,7 +475,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "INITIAL");
 
     @Override
-    public boolean isCaseSensitive() {
+    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
         return false;
     }
     

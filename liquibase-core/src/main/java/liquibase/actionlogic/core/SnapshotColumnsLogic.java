@@ -6,17 +6,18 @@ import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.Database;
+import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 
 import java.sql.*;
-import java.util.List;
 
 /**
  * Logic to snapshot database column(s). Delegates to {@link QueryJdbcMetaDataAction} getColumns().
@@ -39,56 +40,60 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
-    protected Action createSnapshotAction(Action action, Scope scope) throws DatabaseException {
+    protected Action createSnapshotAction(Action action, Scope scope) throws DatabaseException, ActionPerformException {
         DatabaseObject relatedTo = action.get(SnapshotDatabaseObjectsAction.Attr.relatedTo, DatabaseObject.class);
 
-        String catalogName = null;
-        String schemaName = null;
-        String relationName = null;
+        ObjectName relationName = null;
         String columnName = null;
 
-        if (relatedTo instanceof Catalog) {
-            catalogName = relatedTo.getSimpleName();
-        } else if (relatedTo instanceof Schema) {
-            catalogName = ((Schema) relatedTo).getCatalogName();
-            schemaName = relatedTo.getSimpleName();
-        } else if (relatedTo instanceof Relation) {
-            relationName = relatedTo.getSimpleName();
+        Database database = scope.getDatabase();
 
-            Schema schema = relatedTo.getSchema();
-            if (schema != null) {
-                catalogName = schema.getCatalogName();
-                schemaName = schema.getSimpleName();
+        if (relatedTo instanceof Catalog) {
+            if (!database.supportsCatalogs()) {
+                throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
+            }
+            relationName = new ObjectName(relatedTo.getSimpleName(), null, null);
+        } else if (relatedTo instanceof Schema) {
+            relationName = new ObjectName(null, relatedTo.getName());
+        } else if (relatedTo instanceof Relation) {
+            relationName = relatedTo.getName();
+            if (database.getMaxContainerDepth(relatedTo.getClass()) < relationName.depth()) {
+                throw new ActionPerformException("Cannot snapshot a "+relatedTo.getClass().getSimpleName().toLowerCase()+" with "+relationName.depth()+" level(s) of hierarchy on "+database.getShortName());
             }
         } else if (relatedTo instanceof Column) {
             columnName = relatedTo.getSimpleName();
 
-            List<String> relationNameList = ((Column) relatedTo).getRelation().getName().asList();
-            switch (relationNameList.size()) {
-                case 0:
-                    break; //everything stays null
-                case 1:
-                    relationName = relationNameList.get(0);
-                    break;
-                case 2:
-                    schemaName = relationNameList.get(0);
-                    relationName = relationNameList.get(1);
-                    break;
-                default:
-                    catalogName = relationNameList.get(0);
-                    schemaName = relationNameList.get(1);
-                    relationName = relationNameList.get(2);
+            Relation relation = ((Column) relatedTo).getRelation();
+            if (relation != null) {
+                relationName = relation.getName();
             }
         } else {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }
 
-        return new QueryJdbcMetaDataAction("getColumns", catalogName, schemaName, relationName, columnName);
+        String catalogName = null;
+        String schemaName = null;
+        String tableName = null;
+
+        if (relationName != null) {
+            tableName = relationName.getName();
+            ObjectName container = relationName.getContainer();
+            if (container != null) {
+                schemaName = container.getName();
+                container = container.getContainer();
+
+                if (container != null) {
+                    catalogName = container.getName();
+                }
+            }
+        }
+
+        return new QueryJdbcMetaDataAction("getColumns", catalogName, schemaName, tableName, columnName);
 
     }
 
     @Override
-    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) {
+    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
         String rawTableName = StringUtils.trimToNull(row.get("TABLE_NAME", String.class));
@@ -103,7 +108,20 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 
         Column column = new Column();
         column.setName(rawColumnName);
-        column.setRelation(new Table(rawCatalogName, rawSchemaName, rawTableName));
+        ObjectName container;
+        int maxContainerDepth = database.getMaxContainerDepth(Table.class);
+        if (maxContainerDepth == 0) {
+            container = null;
+        } else if (maxContainerDepth == 1) {
+            if (rawCatalogName != null && rawSchemaName == null) {
+                container = new ObjectName(rawCatalogName);
+            } else {
+                container = new ObjectName(rawSchemaName);
+            }
+        } else {
+            container = new ObjectName(rawCatalogName, rawSchemaName);
+        }
+        column.setRelation(new Table(new ObjectName(rawTableName, container)));
         column.setRemarks(remarks);
 
 //        if (database instanceof OracleDatabase) {

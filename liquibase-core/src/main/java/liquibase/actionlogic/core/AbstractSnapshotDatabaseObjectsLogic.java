@@ -40,7 +40,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
 
         if (typeToSnapshot.isAssignableFrom(getTypeToSnapshot())) {
             for (Class clazz : getSupportedRelatedTypes()) {
-                if (relatedTo.getClass().isAssignableFrom(clazz)) {
+                if (clazz.isAssignableFrom(relatedTo.getClass())) {
                     return priority;
                 }
             }
@@ -78,7 +78,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
      * Return a lower-level action that will snapshot given type of objects that are related to the given object.
      * The QueryResult from the Action returned by this method will be fed through the object returned by {@link #createModifier(liquibase.action.Action, liquibase.Scope)}.
      */
-    protected abstract Action createSnapshotAction(Action action, Scope scope) throws DatabaseException;
+    protected abstract Action createSnapshotAction(Action action, Scope scope) throws DatabaseException, ActionPerformException;
 
     /**
      * Returns a {@link liquibase.actionlogic.ActionResult.Modifier} that will convert the raw results from the action returned by {@link #createSnapshotAction(liquibase.action.Action, liquibase.Scope)}
@@ -95,7 +95,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
     /**
      * Converts a row returned by the generated action into the final object type.
      */
-    protected abstract DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope);
+    protected abstract DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) throws ActionPerformException;
 
     /**
      * Called for each DatabaseObject in {@link SnapshotModifier#rewrite(liquibase.actionlogic.ActionResult)} to "fix" any raw data coming back from the database.
@@ -131,7 +131,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
         }
 
         @Override
-        public ActionResult rewrite(ActionResult result) {
+        public ActionResult rewrite(ActionResult result) throws ActionPerformException {
             List<DatabaseObject> databaseObjects = new ArrayList<DatabaseObject>();
             for (RowBasedQueryResult.Row row : ((RowBasedQueryResult) result).getRows()) {
                 DatabaseObject object = convertToObject(row, getOriginalAction(), getScope());

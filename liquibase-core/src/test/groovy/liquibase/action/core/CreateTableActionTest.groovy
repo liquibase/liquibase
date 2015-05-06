@@ -26,7 +26,7 @@ class CreateTableActionTest extends Specification {
         new CreateTableAction(new ObjectName("cat", "schem", "tab")).describe() == "createTable(tableName=cat.schem.tab)"
     }
 
-    @Unroll("#featureName #tableName.#columnName")
+    @Unroll("#featureName #tableName with #columnName")
     def "create simple table"() {
         expect:
         def action = new CreateTableAction(tableName).addColumn(columnName, "int")
@@ -34,7 +34,7 @@ class CreateTableActionTest extends Specification {
         def scope = JUnitScope.getInstance(conn.getDatabase())
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        TestMD.test(this.class, conn.databaseShortName, conn.getDatabase().class)
+        TestMD.test(this.specificationContext, conn.getDatabase().class)
                 .withPermutation([connection: conn, tableName_asTable: tableName.toString(), columnName_asTable: columnName.toString()])
                 .addOperations(plan: plan)
                 .setup({
@@ -47,7 +47,7 @@ class CreateTableActionTest extends Specification {
                 .run({
             plan.execute(scope)
             assert scope.getSingleton(SnapshotFactory.class).has(new Table(tableName), scope)
-            assert scope.getSingleton(SnapshotFactory.class).has(new Column(columnName).setRelation(new Table(tableName)), scope)
+            assert scope.getSingleton(SnapshotFactory.class).has(new Column(Table, tableName, columnName.toString()), scope)
 
         })
 
@@ -55,8 +55,8 @@ class CreateTableActionTest extends Specification {
         [conn, tableName, columnName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             return CollectionUtil.permutations([
                     [it],
-                    it.getReferenceObjectNames(Table.class, false, false),
-                    it.getReferenceObjectNames(Column.class, false, false),
+                    it.getReferenceObjectNames(Table.class),
+                    it.getReferenceObjectNames(Column.class),
             ])
         }
     }

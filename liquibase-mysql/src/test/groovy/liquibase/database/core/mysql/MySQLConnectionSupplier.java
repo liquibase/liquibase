@@ -1,7 +1,9 @@
 package liquibase.database.core.mysql;
 
 
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.ConnectionSupplier;
+import liquibase.database.Database;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,6 +38,18 @@ public class MySQLConnectionSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public Database getDatabase() {
+        Database database = super.getDatabase();
+        ((AbstractJdbcDatabase) database).setCaseSensitive(false);
+        return database;
+    }
+
+    @Override
+    public String getConfigurationName() {
+        return "caseInsensitive";
+    }
+
+    @Override
     public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
         Set<ConfigTemplate> configTemplates = super.generateConfigFiles(context);
         configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/mysql/mysql.init.sql.vm", context));
@@ -46,6 +60,8 @@ public class MySQLConnectionSupplier extends ConnectionSupplier {
 
         return configTemplates;
     }
+
+
 
 //    @Override
 //    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {

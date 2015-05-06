@@ -18,7 +18,7 @@ class ConnectionSupplierTest extends Specification {
         def supplier = new UnsupportedDatabaseSupplier() {
             @Override
             Database getDatabase() {
-                return new MockDatabase().setMaxReferenceContainerDepth(1);
+                return new MockDatabase().setMaxContainerDepth(1);
             }
         }
 
@@ -40,7 +40,7 @@ class ConnectionSupplierTest extends Specification {
         def supplier = new UnsupportedDatabaseSupplier() {
             @Override
             Database getDatabase() {
-                return new MockDatabase().setMaxReferenceContainerDepth(2);
+                return new MockDatabase().setMaxContainerDepth(2);
             }
         }
 

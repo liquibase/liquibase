@@ -26,6 +26,9 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         returnList.add("test" + type.getSimpleName().toLowerCase());
         returnList.add("TEST" + type.getSimpleName().toUpperCase());
         returnList.add("Test" + type.getSimpleName());
+        returnList.add("anothertest" + type.getSimpleName().toLowerCase());
+        returnList.add("ANOTHERTEST" + type.getSimpleName().toUpperCase());
+        returnList.add("AnotherTest" + type.getSimpleName());
         returnList.add("4test_" + type.getSimpleName().toLowerCase());
         returnList.add("4TEST_" + type.getSimpleName().toLowerCase());
         returnList.add("crazy!@#\$%^&*()_+{}[]" + type.getSimpleName());
@@ -42,15 +45,17 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
             for (String simpleName : getSimpleObjectNames(type, conn, scope)) {
                 returnList.add(new ObjectName(simpleName, container));
             }
+            returnList.add(new ObjectName("only_"+container.getName(), container));
+        }
+
+        if (!conn.database.isCaseSensitive(type)) {
+            returnList = returnList.findAll { it.name.matches("[^a-z]+")}
         }
 
         return returnList;
     }
 
     protected List<ObjectName> getObjectContainers(Class<T> objectType, ConnectionSupplier conn) {
-        if (objectType.isAssignableFrom(Column.class)) {
-            return [new ObjectName()];
-        }
         return conn.getAllContainers()
     }
 

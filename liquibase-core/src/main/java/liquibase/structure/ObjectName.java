@@ -9,6 +9,25 @@ import java.util.List;
 
 public class ObjectName extends AbstractExtensibleObject implements Comparable<ObjectName> {
 
+    /**
+     * Return the number of parent containers in this ObjectName.
+     * Top-level containers with a null name are not counted in the depth, but null-named containers between named containers are counted.
+     */
+    public int depth() {
+        int seenDepth = 0;
+        int nonNullDepth = 0;
+        ObjectName container = getContainer();
+        while (container != null) {
+            seenDepth++;
+            if (container.getName() != null ) {
+                nonNullDepth = seenDepth;
+            }
+            container = container.getContainer();
+        }
+
+        return nonNullDepth;
+    }
+
     public static enum Attr {
         name,
         container
@@ -19,6 +38,10 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         set(Attr.container, container);
     }
 
+    /**
+     * Construct a new ObjectName, from a passed list of container names.
+     * Name list goes from most general to most specific: new ObjectName("catalogName", "schemaName", "tablenName")
+     */
     public ObjectName(String... names) {
         if (names == null || names.length == 0) {
             set(Attr.name, null);

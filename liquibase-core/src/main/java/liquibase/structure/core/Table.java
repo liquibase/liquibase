@@ -27,7 +27,7 @@ public class Table extends Relation {
 
     public Table(String catalogName, String schemaName, String tableName) {
         this.setSchema(new Schema(catalogName, schemaName));
-        setName(tableName);
+        setName(new ObjectName(catalogName, schemaName, tableName));
     }
 
     public PrimaryKey getPrimaryKey() {

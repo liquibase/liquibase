@@ -1,13 +1,11 @@
 package liquibase.actionlogic.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
+import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
@@ -48,7 +46,9 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
         if (Catalog.class.isAssignableFrom(relatedTo.getClass())) {
             catalogName = relatedTo.getSimpleName();
         } else if (Schema.class.isAssignableFrom(relatedTo.getClass())) {
-            catalogName = ((Schema) relatedTo).getCatalogName();
+            if (relatedTo.getName().getContainer() != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
+                catalogName = relatedTo.getName().getContainer().getName();
+            }
             schemaName = relatedTo.getSimpleName();
         } else if (Table.class.isAssignableFrom(relatedTo.getClass())) {
             Table table = (Table) relatedTo;
@@ -70,7 +70,7 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
-    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) {
+    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) throws ActionPerformException {
         String rawTableName = row.get("TABLE_NAME", String.class);
         String rawSchemaName = row.get("TABLE_SCHEM", String.class);
         String rawCatalogName = row.get("TABLE_CAT", String.class);
@@ -79,7 +79,21 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
-        Table table = new Table().setName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName));
+        ObjectName container;
+        int maxContainerDepth = scope.getDatabase().getMaxContainerDepth(Table.class);
+        if (maxContainerDepth == 0) {
+            container = null;
+        } else if (maxContainerDepth == 1) {
+            if (rawCatalogName != null && rawSchemaName == null) {
+                container = new ObjectName(rawCatalogName);
+            } else {
+                container = new ObjectName(rawSchemaName);
+            }
+        } else {
+            container = new ObjectName(rawCatalogName, rawSchemaName);
+        }
+
+        Table table = new Table().setName(new ObjectName(rawTableName, container));
         table.setRemarks(remarks);
 
         if ("Y".equals(row.get("TEMPORARY", String.class))) {

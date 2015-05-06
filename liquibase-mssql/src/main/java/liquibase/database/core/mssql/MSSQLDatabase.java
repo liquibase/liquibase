@@ -339,14 +339,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null && ! isCaseSensitive()) {
+        if (schemaName != null && ! isCaseSensitive(Schema.class)) {
             schemaName = schemaName.toLowerCase();
         }
         return schemaName;
     }
 
     @Override
-    public boolean isCaseSensitive() {
+    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
 
         if (caseSensitive == null) {
             try {

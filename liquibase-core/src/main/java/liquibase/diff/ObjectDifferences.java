@@ -211,7 +211,7 @@ public class ObjectDifferences {
             if (object1Name == null || object2Name == null) {
                 return false;
             }
-            if (accordingTo.isCaseSensitive()) {
+            if (accordingTo.isCaseSensitive(type)) {
                 return object1Name.equals(object2Name);
             } else {
                 return object1Name.equalsIgnoreCase(object2Name);

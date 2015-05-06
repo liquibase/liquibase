@@ -271,7 +271,7 @@ public interface Database extends PrioritizedService {
 
     void enableForeignKeyChecks() throws DatabaseException;
 
-    public boolean isCaseSensitive();
+    public boolean isCaseSensitive(Class<? extends DatabaseObject> type);
 
     /**
      * Return true if the database is able to store the given name as is.
@@ -358,8 +358,6 @@ public interface Database extends PrioritizedService {
 
     public boolean looksLikeFunctionCall(String value);
 
-    public int getMaxReferenceContainerDepth();
-
-    public int getMaxSnapshotContainerDepth();
+    public int getMaxContainerDepth(Class<? extends DatabaseObject> type);
 }
 

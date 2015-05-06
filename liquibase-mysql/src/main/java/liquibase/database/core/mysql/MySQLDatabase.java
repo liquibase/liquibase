@@ -48,7 +48,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             if (name == null) {
                 return null;
             }
-            if (!this.isCaseSensitive()) {
+            if (!this.isCaseSensitive(objectType)) {
                 return name.toLowerCase();
             }
             return name;
@@ -158,13 +158,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsSchemas() {
-        return false;
-    }
-
-    @Override
     public boolean supportsCatalogs() {
-        return true;
+        return false;
     }
 
     @Override

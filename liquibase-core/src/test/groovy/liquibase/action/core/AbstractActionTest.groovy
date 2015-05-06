@@ -1,7 +1,6 @@
 package liquibase.action.core
 
 import liquibase.Scope
-import liquibase.action.Action
 import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplier
 import liquibase.database.Database
@@ -10,9 +9,8 @@ import liquibase.diff.output.DiffOutputControl
 import liquibase.diff.output.changelog.ActionGeneratorFactory
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Table
-import org.codehaus.groovy.runtime.StackTraceUtils
-import org.spockframework.runtime.model.FeatureInfo
-import org.spockframework.runtime.model.SpecInfo
+import org.slf4j.LoggerFactory
+import org.spockframework.runtime.SpecificationContext
 import spock.lang.Specification
 import testmd.Permutation
 import testmd.TestMD
@@ -23,11 +21,9 @@ abstract class AbstractActionTest extends Specification {
     def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
         def database = scope.database
 
-        def testName = specificationContext.iterationInfo.parent.name
+        def permutation = new ActionTestPermutation(this.specificationContext, this, snapshot, conn, scope, [:])
 
-        def permutation = new ActionTestPermutation(testName, this, snapshot, conn, scope, [:])
-
-        return TestMD.test("${this.class.name}_${database.shortName}", testName, database.class)
+        return TestMD.test(this.specificationContext, database.class)
                 .withPermutation(permutation)
     }
 
@@ -42,7 +38,7 @@ abstract class AbstractActionTest extends Specification {
 
         for (def obj : snapshot.get(Table.class)) {
             for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, scope, scope)) {
-                println executor.createPlan(action, scope).describe()
+                LoggerFactory.getLogger(this.getClass()).debug("Executing: "+executor.createPlan(action, scope).describe())
                 executor.execute(action, scope)
             }
         }
@@ -60,7 +56,7 @@ abstract class AbstractActionTest extends Specification {
 
         for (def obj : snapshot.get(Table.class)) {
             def action = new DropTableAction(obj.getName())
-            println new ActionExecutor().createPlan(action, scope).describe()
+            LoggerFactory.getLogger(this.getClass()).debug("Executing: "+new ActionExecutor().createPlan(action, scope).describe())
             new ActionExecutor().execute(action, scope)
         }
     }
@@ -72,8 +68,8 @@ abstract class AbstractActionTest extends Specification {
         AbstractActionTest test
         Snapshot snapshot
 
-        ActionTestPermutation(String testName, AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
-            super(testName, parameters)
+        ActionTestPermutation(SpecificationContext specificationContext, AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
+            super(specificationContext.currentIteration.parent.name, parameters)
             this.scope = scope
             this.database = scope.database
             this.conn = connectionSupplier

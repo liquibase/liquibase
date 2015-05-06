@@ -5,7 +5,9 @@ import liquibase.database.ConnectionSupplier
 import liquibase.servicelocator.ServiceLocator
 import liquibase.structure.DatabaseObject
 import liquibase.structure.TestStructureSupplierFactory
+import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
+import liquibase.structure.core.Schema
 import liquibase.structure.core.Table;
 
 public class TestSnapshotFactory {
@@ -14,7 +16,7 @@ public class TestSnapshotFactory {
         Snapshot snapshot = new Snapshot(scope)
         def supplierFactory = scope.getSingleton(TestStructureSupplierFactory)
 
-        def types = [Table, Column] //TODO: ensure correct sorting for scope.getSingleton(ServiceLocator).findClasses(DatabaseObject)
+        def types = [Catalog, Schema, Table, Column] //TODO: ensure correct sorting for scope.getSingleton(ServiceLocator).findClasses(DatabaseObject)
 
         for (def type : types) {
             def supplier = supplierFactory.getTestStructureSupplier(type, conn, scope)

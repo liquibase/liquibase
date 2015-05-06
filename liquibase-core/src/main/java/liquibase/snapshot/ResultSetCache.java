@@ -5,11 +5,10 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
+import liquibase.structure.core.Column;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -154,7 +153,7 @@ class ResultSetCache {
 
         public String createKey(Database database, String... params) {
             String key = StringUtils.join(params, ":");
-            if (!database.isCaseSensitive()) {
+            if (!database.isCaseSensitive(Column.class)) {
                 return key.toLowerCase();
             }
             return key;

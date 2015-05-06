@@ -14,7 +14,6 @@ import liquibase.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class ForeignKeyComparator implements DatabaseObjectComparator {
@@ -62,7 +61,7 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
             }
         };
 
-        if (accordingTo.isCaseSensitive()) {
+        if (accordingTo.isCaseSensitive(ForeignKey.class)) {
                 columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
                         StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
         } else {

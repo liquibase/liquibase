@@ -6,6 +6,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.ISODateFormat;
 
 import java.text.ParseException;
@@ -266,7 +267,7 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean isCaseSensitive() {
-        return false;
+    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
+        return true;
     }
 }
