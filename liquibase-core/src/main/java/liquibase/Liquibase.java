@@ -261,7 +261,7 @@ public class Liquibase {
         LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
-        outputHeader("Update Datakbase Script");
+        outputHeader("Update Database Script");
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
