@@ -1,12 +1,6 @@
 package liquibase.structure.core;
 
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.util.ObjectUtil;
-
-import java.util.Set;
 
 public class DataType extends AbstractLiquibaseSerializable {
 
