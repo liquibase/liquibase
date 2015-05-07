@@ -144,7 +144,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * changes on a database that is not local to the machine that the user is current
      * executing the plugin on.
      *
-     * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="true"
+     * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="false"
      */
     protected boolean promptOnNonLocalDatabase;
 
