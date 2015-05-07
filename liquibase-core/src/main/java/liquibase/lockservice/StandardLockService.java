@@ -32,7 +32,7 @@ public class StandardLockService implements LockService {
     private Long changeLogLockPollRate;
     private long changeLogLocRecheckTime;
 
-    private Boolean hasDatabaseChangeLogLockTable = false;
+    private Boolean hasDatabaseChangeLogLockTable = null;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     public StandardLockService() {
@@ -88,6 +88,7 @@ public class StandardLockService implements LockService {
             database.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             createdTable = true;
+            hasDatabaseChangeLogLockTable = true;
         }
 
         if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {

@@ -261,7 +261,7 @@ public class Liquibase {
         LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
-        outputHeader("Update Database Script");
+        outputHeader("Update Datakbase Script");
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
@@ -273,12 +273,9 @@ public class Liquibase {
             output.flush();
         } catch (IOException e) {
             throw new LiquibaseException(e);
-        } finally {
-            lockService.releaseLock();
         }
 
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
-        resetServices();
     }
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
