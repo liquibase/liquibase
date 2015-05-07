@@ -129,7 +129,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
             if (!hasLiquibase) {
                 executor.comment("Adding missing databasechangelog.liquibase column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)", null));
             }
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
