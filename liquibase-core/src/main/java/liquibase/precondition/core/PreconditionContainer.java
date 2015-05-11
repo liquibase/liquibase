@@ -257,4 +257,9 @@ public class PreconditionContainer extends AndPrecondition {
 
         super.load(parsedNode, resourceAccessor);
     }
+
+    @Override
+    public String getName() {
+        return "preConditions";
+    }
 }

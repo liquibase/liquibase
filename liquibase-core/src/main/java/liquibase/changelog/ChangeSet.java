@@ -17,7 +17,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -912,19 +911,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public Set<String> getSerializableFields() {
-        return new HashSet<String>(Arrays.asList(
+        return new LinkedHashSet<String>(Arrays.asList(
                 "id",
                 "author",
                 "runAlways",
                 "runOnChange",
                 "failOnError",
                 "context",
-                "dbms",
-                "comment",
-                "changes",
-                "rollback",
                 "labels",
-                "objectQuotingStrategy"));
+                "dbms",
+                "objectQuotingStrategy",
+                "comment",
+                "preconditions",
+                "changes",
+                "rollback"));
 
     }
 
@@ -996,6 +996,14 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return this.getObjectQuotingStrategy().toString();
         }
 
+        if (field.equals("preconditions")) {
+            if (this.getPreconditions() != null && this.getPreconditions().getNestedPreconditions().size() > 0) {
+                return this.getPreconditions();
+            } else {
+                return null;
+            }
+        }
+
         if (field.equals("changes")) {
             return getChanges();
         }
@@ -1013,7 +1021,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("comment") || field.equals("changes") || field.equals("rollback")) {
+        if (field.equals("comment") || field.equals("preconditions") || field.equals("changes") || field.equals("rollback")) {
             return SerializationType.NESTED_OBJECT;
 //        } else if (field.equals()) {
 //            return SerializationType.DIRECT_VALUE;
