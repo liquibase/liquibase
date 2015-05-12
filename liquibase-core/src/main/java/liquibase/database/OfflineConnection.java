@@ -32,7 +32,7 @@ public class OfflineConnection implements DatabaseConnection {
     private DatabaseSnapshot snapshot = null;
     private boolean outputLiquibaseSql = false;
     private String changeLogFile = "databasechangelog.csv";
-    private Boolean caseSensitive = false;
+    private boolean caseSensitive = false;
     private String productName;
     private String productVersion;
     private int databaseMajorVersion = 999;
@@ -78,7 +78,7 @@ public class OfflineConnection implements DatabaseConnection {
             } else if (paramEntry.getKey().equals("catalog")) {
                 this.catalog = this.params.get("catalog");
             } else if (paramEntry.getKey().equals("caseSensitive")) {
-                 this.caseSensitive = Boolean.valueOf(paramEntry.getValue());
+                 this.caseSensitive = Boolean.parseBoolean(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("changeLogFile")) {
                 this.changeLogFile = paramEntry.getValue();
             } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
@@ -228,5 +228,13 @@ public class OfflineConnection implements DatabaseConnection {
 
     public void setOutputLiquibaseSql(Boolean outputLiquibaseSql) {
         this.outputLiquibaseSql = outputLiquibaseSql;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 }
