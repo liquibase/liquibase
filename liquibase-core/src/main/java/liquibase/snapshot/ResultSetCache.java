@@ -9,8 +9,6 @@ import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -179,6 +177,10 @@ class ResultSetCache {
         }
 
         List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+            return executeAndExtract(sql, database, false);
+        }
+
+        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<CachedRow>();
             }
@@ -189,11 +191,10 @@ class ResultSetCache {
                 statement = connection.createStatement();
                 resultSet = statement.executeQuery(sql);
                 resultSet.setFetchSize(FETCH_SIZE);
-                return extract(resultSet);
+                return extract(resultSet, informixTrimHint);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
-
         }
 
         public boolean equals(Object expectedValue, Object foundValue) {

@@ -497,7 +497,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
-                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, row.getString("TABLE_NAME"));
                 }
 
                 @Override
@@ -509,7 +509,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
+                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase(), (database instanceof InformixDatabase));
                 }
 
                 @Override
@@ -597,12 +597,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND t.tablename = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof InformixDatabase) {
-                        sql = "select sysindexes.idxname, sysindexes.idxtype, systables.tabname "
+                        sql = "select unique sysindexes.idxname as CONSTRAINT_NAME, sysindexes.idxtype, systables.tabname as TABLE_NAME "
                                 + "from sysindexes, systables "
-                                + "where sysindexes.tabid = systables.tabid "
-                                + "and sysindexes.idxtype ='U'";
+                                + "left outer join sysconstraints on sysconstraints.tabid = systables.tabid and sysconstraints.constrtype = 'P' "
+                                + "where sysindexes.tabid = systables.tabid and sysindexes.idxtype = 'U' "
+                                + "and sysconstraints.idxname != sysindexes.idxname "
+                                + "and sysconstraints.tabid = sysindexes.tabid";
                         if (tableName != null) {
-                            sql += " AND systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
                         LogFactory.getLogger().warning("Finding unique constraints not currently supported for Sybase");
