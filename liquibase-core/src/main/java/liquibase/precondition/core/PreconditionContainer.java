@@ -9,6 +9,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
 import liquibase.database.Database;
+import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.executor.Executor;
@@ -18,7 +19,7 @@ import liquibase.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PreconditionContainer extends AndPrecondition {
+public class PreconditionContainer extends AndPrecondition implements ChangeLogChild {
 
     public enum FailOption {
         HALT("HALT"),

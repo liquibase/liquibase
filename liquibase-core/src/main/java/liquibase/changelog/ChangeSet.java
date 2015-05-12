@@ -24,7 +24,6 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
@@ -36,7 +35,7 @@ import java.util.*;
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
-public class ChangeSet implements Conditional, LiquibaseSerializable {
+public class ChangeSet implements Conditional, ChangeLogChild {
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
