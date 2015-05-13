@@ -32,7 +32,7 @@ class ResultSetCache {
             String schemaKey = resultSetExtractor.wantedKeyParameters().createSchemaKey(resultSetExtractor.database);
 
             Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
-            if (cache == null ) {
+            if (cache == null) {
                 cache = new HashMap<String, List<CachedRow>>();
                 cacheBySchema.put(schemaKey, cache);
             }
@@ -46,21 +46,31 @@ class ResultSetCache {
             }
 
             List<CachedRow> results;
+            boolean didBulkSelect = false;
             if (resultSetExtractor.shouldBulkSelect(schemaKey, this)) {
                 cache.clear(); //remove any existing single fetches that may be duplicated
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
+                didBulkSelect = true;
             } else {
                 Integer previousCount = timesSingleQueried.get(schemaKey);
                 if (previousCount == null) {
                     previousCount = 0;
                 }
-                timesSingleQueried.put(schemaKey, previousCount+1);
+                timesSingleQueried.put(schemaKey, previousCount + 1);
                 results = resultSetExtractor.fastFetch();
             }
 
             for (CachedRow row : results) {
-                for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
+
+                String[] keyPermutations;
+                if (didBulkSelect) {
+                    keyPermutations = resultSetExtractor.rowKeyParameters(row).getKeyPermutations();
+                } else {
+                    keyPermutations = new String[] {wantedKey};
+                }
+
+                for (String rowKey : keyPermutations) {
                     if (!cache.containsKey(rowKey)) {
                         cache.put(rowKey, new ArrayList<CachedRow>());
                     }
@@ -73,8 +83,6 @@ class ResultSetCache {
                 returnList = new ArrayList<CachedRow>();
             }
             return returnList;
-
-
 
 
         } catch (SQLException e) {
@@ -122,7 +130,7 @@ class ResultSetCache {
             String[] nullVersion = Arrays.copyOf(params, params.length);
             nullVersion[fromIndex] = null;
             if (params.length == fromIndex + 1) {
-                return new String[] {
+                return new String[]{
                         createKey(database, params),
                         createKey(database, nullVersion)
                 };
@@ -137,10 +145,10 @@ class ResultSetCache {
         }
 
         public String createSchemaKey(Database database) {
-            if (!database.supportsCatalogs() && ! database.supportsSchemas()) {
+            if (!database.supportsCatalogs() && !database.supportsSchemas()) {
                 return "all";
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
-                return (catalog+"."+schema).toLowerCase();
+                return (catalog + "." + schema).toLowerCase();
             } else {
                 if (catalog == null && schema != null) {
                     return schema.toLowerCase();
@@ -217,6 +225,7 @@ class ResultSetCache {
         public abstract RowData wantedKeyParameters();
 
         public abstract List<CachedRow> fastFetch() throws SQLException, DatabaseException;
+
         public abstract List<CachedRow> bulkFetch() throws SQLException, DatabaseException;
 
         protected List<CachedRow> extract(ResultSet resultSet) throws SQLException {
@@ -229,31 +238,31 @@ class ResultSetCache {
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {
                 result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
-                  @Override
-                  protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-                    Object value = super.getColumnValue(rs, index);
-                    if (value != null && value instanceof String) {
+                    @Override
+                    protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+                        Object value = super.getColumnValue(rs, index);
+                        if (value != null && value instanceof String) {
 
-                      // Don't trim for informix database,
-                      // We need to discern the space in front of an index name,
-                      // to know if it was auto-generated or not
-                      
-                      if(informixIndexTrimHint == false) {
-                        value = ((String) value).trim(); // Trim the value normally
-                      } else {
-                        boolean startsWithSpace = false;
-                        if(database instanceof InformixDatabase && ((String)value).matches("^ .*$")) {
-                          startsWithSpace = true; // Set the flag if the value started with a space
-                        }
-                        value = ((String) value).trim(); // Trim the value normally
-                        if(startsWithSpace == true) {
-                          value = " "+value; // Put the space back at the beginning if the flag was set
-                        }
-                      }
+                            // Don't trim for informix database,
+                            // We need to discern the space in front of an index name,
+                            // to know if it was auto-generated or not
 
+                            if (informixIndexTrimHint == false) {
+                                value = ((String) value).trim(); // Trim the value normally
+                            } else {
+                                boolean startsWithSpace = false;
+                                if (database instanceof InformixDatabase && ((String) value).matches("^ .*$")) {
+                                    startsWithSpace = true; // Set the flag if the value started with a space
+                                }
+                                value = ((String) value).trim(); // Trim the value normally
+                                if (startsWithSpace == true) {
+                                    value = " " + value; // Put the space back at the beginning if the flag was set
+                                }
+                            }
+
+                        }
+                        return value;
                     }
-                    return value;
-                  }
                 }).extractData(resultSet);
 
                 for (Map row : result) {
@@ -281,6 +290,7 @@ class ResultSetCache {
         }
 
         public abstract List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException;
+
         public abstract List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException;
 
         @Override
