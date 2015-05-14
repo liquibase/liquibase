@@ -50,7 +50,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #schemaName on #conn")
     def "can snapshot all tables in schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(null, new ObjectName(schemaName))))
+        def action = new SnapshotDatabaseObjectsAction(Table, new Schema(schemaName))
         def scope = JUnitScope.getInstance(conn)
 
         def plan = new ActionExecutor().createPlan(action, scope)
@@ -61,9 +61,11 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
                 .run({
             def result = plan.execute(scope) as QueryResult
 
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
-                it.getName().asList()[1] == schemaName
-            }).toArray())
+
+            def expected = snapshot.get(Table).grep({
+                it.name.container.toString() == schemaName.toString()
+            })
+            assertThat result.asList(Table), containsInAnyOrder(expected.toArray())
         })
 
         where:
@@ -72,7 +74,39 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             return CollectionUtil.permutations([
                     [it],
                     [snapshot],
-                    snapshot.get(Table)*.getName()*.getContainer()*.getName().unique()
+                    snapshot.get(Schema)*.getName()
+            ])
+        }
+    }
+
+    @Unroll("#featureName: #schemaName on #conn")
+    def "can snapshot all tables in schema with a null table name"() {
+        expect:
+        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(null, schemaName)))
+        def scope = JUnitScope.getInstance(conn)
+
+        def plan = new ActionExecutor().createPlan(action, scope)
+
+        testMDPermutation(snapshot, conn, scope)
+                .addParameters(schemaName_asTable: schemaName)
+                .addOperations(plan: plan)
+                .run({
+            def result = plan.execute(scope) as QueryResult
+
+
+            def expected = snapshot.get(Table).grep({
+                it.getName().container.toString() == schemaName.toString()
+            }).toArray()
+            assertThat result.asList(Table), containsInAnyOrder(expected)
+        })
+
+        where:
+        [conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
+            return CollectionUtil.permutations([
+                    [it],
+                    [snapshot],
+                    snapshot.get(Schema)*.name
             ])
         }
     }
@@ -109,36 +143,6 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         }
     }
 
-    @Unroll("#featureName: #tableName on #conn")
-    def "can snapshot tables of the same name regardless of schema/catalog"() {
-        expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(tableName, null)))
-        def scope = JUnitScope.getInstance(conn)
-
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters(tableName_asTable: tableName)
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
-                it.getName().getName() == tableName
-            }).toArray())
-        })
-
-        where:
-        [conn, snapshot, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
-            return CollectionUtil.permutations([
-                    [it],
-                    [snapshot],
-                    snapshot.get(Table)*.getName()*.getName().unique()
-            ])
-        }
-    }
-
     @Unroll("#featureName: #schemaName on #conn")
     def "can snapshot tables related to a schema"() {
         expect:
@@ -153,9 +157,10 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
                 .run({
             def result = plan.execute(scope) as QueryResult
 
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
-                it.getName().getContainer() == schemaName
-            }).toArray())
+            def expected = snapshot.get(Table).grep({
+                it.getName().getContainer().toString() == schemaName.toString()
+            }).toArray()
+            assertThat result.asList(Table), containsInAnyOrder(expected)
         })
 
         where:
@@ -164,7 +169,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             return CollectionUtil.permutations([
                     [it],
                     [snapshot],
-                    snapshot.get(Table)*.getName()*.getContainer().unique()
+                    snapshot.get(Schema)*.getName()
             ])
         }
     }

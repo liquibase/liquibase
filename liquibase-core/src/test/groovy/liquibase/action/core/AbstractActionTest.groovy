@@ -23,6 +23,11 @@ abstract class AbstractActionTest extends Specification {
 
         def permutation = new ActionTestPermutation(this.specificationContext, this, snapshot, conn, scope, [:])
 
+        def configurationName = conn.getConfigurationName()
+        if (configurationName != ConnectionSupplier.CONFIG_NAME_STANDARD) {
+            permutation.addParameter("configuration", configurationName)
+        }
+
         return TestMD.test(this.specificationContext, database.class)
                 .withPermutation(permutation)
     }

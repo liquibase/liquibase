@@ -275,9 +275,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return null;
         }
 
-        if (objectName.contains("(")) { //probably a function
-            return objectName;
-        }
+//        if (objectName.contains("(")) { //probably a function
+//            return objectName;
+//        }
+
+        objectName = objectName.replace("[", "\\[").replace("]", "\\]");
 
         return quoteObject(objectName, objectType);
     }
@@ -364,7 +366,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (caseSensitive == null) {
             return false;
         } else {
-            return caseSensitive.booleanValue();
+            return caseSensitive;
         }
     }
 
@@ -478,5 +480,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
         return Index.class.isAssignableFrom(objectType);
+    }
+
+    @Override
+    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
+        return 2;
     }
 }

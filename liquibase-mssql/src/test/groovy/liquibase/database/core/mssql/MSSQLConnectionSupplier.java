@@ -1,7 +1,9 @@
 package liquibase.database.core.mssql;
 
 
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.ConnectionSupplier;
+import liquibase.database.Database;
 
 import java.io.IOException;
 import java.util.Map;
@@ -32,7 +34,39 @@ public class MSSQLConnectionSupplier extends ConnectionSupplier {
         return OS_WINDOWS;
     }
 
-//    @Override
+    @Override
+    public String getPrimaryCatalog() {
+        return super.getPrimaryCatalog().toLowerCase();
+    }
+
+    @Override
+    public String getPrimarySchema() {
+        return super.getPrimarySchema().toLowerCase();
+    }
+
+    @Override
+    public String getAlternateCatalog() {
+        return super.getAlternateCatalog().toLowerCase();
+    }
+
+    @Override
+    public String getAlternateSchema() {
+        return super.getAlternateSchema().toLowerCase();
+    }
+
+    @Override
+    public Database getDatabase() {
+        Database database = super.getDatabase();
+        ((AbstractJdbcDatabase) database).setCaseSensitive(false);
+        return database;
+    }
+
+    @Override
+    public String getConfigurationName() {
+        return "caseInsensitive";
+    }
+
+    //    @Override
 //    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
 //        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/mssql/mssql.puppet.vm", context);
 //    }
