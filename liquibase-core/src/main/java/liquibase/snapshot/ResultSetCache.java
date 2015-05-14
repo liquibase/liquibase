@@ -46,13 +46,12 @@ class ResultSetCache {
             }
 
             List<CachedRow> results;
-            boolean didBulkSelect = false;
             if (resultSetExtractor.shouldBulkSelect(schemaKey, this)) {
                 cache.clear(); //remove any existing single fetches that may be duplicated
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
-                didBulkSelect = true;
             } else {
+                cache = new HashMap<String, List<CachedRow>>(); //don't store results in real cache to prevent confusion if later fetching all items.
                 Integer previousCount = timesSingleQueried.get(schemaKey);
                 if (previousCount == null) {
                     previousCount = 0;
@@ -62,15 +61,7 @@ class ResultSetCache {
             }
 
             for (CachedRow row : results) {
-
-                String[] keyPermutations;
-                if (didBulkSelect) {
-                    keyPermutations = resultSetExtractor.rowKeyParameters(row).getKeyPermutations();
-                } else {
-                    keyPermutations = new String[] {wantedKey};
-                }
-
-                for (String rowKey : keyPermutations) {
+                for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (!cache.containsKey(rowKey)) {
                         cache.put(rowKey, new ArrayList<CachedRow>());
                     }
