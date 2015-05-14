@@ -186,8 +186,8 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 1
-        ((RawSQLChange) changeSet.rollBackChanges[0]).sql == "rollback logic here"
+        changeSet.rollback.changes.size() == 1
+        ((RawSQLChange) changeSet.rollback.changes[0]).sql == "rollback logic here"
     }
 
     def "load node with rollback containing change node as value"() {
@@ -204,8 +204,8 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 1
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_x"
+        changeSet.rollback.changes.size() == 1
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_x"
     }
 
     def "load node with rollback containing collection of change nodes as value"() {
@@ -225,9 +225,9 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 2
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_x"
-        ((RenameTableChange) changeSet.rollBackChanges[1]).newTableName == "rename_to_y"
+        changeSet.rollback.changes.size() == 2
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_x"
+        ((RenameTableChange) changeSet.rollback.changes[1]).newTableName == "rename_to_y"
     }
 
     def "load node with rollback containing rollback nodes as children"() {
@@ -247,10 +247,10 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 3
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_a"
-        ((RenameTableChange) changeSet.rollBackChanges[1]).newTableName == "rename_to_b"
-        ((RawSQLChange) changeSet.rollBackChanges[2]).sql == "rollback sql"
+        changeSet.rollback.changes.size() == 3
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_a"
+        ((RenameTableChange) changeSet.rollback.changes[1]).newTableName == "rename_to_b"
+        ((RawSQLChange) changeSet.rollback.changes[2]).sql == "rollback sql"
     }
 
     def "load node with rollback containing multiple sql statements in value"() {
@@ -268,9 +268,9 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        ((RawSQLChange) changeSet.rollBackChanges[0]).sql == "rollback sql 1"
-        ((RawSQLChange) changeSet.rollBackChanges[1]).sql == "rollback sql 2"
-        changeSet.rollBackChanges.size() == 2
+        ((RawSQLChange) changeSet.rollback.changes[0]).sql == "rollback sql 1"
+        ((RawSQLChange) changeSet.rollback.changes[1]).sql == "rollback sql 2"
+        changeSet.rollback.changes.size() == 2
     }
 
     def "load node with valid checksums as children"() {
@@ -391,8 +391,8 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 0
-        changeSet.rollBackChanges.size() == 1
-        changeSet.rollBackChanges[0] instanceof EmptyChange
+        changeSet.rollback.changes.size() == 1
+        changeSet.rollback.changes[0] instanceof EmptyChange
     }
 
     @Unroll("#featureName with changeSetPath=#changeSetPath")
@@ -409,8 +409,8 @@ public class ChangeSetTest extends Specification {
         then:
         changeLog.getChangeSet(path, "nvoxland", "3").changes.size() == 1
         ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "3").changes[0]).tableName == "tableX"
-        changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges.size() == 1
-        ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges[0]).tableName == "table2"
+        changeLog.getChangeSet(path, "nvoxland", "3").rollback.changes.size() == 1
+        ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollback.changes[0]).tableName == "table2"
 
         where:
         changeSetPath << ["com/example/test.xml", null]

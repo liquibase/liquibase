@@ -152,7 +152,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     /**
      * Changes defined to roll back this changeSet
      */
-    private List<Change> rollBackChanges = new ArrayList<Change>();
+    private RollbackContainer rollback = new RollbackContainer();
 
 
     /**
@@ -614,11 +614,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             if (hasCustomRollbackChanges()) {
                 
                 final List<SqlStatement> statements = new LinkedList<SqlStatement>();
-                for (Change rollback : rollBackChanges) {
-                    if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
+                for (Change change : rollback.getChanges()) {
+                    if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] changeStatements = rollback.generateStatements(database);
+                    SqlStatement[] changeStatements = change.generateStatements(database);
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
                     }
@@ -664,7 +664,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
     protected boolean hasCustomRollbackChanges() {
-        return rollBackChanges != null && rollBackChanges.size() > 0;
+        return rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0;
     }
     
     /**
@@ -739,20 +739,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return runInTransaction;
     }
 
-    public Change[] getRollBackChanges() {
-        return rollBackChanges.toArray(new Change[rollBackChanges.size()]);
+    public RollbackContainer getRollback() {
+        return rollback;
     }
 
     public void addRollBackSQL(String sql) {
         if (StringUtils.trimToNull(sql) == null) {
-            if (this.rollBackChanges.size() == 0) {
-                rollBackChanges.add(new EmptyChange());
+            if (rollback.getChanges().size() == 0) {
+                rollback.getChanges().add(new EmptyChange());
             }
             return;
         }
 
         for (String statment : StringUtils.splitSQL(sql, null)) {
-            rollBackChanges.add(new RawSQLChange(statment.trim()));
+            rollback.getChanges().add(new RawSQLChange(statment.trim()));
         }
     }
 
@@ -760,13 +760,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (change == null) {
             return;
         }
-        rollBackChanges.add(change);
+        rollback.getChanges().add(change);
         change.setChangeSet(this);
     }
 
 
     public boolean supportsRollback(Database database) {
-        if (rollBackChanges != null && rollBackChanges.size() > 0) {
+        if (rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0) {
             return true;
         }
 
@@ -1008,8 +1008,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if (field.equals("rollback")) {
-            if (this.getRollBackChanges() != null && this.getRollBackChanges().length > 0) {
-                return this.getRollBackChanges();
+            if (rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0) {
+                return rollback;
             } else {
                 return null;
             }
