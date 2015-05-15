@@ -242,14 +242,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
-                    if (seenTables == null) {
-                        seenTables = new HashSet<String>();
-                        resultSetCache.putInfo("seenTables", seenTables);
+                    if (tableName.equalsIgnoreCase("databasechangelog") || tableName.equalsIgnoreCase("databasechangeloglock")) {
+                        return false;
                     }
 
-                    seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
-                    return seenTables.size() > 2;
+                    return true;
+                    //having issues with some columns not being found
+//                    Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
+//                    if (seenTables == null) {
+//                        seenTables = new HashSet<String>();
+//                        resultSetCache.putInfo("seenTables", seenTables);
+//                    }
+//
+//                    seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
+//                    return seenTables.size() > 2;
                 }
 
                 @Override
