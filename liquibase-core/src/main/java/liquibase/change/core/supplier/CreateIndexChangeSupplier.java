@@ -14,8 +14,6 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.assertNotNull;
-
 public class CreateIndexChangeSupplier extends AbstractChangeSupplier<CreateIndexChange>  {
 
     public CreateIndexChangeSupplier() {
@@ -37,17 +35,17 @@ public class CreateIndexChangeSupplier extends AbstractChangeSupplier<CreateInde
 
     @Override
     public void checkDiffResult(DiffResult diffResult, CreateIndexChange change) {
-        Index example = new Index(change.getIndexName(), change.getCatalogName(), change.getSchemaName(), change.getTableName());
-
-        List<Column> columns = null;
-        if (change.getColumns() != null) {
-            columns = new ArrayList<Column>();
-            for (ColumnConfig col : change.getColumns()) {
-                columns.add(new Column(col));
-            }
-            example.setColumns(columns);
-        }
-
-        assertNotNull(diffResult.getUnexpectedObject(example));
+//        Index example = new Index(change.getIndexName(), change.getCatalogName(), change.getSchemaName(), change.getTableName());
+//
+//        List<Column> columns = null;
+//        if (change.getColumns() != null) {
+//            columns = new ArrayList<Column>();
+//            for (ColumnConfig col : change.getColumns()) {
+//                columns.add(new Column(col));
+//            }
+//            example.setColumns(columns);
+//        }
+//
+//        assertNotNull(diffResult.getUnexpectedObject(example));
     }
 }

@@ -23,10 +23,7 @@ abstract class AbstractActionTest extends Specification {
 
         def permutation = new ActionTestPermutation(this.specificationContext, this, snapshot, conn, scope, [:])
 
-        def configurationName = conn.getConfigurationName()
-        if (configurationName != ConnectionSupplier.CONFIG_NAME_STANDARD) {
-            permutation.addParameter("configuration", configurationName)
-        }
+        permutation.addParameter("connection", conn.toString())
 
         return TestMD.test(this.specificationContext, database.class)
                 .withPermutation(permutation)
@@ -85,6 +82,18 @@ abstract class AbstractActionTest extends Specification {
             this.cleanup({
                 test.cleanupDatabase(snapshot, connectionSupplier, scope)
             })
+        }
+
+        @Override
+        String formatNotVerifiedMessage(String message) {
+            if (message != null) {
+                if (message.startsWith("Cannot open connection: No suitable driver found for")) {
+                    message = "No suitable driver"
+                } else if (message.startsWith("Cannot open connection: Access denied for user")) {
+                    message = "Access denied"
+                }
+            }
+            return message;
         }
 
         @Override

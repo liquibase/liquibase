@@ -5,12 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.ModifyDataTypeChange;
 import liquibase.diff.DiffResult;
-import liquibase.diff.ObjectDifferences;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-
-import static junit.framework.TestCase.assertNotNull;
 
 public class ModifyDataTypeChangeSupplier extends AbstractChangeSupplier<ModifyDataTypeChange>  {
 
@@ -39,9 +34,9 @@ public class ModifyDataTypeChangeSupplier extends AbstractChangeSupplier<ModifyD
 
     @Override
     public void checkDiffResult(DiffResult diffResult, ModifyDataTypeChange change) {
-        ObjectDifferences colDiff = diffResult.getChangedObject(new Column(Table.class, change.getCatalogName(), change.getSchemaName(), change.getTableName(), change.getColumnName()));
-        assertNotNull(colDiff);
-        assertNotNull(colDiff.getDifference("type"));
-//todo        assertEquals(change.getNewDataType(), colDiff.getDifference("type").getComparedValue().toString());
+//        ObjectDifferences colDiff = diffResult.getChangedObject(new Column(Table.class, change.getCatalogName(), change.getSchemaName(), change.getTableName(), change.getColumnName()));
+//        assertNotNull(colDiff);
+//        assertNotNull(colDiff.getDifference("type"));
+////todo        assertEquals(change.getNewDataType(), colDiff.getDifference("type").getComparedValue().toString());
     }
 }

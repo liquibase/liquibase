@@ -9,9 +9,6 @@ import liquibase.change.core.DropProcedureChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.StoredProcedure;
-
-import static junit.framework.TestCase.assertNotNull;
 
 public class DropProcedureChangeSupplier extends AbstractChangeSupplier<DropProcedureChange> {
 
@@ -45,7 +42,7 @@ public class DropProcedureChangeSupplier extends AbstractChangeSupplier<DropProc
 
     @Override
     public void checkDiffResult(DiffResult diffResult, DropProcedureChange change) {
-        assertNotNull(diffResult.getMissingObject(new StoredProcedure(change.getCatalogName(), change.getSchemaName(), change.getProcedureName())));
+        //assertNotNull(diffResult.getMissingObject(new StoredProcedure(change.getCatalogName(), change.getSchemaName(), change.getProcedureName())));
     }
 
 }

@@ -30,20 +30,6 @@
         <jdeb.version>1.0.1</jdeb.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>${snakeyaml.version}</version>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>

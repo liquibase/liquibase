@@ -6,9 +6,6 @@ import liquibase.change.core.DropSequenceChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.Sequence;
-
-import static junit.framework.TestCase.assertNotNull;
 
 public class DropSequenceChangeSupplier extends AbstractChangeSupplier<DropSequenceChange>  {
 
@@ -28,6 +25,6 @@ public class DropSequenceChangeSupplier extends AbstractChangeSupplier<DropSeque
 
     @Override
     public void checkDiffResult(DiffResult diffResult, DropSequenceChange change) {
-        assertNotNull(diffResult.getMissingObject(new Sequence(change.getCatalogName(), change.getSchemaName(), change.getSequenceName())));
+        //assertNotNull(diffResult.getMissingObject(new Sequence(change.getCatalogName(), change.getSchemaName(), change.getSequenceName())));
     }
 }

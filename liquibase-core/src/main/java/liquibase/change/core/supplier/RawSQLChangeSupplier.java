@@ -6,11 +6,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.statement.core.RawSqlStatement;
-
-import static org.junit.Assert.assertTrue;
 
 public class RawSQLChangeSupplier extends AbstractChangeSupplier<RawSQLChange>  {
 
@@ -32,10 +28,10 @@ public class RawSQLChangeSupplier extends AbstractChangeSupplier<RawSQLChange>  
 
     @Override
     public void checkDiffResult(DiffResult diffResult, RawSQLChange change) throws Exception {
-        //todo generic check
-
-        int rows = ExecutorService.getInstance().getExecutor(diffResult.getComparisonSnapshot().getDatabase()).queryForInt(new RawSqlStatement("select count(*) from person"));
-        assertTrue(rows > 0);
+//        //todo generic check
+//
+//        int rows = ExecutorService.getInstance().getExecutor(diffResult.getComparisonSnapshot().getDatabase()).queryForInt(new RawSqlStatement("select count(*) from person"));
+//        assertTrue(rows > 0);
 
     }
 

@@ -9,9 +9,6 @@ import liquibase.change.core.DropForeignKeyConstraintChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.ForeignKey;
-
-import static junit.framework.TestCase.assertNotNull;
 
 public class DropForeignKeyConstraintChangeSupplier extends AbstractChangeSupplier<DropForeignKeyConstraintChange>  {
 
@@ -46,6 +43,6 @@ public class DropForeignKeyConstraintChangeSupplier extends AbstractChangeSuppli
 
     @Override
     public void checkDiffResult(DiffResult diffResult, DropForeignKeyConstraintChange change) {
-        assertNotNull(diffResult.getMissingObject(new ForeignKey(change.getConstraintName(), change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName())));
+//        assertNotNull(diffResult.getMissingObject(new ForeignKey(change.getConstraintName(), change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName())));
     }
 }

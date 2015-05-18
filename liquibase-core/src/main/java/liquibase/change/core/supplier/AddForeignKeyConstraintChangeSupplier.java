@@ -12,8 +12,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
-import static junit.framework.Assert.assertNotNull;
-
 public class AddForeignKeyConstraintChangeSupplier extends AbstractChangeSupplier<AddForeignKeyConstraintChange>  {
 
     public AddForeignKeyConstraintChangeSupplier() {
@@ -43,9 +41,9 @@ public class AddForeignKeyConstraintChangeSupplier extends AbstractChangeSupplie
 
     @Override
     public void checkDiffResult(DiffResult diffResult, AddForeignKeyConstraintChange change) {
-        Table baseTable = new Table(change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName());
-        Table referencedTable = new Table(change.getReferencedTableCatalogName(), change.getReferencedTableSchemaName(), change.getReferencedTableName());
-
-        assertNotNull(diffResult.getUnexpectedObject(new ForeignKey(change.getConstraintName()).setForeignKeyTable(baseTable).setPrimaryKeyTable(referencedTable).setForeignKeyColumns(Column.listFromNames(change.getBaseColumnNames())).setPrimaryKeyColumns(Column.listFromNames(change.getReferencedColumnNames()))));
+//        Table baseTable = new Table(change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName());
+//        Table referencedTable = new Table(change.getReferencedTableCatalogName(), change.getReferencedTableSchemaName(), change.getReferencedTableName());
+//
+//        assertNotNull(diffResult.getUnexpectedObject(new ForeignKey(change.getConstraintName()).setForeignKeyTable(baseTable).setPrimaryKeyTable(referencedTable).setForeignKeyColumns(Column.listFromNames(change.getBaseColumnNames())).setPrimaryKeyColumns(Column.listFromNames(change.getReferencedColumnNames()))));
     }
 }
