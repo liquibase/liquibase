@@ -1,3 +1,16 @@
+f3b9acc Temporarily revert change 007701b due to issues with some columns not being found sometimes
+46dd7ec Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
+acfa6bd Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
+2bfa4c1 CORE-2364 Better handling of referenceDefaultSchemaName and referenceDefaultCatalogName
+3132bc4 Don't have a max line length or we produce invalid json
+1adb065 Fixed type due to mistyped ctrl-k
+5aa5313 Fixing failing test
+8c46d9a Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+37cbb3e CORE-2355 Improve updateSQL performance
+1ae1eff DVONE-2770 Do not check LB tables when doing futureRollbackSQL
+ad77afa Merge remote-tracking branch 'lblb/dont_snapshot_all_columns' into ddb
+8875ef8 Merge pull request #415 from liquibase/dont_snapshot_all_columns
+007701b Should not always snapshot all columns for performance reasons.
 1438fa2 DVONE-2578 Added system property to turn off bulk select.  This helps DaticalDB performance when calling ChangeLogHistoryService.init(), as in the status logic
 6be0580 CORE-2228 New usingIndexName attribute on addPrimaryKey and addUniqueConstraint
 613b3da CORE-2254 Ability to save snapshot for later comparison

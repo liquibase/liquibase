@@ -33,7 +33,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     private List<RanChangeSet> ranChangeSetList;
     private boolean serviceInitialized = false;
-    private boolean hasDatabaseChangeLogTable = false;
+    private Boolean hasDatabaseChangeLogTable = null;
     private Integer lastChangeSetSequenceValue;
 
     @Override
@@ -68,7 +68,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
-        if (!hasDatabaseChangeLogTable) {
+        if (hasDatabaseChangeLogTable == null) {
             try {
                 hasDatabaseChangeLogTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(getDatabase());
             } catch (LiquibaseException e) {

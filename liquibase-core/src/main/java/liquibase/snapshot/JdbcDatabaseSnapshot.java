@@ -240,24 +240,22 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
                 }
 
-                //
-                // DVONE-2188 Always return true for shouldBulkSelect to fix problem with
-                // missing columns in snapshot/baseline
-                //
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    //Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
-                    //if (seenTables == null) {
-                    //    seenTables = new HashSet<String>();
-                    //    resultSetCache.putInfo("seenTables", seenTables);
-                    //}
-
-                    //seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
-                    //return seenTables.size() > 2;
-                    if (System.getProperty("NO_BULK_SELECT") != null) {
-                       return false;
+                    if (tableName.equalsIgnoreCase("databasechangelog") || tableName.equalsIgnoreCase("databasechangeloglock")) {
+                        return false;
                     }
+
                     return true;
+                    //having issues with some columns not being found
+//                    Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
+//                    if (seenTables == null) {
+//                        seenTables = new HashSet<String>();
+//                        resultSetCache.putInfo("seenTables", seenTables);
+//                    }
+//
+//                    seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
+//                    return seenTables.size() > 2;
                 }
 
                 @Override

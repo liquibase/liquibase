@@ -79,6 +79,8 @@ public class Main {
     protected String referenceUrl;
     protected String referenceUsername;
     protected String referencePassword;
+    protected String referenceDefaultCatalogName;
+    protected String referenceDefaultSchemaName;
 
     protected String currentDateTimeFunction;
 
@@ -896,7 +898,7 @@ public class Main {
             CompareControl.SchemaComparison[] finalSchemaComparisons;
             CatalogAndSchema[] finalSchemas;
             if (referenceSchemaNames == null) {
-                finalSchemaComparisons = new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(defaultCatalogName, defaultSchemaName), new CatalogAndSchema(defaultCatalogName, defaultSchemaName))};
+                finalSchemaComparisons = new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName), new CatalogAndSchema(defaultCatalogName, defaultSchemaName))};
                 finalSchemas = new CatalogAndSchema[] {new CatalogAndSchema(defaultCatalogName, defaultSchemaName)};
             } else {
                 List<CompareControl.SchemaComparison> schemaComparisons = new ArrayList<CompareControl.SchemaComparison>();
@@ -1142,8 +1144,8 @@ public class Main {
         String url = referenceUrl;
         String username = referenceUsername;
         String password = referencePassword;
-        String defaultSchemaName = this.defaultSchemaName;
-        String defaultCatalogName = this.defaultCatalogName;
+        String defaultSchemaName = this.referenceDefaultSchemaName;
+        String defaultCatalogName = this.referenceDefaultCatalogName;
 
         for (String param : commandParams) {
             String[] splitArg = splitArg(param);

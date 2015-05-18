@@ -39,6 +39,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             dumperOptions.setPrettyFlow(true);
             dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
             dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+            dumperOptions.setWidth(Integer.MAX_VALUE);
 
             return new Yaml(getLiquibaseRepresenter(), dumperOptions);
         }
