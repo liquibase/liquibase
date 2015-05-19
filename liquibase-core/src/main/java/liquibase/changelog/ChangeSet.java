@@ -364,8 +364,11 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         boolean foundValue = false;
         for (ParsedNode childNode : rollbackNode.getChildren()) {
-            addRollbackChange(toChange(childNode, resourceAccessor));
-            foundValue =  true;
+            Change rollbackChange = toChange(childNode, resourceAccessor);
+            if (rollbackChange != null) {
+                addRollbackChange(rollbackChange);
+                foundValue =  true;
+            }
         }
 
         Object value = rollbackNode.getValue();
@@ -588,12 +591,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
-            
+
             // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
             }
-            
+
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
@@ -866,7 +869,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
         return objectQuotingStrategy;
     }
- 
+
     @Override
     public String getSerializedObjectName() {
         return "changeSet";
