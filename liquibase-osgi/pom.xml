@@ -4,6 +4,7 @@
 
     <artifactId>liquibase-osgi</artifactId>
     <name>Liquibase Osgi</name>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <parent>
@@ -18,6 +19,20 @@
     </properties>
 
     <dependencies>
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -85,7 +100,18 @@
                             org.yaml.snakeyaml.introspector.*;resolution:=optional,
                             org.yaml.snakeyaml.nodes.*;resolution:=optional,
                             org.yaml.snakeyaml.representer.*;resolution:=optional,
-                            org.junit.*;resolution:=optional
+                            org.junit.*;resolution:=optional,
+                            groovy.lang.*;resolution:=optional,
+                            org.codehaus.commons.compiler.*;resolution:=optional,
+                            org.codehaus.groovy.control.*;resolution:=optional,
+                            org.codehaus.groovy.control.customizers.*;resolution:=optional,
+                            org.codehaus.groovy.reflection.*;resolution:=optional,
+                            org.codehaus.groovy.runtime.*;resolution:=optional,
+                            org.codehaus.groovy.runtime.callsite.*;resolution:=optional,
+                            org.codehaus.groovy.runtime.typehandling.*;resolution:=optional,
+                            org.codehaus.groovy.runtime.wrappers.*;resolution:=optional,
+                            org.codehaus.janino.*;resolution:=optional,
+                            sun.reflect.*;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
                             *;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api

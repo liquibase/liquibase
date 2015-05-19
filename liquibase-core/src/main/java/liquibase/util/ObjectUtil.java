@@ -1,6 +1,5 @@
 package liquibase.util;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import liquibase.ContextExpression;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
