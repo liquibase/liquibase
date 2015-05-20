@@ -316,8 +316,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
 
-        liquibaseShouldRun=true;  // CORE-2366  I think this should be true by default
-        
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
             getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
