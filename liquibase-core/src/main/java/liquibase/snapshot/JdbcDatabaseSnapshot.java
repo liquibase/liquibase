@@ -240,7 +240,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (tableName.equalsIgnoreCase("databasechangelog") || tableName.equalsIgnoreCase("databasechangeloglock")) {
+                    if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
                         return false;
                     }
 
