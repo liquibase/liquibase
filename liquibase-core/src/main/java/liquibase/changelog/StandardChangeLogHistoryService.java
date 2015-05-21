@@ -87,7 +87,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         Table changeLogTable = null;
         try {
-            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(database, Table.class, Column.class), database);
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(database, false, Table.class, Column.class), database);
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
