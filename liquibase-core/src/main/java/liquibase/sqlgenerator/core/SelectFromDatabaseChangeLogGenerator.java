@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -26,7 +27,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     @Override
     public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, final Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<ColumnConfig> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
-        String sql = "SELECT " + StringUtils.join(columnsToSelect, ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+        String sql = "SELECT " + (database instanceof MSSQLDatabase && statement.getLimit() != null ? "TOP "+statement.getLimit()+" " : "") + StringUtils.join(columnsToSelect, ",", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig column) {
                 if (column.getComputed() != null && column.getComputed()) {
@@ -51,6 +52,20 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
 
         if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
             sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ").toUpperCase();
+        }
+
+        if (statement.getLimit() != null) {
+            if (database instanceof OracleDatabase) {
+                if (whereClause == null) {
+                    sql += " WHERE ROWNUM="+statement.getLimit();
+                } else {
+                    sql += " AND ROWNUM="+statement.getLimit();
+                }
+            } else if (database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+                sql += " LIMIT "+statement.getLimit();
+            } else if (database instanceof DB2Database) {
+                sql += " FETCH FIRST "+statement.getLimit()+" ROWS ONLY";
+            }
         }
 
         return new Sql[]{
