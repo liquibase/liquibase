@@ -14,49 +14,67 @@ public class ReflectionSerializer {
         return instance;
     }
 
+    private Map<Class, Map<String, Field>> reflectionCache = new HashMap<Class, Map<String, Field>>();
+
     private ReflectionSerializer() {
 
     }
 
     public Set<String> getFields(Object object) {
-        Set<String> returnSet = new HashSet<String>();
-        Set<Field> allFields = new HashSet<Field>();
 
-        Class classToExtractFieldsFrom = object.getClass();
-        while (!classToExtractFieldsFrom.equals(Object.class)) {
-            allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
-            classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
-        }
+        if (!reflectionCache.containsKey(object.getClass())) {
 
-        for (Field field : allFields) {
-            if (field.getName().equals("serialVersionUID") || field.getName().equals("serializableFields")) {
-                continue;
-            }
-            if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
-                continue;
+            Map<String, Field> fields = new HashMap<String, Field>();
+            Set<Field> allFields = new HashSet<Field>();
+
+            Class classToExtractFieldsFrom = object.getClass();
+            while (!classToExtractFieldsFrom.equals(Object.class)) {
+                allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
+                classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
             }
 
-            returnSet.add(field.getName());
+            for (Field field : allFields) {
+                if (field.getName().equals("serialVersionUID") || field.getName().equals("serializableFields")) {
+                    continue;
+                }
+                if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
+                    continue;
+                }
+
+                fields.put(field.getName(), field);
+                field.setAccessible(true);
+            }
+
+            reflectionCache.put(object.getClass(), fields);
         }
 
-        return returnSet;
+        return reflectionCache.get(object.getClass()).keySet();
     }
 
     public Object getValue(Object object, String field) {
+        if (!reflectionCache.containsKey(object.getClass())) {
+            getFields(object); //fills cache
+        }
+
+        Map<String, Field> fieldsByName = reflectionCache.get(object.getClass());
+        Field foundField = fieldsByName.get(field);
+
         try {
-            Field foundField = null;
-            Class<? extends Object> classToCheck = object.getClass();
-            while (foundField == null && !classToCheck.equals(Object.class)) {
-                try {
-                    foundField = classToCheck.getDeclaredField(field);
-                } catch (NoSuchFieldException e) {
-                    classToCheck = classToCheck.getSuperclass();
-                }
-            }
             if (foundField == null) {
-                throw new UnexpectedLiquibaseException("No field "+field+" on "+object.getClass());
+                Class<? extends Object> classToCheck = object.getClass();
+                while (foundField == null && !classToCheck.equals(Object.class)) {
+                    try {
+                        foundField = classToCheck.getDeclaredField(field);
+                    } catch (NoSuchFieldException e) {
+                        classToCheck = classToCheck.getSuperclass();
+                    }
+                }
+                if (foundField == null) {
+                    throw new UnexpectedLiquibaseException("No field "+field+" on "+object.getClass());
+                }
+                foundField.setAccessible(true);
+                fieldsByName.put(field, foundField);
             }
-            foundField.setAccessible(true);
 
             return foundField.get(object);
         } catch (Exception e) {
