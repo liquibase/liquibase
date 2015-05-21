@@ -36,18 +36,26 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
 
         InputStream fileStream = null;
-        if (absoluteFile.exists() && absoluteFile.isFile() && absoluteFile.isAbsolute()) {
-            fileStream = new BufferedInputStream(new FileInputStream(absoluteFile));
-        } else if (relativeFile.exists() && relativeFile.isFile()) {
-            fileStream = new BufferedInputStream(new FileInputStream(relativeFile));
+        if (absoluteFile.isAbsolute()) {
+            try {
+                fileStream = new BufferedInputStream(new FileInputStream(absoluteFile));
+            } catch (FileNotFoundException e) {
+                //will try relative
+            }
         }
+
         if (fileStream == null) {
-            return null;
-        } else {
-            Set<InputStream> returnSet = new HashSet<InputStream>();
-            returnSet.add(fileStream);
-            return returnSet;
+            try {
+                fileStream = new BufferedInputStream(new FileInputStream(relativeFile));
+            } catch (FileNotFoundException e2) {
+                return null;
+            }
         }
+
+
+        Set<InputStream> returnSet = new HashSet<InputStream>();
+        returnSet.add(fileStream);
+        return returnSet;
     }
 
     @Override
