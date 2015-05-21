@@ -50,6 +50,6 @@ fi
 # add any JVM options here
 JAVA_OPTS=
 
-java -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main ${1+"$@"}
+java -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main --defaultsFile="${LIQUIBASE_HOME}/liquibase.properties" ${1+"$@"}
 
 
