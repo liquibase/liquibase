@@ -55,6 +55,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         if (example.getSnapshotId() != null) {
             return example;
         }
+        if (example.getAttribute("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
+            example.setSnapshotId(SnapshotIdService.getInstance().generateId());
+            example.setAttribute("liquibase-complete", null);
+            return example;
+        }
 
         Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
@@ -84,8 +89,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
         seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
         seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
-
-        seq.setSnapshotId(SnapshotIdService.getInstance().generateId());
+        seq.setAttribute("liquibase-complete", true);
 
         return seq;
     }
