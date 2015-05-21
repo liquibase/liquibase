@@ -31,6 +31,10 @@ public class OfflineConnection implements DatabaseConnection {
     private final Map<String, String> params = new HashMap<String, String>();
     private DatabaseSnapshot snapshot = null;
     private boolean outputLiquibaseSql = false;
+    /**
+     * Output CREATE TABLE LIQUIBASECHANGELOG or not
+     */
+    private boolean outputLiquibaseDdlSql = true;
     private String changeLogFile = "databasechangelog.csv";
     private Boolean caseSensitive = false;
     private String productName;
@@ -83,6 +87,8 @@ public class OfflineConnection implements DatabaseConnection {
                 this.changeLogFile = paramEntry.getValue();
             } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
                 this.outputLiquibaseSql = Boolean.valueOf(paramEntry.getValue());
+            } else if (paramEntry.getKey().equals("outputLiquibaseDdlSql")) {
+                this.outputLiquibaseDdlSql = Boolean.valueOf(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("snapshot")) {
                 String snapshotFile = paramEntry.getValue();
                 try {
@@ -125,7 +131,7 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
-        return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql);
+        return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql, outputLiquibaseDdlSql);
     }
 
     public DatabaseSnapshot getSnapshot() {

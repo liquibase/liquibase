@@ -32,6 +32,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     private final File changeLogFile;
     private boolean executeAgainstDatabase = true;
+    /**
+     * Output CREATE TABLE LIQUIBASECHANGELOG or not
+     */
+    private boolean executeDdlAgainstDatabase = true;
     private int COLUMN_ID = 0;
     private int COLUMN_AUTHOR = 1;
     private int COLUMN_FILENAME = 2;
@@ -47,9 +51,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private int COLUMN_LABELS = 12;
     private Integer lastChangeSetSequenceValue;
 
-    public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeAgainstDatabase) {
+    public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeAgainstDatabase, boolean executeDdlAgainstDatabase) {
         setDatabase(database);
         this.executeAgainstDatabase = executeAgainstDatabase;
+        this.executeDdlAgainstDatabase = executeDdlAgainstDatabase;
 
         changeLogFile = changeLogFile.getAbsoluteFile();
         this.changeLogFile = changeLogFile;
@@ -73,6 +78,15 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         this.executeAgainstDatabase = executeAgainstDatabase;
     }
 
+    public boolean isExecuteDdlAgainstDatabase() {
+        return executeDdlAgainstDatabase;
+    }
+
+    public void setExecuteDdlAgainstDatabase(boolean executeDdlAgainstDatabase) {
+        this.executeDdlAgainstDatabase = executeDdlAgainstDatabase;
+    }
+
+
     @Override
     public void reset() {
 
@@ -86,7 +100,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 changeLogFile.createNewFile();
                 writeHeader(changeLogFile);
 
-                if (isExecuteAgainstDatabase()) {
+                if (isExecuteAgainstDatabase() && isExecuteDdlAgainstDatabase()) {
                     ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
                 }
 
