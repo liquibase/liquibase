@@ -1,22 +1,23 @@
 package liquibase.precondition.core;
 
-import liquibase.exception.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
-import liquibase.database.Database;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeSet;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.util.StringUtils;
 
 public class PreconditionContainer extends AndPrecondition {
 
@@ -212,7 +213,7 @@ public class PreconditionContainer extends AndPrecondition {
                 message = new StringBuffer(getOnFailMessage());
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                LogFactory.getLogger().info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
+            	LogFactory.getInstance().getLog().info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
             } else {
                 if (getOnFailMessage() == null) {
                     throw e;
@@ -229,10 +230,10 @@ public class PreconditionContainer extends AndPrecondition {
             }
 
             if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
-                LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                LogFactory.getInstance().getLog().info("Continuing past: " + toString() + " despite precondition error:\n " + message);
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                LogFactory.getLogger().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
+            	LogFactory.getInstance().getLog().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
             } else {
                 if (getOnErrorMessage() == null) {
                     throw e;
@@ -256,5 +257,10 @@ public class PreconditionContainer extends AndPrecondition {
         this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
 
         super.load(parsedNode, resourceAccessor);
+    }
+    
+    @Override
+    public String getName() {
+        return "preConditions";
     }
 }

@@ -199,7 +199,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            LogFactory.getLogger().warning(message);
+            LogFactory.getInstance().getLog().warning(message);
         }
 
         if (!validatingVisitor.validationPassed()) {

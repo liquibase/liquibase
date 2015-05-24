@@ -17,7 +17,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -187,7 +186,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public ChangeSet(DatabaseChangeLog databaseChangeLog) {
         this.changes = new ArrayList<Change>();
-        log = LogFactory.getLogger();
+        log = LogFactory.getInstance().getLog();
         this.changeLog = databaseChangeLog;
     }
 
@@ -344,8 +343,6 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     addSqlVisitor(sqlVisitor);
                 }
             }
-
-
         } else if (child.getName().equals("preConditions")) {
             this.preconditions = new PreconditionContainer();
             try {
@@ -487,7 +484,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
 
-                    LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
+                    LogFactory.getInstance().getLog().info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
@@ -922,6 +919,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 "dbms",
                 "comment",
                 "changes",
+                "preconditions",
                 "rollback",
                 "labels",
                 "objectQuotingStrategy"));
@@ -998,6 +996,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         if (field.equals("changes")) {
             return getChanges();
+        }
+        
+        if (field.equals("preconditions")) {
+        	return getPreconditions();
         }
 
         if (field.equals("rollback")) {
