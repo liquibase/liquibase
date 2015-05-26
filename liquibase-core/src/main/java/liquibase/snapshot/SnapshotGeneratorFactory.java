@@ -3,6 +3,7 @@ package liquibase.snapshot;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -97,6 +98,9 @@ public class SnapshotGeneratorFactory {
                 ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), example.getName(), Table.class)));
                 return true;
             } catch (DatabaseException e) {
+                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection
+                    database.rollback();
+                }
                 return false;
             }
         }
