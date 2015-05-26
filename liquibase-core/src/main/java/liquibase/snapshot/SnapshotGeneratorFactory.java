@@ -101,7 +101,7 @@ public class SnapshotGeneratorFactory {
             }
         }
 
-        if (createSnapshot(example, database, new SnapshotControl(database, types.toArray(new Class[types.size()]))) != null) {
+        if (createSnapshot(example, database, new SnapshotControl(database, false, types.toArray(new Class[types.size()]))) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;
@@ -110,7 +110,7 @@ public class SnapshotGeneratorFactory {
         } else {
             catalogAndSchema = example.getSchema().toCatalogAndSchema();
         }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, example.getClass()));
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, false, example.getClass()));
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
                 return true;

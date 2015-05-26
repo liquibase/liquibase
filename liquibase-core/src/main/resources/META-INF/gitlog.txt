@@ -1,3 +1,11 @@
+dba9bdb CORE-2371 Improve performance
+f0142c8 CORE-2371 Improve performance
+bab5eb6 CORE-2371 Improve performance
+21c6c59 CORE-2371 Improve performance
+3872919 CORE-2371 Improve Oracle snapshot performance
+61520d8 CORE-2371 Improve Oracle snapshot performance
+699005d Don't hardcode databasechangelog/lock table names
+14721fb CORE-2371 Improve Oracle snapshot performance
 f3b9acc Temporarily revert change 007701b due to issues with some columns not being found sometimes
 46dd7ec Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
 acfa6bd Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
