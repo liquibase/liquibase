@@ -103,7 +103,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
             for (Resource resource : resources) {
-                returnSet.add(resource.getURL().openStream());
+				LogFactory.getInstance().getLog().debug("Opening "+resource.getURL().toExternalForm()+" as "+path);
+				returnSet.add(resource.getURL().openStream());
             }
 
             return returnSet;
