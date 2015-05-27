@@ -128,6 +128,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         @Override
         public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+			if (path == null) {
+				return null;
+			}
+
             Set<String> returnSet = new HashSet<String>();
             
             String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
@@ -146,6 +150,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         @Override
         public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+			if (path == null) {
+				return null;
+			}
             Set<InputStream> returnSet = new HashSet<InputStream>();
             Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
 
@@ -166,10 +173,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
 
 		private String adjustClasspath(String file) {
+			if (file == null) {
+				return null;
+			}
 			return isPrefixPresent(parentFile) && !isPrefixPresent(file) ? ResourceLoader.CLASSPATH_URL_PREFIX + file : file;
 		}
 
 		public boolean isPrefixPresent(String file) {
+			if (file == null) {
+				return false;
+			}
 			if (file.startsWith("classpath") || file.startsWith("file:") || file.startsWith("url:")) {
 				return true;
 			}
