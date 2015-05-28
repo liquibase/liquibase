@@ -576,6 +576,7 @@
         <xsd:attribute name="columnName" type="xsd:string" use="required"/>
         <xsd:attribute name="defaultNullValue" type="xsd:string"/>
         <xsd:attribute name="columnDataType" type="xsd:string"/>
+        <xsd:attribute name="constraintName" type="xsd:string" />
     </xsd:attributeGroup>
 
 
