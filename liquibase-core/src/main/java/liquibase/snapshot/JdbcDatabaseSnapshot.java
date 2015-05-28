@@ -119,18 +119,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "  p.constraint_name as pk_name,  " +
                                 "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability  " +
                                 "FROM " +
-                                "all_constraints p " +
-                                "INNER JOIN all_cons_columns pc " +
+                                "all_cons_columns pc " +
+                                "INNER JOIN all_constraints p " +
                                 "ON pc.owner = p.owner " +
                                 "AND pc.constraint_name = p.constraint_name " +
-                                "AND pc.table_name = p.table_name " +
                                 "INNER JOIN all_constraints f " +
-                                "ON p.owner = f.r_owner " +
-                                "AND p.constraint_name = f.r_constraint_name " +
+                                "ON pc.owner = f.r_owner " +
+                                "AND pc.constraint_name = f.r_constraint_name " +
                                 "INNER JOIN all_cons_columns fc " +
                                 "ON fc.owner = f.owner " +
                                 "AND fc.constraint_name = f.constraint_name " +
-                                "AND fc.table_name = f.table_name " +
                                 "AND fc.position = pc.position " +
                                 "WHERE p.owner = '" +jdbcSchemaName+"' "+
                                 "AND p.constraint_type in ('P', 'U') " +
@@ -241,21 +239,22 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
                 }
 
-                //
-                // DVONE-2188 Always return true for shouldBulkSelect to fix problem with
-                // missing columns in snapshot/baseline
-                //
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    //Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
-                    //if (seenTables == null) {
-                    //    seenTables = new HashSet<String>();
-                    //    resultSetCache.putInfo("seenTables", seenTables);
-                    //}
+                    if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                        return false;
+                    }
 
-                    //seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
-                    //return seenTables.size() > 2;
                     return true;
+                    //having issues with some columns not being found
+//                    Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
+//                    if (seenTables == null) {
+//                        seenTables = new HashSet<String>();
+//                        resultSetCache.putInfo("seenTables", seenTables);
+//                    }
+//
+//                    seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
+//                    return seenTables.size() > 2;
                 }
 
                 @Override
@@ -482,12 +481,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public List<CachedRow> bulkFetchQuery() throws SQLException {
+                    if (database instanceof OracleDatabase) {
+                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                        try {
+                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM all_cons_columns c, all_constraints k WHERE k.constraint_type = 'P' AND k.owner='"+catalogAndSchema.getCatalogName()+"' AND k.constraint_name = c.constraint_name  AND k.table_name = c.table_name  AND k.owner = c.owner  ORDER BY column_name", database);
+                        } catch (DatabaseException e) {
+                            throw new SQLException(e);
+                        }
+                    }
                     return null;
                 }
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    return false;
+                    if (database instanceof OracleDatabase) {
+                        return super.shouldBulkSelect(schemaKey, resultSetCache);
+                    } else {
+                        return false;
+                    }
                 }
             });
         }

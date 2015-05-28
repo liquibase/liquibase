@@ -1,5 +1,6 @@
 package liquibase.resource;
 
+import liquibase.logging.LogFactory;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtils;
 
@@ -39,6 +40,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 continue;
             }
             seenUrls.add(url.toExternalForm());
+            LogFactory.getInstance().getLog().debug("Opening "+url.toExternalForm()+" as "+path);
+
             URLConnection connection = url.openConnection();
             connection.setUseCaches(false);
             InputStream resourceAsStream = connection.getInputStream();

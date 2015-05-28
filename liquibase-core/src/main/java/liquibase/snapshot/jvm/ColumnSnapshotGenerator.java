@@ -21,6 +21,8 @@ import java.util.List;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
+    private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
+
     public ColumnSnapshotGenerator() {
         super(Column.class, new Class[]{Table.class, View.class});
     }
@@ -37,14 +39,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         List<CachedRow> columnMetadataRs = null;
         try {
 
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+            Column column = null;
 
-            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+            if (example.getAttribute(LIQUIBASE_COMPLETE, false)) {
+                column = (Column) example;
+                example.setAttribute(LIQUIBASE_COMPLETE, null);
+            } else {
+                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-            if (columnMetadataRs.size() > 0) {
-                CachedRow data = columnMetadataRs.get(0);
-                Column column = readColumn(data, relation, database);
+                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
 
+                if (columnMetadataRs.size() > 0) {
+                    CachedRow data = columnMetadataRs.get(0);
+                    column = readColumn(data, relation, database);
+                }
+            }
                 if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
                     String sql;
                     if (database.getDatabaseMajorVersion() >= 9) {
@@ -73,12 +82,22 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (remarks != null && remarks.size() > 0) {
                         column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
                     }
-                }
+            if (column != null && database instanceof MSSQLDatabase) {
+                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
+                        " CAST(value as varchar(max)) as REMARKS\n" +
+                        " FROM\n" +
+                        " sys.extended_properties\n" +
+                        "  WHERE\n" +
+                        " name='MS_Description' " +
+                        " AND major_id = OBJECT_ID('" + column.getRelation().getName() + "')\n" +
+                        " AND\n" +
+                        " minor_id = COLUMNPROPERTY(major_id, '" + column.getName() + "', 'ColumnId')"), String.class);
 
-                return column;
-            } else {
-                return null;
+                if (remarks != null && remarks.size() > 0) {
+                    column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+                }
             }
+            return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -103,8 +122,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
 
                 for (CachedRow row : allColumnsMetadataRs) {
-                    Column exampleColumn = new Column().setRelation(relation).setName(StringUtils.trimToNull(row.getString("COLUMN_NAME")));
-                    relation.getColumns().add(exampleColumn);
+                    Column column = readColumn(row, relation, database);
+                    column.setAttribute(LIQUIBASE_COMPLETE, true);
+                    relation.getColumns().add(column);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);

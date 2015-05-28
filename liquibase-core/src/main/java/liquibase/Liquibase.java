@@ -276,7 +276,6 @@ public class Liquibase {
         }
 
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
-        resetServices();
     }
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
@@ -856,15 +855,37 @@ public class Liquibase {
         }
     }
 
+    public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
+        futureRollbackSQL(null, contexts, output, true);
+    }
+    
     public void futureRollbackSQL(Writer output) throws LiquibaseException {
         futureRollbackSQL(null, null, new Contexts(), new LabelExpression(), output);
     }
 
+    public void futureRollbackSQL(String contexts, Writer output, boolean checkLiquibaseTables) 
+           throws LiquibaseException {
+        futureRollbackSQL(null, contexts, output, checkLiquibaseTables);
+    }
+
+    public void futureRollbackSQL(Integer count, String contexts, Writer output) throws LiquibaseException {
+        futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, true);
+    }
+    
     public void futureRollbackSQL(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         futureRollbackSQL(null, null, contexts, labelExpression, output);
     }
 
+    public void futureRollbackSQL(Integer count, String contexts, Writer output, boolean checkLiquibaseTables) 
+           throws LiquibaseException {
+        futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, checkLiquibaseTables);
+    }
+
     public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        futureRollbackSQL(count, contexts, labelExpression, output, true);
+    }
+
+    public void futureRollbackSQL(Integer count, Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables) throws LiquibaseException {
         futureRollbackSQL(count, null, contexts, labelExpression, output);
     }
 
@@ -887,7 +908,9 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
-            checkLiquibaseTables(false, changeLog, contexts, labelExpression);
+            if (checkLiquibaseTables) {
+                checkLiquibaseTables(false, changeLog, contexts, labelExpression);
+            }
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator;

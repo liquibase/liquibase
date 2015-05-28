@@ -161,7 +161,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
             for (Resource resource : resources) {
-            	URLConnection connection = resource.getURL().openConnection();
+				LogFactory.getInstance().getLog().debug("Opening "+resource.getURL().toExternalForm()+" as "+path);
+				URLConnection connection = resource.getURL().openConnection();
             	connection.setUseCaches(false);
             	returnSet.add(connection.getInputStream());
             }
