@@ -176,7 +176,34 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 return returnList;
             }
-
+        } else if (database instanceof InformixDatabase) {
+            sql = "select sysindexes.idxname as CONSTRAINT_NAME, syscolumns.colname as COLUMN_NAME " +
+                  "from sysindexes, systables, syscolumns " +
+                  "where sysindexes.tabid = systables.tabid and sysindexes.tabid = syscolumns.tabid " +
+                  "and syscolumns.colno in (sysindexes.part1,sysindexes.part2,sysindexes.part3,sysindexes.part4," +
+                                           "sysindexes.part5,sysindexes.part6,sysindexes.part7,sysindexes.part8," +
+                                           "sysindexes.part9,sysindexes.part10,sysindexes.part11,sysindexes.part12," +
+                                           "sysindexes.part13,sysindexes.part14,sysindexes.part15,sysindexes.part16)" +
+                  "and sysindexes.idxtype ='U' " +
+                  "and sysindexes.idxname = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                  "order by case syscolumns.colno " +
+                      "when sysindexes.part1 then 1 " +
+                      "when sysindexes.part2 then 2 " +
+                      "when sysindexes.part3 then 3 " +
+                      "when sysindexes.part4 then 4 " +
+                      "when sysindexes.part5 then 5 " +
+                      "when sysindexes.part6 then 6 " +
+                      "when sysindexes.part7 then 7 " +
+                      "when sysindexes.part8 then 8 " +
+                      "when sysindexes.part9 then 9 " +
+                      "when sysindexes.part10 then 10 " +
+                      "when sysindexes.part11 then 11 " +
+                      "when sysindexes.part12 then 12 " +
+                      "when sysindexes.part13 then 13 " +
+                      "when sysindexes.part14 then 14 " +
+                      "when sysindexes.part15 then 15 " +
+                      "when sysindexes.part16 then 16 " +
+                  "end asc";
         } else if (database instanceof FirebirdDatabase) {
             sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
                     "FROM RDB$INDEX_SEGMENTS " +
