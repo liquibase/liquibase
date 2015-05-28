@@ -12,6 +12,8 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.format.Parsed
+
 import static org.junit.Assert.assertTrue
 import static spock.util.matcher.HamcrestSupport.that
 
@@ -314,7 +316,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChildren([preConditions: [
+            changeSet.load(new ParsedNode(null, "changeSet").addChildren([preConditions: [
                     [runningAs: [username: "my_user"]],
                     [runningAs: [username: "my_other_user"]],
             ]]), resourceSupplier.simpleResourceAccessor)
@@ -332,7 +334,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").setValue(new liquibase.parser.core.ParsedNode(null, "preConditions").setValue([
+            changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").setValue([
                     [runningAs: [username: "my_user"]],
                     [runningAs: [username: "my_other_user"]],
             ])), resourceSupplier.simpleResourceAccessor)
@@ -350,9 +352,9 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").setValue([
-                    new liquibase.parser.core.ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
-                    new liquibase.parser.core.ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
+            changeSet.load(new ParsedNode(null, "changeSet").setValue([
+                    new ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
+                    new ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
                             [replace: [replace: "x1", with: "y1"]],
                             [replace: [replace: "x2", with: "y2"]],
                     ])
@@ -384,7 +386,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(new liquibase.parser.core.ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(new ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -393,6 +395,43 @@ public class ChangeSetTest extends Specification {
         changeSet.changes.size() == 0
         changeSet.rollBackChanges.size() == 1
         changeSet.rollBackChanges[0] instanceof EmptyChange
+    }
+
+    def "load node with rollback containing only a comment creates an EmptyChange"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        try {
+            def commentNode = new ParsedNode(null, "comment").setValue("comment here")
+            def rollbackNode = new ParsedNode(null, "rollback").addChild(commentNode)
+            def changeSetNode = new ParsedNode(null, "changeSet").addChild(rollbackNode)
+            changeSet.load(changeSetNode, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
+        then:
+        changeSet.changes.size() == 0
+        changeSet.rollBackChanges.size() == 1
+        changeSet.rollBackChanges[0] instanceof EmptyChange
+    }
+
+    def "load node with rollback containing change node and a comment as value"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def createTableNode = new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1")
+        def renameTableNode = new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")
+        def commentNode = new ParsedNode(null, "comment").setValue("comment here")
+        def rollbackNode = new ParsedNode(null, "rollback").addChild(commentNode).addChild(renameTableNode)
+        def changeSetNode = new ParsedNode(null, "changeSet").addChild(createTableNode).addChild(rollbackNode)
+        try {
+            changeSet.load(changeSetNode, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
+
+        then:
+        changeSet.changes.size() == 1
+        changeSet.rollBackChanges.size() == 1
+        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_x"
     }
 
     @Unroll("#featureName with changeSetPath=#changeSetPath")
@@ -442,7 +481,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
@@ -463,7 +502,7 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         try {
-            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+            changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
         }
