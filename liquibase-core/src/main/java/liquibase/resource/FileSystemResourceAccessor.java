@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * A @{link ResourceAccessor} implementation which finds Files in the File System.
@@ -38,7 +39,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         InputStream fileStream = null;
         if (absoluteFile.isAbsolute()) {
             try {
-                fileStream = new BufferedInputStream(new FileInputStream(absoluteFile));
+                fileStream =  openStream(absoluteFile);
             } catch (FileNotFoundException e) {
                 //will try relative
             }
@@ -46,7 +47,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
         if (fileStream == null) {
             try {
-                fileStream = new BufferedInputStream(new FileInputStream(relativeFile));
+                fileStream = openStream(relativeFile);
             } catch (FileNotFoundException e2) {
                 return null;
             }
@@ -56,6 +57,14 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         Set<InputStream> returnSet = new HashSet<InputStream>();
         returnSet.add(fileStream);
         return returnSet;
+    }
+
+    private InputStream openStream(File file) throws IOException, FileNotFoundException {
+        if (file.getName().toLowerCase().endsWith(".gz")) {
+            return new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)));
+        } else {
+            return new BufferedInputStream(new FileInputStream(file));
+        }
     }
 
     @Override
