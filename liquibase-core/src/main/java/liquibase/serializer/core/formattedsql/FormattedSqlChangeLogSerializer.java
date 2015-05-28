@@ -1,19 +1,17 @@
 package liquibase.serializer.core.formattedsql;
 
 import liquibase.change.Change;
+import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,12 +79,12 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     }
 
     @Override
-    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
+    public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
         builder.append("--liquibase formatted sql\n\n");
 
-        for (ChangeSet changeSet : changeSets) {
-            builder.append(serialize(changeSet, true));
+        for (T child : children) {
+            builder.append(serialize(child, true));
             builder.append("\n");
         }
 

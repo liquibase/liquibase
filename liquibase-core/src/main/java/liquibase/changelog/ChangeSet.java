@@ -17,7 +17,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -25,7 +24,6 @@ import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
@@ -37,7 +35,7 @@ import java.util.*;
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
-public class ChangeSet implements Conditional, LiquibaseSerializable {
+public class ChangeSet implements Conditional, ChangeLogChild {
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -154,7 +152,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     /**
      * Changes defined to roll back this changeSet
      */
-    private List<Change> rollBackChanges = new ArrayList<Change>();
+    private RollbackContainer rollback = new RollbackContainer();
 
 
     /**
@@ -619,11 +617,11 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             if (hasCustomRollbackChanges()) {
                 
                 final List<SqlStatement> statements = new LinkedList<SqlStatement>();
-                for (Change rollback : rollBackChanges) {
-                    if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
+                for (Change change : rollback.getChanges()) {
+                    if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] changeStatements = rollback.generateStatements(database);
+                    SqlStatement[] changeStatements = change.generateStatements(database);
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
                     }
@@ -669,7 +667,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
     protected boolean hasCustomRollbackChanges() {
-        return rollBackChanges != null && rollBackChanges.size() > 0;
+        return rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0;
     }
     
     /**
@@ -744,20 +742,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return runInTransaction;
     }
 
-    public Change[] getRollBackChanges() {
-        return rollBackChanges.toArray(new Change[rollBackChanges.size()]);
+    public RollbackContainer getRollback() {
+        return rollback;
     }
 
     public void addRollBackSQL(String sql) {
         if (StringUtils.trimToNull(sql) == null) {
-            if (this.rollBackChanges.size() == 0) {
-                rollBackChanges.add(new EmptyChange());
+            if (rollback.getChanges().size() == 0) {
+                rollback.getChanges().add(new EmptyChange());
             }
             return;
         }
 
         for (String statment : StringUtils.splitSQL(sql, null)) {
-            rollBackChanges.add(new RawSQLChange(statment.trim()));
+            rollback.getChanges().add(new RawSQLChange(statment.trim()));
         }
     }
 
@@ -765,13 +763,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         if (change == null) {
             return;
         }
-        rollBackChanges.add(change);
+        rollback.getChanges().add(change);
         change.setChangeSet(this);
     }
 
 
     public boolean supportsRollback(Database database) {
-        if (rollBackChanges != null && rollBackChanges.size() > 0) {
+        if (rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0) {
             return true;
         }
 
@@ -915,19 +913,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public Set<String> getSerializableFields() {
-        return new HashSet<String>(Arrays.asList(
+        return new LinkedHashSet<String>(Arrays.asList(
                 "id",
                 "author",
                 "runAlways",
                 "runOnChange",
                 "failOnError",
                 "context",
-                "dbms",
-                "comment",
-                "changes",
-                "rollback",
                 "labels",
-                "objectQuotingStrategy"));
+                "dbms",
+                "objectQuotingStrategy",
+                "comment",
+                "preconditions",
+                "changes",
+                "rollback"));
 
     }
 
@@ -999,13 +998,21 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return this.getObjectQuotingStrategy().toString();
         }
 
+        if (field.equals("preconditions")) {
+            if (this.getPreconditions() != null && this.getPreconditions().getNestedPreconditions().size() > 0) {
+                return this.getPreconditions();
+            } else {
+                return null;
+            }
+        }
+
         if (field.equals("changes")) {
             return getChanges();
         }
 
         if (field.equals("rollback")) {
-            if (this.getRollBackChanges() != null && this.getRollBackChanges().length > 0) {
-                return this.getRollBackChanges();
+            if (rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0) {
+                return rollback;
             } else {
                 return null;
             }
@@ -1016,7 +1023,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("comment") || field.equals("changes") || field.equals("rollback")) {
+        if (field.equals("comment") || field.equals("preconditions") || field.equals("changes") || field.equals("rollback")) {
             return SerializationType.NESTED_OBJECT;
 //        } else if (field.equals()) {
 //            return SerializationType.DIRECT_VALUE;
