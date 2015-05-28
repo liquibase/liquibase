@@ -4,7 +4,6 @@ import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -21,12 +20,16 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
 
     @Override
     public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        writer.write("databaseChangeLog:\n");
-        for (T child : children) {
-            writer.write(StringUtils.indent(serialize(child, true), 2));
-            writer.write("\n");
+        List<Object> maps = new ArrayList<Object>();
+        for (T changeSet : children) {
+            maps.add(toMap(changeSet));
         }
+        Map<String, Object> containerMap = new HashMap<String, Object>();
+        containerMap.put("databaseChangeLog", maps);
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        writer.write(yaml.dumpAsMap(containerMap));
+        writer.write("\n");
         writer.flush();
     }
 
