@@ -408,8 +408,8 @@ public class ChangeSetTest extends Specification {
         }
         then:
         changeSet.changes.size() == 0
-        changeSet.rollBackChanges.size() == 1
-        changeSet.rollBackChanges[0] instanceof EmptyChange
+        changeSet.rollback.changes.size() == 1
+        changeSet.rollback.changes[0] instanceof EmptyChange
     }
 
     def "load node with rollback containing change node and a comment as value"() {
@@ -428,8 +428,8 @@ public class ChangeSetTest extends Specification {
 
         then:
         changeSet.changes.size() == 1
-        changeSet.rollBackChanges.size() == 1
-        ((RenameTableChange) changeSet.rollBackChanges[0]).newTableName == "rename_to_x"
+        changeSet.rollback.changes.size() == 1
+        ((RenameTableChange) changeSet.rollback.changes[0]).newTableName == "rename_to_x"
     }
 
     @Unroll("#featureName with changeSetPath=#changeSetPath")

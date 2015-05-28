@@ -339,7 +339,7 @@ public class Main {
             }
           }
         } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-          if (diffTypes.toLowerCase().contains("data")) {
+          if (diffTypes != null && diffTypes.toLowerCase().contains("data")) {
             messages.add("Including diffTypes=data in the diffChangeLog command has no effect. This option should only be used with the generateChangeLog command.");
           }
         }
