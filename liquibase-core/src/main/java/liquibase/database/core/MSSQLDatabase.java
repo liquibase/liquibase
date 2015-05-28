@@ -6,6 +6,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -339,7 +340,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null && ! isCaseSensitive()) {
+        if (schemaName != null && !isCaseSensitive()) {
             schemaName = schemaName.toLowerCase();
         }
         return schemaName;
@@ -347,25 +348,21 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCaseSensitive() {
-
         if (caseSensitive == null) {
             try {
-                if (getConnection() != null) {
-                  String catalog = getConnection().getCatalog();
-                  String sql = String.format("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('%s', 'COLLATION'))", catalog);
-                  String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
-                  caseSensitive = ! collation.contains("_CI_");
+                if (getConnection() instanceof JdbcConnection) {
+                    String catalog = getConnection().getCatalog();
+                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
+                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+                    caseSensitive = collation != null && !collation.contains("_CI_");
+                } else if (getConnection() instanceof OfflineConnection) {
+                    caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (Exception e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
-
-        if (caseSensitive == null) {
-            return false;
-        } else {
-            return caseSensitive.booleanValue();
-        }
+        return caseSensitive != null && caseSensitive;
     }
 
     @Override
