@@ -13,12 +13,9 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
 
 public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
@@ -95,5 +92,10 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 }

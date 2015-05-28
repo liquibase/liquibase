@@ -7,14 +7,8 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.io.OutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
 
@@ -160,6 +154,11 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
     public static class FieldFilter {

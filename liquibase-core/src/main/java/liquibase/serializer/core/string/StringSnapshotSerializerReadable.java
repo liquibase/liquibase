@@ -10,8 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 public class StringSnapshotSerializerReadable implements SnapshotSerializer {
@@ -205,5 +204,10 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
         out.write(serialize(snapshot, true).getBytes());
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 }
