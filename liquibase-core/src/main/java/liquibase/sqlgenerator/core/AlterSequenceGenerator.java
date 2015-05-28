@@ -55,10 +55,6 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             buffer.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
-        if (statement.getCacheSize() != null) {
-            buffer.append(" CACHE ").append(statement.getCacheSize());
-        }
-
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
                 buffer.append(" ORDER");

@@ -894,6 +894,10 @@ public class Liquibase {
     }
 
     protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
+        futureRollbackSQL(count, tag, contexts, labelExpression, output, true);
+    }
+
+    protected void futureRollbackSQL(Integer count, String tag, Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 

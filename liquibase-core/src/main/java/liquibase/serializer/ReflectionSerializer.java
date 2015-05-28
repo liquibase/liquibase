@@ -78,7 +78,7 @@ public class ReflectionSerializer {
 
         try {
             if (foundField == null) {
-                Field foundField = findField(object, field);
+                foundField = findField(object, field);
                 foundField.setAccessible(true);
 
                 fieldsByName.put(field, foundField);
