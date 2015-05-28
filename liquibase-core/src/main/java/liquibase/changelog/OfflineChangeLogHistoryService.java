@@ -114,7 +114,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     "DESCRIPTION",
                     "COMMENTS",
                     "TAG",
-                    "LIQUIBASE"
+                    "LIQUIBASE",
+                    "CONTEXTS",
+                    "LABELS"                    
             });
         } finally {
             if (writer != null) {
