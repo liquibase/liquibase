@@ -991,14 +991,14 @@ public class Liquibase {
     }
 
     /**
-     * Drops all database objects owned by the current user.
+     * Drops all database objects in the default schema.
      */
     public final void dropAll() throws DatabaseException, LockException {
         dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
     }
 
     /**
-     * Drops all database objects owned by the current user.
+     * Drops all database objects in the passed schema(s).
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         try {
