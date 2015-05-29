@@ -298,6 +298,7 @@
                 </xsd:appinfo>
             </xsd:annotation>
         </xsd:attribute>
+        <xsd:attribute name="descending" type="booleanExp"/>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:attributeGroup>
 

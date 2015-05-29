@@ -5,14 +5,10 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.compare.DatabaseObjectComparator;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -170,12 +166,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     if (database instanceof OracleDatabase) {
                         //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                        String sql = "SELECT c.INDEX_NAME, 3 AS TYPE, c.TABLE_NAME, c.COLUMN_NAME, c.COLUMN_POSITION AS ORDINAL_POSITION, e.COLUMN_EXPRESSION AS FILTER_CONDITION, case I.UNIQUENESS when 'UNIQUE' then 0 else 1 end as NON_UNIQUE " +
+                        String sql =
+                                "SELECT " +
+                                    "c.INDEX_NAME, " +
+                                    "3 AS TYPE, " +
+                                    "c.TABLE_NAME, " +
+                                    "c.COLUMN_NAME, " +
+                                    "c.COLUMN_POSITION AS ORDINAL_POSITION, " +
+                                    "e.COLUMN_EXPRESSION AS FILTER_CONDITION, " +
+                                    "CASE I.UNIQUENESS WHEN 'UNIQUE' THEN 0 ELSE 1 END AS NON_UNIQUE, " +
+                                    "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'N' THEN 'A' END AS ASC_OR_DESC " +
                                 "FROM ALL_IND_COLUMNS c " +
-                                "JOIN ALL_INDEXES i on i.index_name = c.index_name " +
-                                "LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name) " +
-                                "WHERE c.TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' " +
-                                "AND i.OWNER=c.TABLE_OWNER";
+                                "JOIN ALL_INDEXES i " +
+                                "ON i.index_name = c.index_name " +
+                                "LEFT JOIN all_ind_expressions e " +
+                                "ON e.column_position = c.column_position " +
+                                "AND e.index_name = c.index_name " +
+                                "WHERE c.TABLE_OWNER = '" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' " +
+                                "AND i.OWNER = c.TABLE_OWNER";
+
                         if (!bulkFetch && tableName != null) {
                             sql += " AND c.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
@@ -459,24 +468,98 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 public List<CachedRow> fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
-
-                    if (table == null) {
-                        try {
-                            List<CachedRow> foundPks = new ArrayList<CachedRow>();
+                    try {
+                        List<CachedRow> foundPks = new ArrayList<CachedRow>();
+                        if (table == null) {
                             List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null);
                             for (CachedRow table : tables) {
-                                List<CachedRow> pkInfo = extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table.getString("TABLE_NAME")));
+                                List<CachedRow> pkInfo = getPkInfo(schemaName, catalogAndSchema, table.getString("TABLE_NAME"));
                                 if (pkInfo != null) {
                                     foundPks.addAll(pkInfo);
                                 }
                             }
                             return foundPks;
-                        } catch (DatabaseException e) {
-                            throw new SQLException(e);
+                        } else {
+                            List<CachedRow> pkInfo = getPkInfo(schemaName, catalogAndSchema, table);
+                            if (pkInfo != null) {
+                                foundPks.addAll(pkInfo);
+                            }
                         }
-                    } else {
-                        return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                        return foundPks;
+                    } catch (DatabaseException e) {
+                        throw new SQLException(e);
                     }
+                }
+
+                private List<CachedRow> getPkInfo(String schemaName, CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
+                    List<CachedRow> pkInfo;
+                    if (database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+                        String sql;
+                        if (database.getDatabaseMajorVersion() >= 9) {
+                            sql =
+                                    "SELECT " +
+                                        "DB_NAME() AS [TABLE_CAT], " +
+                                        "[s].[name] AS [TABLE_SCHEM], " +
+                                        "[t].[name] AS [TABLE_NAME], " +
+                                        "[c].[name] AS [COLUMN_NAME], " +
+                                        "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC], " +
+                                        "[ic].[key_ordinal] AS [KEY_SEQ], " +
+                                        "[kc].[name] AS [PK_NAME] " +
+                                    "FROM [sys].[schemas] AS [s] " +
+                                    "INNER JOIN [sys].[tables] AS [t] " +
+                                    "ON [t].[schema_id] = [s].[schema_id] " +
+                                    "INNER JOIN [sys].[key_constraints] AS [kc] " +
+                                    "ON [kc].[parent_object_id] = [t].[object_id] " +
+                                    "INNER JOIN [sys].[indexes] AS [i] " +
+                                    "ON [i].[object_id] = [kc].[parent_object_id] " +
+                                    "AND [i].[index_id] = [kc].[unique_index_id] " +
+                                    "INNER JOIN [sys].[index_columns] AS [ic] " +
+                                    "ON [ic].[object_id] = [i].[object_id] " +
+                                    "AND [ic].[index_id] = [i].[index_id] " +
+                                    "INNER JOIN [sys].[columns] AS [c] " +
+                                    "ON [c].[object_id] = [ic].[object_id] " +
+                                    "AND [c].[column_id] = [ic].[column_id] " +
+                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schemaName, Schema.class)) + "' " +
+                                    "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
+                                    "AND [kc].[type] = 'PK' " +
+                                    "AND [ic].[key_ordinal] > 0 " +
+                                    "ORDER BY " +
+                                        "[ic].[key_ordinal]";
+                        } else {
+                            sql =
+                                    "SELECT " +
+                                        "DB_NAME() AS [TABLE_CAT], " +
+                                        "[s].[name] AS [TABLE_SCHEM], " +
+                                        "[t].[name] AS [TABLE_NAME], " +
+                                        "[c].[name] AS [COLUMN_NAME], " +
+                                        "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC], " +
+                                        "[ic].[keyno] AS [KEY_SEQ], " +
+                                        "[kc].[name] AS [PK_NAME] " +
+                                    "FROM [dbo].[sysusers] AS [s] " +
+                                    "INNER JOIN [dbo].[sysobjects] AS [t] " +
+                                    "ON [t].[uid] = [s].[uid] " +
+                                    "INNER JOIN [dbo].[sysobjects] AS [kc] " +
+                                    "ON [kc].[parent_obj] = [t].[id] " +
+                                    "INNER JOIN [dbo].[sysindexes] AS [i] " +
+                                    "ON [i].[id] = [kc].[parent_obj] " +
+                                    "AND [i].[name] = [kc].[name] " +
+                                    "INNER JOIN [dbo].[sysindexkeys] AS [ic] " +
+                                    "ON [ic].[id] = [i].[id] " +
+                                    "AND [ic].[indid] = [i].[indid] " +
+                                    "INNER JOIN [dbo].[syscolumns] AS [c] " +
+                                    "ON [c].[id] = [ic].[id] " +
+                                    "AND [c].[colid] = [ic].[colid] " +
+                                    "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schemaName, Schema.class)) + "' " +
+                                    "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
+                                    "AND [kc].[xtype] = 'PK' " +
+                                    "ORDER BY " +
+                                        "[ic].[keyno]";
+                        }
+                        pkInfo = executeAndExtract(sql, database);
+                    } else {
+                        pkInfo = extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName));
+                    }
+                    return pkInfo;
                 }
 
                 @Override
@@ -557,11 +640,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof MSSQLDatabase) {
-                        sql = "select CONSTRAINT_NAME, TABLE_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS "
-                                + "where CONSTRAINT_TYPE = 'Unique' "
-                                + "and CONSTRAINT_SCHEMA='" + jdbcSchemaName + "'";
+                        sql =
+                                "SELECT " +
+                                    "[TC].[CONSTRAINT_NAME], " +
+                                    "[TC].[TABLE_NAME] " +
+                                "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
+                                "WHERE [TC].[CONSTRAINT_TYPE] = 'UNIQUE' " +
+                                "AND [TC].[CONSTRAINT_CATALOG] = N'" + database.escapeStringForDatabase(jdbcCatalogName) + "' " +
+                                "AND [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(jdbcSchemaName) + "'";
                         if (tableName != null) {
-                            sql += " and TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
                         sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG from all_constraints uc, all_indexes ui "
