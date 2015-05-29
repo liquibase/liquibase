@@ -14,7 +14,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
@@ -56,7 +55,9 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     position = (short) (position + 1);
                 }
 
-                returnKey.addColumn(position - 1, new Column(columnName).setRelation(((PrimaryKey) example).getTable()));
+                String ascOrDesc = row.getString("ASC_OR_DESC");
+                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                returnKey.addColumn(position - 1, new Column(columnName).setDescending(descending).setRelation(((PrimaryKey) example).getTable()));
             }
 
             if (returnKey != null) {

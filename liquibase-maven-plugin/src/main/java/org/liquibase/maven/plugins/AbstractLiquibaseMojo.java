@@ -240,7 +240,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter expression="${liquibase.should.run}"
      */
-    protected boolean liquibaseShouldRun;
+    protected boolean liquibaseShouldRun = true;
 
     /**
      * Array to put a expression variable to maven plugin.
@@ -320,7 +320,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
-
         if (!liquibaseShouldRun) {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;

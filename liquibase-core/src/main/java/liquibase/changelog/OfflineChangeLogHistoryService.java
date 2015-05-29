@@ -114,7 +114,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     "DESCRIPTION",
                     "COMMENTS",
                     "TAG",
-                    "LIQUIBASE"
+                    "LIQUIBASE",
+                    "CONTEXTS",
+                    "LABELS"                    
             });
         } finally {
             if (writer != null) {
@@ -252,7 +254,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 csvWriter.writeNext(line);
             }
 
-            String[] newLine = new String[11];
+            String[] newLine = new String[13];
             newLine[COLUMN_ID] = changeSet.getId();
             newLine[COLUMN_AUTHOR] = changeSet.getAuthor();
             newLine[COLUMN_FILENAME] =  changeSet.getFilePath();

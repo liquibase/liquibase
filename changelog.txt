@@ -1,6 +1,16 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.3.4 (2015.05.27)
+
+[CORE-2360] - Maven - Skip is active by default
+[CORE-2199] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
+[CORE-2344] - Unknown host exception on OS RHEL 6.5
+[CORE-2346] - IncludeAll does not work when runing liquibase from inside a jar
+[CORE-2357] - alterSequence does not work as expected when you need to change the cache size
+[CORE-2366] - Derby Network server works with command line but not with maven "Liquibase skipped due to maven configuration"
+[CORE-2368] - No SQL outputted for <update> change
+
 Changes in version 3.3.3 (2015.04.28)
 
 [CORE-1768] - Oracle dropAll fails on spatial tables and sequences

@@ -1,17 +1,13 @@
 package liquibase.serializer.core.string;
 
-import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
-import java.io.OutputStream;
-import java.io.IOException;
 
 public class StringSnapshotSerializer implements SnapshotSerializer {
 
@@ -149,5 +145,10 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {
         out.write(serialize(snapshot, true).getBytes());
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 }

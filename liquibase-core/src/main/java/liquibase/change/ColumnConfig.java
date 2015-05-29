@@ -55,6 +55,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private BigInteger startWith;
     private BigInteger incrementBy;
     private String remarks;
+    private Boolean descending;
 
     /**
      * Create a ColumnConfig object based on a {@link Column} snapshot.
@@ -62,7 +63,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(columnSnapshot.getComputed());
+        setComputed(columnSnapshot.getComputed() != null && columnSnapshot.getComputed() ? Boolean.TRUE : null);
+        setDescending(columnSnapshot.getDescending() != null && columnSnapshot.getDescending() ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -834,6 +836,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public Boolean getDescending() {
+        return descending;
+    }
+
+    public ColumnConfig setDescending(Boolean descending) {
+        this.descending = descending;
+        return this;
+    }
+
     @Override
     public String getSerializedObjectName() {
         return "column";
@@ -869,6 +880,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         startWith = parsedNode.getChildValue(null, "startWith", BigInteger.class);
         incrementBy = parsedNode.getChildValue(null, "incrementBy", BigInteger.class);
         remarks = parsedNode.getChildValue(null, "remarks", String.class);
+        descending = parsedNode.getChildValue(null, "descending", Boolean.class);
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
@@ -946,14 +958,29 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     }
 
+    public static ColumnConfig fromName(String name) {
+        name = name.trim();
+        Boolean descending = null;
+        if (name.matches("(?i).*\\s+DESC")) {
+            name = name.replaceFirst("(?i)\\s+DESC$", "");
+            descending = true;
+        } else if (name.matches("(?i).*\\s+ASC")) {
+            name = name.replaceFirst("(?i)\\s+ASC$", "");
+            descending = false;
+        }
+        return new ColumnConfig()
+                .setName(name)
+                .setDescending(descending);
+    }
+
     public static ColumnConfig[] arrayFromNames(String names) {
         if (names == null) {
             return null;
         }
         List<String> nameArray = StringUtils.splitAndTrim(names, ",");
         ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
-        for (int i=0; i<nameArray.size(); i++) {
-            returnArray[i] = new ColumnConfig().setName(nameArray.get(i));
+        for (int i = 0; i < nameArray.size(); i++) {
+            returnArray[i] = fromName(nameArray.get(i));
         }
         return returnArray;
     }
