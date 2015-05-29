@@ -1021,15 +1021,24 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeColumnNameList(final String columnNames) {
-        StringBuffer sb = new StringBuffer();
-        for (String columnName : columnNames.split(",")) {
+        StringBuilder sb = new StringBuilder();
+        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(escapeObjectName(columnName.trim(), Column.class));
+            boolean descending = false;
+            if (columnName.matches("(?i).*\\s+DESC")) {
+                columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
+                descending = true;
+            } else if (columnName.matches("(?i).*\\s+ASC")) {
+                columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
+            }
+            sb.append(escapeObjectName(columnName, Column.class));
+            if (descending) {
+                sb.append(" DESC");
+            }
         }
         return sb.toString();
-
     }
 
     @Override

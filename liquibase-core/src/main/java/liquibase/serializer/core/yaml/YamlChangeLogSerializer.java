@@ -1,11 +1,9 @@
 package liquibase.serializer.core.yaml;
 
+import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectCollection;
-import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -21,13 +19,17 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
     }
 
     @Override
-    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        writer.write("databaseChangeLog:\n");
-        for (ChangeSet changeSet : changeSets) {
-            writer.write(StringUtils.indent(serialize(changeSet, true), 2));
-            writer.write("\n");
+    public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
+        List<Object> maps = new ArrayList<Object>();
+        for (T changeSet : children) {
+            maps.add(toMap(changeSet));
         }
+        Map<String, Object> containerMap = new HashMap<String, Object>();
+        containerMap.put("databaseChangeLog", maps);
+
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        writer.write(yaml.dumpAsMap(containerMap));
+        writer.write("\n");
         writer.flush();
     }
 
@@ -69,4 +71,8 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
         }
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 }

@@ -7,12 +7,9 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
 public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializable {
 

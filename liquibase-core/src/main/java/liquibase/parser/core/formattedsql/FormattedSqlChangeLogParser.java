@@ -227,7 +227,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
 
                 if (StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
-                    change.setEndDelimiter("\n/");
+                    change.setEndDelimiter("\n/$");
                 }
 
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
