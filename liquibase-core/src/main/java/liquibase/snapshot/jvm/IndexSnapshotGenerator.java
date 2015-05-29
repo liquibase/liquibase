@@ -169,7 +169,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         foundIndexes.put(indexName, index);
                     }
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setRelation(index.getTable()));
+                    String ascOrDesc = row.getString("ASC_OR_DESC");
+                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {
@@ -300,7 +302,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.getColumns().add(null);
                 }
                 if (definition == null) {
-                    returnIndex.getColumns().set(position - 1, new Column(columnName).setComputed(false).setRelation(returnIndex.getTable()));
+                    String ascOrDesc = row.getString("ASC_OR_DESC");
+                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                    returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
                 } else {
                     returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
                 }

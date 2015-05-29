@@ -17,6 +17,7 @@ public class ColumnDefinition extends AbstractExtensibleObject {
         isNullable,
         constraints,
         computed,
+        descending
     }
 
     public ColumnDefinition() {

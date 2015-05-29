@@ -52,7 +52,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         change.setIndexName(index.getSimpleName());
         change.setUnique(index.isUnique());
         change.setAssociatedWith(index.getAssociatedWithAsString());
-        change.setClustered(index.getClustered());
+        change.setClustered(index.getClustered() != null && index.getClustered() ? Boolean.TRUE : null);
 
 //        if (index.getAssociatedWith().contains(Index.MARK_PRIMARY_KEY) || index.getAssociatedWith().contains(Index.MARK_FOREIGN_KEY) || index.getAssociatedWith().contains(Index.MARK_UNIQUE_CONSTRAINT)) {
 //            continue;

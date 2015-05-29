@@ -8,7 +8,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.DataType;
-import liquibase.util.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.GenericProperty;
@@ -21,7 +20,6 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.beans.IntrospectionException;
-import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -39,6 +37,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             dumperOptions.setPrettyFlow(true);
             dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
             dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+            dumperOptions.setWidth(Integer.MAX_VALUE);
 
             return new Yaml(getLiquibaseRepresenter(), dumperOptions);
         }
@@ -60,7 +59,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     @Override
     public String[] getValidFileExtensions() {
         return new String[]{
-                "yaml"
+                "yaml",
+                "yml"
         };
     }
 

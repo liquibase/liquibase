@@ -83,13 +83,19 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
             @Override
             public String toString(ColumnDefinition column) {
                 Boolean computed = column.get(ColumnDefinition.Attr.computed, Boolean.class);
+                String name;
                 if (computed == null) {
-                    return database.escapeColumnName(tableCatalogName, tableSchemaName, tableName, column.get(ColumnDefinition.Attr.columnName, String.class), true);
+                    name = database.escapeColumnName(tableCatalogName, tableSchemaName, tableName, column.get(ColumnDefinition.Attr.columnName, String.class), true);
                 } else if (computed) {
-                    return column.get(ColumnDefinition.Attr.columnName, String.class);
+                    name = column.get(ColumnDefinition.Attr.columnName, String.class);
                 } else {
-                    return database.escapeColumnName(tableCatalogName, tableSchemaName, tableName, column.get(ColumnDefinition.Attr.columnName, String.class), false);
+                    name = database.escapeColumnName(tableCatalogName, tableSchemaName, tableName, column.get(ColumnDefinition.Attr.columnName, String.class), false);
                 }
+
+                if (column.get(ColumnDefinition.Attr.descending, false)) {
+                    name += " DESC";
+                }
+                return name;
             }
             })+")");
 

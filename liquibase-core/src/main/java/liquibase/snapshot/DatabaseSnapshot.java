@@ -20,11 +20,8 @@ import liquibase.util.ObjectUtil;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class DatabaseSnapshot implements LiquibaseSerializable{
+public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private final DatabaseObject[] originalExamples;
     private HashSet<String> serializableFields;
@@ -46,7 +43,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
 
         init(examples);
 
-        this.serializableFields =  new HashSet<String>();
+        this.serializableFields = new HashSet<String>();
         this.serializableFields.add("snapshotControl");
         this.serializableFields.add("objects");
         this.serializableFields.add("referencedObjects");
@@ -129,7 +126,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             }
             return map;
         } else {
-            throw new UnexpectedLiquibaseException("Unknown field: "+field);
+            throw new UnexpectedLiquibaseException("Unknown field: " + field);
         }
     }
 
@@ -142,9 +139,10 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         } else if (field.equals("referencedObjects")) {
             return SerializationType.NESTED_OBJECT;
         } else {
-            throw new UnexpectedLiquibaseException("Unknown field: "+field);
+            throw new UnexpectedLiquibaseException("Unknown field: " + field);
         }
     }
+
     public Database getDatabase() {
         return database;
     }
@@ -160,7 +158,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
      * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null if the object does not exist in the database.
      * If the same object was returned by an earlier include() call, the same object instance will be returned.
      */
-    protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+    protected <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
         }
@@ -178,7 +176,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             return example;
         }
 
-       T existing = get(example);
+        T existing = get(example);
         if (existing != null) {
             return existing;
         }
@@ -223,14 +221,26 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     }
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
-            for (String field : new HashSet<String>(object.getAttributeNames())) {
-                Object fieldValue = object.get(field, Object.class);
-                Object newFieldValue = replaceObject(fieldValue);
-                if (fieldValue != newFieldValue && newFieldValue != null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
-                    object.set(field, newFieldValue);
-                }
-
+        for (String field : new HashSet<String>(object.getAttributes())) {
+            if (object.getClass() == Index.class && field.equals("columns")) {
+                continue;
             }
+            if (object.getClass() == PrimaryKey.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == UniqueConstraint.class && field.equals("columns")) {
+                continue;
+            }
+            Object fieldValue = object.getAttribute(field, Object.class);
+            Object newFieldValue = replaceObject(fieldValue);
+            if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
+                if (object instanceof PrimaryKey && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
+                    object.setAttribute(field, null);
+                }
+            } else if (fieldValue != newFieldValue) {
+                object.setAttribute(field, newFieldValue);
+            }
+        }
     }
 
     private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, IllegalAccessException, InstantiationException {
@@ -350,7 +360,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     /**
      * Returns all objects of the given type that are already included in this snapshot.
      */
-    public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
+    public <DatabaseObjectType extends DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
         return allFound.get(type);
     }
 

@@ -30,7 +30,7 @@ class ResultSetCache {
             String schemaKey = resultSetExtractor.wantedKeyParameters().createSchemaKey(resultSetExtractor.database);
 
             Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
-            if (cache == null ) {
+            if (cache == null) {
                 cache = new HashMap<String, List<CachedRow>>();
                 cacheBySchema.put(schemaKey, cache);
             }
@@ -49,11 +49,12 @@ class ResultSetCache {
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
             } else {
+                cache = new HashMap<String, List<CachedRow>>(); //don't store results in real cache to prevent confusion if later fetching all items.
                 Integer previousCount = timesSingleQueried.get(schemaKey);
                 if (previousCount == null) {
                     previousCount = 0;
                 }
-                timesSingleQueried.put(schemaKey, previousCount+1);
+                timesSingleQueried.put(schemaKey, previousCount + 1);
                 results = resultSetExtractor.fastFetch();
             }
 
@@ -71,8 +72,6 @@ class ResultSetCache {
                 returnList = new ArrayList<CachedRow>();
             }
             return returnList;
-
-
 
 
         } catch (SQLException e) {
@@ -120,7 +119,7 @@ class ResultSetCache {
             String[] nullVersion = Arrays.copyOf(params, params.length);
             nullVersion[fromIndex] = null;
             if (params.length == fromIndex + 1) {
-                return new String[] {
+                return new String[]{
                         createKey(database, params),
                         createKey(database, nullVersion)
                 };
@@ -135,10 +134,10 @@ class ResultSetCache {
         }
 
         public String createSchemaKey(Database database) {
-            if (!database.supportsCatalogs() && ! database.supportsSchemas()) {
+            if (!database.supportsCatalogs() && !database.supportsSchemas()) {
                 return "all";
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
-                return (catalog+"."+schema).toLowerCase();
+                return (catalog + "." + schema).toLowerCase();
             } else {
                 if (catalog == null && schema != null) {
                     return schema.toLowerCase();
@@ -177,6 +176,10 @@ class ResultSetCache {
         }
 
         List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+            return executeAndExtract(sql, database, false);
+        }
+
+        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<CachedRow>();
             }
@@ -187,11 +190,10 @@ class ResultSetCache {
                 statement = connection.createStatement();
                 resultSet = statement.executeQuery(sql);
                 resultSet.setFetchSize(FETCH_SIZE);
-                return extract(resultSet);
+                return extract(resultSet, informixTrimHint);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
-
         }
 
         public boolean equals(Object expectedValue, Object foundValue) {
@@ -215,6 +217,7 @@ class ResultSetCache {
         public abstract RowData wantedKeyParameters();
 
         public abstract List<CachedRow> fastFetch() throws SQLException, DatabaseException;
+
         public abstract List<CachedRow> bulkFetch() throws SQLException, DatabaseException;
 
         protected List<CachedRow> extract(ResultSet resultSet) throws SQLException {
@@ -227,31 +230,31 @@ class ResultSetCache {
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {
                 result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
-                  @Override
-                  protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-                    Object value = super.getColumnValue(rs, index);
-                    if (value != null && value instanceof String) {
+                    @Override
+                    protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+                        Object value = super.getColumnValue(rs, index);
+                        if (value != null && value instanceof String) {
 
-                      // Don't trim for informix database,
-                      // We need to discern the space in front of an index name,
-                      // to know if it was auto-generated or not
-                      
-                      if(informixIndexTrimHint == false) {
-                        value = ((String) value).trim(); // Trim the value normally
-                      } else {
-                        boolean startsWithSpace = false;
-//TODO: move with action                        if(database instanceof InformixDatabase && ((String)value).matches("^ .*$")) {
-//                          startsWithSpace = true; // Set the flag if the value started with a space
-//                        }
-                        value = ((String) value).trim(); // Trim the value normally
-                        if(startsWithSpace == true) {
-                          value = " "+value; // Put the space back at the beginning if the flag was set
+                            // Don't trim for informix database,
+                            // We need to discern the space in front of an index name,
+                            // to know if it was auto-generated or not
+
+                            if (informixIndexTrimHint == false) {
+                                value = ((String) value).trim(); // Trim the value normally
+                            } else {
+                                boolean startsWithSpace = false;
+//                                if (database instanceof InformixDatabase && ((String) value).matches("^ .*$")) {
+//                                    startsWithSpace = true; // Set the flag if the value started with a space
+//                                }
+                                value = ((String) value).trim(); // Trim the value normally
+                                if (startsWithSpace == true) {
+                                    value = " " + value; // Put the space back at the beginning if the flag was set
+                                }
+                            }
+
                         }
-                      }
-
+                        return value;
                     }
-                    return value;
-                  }
                 }).extractData(resultSet);
 
                 for (Map row : result) {
@@ -279,6 +282,7 @@ class ResultSetCache {
         }
 
         public abstract List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException;
+
         public abstract List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException;
 
         @Override

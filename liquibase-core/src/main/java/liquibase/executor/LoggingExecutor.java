@@ -6,6 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.util.StreamUtil;
@@ -98,6 +99,10 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
+            if (sql instanceof ExecutablePreparedStatement) {
+                output.write("WARNING!: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode");
+            }
+
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (statement == null) {
                     continue;
@@ -119,7 +124,11 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                     } else if (sql instanceof CreateProcedureStatement) {
                         potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
-                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n]+")) {
+
+                    if (potentialDelimiter != null) {
+                        potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", ""); //ignore trailing $ as a regexp to determine if it should be output
+                    }
+                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n@\\-]+")) {
                         endDelimiter = potentialDelimiter;
                     }
 

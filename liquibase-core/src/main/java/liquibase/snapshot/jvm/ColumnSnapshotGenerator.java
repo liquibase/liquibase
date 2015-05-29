@@ -20,6 +20,8 @@ import java.util.List;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
+    private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
+
     public ColumnSnapshotGenerator() {
         super(Column.class, new Class[]{Table.class, View.class});
     }
@@ -36,47 +38,56 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         List<CachedRow> columnMetadataRs = null;
         try {
 
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+            Column column = null;
 
-            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), example.getSimpleName());
-
-            if (columnMetadataRs.size() > 0) {
-                CachedRow data = columnMetadataRs.get(0);
-                Column column = readColumn(data, relation, database);
-
-//todo: action refactoring                if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
-//                    String sql;
-//                    if (database.getDatabaseMajorVersion() >= 9) {
-//                        // SQL Server 2005 or later
-//                        // https://technet.microsoft.com/en-us/library/ms177541.aspx
-//                        sql =
-//                                "SELECT CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS] " +
-//                                "FROM [sys].[extended_properties] AS [ep] " +
-//                                "WHERE [ep].[class] = 1 " +
-//                                "AND [ep].[major_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
-//                                "AND [ep].[minor_id] = COLUMNPROPERTY([ep].[major_id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
-//                                "AND [ep].[name] = 'MS_Description'";
-//                    } else {
-//                        // SQL Server 2000
-//                        // https://technet.microsoft.com/en-us/library/aa224810%28v=sql.80%29.aspx
-//                        sql =
-//                                "SELECT CAST([p].[value] AS [ntext]) AS [REMARKS] " +
-//                                "FROM [dbo].[sysproperties] AS [p] " +
-//                                "WHERE [p].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
-//                                "AND [p].[smallid] = COLUMNPROPERTY([p].[id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
-//                                "AND [p].[type] = 4 " +
-//                                "AND [p].[name] = 'MS_Description'";
-//                    }
-//
-//                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
-//                    if (remarks != null && remarks.size() > 0) {
-//                        column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
-//                    }
-//                }
-
+            if (example.getAttribute(LIQUIBASE_COMPLETE, false)) {
+                column = (Column) example;
+                example.setAttribute(LIQUIBASE_COMPLETE, null);
+                
                 return column;
             } else {
-                return null;
+                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+
+                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+
+                if (columnMetadataRs.size() > 0) {
+                    CachedRow data = columnMetadataRs.get(0);
+                    column = readColumn(data, relation, database);
+//                }
+//            }
+//            if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+//                String sql;
+//                if (database.getDatabaseMajorVersion() >= 9) {
+//                    // SQL Server 2005 or later
+//                    // https://technet.microsoft.com/en-us/library/ms177541.aspx
+//                    sql =
+//                            "SELECT CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS] " +
+//                                    "FROM [sys].[extended_properties] AS [ep] " +
+//                                    "WHERE [ep].[class] = 1 " +
+//                                    "AND [ep].[major_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
+//                                    "AND [ep].[minor_id] = COLUMNPROPERTY([ep].[major_id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
+//                                    "AND [ep].[name] = 'MS_Description'";
+//                } else {
+//                    // SQL Server 2000
+//                    // https://technet.microsoft.com/en-us/library/aa224810%28v=sql.80%29.aspx
+//                    sql =
+//                            "SELECT CAST([p].[value] AS [ntext]) AS [REMARKS] " +
+//                                    "FROM [dbo].[sysproperties] AS [p] " +
+//                                    "WHERE [p].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
+//                                    "AND [p].[smallid] = COLUMNPROPERTY([p].[id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
+//                                    "AND [p].[type] = 4 " +
+//                                    "AND [p].[name] = 'MS_Description'";
+//                }
+//
+//                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
+//                if (remarks != null && remarks.size() > 0) {
+//                    column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+//                }
+//            }
+                    return column;
+                } else {
+                    return null;
+                }
             }
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -102,8 +113,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), null);
 
                 for (CachedRow row : allColumnsMetadataRs) {
-                    Column exampleColumn = new Column().setRelation(relation).setName(StringUtils.trimToNull(row.getString("COLUMN_NAME")));
-                    relation.getColumns().add(exampleColumn);
+                    Column column = readColumn(row, relation, database);
+                    column.setAttribute(LIQUIBASE_COMPLETE, true);
+                    relation.getColumns().add(column);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);
@@ -162,7 +174,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                         column.setAutoIncrementInformation(null);
                     } else {
-                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement+"'");
+                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
                     }
                 } else {
                     //probably older version of java, need to select from the column to find out if it is auto-increment
@@ -173,13 +185,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
                         LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
                         LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
-                        
-                        
-                    }
-                    else{
+
+
+                    } else {
                         selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                     }
-                    LogFactory.getLogger().debug("Checking "+rawTableName+"."+rawCatalogName+" for auto-increment with SQL: '"+selectStatement+"'");
+                    LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                     Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                     Statement statement = null;
                     ResultSet columnSelectRS = null;
@@ -263,7 +274,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
-//todo: action refactoring        if (database instanceof FirebirdDatabase) {
+//        if (database instanceof FirebirdDatabase) {
 //            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
 //                columnTypeName = "BLOB";
 //            }
@@ -283,14 +294,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                        "FROM INFORMATION_SCHEMA.COLUMNS\n" +
 //                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
 //                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-//                        "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
-//                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
+//                        "WHERE TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
+//                        "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
 //                String enumClause = "";
 //                for (String enumValue : enumValues) {
-//                    enumClause += "'"+enumValue+"', ";
+//                    enumClause += "'" + enumValue + "', ";
 //                }
 //                enumClause = enumClause.replaceFirst(", $", "");
-//                return new DataType(columnTypeName + "("+enumClause+")");
+//                return new DataType(columnTypeName + "(" + enumClause + ")");
 //            } catch (DatabaseException e) {
 //                LogFactory.getLogger().warning("Error fetching enum values", e);
 //            }
@@ -334,7 +345,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
-//todo: action refactoring        if (database instanceof MSSQLDatabase) {
+//        if (database instanceof MSSQLDatabase) {
 //            Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 //
 //            if (defaultValue != null && defaultValue instanceof String) {
@@ -360,7 +371,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
 //                    Object column_def = columnMetadataResultSet.get("COLUMN_DEF");
 //                    if (column_def != null && !column_def.equals("null")) {
-//                        columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+ column_def +")");
+//                        columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS (" + column_def + ")");
 //                    }
 //                }
 //            }

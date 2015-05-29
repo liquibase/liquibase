@@ -140,9 +140,9 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeLog.getChangeSet(path, "nvoxland", "2").getComments() == "Testing add column"
         assert changeLog.getChangeSet(path, "nvoxland", "2").shouldAlwaysRun()
         assert changeLog.getChangeSet(path, "nvoxland", "2").shouldRunOnChange()
-        changeLog.getChangeSet(path, "nvoxland", "2").getRollBackChanges().length == 2
-        assert changeLog.getChangeSet(path, "nvoxland", "2").getRollBackChanges()[0] instanceof RawSQLChange
-        assert changeLog.getChangeSet(path, "nvoxland", "2").getRollBackChanges()[1] instanceof RawSQLChange
+        changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes.size() == 2
+        assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[0] instanceof RawSQLChange
+        assert changeLog.getChangeSet(path, "nvoxland", "2").rollback.changes[1] instanceof RawSQLChange
 
         ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getName() == "addColumn"
         assert changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0) instanceof AddColumnChange
@@ -331,7 +331,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeLog.getChangeSets().get(0).getId() == "1"
         changeLog.getChangeSets().get(0).comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'value from mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "create table my_table_name"
-        ((RawSQLChange) changeLog.getChangeSets().get(0).getRollBackChanges()[0]).getSql() == "drop table my_table_name"
+        ((RawSQLChange) changeLog.getChangeSets().get(0).rollback.changes[0]).getSql() == "drop table my_table_name"
 
         and: "changeSet 2"
         changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
@@ -475,22 +475,22 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "changeSet with UTF8").changes[0]).sql == "insert into testutf8insert (stringvalue) values ('string with € and £')"
 
         and: "rollback blocks are parsed correctly"
-        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").rollBackChanges.size() == 0
+        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").rollback.changes.size() == 0
 
-        changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollBackChanges.length == 1
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollBackChanges[0]).sql == "drop table rollback_test"
+        changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollback.changes.size() == 1
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollback.changes[0]).sql == "drop table rollback_test"
 
-        changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollBackChanges.size() == 1
-        assert changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollBackChanges[0] instanceof EmptyChange
+        changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollback.changes.size() == 1
+        assert changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollback.changes[0] instanceof EmptyChange
 
 
-        changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges.length == 6
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[0]).sql == "drop table multiRollback1"
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[1]).sql == "drop table multiRollback2"
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[2]).sql == "drop table multiRollback3"
-        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[3]).tableName == "multiRollback4"
-        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[4]).tableName == "multiRollback5"
-        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[5]).tableName == "multiRollback6"
+        changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes.size() == 6
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[0]).sql == "drop table multiRollback1"
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[1]).sql == "drop table multiRollback2"
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[2]).sql == "drop table multiRollback3"
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[3]).tableName == "multiRollback4"
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[4]).tableName == "multiRollback5"
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[5]).tableName == "multiRollback6"
 
     }
 
