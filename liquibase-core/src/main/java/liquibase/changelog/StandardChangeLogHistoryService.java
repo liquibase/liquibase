@@ -78,9 +78,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     protected String getCharTypeName() {
-        if (getDatabase() instanceof MSSQLDatabase && ((MSSQLDatabase) getDatabase()).sendsStringParametersAsUnicode()) {
-            return "nvarchar";
-        }
+//        if (getDatabase() instanceof MSSQLDatabase && ((MSSQLDatabase) getDatabase()).sendsStringParametersAsUnicode()) {
+//            return "nvarchar";
+//        }
         return "varchar";
     }
 
@@ -115,10 +115,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 //            }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
-            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize != 35;
-            }
+//            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
+//                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
+//                checksumNotRightSize = columnSize != null && columnSize != 35;
+//            }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             String charTypeName = getCharTypeName();
 

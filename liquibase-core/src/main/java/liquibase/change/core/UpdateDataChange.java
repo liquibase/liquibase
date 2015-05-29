@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -62,9 +61,9 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                 needsPreparedStatement = true;
             }
 
-            if (database instanceof OracleDatabase &&  column.getType() != null && column.getType().equalsIgnoreCase("CLOB") && column.getValue() != null && column.getValue().length() >= 4000) {
-                needsPreparedStatement = true;
-            }
+//            if (database instanceof OracleDatabase &&  column.getType() != null && column.getType().equalsIgnoreCase("CLOB") && column.getValue() != null && column.getValue().length() >= 4000) {
+//                needsPreparedStatement = true;
+//            }
         }
 
         if (needsPreparedStatement) {

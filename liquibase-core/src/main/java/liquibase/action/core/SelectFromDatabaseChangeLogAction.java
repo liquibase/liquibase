@@ -8,6 +8,7 @@ public class SelectFromDatabaseChangeLogAction extends AbstractAction {
         selectColumnDefinitions,
         where,
         orderByColumnNames,
+        limit,
     }
 
     public SelectFromDatabaseChangeLogAction() {

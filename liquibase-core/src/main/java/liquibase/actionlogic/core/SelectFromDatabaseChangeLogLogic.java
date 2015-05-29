@@ -30,6 +30,7 @@ public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic {
                         action.get(SelectFromDatabaseChangeLogAction.Attr.selectColumnDefinitions, ColumnDefinition[].class))
                         .set(SelectDataAction.Attr.where, action.get(SelectFromDatabaseChangeLogAction.Attr.where, String.class))
                         .set(SelectDataAction.Attr.orderByColumnNames, action.get(SelectFromDatabaseChangeLogAction.Attr.orderByColumnNames, Object.class))
+                        .set(SelectDataAction.Attr.limit, action.get(SelectFromDatabaseChangeLogAction.Attr.limit, Integer.class))
         );
     }
 }

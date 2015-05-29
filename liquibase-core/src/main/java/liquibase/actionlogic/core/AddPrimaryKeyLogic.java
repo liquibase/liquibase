@@ -50,6 +50,16 @@ public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic {
         StringClauses clauses = new StringClauses();
 
         clauses.append("ADD CONSTRAINT");
+
+        //TODO: Informix logic from AddPrimaryKeyGeneratorInformix:
+//        // Using auto-generated names of the form <constraint_type><tabid>_<constraintid> can cause collisions
+//        // See here: http://www-01.ibm.com/support/docview.wss?uid=swg21156047
+//        String constraintName = statement.getConstraintName();
+//        if (constraintName != null && !constraintName.matches("[urcn][0-9]+_[0-9]+")) {
+//            sql.append(" CONSTRAINT ");
+//            sql.append(database.escapeConstraintName(constraintName));
+//        }
+//
         clauses.append(Clauses.constraintName, database.escapeConstraintName(action.get(AddPrimaryKeyAction.Attr.constraintName, String.class)));
         clauses.append("PRIMARY KEY");
         clauses.append(Clauses.columnNames, "(" + database.escapeColumnNameList(action.get(AddPrimaryKeyAction.Attr.columnNames, String.class)) + ")");

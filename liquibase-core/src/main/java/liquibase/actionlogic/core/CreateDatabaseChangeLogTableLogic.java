@@ -22,19 +22,42 @@ public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
+        String charTypeName = getCharTypeName(database);
+        String dateTimeTypeString = getDateTimeTypeString(database);
+
         return new DelegateResult((CreateTableAction) new CreateTableAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .addColumn((ColumnDefinition) new ColumnDefinition("ID", "VARCHAR(255)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("AUTHOR", "VARCHAR(255)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("FILENAME", "VARCHAR(255)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("DATEEXECUTED", "DATETIME").set(ColumnDefinition.Attr.isNullable, false))
+                .addColumn((ColumnDefinition) new ColumnDefinition("ID", charTypeName+"(255)").set(ColumnDefinition.Attr.isNullable, false))
+                .addColumn((ColumnDefinition) new ColumnDefinition("AUTHOR", charTypeName+"(255)").set(ColumnDefinition.Attr.isNullable, false))
+                .addColumn((ColumnDefinition) new ColumnDefinition("FILENAME", charTypeName+"(255)").set(ColumnDefinition.Attr.isNullable, false))
+                .addColumn((ColumnDefinition) new ColumnDefinition("DATEEXECUTED", dateTimeTypeString).set(ColumnDefinition.Attr.isNullable, false))
                 .addColumn((ColumnDefinition) new ColumnDefinition("ORDEREXECUTED", "INT").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("EXECTYPE", "VARCHAR(10)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn(new ColumnDefinition("MD5SUM", "VARCHAR(35)"))
-                .addColumn(new ColumnDefinition("DESCRIPTION", "VARCHAR(255)"))
-                .addColumn(new ColumnDefinition("COMMENTS", "VARCHAR(255)"))
-                .addColumn(new ColumnDefinition("TAG", "VARCHAR(255)"))
-                .addColumn(new ColumnDefinition("LIQUIBASE", "VARCHAR(20)"))
+                .addColumn((ColumnDefinition) new ColumnDefinition("EXECTYPE", charTypeName+"(10)").set(ColumnDefinition.Attr.isNullable, false))
+                .addColumn(new ColumnDefinition("MD5SUM", charTypeName+"(35)"))
+                .addColumn(new ColumnDefinition("DESCRIPTION", charTypeName+"(255)"))
+                .addColumn(new ColumnDefinition("COMMENTS", charTypeName+"(255)"))
+                .addColumn(new ColumnDefinition("TAG", charTypeName+"(255)"))
+                .addColumn(new ColumnDefinition("LIQUIBASE", charTypeName+"(20)"))
                 .set(CreateTableAction.Attr.tablespace, database.getLiquibaseTablespaceName())
         );
+    }
+
+    protected String getCharTypeName(Database database) {
+//        if (database instanceof MSSQLDatabase && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
+//            return "nvarchar";
+//        }
+        return "varchar";
+    }
+
+    protected String getDateTimeTypeString(Database database) {
+//        if (database instanceof MSSQLDatabase) {
+//            try {
+//                if (database.getDatabaseMajorVersion() >= 10) { // 2008 or later
+//                    return "datetime2(3)";
+//                }
+//            } catch (DatabaseException e) {
+//                // ignore
+//            }
+//        }
+        return "datetime";
     }
 }

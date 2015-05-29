@@ -11,6 +11,7 @@ public class SelectDataAction extends AbstractAction {
         selectColumnDefinitions,
         where,
         orderByColumnNames,
+        limit
     }
 
     public SelectDataAction() {
