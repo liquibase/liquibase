@@ -59,7 +59,8 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     @Override
     public String[] getValidFileExtensions() {
         return new String[]{
-                "yaml"
+                "yaml",
+                "yml"
         };
     }
 
