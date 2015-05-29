@@ -104,24 +104,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
 
-//    public void dropDatabaseObjects(String schema) throws DatabaseException {
-//        try {
-//            if (schema == null) {
-//                schema = getConnectionUsername();
-//            }
-//            new Executor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
-//
-//            getConnection().commit();
-//
-//            changeLogTableExists = false;
-//            changeLogLockTableExists = false;
-//            changeLogCreateAttempted = false;
-//            changeLogLockCreateAttempted = false;
-//
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        }
-//    }
+    @Override
+    public void dropDatabaseObjects(CatalogAndSchema schema) throws DatabaseException {
+        ExecutorService.getInstance().getExecutor(this)
+                .execute(new RawSqlStatement("DROP OWNED BY " + getConnection().getConnectionUserName()));
+        getConnection().commit();
+    }
+
 
 
     @Override
