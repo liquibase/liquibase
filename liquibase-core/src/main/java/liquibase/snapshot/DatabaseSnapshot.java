@@ -20,9 +20,6 @@ import liquibase.util.ObjectUtil;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
@@ -225,6 +222,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<String>(object.getAttributes())) {
+            if (object.getClass() == Index.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == PrimaryKey.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == UniqueConstraint.class && field.equals("columns")) {
+                continue;
+            }
             Object fieldValue = object.getAttribute(field, Object.class);
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example

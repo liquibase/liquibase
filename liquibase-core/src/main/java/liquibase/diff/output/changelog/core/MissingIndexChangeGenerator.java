@@ -50,9 +50,9 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
             change.setSchemaName(index.getTable().getSchema().getName());
         }
         change.setIndexName(index.getName());
-        change.setUnique(index.isUnique());
+        change.setUnique(index.isUnique() != null && index.isUnique() ? Boolean.TRUE : null);
         change.setAssociatedWith(index.getAssociatedWithAsString());
-        change.setClustered(index.getClustered());
+        change.setClustered(index.getClustered() != null && index.getClustered() ? Boolean.TRUE : null);
 
 //        if (index.getAssociatedWith().contains(Index.MARK_PRIMARY_KEY) || index.getAssociatedWith().contains(Index.MARK_FOREIGN_KEY) || index.getAssociatedWith().contains(Index.MARK_UNIQUE_CONSTRAINT)) {
 //            continue;
