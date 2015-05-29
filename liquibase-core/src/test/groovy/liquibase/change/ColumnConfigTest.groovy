@@ -428,6 +428,8 @@ public class ColumnConfigTest extends Specification {
             testValue = "838"
         } else if (field in ["valueNumeric", "defaultValueNumeric"]) {
             testValue = "347.22"
+        } else if (field in ["descending"]) {
+            testValue = true
         }
         node.addChild(null, field, testValue)
         try {

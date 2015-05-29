@@ -89,6 +89,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
+    @DatabaseChangeProperty(description = "Change the cache size?")
     public BigInteger getCacheSize() {
         return cacheSize;
     }
@@ -138,6 +139,9 @@ public class AlterSequenceChange extends AbstractChange {
             }
             if (isOrdered() != null) {
                 result.assertCorrect(isOrdered().equals(sequence.getOrdered()), "Max Value is different");
+            }
+            if (getCacheSize() != null) {
+                result.assertCorrect(getCacheSize().equals(sequence.getCacheSize()), "Cache size is different");
             }
         } catch (Exception e) {
             return result.unknown(e);

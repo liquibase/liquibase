@@ -208,6 +208,7 @@ public class XMLChangeLogSerializerTest {
         refactoring.setMaxValue(new BigInteger("2"));
         refactoring.setMinValue(new BigInteger("3"));
         refactoring.setOrdered(true);
+        refactoring.setCacheSize(new BigInteger("2008"));
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("alterSequence", node.getNodeName());
@@ -217,6 +218,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("2", node.getAttribute("maxValue"));
         assertEquals("3", node.getAttribute("minValue"));
         assertEquals("true", node.getAttribute("ordered"));
+        assertEquals("2008", node.getAttribute("cacheSize"));
     }
 
     @Test
@@ -270,6 +272,7 @@ public class XMLChangeLogSerializerTest {
 
         AddColumnConfig column2 = new AddColumnConfig();
         column2.setName("COL2");
+        column2.setDescending(true);
         refactoring.addColumn(column2);
 
         Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
@@ -282,6 +285,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("COL1", ((Element) element.getChildNodes().item(0)).getAttribute("name"));
         assertEquals("column", ((Element) element.getChildNodes().item(1)).getTagName());
         assertEquals("COL2", ((Element) element.getChildNodes().item(1)).getAttribute("name"));
+        assertEquals("true", ((Element) element.getChildNodes().item(1)).getAttribute("descending"));
     }
 
     @Test

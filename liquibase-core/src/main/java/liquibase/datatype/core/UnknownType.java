@@ -31,10 +31,6 @@ public class UnknownType extends LiquibaseDataType {
             dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
         }
         Object[] parameters = getParameters();
-//        if (database instanceof DB2Database && getName().equalsIgnoreCase("XML")) {
-//            parameters = new Object[0];
-//        }
-//
 //        if (database instanceof MSSQLDatabase) {
 //            String name = database.escapeDataTypeName(getName());
 //            if (dataTypeMaxParameters < parameters.length) {
@@ -47,7 +43,6 @@ public class UnknownType extends LiquibaseDataType {
 //            if (getName().equalsIgnoreCase("LONG")
 //                    || getName().equalsIgnoreCase("BFILE")
 //                    || getName().equalsIgnoreCase("ROWID")
-//                    || getName().equalsIgnoreCase("XMLTYPE")
 //                    || getName().equalsIgnoreCase("ANYDATA")
 //                    || getName().equalsIgnoreCase("SDO_GEOMETRY")
 //                    ) {

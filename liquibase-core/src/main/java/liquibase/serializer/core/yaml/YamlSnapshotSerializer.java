@@ -12,14 +12,12 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.util.ISODateFormat;
+
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.*;
 
 public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSerializer {
@@ -73,6 +71,11 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 
     protected LiquibaseRepresenter getLiquibaseRepresenter() {
         return new SnapshotLiquibaseRepresenter();
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {

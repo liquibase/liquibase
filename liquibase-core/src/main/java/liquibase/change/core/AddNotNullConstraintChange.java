@@ -23,6 +23,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String columnName;
     private String defaultNullValue;
     private String columnDataType;
+    private String constraintName;
 
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
@@ -78,6 +79,15 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @DatabaseChangeProperty(description = "Created constraint name (if database supports names for NOT NULL constraints)")
+    public String getConstraintName() {
+        return constraintName;
+    }
+
+    public void setConstraintName(String constraintName) {
+        this.constraintName = constraintName;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
@@ -95,7 +105,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
         }
         
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
-
+//        if (database instanceof DB2Database) {
+//            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+//        }
+        
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 

@@ -6,6 +6,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -16,7 +17,10 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.util.JdbcUtils;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +36,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private Boolean sendsStringParametersAsUnicode = null;
 
     @Override
     public String getShortName() {
@@ -339,7 +345,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null && ! isCaseSensitive()) {
+        if (schemaName != null && !isCaseSensitive()) {
             schemaName = schemaName.toLowerCase();
         }
         return schemaName;
@@ -347,25 +353,21 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCaseSensitive() {
-
         if (caseSensitive == null) {
             try {
-                if (getConnection() != null) {
-                  String catalog = getConnection().getCatalog();
-                  String sql = String.format("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('%s', 'COLLATION'))", catalog);
-                  String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
-                  caseSensitive = ! collation.contains("_CI_");
+                if (getConnection() instanceof JdbcConnection) {
+                    String catalog = getConnection().getCatalog();
+                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
+                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+                    caseSensitive = collation != null && !collation.contains("_CI_");
+                } else if (getConnection() instanceof OfflineConnection) {
+                    caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (Exception e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
-
-        if (caseSensitive == null) {
-            return false;
-        } else {
-            return caseSensitive.booleanValue();
-        }
+        return caseSensitive != null && caseSensitive;
     }
 
     @Override
@@ -473,6 +475,36 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         return unescapeDataTypeName(dataTypeString.substring(0, indexOfLeftParen))
                 + dataTypeString.substring(indexOfLeftParen);
+    }
+
+    public boolean sendsStringParametersAsUnicode() {
+        if (sendsStringParametersAsUnicode == null) {
+            try {
+                if (getConnection() instanceof JdbcConnection) {
+                    PreparedStatement ps = null;
+                    ResultSet rs = null;
+                    try {
+                        String sql = "SELECT CONVERT([sysname], SQL_VARIANT_PROPERTY(?, 'BaseType'))";
+                        ps = ((JdbcConnection) getConnection()).prepareStatement(sql);
+                        ps.setString(1, "Liquibase");
+                        rs = ps.executeQuery();
+                        String baseType = null;
+                        if (rs.next()) {
+                            baseType = rs.getString(1);
+                        }
+                        sendsStringParametersAsUnicode = baseType == null || baseType.startsWith("n"); // i.e. nvarchar (or nchar)
+                    } finally {
+                        JdbcUtils.close(rs, ps);
+                    }
+                } else if (getConnection() instanceof OfflineConnection) {
+                    sendsStringParametersAsUnicode = ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
+                }
+            } catch (Exception e) {
+                LogFactory.getLogger().warning("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+            }
+        }
+
+        return sendsStringParametersAsUnicode == null ? true : sendsStringParametersAsUnicode;
     }
 
     @Override

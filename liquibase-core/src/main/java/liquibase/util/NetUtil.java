@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import liquibase.logging.LogFactory;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -44,7 +46,12 @@ public class NetUtil {
      * @throws SocketException
      */
     public static String getLocalHostAddress() throws UnknownHostException, SocketException {
-        return getLocalHost().getHostAddress();
+        try {
+            return getLocalHost().getHostAddress();
+        } catch (Throwable e) {
+            LogFactory.getInstance().getLog().debug("Error getting hostname", e);
+            return "unknown";
+        }
     }
 
     /**
@@ -54,7 +61,12 @@ public class NetUtil {
      * @throws SocketException
      */
     public static String getLocalHostName() throws UnknownHostException, SocketException {
-        return getLocalHost().getHostName();
+        try {
+            return getLocalHost().getHostName();
+        } catch (Throwable e) {
+            LogFactory.getInstance().getLog().debug("Error getting hostname", e);
+            return "unknown";
+        }
     }
 
 

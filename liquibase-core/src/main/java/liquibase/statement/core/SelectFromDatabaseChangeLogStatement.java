@@ -8,6 +8,7 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
     private ColumnConfig[] columnsToSelect;
     private WhereClause whereClause;
     private String[] orderByColumns;
+    private Integer limit;
 
     public SelectFromDatabaseChangeLogStatement(String... columnsToSelect) {
         if (columnsToSelect != null) {
@@ -42,6 +43,15 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
     public SelectFromDatabaseChangeLogStatement setOrderBy(String... columns) {
         this.orderByColumns = columns;
 
+        return this;
+    }
+
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public SelectFromDatabaseChangeLogStatement setLimit(Integer limit) {
+        this.limit = limit;
         return this;
     }
 
