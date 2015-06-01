@@ -37,8 +37,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             //noinspection unchecked
             List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
 
-            if (sequenceNames != null) {
-                for (Map<String, ?> sequence : sequenceNames) {
+            if (sequences != null) {
+                for (Map<String, ?> sequence : sequences) {
                     schema.addDatabaseObject(new Sequence(cleanNameFromDatabase((String) sequence.get("SEQUENCE_NAME"), database)).setSchema(schema));
                 }
             }
@@ -50,9 +50,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         if (example.getSnapshotId() != null) {
             return example;
         }
-        if (example.getAttribute("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
+        if (example.get("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
             example.setSnapshotId(SnapshotIdService.getInstance().generateId());
-            example.setAttribute("liquibase-complete", null);
+            example.set("liquibase-complete", null);
             return example;
         }
 
@@ -64,7 +64,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
         for (Map<String, ?> sequenceRow : sequences) {
             String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
-            if ((database.isCaseSensitive() && name.equals(example.getName()) || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
+            if ((database.isCaseSensitive(example.getClass()) && name.equals(example.getName()) || (!database.isCaseSensitive(example.getClass()) && name.equalsIgnoreCase(example.getSimpleName())))) {
                 return mapToSequence(sequenceRow, example.getSchema(), database);
             }
         }
@@ -84,7 +84,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
         seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
         seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
-        seq.setAttribute("liquibase-complete", true);
+        seq.set("liquibase-complete", true);
 
         return seq;
     }

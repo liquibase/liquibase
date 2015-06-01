@@ -40,15 +40,15 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             Column column = null;
 
-            if (example.getAttribute(LIQUIBASE_COMPLETE, false)) {
+            if (example.get(LIQUIBASE_COMPLETE, false)) {
                 column = (Column) example;
-                example.setAttribute(LIQUIBASE_COMPLETE, null);
+                example.set(LIQUIBASE_COMPLETE, null);
                 
                 return column;
             } else {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), example.getSimpleName());
 
                 if (columnMetadataRs.size() > 0) {
                     CachedRow data = columnMetadataRs.get(0);
@@ -114,7 +114,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, relation, database);
-                    column.setAttribute(LIQUIBASE_COMPLETE, true);
+                    column.set(LIQUIBASE_COMPLETE, true);
                     relation.getColumns().add(column);
                 }
             } catch (Exception e) {

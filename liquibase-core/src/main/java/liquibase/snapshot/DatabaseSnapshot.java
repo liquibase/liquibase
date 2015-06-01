@@ -221,7 +221,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     }
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
-        for (String field : new HashSet<String>(object.getAttributes())) {
+        for (String field : new HashSet<String>(object.getAttributeNames())) {
             if (object.getClass() == Index.class && field.equals("columns")) {
                 continue;
             }
@@ -231,14 +231,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             if (object.getClass() == UniqueConstraint.class && field.equals("columns")) {
                 continue;
             }
-            Object fieldValue = object.getAttribute(field, Object.class);
+            Object fieldValue = object.get(field, Object.class);
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
                 if (object instanceof PrimaryKey && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
-                    object.setAttribute(field, null);
+                    object.set(field, null);
                 }
             } else if (fieldValue != newFieldValue) {
-                object.setAttribute(field, newFieldValue);
+                object.set(field, newFieldValue);
             }
         }
     }

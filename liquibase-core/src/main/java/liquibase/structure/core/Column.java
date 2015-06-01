@@ -167,7 +167,7 @@ public class Column extends AbstractDatabaseObject {
 
     public Column setDescending(Boolean descending) {
         this.descending = descending;
-        setAttribute("descending", descending);
+        set("descending", descending);
 
         return this;
     }
@@ -184,9 +184,9 @@ public class Column extends AbstractDatabaseObject {
     public String toString() {
         String name = getName().toShortString();
         if (getRelation() == null) {
-            return name + (getDescending() != null && getDescending() ? " DESC" : "");;
+            return name + (getDescending() != null && getDescending() ? " DESC" : "");
         } else {
-            return getRelation().getName().toString()+"." + name + (getDescending() != null && getDescending() ? " DESC" : "");;
+            return getRelation().getName().toString()+"." + name + (getDescending() != null && getDescending() ? " DESC" : "");
         }
     }
 
