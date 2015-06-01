@@ -830,6 +830,24 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="setTableRemarks">
+		<xsd:complexType>
+			<xsd:attribute name="catalogName" type="xsd:string" />
+			<xsd:attribute name="schemaName" type="xsd:string" />
+			<xsd:attribute name="tableName" type="xsd:string" use="required" />
+			<xsd:attribute name="remarks" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="setColumnRemarks">
+		<xsd:complexType>
+			<xsd:attribute name="catalogName" type="xsd:string" />
+			<xsd:attribute name="schemaName" type="xsd:string" />
+			<xsd:attribute name="tableName" type="xsd:string" use="required" />
+			<xsd:attribute name="columnName" type="xsd:string" use="required" />
+			<xsd:attribute name="remarks" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
 
 	<xsd:element name="constraints">
 		<xsd:complexType>
@@ -1206,6 +1224,8 @@
 			<xsd:element ref="dropDefaultValue" maxOccurs="unbounded" />
 			<xsd:element ref="addUniqueConstraint" maxOccurs="unbounded" />
 			<xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded" />
+			<xsd:element ref="setTableRemarks" maxOccurs="unbounded" />
+			<xsd:element ref="setColumnRemarks" maxOccurs="unbounded" />
 			<xsd:element ref="customChange" maxOccurs="unbounded" />
 			<xsd:element ref="update" maxOccurs="unbounded" />
 			<xsd:element ref="delete" maxOccurs="unbounded" />
