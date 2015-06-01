@@ -14,7 +14,7 @@ import liquibase.exception.ActionPerformException;
 
 import java.math.BigInteger;
 
-public class AddAutoIncrementLogicMysql2 extends AddAutoIncrementLogic {
+public class AddAutoIncrementLogicMysql extends AddAutoIncrementLogic {
 
     @Override
     protected Class<? extends Database> getRequiredDatabase() {
