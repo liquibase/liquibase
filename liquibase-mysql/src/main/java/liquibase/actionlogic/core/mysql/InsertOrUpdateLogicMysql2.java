@@ -9,7 +9,7 @@ import liquibase.statement.core.InsertOrUpdateStatement;
  *
  * @author Carles
  */
-public class InsertOrUpdateLogicMysql extends InsertOrUpdateLogic {
+public class InsertOrUpdateLogicMysql2 extends InsertOrUpdateLogic {
     @Override
     protected Class<? extends Database> getRequiredDatabase() {
         return MySQLDatabase.class;
