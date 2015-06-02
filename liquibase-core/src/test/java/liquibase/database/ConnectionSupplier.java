@@ -270,7 +270,7 @@ public abstract class ConnectionSupplier implements Cloneable {
                 returnList.add(new ObjectName(simpleName));
             } else {
                 for (ObjectName container : getContainers(maxDepth, includePartials, includeNulls)) {
-                    returnList.add(new ObjectName(simpleName, container));
+                    returnList.add(new ObjectName(container, simpleName));
                 }
             }
         }

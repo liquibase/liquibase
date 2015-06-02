@@ -11,6 +11,8 @@ import liquibase.database.Database;
 import liquibase.database.core.sqlite.SQLiteDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class ReindexLogicSQLite extends AbstractActionLogic {
 
@@ -36,8 +38,6 @@ public class ReindexLogicSQLite extends AbstractActionLogic {
 
         return new DelegateResult(new ExecuteSqlAction(
                 "REINDEX "
-                        + database.escapeTableName(action.get(ReindexAction.Attr.catalogName, String.class),
-                        action.get(ReindexAction.Attr.schemaName, String.class),
-                        action.get(ReindexAction.Attr.tableName, String.class))));
+                        + database.escapeObjectName(action.get(ReindexAction.Attr.tableName, ObjectName.class), Table.class)));
     }
 }

@@ -7,6 +7,8 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Sequence;
 
 public class DropSequenceLogic extends AbstractSqlBuilderLogic {
 
@@ -32,9 +34,6 @@ public class DropSequenceLogic extends AbstractSqlBuilderLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new StringClauses()
                 .append("DROP SEQUENCE")
-                .append(database.escapeSequenceName(
-                        action.get(DropSequenceAction.Attr.catalogName, String.class),
-                        action.get(DropSequenceAction.Attr.schemaName, String.class),
-                        action.get(DropSequenceAction.Attr.sequenceName, String.class)));
+                .append(database.escapeObjectName(action.get(DropSequenceAction.Attr.sequenceName, ObjectName.class), Sequence.class));
     }
 }

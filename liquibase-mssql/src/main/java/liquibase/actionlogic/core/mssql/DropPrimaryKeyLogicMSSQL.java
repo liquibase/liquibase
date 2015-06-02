@@ -11,6 +11,8 @@ import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.actionlogic.core.DropPrimaryKeyLogic;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
     @Override
@@ -28,12 +30,6 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
-        String escapedTableName = database.escapeTableName(
-                action.get(DropPrimaryKeyAction.Attr.catalogName, String.class),
-                action.get(DropPrimaryKeyAction.Attr.schemaName, String.class),
-                action.get(DropPrimaryKeyAction.Attr.tableName, String.class)
-        );
-
         String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
         if (constraintName == null) {
             return new DelegateResult(new ExecuteSqlAction(
@@ -46,9 +42,9 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
             +" join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'"
             +" join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid"
             +" join syscolumns c ON ik.id = c.id AND ik.colid = c.colid"
-            +" where o.name = '"+scope.get(DropPrimaryKeyAction.Attr.tableName, String.class)+"'"
+            +" where o.name = '"+action.get(DropPrimaryKeyAction.Attr.tableName, String.class)+"'"
             +"\n"
-            +"set @sql='alter table "+escapedTableName+" drop constraint ' + @pkname"
+            +"set @sql='alter table "+database.escapeObjectName(action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class), Table.class)+" drop constraint ' + @pkname"
             +"\n"
             +"exec(@sql)"
             +"\n"));

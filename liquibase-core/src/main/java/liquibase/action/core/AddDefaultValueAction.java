@@ -1,13 +1,11 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class AddDefaultValueAction extends AbstractAction {
 
     public static enum Attr {
-        catalogName,
-        schemaName,
-        tableName,
         columnName,
         columnDataType,
         defaultValue,
@@ -16,10 +14,7 @@ public class AddDefaultValueAction extends AbstractAction {
     public AddDefaultValueAction() {
     }
 
-    public AddDefaultValueAction(String catalogName, String schemaName, String tableName, String columnName, String columnDataType, Object defaultValue) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
-        set(Attr.tableName, tableName);
+    public AddDefaultValueAction(ObjectName columnName, String columnDataType, Object defaultValue) {
         set(Attr.columnName, columnName);
         set(Attr.columnDataType, columnDataType);
         set(Attr.defaultValue, defaultValue);

@@ -10,6 +10,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic {
 
@@ -23,10 +24,7 @@ public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic {
         final Database database = scope.get(Scope.Attr.database, Database.class);
 
         return new DelegateResult(
-                (SelectDataAction) new SelectDataAction(
-                        database.getLiquibaseCatalogName(),
-                        database.getLiquibaseSchemaName(),
-                        database.getDatabaseChangeLogTableName(),
+                (SelectDataAction) new SelectDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()),
                         action.get(SelectFromDatabaseChangeLogAction.Attr.selectColumnDefinitions, ColumnDefinition[].class))
                         .set(SelectDataAction.Attr.where, action.get(SelectFromDatabaseChangeLogAction.Attr.where, String.class))
                         .set(SelectDataAction.Attr.orderByColumnNames, action.get(SelectFromDatabaseChangeLogAction.Attr.orderByColumnNames, Object.class))

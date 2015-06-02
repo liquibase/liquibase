@@ -1,12 +1,11 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class SelectDataAction extends AbstractAction {
 
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
         selectColumnDefinitions,
         where,
@@ -17,7 +16,8 @@ public class SelectDataAction extends AbstractAction {
     public SelectDataAction() {
     }
 
-    public SelectDataAction(String catalogName, String schemaName, String tableName, ColumnDefinition... selectColumnNames) {
+    public SelectDataAction(ObjectName tableName, ColumnDefinition... selectColumnNames) {
+        set(Attr.tableName, tableName);
         set(Attr.selectColumnDefinitions, selectColumnNames);
     }
 }

@@ -10,7 +10,11 @@ import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
+
+import java.util.List;
 
 public class RenameColumnLogicMSSQL extends RenameColumnLogic {
     @Override
@@ -25,9 +29,7 @@ public class RenameColumnLogicMSSQL extends RenameColumnLogic {
         // do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
         return new DelegateResult(new ExecuteSqlAction(
                 "exec sp_rename '"
-                        + database.escapeTableName(action.get(RenameColumnAction.Attr.catalogName, String.class),
-                        action.get(RenameColumnAction.Attr.schemaName, String.class),
-                        action.get(RenameColumnAction.Attr.tableName, String.class))
+                        + database.escapeObjectName(action.get(RenameColumnAction.Attr.tableName, ObjectName.class), Table.class)
                         + "."
                         + database.escapeObjectName(action.get(RenameColumnAction.Attr.oldColumnName, String.class), Column.class)
                         + "', '"

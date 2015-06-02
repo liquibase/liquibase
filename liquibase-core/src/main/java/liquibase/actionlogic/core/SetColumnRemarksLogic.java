@@ -10,7 +10,9 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class SetColumnRemarksLogic extends AbstractActionLogic {
 
@@ -22,7 +24,7 @@ public class SetColumnRemarksLogic extends AbstractActionLogic {
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SetColumnRemarksAction.Attr.tableName, action)
+                .checkForRequiredContainer("Table name is required", SetColumnRemarksAction.Attr.columnName, action)
                 .checkForRequiredField(SetColumnRemarksAction.Attr.columnName, action);
     }
 
@@ -31,9 +33,7 @@ public class SetColumnRemarksLogic extends AbstractActionLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new DelegateResult(new ExecuteSqlAction(
                 "COMMENT ON COLUMN "
-                        + database.escapeTableName(action.get(SetColumnRemarksAction.Attr.catalogName, String.class),
-                        action.get(SetColumnRemarksAction.Attr.schemaName, String.class),
-                        action.get(SetColumnRemarksAction.Attr.tableName, String.class))
+                        + database.escapeObjectName(action.get(SetColumnRemarksAction.Attr.columnName, ObjectName.class).getContainer(), Table.class)
                         + "."
                         + database.escapeObjectName(action.get(SetColumnRemarksAction.Attr.columnName, String.class), Column.class)
                         + " IS '"

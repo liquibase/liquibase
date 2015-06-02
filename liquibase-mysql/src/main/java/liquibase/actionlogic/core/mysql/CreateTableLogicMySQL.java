@@ -13,6 +13,7 @@ import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
             String columnRemarks = column.get(ColumnDefinition.Attr.remarks, String.class);
             if (columnRemarks != null) {
                 SetColumnRemarksAction remarksAction = (SetColumnRemarksAction) new SetColumnRemarksAction()
-                        .set(SetColumnRemarksAction.Attr.tableName, action.get(CreateTableAction.Attr.tableName, String.class))
+                        .set(SetColumnRemarksAction.Attr.columnName, new ObjectName(action.get(CreateTableAction.Attr.tableName, ObjectName.class), column.get(ColumnDefinition.Attr.columnName, String.class)))
                         .set(SetColumnRemarksAction.Attr.remarks, columnRemarks);
                 return new DelegateResult(result, remarksAction);
             }

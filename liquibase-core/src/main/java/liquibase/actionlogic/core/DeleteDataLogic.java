@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.core.DeleteStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -34,9 +35,7 @@ public class DeleteDataLogic extends AbstractSqlBuilderLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         StringClauses clauses = new StringClauses();
         clauses.append("DELETE FROM");
-        clauses.append(database.escapeTableName(action.get(DeleteDataAction.Attr.catalogName, String.class),
-                action.get(DeleteDataAction.Attr.schemaName, String.class),
-                action.get(DeleteDataAction.Attr.tableName, String.class)));
+        clauses.append(database.escapeObjectName(action.get(DeleteDataAction.Attr.tableName, ObjectName.class), Table.class));
 
         String whereClause = action.get(DeleteDataAction.Attr.where, String.class);
         if (whereClause != null) {

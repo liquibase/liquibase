@@ -7,6 +7,8 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetTableRemarksLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class SetTableRemarksLogicMSSQL extends SetTableRemarksLogic {
     @Override
@@ -19,10 +21,7 @@ public class SetTableRemarksLogicMSSQL extends SetTableRemarksLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
         return new StringClauses().append("ALTER TABLE")
-                .append(database.escapeTableName(
-                        action.get(SetTableRemarksAction.Attr.catalogName, String.class),
-                        action.get(SetTableRemarksAction.Attr.schemaName, String.class),
-                        action.get(SetTableRemarksAction.Attr.tableName, String.class)))
+                .append(database.escapeObjectName(action.get(SetTableRemarksAction.Attr.tableName, ObjectName.class), Table.class))
                 .append("COMMENT = '" + database.escapeStringForDatabase(action.get(SetTableRemarksAction.Attr.remarks, String.class)) + "'");
     }
 }

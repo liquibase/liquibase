@@ -7,6 +7,7 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.View;
 
 public class RenameViewLogic extends AbstractSqlBuilderLogic {
@@ -28,11 +29,8 @@ public class RenameViewLogic extends AbstractSqlBuilderLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new StringClauses()
                 .append("RENAME")
-                .append(database.escapeViewName(
-                        action.get(RenameViewAction.Attr.catalogName, String.class),
-                        action.get(RenameViewAction.Attr.schemaName, String.class),
-                        action.get(RenameViewAction.Attr.oldViewName, String.class)))
+                .append(database.escapeObjectName(action.get(RenameViewAction.Attr.oldViewName, ObjectName.class), View.class))
                 .append("TO")
-                .append(database.escapeObjectName(action.get(RenameViewAction.Attr.newViewName, String.class), View.class));
+                .append(database.escapeObjectName(action.get(RenameViewAction.Attr.newViewName, ObjectName.class).getName(), View.class));
     }
 }

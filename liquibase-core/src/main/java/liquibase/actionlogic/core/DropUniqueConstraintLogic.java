@@ -3,7 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.DropUniqueConstraintActon;
-import liquibase.action.core.RedefineTableAction;
+import liquibase.action.core.AlterTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -11,6 +11,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class DropUniqueConstraintLogic extends AbstractSqlBuilderLogic {
 
@@ -28,10 +29,8 @@ public class DropUniqueConstraintLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineTableAction(
-                action.get(DropUniqueConstraintActon.Attr.catalogName, String.class),
-                action.get(DropUniqueConstraintActon.Attr.schemaName, String.class),
-                action.get(DropUniqueConstraintActon.Attr.catalogName, String.class),
+        return new DelegateResult(new AlterTableAction(
+                action.get(DropUniqueConstraintActon.Attr.tableName, ObjectName.class),
                 generateSql(action, scope)));
     }
 

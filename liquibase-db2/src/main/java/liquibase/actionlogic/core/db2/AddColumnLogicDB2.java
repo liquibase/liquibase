@@ -10,6 +10,7 @@ import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class AddColumnLogicDB2 extends AddColumnsLogic {
     @Override
@@ -20,7 +21,7 @@ public class AddColumnLogicDB2 extends AddColumnsLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult((DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(AddColumnsAction.Attr.catalogName, String.class), action.get(AddColumnsAction.Attr.schemaName, String.class), action.get(AddColumnsAction.Attr.tableName, String.class))
+                new ReorganizeTableAction(action.get(AddColumnsAction.Attr.tableName, ObjectName.class))
         );
     }
 }

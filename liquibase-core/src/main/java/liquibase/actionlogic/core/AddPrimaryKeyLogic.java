@@ -3,7 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddPrimaryKeyAction;
-import liquibase.action.core.RedefineTableAction;
+import liquibase.action.core.AlterTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -11,6 +11,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic {
 
@@ -38,9 +39,7 @@ public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
-                new RedefineTableAction(scope.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
-                        scope.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
-                        scope.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
+                new AlterTableAction(scope.get(AddPrimaryKeyAction.Attr.tableName, ObjectName.class),
                         generateSql(action, scope)));
     }
 

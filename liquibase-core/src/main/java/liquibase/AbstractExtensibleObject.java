@@ -2,10 +2,7 @@ package liquibase;
 
 import liquibase.util.SmartMap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Convenience class implementing ExtensibleObject. It is usually easiest to extend this class rather than implement all of ExtensibleObject yourself.
@@ -13,10 +10,30 @@ import java.util.Set;
 public class AbstractExtensibleObject implements ExtensibleObject {
 
     private SmartMap attributes = new SmartMap();
+    private Set<String> standardAttributeNames;
 
     @Override
     public Set<String> getAttributeNames() {
         return attributes.keySet();
+    }
+
+    /**
+     * Default implementation looks for an inner enum called "Attr" and returns the fields in there
+     */
+    @Override
+    public Set<String> getStandardAttributeNames() {
+        if (standardAttributeNames == null) {
+            standardAttributeNames = new HashSet<>();
+            for (Class declaredClass : this.getClass().getDeclaredClasses()) {
+                if (declaredClass.getSimpleName().equals("Attr") && Enum.class.isAssignableFrom(declaredClass)) {
+                    for (Object obj : declaredClass.getEnumConstants()) {
+                        standardAttributeNames.add(((Enum) obj).name());
+                    }
+                    break;
+                }
+            }
+        }
+        return standardAttributeNames;
     }
 
     /**

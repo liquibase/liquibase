@@ -3,7 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
-import liquibase.action.core.RedefineColumnAction;
+import liquibase.action.core.AlterColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -16,6 +16,7 @@ import liquibase.datatype.core.CharType;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 
 public class AddDefaultValueLogic extends AbstractSqlBuilderLogic {
 
@@ -33,7 +34,7 @@ public class AddDefaultValueLogic extends AbstractSqlBuilderLogic {
         ValidationErrors validationErrors = super.validate(action, scope);
         validationErrors.checkForRequiredField(AddDefaultValueAction.Attr.defaultValue, action);
         validationErrors.checkForRequiredField(AddDefaultValueAction.Attr.columnName, action);
-        validationErrors.checkForRequiredField(AddDefaultValueAction.Attr.tableName, action);
+        validationErrors.checkForRequiredContainer("Table name is required", AddDefaultValueAction.Attr.columnName, action);
         if (!database.supportsSequences() && defaultValue instanceof SequenceNextValueFunction) {
             validationErrors.addError("Database " + database.getShortName() + " does not support sequences");
         }
@@ -62,11 +63,8 @@ public class AddDefaultValueLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineColumnAction(
-                action.get(AddDefaultValueAction.Attr.catalogName, String.class),
-                action.get(AddDefaultValueAction.Attr.schemaName, String.class),
-                action.get(AddDefaultValueAction.Attr.tableName, String.class),
-                action.get(AddDefaultValueAction.Attr.columnName, String.class),
+        return new DelegateResult(new AlterColumnAction(
+                action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class),
                 generateSql(action, scope)
         ));
     }

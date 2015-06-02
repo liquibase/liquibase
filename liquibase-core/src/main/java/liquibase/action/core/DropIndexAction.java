@@ -6,8 +6,6 @@ public class DropIndexAction extends AbstractAction {
 
     public static enum Attr {
         indexName,
-        tableCatalogName,
-        tableSchemaName,
         tableName,
         associatedWith,
     }

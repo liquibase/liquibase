@@ -12,7 +12,10 @@ import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 /**
  * Adds functionality for setting the sequence to be owned by the column with the default value
@@ -35,15 +38,10 @@ public class AddDefaultValueLogicPostgresql extends AddDefaultValueLogic {
         // this will allow a drop table cascade to remove the sequence as well.
         if (defaultValue instanceof SequenceNextValueFunction) {
             result = new DelegateResult(result, new RedefineSequenceAction(
-                    action.get(AddDefaultValueAction.Attr.catalogName, String.class),
-                    action.get(AddDefaultValueAction.Attr.schemaName, String.class),
-                    ((SequenceNextValueFunction) defaultValue).getValue(),
+                    new ObjectName(action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class).getContainer().getContainer(), ((SequenceNextValueFunction) defaultValue).getValue()),
                     new StringClauses()
                             .append("OWNED BY")
-                            .append(database.escapeTableName(
-                                    action.get(AddDefaultValueAction.Attr.catalogName, String.class),
-                                    action.get(AddDefaultValueAction.Attr.schemaName, String.class),
-                                    action.get(AddDefaultValueAction.Attr.tableName, String.class))
+                            .append(database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class).getContainer(), Table.class)
                                     + "."
                                     + database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, String.class), Column.class))));
         }

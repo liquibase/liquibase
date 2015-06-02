@@ -14,7 +14,9 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class DropColumnsLogic extends AbstractActionLogic {
 
@@ -44,8 +46,8 @@ public class DropColumnsLogic extends AbstractActionLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
         return new StringClauses()
-                .append("ALTER TABLE " + database.escapeTableName(action.get(DropColumnsAction.Attr.catalogName, String.class), action.get(DropColumnsAction.Attr.schemaName, String.class), action.get(DropColumnsAction.Attr.tableName, String.class)))
-                .append("DROP COLUMN")
-                .append(database.escapeObjectName(column, Column.class));
+                .append("ALTER TABLE " + database.escapeObjectName(action.get(DropColumnsAction.Attr.tableName, ObjectName.class), Table.class))
+                        .append("DROP COLUMN")
+                        .append(database.escapeObjectName(column, Column.class));
     }
 }

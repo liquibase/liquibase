@@ -9,6 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -270,8 +271,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return super.isSystemObject(example);
     }
 
-    public String generateDefaultConstraintName(String tableName, String columnName) {
-        return "DF_" + tableName + "_" + columnName;
+    public String generateDefaultConstraintName(ObjectName columnName) {
+        return "DF_" + columnName.getContainer().getName() + "_" + columnName.getName();
     }
 
 

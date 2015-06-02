@@ -11,6 +11,8 @@ import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.View;
 
 public class CreateViewLogicPostgresql extends CreateViewLogic {
     @Override
@@ -23,12 +25,10 @@ public class CreateViewLogicPostgresql extends CreateViewLogic {
         ActionResult result = super.execute(action, scope);
         if (action.get(CreateViewAction.Attr.replaceIfExists, false)) {
             Database database = scope.get(Scope.Attr.database, Database.class);
-            String catalogName = action.get(CreateViewAction.Attr.catalogName, String.class);
-            String schemaName = action.get(CreateViewAction.Attr.schemaName, String.class);
-            String viewName = action.get(CreateViewAction.Attr.viewName, String.class);
+            ObjectName viewName = action.get(CreateViewAction.Attr.viewName, ObjectName.class);
 
             return new DelegateResult(
-                    new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeViewName(catalogName, schemaName, viewName)),
+                    new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeObjectName(viewName, View.class)),
                     ((DelegateResult) result).getActions().get(0));
         }
 

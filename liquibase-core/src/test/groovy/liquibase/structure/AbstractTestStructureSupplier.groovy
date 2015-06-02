@@ -4,7 +4,6 @@ import liquibase.Scope
 import liquibase.database.ConnectionSupplier
 import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
-import liquibase.structure.core.Column
 import liquibase.util.ObjectUtil
 
 abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implements Service {
@@ -43,9 +42,9 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
 
         for (ObjectName container : containers) {
             for (String simpleName : getSimpleObjectNames(type, conn, scope)) {
-                returnList.add(new ObjectName(simpleName, container));
+                returnList.add(new ObjectName(container, simpleName));
             }
-            returnList.add(new ObjectName("only_"+container.getName(), container));
+            returnList.add(new ObjectName(container, "only_" + container.getName()));
         }
 
         if (!conn.database.isCaseSensitive(type)) {

@@ -11,7 +11,9 @@ import liquibase.database.Database;
 import liquibase.database.core.sybase.SybaseDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 
 public class DropIndexLogicSybase extends DropIndexLogic {
 
@@ -32,9 +34,7 @@ public class DropIndexLogicSybase extends DropIndexLogic {
 
         return new DelegateResult(new ExecuteSqlAction(
                 "DROP INDEX "
-                        + database.escapeTableName(null,
-                        action.get(DropIndexAction.Attr.tableSchemaName, String.class),
-                        action.get(DropIndexAction.Attr.tableName, String.class))
+                        + database.escapeObjectName(action.get(DropIndexAction.Attr.tableName, ObjectName.class), Table.class)
                         + "."
                         + database.escapeObjectName(action.get(DropIndexAction.Attr.indexName, String.class), Index.class)));
 

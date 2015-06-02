@@ -11,6 +11,7 @@ import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.actionlogic.core.DropPrimaryKeyLogic;
+import liquibase.structure.ObjectName;
 
 public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
     @Override
@@ -27,12 +28,6 @@ public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
-
-        String escapedTableName = database.escapeTableName(
-                action.get(DropPrimaryKeyAction.Attr.catalogName, String.class),
-                action.get(DropPrimaryKeyAction.Attr.schemaName, String.class),
-                action.get(DropPrimaryKeyAction.Attr.tableName, String.class)
-        );
 
         String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
         if (constraintName == null) {
@@ -56,9 +51,9 @@ public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
                                     + " $$ language plpgsql;"),
                     new ExecuteSqlAction(
                             " select __liquibase_drop_pk('"
-                                    + action.get(DropPrimaryKeyAction.Attr.schemaName, String.class)
+                                    + action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class).getContainer().getName()
                                     + "', '"
-                                    + action.get(DropPrimaryKeyAction.Attr.tableName, String.class)
+                                    + action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class).getName()
                                     + "' drop function __liquibase_drop_pk(schemaName text, tableName text")
             );
         } else {

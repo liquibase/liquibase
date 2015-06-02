@@ -16,6 +16,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -57,7 +58,7 @@ public class UpdateDataLogic extends AbstractSqlBuilderLogic {
 
         StringClauses clauses = new StringClauses()
                 .append("UPDATE")
-                .append(database.escapeTableName(action.get(UpdateDataAction.Attr.catalogName, String.class), action.get(UpdateDataAction.Attr.schemaName, String.class), action.get(UpdateDataAction.Attr.tableName, String.class)))
+                .append(database.escapeObjectName(action.get(UpdateDataAction.Attr.tableName, ObjectName.class), Table.class))
                 .append("SET");
         for (int i = 0; i < columnNames.length; i++) {
             clauses.append(

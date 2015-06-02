@@ -1,11 +1,10 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class DeleteDataAction extends AbstractAction {
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
         where,
         whereParameters,
@@ -15,9 +14,7 @@ public class DeleteDataAction extends AbstractAction {
     public DeleteDataAction() {
     }
 
-    public DeleteDataAction(String catalogName, String schemaName, String tableName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public DeleteDataAction(ObjectName tableName) {
         set(Attr.tableName, tableName);
     }
 

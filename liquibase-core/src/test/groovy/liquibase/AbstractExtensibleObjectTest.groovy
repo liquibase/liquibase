@@ -1,6 +1,10 @@
 package liquibase
 
+import liquibase.action.core.AddAutoIncrementAction
+import liquibase.action.core.DropTableAction
 import spock.lang.Specification
+import static org.hamcrest.Matchers.containsInAnyOrder
+import static spock.util.matcher.HamcrestSupport.that
 
 class AbstractExtensibleObjectTest extends Specification {
 
@@ -25,5 +29,27 @@ class AbstractExtensibleObjectTest extends Specification {
         obj.get("wasEmpty", Collection) == ["Value 2a", "Value 2b", "Value 2c", ]
         obj.get("wasNull", Collection) == ["Value 3a", "Value 3b", "Value 3c", ]
 
+    }
+
+    def "getStandardAttributeNames"() {
+        expect:
+        that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["catalogName", "schemaName", "startWith", "tableName", "columnDataType", "columnName", "incrementBy"] as String[])
+        that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["catalogName", "schemaName", "startWith", "tableName", "columnDataType", "columnName", "incrementBy"] as String[]) //caching works
+
+        that new DropTableAction().getStandardAttributeNames(), containsInAnyOrder(["tableName", "cascadeConstraints"] as String[])
+
+        (new AbstractExtensibleObject() {}).getStandardAttributeNames().size() == 0
+    }
+
+    def "getExpectedAttributeType"() {
+        expect:
+        new AddAutoIncrementAction().getExpectedAttributeType("catalogName") == String
+        new AddAutoIncrementAction().getExpectedAttributeType("schemaName") == String
+        new AddAutoIncrementAction().getExpectedAttributeType("startWith") == BigInteger
+        new AddAutoIncrementAction().getExpectedAttributeType("fakeAttr") == null
+
+        new DropTableAction().getExpectedAttributeType("tableName") == null
+
+        (new AbstractExtensibleObject() {}).getExpectedAttributeType("whatever") == null
     }
 }

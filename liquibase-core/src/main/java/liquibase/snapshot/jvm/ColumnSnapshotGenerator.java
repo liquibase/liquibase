@@ -11,6 +11,7 @@ import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
@@ -180,7 +181,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     //probably older version of java, need to select from the column to find out if it is auto-increment
                     String selectStatement;
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
+                        selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
                         LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
                         LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
                         LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
@@ -188,7 +189,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
                     } else {
-                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                        selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                     }
                     LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                     Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();

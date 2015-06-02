@@ -28,7 +28,7 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	            && Boolean.TRUE.equals(column.isAutoIncrement())) {
 	            continue;
 	        }
-	        sql.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
+	        sql.append(database.escapeColumnName(column.getName()));
 	        sql.append(", ");
 	        params.append("?, ");
 	        cols.add(column);

@@ -3,7 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddForeignKeyConstraintAction;
-import liquibase.action.core.RedefineTableAction;
+import liquibase.action.core.AlterTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -11,6 +11,8 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
 
@@ -53,7 +55,7 @@ public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
                 .append("FOREIGN KEY")
                 .append(Clauses.baseColumnNames, "(" + database.escapeColumnNameList(action.get(AddForeignKeyConstraintAction.Attr.baseColumnNames, String.class)) + ")")
                 .append("REFERENCES")
-                .append(Clauses.referencedTableName, database.escapeTableName(action.get(AddForeignKeyConstraintAction.Attr.referencedTableName, String.class), action.get(AddForeignKeyConstraintAction.Attr.referencedTableSchemaName, String.class), action.get(AddForeignKeyConstraintAction.Attr.referencedTableName, String.class)))
+                .append(Clauses.referencedTableName, database.escapeObjectName(action.get(AddForeignKeyConstraintAction.Attr.referencedTableName, ObjectName.class), Table.class))
                 .append(Clauses.referencedColumnNames, "(" + database.escapeColumnNameList(action.get(AddForeignKeyConstraintAction.Attr.referencedColumnNames, String.class)) + ")");
 
         if (action.get(AddForeignKeyConstraintAction.Attr.onUpdate, false)) {
@@ -84,10 +86,8 @@ public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
 
-        return new DelegateResult(new RedefineTableAction(
-                action.get(AddForeignKeyConstraintAction.Attr.baseTableCatalogName, String.class),
-                action.get(AddForeignKeyConstraintAction.Attr.baseTableSchemaName, String.class),
-                action.get(AddForeignKeyConstraintAction.Attr.baseTableName, String.class),
+        return new DelegateResult(new AlterTableAction(
+                action.get(AddForeignKeyConstraintAction.Attr.baseTableName, ObjectName.class),
                 generateSql(action, scope)
         ));
     }

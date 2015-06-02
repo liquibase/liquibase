@@ -26,6 +26,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
@@ -69,8 +70,10 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
                 }
             }
 
+            ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+
             if (execType.ranBefore) {
-                runAction = (UpdateDataAction) new UpdateDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                runAction = (UpdateDataAction) new UpdateDataAction(tableName)
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", execType.value)
@@ -81,7 +84,7 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
                     ((UpdateDataAction) runAction).addNewColumnValue("TAG", tag);
                 }
             } else {
-                runAction = new InsertDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                runAction = new InsertDataAction(tableName)
                         .addColumnValue("ID", changeSet.getId())
                         .addColumnValue("AUTHOR", changeSet.getAuthor())
                         .addColumnValue("FILENAME", changeSet.getFilePath())

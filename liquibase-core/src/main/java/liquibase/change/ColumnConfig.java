@@ -15,6 +15,7 @@ import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.PrimaryKey;
@@ -904,7 +905,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
         String valueSequenceNextString = parsedNode.getChildValue(null, "valueSequenceNext", String.class);
         if (valueSequenceNextString != null) {
-            valueSequenceNext = new SequenceNextValueFunction(valueSequenceNextString);
+            valueSequenceNext = new SequenceNextValueFunction(new ObjectName(valueSequenceNextString));
         }
         String valueSequenceCurrentString = parsedNode.getChildValue(null, "valueSequenceCurrent", String.class);
         if (valueSequenceCurrentString != null) {
@@ -928,7 +929,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
         String defaultValueSequenceNextString = parsedNode.getChildValue(null, "defaultValueSequenceNext", String.class);
         if (defaultValueSequenceNextString != null) {
-            defaultValueSequenceNext = new SequenceNextValueFunction(defaultValueSequenceNextString);
+            defaultValueSequenceNext = new SequenceNextValueFunction(new ObjectName(defaultValueSequenceNextString));
         }
 
         loadConstraints(parsedNode.getChild(null, "constraints"));

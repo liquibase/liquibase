@@ -1,5 +1,6 @@
 package liquibase.actionlogic.core;
 
+import ch.qos.logback.classic.db.names.TableName;
 import liquibase.Scope;
 import liquibase.action.AbstractAction;
 import liquibase.action.Action;
@@ -17,8 +18,10 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,22 +39,18 @@ public class MergeColumnsLogic extends AbstractActionLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         List<Action> actions = new ArrayList<>();
 
-        String catalogName = action.get(MergeColumnsAction.Attr.catalogName, String.class);
-        String schemaName = action.get(MergeColumnsAction.Attr.schemaName, String.class);
-        String tableName = action.get(MergeColumnsAction.Attr.tableName, String.class);
+        ObjectName tableName = action.get(MergeColumnsAction.Attr.tableName, ObjectName.class);
         String finalColumnName = action.get(MergeColumnsAction.Attr.finalColumnName, String.class);
         String finalColumnType = action.get(MergeColumnsAction.Attr.finalColumnType, String.class);
         String column1Name = action.get(MergeColumnsAction.Attr.column1Name, String.class);
         String column2Name = action.get(MergeColumnsAction.Attr.column2Name, String.class);
 
         actions.add((Action) new AddColumnsAction()
-                        .set(AddColumnsAction.Attr.catalogName, catalogName)
-                        .set(AddColumnsAction.Attr.schemaName, schemaName)
                         .set(AddColumnsAction.Attr.tableName, tableName)
                         .add(AddColumnsAction.Attr.columnDefinitions, new ColumnDefinition(finalColumnName, finalColumnType))
         );
 
-        actions.add((Action) new UpdateSqlAction("UPDATE " + database.escapeTableName(catalogName, schemaName, tableName) +
+        actions.add((Action) new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName, Table.class) +
                 " SET " + database.escapeObjectName(finalColumnName, Column.class)
                 + " = " + database.getConcatSql(database.escapeObjectName(column1Name, Column.class)
                 , "'" + action.get(MergeColumnsAction.Attr.joinString, String.class) + "'", database.escapeObjectName(column2Name, Column.class))));
@@ -105,12 +104,10 @@ public class MergeColumnsLogic extends AbstractActionLogic {
             // ...if it is not a SQLite database
 
             actions.add((Action) new DropColumnsAction()
-                    .set(DropColumnsAction.Attr.schemaName, schemaName)
                     .set(DropColumnsAction.Attr.tableName, tableName)
                     .set(DropColumnsAction.Attr.columnNames, new String[]{column1Name}));
 
         actions.add((Action) new DropColumnsAction()
-                .set(DropColumnsAction.Attr.schemaName, schemaName)
                 .set(DropColumnsAction.Attr.tableName, tableName)
                 .set(DropColumnsAction.Attr.columnNames, new String[] {column2Name}));
 

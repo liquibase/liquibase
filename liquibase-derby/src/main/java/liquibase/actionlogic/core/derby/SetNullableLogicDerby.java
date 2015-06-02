@@ -8,6 +8,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class SetNullableLogicDerby extends SetNullableLogic {
     @Override
@@ -15,9 +16,7 @@ public class SetNullableLogicDerby extends SetNullableLogic {
         return new DelegateResult(
                 (DelegateResult) super.execute(action, scope),
                 (ReorganizeTableAction) new ReorganizeTableAction(
-                        action.get(SetNullableAction.Attr.catalogName, String.class),
-                        action.get(SetNullableAction.Attr.schemaName, String.class),
-                        action.get(SetNullableAction.Attr.tableName, String.class)
+                        action.get(SetNullableAction.Attr.columnName, ObjectName.class).getContainer()
                 ));
     }
 }

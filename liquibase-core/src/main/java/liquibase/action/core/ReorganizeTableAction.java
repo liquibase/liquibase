@@ -1,20 +1,17 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class ReorganizeTableAction extends AbstractAction {
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
     }
 
     public ReorganizeTableAction() {
     }
 
-    public ReorganizeTableAction(String catalogName, String schemaName, String tableName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public ReorganizeTableAction(ObjectName tableName) {
         set(Attr.tableName, tableName);
     }
 

@@ -1,12 +1,11 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class RedefineSequenceAction extends AbstractAction {
 
     public static enum Attr {
-        catalogName,
-        schemaName,
         sequenceName,
         newDefinition
     }
@@ -14,9 +13,7 @@ public class RedefineSequenceAction extends AbstractAction {
     public RedefineSequenceAction() {
     }
 
-    public RedefineSequenceAction(String catalogName, String schemaName, String sequenceName, StringClauses newDefinition) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public RedefineSequenceAction(ObjectName sequenceName, StringClauses newDefinition) {
         set(Attr.sequenceName, sequenceName);
         set(Attr.newDefinition, newDefinition);
     }

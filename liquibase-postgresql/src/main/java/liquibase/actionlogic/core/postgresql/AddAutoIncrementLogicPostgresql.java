@@ -13,6 +13,7 @@ import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 
 public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
 
@@ -28,18 +29,17 @@ public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        String sequenceName = (action.get(AddAutoIncrementAction.Attr.tableName, String.class) + "_" + action.get(AddAutoIncrementAction.Attr.columnName, String.class) + "_seq").toLowerCase();
+        ObjectName columnName = action.get(AddAutoIncrementAction.Attr.columnName, ObjectName.class);
+        ObjectName tableName = columnName.getContainer();
 
-        String catalogName = action.get(AddAutoIncrementAction.Attr.catalogName, String.class);
-        String schemaName = action.get(AddAutoIncrementAction.Attr.schemaName, String.class);
-        String tableName = action.get(AddAutoIncrementAction.Attr.tableName, String.class);
-        String columnName = action.get(AddAutoIncrementAction.Attr.columnName, String.class);
+        ObjectName sequenceName = new ObjectName(tableName.getContainer(), (tableName.getName() + "_" + columnName.getName() + "_seq").toLowerCase());
+
         String columnDataType = action.get(AddAutoIncrementAction.Attr.columnDataType, String.class);
 
         return new DelegateResult(
-                new CreateSequenceAction(catalogName, schemaName, sequenceName),
-                new SetNullableAction(catalogName, schemaName, tableName, columnName, null, false),
-                new AddDefaultValueAction(catalogName, schemaName, tableName, columnName, columnDataType, new SequenceNextValueFunction((schemaName==null?"":schemaName+".")+sequenceName))
+                new CreateSequenceAction(sequenceName),
+                new SetNullableAction(columnName, null, false),
+                new AddDefaultValueAction(columnName, columnDataType, new SequenceNextValueFunction(sequenceName))
         );
 
     }

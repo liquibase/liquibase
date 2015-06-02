@@ -1,12 +1,11 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class InsertDataAction extends AbstractAction {
 
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
         columnNames,
         columnValues,
@@ -15,9 +14,7 @@ public class InsertDataAction extends AbstractAction {
     public InsertDataAction() {
     }
 
-    public InsertDataAction(String catalogName, String schemaName, String tableName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public InsertDataAction(ObjectName tableName) {
         set(Attr.tableName, tableName);
     }
 

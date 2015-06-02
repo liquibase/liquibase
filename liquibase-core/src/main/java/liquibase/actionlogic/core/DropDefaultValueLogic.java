@@ -3,13 +3,14 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.DropDefaultValueAction;
-import liquibase.action.core.RedefineColumnAction;
+import liquibase.action.core.AlterColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class DropDefaultValueLogic extends AbstractSqlBuilderLogic {
 
@@ -21,17 +22,14 @@ public class DropDefaultValueLogic extends AbstractSqlBuilderLogic {
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropDefaultValueAction.Attr.tableName, action)
+                .checkForRequiredContainer("Table name is required", DropDefaultValueAction.Attr.columnName, action)
                 .checkForRequiredField(DropDefaultValueAction.Attr.columnName, action);
     }
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineColumnAction(
-                action.get(DropDefaultValueAction.Attr.catalogName, String.class),
-                action.get(DropDefaultValueAction.Attr.schemaName, String.class),
-                action.get(DropDefaultValueAction.Attr.tableName, String.class),
-                action.get(DropDefaultValueAction.Attr.columnName, String.class),
+        return new DelegateResult(new AlterColumnAction(
+                action.get(DropDefaultValueAction.Attr.columnName, ObjectName.class),
                 generateSql(action, scope)));
     }
 

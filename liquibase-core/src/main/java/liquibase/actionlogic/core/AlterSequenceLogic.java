@@ -11,6 +11,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 import java.math.BigInteger;
 
@@ -43,9 +44,7 @@ public class AlterSequenceLogic extends AbstractSqlBuilderLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new RedefineSequenceAction(
-                action.get(AlterSequenceAction.Attr.catalogName, String.class),
-                action.get(AlterSequenceAction.Attr.schemaName, String.class),
-                action.get(AlterSequenceAction.Attr.sequenceName, String.class),
+                action.get(AlterSequenceAction.Attr.sequenceName, ObjectName.class),
                 generateSql(action, scope)));
     }
 

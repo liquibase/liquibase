@@ -10,6 +10,7 @@ import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class SetNullableLogicDB2 extends SetNullableLogic {
     @Override
@@ -21,9 +22,7 @@ public class SetNullableLogicDB2 extends SetNullableLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
                 (DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(SetNullableAction.Attr.catalogName, String.class),
-                        action.get(SetNullableAction.Attr.schemaName, String.class),
-                        action.get(SetNullableAction.Attr.tableName, String.class))
+                new ReorganizeTableAction(action.get(SetNullableAction.Attr.columnName, ObjectName.class).getContainer())
         );
     }
 }

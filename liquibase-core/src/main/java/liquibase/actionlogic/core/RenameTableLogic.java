@@ -2,7 +2,7 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.RedefineTableAction;
+import liquibase.action.core.AlterTableAction;
 import liquibase.action.core.RenameTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
@@ -11,6 +11,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
 public class RenameTableLogic extends AbstractSqlBuilderLogic {
@@ -30,10 +31,8 @@ public class RenameTableLogic extends AbstractSqlBuilderLogic {
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineTableAction(
-                action.get(RenameTableAction.Attr.catalogName, String.class),
-                action.get(RenameTableAction.Attr.schemaName, String.class),
-                action.get(RenameTableAction.Attr.oldTableName, String.class),
+        return new DelegateResult(new AlterTableAction(
+                action.get(RenameTableAction.Attr.oldTableName, ObjectName.class),
                 generateSql(action, scope)
         ));
     }

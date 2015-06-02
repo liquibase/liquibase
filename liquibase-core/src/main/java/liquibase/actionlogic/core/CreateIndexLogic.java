@@ -12,7 +12,9 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.List;
@@ -56,10 +58,8 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
     @Override
     protected StringClauses generateSql(Action action, Scope scope) {
         final Database database = scope.get(Scope.Attr.database, Database.class);
-        final String tableCatalogName = action.get(CreateIndexAction.Attr.tableCatalogName, String.class);
-        final String tableSchemaName = action.get(CreateIndexAction.Attr.tableSchemaName, String.class);
-        final String tableName = action.get(CreateIndexAction.Attr.tableName, String.class);
-        String indexName = action.get(CreateIndexAction.Attr.indexName, String.class);
+        ObjectName indexName = action.get(CreateIndexAction.Attr.indexName, ObjectName.class);
+        ObjectName tableName = action.get(CreateIndexAction.Attr.tableName, ObjectName.class);
         String tablespace = action.get(CreateIndexAction.Attr.tablespace, String.class);
 
 
@@ -72,12 +72,12 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
         clauses.append("INDEX ");
 
 	    if (indexName != null) {
-            clauses.append(Clauses.indexName, database.escapeIndexName(tableCatalogName, tableSchemaName, indexName));
+            clauses.append(Clauses.indexName, database.escapeObjectName(indexName, Index.class));
 	    }
 
         clauses.append("ON");
 
-	    clauses.append(Clauses.tableName, database.escapeTableName(tableCatalogName, tableSchemaName, tableName));
+	    clauses.append(Clauses.tableName, database.escapeObjectName(tableName, Table.class));
 
         clauses.append(Clauses.columns, "("+ StringUtils.join(action.get(CreateIndexAction.Attr.columnDefinitions, List.class), ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
             @Override
@@ -85,11 +85,11 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
                 Boolean computed = column.get(ColumnDefinition.Attr.computed, Boolean.class);
                 String name;
                 if (computed == null) {
-                    name = database.escapeColumnName(tableCatalogName, tableSchemaName, tableName, column.get(ColumnDefinition.Attr.columnName, String.class), true);
+                    name = database.escapeColumnName(column.get(ColumnDefinition.Attr.columnName, String.class), true);
                 } else if (computed) {
                     name = column.get(ColumnDefinition.Attr.columnName, String.class);
                 } else {
-                    name = database.escapeColumnName(tableCatalogName, tableSchemaName, tableName, column.get(ColumnDefinition.Attr.columnName, String.class), false);
+                    name = database.escapeColumnName(column.get(ColumnDefinition.Attr.columnName, String.class), false);
                 }
 
                 if (column.get(ColumnDefinition.Attr.descending, false)) {

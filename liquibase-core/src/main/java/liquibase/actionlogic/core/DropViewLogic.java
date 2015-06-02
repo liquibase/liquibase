@@ -14,6 +14,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.DropViewStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 
@@ -35,10 +36,8 @@ public class DropViewLogic extends AbstractSqlBuilderLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new StringClauses()
                 .append("DROP VIEW")
-                .append(database.escapeViewName(
-                        action.get(DropViewAction.Attr.catalogName, String.class),
-                        action.get(DropViewAction.Attr.schemaName, String.class),
-                        action.get(DropViewAction.Attr.viewName, String.class)
+                .append(database.escapeObjectName(
+                        action.get(DropViewAction.Attr.viewName, ObjectName.class), View.class
                 ));
     }
 }

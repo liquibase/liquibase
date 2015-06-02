@@ -14,6 +14,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -48,7 +49,7 @@ public class InsertDataLogic extends AbstractSqlBuilderLogic {
         final Database database = scope.get(Scope.Attr.database, Database.class);
         return new StringClauses()
                 .append("INSERT INTO")
-                .append(database.escapeTableName(action.get(InsertDataAction.Attr.catalogName, String.class), action.get(InsertDataAction.Attr.schemaName, String.class), action.get(InsertDataAction.Attr.tableName, String.class)))
+                .append(database.escapeObjectName(action.get(InsertDataAction.Attr.tableName, ObjectName.class), Table.class))
                 .append("("+ StringUtils.join(action.get(InsertDataAction.Attr.columnNames, new ArrayList<String>()), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))+")")
                 .append("VALUES")
         .append("("+new StringUtils().join(action.get(InsertDataAction.Attr.columnNames, new ArrayList<>()), ", ", new StringUtils.StringUtilsFormatter() {

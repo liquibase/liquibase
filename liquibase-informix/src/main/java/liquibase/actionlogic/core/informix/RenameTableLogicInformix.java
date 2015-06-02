@@ -10,6 +10,7 @@ import liquibase.actionlogic.core.RenameTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
 public class RenameTableLogicInformix extends RenameTableLogic {
@@ -24,11 +25,9 @@ public class RenameTableLogicInformix extends RenameTableLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new DelegateResult(new ExecuteSqlAction(
                 "RENAME TABLE "
-                        + database.escapeTableName(action.get(RenameTableAction.Attr.catalogName, String.class),
-                        action.get(RenameTableAction.Attr.schemaName, String.class),
-                        action.get(RenameTableAction.Attr.oldTableName, String.class))
+                        + database.escapeObjectName(action.get(RenameTableAction.Attr.oldTableName, ObjectName.class), Table.class)
                         + " TO "
-                        + database.escapeObjectName(action.get(RenameTableAction.Attr.catalogName, String.class), Table.class)
+                        + database.escapeObjectName(action.get(RenameTableAction.Attr.newTableName, ObjectName.class).getName(), Table.class)
         ));
     }
 }

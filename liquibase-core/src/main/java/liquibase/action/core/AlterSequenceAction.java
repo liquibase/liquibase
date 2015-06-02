@@ -7,8 +7,6 @@ import java.math.BigInteger;
 public class AlterSequenceAction extends AbstractAction {
     
     public static enum Attr {
-        catalogName,
-        schemaName,
         sequenceName,
         incrementBy,
         maxValue,

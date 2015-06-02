@@ -54,7 +54,7 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
             }
             relationName = new ObjectName(relatedTo.getSimpleName(), null, null);
         } else if (relatedTo instanceof Schema) {
-            relationName = new ObjectName(null, relatedTo.getName());
+            relationName = new ObjectName(relatedTo.getName(), null);
         } else if (relatedTo instanceof Relation) {
             relationName = relatedTo.getName();
             if (database.getMaxContainerDepth(relatedTo.getClass()) < relationName.depth()) {
@@ -121,7 +121,7 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         } else {
             container = new ObjectName(rawCatalogName, rawSchemaName);
         }
-        column.setRelation(new Table(new ObjectName(rawTableName, container)));
+        column.setRelation(new Table(new ObjectName(container, rawTableName)));
         column.setRemarks(remarks);
 
 //        if (database instanceof OracleDatabase) {

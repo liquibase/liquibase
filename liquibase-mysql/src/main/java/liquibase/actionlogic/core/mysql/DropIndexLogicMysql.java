@@ -11,7 +11,9 @@ import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 
 public class DropIndexLogicMysql extends DropIndexLogic {
 
@@ -34,10 +36,7 @@ public class DropIndexLogicMysql extends DropIndexLogic {
                 "DROP INDEX "
                         + database.escapeObjectName(action.get(DropIndexAction.Attr.indexName, String.class), Index.class)
                         + " ON "
-                        + database.escapeTableName(
-                        action.get(DropIndexAction.Attr.tableCatalogName, String.class),
-                        action.get(DropIndexAction.Attr.tableSchemaName, String.class),
-                        action.get(DropIndexAction.Attr.tableName, String.class))));
+                        + database.escapeObjectName(action.get(DropIndexAction.Attr.tableName, ObjectName.class), Table.class)));
 
     }
 }

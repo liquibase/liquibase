@@ -6,8 +6,6 @@ import liquibase.change.AddColumnConfig;
 public class CreateIndexAction extends AbstractAction {
     
     public static enum Attr {
-        tableCatalogName,
-        tableSchemaName,
         indexName,
         tableName,
         columnDefinitions,

@@ -9,6 +9,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -91,10 +92,8 @@ public class AddColumnsLogic extends AbstractActionLogic {
 
     protected Action[] execute(ColumnDefinition column, Action action, Scope scope) {
         List<Action> returnActions = new ArrayList<>();
-        returnActions.add(new RedefineTableAction(
-                action.get(AddColumnsAction.Attr.catalogName, String.class),
-                action.get(AddColumnsAction.Attr.schemaName, String.class),
-                action.get(AddColumnsAction.Attr.tableName, String.class),
+        returnActions.add(new AlterTableAction(
+                action.get(AddColumnsAction.Attr.tableName, ObjectName.class),
                 getColumnDefinitionClauses(column, action, scope)
         ));
 
@@ -147,14 +146,12 @@ public class AddColumnsLogic extends AbstractActionLogic {
     protected void addUniqueConstraintActions(Action action, Scope scope, List<Action> returnActions) {
         UniqueConstraintDefinition[] constraints = action.get(AddColumnsAction.Attr.uniqueConstraintDefinitions, new UniqueConstraintDefinition[0]);
         for (UniqueConstraintDefinition def : constraints) {
-            String catalogName = action.get(AddColumnsAction.Attr.catalogName, String.class);
-            String schemaName = action.get(AddColumnsAction.Attr.schemaName, String.class);
-            String tableName = action.get(AddColumnsAction.Attr.tableName, String.class);
+            ObjectName tableName = action.get(AddColumnsAction.Attr.tableName, ObjectName.class);
             String[] columnNames = def.get(UniqueConstraintDefinition.Attr.columnNames, String[].class);
             String constraintName = def.get(UniqueConstraintDefinition.Attr.constraintName, String.class);
 
 
-            returnActions.add(new AddUniqueConstraintAction(catalogName, schemaName, tableName, constraintName, columnNames));
+            returnActions.add(new AddUniqueConstraintAction(tableName, constraintName, columnNames));
         }
     }
 
@@ -162,12 +159,9 @@ public class AddColumnsLogic extends AbstractActionLogic {
         ForeignKeyDefinition[] constraints = action.get(AddColumnsAction.Attr.foreignKeyDefinitions, new ForeignKeyDefinition[0]);
 
         for (ForeignKeyDefinition fkConstraint : constraints) {
-            String refSchemaName = null;
-            String refTableName;
+            ObjectName refTableName;
             String refColName;
-            String baseCatalogName = action.get(AddColumnsAction.Attr.catalogName, String.class);
-            String baseSchemaName = action.get(AddColumnsAction.Attr.schemaName, String.class);
-            String baseTableName = action.get(AddColumnsAction.Attr.tableName, String.class);
+            ObjectName baseTableName = action.get(AddColumnsAction.Attr.tableName, ObjectName.class);
             String[] baseColumnNames = fkConstraint.get(ForeignKeyDefinition.Attr.columnNames, String[].class);
 
 
@@ -179,20 +173,15 @@ public class AddColumnsLogic extends AbstractActionLogic {
                 if (!referencesMatcher.matches()) {
                     throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " +references);
                 }
-                refTableName = referencesMatcher.group(1);
+                refTableName = ObjectName.parse(referencesMatcher.group(1));
                 refColName = referencesMatcher.group(2);
             } else {
-                refTableName = fkConstraint.get(ForeignKeyDefinition.Attr.referencedTableName, String.class);
+                refTableName = fkConstraint.get(ForeignKeyDefinition.Attr.referencedTableName, ObjectName.class);
                 refColName =  fkConstraint.get(ForeignKeyDefinition.Attr.referencedColumnNames, String.class);
             }
 
-            if (refTableName.indexOf(".") > 0) {
-                refSchemaName = refTableName.split("\\.")[0];
-                refTableName = refTableName.split("\\.")[1];
-            }
-
             List<String> refColumns = StringUtils.splitAndTrim(refColName, ",");
-            returnActions.add(new AddForeignKeyConstraintAction(foreignKeyName, baseCatalogName, baseSchemaName, baseTableName, baseColumnNames, null, refSchemaName, refTableName, refColumns.toArray(new String[refColumns.size()])));
+            returnActions.add(new AddForeignKeyConstraintAction(foreignKeyName, baseTableName, baseColumnNames, refTableName, refColumns.toArray(new String[refColumns.size()])));
         }
     }
 

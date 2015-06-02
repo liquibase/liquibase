@@ -93,7 +93,7 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
             container = new ObjectName(rawCatalogName, rawSchemaName);
         }
 
-        Table table = new Table().setName(new ObjectName(rawTableName, container));
+        Table table = new Table().setName(new ObjectName(container, rawTableName));
         table.setRemarks(remarks);
 
         if ("Y".equals(row.get("TEMPORARY", String.class))) {

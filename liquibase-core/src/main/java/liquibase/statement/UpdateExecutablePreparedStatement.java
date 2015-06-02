@@ -29,7 +29,7 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 
 		StringBuilder params = new StringBuilder(" SET ");
 	    for(ColumnConfig column : getColumns()) {
-	    	params.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
+	    	params.append(database.escapeColumnName(column.getName()));
 	    	params.append(" = ");
 	        params.append("?, ");
 	        cols.add(column);

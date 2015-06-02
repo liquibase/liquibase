@@ -11,6 +11,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class UpdateChangeSetChecksumLogic extends AbstractActionLogic {
 
@@ -29,7 +30,7 @@ public class UpdateChangeSetChecksumLogic extends AbstractActionLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
         ChangeSet changeSet = action.get(UpdateChangeSetChecksumAction.Attr.changeSet, ChangeSet.class);
-        return new DelegateResult((Action) new UpdateDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+        return new DelegateResult((Action) new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
                 .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                 .set(UpdateDataAction.Attr.whereClause, "ID=? AND AUTHOR=? AND FILENAME=?")
                 .set(UpdateDataAction.Attr.whereParameters, new Object[]{changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()}));

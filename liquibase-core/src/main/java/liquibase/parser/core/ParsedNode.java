@@ -4,6 +4,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.ObjectName;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
@@ -250,7 +251,7 @@ public class ParsedNode {
             } else if (type.isAssignableFrom(Date.class)) {
                 return (T) new ISODateFormat().parse(rawValue.toString());
             } else if (type.equals(SequenceNextValueFunction.class)) {
-                return (T) new SequenceNextValueFunction(rawValue.toString());
+                return (T) new SequenceNextValueFunction(new ObjectName(rawValue.toString()));
             } else if (type.equals(SequenceCurrentValueFunction.class)) {
                 return (T) new SequenceCurrentValueFunction(rawValue.toString());
             } else if (type.equals(DatabaseFunction.class)) {

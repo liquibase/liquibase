@@ -3,7 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.ModifyDataTypeAction;
-import liquibase.action.core.RedefineColumnAction;
+import liquibase.action.core.AlterColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -12,6 +12,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class ModifyDataTypeLogic extends AbstractSqlBuilderLogic {
 
@@ -27,20 +28,17 @@ public class ModifyDataTypeLogic extends AbstractSqlBuilderLogic {
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(ModifyDataTypeAction.Attr.tableName, action)
                 .checkForRequiredField(ModifyDataTypeAction.Attr.columnName, action)
+                .checkForRequiredContainer("Table name is required", ModifyDataTypeAction.Attr.columnName, action)
                 .checkForRequiredField(ModifyDataTypeAction.Attr.newDataType, action);
     }
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineColumnAction(
-                action.get(ModifyDataTypeAction.Attr.catalogName, String.class),
-                action.get(ModifyDataTypeAction.Attr.schemaName, String.class),
-                action.get(ModifyDataTypeAction.Attr.tableName, String.class),
-                action.get(ModifyDataTypeAction.Attr.columnName, String.class),
+        return new DelegateResult(new AlterColumnAction(
+                action.get(ModifyDataTypeAction.Attr.columnName, ObjectName.class),
                 generateSql(action, scope)
-                ));
+        ));
     }
 
     @Override

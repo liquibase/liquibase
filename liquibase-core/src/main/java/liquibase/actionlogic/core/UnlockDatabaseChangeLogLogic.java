@@ -9,6 +9,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 
 public class UnlockDatabaseChangeLogLogic extends AbstractActionLogic {
@@ -22,7 +23,7 @@ public class UnlockDatabaseChangeLogLogic extends AbstractActionLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
-        return new DelegateResult((UpdateDataAction) new UpdateDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+        return new DelegateResult((UpdateDataAction) new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))
         .addNewColumnValue("LOCKED", false)
         .addNewColumnValue("LOCKGRANTED", null)
         .addNewColumnValue("LOCKEDBY", null)

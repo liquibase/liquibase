@@ -8,6 +8,7 @@ import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.structure.ObjectName;
 
 public class AddColumnsLogicMSSQL extends AddColumnsLogic {
 
@@ -25,7 +26,7 @@ public class AddColumnsLogicMSSQL extends AddColumnsLogic {
             return null;
         } else {
             return "CONSTRAINT "
-                    + database.generateDefaultConstraintName(action.get(AddColumnsAction.Attr.tableName, String.class), column.get(ColumnDefinition.Attr.columnName, String.class))
+                    + database.generateDefaultConstraintName(column.get(ColumnDefinition.Attr.columnName, ObjectName.class))
                     + clause;
         }
 

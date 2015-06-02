@@ -3,7 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.AddAutoIncrementAction;
-import liquibase.action.core.RedefineColumnAction;
+import liquibase.action.core.AlterColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -12,6 +12,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 import java.math.BigInteger;
 
@@ -35,19 +36,21 @@ public class AddAutoIncrementLogic extends AbstractSqlBuilderLogic {
     public ValidationErrors validate(Action action, Scope scope) {
         ValidationErrors validationErrors = super.validate(action, scope);
         validationErrors.checkForRequiredField(AddAutoIncrementAction.Attr.columnName, action);
-        validationErrors.checkForRequiredField(AddAutoIncrementAction.Attr.tableName, action);
         validationErrors.checkForRequiredField(AddAutoIncrementAction.Attr.columnDataType, action);
+
+        if (!validationErrors.hasErrors()) {
+            if (action.get(AddAutoIncrementAction.Attr.columnName, ObjectName.class).asList().size() < 2) {
+                validationErrors.addError("Table name is required");
+            }
+        }
 
         return validationErrors;
     }
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineColumnAction(
-                action.get(AddAutoIncrementAction.Attr.catalogName, String.class),
-                action.get(AddAutoIncrementAction.Attr.schemaName, String.class),
-                action.get(AddAutoIncrementAction.Attr.tableName, String.class),
-                action.get(AddAutoIncrementAction.Attr.columnName, String.class),
+        return new DelegateResult(new AlterColumnAction(
+                action.get(AddAutoIncrementAction.Attr.columnName, ObjectName.class),
                 generateSql(action, scope)));
     }
 

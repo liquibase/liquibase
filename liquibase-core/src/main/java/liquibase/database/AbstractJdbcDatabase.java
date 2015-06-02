@@ -1034,6 +1034,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         return objectName;
     }
 
+    @Override
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
+    }
+
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*") || (!canStoreObjectName(objectName, false, objectType) && canStoreObjectName(objectName, true, objectType));
     }
@@ -1064,7 +1069,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
+    public String escapeColumnName(final String columnName) {
         return escapeObjectName(columnName, Column.class);
     }
 
@@ -1074,7 +1079,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
      */
     @Override
-    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
+    public String escapeColumnName(String columnName, boolean quoteNamesThatMayBeFunctions) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
             return quoteObject(columnName, Column.class);
         }

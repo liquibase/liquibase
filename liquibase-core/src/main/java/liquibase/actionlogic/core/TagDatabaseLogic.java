@@ -10,6 +10,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class TagDatabaseLogic extends AbstractActionLogic {
 
@@ -27,7 +28,7 @@ public class TagDatabaseLogic extends AbstractActionLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
-        UpdateDataAction updateDataAction = new UpdateDataAction(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+        UpdateDataAction updateDataAction = new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
         updateDataAction.addNewColumnValue("TAG", action.get(TagDatabaseAction.Attr.tag, String.class));
         updateDataAction.set(UpdateDataAction.Attr.whereClause, generateWhereClause(action, scope));
 

@@ -11,6 +11,7 @@ import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class DropColumnLogicDB2 extends DropColumnsLogic {
     @Override
@@ -21,8 +22,6 @@ public class DropColumnLogicDB2 extends DropColumnsLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult((DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(DropColumnsAction.Attr.catalogName, String.class),
-                        action.get(DropColumnsAction.Attr.schemaName, String.class),
-                        action.get(DropColumnsAction.Attr.tableName, String.class)));
+                new ReorganizeTableAction(action.get(DropColumnsAction.Attr.tableName, ObjectName.class)));
     }
 }

@@ -17,6 +17,11 @@ public interface ExtensibleObject {
      */
     Set<String> getAttributeNames();
 
+    /**
+     * Returns the names of standard attributes. Any other attributes can be set, but this list is helpful for testing and tools.
+     */
+    Set<String> getStandardAttributeNames();
+
     boolean has(String attribute);
 
     boolean has(Enum attribute);

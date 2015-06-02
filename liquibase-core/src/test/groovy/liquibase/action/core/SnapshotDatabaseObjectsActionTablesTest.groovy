@@ -114,7 +114,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #catalogName on #conn")
     def "can snapshot all tables in catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(null, new ObjectName(catalogName, null))))
+        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(new ObjectName(catalogName, null), null)))
         def scope = JUnitScope.getInstance(conn)
 
         def plan = new ActionExecutor().createPlan(action, scope)

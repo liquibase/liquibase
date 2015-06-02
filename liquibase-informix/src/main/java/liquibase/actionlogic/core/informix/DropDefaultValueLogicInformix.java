@@ -12,7 +12,9 @@ import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class DropDefaultValueLogicInformix extends DropDefaultValueLogic {
 
@@ -31,9 +33,7 @@ public class DropDefaultValueLogicInformix extends DropDefaultValueLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         Database database = scope.get(Scope.Attr.database, Database.class);
 
-        String escapedTableName = database.escapeTableName(action.get(DropDefaultValueAction.Attr.catalogName, String.class),
-                action.get(DropDefaultValueAction.Attr.schemaName, String.class),
-                action.get(DropDefaultValueAction.Attr.tableName, String.class));
+        String escapedTableName = database.escapeObjectName(action.get(DropDefaultValueAction.Attr.columnName, ObjectName.class), Table.class);
 
         String columnName = action.get(DropDefaultValueAction.Attr.columnName, String.class);
 

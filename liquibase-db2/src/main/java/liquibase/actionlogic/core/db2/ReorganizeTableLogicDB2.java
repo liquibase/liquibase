@@ -1,5 +1,6 @@
 package liquibase.actionlogic.core.db2;
 
+import javafx.scene.control.Tab;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
@@ -10,6 +11,8 @@ import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class ReorganizeTableLogicDB2 extends AbstractActionLogic implements ActionLogic.InteractsExternally {
 
@@ -41,10 +44,7 @@ public class ReorganizeTableLogicDB2 extends AbstractActionLogic implements Acti
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new DelegateResult(new ExecuteSqlAction(
                         "CALL SYSPROC.ADMIN_CMD ('REORG TABLE "
-                                + database.escapeTableName(
-                                action.get(ReorganizeTableAction.Attr.catalogName, String.class),
-                                action.get(ReorganizeTableAction.Attr.schemaName, String.class),
-                                action.get(ReorganizeTableAction.Attr.tableName, String.class))
+                                + database.escapeObjectName(action.get(ReorganizeTableAction.Attr.tableName, ObjectName.class), Table.class)
                                 + "')"));
             } else {
                 return new NoOpResult();

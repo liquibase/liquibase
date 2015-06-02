@@ -34,6 +34,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 public class MockDatabase implements Database, InternalDatabase {
 
@@ -388,12 +389,12 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
+    public String escapeColumnName(final String columnName) {
         return columnName;
     }
 
     @Override
-    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
+    public String escapeColumnName(String columnName, boolean quoteNamesThatMayBeFunctions) {
         return columnName;
     }
 
@@ -527,6 +528,11 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public String escapeObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
         return "`"+objectName+"`";
+    }
+
+    @Override
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
     }
 
     @Override

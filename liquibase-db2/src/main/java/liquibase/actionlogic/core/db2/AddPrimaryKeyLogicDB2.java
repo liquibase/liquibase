@@ -10,6 +10,7 @@ import liquibase.actionlogic.core.AddPrimaryKeyLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class AddPrimaryKeyLogicDB2 extends AddPrimaryKeyLogic {
     @Override
@@ -20,8 +21,6 @@ public class AddPrimaryKeyLogicDB2 extends AddPrimaryKeyLogic {
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult((DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(AddPrimaryKeyAction.Attr.catalogName, String.class),
-                        action.get(AddPrimaryKeyAction.Attr.schemaName, String.class),
-                        action.get(AddPrimaryKeyAction.Attr.tableName, String.class)));
+                new ReorganizeTableAction(action.get(AddPrimaryKeyAction.Attr.tableName, ObjectName.class)));
     }
 }

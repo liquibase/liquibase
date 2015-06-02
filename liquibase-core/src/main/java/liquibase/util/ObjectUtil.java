@@ -67,7 +67,7 @@ public class ObjectUtil {
         } else if (parameterType.equals(DatabaseFunction.class)) {
             finalValue = new DatabaseFunction(propertyValue);
         } else if (parameterType.equals(SequenceNextValueFunction.class)) {
-            finalValue = new SequenceNextValueFunction(propertyValue);
+            finalValue = new SequenceNextValueFunction(new ObjectName(propertyValue));
         } else if (parameterType.equals(SequenceCurrentValueFunction.class)) {
             finalValue = new SequenceCurrentValueFunction(propertyValue);
         } else if (Enum.class.isAssignableFrom(parameterType)) {

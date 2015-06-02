@@ -8,6 +8,7 @@ import liquibase.actionlogic.core.AddDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.structure.ObjectName;
 
 public class AddDefaultValueLogicMSSQL extends AddDefaultValueLogic {
 
@@ -23,7 +24,7 @@ public class AddDefaultValueLogicMSSQL extends AddDefaultValueLogic {
 
         return new StringClauses()
                 .append("ADD CONSTRAINT")
-                .append(database.generateDefaultConstraintName(action.get(AddDefaultValueAction.Attr.tableName, String.class), action.get(AddDefaultValueAction.Attr.columnName, String.class)))
+                .append(database.generateDefaultConstraintName(action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class)))
                 .append("DEFAULT")
                 .append(DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
                 .append("FOR")

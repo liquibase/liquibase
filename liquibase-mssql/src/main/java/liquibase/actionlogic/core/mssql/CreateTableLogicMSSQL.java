@@ -38,7 +38,7 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
 
         String defaultValue = clauses.get(ColumnClauses.defaultValue);
         if (defaultValue != null) {
-            clauses.replace(ColumnClauses.defaultValue, defaultValue.replaceFirst("DEFAULT", "CONSTRAINT " + database.generateDefaultConstraintName(action.get(CreateTableAction.Attr.tableName, String.class), column.get(ColumnDefinition.Attr.columnName, String.class))));
+            clauses.replace(ColumnClauses.defaultValue, defaultValue.replaceFirst("DEFAULT", "CONSTRAINT " + database.generateDefaultConstraintName(column.get(ColumnDefinition.Attr.columnName, ObjectName.class))));
         }
 
         String remarks = column.get(ColumnDefinition.Attr.remarks, String.class);

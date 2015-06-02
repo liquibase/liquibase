@@ -10,7 +10,9 @@ import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 public class DropColumnsLogicMysql extends DropColumnsLogic {
@@ -24,9 +26,9 @@ public class DropColumnsLogicMysql extends DropColumnsLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new DelegateResult(new ExecuteSqlAction(
                 "ALTER TABLE "
-                        + database.escapeTableName(action.get(DropColumnsAction.Attr.catalogName, String.class), action.get(DropColumnsAction.Attr.schemaName, String.class), action.get(DropColumnsAction.Attr.tableName, String.class))
+                        + database.escapeObjectName(action.get(DropColumnsAction.Attr.tableName, ObjectName.class), Table.class)
                         + " DROP "
-                        + StringUtils.join(action.get(DropColumnsAction.Attr.catalogName, String[].class), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
+                        + StringUtils.join(action.get(DropColumnsAction.Attr.columnNames, String[].class), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
         ));
     }
 }

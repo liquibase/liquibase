@@ -168,20 +168,20 @@ public interface Database extends PrioritizedService {
 
     String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
 
+    String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType);
+
     String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
      * name (i.e. "return").
      *
-     * @param schemaName
-     * @param tableName
      * @param columnName column name
      * @return escaped column name
      */
-    String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName);
+    String escapeColumnName(String columnName);
 
-    String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions);
+    String escapeColumnName(String columnName, boolean quoteNamesThatMayBeFunctions);
 
     /**
      * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column

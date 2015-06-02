@@ -10,6 +10,7 @@ import liquibase.actionlogic.core.ModifyDataTypeLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
 
 public class ModifyDataTypeLogicDB2 extends ModifyDataTypeLogic {
     @Override
@@ -21,8 +22,6 @@ public class ModifyDataTypeLogicDB2 extends ModifyDataTypeLogic {
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
                 (DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(ModifyDataTypeAction.Attr.catalogName, String.class),
-                        action.get(ModifyDataTypeAction.Attr.schemaName, String.class),
-                        action.get(ModifyDataTypeAction.Attr.tableName, String.class)));
+                new ReorganizeTableAction(action.get(ModifyDataTypeAction.Attr.columnName, ObjectName.class).getContainer()));
     }
 }

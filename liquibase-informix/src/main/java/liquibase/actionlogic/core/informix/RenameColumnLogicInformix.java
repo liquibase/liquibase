@@ -7,7 +7,9 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class RenameColumnLogicInformix extends RenameColumnLogic {
     @Override
@@ -20,10 +22,7 @@ public class RenameColumnLogicInformix extends RenameColumnLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new StringClauses()
                 .append("RENAME COLUMN")
-                .append(database.escapeTableName(
-                        action.get(RenameColumnAction.Attr.catalogName, String.class),
-                        action.get(RenameColumnAction.Attr.schemaName, String.class),
-                        action.get(RenameColumnAction.Attr.tableName, String.class))
+                .append(database.escapeObjectName(action.get(RenameColumnAction.Attr.tableName, ObjectName.class), Table.class)
                         + "."
                         + database.escapeObjectName(action.get(RenameColumnAction.Attr.oldColumnName, String.class), Column.class))
                 .append("TO")

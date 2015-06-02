@@ -1,9 +1,12 @@
 package liquibase.exception;
 
 import liquibase.ExtensibleObject;
+import liquibase.action.Action;
 import liquibase.action.core.AddPrimaryKeyAction;
+import liquibase.action.core.SetNullableAction;
 import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -173,5 +176,42 @@ public class ValidationErrors {
 
     public ValidationErrors removeUnsupportedField(Enum field) {
         return this;
+    }
+
+    public ValidationErrors check(String errorMessage, ErrorCheck check) {
+        if (!hasErrors()) {
+            if (!check.check()) {
+                addError(errorMessage);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Convenience method for {@link #checkForRequiredContainer(String, String, Action)}
+     */
+    public ValidationErrors checkForRequiredContainer(String errorMessage, Enum field, Action action) {
+        return checkForRequiredContainer(errorMessage, field.name(), action);
+    }
+
+    /**
+     * Adds the given errorMessage to the validationErrors if the {@link ObjectName} on the given field is set but doesn't have a container defined.
+     * If the given field is not set, no error message is set.
+     */
+    public ValidationErrors checkForRequiredContainer(String errorMessage, String field, Action action) {
+        ObjectName objectName = action.get(field, ObjectName.class);
+        if (objectName != null) {
+            if (objectName.getContainer() == null) {
+                addError(errorMessage);
+            } else if (objectName.getContainer().getName() == null) {
+                addError(errorMessage);
+            }
+        }
+        return this;
+    }
+
+    public interface ErrorCheck {
+
+        boolean check();
     }
 }

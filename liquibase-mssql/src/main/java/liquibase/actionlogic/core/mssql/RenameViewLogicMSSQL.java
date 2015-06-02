@@ -10,6 +10,8 @@ import liquibase.actionlogic.core.RenameViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.View;
 
 public class RenameViewLogicMSSQL extends RenameViewLogic {
     @Override
@@ -22,9 +24,7 @@ public class RenameViewLogicMSSQL extends RenameViewLogic {
         Database database = scope.get(Scope.Attr.database, Database.class);
         return new DelegateResult(new ExecuteSqlAction(
                 "exec sp_rename '"
-                        + database.escapeViewName(action.get(RenameViewAction.Attr.catalogName, String.class),
-                        action.get(RenameViewAction.Attr.schemaName, String.class),
-                        action.get(RenameViewAction.Attr.oldViewName, String.class))
+                        + database.escapeObjectName(action.get(RenameViewAction.Attr.oldViewName, ObjectName.class), View.class)
                         + "', '"
                         + action.get(RenameViewAction.Attr.newViewName, String.class)
                         + "'"));

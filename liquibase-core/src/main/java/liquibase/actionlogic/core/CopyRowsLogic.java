@@ -1,5 +1,6 @@
 package liquibase.actionlogic.core;
 
+import javafx.scene.control.Tab;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
@@ -10,7 +11,9 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 public class CopyRowsLogic extends AbstractActionLogic {
@@ -41,19 +44,13 @@ public class CopyRowsLogic extends AbstractActionLogic {
         }
 
         String sql = "INSERT INTO "
-                + database.escapeTableName(
-                action.get(CopyRowsAction.Attr.targetTableCatalogName, String.class),
-                action.get(CopyRowsAction.Attr.targetTableSchemaName, String.class),
-                action.get(CopyRowsAction.Attr.targetTableName, String.class))
+                + database.escapeObjectName(action.get(CopyRowsAction.Attr.targetTableName, ObjectName.class), Table.class)
                 + " ("
                 + StringUtils.join(sourceColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
                 + ")  SELECT "
                 + StringUtils.join(targetColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
                 + " FROM "
-                + database.escapeTableName(
-                action.get(CopyRowsAction.Attr.sourceTableCatalogName, String.class),
-                action.get(CopyRowsAction.Attr.sourceTableSchemaName, String.class),
-                action.get(CopyRowsAction.Attr.sourceTableName, String.class));
+                + database.escapeObjectName(action.get(CopyRowsAction.Attr.sourceTableName, ObjectName.class), Table.class);
 
         return new DelegateResult(new ExecuteSqlAction(sql));
     }

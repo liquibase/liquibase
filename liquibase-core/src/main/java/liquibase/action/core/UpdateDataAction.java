@@ -2,12 +2,11 @@ package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
 import liquibase.actionlogic.UpdateResult;
+import liquibase.structure.ObjectName;
 
 public class UpdateDataAction extends AbstractAction {
     
     public static enum Attr {
-        catalogName,
-        schemaName,
         tableName,
         columnNames,
         newColumnValues,
@@ -19,9 +18,7 @@ public class UpdateDataAction extends AbstractAction {
     public UpdateDataAction() {
     }
 
-    public UpdateDataAction(String catalogName, String schemaName, String tableName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public UpdateDataAction(ObjectName tableName) {
         set(Attr.tableName, tableName);
     }
 

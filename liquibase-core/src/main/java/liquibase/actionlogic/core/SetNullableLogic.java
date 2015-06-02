@@ -2,7 +2,7 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.RedefineColumnAction;
+import liquibase.action.core.AlterColumnAction;
 import liquibase.action.core.SetNullableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
@@ -10,6 +10,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 
 public class SetNullableLogic extends AbstractSqlBuilderLogic {
 
@@ -19,19 +20,17 @@ public class SetNullableLogic extends AbstractSqlBuilderLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(final Action action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SetNullableAction.Attr.tableName, action)
-                .checkForRequiredField(SetNullableAction.Attr.columnName, action);
+                .checkForRequiredField(SetNullableAction.Attr.columnName, action)
+                .checkForRequiredContainer("Table name is required", SetNullableAction.Attr.columnName, action)
+                .checkForRequiredContainer("Table name is required", SetNullableAction.Attr.columnName, action);
     }
 
     @Override
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new RedefineColumnAction(
-                action.get(SetNullableAction.Attr.catalogName, String.class),
-                action.get(SetNullableAction.Attr.schemaName, String.class),
-                action.get(SetNullableAction.Attr.tableName, String.class),
-                action.get(SetNullableAction.Attr.columnName, String.class),
+        return new DelegateResult(new AlterColumnAction(
+                action.get(SetNullableAction.Attr.columnName, ObjectName.class),
                 generateSql(action, scope)
         ));
     }

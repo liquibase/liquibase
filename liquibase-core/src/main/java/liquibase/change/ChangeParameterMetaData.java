@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
@@ -376,7 +377,7 @@ public class ChangeParameterMetaData {
         } else if (dataType.equals("list")) {
             return null; //"TODO";
         } else if (dataType.equals("sequenceNextValueFunction")) {
-            return new SequenceNextValueFunction("seq_name");
+            return new SequenceNextValueFunction(new ObjectName("seq_name"));
         } else if (dataType.equals("databaseFunction")) {
             return new DatabaseFunction("now");
         } else if (dataType.equals("list of columnConfig")) {

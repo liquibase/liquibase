@@ -1,6 +1,7 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 /**
  * Action to create a new sequence.
@@ -8,8 +9,6 @@ import liquibase.action.AbstractAction;
 public class CreateSequenceAction extends AbstractAction {
 
     public static enum Attr {
-        catalogName,
-        schemaName,
         sequenceName,
         startValue,
         incrementBy,
@@ -23,9 +22,7 @@ public class CreateSequenceAction extends AbstractAction {
     public CreateSequenceAction() {
     }
 
-    public CreateSequenceAction(String catalogName, String schemaName, String sequenceName) {
-        set(Attr.catalogName, catalogName);
-        set(Attr.schemaName, schemaName);
+    public CreateSequenceAction(ObjectName sequenceName) {
         set(Attr.sequenceName, sequenceName);
     }
 
