@@ -3,6 +3,7 @@ package liquibase.dbdoc;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
@@ -31,6 +32,7 @@ public class TableWriter extends HTMLWriter {
         writeTableRemarks(fileWriter, table, database);
         writeColumns(fileWriter, table, database);
         writeTableIndexes(fileWriter, table, database);
+        writeTableForeignKeys(fileWriter, table, database);
     }
 
     private void writeColumns(FileWriter fileWriter, Table table, Database database) throws IOException {
@@ -69,6 +71,19 @@ public class TableWriter extends HTMLWriter {
                         index.getColumnNames().replace(index.getTable().getName() + ".","")));
             }
         writeTable("Current Table Indexes", cells, fileWriter);
+        }
+    }
+    
+    private void writeTableForeignKeys(FileWriter fileWriter, Table table, Database database) throws IOException {
+        final List<List<String>> cells = new ArrayList<List<String>>();
+        if(!table.getOutgoingForeignKeys().isEmpty())
+        {
+            for (ForeignKey outgoingForeignKey : table.getOutgoingForeignKeys()) {
+                cells.add(Arrays.asList(outgoingForeignKey.getName(),
+                        outgoingForeignKey.getForeignKeyColumns().toString().replace(table.getName() + ".", "").replaceAll("[\\[\\]]", ""),
+                        outgoingForeignKey.getPrimaryKeyColumns().toString().replaceAll("[\\[\\]]", "")));
+            }
+            writeTable("Current Table Foreign Keys", cells, fileWriter);
         }
     }
 }
