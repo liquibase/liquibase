@@ -2,7 +2,6 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
