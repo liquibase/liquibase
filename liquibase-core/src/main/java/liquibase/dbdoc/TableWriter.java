@@ -25,9 +25,9 @@ public class TableWriter extends HTMLWriter {
 
     @Override
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
-    	final Table table = (Table) object;
-    	writeTableRemarks(fileWriter, table, database);
-		writeColumns(fileWriter, table, database);
+        final Table table = (Table) object;
+        writeTableRemarks(fileWriter, table, database);
+        writeColumns(fileWriter, table, database);
     }
 
     private void writeColumns(FileWriter fileWriter, Table table, Database database) throws IOException {
