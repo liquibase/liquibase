@@ -17,7 +17,6 @@ import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
@@ -31,7 +30,7 @@ import java.util.*;
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private final File changeLogFile;
-    private boolean executeAgainstDatabase = true;
+    private boolean executeDmlAgainstDatabase = true;
     /**
      * Output CREATE TABLE LIQUIBASECHANGELOG or not
      */
@@ -51,9 +50,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private int COLUMN_LABELS = 12;
     private Integer lastChangeSetSequenceValue;
 
-    public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeAgainstDatabase, boolean executeDdlAgainstDatabase) {
+    public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeDmlAgainstDatabase, boolean executeDdlAgainstDatabase) {
         setDatabase(database);
-        this.executeAgainstDatabase = executeAgainstDatabase;
+        this.executeDmlAgainstDatabase = executeDmlAgainstDatabase;
         this.executeDdlAgainstDatabase = executeDdlAgainstDatabase;
 
         changeLogFile = changeLogFile.getAbsoluteFile();
@@ -70,12 +69,12 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         return database.getConnection() != null && database.getConnection() instanceof OfflineConnection;
     }
 
-    public boolean isExecuteAgainstDatabase() {
-        return executeAgainstDatabase;
+    public boolean isExecuteDmlAgainstDatabase() {
+        return executeDmlAgainstDatabase;
     }
 
-    public void setExecuteAgainstDatabase(boolean executeAgainstDatabase) {
-        this.executeAgainstDatabase = executeAgainstDatabase;
+    public void setExecuteDmlAgainstDatabase(boolean executeDmlAgainstDatabase) {
+        this.executeDmlAgainstDatabase = executeDmlAgainstDatabase;
     }
 
     public boolean isExecuteDdlAgainstDatabase() {
@@ -100,7 +99,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 changeLogFile.createNewFile();
                 writeHeader(changeLogFile);
 
-                if (isExecuteAgainstDatabase() && isExecuteDdlAgainstDatabase()) {
+                if (isExecuteDdlAgainstDatabase()) {
                     ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
                 }
 
@@ -140,7 +139,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     protected void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
-        if (isExecuteAgainstDatabase()) {
+        if (isExecuteDmlAgainstDatabase()) {
             ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
         replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
@@ -311,7 +310,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void setExecType(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        if (isExecuteAgainstDatabase()) {
+        if (isExecuteDmlAgainstDatabase()) {
             ExecutorService.getInstance().getExecutor(getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
             getDatabase().commit();
         }
@@ -335,7 +334,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void removeFromHistory(ChangeSet changeSet) throws DatabaseException {
-        if (isExecuteAgainstDatabase()) {
+        if (isExecuteDmlAgainstDatabase()) {
             ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
             getDatabase().commit();
         }

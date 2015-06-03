@@ -38,13 +38,13 @@ public class OfflineChangeLogHistoryServiceTest  {
     }
 
     /**
-     * Test ChangeLog table update SQL generation with outputLiquibaseSql=true and outputLiquibaseDdlSql=true
+     * Test ChangeLog table update SQL generation with outputLiquibaseSql=true and outputLiquibaseSql=true
      */
     @Test
     public void testInitOfflineWithOutputLiquibaseSql() throws Exception {
         // Given
         StringWriter writer = new StringWriter();
-        OfflineChangeLogHistoryService service = createService(writer, true);
+        OfflineChangeLogHistoryService service = createService(writer, "true");
         ChangeSet changeSet = createChangeSet();
         // When
         service.init();
@@ -55,13 +55,13 @@ public class OfflineChangeLogHistoryServiceTest  {
         assertTrue(writer.toString().contains("INSERT INTO PUBLIC.DATABASECHANGELOG"));
     }
     /**
-     * Test ChangeLog table update SQL generation with outputLiquibaseSql=true and outputLiquibaseDdlSql=false
+     * Test ChangeLog table update SQL generation with outputLiquibaseSql=true and outputLiquibaseSql=data_only
      */
     @Test
     public void testInitOfflineWithOutputLiquibaseSqlAndNoDdl() throws Exception {
         // Given
         StringWriter writer = new StringWriter();
-        OfflineChangeLogHistoryService service = createService(writer, false);
+        OfflineChangeLogHistoryService service = createService(writer, "data_only");
         ChangeSet changeSet = createChangeSet();
         // When
         service.init();
@@ -74,10 +74,10 @@ public class OfflineChangeLogHistoryServiceTest  {
     /**
      * Create OfflineChangeLogHistoryService and register LoggingExecutor
      */
-    private OfflineChangeLogHistoryService createService(Writer writer, boolean outputLiquibaseDdlSql) {
+    private OfflineChangeLogHistoryService createService(Writer writer, String outputLiquibaseSql) {
         HsqlDatabase database = new HsqlDatabase();
         File changeLogCsvFile = new File(temporaryFolder.getRoot(), "changeLog.csv");
-        OfflineConnection connection = new OfflineConnection("offline:hsqldb?changeLogFile="+changeLogCsvFile.getAbsolutePath()+"&outputLiquibaseSql=true&outputLiquibaseDdlSql="+outputLiquibaseDdlSql, new ClassLoaderResourceAccessor());
+        OfflineConnection connection = new OfflineConnection("offline:hsqldb?changeLogFile="+changeLogCsvFile.getAbsolutePath()+"&outputLiquibaseSql="+outputLiquibaseSql, new ClassLoaderResourceAccessor());
         database.setConnection(connection);
         connection.attached(database);
         OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
