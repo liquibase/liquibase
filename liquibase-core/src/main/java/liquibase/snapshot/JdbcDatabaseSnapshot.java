@@ -374,7 +374,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
                         "WHERE a.OWNER='" + ownerName + "'";
                     if (tableName != null) {
-                        sql += " AND a.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                        sql += " AND a.TABLE_NAME='" + tableName + "'";
                     }
 
                     return executeAndExtract(sql, database);
