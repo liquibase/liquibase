@@ -15,59 +15,62 @@ import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AddLookupTableLogic extends AbstractActionLogic {
+public class AddLookupTableLogic extends AbstractActionLogic<AddLookupTableAction> {
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AddLookupTableAction> getSupportedAction() {
         return AddLookupTableAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        ObjectName newColumnName = action.get(AddLookupTableAction.Attr.newColumnName, ObjectName.class);
-        ObjectName newTableName = newColumnName.getContainer();
+    public ActionResult execute(AddLookupTableAction action, Scope scope) throws ActionPerformException {
+        ObjectName newColumnName = action.newColumnName;
+        ObjectName newTableName = newColumnName.container;
 
-        String newColumnDataType = action.get(AddLookupTableAction.Attr.newColumnDataType, String.class);
+        String newColumnDataType = action.newColumnDataType;
 
-        ObjectName existingColumnName = action.get(AddLookupTableAction.Attr.existingColumnName, ObjectName.class);
-        ObjectName existingTableName = existingColumnName.getContainer();
+        ObjectName existingColumnName = action.existingColumnName;
+        ObjectName existingTableName = existingColumnName.container;
 
         List<Action> actions = new ArrayList<>(Arrays.asList(generateCreateAndLoadActions(action, scope)));
 
         actions.add(new SetNullableAction(newColumnName, newColumnDataType, false));
 
-        actions.add((Action) new AddPrimaryKeyAction()
-                .set(AddPrimaryKeyAction.Attr.tableName, newTableName)
-                .set(AddPrimaryKeyAction.Attr.columnNames, newColumnName));
+        AddPrimaryKeyAction addPkAction = new AddPrimaryKeyAction();
+        addPkAction.tableName = newTableName;
+        addPkAction.columnNames = Arrays.asList(newColumnName.name);
+
+        actions.add(addPkAction);
 
         actions.add(new AddForeignKeyConstraintAction(
-                action.get(AddLookupTableAction.Attr.constraintName, String.class),
+                action.constraintName,
                 newTableName,
-                new String[]{newColumnName.getName()},
+                newColumnName.name,
                 existingTableName,
-                new String[]{existingColumnName.getName()}));
+                existingColumnName.name));
 
         return new DelegateResult(actions);
     }
 
-    public Action[] generateCreateAndLoadActions(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public Action[] generateCreateAndLoadActions(AddLookupTableAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new Action[]{
                 new ExecuteSqlAction(
                         "CREATE TABLE "
-                                + database.escapeObjectName(action.get(AddLookupTableAction.Attr.newColumnName, ObjectName.class).getContainer(), Table.class)
+                                + database.escapeObjectName(action.newColumnName.container, Table.class)
                                 + " AS SELECT DISTINCT "
-                                + database.escapeObjectName(action.get(AddLookupTableAction.Attr.existingColumnName, String.class), Column.class)
+                                + database.escapeObjectName(action.existingColumnName, Column.class)
                                 + " AS "
-                                + database.escapeObjectName(action.get(AddLookupTableAction.Attr.newColumnName, String.class), Column.class)
+                                + database.escapeObjectName(action.newColumnName, Column.class)
                                 + " FROM "
-                                + database.escapeObjectName(action.get(AddLookupTableAction.Attr.existingColumnName, ObjectName.class).getContainer(), Table.class)
+                                + database.escapeObjectName(action.existingColumnName.container, Table.class)
                                 + " WHERE "
-                                + database.escapeObjectName(action.get(AddLookupTableAction.Attr.existingColumnName, String.class), Column.class)
+                                + database.escapeObjectName(action.existingColumnName, Column.class)
                                 + " IS NOT NULL")
         };
     }

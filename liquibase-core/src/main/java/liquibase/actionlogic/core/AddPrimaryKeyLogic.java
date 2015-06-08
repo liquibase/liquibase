@@ -12,40 +12,42 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtils;
 
-public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic {
+public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic<AddPrimaryKeyAction> {
 
     public static enum Clauses {
         constraintName, columnNames, tablespace,
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AddPrimaryKeyAction> getSupportedAction() {
         return AddPrimaryKeyAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AddPrimaryKeyAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
-        errors.checkForRequiredField(AddPrimaryKeyAction.Attr.columnNames, action);
-        errors.checkForRequiredField(AddPrimaryKeyAction.Attr.tableName, action);
-        if (action.get(AddPrimaryKeyAction.Attr.clustered, false)) {
-            errors.addUnsupportedError("Adding a clustered primary key", scope.get(Scope.Attr.database, Database.class).getShortName());
+        errors.checkForRequiredField("columnNames", action);
+        errors.checkForRequiredField("tableName", action);
+        if (ObjectUtil.defaultIfEmpty(action.clustered, false)) {
+            errors.addUnsupportedError("Adding a clustered primary key", scope.getDatabase().getShortName());
         }
 
         return errors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddPrimaryKeyAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
-                new AlterTableAction(scope.get(AddPrimaryKeyAction.Attr.tableName, ObjectName.class),
+                new AlterTableAction(action.tableName,
                         generateSql(action, scope)));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(AddPrimaryKeyAction action, Scope scope) {
+        Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses();
 
         clauses.append("ADD CONSTRAINT");
@@ -59,11 +61,11 @@ public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic {
 //            sql.append(database.escapeConstraintName(constraintName));
 //        }
 //
-        clauses.append(Clauses.constraintName, database.escapeConstraintName(action.get(AddPrimaryKeyAction.Attr.constraintName, String.class)));
+        clauses.append(Clauses.constraintName, database.escapeConstraintName(action.constraintName));
         clauses.append("PRIMARY KEY");
-        clauses.append(Clauses.columnNames, "(" + database.escapeColumnNameList(action.get(AddPrimaryKeyAction.Attr.columnNames, String.class)) + ")");
+        clauses.append(Clauses.columnNames, "(" + database.escapeColumnNameList(StringUtils.join(action.columnNames, ", ")) + ")");
 
-        String tablespace = action.get(AddPrimaryKeyAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null && database.supportsTablespaces()) {
             clauses.append(Clauses.tablespace, "USING INDEX TABLESPACE " + tablespace);
         }

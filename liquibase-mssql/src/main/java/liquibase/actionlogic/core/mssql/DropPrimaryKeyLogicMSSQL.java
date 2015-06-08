@@ -21,16 +21,16 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropPrimaryKeyAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropPrimaryKeyAction.Attr.constraintName, action);
+                .checkForRequiredField("constraintName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(DropPrimaryKeyAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
-        String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
+        String constraintName = action.constraintName;
         if (constraintName == null) {
             return new DelegateResult(new ExecuteSqlAction(
                     "DECLARE @pkname nvarchar(255)"
@@ -42,9 +42,9 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
             +" join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'"
             +" join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid"
             +" join syscolumns c ON ik.id = c.id AND ik.colid = c.colid"
-            +" where o.name = '"+action.get(DropPrimaryKeyAction.Attr.tableName, String.class)+"'"
+            +" where o.name = '"+action.tableName.name+"'"
             +"\n"
-            +"set @sql='alter table "+database.escapeObjectName(action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class), Table.class)+" drop constraint ' + @pkname"
+            +"set @sql='alter table "+database.escapeObjectName(action.tableName, Table.class)+" drop constraint ' + @pkname"
             +"\n"
             +"exec(@sql)"
             +"\n"));

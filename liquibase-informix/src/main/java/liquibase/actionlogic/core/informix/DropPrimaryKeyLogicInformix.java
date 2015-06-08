@@ -15,8 +15,8 @@ public class DropPrimaryKeyLogicInformix extends DropPrimaryKeyLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropPrimaryKeyAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropPrimaryKeyAction.Attr.constraintName, action);
+                .checkForRequiredField("constraintName", action);
     }
 }

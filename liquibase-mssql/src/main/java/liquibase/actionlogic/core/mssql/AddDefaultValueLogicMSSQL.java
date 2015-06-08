@@ -18,16 +18,16 @@ public class AddDefaultValueLogicMSSQL extends AddDefaultValueLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(AddDefaultValueAction action, Scope scope) {
         MSSQLDatabase database = scope.get(Scope.Attr.database, MSSQLDatabase.class);
-        Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
+        Object defaultValue = action.defaultValue;
 
         return new StringClauses()
                 .append("ADD CONSTRAINT")
-                .append(database.generateDefaultConstraintName(action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class)))
+                .append(database.generateDefaultConstraintName(action.columnName))
                 .append("DEFAULT")
                 .append(DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
                 .append("FOR")
-                .append(action.get(AddDefaultValueAction.Attr.columnName, String.class));
+                .append(action.columnName.name);
     }
 }

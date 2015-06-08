@@ -14,38 +14,38 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class ModifyDataTypeLogic extends AbstractSqlBuilderLogic {
+public class ModifyDataTypeLogic extends AbstractSqlBuilderLogic<ModifyDataTypeAction> {
 
     public static enum Clauses {
         dataType
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<ModifyDataTypeAction> getSupportedAction() {
         return ModifyDataTypeAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(ModifyDataTypeAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(ModifyDataTypeAction.Attr.columnName, action)
-                .checkForRequiredContainer("Table name is required", ModifyDataTypeAction.Attr.columnName, action)
-                .checkForRequiredField(ModifyDataTypeAction.Attr.newDataType, action);
+                .checkForRequiredField("columnName", action)
+                .checkForRequiredContainer("Table name is required", "columnName", action)
+                .checkForRequiredField("newDataType", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(ModifyDataTypeAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterColumnAction(
-                action.get(ModifyDataTypeAction.Attr.columnName, ObjectName.class),
+                action.columnName,
                 generateSql(action, scope)
         ));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(ModifyDataTypeAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         return new StringClauses()
-                .append(Clauses.dataType, DataTypeFactory.getInstance().fromDescription(action.get(ModifyDataTypeAction.Attr.newDataType, String.class), database).toDatabaseDataType(database).toSql());
+                .append(Clauses.dataType, DataTypeFactory.getInstance().fromDescription(action.newDataType, database).toDatabaseDataType(database).toSql());
     }
 }

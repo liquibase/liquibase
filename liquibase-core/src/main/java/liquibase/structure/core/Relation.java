@@ -12,10 +12,7 @@ import java.util.List;
  */
 public abstract class Relation extends AbstractDatabaseObject {
 
-    public static enum Attr {
-        name,
-        columns,
-    }
+    public List<Column> columns;
 
     protected Relation() {
     }
@@ -46,7 +43,7 @@ public abstract class Relation extends AbstractDatabaseObject {
     }
 
     public List<Column> getColumns() {
-        return get("columns", List.class);
+        return columns;
     }
 
     /**

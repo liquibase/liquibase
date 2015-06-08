@@ -17,13 +17,13 @@ public class AddForeignKeyConstraintLogicInformix extends AddForeignKeyConstrain
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope)  {
+    protected StringClauses generateSql(AddForeignKeyConstraintAction action, Scope scope)  {
         StringClauses clauses = super.generateSql(action, scope)
                 .remove(Clauses.constraintName)
                 .remove("ON UPDATE")
                 .remove("ON DELETE CASCADE");
 
-        clauses.append("CONSTRAINT "+action.get(AddForeignKeyConstraintAction.Attr.constraintName, String.class));
+        clauses.append("CONSTRAINT "+action.constraintName);
 
         return clauses;
     }

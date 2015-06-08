@@ -11,15 +11,16 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.structure.core.Column;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class InsertOrUpdateLogic extends AbstractActionLogic {
+public abstract class InsertOrUpdateLogic extends AbstractActionLogic<InsertOrUpdateDataAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<InsertOrUpdateDataAction> getSupportedAction() {
         return InsertOrUpdateDataAction.class;
     }
 
@@ -32,13 +33,13 @@ public abstract class InsertOrUpdateLogic extends AbstractActionLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(InsertOrUpdateDataAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope)
-                .checkForRequiredField(InsertOrUpdateDataAction.Attr.tableName, action)
-                .checkForRequiredField(InsertOrUpdateDataAction.Attr.columnNames, action)
-                .checkForRequiredField(InsertOrUpdateDataAction.Attr.primaryKeyColumnNames, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("columnNames", action)
+                .checkForRequiredField("primaryKeyColumnNames", action);
 
-        if (action.get(InsertOrUpdateDataAction.Attr.columnNames, new ArrayList()).size() != action.get(InsertOrUpdateDataAction.Attr.columnValues, new ArrayList()).size()) {
+        if (CollectionUtil.createIfNull(action.columnNames).size() != CollectionUtil.createIfNull(action.columnValues).size()) {
             errors.addError("InsertOrUpdateData columnNames and columnValues must contain the same number of values");
         }
 
@@ -47,23 +48,23 @@ public abstract class InsertOrUpdateLogic extends AbstractActionLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(InsertOrUpdateDataAction action, Scope scope) throws ActionPerformException {
         throw new ActionPerformException("TODO");
     }
 
-    protected String getWhereClause(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected String getWhereClause(InsertOrUpdateDataAction action, Scope scope) {
+        Database database = scope.getDatabase();
         StringBuffer where = new StringBuffer();
 
-        String[] pkColumns = action.get(InsertOrUpdateDataAction.Attr.primaryKeyColumnNames, String[].class);
-        String[] columnNames = action.get(InsertOrUpdateDataAction.Attr.columnNames, String[].class);
-        Object[] newValues = action.get(InsertOrUpdateDataAction.Attr.primaryKeyColumnNames, Object[].class);
+        List<String> pkColumns = action.primaryKeyColumnNames;
+        List<String> columnNames = action.columnNames;
+        List<Object> newValues = action.columnValues;
 
         List<String> whereClauses = new ArrayList<>();
         for (String thisPkColumn : pkColumns) {
-            for (int i = 0; i < columnNames.length; i++) {
-                if (columnNames[i].equals(thisPkColumn)) {
-                    Object newValue = newValues[i];
+            for (int i = 0; i < columnNames.size(); i++) {
+                if (columnNames.get(i).equals(thisPkColumn)) {
+                    Object newValue = newValues.get(i);
                     String thisClause = database.escapeObjectName(thisPkColumn, Column.class);
                     if ((newValue == null || newValue.toString().equalsIgnoreCase("NULL"))) {
                         thisClause += " IS NULL";

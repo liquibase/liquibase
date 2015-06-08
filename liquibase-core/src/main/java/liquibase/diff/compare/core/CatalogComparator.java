@@ -38,14 +38,14 @@ public class CatalogComparator implements DatabaseObjectComparator {
         }
 
         String object1Name;
-        if (((Catalog) databaseObject1).isDefault()) {
+        if (((Catalog) databaseObject1).isDefault) {
             object1Name = null;
         } else {
             object1Name = databaseObject1.getSimpleName();
         }
 
         String object2Name;
-        if (((Catalog) databaseObject2).isDefault()) {
+        if (((Catalog) databaseObject2).isDefault) {
             object2Name = null;
         } else {
             object2Name = databaseObject2.getSimpleName();

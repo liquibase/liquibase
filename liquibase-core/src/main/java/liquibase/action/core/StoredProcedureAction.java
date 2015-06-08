@@ -1,13 +1,12 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
+
+import java.util.List;
 
 public class StoredProcedureAction extends AbstractAction {
 
-    public static enum Attr {
-        procedureName,
-        parameterNames,
-//        private List<Integer> types = new ArrayList<Integer>();
-
-        }
+    public ObjectName procedureName;
+    public List<String> parameterNames;
 }

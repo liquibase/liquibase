@@ -18,26 +18,25 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 
-public class DropViewLogic extends AbstractSqlBuilderLogic {
+public class DropViewLogic extends AbstractSqlBuilderLogic<DropViewAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropViewAction> getSupportedAction() {
         return DropViewAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropViewAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropViewAction.Attr.viewName, action);
+                .checkForRequiredField("viewName", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DropViewAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP VIEW")
-                .append(database.escapeObjectName(
-                        action.get(DropViewAction.Attr.viewName, ObjectName.class), View.class
+                .append(database.escapeObjectName(action.viewName, View.class
                 ));
     }
 }

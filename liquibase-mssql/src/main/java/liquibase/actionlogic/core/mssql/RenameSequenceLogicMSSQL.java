@@ -16,13 +16,13 @@ public class RenameSequenceLogicMSSQL extends RenameSequenceLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(RenameSequenceAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         return new StringClauses()
                 .append("SP_RENAME ")
-                .append(database.escapeObjectName(action.get(RenameSequenceAction.Attr.oldSequenceName, String.class), Sequence.class))
+                .append(database.escapeObjectName(action.oldSequenceName, Sequence.class))
                 .append(", ")
-                .append(database.escapeObjectName(action.get(RenameSequenceAction.Attr.newSequenceName, String.class), Sequence.class));
+                .append(database.escapeObjectName(action.newSequenceName.name, Sequence.class));
     }
 }

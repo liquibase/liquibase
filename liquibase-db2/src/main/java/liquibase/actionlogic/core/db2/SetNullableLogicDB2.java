@@ -19,10 +19,10 @@ public class SetNullableLogicDB2 extends SetNullableLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(SetNullableAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
                 (DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(SetNullableAction.Attr.columnName, ObjectName.class).getContainer())
+                new ReorganizeTableAction(action.columnName.container)
         );
     }
 }

@@ -11,33 +11,34 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.util.ObjectUtil;
 
-public class SetNullableLogic extends AbstractSqlBuilderLogic {
+public class SetNullableLogic extends AbstractSqlBuilderLogic<SetNullableAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<SetNullableAction> getSupportedAction() {
         return SetNullableAction.class;
     }
 
     @Override
-    public ValidationErrors validate(final Action action, Scope scope) {
+    public ValidationErrors validate(SetNullableAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SetNullableAction.Attr.columnName, action)
-                .checkForRequiredContainer("Table name is required", SetNullableAction.Attr.columnName, action)
-                .checkForRequiredContainer("Table name is required", SetNullableAction.Attr.columnName, action);
+                .checkForRequiredField("columnName", action)
+                .checkForRequiredContainer("Table name is required", "columnName", action)
+                .checkForRequiredContainer("Table name is required", "columnName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(SetNullableAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterColumnAction(
-                action.get(SetNullableAction.Attr.columnName, ObjectName.class),
+                action.columnName,
                 generateSql(action, scope)
         ));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        if (action.get(SetNullableAction.Attr.nullable, false)) {
+    protected StringClauses generateSql(SetNullableAction action, Scope scope) {
+        if (ObjectUtil.defaultIfEmpty(action.nullable, false)) {
             return new StringClauses().append("NULL");
         } else {
             return new StringClauses().append("NOT NULL");

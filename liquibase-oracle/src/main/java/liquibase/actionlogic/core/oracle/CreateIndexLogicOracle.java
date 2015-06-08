@@ -7,6 +7,7 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateIndexLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
+import liquibase.util.ObjectUtil;
 
 public class CreateIndexLogicOracle extends CreateIndexLogic {
 
@@ -16,10 +17,10 @@ public class CreateIndexLogicOracle extends CreateIndexLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateIndexAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        if (action.get(CreateIndexAction.Attr.clustered, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.clustered, false)) {
             clauses.insertAfter("ON", "CLUSTER");
         }
 

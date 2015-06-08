@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.InsertDataAction;
 import liquibase.action.core.MarkChangeSetRanAction;
+import liquibase.action.core.StringClauses;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
@@ -33,28 +34,28 @@ import liquibase.util.StringUtils;
 
 import java.util.List;
 
-public class MarkChangeSetRanLogic extends AbstractActionLogic {
+public class MarkChangeSetRanLogic extends AbstractActionLogic<MarkChangeSetRanAction> {
 
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<MarkChangeSetRanAction> getSupportedAction() {
         return MarkChangeSetRanAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(MarkChangeSetRanAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(MarkChangeSetRanAction.Attr.changeSet, action)
-                .checkForRequiredField(MarkChangeSetRanAction.Attr.execType, action);
+                .checkForRequiredField("changeSet", action)
+                .checkForRequiredField("execType", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(MarkChangeSetRanAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         String dateValue = database.getCurrentDateTimeFunction();
-        ChangeSet changeSet = action.get(MarkChangeSetRanAction.Attr.changeSet, ChangeSet.class);
+        ChangeSet changeSet = action.changeSet;
 
-        ChangeSet.ExecType execType = ChangeSet.ExecType.valueOf(action.get(MarkChangeSetRanAction.Attr.execType, String.class));
+        ChangeSet.ExecType execType = action.execType;
 
         Action runAction;
         try {
@@ -73,12 +74,12 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic {
             ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 
             if (execType.ranBefore) {
-                runAction = (UpdateDataAction) new UpdateDataAction(tableName)
+                runAction = new UpdateDataAction(tableName)
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", execType.value)
-                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
-                        .set(UpdateDataAction.Attr.whereClause, "ID=? AND AUTHOR=? AND FILENAME=?");
+                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+                ((UpdateDataAction) runAction).whereClause = new StringClauses("ID=? AND AUTHOR=? AND FILENAME=?");
 
                 if (tag != null) {
                     ((UpdateDataAction) runAction).addNewColumnValue("TAG", tag);

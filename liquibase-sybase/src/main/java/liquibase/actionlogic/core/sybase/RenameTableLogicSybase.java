@@ -20,13 +20,13 @@ public class RenameTableLogicSybase extends RenameTableLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(RenameTableAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "exec sp_rename '"
-                        + database.escapeObjectName(action.get(RenameTableAction.Attr.oldTableName, ObjectName.class), Table.class)
+                        + database.escapeObjectName(action.oldTableName, Table.class)
                         + "', '"
-                        + action.get(RenameTableAction.Attr.newTableName, String.class)
+                        + action.newTableName.name
                         + "'"));
     }
 }

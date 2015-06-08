@@ -15,12 +15,12 @@ public class CreateSequenceLogicDB2 extends CreateSequenceLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateSequenceAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
 
-        String shortName = scope.get(Scope.Attr.database, Database.class).getShortName();
+        String shortName = scope.getDatabase().getShortName();
 
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.ordered, action, shortName);
+        errors.checkForDisallowedField("ordered", action, shortName);
 
         return errors;
     }

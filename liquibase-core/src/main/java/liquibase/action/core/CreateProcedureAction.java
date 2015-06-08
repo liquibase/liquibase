@@ -1,13 +1,11 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class CreateProcedureAction extends AbstractAction {
-    public static enum Attr {
-        procedureName,
-        procedureText,
-        endDelimiter,
-        replaceIfExists,
-
-    }
+        public ObjectName procedureName;
+        public StringClauses procedureText;
+        public String endDelimiter;
+        public Boolean replaceIfExists;
 }

@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.DropSequenceAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropSequenceLogic;
 import liquibase.database.Database;
@@ -14,7 +15,7 @@ public class DropSequenceLogicPostgresql extends DropSequenceLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(DropSequenceAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .append("CASCADE");
     }

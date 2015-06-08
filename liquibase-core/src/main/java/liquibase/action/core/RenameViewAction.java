@@ -1,11 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class RenameViewAction extends AbstractAction {
-    public static enum Attr {
-        oldViewName,
-        newViewName,
-
-    }
+    public ObjectName oldViewName;
+    public ObjectName newViewName;
 }

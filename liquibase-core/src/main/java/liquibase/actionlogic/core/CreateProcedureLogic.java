@@ -11,24 +11,24 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 
-public class CreateProcedureLogic extends AbstractActionLogic {
+public class CreateProcedureLogic extends AbstractActionLogic<CreateProcedureAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<CreateProcedureAction> getSupportedAction() {
         return CreateProcedureAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateProcedureAction action, Scope scope) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkForRequiredField(CreateProcedureAction.Attr.procedureText, action);
-        validationErrors.checkForDisallowedField(CreateProcedureAction.Attr.replaceIfExists, action, scope.get(Scope.Attr.database, Database.class).getShortName());
+        validationErrors.checkForRequiredField("procedureText", action);
+        validationErrors.checkForDisallowedField("replaceIfExists", action, scope.getDatabase().getShortName());
 
         return validationErrors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new ExecuteSqlAction(action.get(CreateProcedureAction.Attr.procedureText, String.class)));
+    public ActionResult execute(CreateProcedureAction action, Scope scope) throws ActionPerformException {
+        return new DelegateResult(new ExecuteSqlAction(action.procedureText.toString()));
     }
 }

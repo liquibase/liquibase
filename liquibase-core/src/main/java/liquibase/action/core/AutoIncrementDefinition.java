@@ -6,10 +6,7 @@ import java.math.BigInteger;
 
 public class AutoIncrementDefinition extends AbstractExtensibleObject {
 
-    public static enum Attr {
-        startWith,
-        incrementBy,
-    }
-
+    public BigInteger startWith;
+    public BigInteger incrementBy;
 
 }

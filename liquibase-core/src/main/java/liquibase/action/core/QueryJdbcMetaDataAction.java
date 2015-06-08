@@ -2,7 +2,12 @@ package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
 import liquibase.action.QueryAction;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Action to execute a method from java.sql.DatabaseMetaData.
@@ -10,18 +15,16 @@ import liquibase.util.StringUtils;
  * Any case-fixing etc. logic should occur in less "raw" Actions.
  */
 public class QueryJdbcMetaDataAction extends AbstractAction implements QueryAction {
-    public static enum Attr {
-        method,
-        arguments
-    }
+    public String method;
+    public List<Object> arguments;
 
     public QueryJdbcMetaDataAction(String method, Object... arguments) {
-        set(Attr.method, method);
-        set(Attr.arguments, arguments);
+        this.method = method;
+        this.arguments = Arrays.asList(CollectionUtil.createIfNull(arguments));
     }
 
     @Override
     public String describe() {
-        return get(Attr.method, String.class)+"("+ StringUtils.join(get(Attr.arguments, Object[].class), ", ", new StringUtils.DefaultFormatter())+")";
+        return method + "(" + StringUtils.join(arguments, ", ", new StringUtils.DefaultFormatter()) + ")";
     }
 }

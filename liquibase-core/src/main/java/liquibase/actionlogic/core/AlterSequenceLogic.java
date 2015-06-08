@@ -12,10 +12,11 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.util.ObjectUtil;
 
 import java.math.BigInteger;
 
-public class AlterSequenceLogic extends AbstractSqlBuilderLogic {
+public class AlterSequenceLogic extends AbstractSqlBuilderLogic<AlterSequenceAction> {
 
     public static enum Clauses {
         incrementBy,
@@ -24,45 +25,45 @@ public class AlterSequenceLogic extends AbstractSqlBuilderLogic {
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AlterSequenceAction> getSupportedAction() {
         return AlterSequenceAction.class;
     }
 
     @Override
     protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class).supportsSequences();
+        return super.supportsScope(scope) && scope.getDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AlterSequenceAction action, Scope scope) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkForRequiredField(AlterSequenceAction.Attr.sequenceName, action);
+        validationErrors.checkForRequiredField("sequenceName", action);
 
         return validationErrors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AlterSequenceAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new RedefineSequenceAction(
-                action.get(AlterSequenceAction.Attr.sequenceName, ObjectName.class),
+                action.sequenceName,
                 generateSql(action, scope)));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(AlterSequenceAction action, Scope scope) {
         StringClauses clauses = new StringClauses();
 
-        BigInteger incrementBy = action.get(AlterSequenceAction.Attr.incrementBy, BigInteger.class);
-        BigInteger minValue = action.get(AlterSequenceAction.Attr.minValue, BigInteger.class);
-        BigInteger maxValue = action.get(AlterSequenceAction.Attr.maxValue, BigInteger.class);
-        boolean ordered = action.get(AlterSequenceAction.Attr.ordered, false);
+        BigInteger incrementBy = action.incrementBy;
+        BigInteger minValue = action.minValue;
+        BigInteger maxValue = action.maxValue;
+        boolean ordered = ObjectUtil.defaultIfEmpty(action.ordered, false);
 
         if (incrementBy != null) {
-                clauses.append(Clauses.incrementBy, "INCREMENT BY " + incrementBy);
+            clauses.append(Clauses.incrementBy, "INCREMENT BY " + incrementBy);
         }
 
         if (minValue != null) {
-            clauses.append(Clauses.minValue, "RESTART WITH "+minValue);
+            clauses.append(Clauses.minValue, "RESTART WITH " + minValue);
         }
 
         if (maxValue != null) {

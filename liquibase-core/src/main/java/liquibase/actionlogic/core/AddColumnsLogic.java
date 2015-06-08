@@ -13,6 +13,8 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.CollectionUtil;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -22,30 +24,30 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AddColumnsLogic extends AbstractActionLogic {
+public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
     public static enum Clauses {
         nullable,
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AddColumnsAction> getSupportedAction() {
         return AddColumnsAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AddColumnsAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope)
-                .checkForRequiredField(AddColumnsAction.Attr.columnDefinitions, action);
+                .checkForRequiredField("columnDefinitions", action);
 
         if (errors.hasErrors()) {
             return errors;
         }
-        List<ColumnDefinition> columns = action.get(AddColumnsAction.Attr.columnDefinitions, List.class);
+        List<ColumnDefinition> columns = action.columnDefinitions;
 
         for (ColumnDefinition column : columns) {
-            errors.checkForRequiredField(ColumnDefinition.Attr.columnName, column)
-                    .checkForRequiredField(ColumnDefinition.Attr.columnType, column);
+            errors.checkForRequiredField("columnName", column)
+                    .checkForRequiredField("columnType", column);
         }
 
 
@@ -76,9 +78,9 @@ public class AddColumnsLogic extends AbstractActionLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddColumnsAction action, Scope scope) throws ActionPerformException {
         List<Action> actions = new ArrayList<>();
-        List<ColumnDefinition> columns = action.get(AddColumnsAction.Attr.columnDefinitions, List.class);
+        List<ColumnDefinition> columns = action.columnDefinitions;
 
         for (ColumnDefinition column : columns) {
             actions.addAll(Arrays.asList(execute(column, action, scope)));
@@ -90,10 +92,10 @@ public class AddColumnsLogic extends AbstractActionLogic {
         return new DelegateResult(actions.toArray(new Action[actions.size()]));
     }
 
-    protected Action[] execute(ColumnDefinition column, Action action, Scope scope) {
+    protected Action[] execute(ColumnDefinition column, AddColumnsAction action, Scope scope) {
         List<Action> returnActions = new ArrayList<>();
         returnActions.add(new AlterTableAction(
-                action.get(AddColumnsAction.Attr.tableName, ObjectName.class),
+                action.tableName,
                 getColumnDefinitionClauses(column, action, scope)
         ));
 
@@ -101,23 +103,23 @@ public class AddColumnsLogic extends AbstractActionLogic {
         return returnActions.toArray(new Action[returnActions.size()]);
     }
 
-    protected StringClauses getColumnDefinitionClauses(ColumnDefinition column, Action action, Scope scope) {
+    protected StringClauses getColumnDefinitionClauses(ColumnDefinition column, AddColumnsAction action, Scope scope) {
         StringClauses clauses = new StringClauses();
-        Database database = scope.get(Scope.Attr.database, Database.class);
+        Database database = scope.getDatabase();
 
-        String columnName = column.get(ColumnDefinition.Attr.columnName, String.class);
-        String columnType = column.get(ColumnDefinition.Attr.columnType, String.class);
-        AutoIncrementDefinition autoIncrement = column.get(ColumnDefinition.Attr.autoIncrementDefinition, AutoIncrementDefinition.class);
-        boolean primaryKey = column.get(ColumnDefinition.Attr.isPrimaryKey, false);
-        boolean nullable = primaryKey || column.get(ColumnDefinition.Attr.isNullable, false);
-        String addAfterColumn = column.get(ColumnDefinition.Attr.addAfterColumn, String.class);
+        ObjectName columnName = column.columnName;
+        String columnType = column.columnType;
+        AutoIncrementDefinition autoIncrement = column.autoIncrementDefinition;
+        boolean primaryKey = ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false);
+        boolean nullable = primaryKey || ObjectUtil.defaultIfEmpty(column.isNullable, false);
+        String addAfterColumn = column.addAfterColumn;
 
         clauses.append("ADD " + database.escapeObjectName(columnName, Column.class) + " " + DataTypeFactory.getInstance().fromDescription(columnType + (autoIncrement == null ? "" : "{autoIncrement:true}"), database).toDatabaseDataType(database));
 
         clauses.append(getDefaultValueClause(column, action, scope));
 
         if (autoIncrement != null && database.supportsAutoIncrement()) {
-            clauses.append(database.getAutoIncrementClause(autoIncrement.get(AutoIncrementDefinition.Attr.startWith, BigInteger.class), autoIncrement.get(AutoIncrementDefinition.Attr.incrementBy, BigInteger.class)));
+            clauses.append(database.getAutoIncrementClause(autoIncrement.startWith, autoIncrement.incrementBy));
         }
 
         if (nullable) {
@@ -143,51 +145,51 @@ public class AddColumnsLogic extends AbstractActionLogic {
         return clauses;
     }
 
-    protected void addUniqueConstraintActions(Action action, Scope scope, List<Action> returnActions) {
-        UniqueConstraintDefinition[] constraints = action.get(AddColumnsAction.Attr.uniqueConstraintDefinitions, new UniqueConstraintDefinition[0]);
+    protected void addUniqueConstraintActions(AddColumnsAction action, Scope scope, List<Action> returnActions) {
+        List<UniqueConstraintDefinition> constraints = CollectionUtil.createIfNull(action.uniqueConstraintDefinitions);
         for (UniqueConstraintDefinition def : constraints) {
-            ObjectName tableName = action.get(AddColumnsAction.Attr.tableName, ObjectName.class);
-            String[] columnNames = def.get(UniqueConstraintDefinition.Attr.columnNames, String[].class);
-            String constraintName = def.get(UniqueConstraintDefinition.Attr.constraintName, String.class);
+            ObjectName tableName = action.tableName;
+            List<String> columnNames = def.columnNames;
+            String constraintName = def.constraintName;
 
 
             returnActions.add(new AddUniqueConstraintAction(tableName, constraintName, columnNames));
         }
     }
 
-    protected void addForeignKeyStatements(Action action, Scope scope, List<Action> returnActions) {
-        ForeignKeyDefinition[] constraints = action.get(AddColumnsAction.Attr.foreignKeyDefinitions, new ForeignKeyDefinition[0]);
+    protected void addForeignKeyStatements(AddColumnsAction action, Scope scope, List<Action> returnActions) {
+        List<ForeignKeyDefinition> constraints = CollectionUtil.createIfNull(action.foreignKeyDefinitions);
 
         for (ForeignKeyDefinition fkConstraint : constraints) {
             ObjectName refTableName;
             String refColName;
-            ObjectName baseTableName = action.get(AddColumnsAction.Attr.tableName, ObjectName.class);
-            String[] baseColumnNames = fkConstraint.get(ForeignKeyDefinition.Attr.columnNames, String[].class);
+            ObjectName baseTableName = action.tableName;
+            List<String> baseColumnNames = fkConstraint.columnNames;
 
 
-            String foreignKeyName = fkConstraint.get(ForeignKeyDefinition.Attr.foreignKeyName, String.class);
-            String references = fkConstraint.get(ForeignKeyDefinition.Attr.references, String.class);
+            String foreignKeyName = fkConstraint.foreignKeyName;
+            StringClauses references = fkConstraint.references;
 
             if (references != null) {
-                Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(references);
+                Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(references.toString());
                 if (!referencesMatcher.matches()) {
                     throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " +references);
                 }
                 refTableName = ObjectName.parse(referencesMatcher.group(1));
                 refColName = referencesMatcher.group(2);
             } else {
-                refTableName = fkConstraint.get(ForeignKeyDefinition.Attr.referencedTableName, ObjectName.class);
-                refColName =  fkConstraint.get(ForeignKeyDefinition.Attr.referencedColumnNames, String.class);
+                refTableName = fkConstraint.referencedTableName;
+                refColName =  StringUtils.join(fkConstraint.referencedColumnNames, ", ");
             }
 
             List<String> refColumns = StringUtils.splitAndTrim(refColName, ",");
-            returnActions.add(new AddForeignKeyConstraintAction(foreignKeyName, baseTableName, baseColumnNames, refTableName, refColumns.toArray(new String[refColumns.size()])));
+            returnActions.add(new AddForeignKeyConstraintAction(foreignKeyName, baseTableName, StringUtils.join(baseColumnNames, ", "), refTableName, StringUtils.join(refColumns, ", ")));
         }
     }
 
-    protected String getDefaultValueClause(ColumnDefinition column, Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        Object defaultValue = column.get(ColumnDefinition.Attr.defaultValue, Object.class);
+    protected String getDefaultValueClause(ColumnDefinition column, AddColumnsAction action, Scope scope) {
+        Database database = scope.getDatabase();
+        Object defaultValue = column.defaultValue;
         if (defaultValue != null) {
             return "DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
         }

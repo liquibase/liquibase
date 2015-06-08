@@ -1,11 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class ClearDatabaseChangeLogHistoryAction extends AbstractAction {
 
-    public static enum Attr {
-        catalogName,
-        schemaName,
-    }
+        public ObjectName container;
 }

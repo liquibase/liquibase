@@ -13,25 +13,24 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 
-public class DropIndexLogic extends AbstractActionLogic {
+public class DropIndexLogic extends AbstractActionLogic<DropIndexAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropIndexAction> getSupportedAction() {
         return DropIndexAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropIndexAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropIndexAction.Attr.indexName, action);
+                .checkForRequiredField("indexName", action);
     }
 
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        return new DelegateResult(new ExecuteSqlAction("DROP INDEX " + database.escapeObjectName(
-                action.get(DropIndexAction.Attr.indexName, ObjectName.class), Index.class)));
+    public ActionResult execute(DropIndexAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
+        return new DelegateResult(new ExecuteSqlAction("DROP INDEX " + database.escapeObjectName(action.indexName, Index.class)));
     }
 
 }

@@ -82,7 +82,7 @@ public class DropDefaultValueChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         try {
             Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
-            return new ChangeStatus().assertComplete(snapshot.getDefaultValue() == null, "Column has a default value");
+            return new ChangeStatus().assertComplete(snapshot.defaultValue == null, "Column has a default value");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

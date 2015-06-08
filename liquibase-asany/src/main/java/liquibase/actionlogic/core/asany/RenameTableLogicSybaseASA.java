@@ -1,7 +1,7 @@
 package liquibase.actionlogic.core.asany;
 
 import liquibase.Scope;
-import liquibase.action.Action;
+import liquibase.action.core.RenameTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameTableLogic;
 import liquibase.database.Database;
@@ -14,7 +14,7 @@ public class RenameTableLogicSybaseASA extends RenameTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(RenameTableAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .replace("RENAME TO", "RENAME");
     }

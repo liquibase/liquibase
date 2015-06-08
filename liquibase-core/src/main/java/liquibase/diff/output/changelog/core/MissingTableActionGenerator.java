@@ -49,48 +49,48 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
     public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Scope referenceScope, Scope targetScope) {
         Table missingTable = (Table) missingObject;
 
-        PrimaryKey primaryKey = missingTable.getPrimaryKey();
+        PrimaryKey primaryKey = missingTable.primaryKey;
 
 //        if (control.diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema().toCatalogAndSchema(), missingTable.getName())) {
 //            continue;
 //        }
 
         CreateTableAction action = createCreateTableChange();
-        action.set(CreateTableAction.Attr.tableName, missingTable.getName());
-        action.set(CreateTableAction.Attr.remarks, missingTable.getRemarks());
+        action.tableName = missingTable.getName();
+        action.remarks = missingTable.getRemarks();
 
         for (Column column : missingTable.getColumns()) {
             ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.set(ColumnDefinition.Attr.columnName, column.getSimpleName());
+            columnDefinition.columnName = column.getName();
 
-            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), targetScope.getDatabase());
+            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.type, targetScope.getDatabase());
             DatabaseDataType ddt = ldt.toDatabaseDataType(referenceScope.getDatabase());
-            columnDefinition.set(ColumnDefinition.Attr.columnType, ddt.toString());
+            columnDefinition.columnType = ddt.toString();
 
             if (column.isAutoIncrement()) {
-                columnDefinition.set(ColumnDefinition.Attr.autoIncrementDefinition, new AutoIncrementDefinition());
+                columnDefinition.autoIncrementDefinition = new AutoIncrementDefinition();
             }
 
             // In MySQL, the primary key must be specified at creation for an autoincrement column
             if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumnNamesAsList().contains(column.getName())) {
-                columnDefinition.set(ColumnDefinition.Attr.isPrimaryKey, true);
-                action.set(CreateTableAction.Attr.primaryKeyTablespace, primaryKey.getTablespace());
+                columnDefinition.isPrimaryKey = true;
+                action.primaryKeyTablespace = primaryKey.getTablespace();
 //todo:         action refactoring MySQL sets some primary key names as PRIMARY which is invalid
 //                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
 //                    constraintsConfig.setPrimaryKeyName(null);
 //                } else  {
-                    action.set(CreateTableAction.Attr.primaryKeyName, primaryKey.getSimpleName());
+                    action.primaryKeyName = primaryKey.getSimpleName();
 //                }
                 control.setAlreadyHandledMissing(primaryKey);
                 control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
-            } else if (column.isNullable() != null && !column.isNullable()) {
-                columnDefinition.set(ColumnDefinition.Attr.isNullable, false);
+            } else if (column.nullable != null && !column.nullable) {
+                columnDefinition.isNullable = false;
             }
 
             setDefaultValue(columnDefinition, column, referenceScope, targetScope);
 
-            if (column.getRemarks() != null) {
-                columnDefinition.set(ColumnDefinition.Attr.remarks, column.getRemarks());
+            if (column.remarks != null) {
+                columnDefinition.remarks = column.remarks;
             }
 
             action.addColumn(columnDefinition);
@@ -102,9 +102,9 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
     }
 
     public static void setDefaultValue(ColumnDefinition columnDefinition, Column column, Scope referenceScope, Scope targetScope) {
-        LiquibaseDataType dataType = DataTypeFactory.getInstance().from(column.getType(), targetScope.getDatabase());
+        LiquibaseDataType dataType = DataTypeFactory.getInstance().from(column.type, targetScope.getDatabase());
 
-        Object defaultValue = column.getDefaultValue();
+        Object defaultValue = column.defaultValue;
 //todo: action refactoring        if (defaultValue == null) {
 //            // do nothing
 //        } else if (column.isAutoIncrement()) {

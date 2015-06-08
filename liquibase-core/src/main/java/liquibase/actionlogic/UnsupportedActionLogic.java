@@ -10,7 +10,7 @@ public abstract class UnsupportedActionLogic extends AbstractActionLogic {
 
     @Override
     public ValidationErrors validate(Action action, Scope scope) {
-        return new ValidationErrors().addUnsupportedError(action.getClass().getSimpleName(), scope.get(Scope.Attr.database, Database.class).getShortName());
+        return new ValidationErrors().addUnsupportedError(action.getClass().getSimpleName(), scope.getDatabase().getShortName());
     }
 
     @Override
@@ -26,7 +26,7 @@ public abstract class UnsupportedActionLogic extends AbstractActionLogic {
 
     @Override
     protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && getUnsupportedDatabase().isAssignableFrom(scope.get(Scope.Attr.database, Database.class).getClass());
+        return super.supportsScope(scope) && getUnsupportedDatabase().isAssignableFrom(scope.getDatabase().getClass());
     }
 
     @Override

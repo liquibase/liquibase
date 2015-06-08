@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.hsql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.RenameColumnAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
@@ -14,7 +15,7 @@ public class RenameColumnLogicHsql extends RenameColumnLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(RenameColumnAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .replace("RENAME COLUMN", "ALTER COLUMN")
                 .replace("TO", "RENAME TO");

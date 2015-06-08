@@ -1,6 +1,7 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
+import liquibase.action.AbstractAction;
 import liquibase.action.Action;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.*;
@@ -18,29 +19,27 @@ import java.util.List;
  * Implementations should not directly execute the metadata read, but instead return a {@link liquibase.actionlogic.DelegateResult} that returns simple lower-level actions.
  * This pattern is built into this methods {@link #execute(liquibase.action.Action, liquibase.Scope)} method.
  */
-public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActionLogic {
+public abstract class AbstractSnapshotDatabaseObjectsLogic<T extends SnapshotDatabaseObjectsAction> extends AbstractActionLogic<T> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
-        return SnapshotDatabaseObjectsAction.class;
+    protected Class<T> getSupportedAction() {
+        return (Class<T>) SnapshotDatabaseObjectsAction.class;
     }
 
     @Override
-    public int getPriority(Action action, Scope scope) {
+    public int getPriority(T action, Scope scope) {
         int priority = super.getPriority(action, scope);
         if (priority == PRIORITY_NOT_APPLICABLE) {
             return priority;
         }
 
-        DatabaseObject relatedTo = action.get(SnapshotDatabaseObjectsAction.Attr.relatedTo, DatabaseObject.class);
-        Class typeToSnapshot = action.get(SnapshotDatabaseObjectsAction.Attr.typeToSnapshot, Class.class);
-        if (relatedTo == null || typeToSnapshot == null) {
+        if (action.relatedTo == null || action.typeToSnapshot == null) {
             return PRIORITY_NOT_APPLICABLE;
         }
 
-        if (typeToSnapshot.isAssignableFrom(getTypeToSnapshot())) {
+        if (action.typeToSnapshot.isAssignableFrom(getTypeToSnapshot())) {
             for (Class clazz : getSupportedRelatedTypes()) {
-                if (clazz.isAssignableFrom(relatedTo.getClass())) {
+                if (clazz.isAssignableFrom(action.relatedTo.getClass())) {
                     return priority;
                 }
             }
@@ -56,16 +55,16 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
     abstract protected Class <? extends DatabaseObject> getTypeToSnapshot();
 
     /**
-     * Return the type(s) of {@link liquibase.action.core.SnapshotDatabaseObjectsAction.Attr#relatedTo} objects this implementation supports.
+     * Return the type(s) of {@link liquibase.action.core.SnapshotDatabaseObjectsAction#relatedTo} objects this implementation supports.
      * Used in {@link #getPriority(liquibase.action.Action, liquibase.Scope)}.
      */
     abstract protected Class<? extends DatabaseObject>[] getSupportedRelatedTypes();
 
     /**
-     * Default implementation returns a {@link liquibase.actionlogic.DelegateResult} based on {@link #createSnapshotAction(liquibase.action.Action, liquibase.Scope)}  and {@link #createModifier(liquibase.action.Action, liquibase.Scope)}.
+     * Default implementation returns a {@link liquibase.actionlogic.DelegateResult} based on {@link #createSnapshotAction(T, liquibase.Scope)}  and {@link #createModifier(T, liquibase.Scope)}.
      */
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(T action, Scope scope) throws ActionPerformException {
         try {
             return new DelegateResult(createModifier(action, scope), createSnapshotAction(action, scope));
         } catch (DatabaseException e) {
@@ -76,26 +75,26 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
 
     /**
      * Return a lower-level action that will snapshot given type of objects that are related to the given object.
-     * The QueryResult from the Action returned by this method will be fed through the object returned by {@link #createModifier(liquibase.action.Action, liquibase.Scope)}.
+     * The QueryResult from the Action returned by this method will be fed through the object returned by {@link #createModifier(T, liquibase.Scope)}.
      */
-    protected abstract Action createSnapshotAction(Action action, Scope scope) throws DatabaseException, ActionPerformException;
+    protected abstract Action createSnapshotAction(T action, Scope scope) throws DatabaseException, ActionPerformException;
 
     /**
-     * Returns a {@link liquibase.actionlogic.ActionResult.Modifier} that will convert the raw results from the action returned by {@link #createSnapshotAction(liquibase.action.Action, liquibase.Scope)}
+     * Returns a {@link liquibase.actionlogic.ActionResult.Modifier} that will convert the raw results from the action returned by {@link #createSnapshotAction(T, liquibase.Scope)}
      * to a list of objects.
-     * Default implementation returns {@link liquibase.actionlogic.core.AbstractSnapshotDatabaseObjectsLogic.SnapshotModifier} which uses {@link #convertToObject(liquibase.actionlogic.RowBasedQueryResult.Row, liquibase.action.Action, liquibase.Scope)}
+     * Default implementation returns {@link liquibase.actionlogic.core.AbstractSnapshotDatabaseObjectsLogic.SnapshotModifier} which uses {@link #convertToObject(liquibase.actionlogic.RowBasedQueryResult.Row, T, liquibase.Scope)}
      * to convert the returned QueryResult to the correct DatabaseObject.
      *
-     * The passed action is the original action, not the one returned by {@link #createSnapshotAction(liquibase.action.Action, liquibase.Scope)}
+     * The passed action is the original action, not the one returned by {@link #createSnapshotAction(T, liquibase.Scope)}
      */
-    protected ActionResult.Modifier createModifier(final Action originalAction, final Scope scope) {
+    protected ActionResult.Modifier createModifier(T originalAction, final Scope scope) {
         return new SnapshotModifier(originalAction, scope);
     }
 
     /**
      * Converts a row returned by the generated action into the final object type.
      */
-    protected abstract DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) throws ActionPerformException;
+    protected abstract DatabaseObject convertToObject(RowBasedQueryResult.Row row, T originalAction, Scope scope) throws ActionPerformException;
 
     /**
      * Called for each DatabaseObject in {@link SnapshotModifier#rewrite(liquibase.actionlogic.ActionResult)} to "fix" any raw data coming back from the database.
@@ -104,25 +103,25 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic extends AbstractActio
     protected void correctObject(DatabaseObject object) {
         ObjectName name = object.getName();
         while (name != null) {
-            name.set(ObjectName.Attr.name, StringUtils.trimToNull(name.get(ObjectName.Attr.name, String.class)));
-            name = name.get(ObjectName.Attr.container, ObjectName.class);
+            name.name = StringUtils.trimToNull(name.name);
+            name = name.container;
         }
     }
 
     /**
-     * Class used by default {@link #createModifier(liquibase.action.Action, liquibase.Scope)} implementation.
+     * Class used by default {@link #createModifier(T, liquibase.Scope)} implementation.
      */
     protected class SnapshotModifier implements ActionResult.Modifier {
 
-        private Action originalAction;
+        private T originalAction;
         private Scope scope;
 
-        public SnapshotModifier(Action originalAction, Scope scope) {
+        public SnapshotModifier(T originalAction, Scope scope) {
             this.originalAction = originalAction;
             this.scope = scope;
         }
 
-        public Action getOriginalAction() {
+        public T getOriginalAction() {
             return originalAction;
         }
 

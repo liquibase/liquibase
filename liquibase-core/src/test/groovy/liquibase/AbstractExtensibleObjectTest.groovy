@@ -2,15 +2,19 @@ package liquibase
 
 import liquibase.action.core.AddAutoIncrementAction
 import liquibase.action.core.DropTableAction
+import liquibase.structure.ObjectName
+import liquibase.structure.core.Column
+import liquibase.structure.core.Table
 import spock.lang.Specification
 import static org.hamcrest.Matchers.containsInAnyOrder
+import static spock.util.matcher.HamcrestSupport.expect
 import static spock.util.matcher.HamcrestSupport.that
 
 class AbstractExtensibleObjectTest extends Specification {
 
     def "add works"() {
         given:
-        def obj = new AbstractExtensibleObject() { }
+        def obj = new AbstractExtensibleObject() {}
         obj.set("wasObj", "Value 1a")
         obj.set("wasEmpty", [])
 
@@ -25,31 +29,92 @@ class AbstractExtensibleObjectTest extends Specification {
         obj.add("wasNull", "Value 3c")
 
         then:
-        obj.get("wasObj", Collection) == ["Value 1a", "Value 1b", "Value 1c", ]
-        obj.get("wasEmpty", Collection) == ["Value 2a", "Value 2b", "Value 2c", ]
-        obj.get("wasNull", Collection) == ["Value 3a", "Value 3b", "Value 3c", ]
+        obj.get("wasObj", Collection) == ["Value 1a", "Value 1b", "Value 1c",]
+        obj.get("wasEmpty", Collection) == ["Value 2a", "Value 2b", "Value 2c",]
+        obj.get("wasNull", Collection) == ["Value 3a", "Value 3b", "Value 3c",]
 
     }
 
     def "getStandardAttributeNames"() {
         expect:
-        that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["catalogName", "schemaName", "startWith", "tableName", "columnDataType", "columnName", "incrementBy"] as String[])
-        that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["catalogName", "schemaName", "startWith", "tableName", "columnDataType", "columnName", "incrementBy"] as String[]) //caching works
+        that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["startWith", "columnDataType", "columnName", "incrementBy"] as String[])
+        that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["startWith", "columnDataType", "columnName", "incrementBy"] as String[]) //caching works
 
         that new DropTableAction().getStandardAttributeNames(), containsInAnyOrder(["tableName", "cascadeConstraints"] as String[])
 
         (new AbstractExtensibleObject() {}).getStandardAttributeNames().size() == 0
     }
 
-    def "getExpectedAttributeType"() {
-        expect:
-        new AddAutoIncrementAction().getExpectedAttributeType("catalogName") == String
-        new AddAutoIncrementAction().getExpectedAttributeType("schemaName") == String
-        new AddAutoIncrementAction().getExpectedAttributeType("startWith") == BigInteger
-        new AddAutoIncrementAction().getExpectedAttributeType("fakeAttr") == null
+    def "get/set works with non-field values"() {
+        when:
+        def obj = new AbstractExtensibleObject() {};
+        obj.set("value1", "One")
+        obj.set("value2", "Two")
+        obj.set("value3", 3)
+        obj.set("valueNull", null)
 
-        new DropTableAction().getExpectedAttributeType("tableName") == null
+        then:
+        obj.get("value1", String) == "One"
+        obj.get("value2", String) == "Two"
+        obj.get("value3", String) == "3"
+        obj.get("value3", Integer) == 3
+        obj.get("valueNull", Integer) == null
+        obj.get("valueUndefined", Integer) == null
+    }
 
-        (new AbstractExtensibleObject() {}).getExpectedAttributeType("whatever") == null
+    def "get/set works with field values"() {
+        when:
+        def obj = new AddAutoIncrementAction();
+        obj.set("value1", "One")
+        obj.set("value2", 2)
+        obj.set("startWith", 12)
+        obj.incrementBy = new BigInteger(32)
+
+        then:
+        obj.get("value1", String) == "One"
+        obj.get("value2", String) == "2"
+        obj.get("value2", Integer) == 2
+
+        obj.get("startWith", Integer) == 12
+        obj.get("startWith", String) == "12"
+        obj.startWith == new BigInteger("12")
+        assert obj.has("startWith")
+
+        obj.get("incrementBy", Integer) == 32
+        obj.get("incrementBy", String) == "32"
+        obj.incrementBy == new BigInteger("32")
+        assert obj.has("incrementBy")
+
+        obj.columnDataType == null;
+        obj.get("columnDataType", String) == null
+        assert !obj.has("columnDataType")
+    }
+
+    def "get/set works with field values on parent objects"() {
+        when:
+        def obj = new Table();
+        obj.set("value1", "One")
+        obj.set("value2", 2)
+        obj.columns = [new Column("a"), new Column("b")]
+        obj.name = new ObjectName("testTable")
+
+        then:
+        obj.get("value2", String) == "2"
+        obj.columns*.toString() == ["a", "b"]
+        obj.get("columns", List)*.toString() == ["a", "b"]
+        obj.name.toString() == "testTable"
+        obj.get("name", ObjectName).toString() == "testTable"
+
+        when:
+        obj.set("columns", [new Column("x"), new Column("y")])
+        obj.set("name", new ObjectName("newTableName"))
+
+        then:
+        obj.get("value2", String) == "2"
+        obj.columns*.toString() == ["x", "y"]
+        obj.get("columns", List)*.toString() == ["x", "y"]
+        obj.name.toString() == "newTableName"
+        obj.get("name", ObjectName).toString() == "newTableName"
+
     }
 }

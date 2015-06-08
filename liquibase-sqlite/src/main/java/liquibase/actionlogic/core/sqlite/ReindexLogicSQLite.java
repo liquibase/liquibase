@@ -14,7 +14,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
-public class ReindexLogicSQLite extends AbstractActionLogic {
+public class ReindexLogicSQLite extends AbstractActionLogic<ReindexAction> {
 
     @Override
     protected Class<? extends Database> getRequiredDatabase() {
@@ -22,22 +22,22 @@ public class ReindexLogicSQLite extends AbstractActionLogic {
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<ReindexAction> getSupportedAction() {
         return ReindexAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(ReindexAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(ReindexAction.Attr.tableName, action);
+                .checkForRequiredField("tableName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(ReindexAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
         return new DelegateResult(new ExecuteSqlAction(
                 "REINDEX "
-                        + database.escapeObjectName(action.get(ReindexAction.Attr.tableName, ObjectName.class), Table.class)));
+                        + database.escapeObjectName(action.tableName, Table.class)));
     }
 }

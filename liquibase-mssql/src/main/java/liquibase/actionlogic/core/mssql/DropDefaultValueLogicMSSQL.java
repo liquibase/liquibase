@@ -20,12 +20,12 @@ public class DropDefaultValueLogicMSSQL extends DropDefaultValueLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        String escapedTableName = database.escapeObjectName(action.get(DropDefaultValueAction.Attr.columnName, ObjectName.class).getContainer(), Table.class);
+    public ActionResult execute(DropDefaultValueAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
+        String escapedTableName = database.escapeObjectName(action.columnName.container, Table.class);
 
         return new DelegateResult(new ExecuteSqlAction("DECLARE @default sysname\n"
-                + "SELECT @default = object_name(default_object_id) FROM sys.columns WHERE object_id=object_id('" + escapedTableName + "') AND name='" + action.get(DropDefaultValueAction.Attr.columnName, String.class) + "'\n"
+                + "SELECT @default = object_name(default_object_id) FROM sys.columns WHERE object_id=object_id('" + escapedTableName + "') AND name='" + action.columnName + "'\n"
                 + "EXEC ('ALTER TABLE " + escapedTableName + " DROP CONSTRAINT ' + @default)"));
     }
 }

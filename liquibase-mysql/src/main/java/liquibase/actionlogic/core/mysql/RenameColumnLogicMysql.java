@@ -17,21 +17,21 @@ public class RenameColumnLogicMysql extends RenameColumnLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(RenameColumnAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(RenameColumnAction.Attr.columnDataType, action);
+                .checkForRequiredField("columnDataType", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(RenameColumnAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         StringClauses clauses = super.generateSql(action, scope)
                 .replace("RENAME COLUMN", "CHANGE")
                 .remove("TO")
-                .append(DataTypeFactory.getInstance().fromDescription(action.get(RenameColumnAction.Attr.columnDataType, String.class), database).toDatabaseDataType(database).toSql());
+                .append(DataTypeFactory.getInstance().fromDescription(action.columnDataType, database).toDatabaseDataType(database).toSql());
 
-        String remarks = action.get(RenameColumnAction.Attr.remarks, String.class);
+        String remarks = action.remarks;
         if (remarks != null) {
             clauses.append("COMMENT '" + database.escapeStringForDatabase(remarks) + "'");
         }

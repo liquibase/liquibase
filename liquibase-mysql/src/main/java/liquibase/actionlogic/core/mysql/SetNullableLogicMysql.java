@@ -18,15 +18,15 @@ public class SetNullableLogicMysql extends SetNullableLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(SetNullableAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SetNullableAction.Attr.columnDataType, action);
+                .checkForRequiredField("columnDataType", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(SetNullableAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return super.generateSql(action, scope)
-                .prepend(DataTypeFactory.getInstance().fromDescription(action.get(SetNullableAction.Attr.columnDataType, String.class), database).toDatabaseDataType(database).toSql());
+                .prepend(DataTypeFactory.getInstance().fromDescription(action.columnDataType, database).toDatabaseDataType(database).toSql());
     }
 }

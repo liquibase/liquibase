@@ -22,6 +22,8 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     private String snapshotId;
 
+    public ObjectName name;
+
     @Override
     public String getObjectTypeName() {
         return StringUtils.lowerCaseFirst(getClass().getSimpleName());
@@ -43,23 +45,23 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
         if (name == null) {
             return null;
         } else {
-            return name.getName();
+            return name.name;
         }
     }
 
     public ObjectName getName() {
-        return get(Attr.name, ObjectName.class);
+        return name;
     }
 
     @Override
     public <T> T setName(String name) {
-        set(Attr.name, new ObjectName(name));
+        this.name = new ObjectName(name);
         return (T) this;
     }
 
     @Override
     public <T> T setName(ObjectName name) {
-        set(ObjectName.Attr.name, name);
+        this.name = name;
 
         return (T) this;
     }

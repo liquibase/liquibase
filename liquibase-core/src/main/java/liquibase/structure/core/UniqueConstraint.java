@@ -66,7 +66,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         set("columns", columns);
 		if (get("table", Object.class) instanceof Table) {
 			for (Column column : getColumns()) {
-				column.setRelation(getTable());
+				column.relation = getTable();
 			}
 		}
         return this;

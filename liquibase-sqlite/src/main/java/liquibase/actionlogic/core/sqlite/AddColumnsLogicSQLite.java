@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.sqlite;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.AddColumnsAction;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.database.Database;
@@ -23,7 +24,7 @@ public class AddColumnsLogicSQLite extends AddColumnsLogic {
 
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddColumnsAction action, Scope scope) throws ActionPerformException {
 //        // SQLite does not support this ALTER TABLE operation until now.
 //        // For more information see: http://www.sqlite.org/omitted.html.
 //        // This is a small work around...

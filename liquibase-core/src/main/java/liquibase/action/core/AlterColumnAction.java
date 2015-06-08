@@ -5,17 +5,15 @@ import liquibase.structure.ObjectName;
 
 public class AlterColumnAction extends AbstractAction {
 
-    public static enum Attr {
-        columnName,
-        newDefinition
-    }
+    public ObjectName columnName;
+    public StringClauses newDefinition;
 
     public AlterColumnAction() {
     }
 
     public AlterColumnAction(ObjectName columnName, StringClauses newDefinition) {
-        set(Attr.columnName, columnName);
-        set(Attr.newDefinition, newDefinition);
+        this.columnName = columnName;
+        this.newDefinition = newDefinition;
     }
 
 }

@@ -13,41 +13,43 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
+import liquibase.util.CollectionUtil;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectDataLogic extends AbstractSqlBuilderLogic {
+public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<SelectDataAction> getSupportedAction() {
         return SelectDataAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(SelectDataAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SelectDataAction.Attr.tableName, action)
-                .checkForRequiredField(SelectDataAction.Attr.selectColumnDefinitions, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("selectColumnDefinitions", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(SelectDataAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new QuerySqlAction(generateSql(action, scope).toString()));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        final Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(SelectDataAction action, Scope scope) {
+        final Database database = scope.getDatabase();
 
         StringClauses clauses = new StringClauses()
         .append("SELECT")
-                        .append(StringUtils.join(action.get(SelectDataAction.Attr.selectColumnDefinitions, new ArrayList<ColumnDefinition>()), ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
+                        .append(StringUtils.join(CollectionUtil.createIfNull(action.selectColumnDefinitions), ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
                     @Override
                     public String toString(ColumnDefinition column) {
-                        String columnName = column.get(ColumnDefinition.Attr.columnName, String.class);
-                        if (column.get(ColumnDefinition.Attr.computed, false)) {
+                        String columnName = column.columnName.name;
+                        if (ObjectUtil.defaultIfEmpty(column.computed, false)) {
                             return columnName;
                         } else {
                             return database.escapeObjectName(columnName, Column.class);
@@ -57,12 +59,12 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic {
                    .append("FROM")
                         .append(database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
 
-        String whereClause = action.get(SelectDataAction.Attr.where, String.class);
+        StringClauses whereClause = action.where;
         if (whereClause != null) {
-            clauses.append("WHERE").append(whereClause);
+            clauses.append("WHERE").append(whereClause.toString());
         }
 
-        List<String> orderByColumns = action.get(SelectDataAction.Attr.orderByColumnNames, new ArrayList<String>());
+        List<String> orderByColumns = CollectionUtil.createIfNull(action.orderByColumnNames);
         if (orderByColumns.size() > 0) {
             clauses.append("ORDER BY").append(StringUtils.join(orderByColumns, ", "));
         }

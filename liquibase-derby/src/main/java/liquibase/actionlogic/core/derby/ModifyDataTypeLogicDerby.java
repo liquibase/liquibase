@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.derby;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.ModifyDataTypeAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.ModifyDataTypeLogic;
 import liquibase.database.Database;
@@ -14,7 +15,7 @@ public class ModifyDataTypeLogicDerby extends ModifyDataTypeLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(ModifyDataTypeAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .prepend("SET DATA TYPE");
     }

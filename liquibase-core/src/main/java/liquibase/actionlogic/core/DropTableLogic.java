@@ -18,35 +18,36 @@ import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+import liquibase.util.ObjectUtil;
 
-public class DropTableLogic extends AbstractSqlBuilderLogic {
+public class DropTableLogic extends AbstractSqlBuilderLogic<DropTableAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropTableAction> getSupportedAction() {
         return DropTableAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ValidationErrors validate(DropTableAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         ValidationErrors errors = super.validate(action, scope)
-                .checkForRequiredField(DropTableAction.Attr.tableName, action);
+                .checkForRequiredField("tableName", action);
 
-        if (action.get(DropTableAction.Attr.cascadeConstraints, false) && !database.supportsDropTableCascadeConstraints()) {
+        if (ObjectUtil.defaultIfEmpty(action.cascadeConstraints, false) && !database.supportsDropTableCascadeConstraints()) {
             errors.addWarning("Database does not support drop with cascade");
         }
         return errors;
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DropTableAction action, Scope scope) {
+        Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses()
                 .append("DROP TABLE")
-                .append(database.getQualifiedName(action.get(DropTableAction.Attr.tableName, ObjectName.class), Table.class));
+                .append(database.getQualifiedName(action.tableName, Table.class));
 
-        if (action.get(DropTableAction.Attr.cascadeConstraints, false) && database.supportsDropTableCascadeConstraints()) {
+        if (ObjectUtil.defaultIfEmpty(action.cascadeConstraints, false) && database.supportsDropTableCascadeConstraints()) {
             clauses.append("CASCADE");
         }
         return clauses;

@@ -14,6 +14,7 @@ import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -26,15 +27,15 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(CreateTableAction action, Scope scope) throws ActionPerformException {
         DelegateResult result = (DelegateResult) super.execute(action, scope);
 
-        for (ColumnDefinition column : action.get(CreateTableAction.Attr.columnDefinitions, new ArrayList<ColumnDefinition>())) {
-            String columnRemarks = column.get(ColumnDefinition.Attr.remarks, String.class);
+        for (ColumnDefinition column : CollectionUtil.createIfNull(action.columnDefinitions)) {
+            String columnRemarks = column.remarks;
             if (columnRemarks != null) {
-                SetColumnRemarksAction remarksAction = (SetColumnRemarksAction) new SetColumnRemarksAction()
-                        .set(SetColumnRemarksAction.Attr.columnName, new ObjectName(action.get(CreateTableAction.Attr.tableName, ObjectName.class), column.get(ColumnDefinition.Attr.columnName, String.class)))
-                        .set(SetColumnRemarksAction.Attr.remarks, columnRemarks);
+                SetColumnRemarksAction remarksAction = new SetColumnRemarksAction();
+                remarksAction.columnName = new ObjectName(action.tableName, column.columnName.name);
+                remarksAction.remarks = columnRemarks;
                 return new DelegateResult(result, remarksAction);
             }
         }
@@ -43,11 +44,11 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(CreateTableAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         StringClauses clauses = super.generateSql(action, scope);
-        String remarks = action.get(CreateTableAction.Attr.remarks, String.class);
+        String remarks = action.remarks;
         if (remarks != null) {
             clauses.append("COMMENT='" + database.escapeStringForDatabase(remarks) + "'");
         }
@@ -56,11 +57,11 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateColumnSql(ColumnDefinition column, Action action, Scope scope, List<Action> additionalActions) {
+    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         StringClauses clauses = super.generateColumnSql(column, action, scope, additionalActions);
 
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        String remarks = column.get(ColumnDefinition.Attr.remarks, String.class);
+        Database database = scope.getDatabase();
+        String remarks = column.remarks;
 
         if (remarks != null) {
             clauses.append("COMMENT '" + database.escapeStringForDatabase(remarks) + "'");

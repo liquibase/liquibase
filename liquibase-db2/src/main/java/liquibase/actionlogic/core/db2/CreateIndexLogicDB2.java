@@ -7,6 +7,7 @@ import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateIndexLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
+import liquibase.util.ObjectUtil;
 
 public class CreateIndexLogicDB2 extends CreateIndexLogic {
 
@@ -16,15 +17,15 @@ public class CreateIndexLogicDB2 extends CreateIndexLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateIndexAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.get(CreateIndexAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null) {
             clauses.replace(tablespace, "IN " + tablespace);
         }
 
-        if (action.get(CreateIndexAction.Attr.clustered, false)){
+        if (ObjectUtil.defaultIfEmpty(action.clustered, false)){
             clauses.append("CLUSTER");
         }
 

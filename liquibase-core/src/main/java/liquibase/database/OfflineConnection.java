@@ -88,7 +88,7 @@ public class OfflineConnection implements DatabaseConnection {
                     this.snapshot.getDatabase().setConnection(this);
 
                     for (Catalog catalog : this.snapshot.get(Catalog.class)) {
-                        if (catalog.isDefault()) {
+                        if (catalog.isDefault) {
                             this.catalog = catalog.getSimpleName();
                         }
                     }

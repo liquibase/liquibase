@@ -1,6 +1,7 @@
 package liquibase.actionlogic;
 
 import liquibase.Scope;
+import liquibase.action.AbstractAction;
 import liquibase.action.Action;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -8,12 +9,12 @@ import liquibase.exception.ValidationErrors;
 /**
  * Convenience base class for {@link liquibase.actionlogic.ActionLogic} implementations.
  */
-public abstract class AbstractActionLogic implements ActionLogic {
+public abstract class AbstractActionLogic<T extends Action> implements ActionLogic<T> {
 
     /**
      * Returns the Action class supported by this ActionLogic implementation. Used by {@link AbstractActionLogic#getPriority(liquibase.action.Action, liquibase.Scope)}
      */
-    protected abstract Class<? extends Action> getSupportedAction();
+    protected abstract Class<? extends T> getSupportedAction();
 
     /**
      * Return true if this ActionLogic requires a database in the scope. Used by {@link #supportsScope(liquibase.Scope)}
@@ -28,7 +29,7 @@ public abstract class AbstractActionLogic implements ActionLogic {
     protected boolean supportsScope(Scope scope) {
         Class<? extends Database> requiredDatabase = getRequiredDatabase();
         if (requiredDatabase != null) {
-            Database database = scope.get(Scope.Attr.database, Database.class);
+            Database database = scope.getDatabase();
             return database != null && requiredDatabase.isAssignableFrom(database.getClass());
         }
 
@@ -36,7 +37,7 @@ public abstract class AbstractActionLogic implements ActionLogic {
     }
 
     @Override
-    public int getPriority(Action action, Scope scope) {
+    public int getPriority(T action, Scope scope) {
         if (!action.getClass().isAssignableFrom(getSupportedAction())) {
             return PRIORITY_NOT_APPLICABLE;
         }
@@ -56,7 +57,7 @@ public abstract class AbstractActionLogic implements ActionLogic {
      * Standard implementation returns an empty ValidationErrors
      */
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(T action, Scope scope) {
         return new ValidationErrors();
     }
 }

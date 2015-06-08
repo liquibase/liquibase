@@ -196,7 +196,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
 
                 if (snapshot != null) {
-                    PrimaryKey snapshotPK = ((Table) snapshot.getRelation()).getPrimaryKey();
+                    PrimaryKey snapshotPK = ((Table) snapshot.relation).primaryKey;
 
                     ConstraintsConfig constraints = column.getConstraints();
                     if (constraints != null) {

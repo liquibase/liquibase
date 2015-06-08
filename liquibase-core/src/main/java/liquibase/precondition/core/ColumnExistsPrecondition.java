@@ -86,7 +86,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
     private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtils.trimToNull(getTableName()) != null) {
-            example.setRelation(new Table(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));
+            example.relation = new Table(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName()));
         }
         example.setName(database.correctObjectName(getColumnName(), Column.class));
 

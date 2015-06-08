@@ -16,19 +16,19 @@ public class CreateSequenceLogicHsql extends CreateSequenceLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateSequenceAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
 
-        String shortName = scope.get(Scope.Attr.database, Database.class).getShortName();
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.minValue, action, shortName);
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.maxValue, action, shortName);
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.ordered, action, shortName);
+        String shortName = scope.getDatabase().getShortName();
+        errors.checkForDisallowedField("minValue", action, shortName);
+        errors.checkForDisallowedField("maxValue", action, shortName);
+        errors.checkForDisallowedField("ordered", action, shortName);
 
         return errors;
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateSequenceAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
         clauses.insertAfter(Clauses.sequenceName, "AS BIGINT");
         return clauses;

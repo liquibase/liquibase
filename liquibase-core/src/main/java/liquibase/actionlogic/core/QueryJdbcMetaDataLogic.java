@@ -26,35 +26,35 @@ import java.util.List;
  * Executes a method on {@link java.sql.DatabaseMetaData}.
  * No pre-processing of the arguments is performed. No post-processing of the results is performed.
  */
-public class QueryJdbcMetaDataLogic extends AbstractActionLogic implements ActionLogic.InteractsExternally {
+public class QueryJdbcMetaDataLogic extends AbstractActionLogic<QueryJdbcMetaDataAction> implements ActionLogic.InteractsExternally<QueryJdbcMetaDataAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<QueryJdbcMetaDataAction> getSupportedAction() {
         return QueryJdbcMetaDataAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(QueryJdbcMetaDataAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(QueryJdbcMetaDataAction.Attr.method, action);
+                .checkForRequiredField("method", action);
     }
 
     @Override
     protected boolean supportsScope(Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+        Database database = scope.getDatabase();
 
         return super.supportsScope(scope) && database instanceof AbstractJdbcDatabase;
     }
 
     @Override
-    public boolean interactsExternally(Action action, Scope scope) {
+    public boolean interactsExternally(QueryJdbcMetaDataAction action, Scope scope) {
         return true;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        String method = action.get(QueryJdbcMetaDataAction.Attr.method, String.class);
-        List arguments = action.get(QueryJdbcMetaDataAction.Attr.arguments, List.class);
+    public ActionResult execute(QueryJdbcMetaDataAction action, Scope scope) throws ActionPerformException {
+        String method = action.method;
+        List arguments = action.arguments;
         try {
             if (method.equals("getTables")) {
                 Validate.isTrue(arguments.size() == 4, "getTables requires 4 arguments");
@@ -70,7 +70,7 @@ public class QueryJdbcMetaDataLogic extends AbstractActionLogic implements Actio
     }
 
     protected DatabaseMetaData getMetaData(Scope scope) throws DatabaseException {
-        AbstractJdbcDatabase database = scope.get(Scope.Attr.database, AbstractJdbcDatabase.class);
+        AbstractJdbcDatabase database = (AbstractJdbcDatabase) scope.getDatabase();
         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
 
         try {

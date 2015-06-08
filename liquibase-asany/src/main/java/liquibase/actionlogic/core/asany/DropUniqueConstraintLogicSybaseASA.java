@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.database.core.asany.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -20,17 +21,17 @@ public class DropUniqueConstraintLogicSybaseASA extends DropUniqueConstraintLogi
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropUniqueConstraintActon action, Scope scope) {
         return super.validate(action, scope)
-                .removeRequiredField(DropUniqueConstraintActon.Attr.constraintName)
-                .checkForRequiredField(DropUniqueConstraintActon.Attr.uniqueColumnNames, action);
+                .removeRequiredField("constraintName")
+                .checkForRequiredField("uniqueColumnNames", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DropUniqueConstraintActon action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP UNIQUE")
-                .append("(" + StringUtils.join(action.get(DropUniqueConstraintActon.Attr.uniqueColumnNames, new ArrayList<String>()), ", ", new StringUtils.ObjectNameFormatter(Column.class, database)) + ")");
+                .append("(" + StringUtils.join(CollectionUtil.createIfNull(action.uniqueColumnNames), ", ", new StringUtils.ObjectNameFormatter(Column.class, database)) + ")");
     }
 }

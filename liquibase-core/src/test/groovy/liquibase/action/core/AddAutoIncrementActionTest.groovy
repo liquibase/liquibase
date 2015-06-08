@@ -1,12 +1,14 @@
 package liquibase.action.core
 
 import liquibase.JUnitScope
+import liquibase.Scope
 import liquibase.action.Action
 import liquibase.action.TestObjectFactory
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.TestSnapshotFactory
+import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
@@ -17,18 +19,18 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
 
     @Unroll("#featureName: #column on #conn")
     def "Can add auto increment on databases that support it"() {
-        expect:
-        def scope = JUnitScope.getInstance(conn)
-        action.set(AddAutoIncrementAction.Attr.columnName, column.name)
-        action.set(AddAutoIncrementAction.Attr.columnDataType, column.dataType)
+        when:
+        action.columnName = new ObjectName(column.relation.name, column.name.name)
+        action.columnDataType = column.type
 
+        then:
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
                 .addParameters([
-                columnName_asTable: column.getName(),
-                startWith         : action.get("startWith"),
-                incrementBy       : action.get("incrementBy")
+                columnName_asTable: action.columnName.toString(),
+                startWith_asTable         : action.startWith,
+                incrementBy_asTable       : action.incrementBy
         ])
                 .addOperations(plan: plan)
                 .run({
@@ -42,10 +44,12 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
         })
 
         where:
-        [conn, snapshot, column, action] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(it, JUnitScope.instance)
+        [conn, scope, snapshot, column, action] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it)
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(scope)
             return CollectionUtil.permutations([
                     [it],
+                    [scope],
                     [snapshot],
                     snapshot.get(Column),
                     JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(AddAutoIncrementAction, [
@@ -53,7 +57,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
                             columnDataType: null,
                             startWith     : [1, 2, 10],
                             incrementBy   : [1, 5, 20]
-                    ], JUnitScope.instance),
+                    ]),
             ])
         }
 

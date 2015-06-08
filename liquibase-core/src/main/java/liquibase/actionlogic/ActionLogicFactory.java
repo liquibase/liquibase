@@ -1,11 +1,13 @@
 package liquibase.actionlogic;
 
 import liquibase.Scope;
+import liquibase.action.AbstractAction;
 import liquibase.action.Action;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.AbstractServiceFactory;
+import liquibase.servicelocator.Service;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.StreamUtil;
 import liquibase.util.Validate;
@@ -41,7 +43,7 @@ public class ActionLogicFactory  extends AbstractServiceFactory<ActionLogic> {
     }
 
     protected TemplateActionLogic[] getTemplateActionLogic(Scope scope) {
-        ResourceAccessor resourceAccessor = scope.get(Scope.Attr.resourceAccessor, ResourceAccessor.class);
+        ResourceAccessor resourceAccessor = scope.getResourceAccessor();
         Validate.notNull(resourceAccessor, "Scope.resourceAccessor not set");
 
         for (String packagePath : ServiceLocator.getInstance().getPackages()) {
@@ -81,6 +83,11 @@ public class ActionLogicFactory  extends AbstractServiceFactory<ActionLogic> {
 
     @Override
     protected int getPriority(ActionLogic obj, Scope scope, Object... args) {
-        return obj.getPriority((Action) args[0], scope);
+        Action action = (Action) args[0];
+        if (obj instanceof AbstractActionLogic && !action.getClass().isAssignableFrom(((AbstractActionLogic) obj).getSupportedAction())) {
+            return Service.PRIORITY_NOT_APPLICABLE;
+        }
+
+        return obj.getPriority(action, scope);
     }
 }

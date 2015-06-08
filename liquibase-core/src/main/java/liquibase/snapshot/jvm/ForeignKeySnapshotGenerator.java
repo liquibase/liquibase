@@ -81,7 +81,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : importedKeyMetadataResultSet) {
                     ForeignKey fk = new ForeignKey(row.getString("FK_NAME")).setForeignKeyTable(table);
                     if (seenFks.add(fk.getSimpleName())) {
-                        table.getOutgoingForeignKeys().add(fk);
+                        table.outgoingForeignKeys.add(fk);
                     }
                 }
             } catch (Exception e) {
@@ -127,7 +127,8 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
                 foreignKey.setForeignKeyTable(foreignKeyTable);
-                Column fkColumn = new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)).setRelation(foreignKeyTable);
+                Column fkColumn = new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database));
+                fkColumn.relation = foreignKeyTable;
                 boolean alreadyAdded = false;
                 for (Column existing : foreignKey.getForeignKeyColumns()) {
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(existing, fkColumn, database)) {
@@ -142,7 +143,8 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
                 foreignKey.setPrimaryKeyTable(tempPkTable);
-                Column pkColumn = new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)).setRelation(tempPkTable);
+                Column pkColumn = new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database));
+                pkColumn.relation = tempPkTable;
 
                 foreignKey.addForeignKeyColumn(fkColumn);
                 foreignKey.addPrimaryKeyColumn(pkColumn);

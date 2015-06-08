@@ -8,17 +8,16 @@ import java.util.*;
 
 public class Catalog extends AbstractDatabaseObject {
 
-    public static enum Attr {
-        isDefault, objects
-    }
+    public Boolean isDefault;
+    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> objects;
 
     public Catalog() {
-        set(Attr.objects, new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        this.objects = new HashMap<>();
     }
 
     public Catalog(ObjectName name) {
         super(name);
-        set(Attr.objects, new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+        this.objects = new HashMap<>();
     }
 
     public Catalog(String name) {
@@ -35,25 +34,16 @@ public class Catalog extends AbstractDatabaseObject {
         return null;
     }
 
-    public boolean isDefault() {
-        return get(Attr.isDefault, false);
-    }
-
-    public Catalog setDefault(Boolean isDefault) {
-        set(Attr.isDefault, isDefault);
-        return this;
-    }
-
     protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {
-        return get("objects", Map.class);
+        return objects;
     }
 
     public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
         Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
         if (databaseObjects == null) {
-            return new ArrayList<DatabaseObjectType>();
+            return new ArrayList<>();
         }
-        return new ArrayList<DatabaseObjectType>(databaseObjects);
+        return new ArrayList<>(databaseObjects);
     }
 
     public void addDatabaseObject(DatabaseObject databaseObject) {
@@ -62,7 +52,7 @@ public class Catalog extends AbstractDatabaseObject {
         }
         Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
         if (objects == null) {
-            objects = new HashSet<DatabaseObject>();
+            objects = new HashSet<>();
             this.getObjects().put(databaseObject.getClass(), objects);
         }
         objects.add(databaseObject);

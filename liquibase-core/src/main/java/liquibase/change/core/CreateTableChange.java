@@ -149,20 +149,22 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             if (tableSnapshot != null) {
                 for (ColumnConfig columnConfig : getColumns()) {
-                    Column columnSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(columnConfig).setRelation(tableSnapshot), database);
+                    Column exampleToSnapshot = new Column(columnConfig);
+                    exampleToSnapshot.relation = tableSnapshot;
+                    Column columnSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(exampleToSnapshot, database);
                     status.assertCorrect(columnSnapshot != null, "Column "+columnConfig.getName()+" is missing");
                     if (columnSnapshot != null) {
                         ConstraintsConfig constraints = columnConfig.getConstraints();
                         if (constraints != null) {
                             if (constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
-                                PrimaryKey tablePk = tableSnapshot.getPrimaryKey();
+                                PrimaryKey tablePk = tableSnapshot.primaryKey;
                                 status.assertCorrect(tablePk != null && tablePk.getColumnNamesAsList().contains(columnConfig.getName()), "Column "+columnConfig.getName()+" is not part of the primary key");
                             }
                             if (constraints.isNullable() != null) {
                                 if (constraints.isNullable()) {
-                                    status.assertCorrect(columnSnapshot.isNullable() == null || columnSnapshot.isNullable(), "Column "+columnConfig.getName()+" nullability does not match");
+                                    status.assertCorrect(columnSnapshot.nullable == null || columnSnapshot.nullable, "Column "+columnConfig.getName()+" nullability does not match");
                                 } else {
-                                    status.assertCorrect(columnSnapshot.isNullable() != null && !columnSnapshot.isNullable(), "Column "+columnConfig.getName()+" nullability does not match");
+                                    status.assertCorrect(columnSnapshot.nullable != null && !columnSnapshot.nullable, "Column "+columnConfig.getName()+" nullability does not match");
                                 }
                             }
                         }

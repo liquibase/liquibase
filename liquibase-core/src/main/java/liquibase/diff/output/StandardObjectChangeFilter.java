@@ -106,7 +106,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
             if (!matches) {
                 if (object instanceof Column) {
-                    return matches(((Column) object).getRelation());
+                    return matches(((Column) object).relation);
                 }
                 if (object instanceof Index) {
                     return matches(((Index) object).getTable());

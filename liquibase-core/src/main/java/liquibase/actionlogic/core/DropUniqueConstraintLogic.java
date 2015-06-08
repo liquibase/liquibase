@@ -13,33 +13,33 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class DropUniqueConstraintLogic extends AbstractSqlBuilderLogic {
+public class DropUniqueConstraintLogic extends AbstractSqlBuilderLogic<DropUniqueConstraintActon> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropUniqueConstraintActon> getSupportedAction() {
         return DropUniqueConstraintActon.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropUniqueConstraintActon action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropUniqueConstraintActon.Attr.tableName, action)
-                .checkForRequiredField(DropUniqueConstraintActon.Attr.constraintName, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("constraintName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(DropUniqueConstraintActon action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterTableAction(
-                action.get(DropUniqueConstraintActon.Attr.tableName, ObjectName.class),
+                action.tableName,
                 generateSql(action, scope)));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DropUniqueConstraintActon action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP CONSTRAINT")
-                .append(database.escapeConstraintName(action.get(DropUniqueConstraintActon.Attr.constraintName, String.class)));
+                .append(database.escapeConstraintName(action.constraintName));
 
     }
 }

@@ -18,26 +18,27 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-public class InsertDataLogic extends AbstractSqlBuilderLogic {
+public class InsertDataLogic extends AbstractSqlBuilderLogic<InsertDataAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<InsertDataAction> getSupportedAction() {
         return InsertDataAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(InsertDataAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope)
-                .checkForRequiredField(InsertDataAction.Attr.tableName, action)
-                .checkForRequiredField(InsertDataAction.Attr.columnNames, action)
-                .checkForRequiredField(InsertDataAction.Attr.columnValues, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("columnNames", action)
+                .checkForRequiredField("columnValues", action);
 
-        if (action.get(InsertDataAction.Attr.columnNames, new ArrayList()).size() != action.get(InsertDataAction.Attr.columnValues, new ArrayList()).size()) {
+        if (CollectionUtil.createIfNull(action.columnNames).size() != CollectionUtil.createIfNull(action.columnValues).size()) {
             errors.addError("InsertData columnNames and columnValues must contain the same number of values");
         }
 
@@ -45,14 +46,14 @@ public class InsertDataLogic extends AbstractSqlBuilderLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        final Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(InsertDataAction action, Scope scope) {
+        final Database database = scope.getDatabase();
         return new StringClauses()
                 .append("INSERT INTO")
-                .append(database.escapeObjectName(action.get(InsertDataAction.Attr.tableName, ObjectName.class), Table.class))
-                .append("("+ StringUtils.join(action.get(InsertDataAction.Attr.columnNames, new ArrayList<String>()), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))+")")
+                .append(database.escapeObjectName(action.tableName, Table.class))
+                .append("("+ StringUtils.join(CollectionUtil.createIfNull(action.columnNames), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))+")")
                 .append("VALUES")
-        .append("("+new StringUtils().join(action.get(InsertDataAction.Attr.columnNames, new ArrayList<>()), ", ", new StringUtils.StringUtilsFormatter() {
+        .append("("+StringUtils.join(CollectionUtil.createIfNull(action.columnNames), ", ", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
                 if (obj == null || obj.toString().equalsIgnoreCase("NULL")) {

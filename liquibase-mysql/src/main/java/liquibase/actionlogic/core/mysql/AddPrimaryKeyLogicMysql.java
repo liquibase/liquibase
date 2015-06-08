@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.AddPrimaryKeyAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddPrimaryKeyLogic;
 import liquibase.database.Database;
@@ -15,7 +16,7 @@ public class AddPrimaryKeyLogicMysql extends AddPrimaryKeyLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(AddPrimaryKeyAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
         clauses.replace("ADD CONSTRAINT", "ADD PRIMARY KEY");
         clauses.remove(Clauses.constraintName);

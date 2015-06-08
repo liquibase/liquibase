@@ -18,26 +18,26 @@ public class AddLookupTableLogicInformix extends AddLookupTableLogic {
     }
 
     @Override
-    public Action[] generateCreateAndLoadActions(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public Action[] generateCreateAndLoadActions(AddLookupTableAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new Action[]{
                 new ExecuteSqlAction("CREATE TABLE "
-                        + database.escapeObjectName(action.get(AddLookupTableAction.Attr.newColumnName, ObjectName.class).getContainer(), Table.class)
+                        + database.escapeObjectName(action.newColumnName.container, Table.class)
                         + " ( "
-                        + database.escapeObjectName(action.get(AddLookupTableAction.Attr.newColumnName, String.class), Column.class)
+                        + database.escapeObjectName(action.newColumnName, Column.class)
                         + " "
-                        + action.get(AddLookupTableAction.Attr.newColumnDataType, String.class)
+                        + action.newColumnDataType
                         + " )"),
                 new ExecuteSqlAction("INSERT INTO "
-                        + database.escapeObjectName(action.get(AddLookupTableAction.Attr.newColumnName, ObjectName.class).getContainer(), Table.class)
+                        + database.escapeObjectName(action.newColumnName.container, Table.class)
                         + " ( "
-                        + action.get(AddLookupTableAction.Attr.newColumnName, String.class)
+                        + action.newColumnName
                         + " ) SELECT DISTINCT "
-                        + action.get(AddLookupTableAction.Attr.existingColumnName, String.class)
+                        + action.existingColumnName
                         + " FROM "
-                        + database.escapeObjectName(action.get(AddLookupTableAction.Attr.existingColumnName, ObjectName.class).getContainer(), Table.class)
+                        + database.escapeObjectName(action.existingColumnName.container, Table.class)
                         + " WHERE "
-                        + action.get(AddLookupTableAction.Attr.existingColumnName, String.class)
+                        + action.existingColumnName.name
                         + " IS NOT NULL"),
         };
     }

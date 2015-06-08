@@ -16,9 +16,9 @@ public class AddUniqueConstraintLogicMSSQL extends AddUniqueConstraintLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(AddUniqueConstraintAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
-        String tablespace = action.get(AddUniqueConstraintAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
 
         clauses.replace(Clauses.tablespace, "ON " + tablespace);
         return clauses;

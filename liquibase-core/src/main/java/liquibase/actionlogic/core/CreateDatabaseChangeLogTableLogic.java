@@ -12,34 +12,35 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 
-public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic {
+public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic<CreateDatabaseChangeLogTableAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<CreateDatabaseChangeLogTableAction> getSupportedAction() {
         return CreateDatabaseChangeLogTableAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(CreateDatabaseChangeLogTableAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
         String charTypeName = getCharTypeName(database);
         String dateTimeTypeString = getDateTimeTypeString(database);
 
-        return new DelegateResult((CreateTableAction) new CreateTableAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
-                .addColumn((ColumnDefinition) new ColumnDefinition("ID", charTypeName+"(255)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("AUTHOR", charTypeName+"(255)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("FILENAME", charTypeName+"(255)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("DATEEXECUTED", dateTimeTypeString).set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("ORDEREXECUTED", "INT").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn((ColumnDefinition) new ColumnDefinition("EXECTYPE", charTypeName+"(10)").set(ColumnDefinition.Attr.isNullable, false))
-                .addColumn(new ColumnDefinition("MD5SUM", charTypeName+"(35)"))
-                .addColumn(new ColumnDefinition("DESCRIPTION", charTypeName+"(255)"))
-                .addColumn(new ColumnDefinition("COMMENTS", charTypeName+"(255)"))
-                .addColumn(new ColumnDefinition("TAG", charTypeName+"(255)"))
-                .addColumn(new ColumnDefinition("LIQUIBASE", charTypeName+"(20)"))
-                .set(CreateTableAction.Attr.tablespace, database.getLiquibaseTablespaceName())
-        );
+        CreateTableAction createTableAction = new CreateTableAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
+                .addColumn(new ColumnDefinition("ID", charTypeName + "(255)", false))
+                .addColumn(new ColumnDefinition("AUTHOR", charTypeName + "(255)", false))
+                .addColumn(new ColumnDefinition("FILENAME", charTypeName + "(255)", false))
+                .addColumn(new ColumnDefinition("DATEEXECUTED", dateTimeTypeString, false))
+                .addColumn(new ColumnDefinition("ORDEREXECUTED", "INT", false))
+                .addColumn(new ColumnDefinition("EXECTYPE", charTypeName + "(10)", false))
+                .addColumn(new ColumnDefinition("MD5SUM", charTypeName + "(35)"))
+                .addColumn(new ColumnDefinition("DESCRIPTION", charTypeName + "(255)"))
+                .addColumn(new ColumnDefinition("COMMENTS", charTypeName + "(255)"))
+                .addColumn(new ColumnDefinition("TAG", charTypeName + "(255)"))
+                .addColumn(new ColumnDefinition("LIQUIBASE", charTypeName + "(20)"));
+        createTableAction.tablespace = database.getLiquibaseTablespaceName();
+
+        return new DelegateResult(createTableAction);
     }
 
     protected String getCharTypeName(Database database) {

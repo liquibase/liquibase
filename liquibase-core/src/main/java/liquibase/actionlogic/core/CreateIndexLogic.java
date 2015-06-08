@@ -15,11 +15,12 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.util.List;
 
-public class CreateIndexLogic extends AbstractSqlBuilderLogic {
+public class CreateIndexLogic extends AbstractSqlBuilderLogic<CreateIndexAction> {
 
     public static enum Clauses {
         indexName,
@@ -29,20 +30,20 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<CreateIndexAction> getSupportedAction() {
         return CreateIndexAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ValidationErrors validate(CreateIndexAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkForRequiredField(CreateIndexAction.Attr.tableName, action);
-        validationErrors.checkForRequiredField(CreateIndexAction.Attr.columnDefinitions, action);
+        validationErrors.checkForRequiredField("tableName", action);
+        validationErrors.checkForRequiredField("columnDefinitions", action);
 
         if (!database.supportsClustered(Index.class)) {
-            if (action.get(CreateIndexAction.Attr.clustered, false)) {
+            if (ObjectUtil.defaultIfEmpty(action.clustered, false)) {
                 validationErrors.addWarning("Creating clustered index not supported with "+database);
             }
         }
@@ -51,21 +52,21 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(CreateIndexAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        final Database database = scope.get(Scope.Attr.database, Database.class);
-        ObjectName indexName = action.get(CreateIndexAction.Attr.indexName, ObjectName.class);
-        ObjectName tableName = action.get(CreateIndexAction.Attr.tableName, ObjectName.class);
-        String tablespace = action.get(CreateIndexAction.Attr.tablespace, String.class);
+    protected StringClauses generateSql(CreateIndexAction action, Scope scope) {
+        final Database database = scope.getDatabase();
+        ObjectName indexName = action.indexName;
+        ObjectName tableName = action.tableName;
+        String tablespace = action.tablespace;
 
 
         StringClauses clauses = new StringClauses().append("CREATE");
 
-        if (action.get(CreateIndexAction.Attr.unique, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.unique, false)) {
 		    clauses.append("UNIQUE ");
 	    }
 
@@ -79,20 +80,20 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic {
 
 	    clauses.append(Clauses.tableName, database.escapeObjectName(tableName, Table.class));
 
-        clauses.append(Clauses.columns, "("+ StringUtils.join(action.get(CreateIndexAction.Attr.columnDefinitions, List.class), ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
+        clauses.append(Clauses.columns, "("+ StringUtils.join(action.columnDefinitions, ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
             @Override
             public String toString(ColumnDefinition column) {
-                Boolean computed = column.get(ColumnDefinition.Attr.computed, Boolean.class);
+                Boolean computed = column.computed;
                 String name;
                 if (computed == null) {
-                    name = database.escapeColumnName(column.get(ColumnDefinition.Attr.columnName, String.class), true);
+                    name = database.escapeColumnName(column.columnName.name, true);
                 } else if (computed) {
-                    name = column.get(ColumnDefinition.Attr.columnName, String.class);
+                    name = column.columnName.name;
                 } else {
-                    name = database.escapeColumnName(column.get(ColumnDefinition.Attr.columnName, String.class), false);
+                    name = database.escapeColumnName(column.columnName.name, false);
                 }
 
-                if (column.get(ColumnDefinition.Attr.descending, false)) {
+                if (ObjectUtil.defaultIfEmpty(column.descending, false)) {
                     name += " DESC";
                 }
                 return name;

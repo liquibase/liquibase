@@ -54,7 +54,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (match != null && isDefaultCatalog(match, database)) {
-            match.setDefault(true);
+            match.isDefault = true;
         }
         return match;
     }

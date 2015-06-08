@@ -28,9 +28,9 @@ public class AddDefaultValueLogicPostgresql extends AddDefaultValueLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
+    public ActionResult execute(AddDefaultValueAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
+        Object defaultValue = action.defaultValue;
 
         DelegateResult result = (DelegateResult) super.execute(action, scope);
 
@@ -38,12 +38,12 @@ public class AddDefaultValueLogicPostgresql extends AddDefaultValueLogic {
         // this will allow a drop table cascade to remove the sequence as well.
         if (defaultValue instanceof SequenceNextValueFunction) {
             result = new DelegateResult(result, new RedefineSequenceAction(
-                    new ObjectName(action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class).getContainer().getContainer(), ((SequenceNextValueFunction) defaultValue).getValue()),
+                    new ObjectName(action.columnName.container.container, ((SequenceNextValueFunction) defaultValue).getValue()),
                     new StringClauses()
                             .append("OWNED BY")
-                            .append(database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class).getContainer(), Table.class)
+                            .append(database.escapeObjectName(action.columnName.container, Table.class)
                                     + "."
-                                    + database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, String.class), Column.class))));
+                                    + database.escapeObjectName(action.columnName, Column.class))));
         }
 
         return result;

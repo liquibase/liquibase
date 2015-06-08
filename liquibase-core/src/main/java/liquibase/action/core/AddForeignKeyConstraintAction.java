@@ -3,33 +3,33 @@ package liquibase.action.core;
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
 
+import java.util.List;
+
 public class AddForeignKeyConstraintAction extends AbstractAction {
 
-    public static enum Attr {
-        baseTableName,
-        baseColumnNames,
+    public ObjectName baseTableName;
+    public String baseColumnNames;
 
-        referencedTableName,
-        referencedColumnNames,
+    public ObjectName referencedTableName;
+    public String referencedColumnNames;
 
-        constraintName,
+    public String constraintName;
 
-        deferrable,
-        initiallyDeferred,
+    public Boolean deferrable;
+    public Boolean initiallyDeferred;
 
-        onDelete,
-        onUpdate,
-    }
+    public String onDelete;
+    public Boolean onUpdate;
 
     public AddForeignKeyConstraintAction() {
     }
 
-    public AddForeignKeyConstraintAction(String constraintName, ObjectName baseTableName, String[] baseColumnNames, ObjectName referencedTableName, String[] referencedColumnNames) {
-        set(Attr.constraintName, constraintName);
-        set(Attr.baseTableName, baseTableName);
-        set(Attr.baseColumnNames, baseColumnNames);
-        set(Attr.referencedTableName, referencedTableName);
-        set(Attr.referencedColumnNames, referencedColumnNames);
+    public AddForeignKeyConstraintAction(String constraintName, ObjectName baseTableName, String baseColumnNames, ObjectName referencedTableName, String referencedColumnNames) {
+        this.constraintName = constraintName;
+        this.baseTableName = baseTableName;
+        this.baseColumnNames = baseColumnNames;
+        this.referencedTableName = referencedTableName;
+        this.referencedColumnNames = referencedColumnNames;
 
 
     }

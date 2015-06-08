@@ -12,13 +12,13 @@ import liquibase.exception.ActionPerformException;
 public class RenameColumnLogicSybase extends RenameColumnLogic {
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(RenameColumnAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new ExecuteSqlAction("exec sp_rename '"
-                + action.get(RenameColumnAction.Attr.tableName, String.class)
+                + action.tableName
                 + "."
-                + action.get(RenameColumnAction.Attr.oldColumnName, String.class)
+                + action.oldColumnName
                 + "', '"
-                + action.get(RenameColumnAction.Attr.newColumnName, String.class)
+                + action.newColumnName
                 + "'"));
     }
 }

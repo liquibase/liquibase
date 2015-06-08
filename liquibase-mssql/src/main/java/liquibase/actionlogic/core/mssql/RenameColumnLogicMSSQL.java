@@ -23,17 +23,17 @@ public class RenameColumnLogicMSSQL extends RenameColumnLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(RenameColumnAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
         // do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
         return new DelegateResult(new ExecuteSqlAction(
                 "exec sp_rename '"
-                        + database.escapeObjectName(action.get(RenameColumnAction.Attr.tableName, ObjectName.class), Table.class)
+                        + database.escapeObjectName(action.tableName, Table.class)
                         + "."
-                        + database.escapeObjectName(action.get(RenameColumnAction.Attr.oldColumnName, String.class), Column.class)
+                        + database.escapeObjectName(action.oldColumnName, Column.class)
                         + "', '"
-                        + action.get(RenameColumnAction.Attr.newColumnName, String.class)
+                        + action.newColumnName
                         + "'"));
     }
 }

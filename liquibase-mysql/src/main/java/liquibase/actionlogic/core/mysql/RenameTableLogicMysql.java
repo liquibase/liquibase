@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.RenameTableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameTableLogic;
 import liquibase.database.Database;
@@ -14,7 +15,7 @@ public class RenameTableLogicMysql extends RenameTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(RenameTableAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .replace("RENAME", "RENAME TABLE");
     }

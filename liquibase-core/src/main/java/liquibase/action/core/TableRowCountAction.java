@@ -1,9 +1,8 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class TableRowCountAction extends AbstractAction {
-    public static enum Attr {
-        tableName,
-    }
+    public ObjectName tableName;
 }

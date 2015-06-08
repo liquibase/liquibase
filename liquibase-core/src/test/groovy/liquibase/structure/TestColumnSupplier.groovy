@@ -1,7 +1,6 @@
 package liquibase.structure
 
 import liquibase.Scope
-import liquibase.database.ConnectionSupplier
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
@@ -15,11 +14,13 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
     }
 
     @Override
-    List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
+    List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         def returnList = []
         for (Table table : snapshot.get(Table)) {
-            for (Column column : super.getTestObjects(type, snapshot, conn, scope)) {
-                returnList.add(column.setRelation(new Table(table.getName())).setType(new DataType("int")))
+            for (Column column : super.getTestObjects(type, snapshot, scope)) {
+                column.relation = new Table(table.getName())
+                column.type = new DataType("int")
+                returnList.add(column)
             }
         }
 
@@ -27,12 +28,12 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
     }
 
     @Override
-    Set<Class<? extends DatabaseObject>> requires(ConnectionSupplier conn, Scope scope) {
+    Set<Class<? extends DatabaseObject>> requires(Scope scope) {
         return [Table] as Set
     }
 
     @Override
-    protected List<ObjectName> getObjectContainers(Class objectType, ConnectionSupplier conn) {
+    protected List<ObjectName> getObjectContainers(Class objectType, Scope scope) {
         return [new ObjectName()];
     }
 

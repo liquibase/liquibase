@@ -16,17 +16,17 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class ExecuteSqlLogic extends AbstractSqlLogic implements ActionLogic.InteractsExternally {
+public class ExecuteSqlLogic extends AbstractSqlLogic<ExecuteSqlAction> implements ActionLogic.InteractsExternally<ExecuteSqlAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<ExecuteSqlAction> getSupportedAction() {
         return ExecuteSqlAction.class;
     }
 
     @Override
-    public int getPriority(Action action, Scope scope) {
+    public int getPriority(ExecuteSqlAction action, Scope scope) {
         if (action instanceof ExecuteSqlAction) {
-            Database database = scope.get(Scope.Attr.database, Database.class);
+            Database database = scope.getDatabase();
             if (database == null || (!(database instanceof AbstractJdbcDatabase))) {
                 return PRIORITY_NOT_APPLICABLE;
             }
@@ -38,19 +38,19 @@ public class ExecuteSqlLogic extends AbstractSqlLogic implements ActionLogic.Int
     }
 
     @Override
-    public boolean interactsExternally(Action action, Scope scope) {
+    public boolean interactsExternally(ExecuteSqlAction action, Scope scope) {
         return true;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(ExecuteSqlAction action, Scope scope) throws ActionPerformException {
         try {
-            AbstractJdbcDatabase database = scope.get(Scope.Attr.database, AbstractJdbcDatabase.class);
+            AbstractJdbcDatabase database = (AbstractJdbcDatabase) scope.getDatabase();
             DatabaseConnection connection = database.getConnection();
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();
             Statement stmt = jdbcConnection.createStatement();
-            stmt.execute(action.get(ExecuteSqlAction.Attr.sql, String.class));
+            stmt.execute(action.sql.toString());
             return new ExecuteResult();
 
         } catch (SQLException e) {

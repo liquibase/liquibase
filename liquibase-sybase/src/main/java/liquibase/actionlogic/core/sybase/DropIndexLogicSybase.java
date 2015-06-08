@@ -23,20 +23,20 @@ public class DropIndexLogicSybase extends DropIndexLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropIndexAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropIndexAction.Attr.tableName, action);
+                .checkForRequiredField("tableName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(DropIndexAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
         return new DelegateResult(new ExecuteSqlAction(
                 "DROP INDEX "
-                        + database.escapeObjectName(action.get(DropIndexAction.Attr.tableName, ObjectName.class), Table.class)
+                        + database.escapeObjectName(action.tableName, Table.class)
                         + "."
-                        + database.escapeObjectName(action.get(DropIndexAction.Attr.indexName, String.class), Index.class)));
+                        + database.escapeObjectName(action.indexName, Index.class)));
 
 
     }

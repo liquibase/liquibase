@@ -9,23 +9,25 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
-public class ClearDatabaseChangeLogHistoryLogic extends AbstractActionLogic {
+public class ClearDatabaseChangeLogHistoryLogic extends AbstractActionLogic<ClearDatabaseChangeLogHistoryAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<ClearDatabaseChangeLogHistoryAction> getSupportedAction() {
         return ClearDatabaseChangeLogHistoryAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(ClearDatabaseChangeLogHistoryAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
-        String schemaName = action.get(ClearDatabaseChangeLogHistoryAction.Attr.schemaName, String.class);
-        if (schemaName == null) {
-            schemaName = database.getLiquibaseSchemaName();
+        ObjectName container = action.container;
+        if (container == null) {
+            container = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
         }
 
-        return new DelegateResult(new UpdateSqlAction("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName())));
+        return new DelegateResult(new UpdateSqlAction("DELETE FROM " + database.escapeObjectName(new ObjectName(container, database.getDatabaseChangeLogTableName()), Table.class)));
     }
 }

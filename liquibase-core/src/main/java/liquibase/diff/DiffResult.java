@@ -93,7 +93,7 @@ public class DiffResult {
     }
 
     public void addMissingObject(DatabaseObject obj) {
-        if (obj instanceof Column && ((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+        if (obj instanceof Column && ((Column) obj).computed != null && ((Column) obj).computed) {
             return; //not really missing, it's a virtual column
         }
         missingObjects.add(obj);

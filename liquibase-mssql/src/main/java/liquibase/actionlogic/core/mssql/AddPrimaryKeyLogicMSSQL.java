@@ -8,6 +8,7 @@ import liquibase.actionlogic.core.AddPrimaryKeyLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.util.ObjectUtil;
 
 public class AddPrimaryKeyLogicMSSQL extends AddPrimaryKeyLogic {
 
@@ -17,23 +18,23 @@ public class AddPrimaryKeyLogicMSSQL extends AddPrimaryKeyLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AddPrimaryKeyAction action, Scope scope) {
         ValidationErrors validate = super.validate(action, scope);
-        validate.removeUnsupportedField(AddPrimaryKeyAction.Attr.clustered);
+        validate.removeUnsupportedField("clustered");
         return validate;
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(AddPrimaryKeyAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        if (action.get(AddPrimaryKeyAction.Attr.clustered, true)) {
+        if (ObjectUtil.defaultIfEmpty(action.clustered, true)) {
             clauses.insertAfter("PRIMARY KEY", "CLUSTERED");
         } else {
             clauses.insertAfter("PRIMARY KEY", "NONCLUSTERED");
         }
 
-        String tablespace = action.get(AddPrimaryKeyAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "ON " + tablespace);
         }

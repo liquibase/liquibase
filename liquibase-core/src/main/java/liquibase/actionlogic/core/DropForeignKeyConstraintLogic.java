@@ -13,33 +13,33 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class DropForeignKeyConstraintLogic extends AbstractSqlBuilderLogic {
+public class DropForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<DropForeignKeyConstraintAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropForeignKeyConstraintAction> getSupportedAction() {
         return DropForeignKeyConstraintAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropForeignKeyConstraintAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropForeignKeyConstraintAction.Attr.baseTableName, action)
-                .checkForRequiredField(DropForeignKeyConstraintAction.Attr.constraintName, action);
+                .checkForRequiredField("baseTableName", action)
+                .checkForRequiredField("constraintName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(DropForeignKeyConstraintAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterTableAction(
-                action.get(DropForeignKeyConstraintAction.Attr.baseTableName, ObjectName.class),
+                action.baseTableName,
                 generateSql(action, scope)
         ));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DropForeignKeyConstraintAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP CONSTRAINT")
-                .append(database.escapeConstraintName(action.get(DropForeignKeyConstraintAction.Attr.constraintName, String.class)));
+                .append(database.escapeConstraintName(action.constraintName));
     }
 }

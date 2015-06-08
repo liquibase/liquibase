@@ -37,7 +37,7 @@ class ActionExecutorTest extends Specification {
     def "execute when validation fails with errors"() {
         when:
         scope.getSingleton(ActionLogicFactory).register(new MockExternalInteractionLogic("mock logic", 1, MockAction) {
-            @Override
+
             ValidationErrors validate(Action action, Scope scope) {
                 return new ValidationErrors()
                         .addError("Mock Validation Error")
@@ -115,7 +115,7 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).get(AbstractSqlAction.Attr.sql, String));
+                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).sql);
             }
         })
 
@@ -135,7 +135,7 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).get(AbstractSqlAction.Attr.sql, String));
+                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).sql);
             }
         })
 
@@ -161,7 +161,7 @@ class ActionExecutorTest extends Specification {
         factory.register(new MockExternalInteractionLogic("mock sql", 1, UpdateSqlAction) {
             @Override
             ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).get(AbstractSqlAction.Attr.sql, String));
+                return new ExecuteResult("executed sql: " + ((AbstractSqlAction) action).sql);
             }
         })
 

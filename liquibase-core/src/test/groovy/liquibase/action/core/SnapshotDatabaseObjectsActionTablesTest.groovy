@@ -138,7 +138,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             return CollectionUtil.permutations([
                     [it],
                     [snapshot],
-                    snapshot.get(Table)*.getName()*.getContainer()*.getContainer()*.getName().unique()
+                    snapshot.get(Table)*.getName()*.container*.container*.getName().unique()
             ])
         }
     }
@@ -158,7 +158,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             def result = plan.execute(scope) as QueryResult
 
             def expected = snapshot.get(Table).grep({
-                it.getName().getContainer().toString() == schemaName.toString()
+                it.getName().container.toString() == schemaName.toString()
             }).toArray()
             assertThat result.asList(Table), containsInAnyOrder(expected)
         })
@@ -189,7 +189,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             def result = plan.execute(scope) as QueryResult
 
             assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
-                it.getName().getContainer().getContainer() == catalogName
+                it.getName().container.container == catalogName
             }).toArray())
         })
 
@@ -199,7 +199,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             return CollectionUtil.permutations([
                     [it],
                     [snapshot],
-                    snapshot.get(Table)*.getName()*.getContainer()*.getContainer().unique()
+                    snapshot.get(Table)*.getName()*.container*.container.unique()
             ])
         }
     }

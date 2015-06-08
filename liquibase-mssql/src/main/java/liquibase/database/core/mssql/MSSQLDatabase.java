@@ -272,7 +272,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     public String generateDefaultConstraintName(ObjectName columnName) {
-        return "DF_" + columnName.getContainer().getName() + "_" + columnName.getName();
+        return "DF_" + columnName.container.name + "_" + columnName.name;
     }
 
 

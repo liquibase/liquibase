@@ -19,10 +19,10 @@ public class CreateTableLogicInformix extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.get(CreateTableAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "IN "+tablespace);
         }
@@ -31,7 +31,7 @@ public class CreateTableLogicInformix extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateUniqueConstraintSql(UniqueConstraintDefinition uniqueConstraint, Action action, Scope scope) {
+    protected StringClauses generateUniqueConstraintSql(UniqueConstraintDefinition uniqueConstraint, CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateUniqueConstraintSql(uniqueConstraint, action, scope);
 
         String constraintClause = clauses.get(UniqueConstraintClauses.constraintName);
@@ -44,7 +44,7 @@ public class CreateTableLogicInformix extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateForeignKeySql(ForeignKeyDefinition foreignKeyDefinition, Action action, Scope scope) {
+    protected StringClauses generateForeignKeySql(ForeignKeyDefinition foreignKeyDefinition, CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateForeignKeySql(foreignKeyDefinition, action, scope);
         String nameClause = clauses.get(ForeignKeyClauses.constraintName);
 

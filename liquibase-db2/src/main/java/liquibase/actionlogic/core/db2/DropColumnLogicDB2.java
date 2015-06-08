@@ -20,8 +20,8 @@ public class DropColumnLogicDB2 extends DropColumnsLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(DropColumnsAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult((DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(DropColumnsAction.Attr.tableName, ObjectName.class)));
+                new ReorganizeTableAction(action.tableName));
     }
 }

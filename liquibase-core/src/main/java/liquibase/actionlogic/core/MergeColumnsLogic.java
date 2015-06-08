@@ -25,35 +25,36 @@ import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class MergeColumnsLogic extends AbstractActionLogic {
+public class MergeColumnsLogic extends AbstractActionLogic<MergeColumnsAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<MergeColumnsAction> getSupportedAction() {
         return MergeColumnsAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(MergeColumnsAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         List<Action> actions = new ArrayList<>();
 
-        ObjectName tableName = action.get(MergeColumnsAction.Attr.tableName, ObjectName.class);
-        String finalColumnName = action.get(MergeColumnsAction.Attr.finalColumnName, String.class);
-        String finalColumnType = action.get(MergeColumnsAction.Attr.finalColumnType, String.class);
-        String column1Name = action.get(MergeColumnsAction.Attr.column1Name, String.class);
-        String column2Name = action.get(MergeColumnsAction.Attr.column2Name, String.class);
+        ObjectName tableName = action.tableName;
+        String finalColumnName = action.finalColumnName;
+        String finalColumnType = action.finalColumnType;
+        String column1Name = action.column1Name;
+        String column2Name = action.column2Name;
 
-        actions.add((Action) new AddColumnsAction()
-                        .set(AddColumnsAction.Attr.tableName, tableName)
-                        .add(AddColumnsAction.Attr.columnDefinitions, new ColumnDefinition(finalColumnName, finalColumnType))
-        );
+        AddColumnsAction addColumnsAction = new AddColumnsAction();
+        addColumnsAction.tableName = tableName;
+        addColumnsAction.columnDefinitions = Collections.singletonList(new ColumnDefinition(finalColumnName, finalColumnType));
+        actions.add(addColumnsAction);
 
-        actions.add((Action) new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName, Table.class) +
+        actions.add(new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName, Table.class) +
                 " SET " + database.escapeObjectName(finalColumnName, Column.class)
                 + " = " + database.getConcatSql(database.escapeObjectName(column1Name, Column.class)
-                , "'" + action.get(MergeColumnsAction.Attr.joinString, String.class) + "'", database.escapeObjectName(column2Name, Column.class))));
+                , "'" + action.joinString + "'", database.escapeObjectName(column2Name, Column.class))));
 
 //        if (database instanceof SQLiteDatabase) {
             // SQLite does not support this ALTER TABLE operation until now.
@@ -103,13 +104,15 @@ public class MergeColumnsLogic extends AbstractActionLogic {
 //        } else {
             // ...if it is not a SQLite database
 
-            actions.add((Action) new DropColumnsAction()
-                    .set(DropColumnsAction.Attr.tableName, tableName)
-                    .set(DropColumnsAction.Attr.columnNames, new String[]{column1Name}));
+        DropColumnsAction dropColumn1Action = new DropColumnsAction();
+        dropColumn1Action.tableName = tableName;
+        dropColumn1Action.columnNames = Collections.singletonList(column1Name);
+        actions.add(dropColumn1Action);
 
-        actions.add((Action) new DropColumnsAction()
-                .set(DropColumnsAction.Attr.tableName, tableName)
-                .set(DropColumnsAction.Attr.columnNames, new String[] {column2Name}));
+        DropColumnsAction dropColumn2Action = new DropColumnsAction();
+        dropColumn2Action.tableName = tableName;
+        dropColumn2Action.columnNames = Collections.singletonList(column2Name);
+        actions.add(dropColumn2Action);
 
         return new DelegateResult(actions);
     }

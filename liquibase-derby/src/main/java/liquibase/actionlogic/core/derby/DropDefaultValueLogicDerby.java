@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.derby;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.DropDefaultValueAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropDefaultValueLogic;
 import liquibase.database.Database;
@@ -15,7 +16,7 @@ public class DropDefaultValueLogicDerby extends DropDefaultValueLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(DropDefaultValueAction action, Scope scope) {
         return new StringClauses().append("WITH DEFAULT NULL");
     }
 }

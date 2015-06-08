@@ -13,29 +13,29 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class SelectFromDatabaseChangeLogLockLogic extends AbstractActionLogic {
+public class SelectFromDatabaseChangeLogLockLogic extends AbstractActionLogic<SelectFromDatabaseChangeLogLockAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<SelectFromDatabaseChangeLogLockAction> getSupportedAction() {
         return SelectFromDatabaseChangeLogLockAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogLockAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SelectFromDatabaseChangeLogLockAction.Attr.selectColumnDefinitions, action);
+                .checkForRequiredField("selectColumnDefinitions", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        final Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(SelectFromDatabaseChangeLogLockAction action, Scope scope) throws ActionPerformException {
+        final Database database = scope.getDatabase();
 
         return new DelegateResult(
                 (SelectDataAction) new SelectDataAction(
                         new ObjectName(database.getLiquibaseCatalogName(),
                                 database.getLiquibaseSchemaName(),
                                 database.getDatabaseChangeLogTableName()),
-                        action.get(SelectFromDatabaseChangeLogLockAction.Attr.selectColumnDefinitions, ColumnDefinition[].class))
+                        action.selectColumnDefinitions)
         );
     }
 

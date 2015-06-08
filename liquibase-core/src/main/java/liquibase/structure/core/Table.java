@@ -5,14 +5,14 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Table extends Relation {
 
-    public static enum Attr {
-        outgoingForeignKeys,
-        indexes,
-        uniqueConstraints,
-    }
+    public PrimaryKey primaryKey;
+    public Set<ForeignKey> outgoingForeignKeys;
+    public Set<Index> indexes;
+    public Set<UniqueConstraint> uniqueConstraints;
 
     public Table() {
     }
@@ -29,25 +29,4 @@ public class Table extends Relation {
         this.setSchema(new Schema(catalogName, schemaName));
         setName(new ObjectName(catalogName, schemaName, tableName));
     }
-
-    public PrimaryKey getPrimaryKey() {
-        return get("primaryKey", PrimaryKey.class);
-    }
-
-    public void setPrimaryKey(PrimaryKey primaryKey) {
-        this.set("primaryKey", primaryKey);
-    }
-
-    public List<ForeignKey> getOutgoingForeignKeys() {
-        return get("outgoingForeignKeys", List.class);
-    }
-
-    public List<Index> getIndexes() {
-        return get("indexes", List.class);
-    }
-
-    public List<UniqueConstraint> getUniqueConstraints() {
-        return get("uniqueConstraints", List.class);
-    }
-
 }

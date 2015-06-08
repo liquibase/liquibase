@@ -20,13 +20,13 @@ public class RenameViewLogicMSSQL extends RenameViewLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(RenameViewAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "exec sp_rename '"
-                        + database.escapeObjectName(action.get(RenameViewAction.Attr.oldViewName, ObjectName.class), View.class)
+                        + database.escapeObjectName(action.oldViewName, View.class)
                         + "', '"
-                        + action.get(RenameViewAction.Attr.newViewName, String.class)
+                        + action.newViewName.name
                         + "'"));
     }
 }

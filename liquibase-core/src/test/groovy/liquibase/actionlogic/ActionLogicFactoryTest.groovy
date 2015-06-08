@@ -44,7 +44,7 @@ class ActionLogicFactoryTest extends Specification {
         emptyLogicFactory.register(new MockActionLogic("drop 2", 2, DropSequenceAction))
         emptyLogicFactory.register(new MockActionLogic("drop 1", 1, DropSequenceAction))
 
-        def scope = JUnitScope.instance.child(Scope.Attr.database, new MockDatabase())
+        def scope = JUnitScope.getInstance(new MockDatabase())
 
         then:
         emptyLogicFactory.getActionLogic(new CreateSequenceAction(), scope).toString() == "Mock action logic 'create 2'"

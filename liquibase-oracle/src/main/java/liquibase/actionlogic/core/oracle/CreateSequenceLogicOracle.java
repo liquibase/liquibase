@@ -9,6 +9,8 @@ import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 
+import java.math.BigInteger;
+
 public class CreateSequenceLogicOracle extends CreateSequenceLogic {
     @Override
     protected Class<? extends Database> getRequiredDatabase() {
@@ -16,17 +18,17 @@ public class CreateSequenceLogicOracle extends CreateSequenceLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateSequenceAction action, Scope scope) {
         ValidationErrors validate = super.validate(action, scope);
 
-        validate.removeUnsupportedField(CreateSequenceAction.Attr.cacheSize);
+        validate.removeUnsupportedField("cacheSize");
 
         return validate;
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        String cacheSize = action.get(CreateSequenceAction.Attr.cacheSize, String.class);
+    protected StringClauses generateSql(CreateSequenceAction action, Scope scope) {
+        BigInteger cacheSize = action.cacheSize;
 
         StringClauses clauses = super.generateSql(action, scope);
 

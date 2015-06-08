@@ -10,30 +10,30 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Sequence;
 
-public class DropSequenceLogic extends AbstractSqlBuilderLogic {
+public class DropSequenceLogic extends AbstractSqlBuilderLogic<DropSequenceAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropSequenceAction> getSupportedAction() {
         return DropSequenceAction.class;
     }
 
 
     @Override
     protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class).supportsSequences();
+        return super.supportsScope(scope) && scope.getDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropSequenceAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropSequenceAction.Attr.sequenceName, action);
+                .checkForRequiredField("sequenceName", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DropSequenceAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP SEQUENCE")
-                .append(database.escapeObjectName(action.get(DropSequenceAction.Attr.sequenceName, ObjectName.class), Sequence.class));
+                .append(database.escapeObjectName(action.sequenceName, Sequence.class));
     }
 }

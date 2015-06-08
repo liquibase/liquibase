@@ -23,7 +23,7 @@ class SnapshotColumnsLogicTest extends Specification {
         when:
         def database = new MockDatabase()
         database.setMaxContainerDepth(maxDepth)
-        def scope = JUnitScope.instance.child(Scope.Attr.database, database)
+        def scope = JUnitScope.getInstance(database)
         new SnapshotColumnsLogic().execute(new SnapshotDatabaseObjectsAction(Column, object), scope)
 
         then:
@@ -43,7 +43,7 @@ class SnapshotColumnsLogicTest extends Specification {
         when:
         def database = new MockDatabase();
         database.setMaxContainerDepth(maxDepth)
-        def scope = JUnitScope.instance.child(Scope.Attr.database, database)
+        def scope = JUnitScope.getInstance(database)
 
         def object = new SnapshotColumnsLogic().convertToObject(new RowBasedQueryResult.Row([
                 TABLE_CAT  : tableCat,

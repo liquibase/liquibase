@@ -15,22 +15,22 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class QuerySqlLogic extends AbstractSqlLogic {
+public class QuerySqlLogic extends AbstractSqlLogic<QuerySqlAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<QuerySqlAction> getSupportedAction() {
         return QuerySqlAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(QuerySqlAction action, Scope scope) throws ActionPerformException {
         try {
-            AbstractJdbcDatabase database = scope.get(Scope.Attr.database, AbstractJdbcDatabase.class);
+            AbstractJdbcDatabase database = (AbstractJdbcDatabase) scope.getDatabase();
             DatabaseConnection connection = database.getConnection();
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();
             Statement stmt = jdbcConnection.createStatement();
-            return new RowBasedQueryResult(JdbcUtils.extract(stmt.executeQuery(action.get(QuerySqlAction.Attr.sql, String.class))));
+            return new RowBasedQueryResult(JdbcUtils.extract(stmt.executeQuery(action.sql.toString())));
         } catch (SQLException e) {
             throw new ActionPerformException(e);
         }

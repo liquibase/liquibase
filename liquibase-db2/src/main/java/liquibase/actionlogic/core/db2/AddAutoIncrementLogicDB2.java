@@ -14,7 +14,7 @@ import java.math.BigInteger;
 public class AddAutoIncrementLogicDB2 extends AddAutoIncrementLogic {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AddAutoIncrementAction> getSupportedAction() {
         return AddAutoIncrementAction.class;
     }
 
@@ -24,18 +24,18 @@ public class AddAutoIncrementLogicDB2 extends AddAutoIncrementLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AddAutoIncrementAction action, Scope scope) {
         ValidationErrors validationErrors = super.validate(action, scope);
-        validationErrors.removeRequiredField(AddAutoIncrementAction.Attr.columnDataType);
+        validationErrors.removeRequiredField("columnDataType");
 
         return validationErrors;
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(AddAutoIncrementAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses().append("SET "+
-                        database.getAutoIncrementClause(action.get(AddAutoIncrementAction.Attr.startWith, BigInteger.class), action.get(AddAutoIncrementAction.Attr.incrementBy, BigInteger.class))
+                        database.getAutoIncrementClause(action.startWith, action.incrementBy)
         );
     }
 }

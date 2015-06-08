@@ -13,31 +13,31 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class DropPrimaryKeyLogic extends AbstractSqlBuilderLogic {
+public class DropPrimaryKeyLogic extends AbstractSqlBuilderLogic<DropPrimaryKeyAction> {
 
 	@Override
-	protected Class<? extends Action> getSupportedAction() {
+	protected Class<DropPrimaryKeyAction> getSupportedAction() {
 		return DropPrimaryKeyAction.class;
 	}
 
 	@Override
-	public ValidationErrors validate(Action action, Scope scope) {
+	public ValidationErrors validate(DropPrimaryKeyAction action, Scope scope) {
 		return super.validate(action, scope)
-				.checkForRequiredField(DropPrimaryKeyAction.Attr.tableName, action);
+				.checkForRequiredField("tableName", action);
     }
 
 	@Override
-	public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+	public ActionResult execute(DropPrimaryKeyAction action, Scope scope) throws ActionPerformException {
 		return new DelegateResult(new AlterTableAction(
-				action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class),
+				action.tableName,
 				generateSql(action, scope)
 		));
 	}
 
 	@Override
-	protected StringClauses generateSql(Action action, Scope scope) {
-		Database database = scope.get(Scope.Attr.database, Database.class);
-		String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
+	protected StringClauses generateSql(DropPrimaryKeyAction action, Scope scope) {
+		Database database = scope.getDatabase();
+		String constraintName = action.constraintName;
 
 		if (constraintName == null) {
 			return new StringClauses().append("DROP PRIMARY KEY");

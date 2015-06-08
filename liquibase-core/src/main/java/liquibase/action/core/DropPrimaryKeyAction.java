@@ -1,11 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class DropPrimaryKeyAction extends AbstractAction {
-    public static enum Attr {
-        tableName,
-        constraintName,
-
-    }
+    public ObjectName tableName;
+    public String constraintName;
 }

@@ -116,12 +116,12 @@ public class AddAutoIncrementChange extends AbstractChange {
 
 
             result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
-            if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
-                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
+            if (getStartWith() != null && column.autoIncrementInformation.getStartWith() != null) {
+                result.assertCorrect(getStartWith().equals(column.autoIncrementInformation.getStartWith()), "startsWith incorrect");
             }
 
-            if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
-                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()), "Increment by incorrect");
+            if (getIncrementBy() != null && column.autoIncrementInformation.getIncrementBy() != null) {
+                result.assertCorrect(getIncrementBy().equals(column.autoIncrementInformation.getIncrementBy()), "Increment by incorrect");
             }
 
             return result;

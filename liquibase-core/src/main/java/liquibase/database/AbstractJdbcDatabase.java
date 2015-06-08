@@ -878,7 +878,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
             return false;
         } else if (object instanceof Column) {
-            return isLiquibaseObject(((Column) object).getRelation());
+            return isLiquibaseObject(((Column) object).relation);
         } else if (object instanceof Index) {
             return isLiquibaseObject(((Index) object).getTable());
         } else if (object instanceof PrimaryKey) {
@@ -922,12 +922,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
-        String name = this.escapeObjectName(objectName.get(ObjectName.Attr.name, String.class), objectType);
-        ObjectName container = objectName.get(ObjectName.Attr.container, ObjectName.class);
+        String name = this.escapeObjectName(objectName.name, objectType);
+        ObjectName container = objectName.container;
         int depth = 0;
-        while (depth++ < this.getMaxContainerDepth(objectType) && container != null && container.getName() != null) {
-            name = this.escapeObjectName(container.get(ObjectName.Attr.name, String.class), Schema.class) + "."+name;
-            container = container.get(ObjectName.Attr.container, ObjectName.class);
+        while (depth++ < this.getMaxContainerDepth(objectType) && container != null && container.name != null) {
+            name = this.escapeObjectName(container.name, Schema.class) + "."+name;
+            container = container.container;
         }
 
         return name;

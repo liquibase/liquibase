@@ -18,15 +18,15 @@ public class AddColumnsLogicMSSQL extends AddColumnsLogic {
     }
 
     @Override
-    protected String getDefaultValueClause(ColumnDefinition column, Action action, Scope scope) {
-        MSSQLDatabase database = scope.get(Scope.Attr.database, MSSQLDatabase.class);
+    protected String getDefaultValueClause(ColumnDefinition column, AddColumnsAction action, Scope scope) {
+        MSSQLDatabase database = (MSSQLDatabase) scope.getDatabase();
         String clause = super.getDefaultValueClause(column, action, scope);
 
         if (clause == null) {
             return null;
         } else {
             return "CONSTRAINT "
-                    + database.generateDefaultConstraintName(column.get(ColumnDefinition.Attr.columnName, ObjectName.class))
+                    + database.generateDefaultConstraintName(column.columnName)
                     + clause;
         }
 

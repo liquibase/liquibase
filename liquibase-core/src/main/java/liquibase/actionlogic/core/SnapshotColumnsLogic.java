@@ -40,8 +40,8 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
-    protected Action createSnapshotAction(Action action, Scope scope) throws DatabaseException, ActionPerformException {
-        DatabaseObject relatedTo = action.get(SnapshotDatabaseObjectsAction.Attr.relatedTo, DatabaseObject.class);
+    protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException, ActionPerformException {
+        DatabaseObject relatedTo = action.relatedTo;
 
         ObjectName relationName = null;
         String columnName = null;
@@ -63,7 +63,7 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         } else if (relatedTo instanceof Column) {
             columnName = relatedTo.getSimpleName();
 
-            Relation relation = ((Column) relatedTo).getRelation();
+            Relation relation = ((Column) relatedTo).relation;
             if (relation != null) {
                 relationName = relation.getName();
             }
@@ -76,14 +76,14 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         String tableName = null;
 
         if (relationName != null) {
-            tableName = relationName.getName();
-            ObjectName container = relationName.getContainer();
+            tableName = relationName.name;
+            ObjectName container = relationName.container;
             if (container != null) {
-                schemaName = container.getName();
-                container = container.getContainer();
+                schemaName = container.name;
+                container = container.container;
 
                 if (container != null) {
-                    catalogName = container.getName();
+                    catalogName = container.name;
                 }
             }
         }
@@ -93,8 +93,8 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
-    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, SnapshotDatabaseObjectsAction originalAction, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
         String rawTableName = StringUtils.trimToNull(row.get("TABLE_NAME", String.class));
         String rawColumnName = row.get("COLUMN_NAME", String.class);
@@ -121,8 +121,8 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         } else {
             container = new ObjectName(rawCatalogName, rawSchemaName);
         }
-        column.setRelation(new Table(new ObjectName(container, rawTableName)));
-        column.setRemarks(remarks);
+        column.relation = new Table(new ObjectName(container, rawTableName));
+        column.remarks = remarks;
 
 //        if (database instanceof OracleDatabase) {
 //            String nullable = row.getString("NULLABLE");
@@ -134,12 +134,12 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 //        } else {
         int nullable = row.get("NULLABLE", Integer.class);
         if (nullable == DatabaseMetaData.columnNoNulls) {
-            column.setNullable(false);
+            column.nullable = false;
         } else if (nullable == DatabaseMetaData.columnNullable) {
-            column.setNullable(true);
+            column.nullable = true;
         } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
             LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
-            column.setNullable(true);
+            column.nullable = true;
         }
 //        }
 
@@ -149,14 +149,14 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
                 String isAutoincrement = row.get("IS_AUTOINCREMENT", String.class);
                 isAutoincrement = StringUtils.trimToNull(isAutoincrement);
                 if (isAutoincrement == null) {
-                    column.setAutoIncrementInformation(null);
+                    column.autoIncrementInformation = null;
                 } else if (isAutoincrement.equals("YES")) {
-                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                    column.autoIncrementInformation = new Column.AutoIncrementInformation();
                 } else if (isAutoincrement.equals("NO")) {
-                    column.setAutoIncrementInformation(null);
+                    column.autoIncrementInformation =null;
                 } else if (isAutoincrement.equals("")) {
                     LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                    column.setAutoIncrementInformation(null);
+                    column.autoIncrementInformation = null;
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
                 }
@@ -204,9 +204,9 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
         }
 
         DataType type = readDataType(row, column, database);
-        column.setType(type);
+        column.type = type;
 
-        column.setDefaultValue(readDefaultValue(row, column, database));
+        column.defaultValue= readDefaultValue(row, column, database);
 
         return column;
     }
@@ -351,6 +351,6 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 //
 //        }
 
-        return SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.getType());
+        return SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.type);
     }
 }

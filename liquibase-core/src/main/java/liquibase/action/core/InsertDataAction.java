@@ -2,25 +2,26 @@ package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
+
+import java.util.List;
 
 public class InsertDataAction extends AbstractAction {
 
-    public static enum Attr {
-        tableName,
-        columnNames,
-        columnValues,
-    }
+    public ObjectName tableName;
+    public List<String> columnNames;
+    public List<Object> columnValues;
 
     public InsertDataAction() {
     }
 
     public InsertDataAction(ObjectName tableName) {
-        set(Attr.tableName, tableName);
+        this.tableName = tableName;
     }
 
     public InsertDataAction addColumnValue(String columnName, Object columnValue) {
-        add(Attr.columnNames, columnName);
-        add(Attr.columnValues, columnValue);
+        columnNames = CollectionUtil.createIfNull(columnNames, columnName);
+        columnValues = CollectionUtil.createIfNull(columnValues, columnValue);
 
         return this;
     }

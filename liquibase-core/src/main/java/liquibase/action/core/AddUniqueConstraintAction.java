@@ -3,28 +3,27 @@ package liquibase.action.core;
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
 
+import java.util.List;
+
 public class AddUniqueConstraintAction extends AbstractAction {
 
-    public static enum Attr {
-        tableName,
-        columnNames,
-        constraintName,
-        tablespace,
+    public ObjectName tableName;
+    public List<String> columnNames;
+    public String constraintName;
+    public String tablespace;
 
-        deferrable,
-        initiallyDeferred,
-        disabled,
-
-    }
+    public Boolean deferrable;
+    public Boolean initiallyDeferred;
+    public Boolean disabled;
 
     public AddUniqueConstraintAction() {
 
     }
 
-    public AddUniqueConstraintAction(ObjectName tableName, String constraintName, String[] columnNames) {
-        set(Attr.tableName, tableName);
-        set(Attr.columnNames, columnNames);
-        set(Attr.constraintName, constraintName);
+    public AddUniqueConstraintAction(ObjectName tableName, String constraintName, List<String> columnNames) {
+        this.tableName = tableName;
+        this.columnNames = columnNames;
+        this.constraintName = constraintName;
     }
 
 }

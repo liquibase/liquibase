@@ -23,15 +23,15 @@ public class AddAutoIncrementLogicMysql extends AddAutoIncrementLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddAutoIncrementAction action, Scope scope) throws ActionPerformException {
         DelegateResult result = (DelegateResult) super.execute(action, scope);
 
-        if (action.has(AddAutoIncrementAction.Attr.startWith)) {
+        if (action.startWith != null) {
             MySQLDatabase database = scope.get(Scope.Attr.database, MySQLDatabase.class);
 
             result = new DelegateResult(result, new AlterTableAction(
-                    action.get(AddAutoIncrementAction.Attr.columnName, ObjectName.class).getContainer(),
-                    new StringClauses().append(database.getTableOptionAutoIncrementStartWithClause(action.get(AddAutoIncrementAction.Attr.startWith, BigInteger.class)))));
+                    action.columnName.container,
+                    new StringClauses().append(database.getTableOptionAutoIncrementStartWithClause(action.startWith))));
 
         }
 

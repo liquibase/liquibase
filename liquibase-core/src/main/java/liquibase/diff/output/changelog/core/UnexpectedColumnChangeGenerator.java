@@ -38,21 +38,21 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
 //        if (!shouldModifyColumn(column)) {
 //            continue;
 //        }
-        if (column.getRelation() instanceof View) {
+        if (column.relation instanceof View) {
             return null;
         }
 
-        if (column.getRelation().getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
+        if (column.relation.getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
             return null;
         }
 
         DropColumnChange change = new DropColumnChange();
-        change.setTableName(column.getRelation().getSimpleName());
+        change.setTableName(column.relation.getSimpleName());
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(column.getRelation().getSchema().getCatalogName());
+            change.setCatalogName(column.relation.getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(column.getRelation().getSchema().getSimpleName());
+            change.setSchemaName(column.relation.getSchema().getSimpleName());
         }
         change.setColumnName(column.getSimpleName());
 

@@ -76,7 +76,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
         this.get("primaryKeyColumns", List.class).add(primaryKeyColumn);
-        primaryKeyColumn.setRelation(getPrimaryKeyTable());
+        primaryKeyColumn.relation = getPrimaryKeyTable();
 
         return this;
     }
@@ -84,7 +84,7 @@ public class ForeignKey extends AbstractDatabaseObject{
     public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
         this.set("primaryKeyColumns", primaryKeyColumns);
         for (Column column : getPrimaryKeyColumns()) {
-            column.setRelation(getPrimaryKeyTable());
+            column.relation = getPrimaryKeyTable();
         }
         return this;
     }
@@ -103,7 +103,7 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     public void addForeignKeyColumn(Column foreignKeyColumn) {
-        foreignKeyColumn.setRelation(getForeignKeyTable());
+        foreignKeyColumn.relation = getForeignKeyTable();
         get("foreignKeyColumns", List.class).add(foreignKeyColumn);
     }
 
@@ -111,7 +111,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         this.set("foreignKeyColumns", foreignKeyColumns);
 
         for (Column column : getForeignKeyColumns()) {
-            column.setRelation(getForeignKeyTable());
+            column.relation = getForeignKeyTable();
         }
 
         return this;

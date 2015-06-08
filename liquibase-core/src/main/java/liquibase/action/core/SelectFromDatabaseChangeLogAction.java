@@ -1,20 +1,27 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.util.CollectionUtil;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class SelectFromDatabaseChangeLogAction extends AbstractAction {
 
-    public static enum Attr {
-        selectColumnDefinitions,
-        where,
-        orderByColumnNames,
-        limit,
-    }
+    public List<ColumnDefinition> selectColumnDefinitions;
+    public StringClauses where;
+    public List<String> orderByColumnNames;
+    public Integer limit;
 
     public SelectFromDatabaseChangeLogAction() {
     }
 
-    public SelectFromDatabaseChangeLogAction(String[] selectColumnNames) {
-        set(Attr.selectColumnDefinitions, selectColumnNames);
+    public SelectFromDatabaseChangeLogAction(ColumnDefinition... selectColumnNames) {
+        this(Arrays.asList(CollectionUtil.createIfNull(selectColumnNames)));
+
+    }
+
+    public SelectFromDatabaseChangeLogAction(List<ColumnDefinition> selectColumnNames) {
+        this.selectColumnDefinitions = selectColumnNames;
     }
 }

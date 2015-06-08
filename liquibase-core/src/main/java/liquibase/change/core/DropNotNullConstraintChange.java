@@ -84,7 +84,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         try {
             Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
-            Boolean nullable = snapshot.isNullable();
+            Boolean nullable = snapshot.nullable;
             return new ChangeStatus().assertComplete(nullable == null || nullable, "Column is not null");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);

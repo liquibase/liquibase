@@ -19,7 +19,7 @@ public class SetNullableLogicH2 extends SetNullableLogic {
 
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(SetNullableAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .prepend("SET");
     }

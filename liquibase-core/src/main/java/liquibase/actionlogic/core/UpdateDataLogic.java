@@ -20,52 +20,54 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+import liquibase.util.CollectionUtil;
 
 import java.util.Date;
+import java.util.List;
 
-public class UpdateDataLogic extends AbstractSqlBuilderLogic {
+public class UpdateDataLogic extends AbstractSqlBuilderLogic<UpdateDataAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<UpdateDataAction> getSupportedAction() {
         return UpdateDataAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(UpdateDataAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope)
-                .checkForRequiredField(UpdateDataAction.Attr.tableName, action)
-                .checkForRequiredField(UpdateDataAction.Attr.columnNames, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("columnNames", action);
 
-        if (action.get(UpdateDataAction.Attr.columnNames, String[].class).length != action.get(UpdateDataAction.Attr.newColumnValues, Object[].class).length) {
+        if (CollectionUtil.createIfNull(action.columnNames).size() != CollectionUtil.createIfNull(action.newColumnValues).size()) {
             errors.addError("UpdateData columnNames and newColumnValues must be of the same length");
         }
         return errors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(UpdateDataAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new UpdateSqlAction(generateSql(action, scope).toString()));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        String[] columnNames = action.get(UpdateDataAction.Attr.columnNames, String[].class);
-        Object[] newValues = action.get(UpdateDataAction.Attr.newColumnValues, Object[].class);
-        String where = action.get(UpdateDataAction.Attr.whereClause, String.class);
-        String[] whereColumnNames = action.get(UpdateDataAction.Attr.whereColumnNames, new String[0]);
-        Object[] whereParams = action.get(UpdateDataAction.Attr.whereParameters, new Object[0]);
+    protected StringClauses generateSql(UpdateDataAction action, Scope scope) {
+        Database database = scope.getDatabase();
+        List<String> columnNames = action.columnNames;
+        List<Object> newValues = action.newColumnValues;
+        StringClauses where = action.whereClause;
+        List<String> whereColumnNames = CollectionUtil.createIfNull(action.whereColumnNames);
+        List<Object> whereParams = CollectionUtil.createIfNull(action.whereParameters);
 
         StringClauses clauses = new StringClauses()
                 .append("UPDATE")
-                .append(database.escapeObjectName(action.get(UpdateDataAction.Attr.tableName, ObjectName.class), Table.class))
+                .append(database.escapeObjectName(action.tableName, Table.class))
                 .append("SET");
-        for (int i = 0; i < columnNames.length; i++) {
+        for (int i = 0; i < columnNames.size(); i++) {
             clauses.append(
-                    database.escapeObjectName(columnNames[i], Column.class)
-                            +" = "
-                            + convertToString(newValues[i], database)
-                            + (i < columnNames.length?", ": "")
+                    database.escapeObjectName(columnNames.get(i), Column.class)
+                            + " = "
+                            + convertToString(newValues.get(i), database)
+                            + (i < columnNames.size() ? ", " : "")
             );
         }
 

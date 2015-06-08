@@ -40,7 +40,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         for (Table table : snapshot.get(Table.class)) {
             for (Column column : table.getColumns()) {
                 if (column.getSimpleName().toLowerCase().endsWith("_default")) {
-                    Object defaultValue = column.getDefaultValue();
+                    Object defaultValue = column.defaultValue;
                     assertNotNull("Null default value for " + table.getName() + "." + column.getName(), defaultValue);
                     if (column.getSimpleName().toLowerCase().contains("date") || column.getSimpleName().toLowerCase().contains("time")) {
                         if (defaultValue instanceof DatabaseFunction) {

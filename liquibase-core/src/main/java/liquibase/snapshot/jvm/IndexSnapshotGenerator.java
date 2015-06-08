@@ -171,11 +171,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     String ascOrDesc = row.getString("ASC_OR_DESC");
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
+                    Column column = new Column(row.getString("COLUMN_NAME"));
+                    column.computed = false;
+                    column.descending = descending;
+                    column.relation = index.getTable();
+                    index.addColumn(column);
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {
-                    table.getIndexes().add(exampleIndex);
+                    table.indexes.add(exampleIndex);
                 }
 
             } catch (Exception e) {
@@ -304,9 +308,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (definition == null) {
                     String ascOrDesc = row.getString("ASC_OR_DESC");
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                    Column column = new Column(columnName);
+                    column.descending = descending;
+                    column.relation = returnIndex.getTable();
+                    returnIndex.getColumns().set(position - 1, column);
                 } else {
-                    returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                    Column column = new Column();
+                    column.relation = returnIndex.getTable();
+                    column.setName(definition, true);
+                    returnIndex.getColumns().set(position - 1, column);
                 }
             }
         } catch (Exception e) {

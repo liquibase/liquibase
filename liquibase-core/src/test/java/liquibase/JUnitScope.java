@@ -14,6 +14,11 @@ public class JUnitScope extends Scope {
 
     private static Scope instance;
 
+    public enum Attr {
+        connectionSupplier,
+    }
+
+
     private JUnitScope() throws Exception {
         super(new JUnitResourceAccessor(), new HashMap<String, Object>());
     }
@@ -30,10 +35,12 @@ public class JUnitScope extends Scope {
     }
 
     public static Scope getInstance(Database database) {
-        return instance.child(Attr.database, database);
+        return instance.child(Scope.Attr.database, database);
     }
 
     public static Scope getInstance(ConnectionSupplier supplier) {
-        return instance.child(Attr.database, supplier.getDatabase());
+        return instance
+                .child(Scope.Attr.database, supplier.getDatabase())
+                .child(Attr.connectionSupplier, supplier);
     }
 }

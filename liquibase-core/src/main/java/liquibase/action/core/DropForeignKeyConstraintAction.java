@@ -1,11 +1,10 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class DropForeignKeyConstraintAction extends AbstractAction {
-    
-    public static enum Attr {
-        baseTableName,
-        constraintName,
-    }
+
+    public ObjectName baseTableName;
+    public String constraintName;
 }

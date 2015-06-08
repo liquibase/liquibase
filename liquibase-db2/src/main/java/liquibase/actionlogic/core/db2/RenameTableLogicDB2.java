@@ -22,14 +22,14 @@ public class RenameTableLogicDB2 extends RenameTableLogic {
 
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(RenameTableAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "RENAME TABLE "
-                        + database.escapeObjectName(action.get(RenameTableAction.Attr.oldTableName, ObjectName.class), Table.class)
+                        + database.escapeObjectName(action.oldTableName, Table.class)
                         + " TO "
-                        + database.escapeObjectName(action.get(RenameTableAction.Attr.newTableName, ObjectName.class), Table.class)
+                        + database.escapeObjectName(action.newTableName, Table.class)
         ),
-                new ReorganizeTableAction(action.get(RenameTableAction.Attr.newTableName, ObjectName.class)));
+                new ReorganizeTableAction(action.newTableName));
     }
 }

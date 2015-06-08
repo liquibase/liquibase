@@ -12,16 +12,16 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 
-public class InitializeDatabaseChangeLogLockTableLogic extends AbstractActionLogic {
+public class InitializeDatabaseChangeLogLockTableLogic extends AbstractActionLogic<InitializeDatabaseChangeLogLockTableAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<InitializeDatabaseChangeLogLockTableAction> getSupportedAction() {
         return InitializeDatabaseChangeLogLockTableAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(InitializeDatabaseChangeLogLockTableAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
         return new DelegateResult(
                 new DeleteDataAction(tableName),

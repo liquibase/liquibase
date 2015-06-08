@@ -2,6 +2,7 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.StringClauses;
 import liquibase.action.core.TagDatabaseAction;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -12,31 +13,31 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class TagDatabaseLogic extends AbstractActionLogic {
+public class TagDatabaseLogic extends AbstractActionLogic<TagDatabaseAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<TagDatabaseAction> getSupportedAction() {
         return TagDatabaseAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(TagDatabaseAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(TagDatabaseAction.Attr.tag, action);
+                .checkForRequiredField("tag", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(TagDatabaseAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         UpdateDataAction updateDataAction = new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
-        updateDataAction.addNewColumnValue("TAG", action.get(TagDatabaseAction.Attr.tag, String.class));
-        updateDataAction.set(UpdateDataAction.Attr.whereClause, generateWhereClause(action, scope));
+        updateDataAction.addNewColumnValue("TAG", action.tag);
+        updateDataAction.whereClause = generateWhereClause(action, scope);
 
         return new DelegateResult(updateDataAction);
     }
 
-    protected String generateWhereClause(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        return "DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + ")";
+    protected StringClauses generateWhereClause(TagDatabaseAction action, Scope scope) {
+        Database database = scope.getDatabase();
+        return new StringClauses("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + ")");
     }
 }

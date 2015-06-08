@@ -1,11 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class ModifyDataTypeAction extends AbstractAction {
-    public static enum Attr {
-        columnName,
-        newDataType,
-
-    }
+    public ObjectName columnName;
+    public String newDataType;
 }

@@ -12,11 +12,11 @@ import liquibase.structure.ObjectName;
 
 public class SetNullableLogicDerby extends SetNullableLogic {
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(SetNullableAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
                 (DelegateResult) super.execute(action, scope),
                 (ReorganizeTableAction) new ReorganizeTableAction(
-                        action.get(SetNullableAction.Attr.columnName, ObjectName.class).getContainer()
+                        action.columnName.container
                 ));
     }
 }

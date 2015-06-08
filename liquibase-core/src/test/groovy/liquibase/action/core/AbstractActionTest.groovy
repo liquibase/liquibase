@@ -51,7 +51,7 @@ abstract class AbstractActionTest extends Specification {
 
 
     def cleanupDatabase(Snapshot snapshot, ConnectionSupplier supplier, scope) {
-        Database database = scope.get(Scope.Attr.database, Database)
+        Database database = scope.database
         if (database instanceof UnsupportedDatabase) {
             return;
         }

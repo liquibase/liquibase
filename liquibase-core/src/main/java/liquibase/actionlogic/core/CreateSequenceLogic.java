@@ -13,51 +13,54 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Sequence;
+import liquibase.util.ObjectUtil;
 
-public class CreateSequenceLogic extends AbstractSqlBuilderLogic {
+import java.math.BigInteger;
+
+public class CreateSequenceLogic extends AbstractSqlBuilderLogic<CreateSequenceAction> {
 
     public static enum Clauses {
         sequenceName, startWith, incrementBy, maxValue, minValue,
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<CreateSequenceAction> getSupportedAction() {
         return CreateSequenceAction.class;
     }
 
     @Override
     protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class).supportsSequences();
+        return super.supportsScope(scope) && scope.getDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateSequenceAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
 
-        errors.checkForRequiredField(CreateSequenceAction.Attr.sequenceName, action);
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.cacheSize, action, scope.get(Scope.Attr.database, Database.class).getShortName());
+        errors.checkForRequiredField("sequenceName", action);
+        errors.checkForDisallowedField("cacheSize", action, scope.getDatabase().getShortName());
 
         return errors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(CreateSequenceAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new ExecuteSqlAction(generateSql(action, scope).toString()));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        String incrementBy = action.get(CreateSequenceAction.Attr.incrementBy, String.class);
-        String minValue = action.get(CreateSequenceAction.Attr.minValue, String.class);
-        String maxValue = action.get(CreateSequenceAction.Attr.maxValue, String.class);
-        String startValue = action.get(CreateSequenceAction.Attr.startValue, String.class);
-        boolean cycle = action.get(CreateSequenceAction.Attr.cycle, false);
+    protected StringClauses generateSql(CreateSequenceAction action, Scope scope) {
+        Database database = scope.getDatabase();
+        BigInteger incrementBy = action.incrementBy;
+        BigInteger minValue = action.minValue;
+        BigInteger maxValue = action.maxValue;
+        BigInteger startValue = action.startValue;
+        boolean cycle = ObjectUtil.defaultIfEmpty(action.cycle, false);
 
         StringClauses clauses = new StringClauses();
 
         clauses.append("CREATE SEQUENCE");
-        clauses.append(database.escapeObjectName(action.get(CreateSequenceAction.Attr.sequenceName, ObjectName.class), Sequence.class));
+        clauses.append(database.escapeObjectName(action.sequenceName, Sequence.class));
 
         clauses.append(Clauses.startWith, startValue == null?null:"START WITH " + startValue);
         clauses.append(Clauses.incrementBy, incrementBy == null?null:"INCREMENT BY " + incrementBy);

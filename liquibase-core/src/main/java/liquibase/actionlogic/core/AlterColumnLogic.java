@@ -3,6 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
+import liquibase.action.core.AddColumnsAction;
 import liquibase.action.core.AlterColumnAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
@@ -14,29 +15,29 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-public class AlterColumnLogic extends AbstractActionLogic {
+public class AlterColumnLogic extends AbstractActionLogic<AlterColumnAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AlterColumnAction> getSupportedAction() {
         return AlterColumnAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AlterColumnAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(AlterColumnAction.Attr.columnName, action)
-                .checkForRequiredContainer("Table name is required", AlterColumnAction.Attr.columnName, action)
-                .checkForRequiredField(AlterColumnAction.Attr.newDefinition, action);
+                .checkForRequiredField("columnName", action)
+                .checkForRequiredContainer("Table name is required", "columnName", action)
+                .checkForRequiredField("newDefinition", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(AlterColumnAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction("ALTER TABLE "
-                + database.escapeObjectName(action.get(AlterColumnAction.Attr.columnName, ObjectName.class).getContainer(), Table.class)
+                + database.escapeObjectName(action.columnName.container, Table.class)
                 + " ALTER COLUMN "
-                + database.escapeObjectName(action.get(AlterColumnAction.Attr.columnName, String.class), Column.class)
+                + database.escapeObjectName(action.columnName, Column.class)
                 + " "
-                + action.get(AlterColumnAction.Attr.newDefinition, String.class).trim()));
+                + action.newDefinition.toString().trim()));
     }
 }

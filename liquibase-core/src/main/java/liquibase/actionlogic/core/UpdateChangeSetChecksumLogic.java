@@ -1,7 +1,9 @@
 package liquibase.actionlogic.core;
 
+import liquibase.ExtensibleObject;
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.StringClauses;
 import liquibase.action.core.UpdateChangeSetChecksumAction;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -13,26 +15,30 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class UpdateChangeSetChecksumLogic extends AbstractActionLogic {
+import java.util.Arrays;
+import java.util.List;
+
+public class UpdateChangeSetChecksumLogic extends AbstractActionLogic<UpdateChangeSetChecksumAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<UpdateChangeSetChecksumAction> getSupportedAction() {
         return UpdateChangeSetChecksumAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(UpdateChangeSetChecksumAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(UpdateChangeSetChecksumAction.Attr.changeSet, action);
+                .checkForRequiredField("changeSet", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        ChangeSet changeSet = action.get(UpdateChangeSetChecksumAction.Attr.changeSet, ChangeSet.class);
-        return new DelegateResult((Action) new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
-                .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
-                .set(UpdateDataAction.Attr.whereClause, "ID=? AND AUTHOR=? AND FILENAME=?")
-                .set(UpdateDataAction.Attr.whereParameters, new Object[]{changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()}));
+    public ActionResult execute(UpdateChangeSetChecksumAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
+        ChangeSet changeSet = action.changeSet;
+        UpdateDataAction updateDataAction = new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
+                .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
+        updateDataAction.whereClause = new StringClauses("ID=? AND AUTHOR=? AND FILENAME=?");
+        updateDataAction.whereParameters = Arrays.asList((Object) changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+        return new DelegateResult((Action) updateDataAction);
     }
 }

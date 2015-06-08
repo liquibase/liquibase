@@ -31,8 +31,8 @@ public class CollectionUtil {
 
         int i=0;
         LinkedHashMap<String, List<T>> map = new LinkedHashMap<>();
-        for (List<T> value : parameterValues) {
-            map.put(String.valueOf(i++), value);
+        for (Collection<T> value : parameterValues) {
+            map.put(String.valueOf(i++), new ArrayList<T>(value));
         }
 
         for (Map<String, T> permutation : permutations(map)) {
@@ -76,4 +76,38 @@ public class CollectionUtil {
         }
     }
 
+    public static boolean hasValue(List value) {
+        return value != null && value.size() > 0;
+    }
+
+    /**
+     * Convenience method returns passed currentValue if it is not null and creates a new ArrayList if it is null.
+     * <br><br>
+     * Example: values = createIfNull(values)
+     */
+    public static <T> List<T> createIfNull(List<T> currentValue) {
+        if (currentValue == null) {
+            return new ArrayList<T>();
+        } else {
+            return currentValue;
+        }
+    }
+
+    /**
+     * Convenience method like {@link #createIfNull(List)} but also adds the given valueToAdd after the collection is ensured to exist.
+     */
+    public static <T> List<T> createIfNull(List<T> currentValue, T valueToAdd) {
+        List<T> list = createIfNull(currentValue);
+        list.add(valueToAdd);
+
+        return list;
+    }
+
+    public static <T> T[] createIfNull(T[] arguments) {
+        if (arguments == null) {
+            return (T[]) new Object[0];
+        } else {
+            return arguments;
+        }
+    }
 }

@@ -15,11 +15,11 @@ public class ModifyDataTypeLogicMysql extends ModifyDataTypeLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(ModifyDataTypeAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
 
         if (!errors.hasErrors()) {
-            String newType = action.get(ModifyDataTypeAction.Attr.newDataType, String.class);
+            String newType = action.newDataType;
             if (!newType.toLowerCase().contains("varchar")) {
                 errors.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
             }

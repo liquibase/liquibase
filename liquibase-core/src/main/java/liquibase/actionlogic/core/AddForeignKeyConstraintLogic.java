@@ -13,8 +13,9 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
+import liquibase.util.ObjectUtil;
 
-public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
+public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<AddForeignKeyConstraintAction> {
 
     public static enum Clauses {
         constraintName,
@@ -22,54 +23,54 @@ public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AddForeignKeyConstraintAction> getSupportedAction() {
         return AddForeignKeyConstraintAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AddForeignKeyConstraintAction action, Scope scope) {
         ValidationErrors validationErrors = super.validate(action, scope);
 
-        Database database = scope.get(Scope.Attr.database, Database.class);
+        Database database = scope.getDatabase();
 
         if (!database.supportsInitiallyDeferrableColumns()) {
-            validationErrors.checkForDisallowedField(AddForeignKeyConstraintAction.Attr.initiallyDeferred, action, database.getShortName());
-            validationErrors.checkForDisallowedField(AddForeignKeyConstraintAction.Attr.deferrable, action, database.getShortName());
+            validationErrors.checkForDisallowedField("initiallyDeferred", action, database.getShortName());
+            validationErrors.checkForDisallowedField("deferrable", action, database.getShortName());
         }
 
-        validationErrors.checkForRequiredField(AddForeignKeyConstraintAction.Attr.baseColumnNames, action);
-        validationErrors.checkForRequiredField(AddForeignKeyConstraintAction.Attr.baseTableName, action);
-        validationErrors.checkForRequiredField(AddForeignKeyConstraintAction.Attr.referencedColumnNames, action);
-        validationErrors.checkForRequiredField(AddForeignKeyConstraintAction.Attr.referencedTableName, action);
-        validationErrors.checkForRequiredField(AddForeignKeyConstraintAction.Attr.constraintName, action);
+        validationErrors.checkForRequiredField("baseColumnNames", action);
+        validationErrors.checkForRequiredField("baseTableName", action);
+        validationErrors.checkForRequiredField("referencedColumnNames", action);
+        validationErrors.checkForRequiredField("referencedTableName", action);
+        validationErrors.checkForRequiredField("constraintName", action);
 
         return validationErrors;
     }
 
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(AddForeignKeyConstraintAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         StringClauses clauses = new StringClauses()
                 .append("ADD CONSTRAINT")
-                .append(AddForeignKeyConstraintLogic.Clauses.constraintName, action.get(AddForeignKeyConstraintAction.Attr.constraintName, String.class))
+                .append(AddForeignKeyConstraintLogic.Clauses.constraintName, action.constraintName)
                 .append("FOREIGN KEY")
-                .append(Clauses.baseColumnNames, "(" + database.escapeColumnNameList(action.get(AddForeignKeyConstraintAction.Attr.baseColumnNames, String.class)) + ")")
+                .append(Clauses.baseColumnNames, "(" + database.escapeColumnNameList(action.baseColumnNames) + ")")
                 .append("REFERENCES")
-                .append(Clauses.referencedTableName, database.escapeObjectName(action.get(AddForeignKeyConstraintAction.Attr.referencedTableName, ObjectName.class), Table.class))
-                .append(Clauses.referencedColumnNames, "(" + database.escapeColumnNameList(action.get(AddForeignKeyConstraintAction.Attr.referencedColumnNames, String.class)) + ")");
+                .append(Clauses.referencedTableName, database.escapeObjectName(action.referencedTableName, Table.class))
+                .append(Clauses.referencedColumnNames, "(" + database.escapeColumnNameList(action.referencedColumnNames) + ")");
 
-        if (action.get(AddForeignKeyConstraintAction.Attr.onUpdate, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.onUpdate, false)) {
             clauses.append("ON UPDATE");
         }
 
-        String onDelete = action.get(AddForeignKeyConstraintAction.Attr.onDelete, String.class);
+        String onDelete = action.onDelete;
         if (onDelete != null) {
             clauses.append("ON DELETE " + onDelete);
         }
 
 
-        boolean deferrable = action.get(AddForeignKeyConstraintAction.Attr.deferrable, false);
-        boolean initiallyDeferred = action.get(AddForeignKeyConstraintAction.Attr.initiallyDeferred, false);
+        boolean deferrable = ObjectUtil.defaultIfEmpty(action.deferrable, false);
+        boolean initiallyDeferred = ObjectUtil.defaultIfEmpty(action.initiallyDeferred, false);
         if (deferrable || initiallyDeferred) {
             if (deferrable) {
                 clauses.append("DEFERRABLE");
@@ -84,10 +85,10 @@ public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic{
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddForeignKeyConstraintAction action, Scope scope) throws ActionPerformException {
 
         return new DelegateResult(new AlterTableAction(
-                action.get(AddForeignKeyConstraintAction.Attr.baseTableName, ObjectName.class),
+                action.baseTableName,
                 generateSql(action, scope)
         ));
     }

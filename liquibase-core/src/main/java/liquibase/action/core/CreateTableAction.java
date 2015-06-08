@@ -7,23 +7,24 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
 
+import java.math.BigInteger;
 import java.util.*;
 
 public class CreateTableAction extends AbstractAction {
 
-    public static enum Attr {
-        tableName,
-        tablespace,
-        remarks,
-        columnDefinitions,
-        autoIncrementColumnName,
-        autoIncrementStartWith,
-        autoIncrementBy,
-        primaryKeyName,
-        foreignKeyDefinitions,
-        primaryKeyTablespace, uniqueConstraintDefinitions
-    }
+    public ObjectName tableName;
+    public String tablespace;
+    public String remarks;
+    public List<ColumnDefinition> columnDefinitions;
+    public String autoIncrementColumnName;
+    public BigInteger autoIncrementStartWith;
+    public BigInteger autoIncrementBy;
+    public String primaryKeyName;
+    public List<ForeignKeyDefinition> foreignKeyDefinitions;
+    public String primaryKeyTablespace;
+    public List<UniqueConstraintDefinition> uniqueConstraintDefinitions;
 
 
     public CreateTableAction() {
@@ -31,7 +32,7 @@ public class CreateTableAction extends AbstractAction {
 
 
     public CreateTableAction(ObjectName tableName) {
-        set(Attr.tableName, tableName);
+        this.tableName = tableName;
     }
 
     public CreateTableAction addColumn(ObjectName columnName, String type) {
@@ -43,10 +44,10 @@ public class CreateTableAction extends AbstractAction {
     }
 
     public CreateTableAction addColumn(ColumnDefinition columnDefinition) {
-        if (!has(Attr.columnDefinitions)) {
-            set(Attr.columnDefinitions, new ArrayList<ColumnDefinition>());
+        if (!CollectionUtil.hasValue(columnDefinitions)) {
+            this.columnDefinitions = new ArrayList<>();
         }
-        get(Attr.columnDefinitions, List.class).add(columnDefinition);
+        columnDefinitions.add(columnDefinition);
 
         return this;
     }

@@ -12,23 +12,25 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 
-public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic {
+public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic<SelectFromDatabaseChangeLogAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<SelectFromDatabaseChangeLogAction> getSupportedAction() {
         return SelectFromDatabaseChangeLogAction.class;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        final Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(SelectFromDatabaseChangeLogAction action, Scope scope) throws ActionPerformException {
+        final Database database = scope.getDatabase();
 
-        return new DelegateResult(
-                (SelectDataAction) new SelectDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()),
-                        action.get(SelectFromDatabaseChangeLogAction.Attr.selectColumnDefinitions, ColumnDefinition[].class))
-                        .set(SelectDataAction.Attr.where, action.get(SelectFromDatabaseChangeLogAction.Attr.where, String.class))
-                        .set(SelectDataAction.Attr.orderByColumnNames, action.get(SelectFromDatabaseChangeLogAction.Attr.orderByColumnNames, Object.class))
-                        .set(SelectDataAction.Attr.limit, action.get(SelectFromDatabaseChangeLogAction.Attr.limit, Integer.class))
+        SelectDataAction selectDataAction = new SelectDataAction(
+                new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()),
+                action.selectColumnDefinitions
         );
+        selectDataAction.where = action.where;
+        selectDataAction.orderByColumnNames = action.orderByColumnNames;
+        selectDataAction.limit = action.limit;
+
+        return new DelegateResult(selectDataAction);
     }
 }

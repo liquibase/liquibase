@@ -28,11 +28,15 @@ public class ValidationErrors {
      * More convenient version of {@link #checkRequiredField(String, Object)} that doesn't require you to lookup the value first.
      * Instead, simply pass the field and the base object.
      */
-    public ValidationErrors checkForRequiredField(Enum requiredFieldName, ExtensibleObject object) {
+    public ValidationErrors checkForRequiredField(String requiredFieldName, ExtensibleObject object) {
         Object value = object.get(requiredFieldName, Object.class);
-        checkRequiredField(requiredFieldName.name(), value);
+        checkRequiredField(requiredFieldName, value);
 
         return this;
+    }
+
+    public ValidationErrors checkForRequiredField(Enum requiredFieldName, ExtensibleObject object) {
+        return checkForRequiredField(requiredFieldName.name(), object);
     }
 
     /**
@@ -77,13 +81,15 @@ public class ValidationErrors {
      * More convenient version of {@link #checkDisallowedField(String, Object, String)} that doesn't require you to lookup the value first.
      * Instead, simply pass the field and the base object.
      */
-    public ValidationErrors checkForDisallowedField(Enum disallowedField, ExtensibleObject object, String scopeDescription) {
+    public ValidationErrors checkForDisallowedField(String disallowedField, ExtensibleObject object, String scopeDescription) {
         Object value = object.get(disallowedField, Object.class);
-        checkDisallowedField(disallowedField.name(), value, scopeDescription);
+        checkDisallowedField(disallowedField, value, scopeDescription);
 
         return this;
+    }
 
-
+    public ValidationErrors checkForDisallowedField(Enum disallowedField, ExtensibleObject object, String scopeDescription) {
+        return checkForDisallowedField(disallowedField.name(), object, scopeDescription);
     }
 
     public void checkDisallowedField(String disallowedFieldName, Object value, String scopeDescription) {
@@ -178,6 +184,10 @@ public class ValidationErrors {
         return this;
     }
 
+    public ValidationErrors removeUnsupportedField(String field) {
+        return this;
+    }
+
     public ValidationErrors check(String errorMessage, ErrorCheck check) {
         if (!hasErrors()) {
             if (!check.check()) {
@@ -201,9 +211,9 @@ public class ValidationErrors {
     public ValidationErrors checkForRequiredContainer(String errorMessage, String field, Action action) {
         ObjectName objectName = action.get(field, ObjectName.class);
         if (objectName != null) {
-            if (objectName.getContainer() == null) {
+            if (objectName.container == null) {
                 addError(errorMessage);
-            } else if (objectName.getContainer().getName() == null) {
+            } else if (objectName.container.name == null) {
                 addError(errorMessage);
             }
         }

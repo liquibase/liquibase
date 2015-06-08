@@ -21,6 +21,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -46,11 +47,11 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         Index index = (Index) changedObject;
 
         if (index.getTable() != null) {
-            if (index.getTable().getPrimaryKey() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().getPrimaryKey().getBackingIndex(), changedObject, comparisonDatabase)) {
-                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().getPrimaryKey(), differences, control, referenceDatabase, comparisonDatabase);
+            if (index.getTable().primaryKey != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().primaryKey.getBackingIndex(), changedObject, comparisonDatabase)) {
+                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().primaryKey, differences, control, referenceDatabase, comparisonDatabase);
             }
 
-            List<UniqueConstraint> uniqueConstraints = index.getTable().getUniqueConstraints();
+            Set<UniqueConstraint> uniqueConstraints = index.getTable().uniqueConstraints;
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, comparisonDatabase)) {

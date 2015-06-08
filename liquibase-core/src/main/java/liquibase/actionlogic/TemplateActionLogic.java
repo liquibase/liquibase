@@ -170,7 +170,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
 
         if (unsupportedAttributes != null) {
             for (String attr : unsupportedAttributes) {
-                validate.checkDisallowedField(attr, action.get(attr, Object.class), scope.get(Scope.Attr.database, Database.class).getShortName());
+                validate.checkDisallowedField(attr, action.get(attr, Object.class), scope.getDatabase().getShortName());
             }
         }
         return validate;
@@ -283,7 +283,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
     }
 
     protected String escapeName(String[] args, Action action, Scope scope) throws ParseException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+        Database database = scope.getDatabase();
 
         String className;
         if (args.length == 2) {

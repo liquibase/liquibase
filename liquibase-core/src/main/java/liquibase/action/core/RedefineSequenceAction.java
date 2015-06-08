@@ -5,17 +5,15 @@ import liquibase.structure.ObjectName;
 
 public class RedefineSequenceAction extends AbstractAction {
 
-    public static enum Attr {
-        sequenceName,
-        newDefinition
-    }
+    public ObjectName sequenceName;
+    public StringClauses newDefinition;
 
     public RedefineSequenceAction() {
     }
 
     public RedefineSequenceAction(ObjectName sequenceName, StringClauses newDefinition) {
-        set(Attr.sequenceName, sequenceName);
-        set(Attr.newDefinition, newDefinition);
+        this.sequenceName = sequenceName;
+        this.newDefinition = newDefinition;
     }
 
 }

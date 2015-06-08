@@ -17,7 +17,7 @@ class SnapshotTablesLogicTest extends Specification {
         when:
         def database = new MockDatabase();
         database.setMaxContainerDepth(maxDepth)
-        def scope = JUnitScope.instance.child(Scope.Attr.database, database)
+        def scope = JUnitScope.getInstance(database)
 
         def object = new SnapshotTablesLogic().convertToObject(new RowBasedQueryResult.Row([
                 TABLE_CAT  : tableCat,

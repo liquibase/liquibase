@@ -17,7 +17,11 @@ public class TestObjectFactory {
         for (Collection<String> paramsToSet : parameterSets) {
             Map<String, List<Object>> parameterValues = new HashMap<>();
             for (String param : paramsToSet) {
-                parameterValues.put(param, new ArrayList(getTestValues(param, defaultValues)));
+                def values = getTestValues(param, defaultValues)
+                if (values != null && values.size() > 0) {
+                    parameterValues.put(param, new ArrayList(values));
+                }
+
             }
 
             for (Map<String, ?> valuePermutation : CollectionUtil.permutations(parameterValues)) {

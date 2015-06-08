@@ -18,19 +18,19 @@ public class SetNullableLogicInformix extends SetNullableLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(SetNullableAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SetNullableAction.Attr.columnDataType, action);
+                .checkForRequiredField("columnDataType", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(SetNullableAction action, Scope scope) {
+        Database database = scope.getDatabase();
         StringClauses clauses = super.generateSql(action, scope);
         // Informix simply omits the null for nullables
         clauses.remove("NULL");
 
-        return clauses.prepend(DataTypeFactory.getInstance().fromDescription(action.get(SetNullableAction.Attr.columnDataType, String.class), database).toDatabaseDataType(database).toSql());
+        return clauses.prepend(DataTypeFactory.getInstance().fromDescription(action.columnDataType, database).toDatabaseDataType(database).toSql());
     }
 
 }

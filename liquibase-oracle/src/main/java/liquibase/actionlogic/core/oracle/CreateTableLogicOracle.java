@@ -18,12 +18,12 @@ public class CreateTableLogicOracle extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
         String primaryKeyDef = clauses.get(Clauses.primaryKey);
         if (primaryKeyDef != null) {
-            String primaryKeyTablespace = action.get(CreateTableAction.Attr.primaryKeyTablespace, String.class);
+            String primaryKeyTablespace = action.primaryKeyTablespace;
             if (primaryKeyTablespace != null) {
                 clauses.append("USING INDEX TABLESPACE "+primaryKeyTablespace);
             }
@@ -33,7 +33,7 @@ public class CreateTableLogicOracle extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateColumnSql(ColumnDefinition column, Action action, Scope scope, List<Action> additionalActions) {
+    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         StringClauses clauses = super.generateColumnSql(column, action, scope, additionalActions);
 
         String defaultValue = clauses.get(ColumnClauses.defaultValue);

@@ -17,36 +17,37 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.CollectionUtil;
 
-public class DropColumnsLogic extends AbstractActionLogic {
+public class DropColumnsLogic extends AbstractActionLogic<DropColumnsAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropColumnsAction> getSupportedAction() {
         return DropColumnsAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropColumnsAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
-        errors.checkForRequiredField(DropColumnsAction.Attr.tableName, action);
-        errors.checkForRequiredField(DropColumnsAction.Attr.columnNames, action);
+        errors.checkForRequiredField("tableName", action);
+        errors.checkForRequiredField("columnNames", action);
         return errors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(DropColumnsAction action, Scope scope) throws ActionPerformException {
         List<Action> actions = new ArrayList<>();
-        for (String column : action.get(DropColumnsAction.Attr.columnNames, String[].class)) {
+        for (String column : CollectionUtil.createIfNull(action.columnNames)) {
             actions.add(new ExecuteSqlAction(generateDropSql(column, action, scope).toString()));
         }
         return new DelegateResult(actions);
     }
 
-    protected StringClauses generateDropSql(String column, Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateDropSql(String column, DropColumnsAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         return new StringClauses()
-                .append("ALTER TABLE " + database.escapeObjectName(action.get(DropColumnsAction.Attr.tableName, ObjectName.class), Table.class))
+                .append("ALTER TABLE " + database.escapeObjectName(action.tableName, Table.class))
                         .append("DROP COLUMN")
                         .append(database.escapeObjectName(column, Column.class));
     }

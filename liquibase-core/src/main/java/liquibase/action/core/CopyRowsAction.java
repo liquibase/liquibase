@@ -1,15 +1,16 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
+
+import java.util.List;
 
 public class CopyRowsAction extends AbstractAction {
 
-    public static enum Attr {
-        sourceTableName,
+    public ObjectName sourceTableName;
 
-        targetTableName,
+    public ObjectName targetTableName;
 
-        sourceColumns,
-        targetColumns,
-    }
+    public List<String> sourceColumns;
+    public List<String> targetColumns;
 }

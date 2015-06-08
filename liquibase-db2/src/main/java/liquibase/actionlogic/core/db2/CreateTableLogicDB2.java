@@ -16,10 +16,10 @@ public class CreateTableLogicDB2 extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.get(CreateTableAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "IN "+tablespace);
         }

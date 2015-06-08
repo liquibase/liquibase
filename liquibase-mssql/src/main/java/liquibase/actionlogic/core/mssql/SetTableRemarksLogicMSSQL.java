@@ -17,11 +17,11 @@ public class SetTableRemarksLogicMSSQL extends SetTableRemarksLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(SetTableRemarksAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         return new StringClauses().append("ALTER TABLE")
-                .append(database.escapeObjectName(action.get(SetTableRemarksAction.Attr.tableName, ObjectName.class), Table.class))
-                .append("COMMENT = '" + database.escapeStringForDatabase(action.get(SetTableRemarksAction.Attr.remarks, String.class)) + "'");
+                .append(database.escapeObjectName(action.tableName, Table.class))
+                .append("COMMENT = '" + database.escapeStringForDatabase(action.remarks) + "'");
     }
 }

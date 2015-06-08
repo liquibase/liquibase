@@ -13,6 +13,7 @@ import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.View;
+import liquibase.util.ObjectUtil;
 
 public class CreateViewLogicPostgresql extends CreateViewLogic {
     @Override
@@ -21,11 +22,11 @@ public class CreateViewLogicPostgresql extends CreateViewLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(CreateViewAction action, Scope scope) throws ActionPerformException {
         ActionResult result = super.execute(action, scope);
-        if (action.get(CreateViewAction.Attr.replaceIfExists, false)) {
-            Database database = scope.get(Scope.Attr.database, Database.class);
-            ObjectName viewName = action.get(CreateViewAction.Attr.viewName, ObjectName.class);
+        if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {
+            Database database = scope.getDatabase();
+            ObjectName viewName = action.viewName;
 
             return new DelegateResult(
                     new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeObjectName(viewName, View.class)),
@@ -36,10 +37,10 @@ public class CreateViewLogicPostgresql extends CreateViewLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateViewAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        if (action.get(CreateViewAction.Attr.replaceIfExists, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {
             clauses.replace(Clauses.createStatement, "CREATE VIEW");
         }
 

@@ -16,41 +16,43 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-public class CopyRowsLogic extends AbstractActionLogic {
+import java.util.List;
+
+public class CopyRowsLogic extends AbstractActionLogic<CopyRowsAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<CopyRowsAction> getSupportedAction() {
         return CopyRowsAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CopyRowsAction action, Scope scope) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkForRequiredField(CopyRowsAction.Attr.sourceTableName, action);
-        validationErrors.checkForRequiredField(CopyRowsAction.Attr.targetTableName, action);
-        validationErrors.checkForRequiredField(CopyRowsAction.Attr.sourceColumns, action);
+        validationErrors.checkForRequiredField("sourceTableName", action);
+        validationErrors.checkForRequiredField("targetTableName", action);
+        validationErrors.checkForRequiredField("sourceColumns", action);
         return validationErrors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        final Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(CopyRowsAction action, Scope scope) throws ActionPerformException {
+        final Database database = scope.getDatabase();
 
-        String[] sourceColumns = action.get(CopyRowsAction.Attr.sourceColumns, String[].class);
-        String[] targetColumns = action.get(CopyRowsAction.Attr.targetColumns, String[].class);
+        List<String> sourceColumns = action.sourceColumns;
+        List<String> targetColumns = action.targetColumns;
 
         if (targetColumns == null) {
             targetColumns = sourceColumns;
         }
 
         String sql = "INSERT INTO "
-                + database.escapeObjectName(action.get(CopyRowsAction.Attr.targetTableName, ObjectName.class), Table.class)
+                + database.escapeObjectName(action.targetTableName, Table.class)
                 + " ("
                 + StringUtils.join(sourceColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
                 + ")  SELECT "
                 + StringUtils.join(targetColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
                 + " FROM "
-                + database.escapeObjectName(action.get(CopyRowsAction.Attr.sourceTableName, ObjectName.class), Table.class);
+                + database.escapeObjectName(action.sourceTableName, Table.class);
 
         return new DelegateResult(new ExecuteSqlAction(sql));
     }

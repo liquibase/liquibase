@@ -16,10 +16,10 @@ public class AlterSequenceLogicDB2  extends AlterSequenceLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AlterSequenceAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
 
-        errors.checkForDisallowedField(AlterSequenceAction.Attr.ordered, action, scope.get(Scope.Attr.database, Database.class).getShortName());
+        errors.checkForDisallowedField("ordered", action, scope.getDatabase().getShortName());
 
         return errors;
     }

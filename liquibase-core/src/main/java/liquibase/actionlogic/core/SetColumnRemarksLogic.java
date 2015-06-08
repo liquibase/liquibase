@@ -14,30 +14,30 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-public class SetColumnRemarksLogic extends AbstractActionLogic {
+public class SetColumnRemarksLogic extends AbstractActionLogic<SetColumnRemarksAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<SetColumnRemarksAction> getSupportedAction() {
         return SetColumnRemarksAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(SetColumnRemarksAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredContainer("Table name is required", SetColumnRemarksAction.Attr.columnName, action)
-                .checkForRequiredField(SetColumnRemarksAction.Attr.columnName, action);
+                .checkForRequiredContainer("Table name is required", "columnName", action)
+                .checkForRequiredField("columnName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(SetColumnRemarksAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "COMMENT ON COLUMN "
-                        + database.escapeObjectName(action.get(SetColumnRemarksAction.Attr.columnName, ObjectName.class).getContainer(), Table.class)
+                        + database.escapeObjectName(action.columnName.container, Table.class)
                         + "."
-                        + database.escapeObjectName(action.get(SetColumnRemarksAction.Attr.columnName, String.class), Column.class)
+                        + database.escapeObjectName(action.columnName, Column.class)
                         + " IS '"
-                        + database.escapeStringForDatabase(action.get(SetColumnRemarksAction.Attr.remarks, String.class))
+                        + database.escapeStringForDatabase(action.remarks)
                         + "'"
         ));
     }

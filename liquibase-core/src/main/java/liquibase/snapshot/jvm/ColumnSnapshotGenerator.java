@@ -30,8 +30,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        Relation relation = ((Column) example).getRelation();
-        if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
+        Relation relation = ((Column) example).relation;
+        if (((Column) example).computed != null && ((Column) example).computed) {
             return example;
         }
         Schema schema = relation.getSchema();
@@ -138,8 +138,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         Column column = new Column();
         column.setName(StringUtils.trimToNull(rawColumnName));
-        column.setRelation(table);
-        column.setRemarks(remarks);
+        column.relation = table;
+        column.remarks = remarks;
 
 //todo: action refactoring        if (database instanceof OracleDatabase) {
 //            String nullable = columnMetadataResultSet.getString("NULLABLE");
@@ -151,12 +151,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //        } else {
             int nullable = columnMetadataResultSet.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
-                column.setNullable(false);
+                column.nullable = false;
             } else if (nullable == DatabaseMetaData.columnNullable) {
-                column.setNullable(true);
+                column.nullable = true;
             } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
                 LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
-                column.setNullable(true);
+                column.nullable = true;
             }
 //        }
 
@@ -166,14 +166,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
                     isAutoincrement = StringUtils.trimToNull(isAutoincrement);
                     if (isAutoincrement == null) {
-                        column.setAutoIncrementInformation(null);
+                        column.autoIncrementInformation = null;
                     } else if (isAutoincrement.equals("YES")) {
-                        column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                        column.autoIncrementInformation = new Column.AutoIncrementInformation();
                     } else if (isAutoincrement.equals("NO")) {
-                        column.setAutoIncrementInformation(null);
+                        column.autoIncrementInformation = null;
                     } else if (isAutoincrement.equals("")) {
                         LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                        column.setAutoIncrementInformation(null);
+                        column.autoIncrementInformation = null;
                     } else {
                         throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
                     }
@@ -200,9 +200,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         statement = underlyingConnection.createStatement();
                         columnSelectRS = statement.executeQuery(selectStatement);
                         if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                            column.autoIncrementInformation = new Column.AutoIncrementInformation();
                         } else {
-                            column.setAutoIncrementInformation(null);
+                            column.autoIncrementInformation = null;
                         }
                     } finally {
                         try {
@@ -220,9 +220,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         DataType type = readDataType(columnMetadataResultSet, column, database);
-        column.setType(type);
+        column.type = type;
 
-        column.setDefaultValue(readDefaultValue(columnMetadataResultSet, column, database));
+        column.defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
 
         return column;
     }
@@ -379,7 +379,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //        }
 
-        return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());
+        return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.type);
     }
 
     //START CODE FROM SQLITEDatabaseSnapshotGenerator

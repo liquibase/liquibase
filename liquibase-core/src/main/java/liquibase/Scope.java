@@ -165,5 +165,9 @@ public class Scope {
         return get(Attr.database, Database.class);
     }
 
+    public ResourceAccessor getResourceAccessor() {
+        return get(Attr.resourceAccessor, ResourceAccessor.class);
+    }
+
 
 }

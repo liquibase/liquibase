@@ -14,7 +14,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 
-public class RenameColumnLogic extends AbstractSqlBuilderLogic {
+public class RenameColumnLogic extends AbstractSqlBuilderLogic<RenameColumnAction> {
 
     public static enum Clauses {
         oldColumnName,
@@ -22,34 +22,34 @@ public class RenameColumnLogic extends AbstractSqlBuilderLogic {
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<RenameColumnAction> getSupportedAction() {
         return RenameColumnAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(RenameColumnAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(RenameColumnAction.Attr.tableName, action)
-                .checkForRequiredField(RenameColumnAction.Attr.oldColumnName, action)
-                .checkForRequiredField(RenameColumnAction.Attr.newColumnName, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("oldColumnName", action)
+                .checkForRequiredField("newColumnName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(RenameColumnAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterTableAction(
-                action.get(RenameColumnAction.Attr.tableName, ObjectName.class),
+                action.tableName,
                 generateSql(action, scope)
         ));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(RenameColumnAction action, Scope scope) {
+        Database database = scope.getDatabase();
 
         return new StringClauses()
                 .append("RENAME COLUMN")
-                .append(Clauses.oldColumnName, database.escapeObjectName(action.get(RenameColumnAction.Attr.oldColumnName, String.class), Column.class))
+                .append(Clauses.oldColumnName, database.escapeObjectName(action.oldColumnName, Column.class))
                 .append("TO")
-                .append(Clauses.newColumnName, database.escapeObjectName(action.get(RenameColumnAction.Attr.oldColumnName, String.class), Column.class));
+                .append(Clauses.newColumnName, database.escapeObjectName(action.newColumnName, Column.class));
     }
 }

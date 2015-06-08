@@ -55,7 +55,10 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String ascOrDesc = row.getString("ASC_OR_DESC");
                 Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                returnKey.addColumn(position - 1, new Column(columnName).setDescending(descending).setRelation(((PrimaryKey) example).getTable()));
+                Column column = new Column(columnName);
+                column.descending = descending;
+                column.relation = ((PrimaryKey) example).getTable();
+                returnKey.addColumn(position - 1, column);
             }
 
             if (returnKey != null) {
@@ -89,7 +92,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getSimpleName());
                 if (rs.size() > 0) {
-                    table.setPrimaryKey(new PrimaryKey(rs.get(0).getString("PK_NAME")).setTable(table));
+                    table.primaryKey = new PrimaryKey(rs.get(0).getString("PK_NAME")).setTable(table);
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

@@ -8,7 +8,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -17,9 +16,15 @@ import java.util.List;
 
 public class Column extends AbstractDatabaseObject {
 
-    private String name;
-    private Boolean computed;
-    private Boolean descending;
+    public Relation relation;
+    public Boolean computed;
+    public Boolean descending;
+    public Boolean certainDataType;
+    public DataType type;
+    public AutoIncrementInformation autoIncrementInformation;
+    public Boolean nullable;
+    public Object defaultValue;
+    public String remarks;
 
     public Column() {
     }
@@ -34,64 +39,52 @@ public class Column extends AbstractDatabaseObject {
 
     public Column(Class<? extends Relation> relationType, ObjectName tableName, String columnName) {
         if (Table.class.isAssignableFrom(relationType)) {
-            this.setRelation(new Table(tableName));
+            this.relation = new Table(tableName);
         } else if (View.class.isAssignableFrom(relationType)) {
-            this.setRelation(new View(tableName));
+            this.relation = new View(tableName);
         }
         setName(columnName);
     }
 
     public Column(Class<? extends Relation> relationType, String catalogName, String schemaName, String tableName, String columnName) {
         if (Table.class.isAssignableFrom(relationType)) {
-            this.setRelation(new Table(catalogName, schemaName, tableName));
+            this.relation = new Table(catalogName, schemaName, tableName);
         } else if (View.class.isAssignableFrom(relationType)) {
-            this.setRelation(new View(catalogName, schemaName, tableName));
+            this.relation = new View(catalogName, schemaName, tableName);
         }
         setName(columnName);
     }
 
     public Column(ColumnConfig columnConfig) {
         setName(columnConfig.getName());
-        setDescending(columnConfig.getDescending());
-        setType(new DataType(columnConfig.getType()));
+        this.descending = columnConfig.getDescending();
+        this.type = new DataType(columnConfig.getType());
 
         if (columnConfig.getDefaultValue() != null) {
-            setDefaultValue(columnConfig.getDefaultValueObject());
+            this.defaultValue = columnConfig.getDefaultValueObject();
         }
 
         if (columnConfig.isAutoIncrement() != null && columnConfig.isAutoIncrement()) {
-            setAutoIncrementInformation(new AutoIncrementInformation(columnConfig.getStartWith(), columnConfig.getIncrementBy()));
+            this.autoIncrementInformation = new AutoIncrementInformation(columnConfig.getStartWith(), columnConfig.getIncrementBy());
         }
 
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
-            setNullable(constraints.isNullable());
+            this.nullable = constraints.isNullable();
         }
 
-        setRemarks(columnConfig.getRemarks());
-    }
-
-    public Relation getRelation() {
-        return get("relation", Relation.class);
+        this.remarks = columnConfig.getRemarks();
     }
 
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[]{
-                getRelation()
+                relation
         };
     }
 
-    public Column setRelation(Relation relation) {
-        set("relation", relation);
-
-        return this;
-    }
-
-
     @Override
     public Schema getSchema() {
-        Relation relation = getRelation();
         if (relation == null) {
             return null;
         }
@@ -100,93 +93,30 @@ public class Column extends AbstractDatabaseObject {
 
     public Column setName(String name, boolean computed) {
         setName(name);
-        setComputed(computed);
-
-        return this;
-    }
-
-
-
-    public Boolean getComputed() {
-        return computed;
-    }
-
-    public Column setComputed(Boolean computed) {
         this.computed = computed;
-        set("computed", computed);
-
-        return this;
-    }
-
-    public Boolean isNullable() {
-        return get("nullable", Boolean.class);
-    }
-
-    public Column setNullable(Boolean nullable) {
-        set("nullable", nullable);
-
-        return this;
-    }
-
-
-    public DataType getType() {
-        return get("type", DataType.class);
-    }
-
-    public Column setType(DataType type) {
-        set("type", type);
-
-        return this;
-    }
-
-    public Object getDefaultValue() {
-        return get("defaultValue", Object.class);
-    }
-
-    public Column setDefaultValue(Object defaultValue) {
-        set("defaultValue", defaultValue);
 
         return this;
     }
 
     public boolean isAutoIncrement() {
-        return getAutoIncrementInformation() != null;
-    }
-
-    public AutoIncrementInformation getAutoIncrementInformation() {
-        return get("autoIncrementInformation", AutoIncrementInformation.class);
-    }
-
-    public void setAutoIncrementInformation(AutoIncrementInformation autoIncrementInformation) {
-        set("autoIncrementInformation", autoIncrementInformation);
-    }
-
-    public Boolean getDescending() {
-        return descending;
-    }
-
-    public Column setDescending(Boolean descending) {
-        this.descending = descending;
-        set("descending", descending);
-
-        return this;
+        return autoIncrementInformation != null;
     }
 
     public String toString(boolean includeRelation) {
         if (includeRelation) {
             return toString();
         } else {
-            return getName().toShortString()  + (getDescending() != null && getDescending() ? " DESC" : "");
+            return getName().toShortString()  + (descending != null && descending ? " DESC" : "");
         }
     }
 
     @Override
     public String toString() {
         String name = getName().toShortString();
-        if (getRelation() == null) {
-            return name + (getDescending() != null && getDescending() ? " DESC" : "");
+        if (relation == null) {
+            return name + (descending != null && descending ? " DESC" : "");
         } else {
-            return getRelation().getName().toString()+"." + name + (getDescending() != null && getDescending() ? " DESC" : "");
+            return relation.getName().toString()+"." + name + (descending != null && descending ? " DESC" : "");
         }
     }
 
@@ -197,12 +127,12 @@ public class Column extends AbstractDatabaseObject {
         try {
             //noinspection UnusedAssignment
             int returnValue = 0;
-            if (this.getRelation() != null && o.getRelation() == null) {
+            if (this.relation != null && o.relation == null) {
                 return 1;
-            } else if (this.getRelation() == null && o.getRelation() != null) {
+            } else if (this.relation == null && o.relation != null) {
                 return -1;
             } else {
-                returnValue = this.getRelation().compareTo(o.getRelation());
+                returnValue = this.relation.compareTo(o.relation);
             }
 
             if (returnValue == 0) {
@@ -230,51 +160,31 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
-        if (!this.isCertainDataType() || !otherColumn.isCertainDataType()) {
+        if (!this.certainDataType || !otherColumn.certainDataType) {
             return false;
         } else {
-            return !this.getType().equals(otherColumn.getType());
+            return !this.type.equals(otherColumn.type);
         }
     }
 
     @SuppressWarnings({"SimplifiableIfStatement"})
     public boolean isNullabilityDifferent(Column otherColumn) {
-        if (this.isNullable() == null && otherColumn.isNullable() == null) {
+        if (this.nullable == null && otherColumn.nullable == null) {
             return false;
         }
-        if (this.isNullable() == null && otherColumn.isNullable() != null) {
+        if (this.nullable == null && otherColumn.nullable != null) {
             return true;
         }
-        if (this.isNullable() != null && otherColumn.isNullable() == null) {
+        if (this.nullable != null && otherColumn.nullable == null) {
             return true;
         }
-        return !this.isNullable().equals(otherColumn.isNullable());
+        return !this.nullable.equals(otherColumn.nullable);
     }
 
     public boolean isDifferent(Column otherColumn) {
         return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
     }
 
-
-    public boolean isCertainDataType() {
-        return get("certainDataType", Boolean.class);
-    }
-
-    public Column setCertainDataType(boolean certainDataType) {
-        set("certainDataType", certainDataType);
-
-        return this;
-    }
-
-    public String getRemarks() {
-        return get("remarks", String.class);
-    }
-
-    public Column setRemarks(String remarks) {
-        set("remarks", remarks);
-
-        return this;
-    }
 
     public static Column fromName(String columnName) {
         columnName = columnName.trim();
@@ -286,8 +196,9 @@ public class Column extends AbstractDatabaseObject {
             columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
             descending = false;
         }
-        return new Column(columnName)
-                .setDescending(descending);
+        Column column = new Column(columnName);
+        column.descending = descending;
+        return column;
     }
 
     public static Column[] arrayFromNames(String columnNames) {
@@ -317,7 +228,7 @@ public class Column extends AbstractDatabaseObject {
         if (typeNode != null) {
             DataType type = new DataType();
             type.load(typeNode, resourceAccessor);
-            setType(type);
+            this.type = type;
         }
     }
 

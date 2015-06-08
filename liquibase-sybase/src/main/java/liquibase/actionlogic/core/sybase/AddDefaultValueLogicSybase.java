@@ -23,15 +23,15 @@ public class AddDefaultValueLogicSybase extends AddDefaultValueLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
+    public ActionResult execute(AddDefaultValueAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
+        Object defaultValue = action.defaultValue;
 
         return new DelegateResult(new AlterTableAction(
-                action.get(AddDefaultValueAction.Attr.columnName, ObjectName.class).getContainer(),
+                action.columnName.container,
                 new StringClauses()
                         .append("REPLACE")
-                        .append(database.escapeObjectName(action.get(AddDefaultValueAction.Attr.columnName, String.class), Column.class))
+                        .append(database.escapeObjectName(action.columnName, Column.class))
                         .append("DEFAULT")
                         .append(DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
         ));

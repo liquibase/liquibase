@@ -10,32 +10,32 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Sequence;
 
-public class RenameSequenceLogic extends AbstractSqlBuilderLogic {
+public class RenameSequenceLogic extends AbstractSqlBuilderLogic<RenameSequenceAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<RenameSequenceAction> getSupportedAction() {
         return RenameSequenceAction.class;
     }
 
     @Override
     protected boolean supportsScope(Scope scope) {
-        return super.supportsScope(scope) && scope.get(Scope.Attr.database, Database.class).supportsSequences();
+        return super.supportsScope(scope) && scope.getDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(RenameSequenceAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(RenameSequenceAction.Attr.newSequenceName, action)
-                .checkForRequiredField(RenameSequenceAction.Attr.oldSequenceName, action);
+                .checkForRequiredField("newSequenceName", action)
+                .checkForRequiredField("oldSequenceName", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(RenameSequenceAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("ALTER SEQUENCE")
-                .append(database.escapeObjectName(action.get(RenameSequenceAction.Attr.oldSequenceName, ObjectName.class), Sequence.class))
+                .append(database.escapeObjectName(action.oldSequenceName, Sequence.class))
                 .append("RENAME TO")
-                .append(database.escapeObjectName(action.get(RenameSequenceAction.Attr.newSequenceName, String.class), Sequence.class));
+                .append(database.escapeObjectName(action.newSequenceName, Sequence.class));
     }
 }

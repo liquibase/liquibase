@@ -1,13 +1,12 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class DropIndexAction extends AbstractAction {
 
-    public static enum Attr {
-        indexName,
-        tableName,
-        associatedWith,
-    }
+    public ObjectName indexName;
+    public ObjectName tableName;
+    public ObjectName associatedWith;
 
 }

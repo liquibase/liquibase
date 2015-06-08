@@ -23,9 +23,9 @@ public class AddAutoIncrementLogicSQLite extends AddAutoIncrementLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(AddAutoIncrementAction action, Scope scope) {
         return super.validate(action, scope)
-                .removeRequiredField(AddAutoIncrementAction.Attr.columnDataType);
+                .removeRequiredField("columnDataType");
     }
 
 //    @Override
@@ -34,7 +34,7 @@ public class AddAutoIncrementLogicSQLite extends AddAutoIncrementLogic {
 //    }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddAutoIncrementAction action, Scope scope) throws ActionPerformException {
 //        List<Sql> statements = new ArrayList<Sql>();
 //
 //        // define alter table logic

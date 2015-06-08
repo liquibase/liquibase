@@ -15,14 +15,14 @@ public class ModifyDataTypeLogicPostgresql extends ModifyDataTypeLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(ModifyDataTypeAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
         clauses.prepend("TYPE");
         clauses.append("USING ("
-                +action.get(ModifyDataTypeAction.Attr.columnName, String.class)
+                +action.columnName
                 +"::"
-                +action.get(ModifyDataTypeAction.Attr.newDataType, String.class)
+                +action.newDataType
                 +")");
 
         return clauses;

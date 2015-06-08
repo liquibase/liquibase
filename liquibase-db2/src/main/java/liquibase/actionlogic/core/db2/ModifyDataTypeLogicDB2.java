@@ -19,9 +19,9 @@ public class ModifyDataTypeLogicDB2 extends ModifyDataTypeLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(ModifyDataTypeAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
                 (DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(ModifyDataTypeAction.Attr.columnName, ObjectName.class).getContainer()));
+                new ReorganizeTableAction(action.columnName.container));
     }
 }

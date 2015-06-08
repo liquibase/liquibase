@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -64,36 +65,36 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getSimpleName());
-        setComputed(columnSnapshot.getComputed());
-        setDescending(columnSnapshot.getDescending() != null && columnSnapshot.getDescending() ? Boolean.TRUE : null);
-        if (columnSnapshot.getType() != null) {
-            setType(columnSnapshot.getType().toString());
+        setComputed(columnSnapshot.computed);
+        setDescending(columnSnapshot.descending != null && columnSnapshot.descending ? Boolean.TRUE : null);
+        if (columnSnapshot.type != null) {
+            setType(columnSnapshot.type.toString());
         }
 
-        if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
-            if (columnSnapshot.getDefaultValue() != null) {
-                setDefaultValue(columnSnapshot.getDefaultValue().toString());
+        if (columnSnapshot.relation != null && columnSnapshot.relation instanceof Table) {
+            if (columnSnapshot.defaultValue != null) {
+                setDefaultValue(columnSnapshot.defaultValue.toString());
             }
 
             boolean nonDefaultConstraints = false;
             ConstraintsConfig constraints = new ConstraintsConfig();
 
-            if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
-                constraints.setNullable(columnSnapshot.isNullable());
+            if (columnSnapshot.nullable != null && !columnSnapshot.nullable) {
+                constraints.setNullable(columnSnapshot.nullable);
                 nonDefaultConstraints = true;
             }
 
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
-                setStartWith(columnSnapshot.getAutoIncrementInformation().getStartWith());
-                setIncrementBy(columnSnapshot.getAutoIncrementInformation().getIncrementBy());
+                setStartWith(columnSnapshot.autoIncrementInformation.getStartWith());
+                setIncrementBy(columnSnapshot.autoIncrementInformation.getIncrementBy());
             } else {
                 setAutoIncrement(false);
             }
 
 
-            Table table = (Table) columnSnapshot.getRelation();
-            PrimaryKey primaryKey = table.getPrimaryKey();
+            Table table = (Table) columnSnapshot.relation;
+            PrimaryKey primaryKey = table.primaryKey;
             if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
                 constraints.setPrimaryKey(true);
                 constraints.setPrimaryKeyName(primaryKey.getSimpleName());
@@ -101,7 +102,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 nonDefaultConstraints = true;
             }
 
-            List<UniqueConstraint> uniqueConstraints = table.getUniqueConstraints();
+            Set<UniqueConstraint> uniqueConstraints = table.uniqueConstraints;
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if (constraint.getColumnNames().contains(getName())) {
@@ -112,7 +113,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 }
             }
 
-            List<ForeignKey> fks = table.getOutgoingForeignKeys();
+            Set<ForeignKey> fks = table.outgoingForeignKeys;
             if (fks != null) {
                 for (ForeignKey fk : fks) {
                     if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
@@ -134,7 +135,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             }
         }
 
-        setRemarks(columnSnapshot.getRemarks());
+        setRemarks(columnSnapshot.remarks);
     }
 
     /**

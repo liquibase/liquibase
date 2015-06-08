@@ -14,34 +14,34 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
-public class SetTableRemarksLogic extends AbstractSqlBuilderLogic {
+public class SetTableRemarksLogic extends AbstractSqlBuilderLogic<SetTableRemarksAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<SetTableRemarksAction> getSupportedAction() {
         return SetTableRemarksAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(SetTableRemarksAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(SetTableRemarksAction.Attr.tableName, action)
-                .checkForRequiredField(SetTableRemarksAction.Attr.remarks, action);
+                .checkForRequiredField("tableName", action)
+                .checkForRequiredField("remarks", action);
 	}
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(SetTableRemarksAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterTableAction(
-                action.get(SetTableRemarksAction.Attr.tableName, ObjectName.class),
+                action.tableName,
                 generateSql(action, scope)));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(SetTableRemarksAction action, Scope scope) {
+        Database database = scope.getDatabase();
         return new StringClauses()
                 .append("COMMENT ON TABLE")
-                .append(database.escapeObjectName(action.get(SetTableRemarksAction.Attr.tableName, ObjectName.class), Table.class))
+                .append(database.escapeObjectName(action.tableName, Table.class))
                 .append("IS")
-                .append(database.escapeStringForDatabase(action.get(SetTableRemarksAction.Attr.remarks, String.class)));
+                .append(database.escapeStringForDatabase(action.remarks));
     }
 }

@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.RenameViewAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameViewLogic;
 import liquibase.database.Database;
@@ -14,7 +15,7 @@ public class RenameViewLogicPostgresql extends RenameViewLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(RenameViewAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .replace("RENAME", "ALTER TABLE")
                 .replace("TO", "RENAME TO");

@@ -1,10 +1,10 @@
 package liquibase.structure
 
+import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.database.ConnectionSupplier
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Catalog
-import liquibase.structure.core.Schema
 
 public class TestCatalogSupplier extends DefaultTestStructureSupplier {
 
@@ -14,12 +14,12 @@ public class TestCatalogSupplier extends DefaultTestStructureSupplier {
     }
 
     @Override
-    List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
+    List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         def returnList = []
         def seenNames = [] as Set
-        for (ObjectName schemaName : conn.getAllContainers()) {
-            if (schemaName.getContainer() != null && !seenNames.contains(schemaName.getContainer().getName())) {
-                returnList.add(new Catalog(schemaName.getContainer().getName()))
+        for (ObjectName schemaName : scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()) {
+            if (schemaName.container != null && !seenNames.contains(schemaName.container.name)) {
+                returnList.add(new Catalog(schemaName.container.name))
             }
 
         }
@@ -28,7 +28,7 @@ public class TestCatalogSupplier extends DefaultTestStructureSupplier {
     }
 
     @Override
-    Set<Class<? extends DatabaseObject>> requires(ConnectionSupplier conn, Scope scope) {
+    Set<Class<? extends DatabaseObject>> requires(Scope scope) {
         return null
     }
 }

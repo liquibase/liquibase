@@ -227,7 +227,7 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     public Scope connect(Scope scope) throws DatabaseException {
         DatabaseConnection databaseConnection = getConnection();
-        Database db = scope.get(Scope.Attr.database, Database.class);
+        Database db = scope.getDatabase();
         if (!(db instanceof UnsupportedDatabase) && !db.isCorrectDatabaseImplementation(databaseConnection)) {
             throw new DatabaseException("Incorrect db '" + db.getShortName() + "' for connection " + databaseConnection.getURL());
         }
@@ -335,7 +335,7 @@ public abstract class ConnectionSupplier implements Cloneable {
 //
 //                    while (nullPadded.asList().size() < maxDepth) {
 //                        nullContainer.set(ObjectName.Attr.container, new ObjectName());
-//                        nullContainer = nullContainer.getContainer();
+//                        nullContainer = nullContainer.container;
 //                    }
 //                    expandedList.add(nullPadded);
 //                }

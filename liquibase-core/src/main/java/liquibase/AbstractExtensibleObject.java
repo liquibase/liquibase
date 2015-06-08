@@ -1,7 +1,11 @@
 package liquibase;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.ObjectUtil;
 import liquibase.util.SmartMap;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -11,6 +15,8 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
     private SmartMap attributes = new SmartMap();
     private Set<String> standardAttributeNames;
+
+    private static Map<Class, Map<String, Field>> attributeFieldCache = new HashMap<>();
 
     @Override
     public Set<String> getAttributeNames() {
@@ -22,18 +28,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
      */
     @Override
     public Set<String> getStandardAttributeNames() {
-        if (standardAttributeNames == null) {
-            standardAttributeNames = new HashSet<>();
-            for (Class declaredClass : this.getClass().getDeclaredClasses()) {
-                if (declaredClass.getSimpleName().equals("Attr") && Enum.class.isAssignableFrom(declaredClass)) {
-                    for (Object obj : declaredClass.getEnumConstants()) {
-                        standardAttributeNames.add(((Enum) obj).name());
-                    }
-                    break;
-                }
-            }
-        }
-        return standardAttributeNames;
+        return getAttributeFields().keySet();
     }
 
     /**
@@ -52,13 +47,51 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
     @Override
     public <T> T get(String attribute, Class<T> type) {
-        return attributes.get(attribute, type);
+        return get(attribute, null, type);
     }
 
     @Override
     public <T> T get(String attribute, T defaultValue) {
-        return attributes.get(attribute, defaultValue);
+        Class<T> type = (Class<T>) Object.class;
+        if (defaultValue != null) {
+            type = (Class<T>) defaultValue.getClass();
+        }
+        return get(attribute, defaultValue, type);
     }
+
+    private Map<String, Field> getAttributeFields() {
+        Map<String, Field> fields = attributeFieldCache.get(this.getClass());
+        if (fields == null) {
+            fields = new HashMap<>();
+            for (Field field : this.getClass().getFields()) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isPublic(modifiers) && !field.isSynthetic()) {
+                    fields.put(field.getName(), field);
+                }
+            }
+            attributeFieldCache.put(this.getClass(), fields);
+        } return fields;
+    }
+
+    private <T> T get(String attribute, T defaultValue, Class<T> type) {
+        T value;
+
+        Field field = getAttributeFields().get(attribute);
+        if (field == null) {
+            value = attributes.get(attribute, type);
+        } else {
+            try {
+                value = ObjectUtil.convert(field.get(this), type);
+            } catch (IllegalAccessException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
 
     @Override
     public <T> T get(Enum attribute, Class<T> type) {
@@ -77,7 +110,16 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
     @Override
     public ExtensibleObject set(String attribute, Object value) {
-        attributes.set(attribute, value);
+        Field field = getAttributeFields().get(attribute);
+        if (field == null) {
+            attributes.set(attribute, value);
+        } else {
+            try {
+                field.set(this, ObjectUtil.convert(value, field.getType()));
+            } catch (IllegalAccessException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
 
         return this;
     }

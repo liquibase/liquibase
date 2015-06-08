@@ -15,13 +15,13 @@ public class CreateSequenceLogicH2 extends CreateSequenceLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateSequenceAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
 
-        String shortName = scope.get(Scope.Attr.database, Database.class).getShortName();
+        String shortName = scope.getDatabase().getShortName();
 
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.minValue, action, shortName);
-        errors.checkForDisallowedField(CreateSequenceAction.Attr.maxValue, action, shortName);
+        errors.checkForDisallowedField("minValue", action, shortName);
+        errors.checkForDisallowedField("maxValue", action, shortName);
 
         return errors;
     }

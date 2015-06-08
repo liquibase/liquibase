@@ -2,27 +2,32 @@ package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DeleteDataAction extends AbstractAction {
-    public static enum Attr {
-        tableName,
-        where,
-        whereParameters,
-        whereColumnNames,
-    }
+    public ObjectName tableName;
+    public StringClauses where;
+    public List<Object> whereParameters;
+    public List<String> whereColumnNames;
 
     public DeleteDataAction() {
     }
 
     public DeleteDataAction(ObjectName tableName) {
-        set(Attr.tableName, tableName);
+        this.tableName = tableName;
     }
 
     public DeleteDataAction addWhereParameters(Object... parameters) {
         if (parameters != null) {
-            for (Object param : parameters) {
-                add(Attr.whereParameters, param);
+            if (!CollectionUtil.hasValue(whereParameters)) {
+                whereParameters = new ArrayList<>();
             }
+
+            Collections.addAll(this.whereParameters, parameters);
         }
 
         return this;

@@ -12,29 +12,29 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 
-public class DropDefaultValueLogic extends AbstractSqlBuilderLogic {
+public class DropDefaultValueLogic extends AbstractSqlBuilderLogic<DropDefaultValueAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DropDefaultValueAction> getSupportedAction() {
         return DropDefaultValueAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropDefaultValueAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredContainer("Table name is required", DropDefaultValueAction.Attr.columnName, action)
-                .checkForRequiredField(DropDefaultValueAction.Attr.columnName, action);
+                .checkForRequiredContainer("Table name is required", "columnName", action)
+                .checkForRequiredField("columnName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(DropDefaultValueAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterColumnAction(
-                action.get(DropDefaultValueAction.Attr.columnName, ObjectName.class),
+                action.columnName,
                 generateSql(action, scope)));
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(DropDefaultValueAction action, Scope scope) {
         return new StringClauses().append("DEFAULT NULL");
     }
 }

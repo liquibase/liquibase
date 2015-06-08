@@ -14,15 +14,15 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
-public class ReorganizeTableLogicDB2 extends AbstractActionLogic implements ActionLogic.InteractsExternally {
+public class ReorganizeTableLogicDB2 extends AbstractActionLogic<ReorganizeTableAction> implements ActionLogic.InteractsExternally<ReorganizeTableAction> {
 
     @Override
-    public boolean interactsExternally(Action action, Scope scope) {
+    public boolean interactsExternally(ReorganizeTableAction action, Scope scope) {
         return true;
     }
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<ReorganizeTableAction> getSupportedAction() {
         return ReorganizeTableAction.class;
     }
 
@@ -32,19 +32,19 @@ public class ReorganizeTableLogicDB2 extends AbstractActionLogic implements Acti
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(ReorganizeTableAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(ReorganizeTableAction.Attr.tableName, action);
+                .checkForRequiredField("tableName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(ReorganizeTableAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new DelegateResult(new ExecuteSqlAction(
                         "CALL SYSPROC.ADMIN_CMD ('REORG TABLE "
-                                + database.escapeObjectName(action.get(ReorganizeTableAction.Attr.tableName, ObjectName.class), Table.class)
+                                + database.escapeObjectName(action.tableName, Table.class)
                                 + "')"));
             } else {
                 return new NoOpResult();

@@ -1,10 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class RenameTableAction extends AbstractAction {
-    public static enum Attr {
-        oldTableName,
-        newTableName,
-    }
+    public ObjectName oldTableName;
+    public ObjectName newTableName;
 }

@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.AddColumnsAction;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.database.Database;
@@ -16,7 +17,7 @@ public class AddColumnsLogicMysql extends AddColumnsLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddColumnsAction action, Scope scope) throws ActionPerformException {
         return null;
 //todo: support multiple columns in a single alter table
 //        String alterTable = generateSingleColumBaseSQL(columns.get(0), database);

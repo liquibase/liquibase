@@ -15,10 +15,10 @@ import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.ObjectName;
 
-public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
+public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic<AddAutoIncrementAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<AddAutoIncrementAction> getSupportedAction() {
         return AddAutoIncrementAction.class;
     }
 
@@ -28,13 +28,13 @@ public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        ObjectName columnName = action.get(AddAutoIncrementAction.Attr.columnName, ObjectName.class);
-        ObjectName tableName = columnName.getContainer();
+    public ActionResult execute(AddAutoIncrementAction action, Scope scope) throws ActionPerformException {
+        ObjectName columnName = action.columnName;
+        ObjectName tableName = columnName.container;
 
-        ObjectName sequenceName = new ObjectName(tableName.getContainer(), (tableName.getName() + "_" + columnName.getName() + "_seq").toLowerCase());
+        ObjectName sequenceName = new ObjectName(tableName.container, (tableName.name + "_" + columnName.name + "_seq").toLowerCase());
 
-        String columnDataType = action.get(AddAutoIncrementAction.Attr.columnDataType, String.class);
+        String columnDataType = action.columnDataType;
 
         return new DelegateResult(
                 new CreateSequenceAction(sequenceName),

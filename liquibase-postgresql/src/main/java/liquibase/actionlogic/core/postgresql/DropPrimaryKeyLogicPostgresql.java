@@ -20,16 +20,16 @@ public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropPrimaryKeyAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropPrimaryKeyAction.Attr.constraintName, action);
+                .checkForRequiredField("constraintName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(DropPrimaryKeyAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
-        String constraintName = action.get(DropPrimaryKeyAction.Attr.constraintName, String.class);
+        String constraintName = action.constraintName;
         if (constraintName == null) {
             return new DelegateResult(
                     new ExecuteSqlAction(
@@ -51,9 +51,9 @@ public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
                                     + " $$ language plpgsql;"),
                     new ExecuteSqlAction(
                             " select __liquibase_drop_pk('"
-                                    + action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class).getContainer().getName()
+                                    + action.tableName.container.name
                                     + "', '"
-                                    + action.get(DropPrimaryKeyAction.Attr.tableName, ObjectName.class).getName()
+                                    + action.tableName.name
                                     + "' drop function __liquibase_drop_pk(schemaName text, tableName text")
             );
         } else {

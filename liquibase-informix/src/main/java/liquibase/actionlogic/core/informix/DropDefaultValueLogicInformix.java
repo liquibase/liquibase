@@ -24,29 +24,29 @@ public class DropDefaultValueLogicInformix extends DropDefaultValueLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DropDefaultValueAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(DropDefaultValueAction.Attr.columnDataType, action);
+                .checkForRequiredField("columnDataType", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(DropDefaultValueAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
 
-        String escapedTableName = database.escapeObjectName(action.get(DropDefaultValueAction.Attr.columnName, ObjectName.class), Table.class);
+        String escapedTableName = database.escapeObjectName(action.columnName, Table.class);
 
-        String columnName = action.get(DropDefaultValueAction.Attr.columnName, String.class);
+        String columnName = action.columnName.name;
 
         /*
          * TODO If dropped from a not null column the not null constraint will be dropped, too.
          * If the column is "NOT NULL" it has to be added behind the datatype.
          */
-        return new DelegateResult(new ExecuteSqlAction("ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeObjectName(columnName, Column.class) + " " + action.get(DropDefaultValueAction.Attr.columnDataType, String.class) + ")"));
+        return new DelegateResult(new ExecuteSqlAction("ALTER TABLE " + escapedTableName + " MODIFY (" + database.escapeObjectName(columnName, Column.class) + " " + action.columnDataType + ")"));
 
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(DropDefaultValueAction action, Scope scope) {
         return new StringClauses().append("DROP DEFAULT");
     }
 }

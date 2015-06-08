@@ -19,9 +19,9 @@ public class AddColumnLogicDB2 extends AddColumnsLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(AddColumnsAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult((DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.get(AddColumnsAction.Attr.tableName, ObjectName.class))
+                new ReorganizeTableAction(action.tableName)
         );
     }
 }

@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.AddForeignKeyConstraintAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddForeignKeyConstraintLogic;
 import liquibase.database.Database;
@@ -16,7 +17,7 @@ public class AddForeignKeyConstraintLogicOracle extends AddForeignKeyConstraintL
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(AddForeignKeyConstraintAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .remove("ON UPDATE")
                 .remove("ON DELETE RESTRICT")

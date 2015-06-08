@@ -1,15 +1,10 @@
-package liquibase.structure;
+package liquibase.structure
 
-import liquibase.Scope;
-import liquibase.database.ConnectionSupplier;
-import liquibase.snapshot.Snapshot;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.DataType
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-
-import java.util.List;
-import java.util.Set;
+import liquibase.JUnitScope
+import liquibase.Scope
+import liquibase.database.ConnectionSupplier
+import liquibase.snapshot.Snapshot
+import liquibase.structure.core.Schema
 
 public class TestSchemaSupplier extends DefaultTestStructureSupplier {
 
@@ -19,9 +14,9 @@ public class TestSchemaSupplier extends DefaultTestStructureSupplier {
     }
 
     @Override
-    List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
+    List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         def returnList = []
-        for (ObjectName schemaName : conn.getAllContainers()) {
+        for (ObjectName schemaName : scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()) {
             returnList.add(new Schema(schemaName))
         }
 
@@ -29,7 +24,7 @@ public class TestSchemaSupplier extends DefaultTestStructureSupplier {
     }
 
     @Override
-    Set<Class<? extends DatabaseObject>> requires(ConnectionSupplier conn, Scope scope) {
+    Set<Class<? extends DatabaseObject>> requires(Scope scope) {
         return null
     }
 }

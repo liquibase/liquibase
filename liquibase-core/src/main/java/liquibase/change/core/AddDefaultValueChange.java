@@ -235,23 +235,23 @@ public class AddDefaultValueChange extends AbstractChange {
                 return result.unknown("Column " + getColumnName() + " does not exist");
             }
 
-            result.assertComplete(column.getDefaultValue() != null, "Column "+getColumnName()+" has no default value");
-            if (column.getDefaultValue() == null) {
+            result.assertComplete(column.defaultValue != null, "Column "+getColumnName()+" has no default value");
+            if (column.defaultValue == null) {
                 return result;
             }
 
             if (getDefaultValue() != null) {
-                return result.assertCorrect(getDefaultValue().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValue().equals(column.defaultValue), "Default value was "+column.defaultValue);
             } else if (getDefaultValueDate() != null) {
-                return result.assertCorrect(getDefaultValueDate().equals(new ISODateFormat().format((Date) column.getDefaultValue())), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueDate().equals(new ISODateFormat().format((Date) column.defaultValue)), "Default value was "+column.defaultValue);
             } else if (getDefaultValueNumeric() != null) {
-                return result.assertCorrect(getDefaultValueNumeric().equals(column.getDefaultValue().toString()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueNumeric().equals(column.defaultValue.toString()), "Default value was "+column.defaultValue);
             } else if (getDefaultValueBoolean() != null) {
-                return result.assertCorrect(getDefaultValueBoolean().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueBoolean().equals(column.defaultValue), "Default value was "+column.defaultValue);
             } else if (getDefaultValueComputed() != null) {
-                return result.assertCorrect(getDefaultValueComputed().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueComputed().equals(column.defaultValue), "Default value was "+column.defaultValue);
             } else if (getDefaultValueSequenceNext() != null) {
-                return result.assertCorrect(getDefaultValueSequenceNext().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueSequenceNext().equals(column.defaultValue), "Default value was "+column.defaultValue);
             } else {
                 return result.unknown("Unknown default value type");
             }

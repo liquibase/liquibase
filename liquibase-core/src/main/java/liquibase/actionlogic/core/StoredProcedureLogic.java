@@ -6,27 +6,29 @@ import liquibase.action.core.StoredProcedureAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.core.StoredProcedure;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
-public class StoredProcedureLogic extends AbstractSqlBuilderLogic {
+public class StoredProcedureLogic extends AbstractSqlBuilderLogic<StoredProcedureAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<StoredProcedureAction> getSupportedAction() {
         return StoredProcedureAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(StoredProcedureAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(StoredProcedureAction.Attr.procedureName, action);
+                .checkForRequiredField("procedureName", action);
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(StoredProcedureAction action, Scope scope) {
         return new StringClauses()
                 .append("EXEC")
-                .append(action.get(StoredProcedureAction.Attr.procedureName, String.class))
-                .append("(" + StringUtils.join(action.get(StoredProcedureAction.Attr.parameterNames, new String[0]), ", ") + ")");
+                .append(scope.getDatabase().escapeObjectName(action.procedureName, StoredProcedure.class))
+                .append("(" + StringUtils.join(CollectionUtil.createIfNull(action.parameterNames), ", ") + ")");
 
     }
 }

@@ -8,6 +8,7 @@ import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.firebird.FirebirdDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.util.ObjectUtil;
 
 public class CreateViewLogicFirebird extends CreateViewLogic {
     @Override
@@ -16,10 +17,10 @@ public class CreateViewLogicFirebird extends CreateViewLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateViewAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        if (action.get(CreateViewAction.Attr.replaceIfExists, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {
             clauses.replace(Clauses.createStatement, "RECREATE VIEW");
         }
 

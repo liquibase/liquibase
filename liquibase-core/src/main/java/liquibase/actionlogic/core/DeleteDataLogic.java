@@ -13,38 +13,39 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+import liquibase.util.CollectionUtil;
 
 import java.util.ArrayList;
 
-public class DeleteDataLogic extends AbstractSqlBuilderLogic {
+public class DeleteDataLogic extends AbstractSqlBuilderLogic<DeleteDataAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<DeleteDataAction> getSupportedAction() {
         return DeleteDataAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(DeleteDataAction action, Scope scope) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkForRequiredField(DeleteDataAction.Attr.tableName, action);
+        validationErrors.checkForRequiredField("tableName", action);
         return validationErrors;
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    protected StringClauses generateSql(DeleteDataAction action, Scope scope) {
+        Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses();
         clauses.append("DELETE FROM");
-        clauses.append(database.escapeObjectName(action.get(DeleteDataAction.Attr.tableName, ObjectName.class), Table.class));
+        clauses.append(database.escapeObjectName(action.tableName, Table.class));
 
-        String whereClause = action.get(DeleteDataAction.Attr.where, String.class);
+        StringClauses whereClause = action.where;
         if (whereClause != null) {
             String fixedWhereClause = " WHERE " + whereClause;
 
-            for (String columnName : action.get(DeleteDataAction.Attr.whereColumnNames, new ArrayList<String>())) {
+            for (String columnName : CollectionUtil.createIfNull(action.whereColumnNames)) {
                 fixedWhereClause = fixedWhereClause.replaceFirst(":name", database.escapeObjectName(columnName, Column.class));
             }
-            for (Object param : action.get(DeleteDataAction.Attr.whereParameters, new ArrayList<String>())) {
+            for (Object param : CollectionUtil.createIfNull(action.whereParameters)) {
                 fixedWhereClause = fixedWhereClause.replaceFirst("\\?|:value", DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database).replaceAll("\\$", "\\$"));
             }
 

@@ -10,6 +10,9 @@ import java.util.ListIterator;
 
 public class ObjectName extends AbstractExtensibleObject implements Comparable<ObjectName> {
 
+    public String name;
+    public ObjectName container;
+
     /**
      * Construct an ObjectName from the given string. If the string contains dots, it will be split into containers on the dots.
      * If null is passed, return an empty ObjectName
@@ -23,14 +26,9 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return new ObjectName(split);
     }
 
-    public static enum Attr {
-        name,
-        container
-    }
-
     public ObjectName(ObjectName container, String name) {
-        set(Attr.name, name);
-        set(Attr.container, container);
+        this.name = name;
+        this.container = container;
     }
 
     /**
@@ -39,27 +37,19 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
      */
     public ObjectName(String... names) {
         if (names == null || names.length == 0) {
-            set(Attr.name, null);
+            this.name = null;
         } else {
             ObjectName container = null;
             for (int i = 0; i < names.length - 1; i++) {
                 container = new ObjectName(container, names[i]);
             }
-            set(Attr.name, names[names.length - 1]);
-            set(Attr.container, container);
+            this.name = names[names.length - 1];
+            this.container = container;
         }
     }
 
-    public String getName() {
-        return get(Attr.name, String.class);
-    }
-
-    public ObjectName getContainer() {
-        return get(Attr.container, ObjectName.class);
-    }
-
     public String toShortString() {
-        return StringUtils.defaultIfEmpty(get(Attr.name, String.class), "#DEFAULT");
+        return StringUtils.defaultIfEmpty(name, "#DEFAULT");
     }
 
     @Override
@@ -78,11 +68,11 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
 
     @Override
     public int compareTo(ObjectName o) {
-        return this.getName().compareTo(o.getName());
+        return this.name.compareTo(o.name);
     }
 
     public boolean equalsIgnoreCase(ObjectName name) {
-        return this.getName().equalsIgnoreCase(name.getName());
+        return this.name.equalsIgnoreCase(name.name);
     }
 
     @Override
@@ -116,15 +106,15 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     }
 
     public List<String> asList() {
-        if (getName() == null && getContainer() == null) {
+        if (name == null && container == null) {
             return new ArrayList<>();
         }
 
         List<String> returnList = new ArrayList<>();
         ObjectName name = this;
         while (name != null) {
-            returnList.add(0, name.getName());
-            name = name.getContainer();
+            returnList.add(0, name.name);
+            name = name.container;
         }
 
         if (returnList.get(0) == null) {

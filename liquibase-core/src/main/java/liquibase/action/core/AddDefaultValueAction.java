@@ -5,18 +5,16 @@ import liquibase.structure.ObjectName;
 
 public class AddDefaultValueAction extends AbstractAction {
 
-    public static enum Attr {
-        columnName,
-        columnDataType,
-        defaultValue,
-    }
+    public ObjectName columnName;
+    public String columnDataType;
+    public Object defaultValue;
 
     public AddDefaultValueAction() {
     }
 
     public AddDefaultValueAction(ObjectName columnName, String columnDataType, Object defaultValue) {
-        set(Attr.columnName, columnName);
-        set(Attr.columnDataType, columnDataType);
-        set(Attr.defaultValue, defaultValue);
+        this.columnName = columnName;
+        this.columnDataType = columnDataType;
+        this.defaultValue = defaultValue;
     }
 }

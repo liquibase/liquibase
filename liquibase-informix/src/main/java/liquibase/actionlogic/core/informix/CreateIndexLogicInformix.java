@@ -16,10 +16,10 @@ public class CreateIndexLogicInformix extends CreateIndexLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateIndexAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.get(CreateIndexAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null) {
             clauses.replace(tablespace, "IN " + tablespace);
         }

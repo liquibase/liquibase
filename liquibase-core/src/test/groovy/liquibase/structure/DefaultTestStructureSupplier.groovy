@@ -1,7 +1,6 @@
 package liquibase.structure
 
 import liquibase.Scope
-import liquibase.database.ConnectionSupplier
 import liquibase.snapshot.Snapshot
 
 public class DefaultTestStructureSupplier extends AbstractTestStructureSupplier {
@@ -12,18 +11,20 @@ public class DefaultTestStructureSupplier extends AbstractTestStructureSupplier 
     }
 
     @Override
-    public List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
+    public List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         List<? extends DatabaseObject> returnList = new ArrayList<>();
 
-        for (def name : getObjectNames(type, conn, scope)) {
-            returnList.add(type.newInstance().set(DatabaseObject.Attr.name, name))
+        for (def name : getObjectNames(type, scope)) {
+            def instance = type.newInstance()
+            instance.name = name
+            returnList.add(instance)
         }
 
         return returnList;
     }
 
     @Override
-    Set<Class<? extends DatabaseObject>> requires(ConnectionSupplier conn, Scope scope) {
+    Set<Class<? extends DatabaseObject>> requires(Scope scope) {
         return null
     }
 }

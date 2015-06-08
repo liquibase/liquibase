@@ -86,4 +86,37 @@ class CollectionUtilTest extends Specification {
                                        [1, 6, 9], [2, 6, 9], [3, 6, 9]]
     }
 
+    def "createIfNull using list"() {
+        when:
+        List<String> emptyStrings = new ArrayList<>()
+        List<String> strings = ["a", "b", "c"]
+
+        then:
+        CollectionUtil.createIfNull(emptyStrings).is(emptyStrings)
+        CollectionUtil.createIfNull(strings) == ["a", "b", "c"]
+        CollectionUtil.createIfNull(strings).is(strings)
+
+        CollectionUtil.createIfNull(null) == []
+        CollectionUtil.createIfNull(null, "x") == ["x"]
+        CollectionUtil.createIfNull(emptyStrings, "y") == ["y"]
+        CollectionUtil.createIfNull(strings, "z") == ["a", "b", "c", "z"]
+
+    }
+
+    def "createIfNull using array"() {
+        when:
+        String[] emptyStrings = new String[0]
+        String[] strings = ["a", "b", "c"]
+
+        then:
+        CollectionUtil.createIfNull(emptyStrings).is(emptyStrings)
+        CollectionUtil.createIfNull(strings).toList() == ["a", "b", "c"]
+        CollectionUtil.createIfNull(strings).is(strings)
+
+        CollectionUtil.createIfNull(null) == []
+        CollectionUtil.createIfNull(null, "x") == ["x"]
+        CollectionUtil.createIfNull(emptyStrings, "y").toList() == ["y"]
+        CollectionUtil.createIfNull(strings, "z").toList() == ["a", "b", "c", "z"]
+
+    }
 }

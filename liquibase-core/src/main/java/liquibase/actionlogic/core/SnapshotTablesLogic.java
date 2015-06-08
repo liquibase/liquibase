@@ -36,9 +36,9 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
-    protected Action createSnapshotAction(Action action, Scope scope) throws DatabaseException {
+    protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException {
 
-        DatabaseObject relatedTo = action.get(SnapshotDatabaseObjectsAction.Attr.relatedTo, DatabaseObject.class);
+        DatabaseObject relatedTo = action.relatedTo;
         String catalogName = null;
         String schemaName = null;
         String tableName = null;
@@ -46,19 +46,19 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
         if (Catalog.class.isAssignableFrom(relatedTo.getClass())) {
             catalogName = relatedTo.getSimpleName();
         } else if (Schema.class.isAssignableFrom(relatedTo.getClass())) {
-            if (relatedTo.getName().getContainer() != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
-                catalogName = relatedTo.getName().getContainer().getName();
+            if (relatedTo.getName().container != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
+                catalogName = relatedTo.getName().container.name;
             }
             schemaName = relatedTo.getSimpleName();
         } else if (Table.class.isAssignableFrom(relatedTo.getClass())) {
             Table table = (Table) relatedTo;
-            ObjectName name = table.get(Relation.Attr.name, ObjectName.class);
+            ObjectName name = table.name;
             if (name != null) {
                 tableName = table.getSimpleName();
-                if (name.getContainer() != null) {
-                    schemaName = name.getContainer().getName();
-                    if (name.getContainer().getContainer() != null) {
-                        catalogName = name.getContainer().getContainer().getName();
+                if (name.container != null) {
+                    schemaName = name.container.name;
+                    if (name.container.container != null) {
+                        catalogName = name.container.container.name;
                     }
                 }
             }
@@ -70,7 +70,7 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
-    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, Action originalAction, Scope scope) throws ActionPerformException {
+    protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, SnapshotDatabaseObjectsAction originalAction, Scope scope) throws ActionPerformException {
         String rawTableName = row.get("TABLE_NAME", String.class);
         String rawSchemaName = row.get("TABLE_SCHEM", String.class);
         String rawCatalogName = row.get("TABLE_CAT", String.class);

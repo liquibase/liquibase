@@ -18,9 +18,9 @@ public class AddDefaultValueLogicHsql extends AddDefaultValueLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
-        Object defaultValue = action.get(AddDefaultValueAction.Attr.defaultValue, Object.class);
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ValidationErrors validate(AddDefaultValueAction action, Scope scope) {
+        Object defaultValue = action.defaultValue;
+        Database database = scope.getDatabase();
 
         ValidationErrors errors = super.validate(action, scope);
 

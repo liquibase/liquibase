@@ -1,12 +1,13 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
+
+import java.util.List;
 
 public class DropUniqueConstraintActon extends AbstractAction {
 
-    public static enum Attr {
-        tableName,
-        constraintName,
-        uniqueColumnNames;
-    }
+    public ObjectName tableName;
+    public String constraintName;
+    public List<String> uniqueColumnNames;
 }

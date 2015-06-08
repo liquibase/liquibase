@@ -27,7 +27,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
             if (columns != null) {
                 set("columns", Arrays.asList(columns));
                 for (Column column : getColumns()) {
-                    column.setRelation(table);
+                    column.relation = table;
                 }
             }
 

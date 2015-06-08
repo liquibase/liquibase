@@ -27,9 +27,5 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable, Exten
     Schema getSchema();
 
     boolean snapshotByDefault();
-
-    public static enum Attr {
-        name
-    }
 }
 

@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateProcedureAction;
+import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateProcedureLogic;
@@ -11,7 +12,9 @@ import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.StoredProcedure;
+import liquibase.util.ObjectUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,24 +26,24 @@ public class CreateProcedureLogicMSSQL extends CreateProcedureLogic {
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(CreateProcedureAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
-        errors.removeUnsupportedField(CreateProcedureAction.Attr.replaceIfExists);
+        errors.removeUnsupportedField("replaceIfExists");
 
-        if (action.get(CreateProcedureAction.Attr.replaceIfExists, false) && !action.has(CreateProcedureAction.Attr.procedureName)) {
+        if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false) && action.procedureName == null) {
             errors.addError("procedureName is required if replaceIfExists is set to true");
         }
         return errors;
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
-        String procedureText = action.get(CreateProcedureAction.Attr.procedureText, String.class);
-        String procedureName = action.get(CreateProcedureAction.Attr.procedureName, String.class);
+    public ActionResult execute(CreateProcedureAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
+        String procedureText = action.procedureText.toString();
+        ObjectName procedureName = action.procedureName;
 
         List<Action> actions = new ArrayList<>();
-        if (action.get(CreateProcedureAction.Attr.replaceIfExists, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {
             actions.add(new ExecuteSqlAction("IF object_id('dbo."
                     +procedureName
                     +"', 'p') IS NULL EXEC ('CREATE PROCEDURE "

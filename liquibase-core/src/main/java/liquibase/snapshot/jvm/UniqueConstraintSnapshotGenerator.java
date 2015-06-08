@@ -49,7 +49,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         for (Map<String, ?> col : metadata) {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
+            Column column = new Column((String) col.get("COLUMN_NAME"));
+            column.descending = descending;
+            column.relation = table;
+            constraint.getColumns().add(column);
         }
 
         return constraint;
@@ -83,7 +86,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
                 }
                 if (seenConstraints.add(uq.getSimpleName())) {
-                    table.getUniqueConstraints().add(uq);
+                    table.uniqueConstraints.add(uq);
                 }
             }
         }

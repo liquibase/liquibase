@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.DropPrimaryKeyAction;
 import liquibase.action.core.StringClauses;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
@@ -14,7 +15,7 @@ public class DropPrimaryKeyLogicOracle extends DropPrimaryKeyLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(DropPrimaryKeyAction action, Scope scope) {
         return new StringClauses().append("DROP PRIMARY KEY DROP INDEX");
     }
 }

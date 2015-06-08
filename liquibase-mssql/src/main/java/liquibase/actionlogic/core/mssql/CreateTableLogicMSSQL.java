@@ -20,10 +20,10 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.get(CreateTableAction.Attr.tablespace, String.class);
+        String tablespace = action.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "ON "+tablespace);
         }
@@ -32,23 +32,23 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateColumnSql(ColumnDefinition column, Action action, Scope scope, List<Action> additionalActions) {
+    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         MSSQLDatabase database = scope.get(Scope.Attr.database, MSSQLDatabase.class);
         StringClauses clauses = super.generateColumnSql(column, action, scope, additionalActions);
 
         String defaultValue = clauses.get(ColumnClauses.defaultValue);
         if (defaultValue != null) {
-            clauses.replace(ColumnClauses.defaultValue, defaultValue.replaceFirst("DEFAULT", "CONSTRAINT " + database.generateDefaultConstraintName(column.get(ColumnDefinition.Attr.columnName, ObjectName.class))));
+            clauses.replace(ColumnClauses.defaultValue, defaultValue.replaceFirst("DEFAULT", "CONSTRAINT " + database.generateDefaultConstraintName(column.columnName)));
         }
 
-        String remarks = column.get(ColumnDefinition.Attr.remarks, String.class);
+        String remarks = column.remarks;
 
         if (remarks != null) {
-            String schemaName = action.get(CreateTableAction.Attr.tableName, ObjectName.class).get(ObjectName.Attr.container, String.class);
+            String schemaName = action.tableName.container.name;
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }
-            additionalActions.add(new ExecuteSqlAction("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+remarks+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+action.get(CreateTableAction.Attr.tableName, String.class)+", @level2type = N'Column', @level2name = "+column));
+            additionalActions.add(new ExecuteSqlAction("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+remarks+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+action.tableName+", @level2type = N'Column', @level2name = "+column));
         }
 
         return clauses;

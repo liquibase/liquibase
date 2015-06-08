@@ -2,6 +2,7 @@ package liquibase.actionlogic.core.hsql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.core.SetNullableAction;
 import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.database.Database;
@@ -16,7 +17,7 @@ public class SetNullableLogicHsql extends SetNullableLogic {
 
 
     @Override
-    protected StringClauses generateSql(Action action, Scope scope) {
+    protected StringClauses generateSql(SetNullableAction action, Scope scope) {
         return super.generateSql(action, scope)
                 .prepend("SET");
     }

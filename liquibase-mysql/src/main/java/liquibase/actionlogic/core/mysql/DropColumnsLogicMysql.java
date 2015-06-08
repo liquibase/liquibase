@@ -22,13 +22,13 @@ public class DropColumnsLogicMysql extends DropColumnsLogic {
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(DropColumnsAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "ALTER TABLE "
-                        + database.escapeObjectName(action.get(DropColumnsAction.Attr.tableName, ObjectName.class), Table.class)
+                        + database.escapeObjectName(action.tableName, Table.class)
                         + " DROP "
-                        + StringUtils.join(action.get(DropColumnsAction.Attr.columnNames, String[].class), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
+                        + StringUtils.join(action.columnNames, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
         ));
     }
 }

@@ -1,10 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
+import liquibase.structure.ObjectName;
 
 public class SetColumnRemarksAction extends AbstractAction {
-    public static enum Attr {
-        columnName,
-        remarks,
-    }
+    public ObjectName columnName;
+    public String remarks;
 }

@@ -13,23 +13,23 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
-public class TableRowCountLogic extends AbstractActionLogic {
+public class TableRowCountLogic extends AbstractActionLogic<TableRowCountAction> {
 
     @Override
-    protected Class<? extends Action> getSupportedAction() {
+    protected Class<TableRowCountAction> getSupportedAction() {
         return TableRowCountAction.class;
     }
 
     @Override
-    public ValidationErrors validate(Action action, Scope scope) {
+    public ValidationErrors validate(TableRowCountAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField(TableRowCountAction.Attr.tableName, action);
+                .checkForRequiredField("tableName", action);
     }
 
     @Override
-    public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
-        Database database = scope.get(Scope.Attr.database, Database.class);
+    public ActionResult execute(TableRowCountAction action, Scope scope) throws ActionPerformException {
+        Database database = scope.getDatabase();
         return new DelegateResult(new QuerySqlAction("SELECT COUNT(*) FROM "
-                + database.escapeObjectName(action.get(TableRowCountAction.Attr.tableName, ObjectName.class), Table.class)));
+                + database.escapeObjectName(action.tableName, Table.class)));
     }
 }
