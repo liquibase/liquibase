@@ -1,8 +1,8 @@
 package liquibase.resource;
 
-import liquibase.logging.LogFactory;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 continue;
             }
             seenUrls.add(url.toExternalForm());
-            LogFactory.getInstance().getLog().debug("Opening "+url.toExternalForm()+" as "+path);
+            LoggerFactory.getLogger(getClass()).debug("Opening "+url.toExternalForm()+" as "+path);
 
             URLConnection connection = url.openConnection();
             connection.setUseCaches(false);

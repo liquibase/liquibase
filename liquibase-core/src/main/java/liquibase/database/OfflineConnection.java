@@ -6,7 +6,6 @@ import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
@@ -14,6 +13,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.core.Catalog;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class OfflineConnection implements DatabaseConnection {
                         this.databaseMinorVersion = Integer.valueOf(versionParts[1]);
                     }
                 } catch (NumberFormatException e) {
-                    LogFactory.getInstance().getLog().warning("Cannot parse database version "+productVersion);
+                    LoggerFactory.getLogger(getClass()).warn("Cannot parse database version " + productVersion);
                 }
             } else if (paramEntry.getKey().equals("productName")) {
                 this.productName = paramEntry.getValue();
@@ -113,7 +113,7 @@ public class OfflineConnection implements DatabaseConnection {
             try {
                 ObjectUtil.setProperty(database, param.getKey(), param.getValue());
             } catch (Throwable e) {
-                LogFactory.getInstance().getLog().warning("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
+                LoggerFactory.getLogger(getClass()).warn("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
             }
         }
         if (database instanceof AbstractJdbcDatabase) {

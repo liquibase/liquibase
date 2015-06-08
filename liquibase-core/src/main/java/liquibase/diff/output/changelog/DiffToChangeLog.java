@@ -11,13 +11,13 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -66,12 +66,12 @@ public class DiffToChangeLog {
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
-            LogFactory.getLogger().info(file + " does not exist, creating");
+            LoggerFactory.getLogger(getClass()).info(file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
             print(new PrintStream(stream), changeLogSerializer);
             stream.close();
         } else {
-            LogFactory.getLogger().info(file + " exists, appending");
+            LoggerFactory.getLogger(getClass()).info(file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             print(new PrintStream(out), changeLogSerializer);
 
@@ -80,7 +80,7 @@ public class DiffToChangeLog {
             xml = xml.replaceFirst("</databaseChangeLog>", "");
             xml = xml.trim();
             if ("".equals(xml)) {
-                LogFactory.getLogger().info("No changes found, nothing to do");
+                LoggerFactory.getLogger(getClass()).info("No changes found, nothing to do");
                 return;
             }
 
@@ -181,7 +181,7 @@ public class DiffToChangeLog {
             for (Class<? extends DatabaseObject> type : types) {
                 log += "    " + type.getName();
             }
-            LogFactory.getLogger().debug(log);
+            LoggerFactory.getLogger(getClass()).debug(log);
             loggedOrderFor.add(generatorType);
         }
 

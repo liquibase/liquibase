@@ -34,8 +34,6 @@ import liquibase.executor.LoggingExecutor;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
@@ -44,20 +42,18 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.util.*;
 
 /**
  * Primary facade class for interacting with Liquibase.
@@ -70,7 +66,7 @@ public class Liquibase {
     private ResourceAccessor resourceAccessor;
 
     protected Database database;
-    private Logger log;
+    private Logger log = LoggerFactory.getLogger(Liquibase.class);
 
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
@@ -99,7 +95,7 @@ public class Liquibase {
      * @see ResourceAccessor
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
-        log = LogFactory.getLogger();
+        log = LoggerFactory.getLogger(getClass());
 
         if (changeLogFile != null) {
             this.changeLogFile = changeLogFile.replace('\\', '/');  //convert to standard / if using absolute path on windows
@@ -111,7 +107,7 @@ public class Liquibase {
     }
 
     public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
-        log = LogFactory.getLogger();
+        log = LoggerFactory.getLogger(getClass());
         this.databaseChangeLog = changeLog;
 
         this.changeLogFile = changeLog.getPhysicalFilePath();
@@ -218,7 +214,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                log.severe("Could not release lock", e);
+                log.warn("Could not release lock", e);
             }
             resetServices();
         }
@@ -519,7 +515,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                log.severe("Error releasing lock", e);
+                log.warn("Error releasing lock", e);
             }
             resetServices();
         }
@@ -564,7 +560,7 @@ public class Liquibase {
         } catch (DatabaseException e) {
             e = new DatabaseException("Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(), e);
             System.err.println(e.getMessage());
-            log.severe("Error executing rollback script", e);
+            log.warn("Error executing rollback script", e);
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, e);
             }

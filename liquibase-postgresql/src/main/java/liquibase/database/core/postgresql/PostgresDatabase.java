@@ -1,22 +1,19 @@
 package liquibase.database.core.postgresql;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -238,7 +235,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         } catch (Exception e) {
             // TODO: Something?
             e.printStackTrace();
-            LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
+            LoggerFactory.getLogger(getClass()).warn("Failed to get default catalog name from postgres", e);
         }
 
         return searchPaths;

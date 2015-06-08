@@ -1,9 +1,7 @@
 package liquibase.servicelocator
 
 import liquibase.database.Database
-import liquibase.logging.Logger
-import liquibase.logging.core.AbstractLogger
-import liquibase.logging.core.DefaultLogger
+
 import spock.lang.Specification
 
 class DefaultPackageScanClassResolverTest extends Specification {

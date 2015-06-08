@@ -11,13 +11,12 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.*;
-import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.Resource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
@@ -198,7 +197,7 @@ public class CommandLineUtils {
 
         @Override
         public void statusUpdate(String message) {
-            LogFactory.getLogger().info(message);
+            LoggerFactory.getLogger(getClass()).info(message);
 
         }
 

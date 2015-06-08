@@ -1,22 +1,11 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.AbstractAction;
-import liquibase.action.Action;
 import liquibase.action.core.DropTableAction;
 import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 

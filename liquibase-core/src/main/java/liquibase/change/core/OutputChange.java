@@ -7,14 +7,12 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
 public class OutputChange extends AbstractChange {
@@ -62,13 +60,13 @@ public class OutputChange extends AbstractChange {
                 } else if (target.equalsIgnoreCase("STDERR")) {
                     System.err.println(getMessage());
                 } else if (target.equalsIgnoreCase("DEBUG")) {
-                    LogFactory.getInstance().getLog().debug(getMessage());
+                    LoggerFactory.getLogger(getClass()).debug(getMessage());
                 } else if (target.equalsIgnoreCase("INFO")) {
-                    LogFactory.getInstance().getLog().info(getMessage());
+                    LoggerFactory.getLogger(getClass()).info(getMessage());
                 } else if (target.equalsIgnoreCase("WARN") || target.equalsIgnoreCase("WARNING")) {
-                    LogFactory.getInstance().getLog().warning(getMessage());
+                    LoggerFactory.getLogger(getClass()).warn(getMessage());
                 } else if (target.equalsIgnoreCase("SEVERE") || target.equalsIgnoreCase("FATAL") || target.equalsIgnoreCase("ERROR")) {
-                    LogFactory.getInstance().getLog().severe(getMessage());
+                    LoggerFactory.getLogger(getClass()).warn(getMessage());
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
                 }

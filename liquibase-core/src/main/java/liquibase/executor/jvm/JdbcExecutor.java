@@ -8,12 +8,12 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.*;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -31,7 +31,7 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class JdbcExecutor extends AbstractExecutor implements Executor {
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LoggerFactory.getLogger(JdbcExecutor.class);
 
     @Override
     public boolean updatesDatabase() {
@@ -259,7 +259,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        LogFactory.getLogger().debug(message);
+        LoggerFactory.getLogger(getClass()).debug(message);
     }
 
     /**

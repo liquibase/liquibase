@@ -1,16 +1,15 @@
 package liquibase.actionlogic;
 
 import liquibase.Scope;
-import liquibase.action.AbstractAction;
 import liquibase.action.Action;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.AbstractServiceFactory;
 import liquibase.servicelocator.Service;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.StreamUtil;
 import liquibase.util.Validate;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +66,7 @@ public class ActionLogicFactory  extends AbstractServiceFactory<ActionLogic> {
                     }
                 }
             } catch (IOException e) {
-                LogFactory.getInstance().getLog().warning("Error reading "+packagePath, e);
+                LoggerFactory.getLogger(getClass()).warn("Error reading " + packagePath, e);
             }
         }
 

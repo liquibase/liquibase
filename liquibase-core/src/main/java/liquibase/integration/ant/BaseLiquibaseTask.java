@@ -6,11 +6,8 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.ant.logging.AntTaskLogFactory;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -24,6 +21,8 @@ import org.apache.tools.ant.taskdefs.Property;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -52,7 +51,6 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogFactory.setInstance(new AntTaskLogFactory(this));
         classpath = new Path(getProject());
     }
 
@@ -484,7 +482,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getInstance().getLog();
+            Logger logger = LoggerFactory.getLogger(getClass());
         }
 
 
@@ -638,25 +636,6 @@ public abstract class BaseLiquibaseTask extends Task {
     public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
         log("The outputDefaultCatalog attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
         getDatabaseType().setOutputDefaultCatalog(outputDefaultCatalog);
-    }
-
-    /**
-     * @deprecated No longer needed. This method has no replacement.
-     * @return Log level.
-     */
-    @Deprecated
-    public String getLogLevel() {
-        return LogFactory.getInstance().getLog().getLogLevel().name();
-    }
-
-    /**
-     * @deprecated Use the ant logging flags (-debug, -verbose, -quiet) instead of this method to control logging
-     * output. This will no longer change log levels.
-     * @param level Log level to set.
-     */
-    @Deprecated
-    public void setLogLevel(String level) {
-        LogFactory.getInstance().getLog().setLogLevel(level);
     }
 
     /**

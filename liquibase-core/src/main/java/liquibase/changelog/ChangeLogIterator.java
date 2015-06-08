@@ -1,13 +1,14 @@
 package liquibase.changelog;
 
+import liquibase.LoggerContexts;
 import liquibase.RuntimeEnvironment;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
+import org.apache.log4j.MDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -42,9 +43,9 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-      Logger log = LogFactory.getLogger();
+      Logger log = LoggerFactory.getLogger(getClass());
       databaseChangeLog.setRuntimeEnvironment(env);
-      log.setChangeLog(databaseChangeLog);
+        MDC.put(LoggerContexts.CHANGELOG.name(), databaseChangeLog);
         try {
             List<ChangeSet> changeSetList = new ArrayList<ChangeSet>(databaseChangeLog.getChangeSets());
             if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
@@ -68,7 +69,7 @@ public class ChangeLogIterator {
                     }
                 }
 
-                log.setChangeSet(changeSet);
+                MDC.put(LoggerContexts.CHANGESET.name(), changeSet);
                 if (shouldVisit) {
                     visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                 } else {
@@ -76,10 +77,10 @@ public class ChangeLogIterator {
                         ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
                     }
                 }
-                log.setChangeSet(null);
+                MDC.remove(LoggerContexts.CHANGESET.name());
             }
         } finally {
-            log.setChangeLog(null);
+            MDC.remove(LoggerContexts.CHANGELOG.name());
             databaseChangeLog.setRuntimeEnvironment(null);
         }
     }

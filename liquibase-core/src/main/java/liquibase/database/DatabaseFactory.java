@@ -4,11 +4,11 @@ import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +23,7 @@ public class DatabaseFactory {
     private Logger log;
 
     private DatabaseFactory() {
-        log = new LogFactory().getLog();
+        log = LoggerFactory.getLogger(DatabaseFactory.class);
         try {
             Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
@@ -110,7 +110,7 @@ public class DatabaseFactory {
         }
 
         if (foundDatabases.size() == 0) {
-            log.warning("Unknown database: " + connection.getDatabaseProductName());
+            log.warn("Unknown database: " + connection.getDatabaseProductName());
             UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
             unsupportedDB.setConnection(connection);
             return unsupportedDB;

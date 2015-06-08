@@ -4,12 +4,12 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -103,7 +103,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (this.statusListeners == null) {
             return;
         }
-        LogFactory.getLogger().debug(message);
+        LoggerFactory.getLogger(getClass()).debug(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

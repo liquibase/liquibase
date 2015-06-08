@@ -10,14 +10,13 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -136,7 +135,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 //        String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
 //
 //        if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
-//        	LogFactory.getLogger().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+//        	LoggerFactory.getLogger(getClass()).info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
 //        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
 //        }
 
@@ -278,7 +277,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 //                    }
 //                }
             } else {
-                LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as requested for "+action.tableName);
+                LoggerFactory.getLogger(getClass()).warn(database.getShortName() + " does not support autoincrement columns as requested for " + action.tableName);
             }
         }
 

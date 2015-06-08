@@ -11,7 +11,6 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -21,6 +20,7 @@ import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogFactory.getLogger().info("Not executing on os "+currentOS+" when "+os+" was specified");
+                LoggerFactory.getLogger(getClass()).info("Not executing on os "+currentOS+" when "+os+" was specified");
             }
         }
 
@@ -132,8 +132,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
                         StreamUtil.copy(p.getErrorStream(), errorStream);
                         StreamUtil.copy(p.getInputStream(), inputStream);
 
-                        LogFactory.getLogger().severe(errorStream.toString());
-                        LogFactory.getLogger().info(inputStream.toString());
+                        LoggerFactory.getLogger(getClass()).warn(errorStream.toString());
+                        LoggerFactory.getLogger(getClass()).info(inputStream.toString());
 
                         if (returnCode != 0) {
                             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);

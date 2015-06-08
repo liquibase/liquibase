@@ -5,18 +5,16 @@ import java.io.InputStream;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.validation.SchemaFactory;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.UtfBomStripperInputStream;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 
+import org.slf4j.LoggerFactory;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -73,19 +71,19 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             xmlReader.setErrorHandler(new ErrorHandler() {
                 @Override
                 public void warning(SAXParseException exception) throws SAXException {
-                    LogFactory.getLogger().warning(exception.getMessage());
+                    LoggerFactory.getLogger(getClass()).warn(exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void error(SAXParseException exception) throws SAXException {
-                    LogFactory.getLogger().severe(exception.getMessage());
+                    LoggerFactory.getLogger(getClass()).warn(exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
-                    LogFactory.getLogger().severe(exception.getMessage());
+                    LoggerFactory.getLogger(getClass()).warn(exception.getMessage());
                     throw exception;
                 }
             });

@@ -5,16 +5,12 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.List;
@@ -155,7 +151,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (nullable == DatabaseMetaData.columnNullable) {
                 column.nullable = true;
             } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
+                LoggerFactory.getLogger(getClass()).info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
                 column.nullable = true;
             }
 //        }
@@ -172,7 +168,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     } else if (isAutoincrement.equals("NO")) {
                         column.autoIncrementInformation = null;
                     } else if (isAutoincrement.equals("")) {
-                        LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                        LoggerFactory.getLogger(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                         column.autoIncrementInformation = null;
                     } else {
                         throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
@@ -182,16 +178,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     String selectStatement;
                     if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                         selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                        LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
-                        LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
-                        LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
-                        LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
+                        LoggerFactory.getLogger(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
+                        LoggerFactory.getLogger(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
+                        LoggerFactory.getLogger(getClass()).debug("rawTableName : <" + rawTableName + ">");
+                        LoggerFactory.getLogger(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
 
 
                     } else {
                         selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                     }
-                    LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                    LoggerFactory.getLogger(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                     Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                     Statement statement = null;
                     ResultSet columnSelectRS = null;
@@ -304,7 +300,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                enumClause = enumClause.replaceFirst(", $", "");
 //                return new DataType(columnTypeName + "(" + enumClause + ")");
 //            } catch (DatabaseException e) {
-//                LogFactory.getLogger().warning("Error fetching enum values", e);
+//                LoggerFactory.getLogger(getClass()).warn("Error fetching enum values", e);
 //            }
 //        }
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
@@ -459,7 +455,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 ////        if (table == null) {
 ////            View view = snapshot.getView(tableName);
 ////            if (view == null) {
-////                LogFactory.getLogger().debug("Could not find table or view " + tableName + " for column " + columnName);
+////                LoggerFactory.getLogger(getClass()).debug("Could not find table or view " + tableName + " for column " + columnName);
 ////                return null;
 ////            } else {
 ////                columnInfo.setView(view);

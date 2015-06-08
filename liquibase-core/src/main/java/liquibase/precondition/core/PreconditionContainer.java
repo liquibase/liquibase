@@ -14,7 +14,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -213,7 +213,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 message = new StringBuffer(getOnFailMessage());
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                LogFactory.getLogger().info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
+                LoggerFactory.getLogger(getClass()).info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
             } else {
                 if (getOnFailMessage() == null) {
                     throw e;
@@ -230,10 +230,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
 
             if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
-                LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                LoggerFactory.getLogger(getClass()).info("Continuing past: " + toString() + " despite precondition error:\n " + message);
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                LogFactory.getLogger().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                LoggerFactory.getLogger(getClass()).warn("Continuing past: " + toString() + " despite precondition error:\n " + message);
             } else {
                 if (getOnErrorMessage() == null) {
                     throw e;

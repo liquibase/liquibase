@@ -3,23 +3,19 @@ package liquibase.parser.core.xml;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
@@ -40,8 +36,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, ChangeLogParameters changeLogParameters) {
-		log = LogFactory.getLogger();
-		this.resourceAccessor = resourceAccessor;
+		log = LoggerFactory.getLogger(XMLChangeLogSAXHandler.class);
+                this.resourceAccessor = resourceAccessor;
 
 		databaseChangeLog = new DatabaseChangeLog();
 		databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);

@@ -17,8 +17,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
@@ -28,6 +26,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class LiquibaseTest {
     private DatabaseChangeLog mockChangeLog;
     private ChangeLogIterator mockChangeLogIterator;
 
-    private Logger mockLogger;
+    private Logger mockLogger = LoggerFactory.getLogger(LiquibaseTest.class);
 
 //    private TestLiquibase testLiquibase;
 //    private DatabaseConnection connectionForConstructor;
@@ -86,13 +86,6 @@ public class LiquibaseTest {
         ChangeLogParserFactory.setInstance(mockChangeLogParserFactory);
         when(mockChangeLogParserFactory.getParser(anyString(), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
         when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLog);
-
-        LogFactory.setInstance(new LogFactory() {
-            @Override
-            public Logger getLog(String name) {
-                return mockLogger;
-            }
-        });
     }
 
     @After
@@ -101,12 +94,10 @@ public class LiquibaseTest {
         Mockito.reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
         LockServiceFactory.reset();
         ChangeLogParserFactory.reset();
-        LogFactory.reset();
     }
 
     @Test
     public void constructor() throws Exception {
-        LogFactory.reset(); //going to test log setup
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
@@ -283,7 +274,7 @@ public class LiquibaseTest {
 //        doThrow(LockException.class).when(mockLockService).releaseLock();
 //
 //        update(); //works like normal, just logs error
-//        verify(mockLogger).severe(eq("Could not release lock"), any(Exception.class));
+//        verify(mockLogger).warn(eq("Could not release lock"), any(Exception.class));
 //    }
 
     @Test

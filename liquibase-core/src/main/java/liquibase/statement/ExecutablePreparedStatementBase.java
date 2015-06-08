@@ -23,18 +23,18 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-  private Logger log = LogFactory.getLogger();
+  private Logger log = LoggerFactory.getLogger(getClass());
 
 	protected Database database;
 	private String catalogName;

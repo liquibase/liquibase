@@ -16,9 +16,6 @@ import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
-import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -28,6 +25,8 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -201,7 +200,7 @@ public class Main {
 		            ((ValidationFailedException)e.getCause()).printDescriptiveError(System.out);
 	            } else {
 	                System.err.println("Unexpected error running Liquibase: " + message + "\n");
-                    LogFactory.getInstance().getLog().severe(message, e);
+                    LoggerFactory.getLogger(Main.class).warn(message, e);
 		            System.err.println(generateLogLevelWarningMessage());
 	            }
             } catch (Exception e1) {
@@ -212,8 +211,8 @@ public class Main {
     }
 
     private static String generateLogLevelWarningMessage() {
-        Logger logger = LogFactory.getInstance().getLog();
-        if (logger != null && logger.getLogLevel() != null && (logger.getLogLevel().equals(LogLevel.OFF))) {
+        Logger logger = LoggerFactory.getLogger(Main.class);
+        if (!logger.isInfoEnabled()) {
             return "";
         } else {
             return "\n\nFor more information, use the --logLevel flag";
@@ -452,7 +451,7 @@ public class Main {
                 if(strict){
                     throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
                 } else {
-                    LogFactory.getInstance().getLog().info("Ignored parameter: " + entry.getKey());
+                    LoggerFactory.getLogger(getClass()).info("Ignored parameter: " + entry.getKey());
                 }
             } catch (Exception e) {
                 throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
@@ -898,15 +897,15 @@ public class Main {
             return;
         }
 
-        try {
-            if (null != logFile) {
-	            LogFactory.getInstance().getLog().setLogLevel(logLevel, logFile);
-            } else {
-	            LogFactory.getInstance().getLog().setLogLevel(logLevel);
-            }
-        } catch (IllegalArgumentException e) {
-            throw new CommandLineParsingException(e.getMessage(), e);
-        }
+//        try {
+//            if (null != logFile) {
+//	            LoggerFactory.getLogger(getClass()).setLogLevel(logLevel, logFile);
+//            } else {
+//	            LoggerFactory.getLogger(getClass()).setLogLevel(logLevel);
+//            }
+//        } catch (IllegalArgumentException e) {
+//            throw new CommandLineParsingException(e.getMessage(), e);
+//        }
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
@@ -1176,7 +1175,7 @@ public class Main {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-	            LogFactory.getInstance().getLog().warning("problem closing connection", e);
+	            LoggerFactory.getLogger(getClass()).warn("problem closing connection", e);
             }
         }
     }

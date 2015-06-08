@@ -1,10 +1,10 @@
 package liquibase.structure.core;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public class DatabaseObjectFactory {
                         set.add(clazz);
                     }
                 } catch (Exception e) {
-                    LogFactory.getLogger().info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+                    LoggerFactory.getLogger(getClass()).info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
                 }
             }
 

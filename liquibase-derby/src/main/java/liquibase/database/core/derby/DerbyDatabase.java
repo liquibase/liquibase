@@ -4,28 +4,21 @@ import java.sql.*;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Driver;
 import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
@@ -146,7 +139,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 } else {
                     url += ";shutdown=true";
                 }
-                LogFactory.getLogger().info("Shutting down derby connection: " + url);
+                LoggerFactory.getLogger(getClass()).info("Shutting down derby connection: " + url);
                 // this cleans up the lock files in the embedded derby database folder
                 ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                 Driver driver = (Driver) contextClassLoader.loadClass(driverName).newInstance();
@@ -202,7 +195,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
         }
         return null;
     }

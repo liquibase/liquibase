@@ -6,8 +6,8 @@ import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import spock.lang.Specification
+
 import static org.hamcrest.Matchers.containsInAnyOrder
-import static spock.util.matcher.HamcrestSupport.expect
 import static spock.util.matcher.HamcrestSupport.that
 
 class AbstractExtensibleObjectTest extends Specification {

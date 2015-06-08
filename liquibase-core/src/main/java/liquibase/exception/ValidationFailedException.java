@@ -3,10 +3,10 @@ package liquibase.exception;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
-import liquibase.logging.LogFactory;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StreamUtil;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -82,7 +82,7 @@ public class ValidationFailedException extends MigrationFailedException {
         if(changeValidationExceptions.size() >0){
             message.append("     ").append(changeValidationExceptions.size()).append(" changes have validation errors").append(StreamUtil.getLineSeparator());
             for (Throwable invalid : changeValidationExceptions) {
-                LogFactory.getLogger().debug("validation exception", invalid);
+                LoggerFactory.getLogger(getClass()).debug("validation exception", invalid);
                 message.append("          ").append(invalid.toString());
                 message.append(StreamUtil.getLineSeparator());
             }

@@ -7,7 +7,6 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
@@ -15,6 +14,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.regex.Matcher;
@@ -39,14 +39,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 return false;
             }
         } catch (IOException e) {
-            LogFactory.getLogger().debug("Exception reading " + changeLogFile, e);
+            LoggerFactory.getLogger(getClass()).debug("Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    LogFactory.getLogger().debug("Exception closing " + changeLogFile, e);
+                    LoggerFactory.getLogger(getClass()).debug("Exception closing " + changeLogFile, e);
                 }
             }
         }

@@ -13,7 +13,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -22,6 +21,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -192,7 +192,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
+            LoggerFactory.getLogger(getClass()).info("Creating database history table with name: " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -200,7 +200,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 executor.execute(sql);
                 getDatabase().commit();
             } else {
-                LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+getDatabase().getShortName()+" when checking databasechangelog table");
+                LoggerFactory.getLogger(getClass()).info("Cannot run "+sql.getClass().getSimpleName()+" on "+getDatabase().getShortName()+" when checking databasechangelog table");
             }
         }
         serviceInitialized = true;
@@ -220,7 +220,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
             if (hasDatabaseChangeLogTable()) {
-                LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
+                LoggerFactory.getLogger(getClass()).info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
                 for (Map rs : results) {
                     String fileName = rs.get("FILENAME").toString();
@@ -249,7 +249,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
-                        LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
+                        LoggerFactory.getLogger(getClass()).warn("Unknown EXECTYPE from database: " + execType);
                         throw e;
                     }
                 }

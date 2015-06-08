@@ -5,12 +5,13 @@ import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.util.StreamUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
+
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.file.FilenameUtils;
 import org.xml.sax.SAXException;
@@ -27,7 +28,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private ResourceAccessor resourceAccessor;
     private String basePath;
 
-    private Logger log=LogFactory.getLogger();
+    private Logger log= LoggerFactory.getLogger(LiquibaseEntityResolver.class);
 
     public LiquibaseEntityResolver(LiquibaseSerializer serializer) {
         this.serializer = serializer;
@@ -141,7 +142,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        log.warning("Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
+        log.warn("Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
         return tryResolveLiquibaseSchema(systemId, publicId);
     }
 

@@ -119,7 +119,7 @@ public class DateTimeType extends LiquibaseDataType {
 //            Object[] params = getParameters();
 //            Integer precision = Integer.valueOf(params[0].toString());
 //            if (precision > 6) {
-//                LogFactory.getInstance().getLog().warning(
+//                LoggerFactory.getLogger(getClass()).warn(
 //                        "MySQL does not support a timestamp precision"
 //                                + " of '" + precision + "' - resetting to"
 //                                + " the maximum of '6'");
@@ -134,7 +134,7 @@ public class DateTimeType extends LiquibaseDataType {
 //    protected boolean supportsFractionalDigits(Database database) {
 //        if (database.getConnection() == null) {
 //            // if no connection is there we cannot do anything...
-//            LogFactory.getInstance().getLog().warning(
+//            LoggerFactory.getLogger(getClass()).warn(
 //                    "No database connection available - specified"
 //                            + " DATETIME/TIMESTAMP precision will be tried");
 //            return true;
@@ -158,7 +158,7 @@ public class DateTimeType extends LiquibaseDataType {
 //
 //            return isMinimumVersion(minimumVersion, major, minor, patch);
 //        } catch (DatabaseException x) {
-//            LogFactory.getInstance().getLog().warning(
+//            LoggerFactory.getLogger(getClass()).warn(
 //                    "Unable to determine exact database server version"
 //                            + " - specified TIMESTAMP precision"
 //                            + " will not be set: ", x);

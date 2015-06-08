@@ -10,8 +10,8 @@ import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,10 +52,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             preconditions.check(database, changeLog, null);
         } catch (PreconditionFailedException e) {
-            LogFactory.getLogger().debug("Precondition Failed: "+e.getMessage(), e);
+            LoggerFactory.getLogger(getClass()).debug("Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            LogFactory.getLogger().debug("Precondition Error: "+e.getMessage(), e);
+            LoggerFactory.getLogger(getClass()).debug("Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -63,7 +63,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     database.rollback();
                 }
             } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("Error rolling back after precondition check", e);
+                LoggerFactory.getLogger(getClass()).warn("Error rolling back after precondition check", e);
             }
         }
     }
@@ -94,7 +94,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
                     if (foundErrors != null && foundErrors.hasErrors()) {
                         if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
-                            LogFactory.getLogger().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                            LoggerFactory.getLogger(getClass()).info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             validationErrors.addAll(foundErrors, changeSet);

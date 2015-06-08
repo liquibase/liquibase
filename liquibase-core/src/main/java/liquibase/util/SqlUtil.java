@@ -4,9 +4,9 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
-import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.DataType;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Types;
@@ -230,7 +230,7 @@ public class SqlUtil {
 //todo: action refactoring        } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
 //            return stringVal;
         } else {
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
+            LoggerFactory.getLogger(SqlUtil.class).info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
             return new DatabaseFunction(stringVal);
         }
     }

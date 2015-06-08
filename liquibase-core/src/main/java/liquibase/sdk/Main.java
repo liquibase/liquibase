@@ -2,8 +2,6 @@ package liquibase.sdk;
 
 import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
 import liquibase.sdk.convert.ConvertCommand;
 import liquibase.sdk.vagrant.VagrantCommand;
 import liquibase.sdk.watch.WatchCommand;
@@ -54,7 +52,6 @@ public class Main {
                 }
             } else if (main.command.equals("watch")) {
                 ((StdErrLog) org.eclipse.jetty.util.log.Log.getRootLogger()).setLevel(StdErrLog.LEVEL_WARN);
-                LogFactory.getInstance().setDefaultLoggingLevel(LogLevel.WARNING);
                 command = new WatchCommand(main);
 
                 Options options = new Options();

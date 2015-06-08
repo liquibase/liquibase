@@ -1,6 +1,5 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
@@ -11,14 +10,13 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
-import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -102,7 +100,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         Difference difference = differences.getDifference("autoIncrementInformation");
         if (difference != null) {
             if (difference.getReferenceValue() == null) {
-                LogFactory.getLogger().info("ChangedColumnChangeGenerator cannot fix dropped auto increment values");
+                LoggerFactory.getLogger(getClass()).info("ChangedColumnChangeGenerator cannot fix dropped auto increment values");
                 //todo: Support dropping auto increments
             } else {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();

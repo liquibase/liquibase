@@ -8,15 +8,14 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -76,7 +75,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 try {
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
-                    LogFactory.getLogger().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    LoggerFactory.getLogger(getClass()).info("Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
                 try {
@@ -84,7 +83,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.setAccessible(true);
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
-                    LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    LoggerFactory.getLogger(getClass()).info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
                     ; //cannot set it. That is OK
                 }
 
@@ -160,7 +159,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
         }
         return null;
     }

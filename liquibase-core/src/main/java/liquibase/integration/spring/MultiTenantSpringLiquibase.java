@@ -16,9 +16,9 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
@@ -47,7 +47,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author ladislav.gazo
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
-	private Logger log = LogFactory.getLogger(MultiTenantSpringLiquibase.class.getName());
+	private Logger log = LoggerFactory.getLogger(MultiTenantSpringLiquibase.class);
 	
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
@@ -84,7 +84,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			}else if(dataSource!=null){
 				log.info("Schema based multitenancy enabled");
 				if(schemas==null || schemas.isEmpty()) {
-					log.warning("Schemas not defined, using defaultSchema only");
+					log.warn("Schemas not defined, using defaultSchema only");
 					schemas = new ArrayList<String>();
 					schemas.add(defaultSchema);
 				}

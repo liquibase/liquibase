@@ -5,8 +5,6 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
@@ -20,6 +18,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import liquibase.util.BooleanParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @DatabaseChange(name="loadData",
@@ -230,7 +230,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
                 if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
-                    Logger log = LogFactory.getLogger();
+                    Logger log = LoggerFactory.getLogger(getClass());
                     log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());        
                     return new SqlStatement[0];
                 } else {

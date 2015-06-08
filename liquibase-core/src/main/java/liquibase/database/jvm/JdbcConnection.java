@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.Arrays;
@@ -29,7 +29,7 @@ public class JdbcConnection implements DatabaseConnection {
         try {
             database.addReservedWords(Arrays.asList(this.getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
         } catch (SQLException e) {
-            LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+            LoggerFactory.getLogger(getClass()).info("Error fetching reserved words list from JDBC driver", e);
         }
 
 

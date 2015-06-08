@@ -1,6 +1,5 @@
 package liquibase.actionlogic.core;
 
-import ch.qos.logback.classic.db.names.TableName;
 import liquibase.Scope;
 import liquibase.action.AbstractAction;
 import liquibase.action.Action;

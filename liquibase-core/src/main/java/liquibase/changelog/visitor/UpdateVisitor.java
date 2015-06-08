@@ -9,8 +9,8 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -18,7 +18,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private Database database;
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LoggerFactory.getLogger(UpdateVisitor.class);
     
     private ChangeExecListener execListener;
 

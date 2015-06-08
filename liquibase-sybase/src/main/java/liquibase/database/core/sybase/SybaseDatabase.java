@@ -9,10 +9,10 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -230,7 +230,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -269,8 +269,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLogger()
-        		.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        	LoggerFactory.getLogger(getClass())
+        		.warn("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
@@ -284,8 +284,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLogger()
-    			.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        	LoggerFactory.getLogger(getClass())
+    			.warn("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }

@@ -5,7 +5,6 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
@@ -709,7 +708,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 //                            sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
 //                        }
 //                    } else if (database instanceof SybaseDatabase) {
-//                        LogFactory.getLogger().warning("Finding unique constraints not currently supported for Sybase");
+//                        LoggerFactory.getLogger(getClass()).warn("Finding unique constraints not currently supported for Sybase");
 //                        return null; //TODO: find sybase sql
 //                    } else if (database instanceof SybaseASADatabase) {
 //                        sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +

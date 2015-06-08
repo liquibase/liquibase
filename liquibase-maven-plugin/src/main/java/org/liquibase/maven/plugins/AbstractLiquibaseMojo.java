@@ -8,7 +8,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -20,6 +19,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -329,7 +329,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
         configureFieldsAndValues(fileOpener);
 
-        LogFactory.getInstance().setDefaultLoggingLevel(logging);
+//        LoggerFactory.getLogger(getClass()).setDefaultLoggingLevel(logging);
 
         // Displays the settings for the Mojo depending of verbosity mode.
         displayMojoSettings();

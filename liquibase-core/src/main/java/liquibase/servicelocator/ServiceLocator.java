@@ -2,20 +2,15 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.Logger;
-import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.*;
 import java.util.jar.Manifest;
 
@@ -36,7 +31,7 @@ public class ServiceLocator {
 
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
-    private Logger logger = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
+    private Logger logger = LoggerFactory.getLogger(getClass());
     private PackageScanClassResolver classResolver;
 
     protected ServiceLocator() {
@@ -225,7 +220,7 @@ public class ServiceLocator {
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
                         logger.info(message);
                     } else {
-                        logger.warning(message);
+                        logger.warn(message);
                     }
                 }
             }
@@ -236,9 +231,5 @@ public class ServiceLocator {
 
     public static void reset() {
         instance = new ServiceLocator();
-    }
-
-    protected Logger getLogger() {
-        return logger;
     }
 }

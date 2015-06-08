@@ -9,12 +9,12 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Table;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -85,7 +85,7 @@ public class StandardLockService implements LockService {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             database.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            LoggerFactory.getLogger(getClass()).debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
             hasDatabaseChangeLogLockTable = true;
@@ -153,7 +153,7 @@ public class StandardLockService implements LockService {
         while (!locked && new Date().getTime() < timeToGiveUp) {
             locked = acquireLock();
             if (!locked) {
-                LogFactory.getLogger().info("Waiting for changelog lock....");
+                LoggerFactory.getLogger(getClass()).info("Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
@@ -204,7 +204,7 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogFactory.getLogger().info("Successfully acquired change log lock");
+                LoggerFactory.getLogger(getClass()).info("Successfully acquired change log lock");
 
                 hasChangeLogLock = true;
 
@@ -244,7 +244,7 @@ public class StandardLockService implements LockService {
 
                 database.setCanCacheLiquibaseTableInfo(false);
 
-                LogFactory.getLogger().info("Successfully released change log lock");
+                LoggerFactory.getLogger(getClass()).info("Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
                 ;
@@ -288,7 +288,7 @@ public class StandardLockService implements LockService {
             releaseLock();
         } catch (LockException e) {
             // ignore ?
-            LogFactory.getLogger().info("Ignored exception in forceReleaseLock: " + e.getMessage());
+            LoggerFactory.getLogger(getClass()).info("Ignored exception in forceReleaseLock: " + e.getMessage());
         }*/
     }
 

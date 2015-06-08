@@ -14,8 +14,6 @@ import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -24,6 +22,8 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -199,7 +199,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            LogFactory.getLogger().warning(message);
+            LoggerFactory.getLogger(getClass()).warn(message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -305,7 +305,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     Properties props = new Properties();
                     InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
                     if (propertiesStream == null) {
-                        LogFactory.getInstance().getLog().info("Could not open properties file " + file);
+                        LoggerFactory.getLogger(getClass()).info("Could not open properties file " + file);
                     } else {
                         props.load(propertiesStream);
 
@@ -330,7 +330,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (!(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
-            Logger log = LogFactory.getInstance().getLog();
+            Logger log = LoggerFactory.getLogger(getClass());
             log.debug("includeAll for " + pathName);
             log.debug("Using file opener for includeAll: " + resourceAccessor.toString());
 
@@ -388,7 +388,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         try {
             changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor);
         } catch (UnknownChangelogFormatException e) {
-            LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            LoggerFactory.getLogger(getClass()).warn("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             return false;
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();

@@ -19,6 +19,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.util.JdbcUtils;
+import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,8 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import liquibase.logging.LogFactory;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -184,7 +183,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
         }
         return null;
     }
@@ -368,7 +367,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (Exception e) {
-                LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
+                LoggerFactory.getLogger(getClass()).warn("Cannot determine case sensitivity from MSSQL", e);
             }
         }
 
@@ -509,7 +508,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     sendsStringParametersAsUnicode = ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
             } catch (Exception e) {
-                LogFactory.getLogger().warning("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                LoggerFactory.getLogger(getClass()).warn("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
