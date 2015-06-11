@@ -81,7 +81,8 @@ public class TableWriter extends HTMLWriter {
             for (ForeignKey outgoingForeignKey : table.getOutgoingForeignKeys()) {
                 cells.add(Arrays.asList(outgoingForeignKey.getName(),
                         outgoingForeignKey.getForeignKeyColumns().toString().replace(table.getName() + ".", "").replaceAll("[\\[\\]]", ""),
-                        outgoingForeignKey.getPrimaryKeyColumns().toString().replaceAll("[\\[\\]]", "")));
+                        outgoingForeignKey.getPrimaryKeyTable().toString(),
+                        outgoingForeignKey.getPrimaryKeyColumns().toString().replace(outgoingForeignKey.getPrimaryKeyTable().toString() + ".", "").replaceAll("[\\[\\]]", "")));
             }
             writeTable("Current Table Foreign Keys", cells, fileWriter);
         }
