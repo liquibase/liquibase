@@ -9,6 +9,7 @@ import liquibase.snapshot.SnapshotIdService;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 
@@ -39,7 +40,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (sequences != null) {
                 for (Map<String, ?> sequence : sequences) {
-                    schema.addDatabaseObject(new Sequence(cleanNameFromDatabase((String) sequence.get("SEQUENCE_NAME"), database)).setSchema(schema));
+                    schema.addDatabaseObject(new Sequence(new ObjectName(cleanNameFromDatabase((String) sequence.get("SEQUENCE_NAME"), database))).setSchema(schema));
                 }
             }
         }
@@ -75,7 +76,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     private Sequence mapToSequence(Map<String, ?> sequenceRow, Schema schema, Database database) {
         String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
         Sequence seq = new Sequence();
-        seq.setName(name);
+        seq.setName(new ObjectName(name));
         seq.setSchema(schema);
         seq.setStartValue(toBigInteger(sequenceRow.get("START_VALUE"), database));
         seq.setMinValue(toBigInteger(sequenceRow.get("MIN_VALUE"), database));

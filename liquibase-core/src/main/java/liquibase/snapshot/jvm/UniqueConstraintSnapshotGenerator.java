@@ -9,6 +9,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 
 import java.sql.SQLException;
@@ -49,9 +50,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         for (Map<String, ?> col : metadata) {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-            Column column = new Column((String) col.get("COLUMN_NAME"));
+            Column column = new Column(new ObjectName((String) col.get("COLUMN_NAME")));
             column.descending = descending;
-            column.relation = table;
             constraint.getColumns().add(column);
         }
 
@@ -81,7 +81,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             Set<String> seenConstraints = new HashSet<String>();
 
             for (CachedRow constraint : metadata) {
-                UniqueConstraint uq = new UniqueConstraint(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
+                UniqueConstraint uq = new UniqueConstraint(new ObjectName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database))).setTable(table);
                 if (constraint.containsColumn("INDEX_NAME")) {
                     uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
                 }

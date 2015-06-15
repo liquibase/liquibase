@@ -35,6 +35,26 @@ class AbstractExtensibleObjectTest extends Specification {
 
     }
 
+    def "getAttributeNames"() {
+        when:
+        def nonFieldObject = new AbstractExtensibleObject() {};
+        nonFieldObject.set("value1", "One")
+        nonFieldObject.set("value2", "Two")
+        nonFieldObject.set("value3", 3)
+        nonFieldObject.set("valueNull", null)
+
+        def fieldObject = new AddAutoIncrementAction();
+        fieldObject.set("value1", "One")
+        fieldObject.set("value2", 2)
+        fieldObject.set("startWith", 12)
+        fieldObject.incrementBy = new BigInteger(32)
+        fieldObject.columnName = new ObjectName("x", "y")
+
+        then:
+        that nonFieldObject.getAttributeNames(), containsInAnyOrder(["value1", "value2", "value3"] as String[])
+        that fieldObject.getAttributeNames(), containsInAnyOrder(["value1", "value2", "startWith", "incrementBy", "columnName"] as String[])
+    }
+
     def "getStandardAttributeNames"() {
         expect:
         that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["startWith", "columnDataType", "columnName", "incrementBy"] as String[])
@@ -95,7 +115,7 @@ class AbstractExtensibleObjectTest extends Specification {
         def obj = new Table();
         obj.set("value1", "One")
         obj.set("value2", 2)
-        obj.columns = [new Column("a"), new Column("b")]
+        obj.columns = [new Column(new ObjectName("a")), new Column(new ObjectName("b"))]
         obj.name = new ObjectName("testTable")
 
         then:
@@ -106,7 +126,7 @@ class AbstractExtensibleObjectTest extends Specification {
         obj.get("name", ObjectName).toString() == "testTable"
 
         when:
-        obj.set("columns", [new Column("x"), new Column("y")])
+        obj.set("columns", [new Column(new ObjectName("x")), new Column(new ObjectName("y"))])
         obj.set("name", new ObjectName("newTableName"))
 
         then:

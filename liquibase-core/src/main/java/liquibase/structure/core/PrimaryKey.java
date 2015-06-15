@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -14,21 +15,18 @@ public class PrimaryKey extends AbstractDatabaseObject {
         set("columns", new ArrayList());
     }
 
-    public PrimaryKey(String name) {
+    public PrimaryKey(ObjectName name) {
         setName(name);
     }
 
     public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, Column... columns) {
         this();
-        setName(name);
+        setName(new ObjectName(name));
         if (tableName != null) {
             Table table = new Table(tableCatalogName, tableSchemaName, tableName);
 
             if (columns != null) {
                 set("columns", Arrays.asList(columns));
-                for (Column column : getColumns()) {
-                    column.relation = table;
-                }
             }
 
             setTable(table);

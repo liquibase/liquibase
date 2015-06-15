@@ -39,18 +39,6 @@ public class Data extends AbstractDatabaseObject {
     }
 
     @Override
-    public Data setName(String name) {
-        Table table = getTable();
-        if (table == null) {
-            setTable((Table) new Table().setName(name));
-        } else {
-            table.setName(name);
-        }
-
-        return this;
-    }
-
-    @Override
     public Schema getSchema() {
         Table table = getTable();
         if (table == null) {

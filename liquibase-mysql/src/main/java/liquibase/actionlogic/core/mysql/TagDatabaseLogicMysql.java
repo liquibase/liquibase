@@ -18,6 +18,6 @@ public class TagDatabaseLogicMysql extends TagDatabaseLogic {
     @Override
     protected StringClauses generateWhereClause(TagDatabaseAction action, Scope scope) {
         Database database = scope.getDatabase();
-        return new StringClauses("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + ") AS X)");
+        return new StringClauses().append("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + ") AS X)");
     }
 }

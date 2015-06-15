@@ -7,6 +7,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -64,8 +65,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
                 ")"));
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, getDatabase(), new SnapshotControl(getDatabase()));
-        Column createdColumn = snapshot.get(new Column("created"));
-        createdColumn.relation = new Table("ad").setSchema(new Schema());
+        Column createdColumn = snapshot.get(new Column(new ObjectName("ad", "created")));
 
         Object defaultValue = createdColumn.defaultValue;
         assertNotNull(defaultValue);

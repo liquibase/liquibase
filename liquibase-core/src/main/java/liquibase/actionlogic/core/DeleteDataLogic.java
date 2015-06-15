@@ -56,6 +56,6 @@ public class DeleteDataLogic extends AbstractSqlBuilderLogic<DeleteDataAction> {
     }
 
     protected Relation getAffectedTable(DeleteStatement statement) {
-        return new Table(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Table(new ObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
     }
 }

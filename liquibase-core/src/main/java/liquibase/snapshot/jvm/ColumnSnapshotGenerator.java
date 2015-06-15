@@ -7,6 +7,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
@@ -26,11 +27,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        Relation relation = ((Column) example).relation;
         if (((Column) example).computed != null && ((Column) example).computed) {
             return example;
         }
-        Schema schema = relation.getSchema();
 
         List<CachedRow> columnMetadataRs = null;
         try {
@@ -44,12 +43,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return column;
             } else {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+                List<String> fullName = column.getName().asList(4);
 
-                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), example.getSimpleName());
+                columnMetadataRs = databaseMetaData.getColumns(fullName.get(3), fullName.get(2), fullName.get(1), fullName.get(0));
 
                 if (columnMetadataRs.size() > 0) {
                     CachedRow data = columnMetadataRs.get(0);
-                    column = readColumn(data, relation, database);
+                    column = readColumn(data, column.getName().container, database);
 //                }
 //            }
 //            if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
@@ -110,7 +110,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), null);
 
                 for (CachedRow row : allColumnsMetadataRs) {
-                    Column column = readColumn(row, relation, database);
+                    Column column = readColumn(row, foundObject.getName(), database);
                     column.set(LIQUIBASE_COMPLETE, true);
                     relation.getColumns().add(column);
                 }
@@ -121,7 +121,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     }
 
-    protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
+    protected Column readColumn(CachedRow columnMetadataResultSet, ObjectName container, Database database) throws SQLException, DatabaseException {
         String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
         String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
@@ -132,9 +132,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
 
-        Column column = new Column();
-        column.setName(StringUtils.trimToNull(rawColumnName));
-        column.relation = table;
+        Column column = new Column(new ObjectName(container, StringUtils.trimToNull(rawColumnName)));
         column.remarks = remarks;
 
 //todo: action refactoring        if (database instanceof OracleDatabase) {
@@ -157,59 +155,57 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //        }
 
         if (database.supportsAutoIncrement()) {
-            if (table instanceof Table) {
-                if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
-                    String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                    isAutoincrement = StringUtils.trimToNull(isAutoincrement);
-                    if (isAutoincrement == null) {
-                        column.autoIncrementInformation = null;
-                    } else if (isAutoincrement.equals("YES")) {
-                        column.autoIncrementInformation = new Column.AutoIncrementInformation();
-                    } else if (isAutoincrement.equals("NO")) {
-                        column.autoIncrementInformation = null;
-                    } else if (isAutoincrement.equals("")) {
-                        LoggerFactory.getLogger(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                        column.autoIncrementInformation = null;
-                    } else {
-                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
-                    }
+            if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
+                isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                if (isAutoincrement == null) {
+                    column.autoIncrementInformation = null;
+                } else if (isAutoincrement.equals("YES")) {
+                    column.autoIncrementInformation = new Column.AutoIncrementInformation();
+                } else if (isAutoincrement.equals("NO")) {
+                    column.autoIncrementInformation = null;
+                } else if (isAutoincrement.equals("")) {
+                    LoggerFactory.getLogger(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                    column.autoIncrementInformation = null;
                 } else {
-                    //probably older version of java, need to select from the column to find out if it is auto-increment
-                    String selectStatement;
-                    if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                        LoggerFactory.getLogger(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
-                        LoggerFactory.getLogger(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
-                        LoggerFactory.getLogger(getClass()).debug("rawTableName : <" + rawTableName + ">");
-                        LoggerFactory.getLogger(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
+                    throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
+                }
+            } else {
+                //probably older version of java, need to select from the column to find out if it is auto-increment
+                String selectStatement;
+                if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                    selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
+                    LoggerFactory.getLogger(getClass()).debug("rawCatalogName : <" + rawCatalogName + ">");
+                    LoggerFactory.getLogger(getClass()).debug("rawSchemaName : <" + rawSchemaName + ">");
+                    LoggerFactory.getLogger(getClass()).debug("rawTableName : <" + rawTableName + ">");
+                    LoggerFactory.getLogger(getClass()).debug("raw selectStatement : <" + selectStatement + ">");
 
 
+                } else {
+                    selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                }
+                LoggerFactory.getLogger(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                Statement statement = null;
+                ResultSet columnSelectRS = null;
+
+                try {
+                    statement = underlyingConnection.createStatement();
+                    columnSelectRS = statement.executeQuery(selectStatement);
+                    if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
+                        column.autoIncrementInformation = new Column.AutoIncrementInformation();
                     } else {
-                        selectStatement = "select " + database.escapeColumnName(rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                        column.autoIncrementInformation = null;
                     }
-                    LoggerFactory.getLogger(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
-                    Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                    Statement statement = null;
-                    ResultSet columnSelectRS = null;
-
+                } finally {
                     try {
-                        statement = underlyingConnection.createStatement();
-                        columnSelectRS = statement.executeQuery(selectStatement);
-                        if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                            column.autoIncrementInformation = new Column.AutoIncrementInformation();
-                        } else {
-                            column.autoIncrementInformation = null;
+                        if (statement != null) {
+                            statement.close();
                         }
-                    } finally {
-                        try {
-                            if (statement != null) {
-                                statement.close();
-                            }
-                        } catch (SQLException ignore) {
-                        }
-                        if (columnSelectRS != null) {
-                            columnSelectRS.close();
-                        }
+                    } catch (SQLException ignore) {
+                    }
+                    if (columnSelectRS != null) {
+                        columnSelectRS.close();
                     }
                 }
             }

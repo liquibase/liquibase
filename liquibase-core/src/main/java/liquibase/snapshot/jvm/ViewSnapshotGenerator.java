@@ -13,6 +13,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
@@ -64,7 +65,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     remarks = remarks.replace("''", "'"); //come back escaped sometimes
                 }
 
-                View view = new View().setName(cleanNameFromDatabase(rawViewName, database));
+                View view = new View().setName(new ObjectName(cleanNameFromDatabase(rawViewName, database)));
                 view.setRemarks(remarks);
 
                 CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
@@ -121,7 +122,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
-                    schema.addDatabaseObject(new View(row.getString("TABLE_NAME")).setSchema(schema));
+                    schema.addDatabaseObject(new View(new ObjectName(row.getString("TABLE_NAME"))).setSchema(schema));
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

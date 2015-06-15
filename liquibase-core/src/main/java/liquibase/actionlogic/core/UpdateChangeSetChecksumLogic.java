@@ -37,7 +37,7 @@ public class UpdateChangeSetChecksumLogic extends AbstractActionLogic<UpdateChan
         ChangeSet changeSet = action.changeSet;
         UpdateDataAction updateDataAction = new UpdateDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
                 .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
-        updateDataAction.whereClause = new StringClauses("ID=? AND AUTHOR=? AND FILENAME=?");
+        updateDataAction.whereClause = new StringClauses().append("ID=? AND AUTHOR=? AND FILENAME=?");
         updateDataAction.whereParameters = Arrays.asList((Object) changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
         return new DelegateResult((Action) updateDataAction);
     }

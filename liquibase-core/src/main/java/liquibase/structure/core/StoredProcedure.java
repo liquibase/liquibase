@@ -1,18 +1,13 @@
 package liquibase.structure.core;
 
+import liquibase.structure.ObjectName;
+
 public class StoredProcedure extends StoredDatabaseLogic<StoredProcedure> {
 
     public StoredProcedure() {
     }
 
-    public StoredProcedure(String name) {
+    public StoredProcedure(ObjectName name) {
         super(name);
     }
-
-
-    public StoredProcedure(String catalogName, String schemaName, String procedureName) {
-        this.setSchema(new Schema(catalogName, schemaName));
-        setName(procedureName);
-    }
-
 }

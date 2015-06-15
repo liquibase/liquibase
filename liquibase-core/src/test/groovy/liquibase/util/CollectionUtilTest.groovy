@@ -96,8 +96,8 @@ class CollectionUtilTest extends Specification {
         CollectionUtil.createIfNull(strings) == ["a", "b", "c"]
         CollectionUtil.createIfNull(strings).is(strings)
 
-        CollectionUtil.createIfNull(null) == []
-        CollectionUtil.createIfNull(null, "x") == ["x"]
+//        CollectionUtil.createIfNull((List) null) == []  //overlapping signature
+//        CollectionUtil.createIfNull(null as List, "x") == ["x"] //overlapping signature
         CollectionUtil.createIfNull(emptyStrings, "y") == ["y"]
         CollectionUtil.createIfNull(strings, "z") == ["a", "b", "c", "z"]
 
@@ -113,10 +113,10 @@ class CollectionUtilTest extends Specification {
         CollectionUtil.createIfNull(strings).toList() == ["a", "b", "c"]
         CollectionUtil.createIfNull(strings).is(strings)
 
-        CollectionUtil.createIfNull(null) == []
-        CollectionUtil.createIfNull(null, "x") == ["x"]
-        CollectionUtil.createIfNull(emptyStrings, "y").toList() == ["y"]
-        CollectionUtil.createIfNull(strings, "z").toList() == ["a", "b", "c", "z"]
+//        CollectionUtil.createIfNull((String[]) null) == [] as String[] //overlapping signature
+//        CollectionUtil.createIfNull((String[]) null, "x") == ["x"] as String[]  //overlapping signature
+        CollectionUtil.createIfNull(emptyStrings).toList() == []
+        CollectionUtil.createIfNull(strings).toList() == ["a", "b", "c"]
 
     }
 }

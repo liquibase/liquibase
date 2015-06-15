@@ -9,9 +9,7 @@ import java.util.*;
 public class TestObjectFactory {
 
     public <T extends ExtensibleObject> List<T> createAllPermutations(Class<T> type, Map<String, List<Object>> defaultValues) throws Exception {
-        T typeObj = type.newInstance();
-
-        Set<Set<String>> parameterSets = CollectionUtil.powerSet(typeObj.getStandardAttributeNames());
+        Set<Set<String>> parameterSets = CollectionUtil.powerSet(defaultValues.findAll({ it.value != null && it.value.size() > 0 }).keySet());
 
         List<T> returnList = new ArrayList<>();
         for (Collection<String> paramsToSet : parameterSets) {
@@ -24,12 +22,16 @@ public class TestObjectFactory {
 
             }
 
-            for (Map<String, ?> valuePermutation : CollectionUtil.permutations(parameterValues)) {
-                T obj = type.newInstance();
-                for (Map.Entry<String, ?> entry : valuePermutation.entrySet()) {
-                    obj.set(entry.getKey(), entry.getValue());
+            if (paramsToSet.size() == 0) {
+                returnList.add(type.newInstance());
+            } else {
+                for (Map<String, ?> valuePermutation : CollectionUtil.permutations(parameterValues)) {
+                    T obj = type.newInstance();
+                    for (Map.Entry<String, ?> entry : valuePermutation.entrySet()) {
+                        obj.set(entry.getKey(), entry.getValue());
+                    }
+                    returnList.add(obj);
                 }
-                returnList.add(obj);
             }
         }
 

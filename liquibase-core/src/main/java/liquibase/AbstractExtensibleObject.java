@@ -20,7 +20,13 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
     @Override
     public Set<String> getAttributeNames() {
-        return attributes.keySet();
+        HashSet<String> returnSet = new HashSet<>(attributes.keySet());
+        for (String field : getAttributeFields().keySet()) {
+            if (has(field)) {
+                returnSet.add(field);
+            }
+        }
+        return Collections.unmodifiableSet(returnSet);
     }
 
     /**
@@ -70,7 +76,8 @@ public class AbstractExtensibleObject implements ExtensibleObject {
                 }
             }
             attributeFieldCache.put(this.getClass(), fields);
-        } return fields;
+        }
+        return fields;
     }
 
     private <T> T get(String attribute, T defaultValue, Class<T> type) {

@@ -33,6 +33,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.DropTableStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.test.DatabaseTestContext;
 import liquibase.test.DiffResultAssert;
@@ -888,10 +889,10 @@ public abstract class AbstractIntegrationTest {
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         SnapshotGeneratorFactory tableSnapshotGenerator = SnapshotGeneratorFactory.getInstance();
-        assertNotNull(tableSnapshotGenerator.has(new Table("hyphen_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table("camel_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table("bar_id"), database));
-        assertNotNull(tableSnapshotGenerator.has(new Table("foo_id"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table(new ObjectName("hyphen_context")), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table(new ObjectName("camel_context")), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table(new ObjectName("bar_id")), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table(new ObjectName("foo_id")), database));
     }
 
     @Test

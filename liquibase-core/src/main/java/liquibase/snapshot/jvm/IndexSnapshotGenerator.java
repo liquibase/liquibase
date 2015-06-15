@@ -6,6 +6,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
@@ -157,7 +158,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                      Index index = foundIndexes.get(indexName);
                     if (index == null) {
                         index = new Index();
-                        index.setName(indexName);
+                        index.setName(new ObjectName(indexName));
                         index.setTable(table);
 
                         short type = row.getShort("TYPE");
@@ -171,10 +172,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     String ascOrDesc = row.getString("ASC_OR_DESC");
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    Column column = new Column(row.getString("COLUMN_NAME"));
+                    Column column = new Column(new ObjectName(index.getTable().name, row.getString("COLUMN_NAME")));
                     column.computed = false;
                     column.descending = descending;
-                    column.relation = index.getTable();
                     index.addColumn(column);
                 }
 
@@ -289,8 +289,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
-                    returnIndex.setTable((Table) new Table(row.getString("TABLE_NAME")).setSchema(schema));
-                    returnIndex.setName(indexName);
+                    returnIndex.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(schema));
+                    returnIndex.setName(new ObjectName(indexName));
                     returnIndex.setUnique(!nonUnique);
 
                     if (type == DatabaseMetaData.tableIndexClustered) {
@@ -308,13 +308,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (definition == null) {
                     String ascOrDesc = row.getString("ASC_OR_DESC");
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    Column column = new Column(columnName);
+                    Column column = new Column(new ObjectName(returnIndex.getTable().name, columnName));
                     column.descending = descending;
-                    column.relation = returnIndex.getTable();
                     returnIndex.getColumns().set(position - 1, column);
                 } else {
                     Column column = new Column();
-                    column.relation = returnIndex.getTable();
                     column.setName(definition, true);
                     returnIndex.getColumns().set(position - 1, column);
                 }

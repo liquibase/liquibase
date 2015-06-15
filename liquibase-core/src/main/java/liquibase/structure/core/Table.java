@@ -17,10 +17,6 @@ public class Table extends Relation {
     public Table() {
     }
 
-    public Table(String name) {
-        super(name);
-    }
-
     public Table(ObjectName name) {
         super(name);
     }

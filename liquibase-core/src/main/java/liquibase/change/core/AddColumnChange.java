@@ -14,6 +14,7 @@ import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
@@ -192,17 +193,17 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         ChangeStatus result = new ChangeStatus();
         try {
             for (AddColumnConfig column : getColumns()) {
-                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
+                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), column.getName())), database);
                 result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
 
-                if (snapshot != null) {
-                    PrimaryKey snapshotPK = ((Table) snapshot.relation).primaryKey;
-
-                    ConstraintsConfig constraints = column.getConstraints();
-                    if (constraints != null) {
-                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNames().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
-                    }
-                }
+//                if (snapshot != null) {
+//                    PrimaryKey snapshotPK = ((Table) snapshot.relation).primaryKey;
+//
+//                    ConstraintsConfig constraints = column.getConstraints();
+//                    if (constraints != null) {
+//                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNames().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
+//                    }
+//                }
             }
         } catch (Exception e) {
             return result.unknown(e);

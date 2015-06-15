@@ -1,9 +1,11 @@
 package liquibase.actionlogic
 
+import liquibase.JUnitEmptyScope
 import liquibase.Scope
 import liquibase.action.*
 import liquibase.exception.ActionPerformException
 import liquibase.exception.ValidationErrors
+import liquibase.sdk.database.MockDatabase
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 
@@ -12,7 +14,7 @@ class ActionExecutorTest extends Specification {
     Scope scope;
 
     def setup() {
-        scope = new Scope(new JUnitResourceAccessor(), ["liquibase.actionlogic.ActionLogicFactory": new ActionLogicFactory(new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) {
+        scope = JUnitEmptyScope.getNewInstance(new MockDatabase()).child(["liquibase.actionlogic.ActionLogicFactory": new ActionLogicFactory(new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) {
             @Override
             protected Class<? extends ActionLogic>[] findAllServiceClasses(Scope scope) {
                 return new Class[0];

@@ -51,7 +51,7 @@ public class LockDatabaseChangeLogLogic extends AbstractActionLogic<LockDatabase
                 .addNewColumnValue("LOCKGRANTED", new Timestamp(new Date().getTime()))
                 .addNewColumnValue("LOCKEDBY", hostname + hostDescription + " (" + hostaddress + ")");
 
-        updateDataAction.whereClause = new StringClauses(database.escapeObjectName("ID", Column.class)
+        updateDataAction.whereClause = new StringClauses().append(database.escapeObjectName("ID", Column.class)
                 + " = 1 AND "
                 + database.escapeObjectName("LOCKED", Column.class)
                 + " = "

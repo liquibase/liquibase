@@ -7,6 +7,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
@@ -121,7 +122,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     @Override
     public ChangeStatus checkStatus(Database database) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database), "Column exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName())), database), "Column exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

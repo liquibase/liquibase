@@ -870,15 +870,15 @@ public abstract class AbstractJdbcDatabase implements Database {
     public boolean isLiquibaseObject(final DatabaseObject object) {
         if (object instanceof Table) {
             Schema liquibaseSchema = new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName());
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(getDatabaseChangeLogTableName()).setSchema(liquibaseSchema), this)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogTableName())).setSchema(liquibaseSchema), this)) {
                 return true;
             }
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(getDatabaseChangeLogLockTableName()).setSchema(liquibaseSchema), this)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogLockTableName())).setSchema(liquibaseSchema), this)) {
                 return true;
             }
             return false;
         } else if (object instanceof Column) {
-            return isLiquibaseObject(((Column) object).relation);
+            return isLiquibaseObject(new Table(object.getName().container));
         } else if (object instanceof Index) {
             return isLiquibaseObject(((Index) object).getTable());
         } else if (object instanceof PrimaryKey) {

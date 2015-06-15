@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.ForeignKey;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
@@ -69,10 +70,10 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             ForeignKey example = new ForeignKey();
-            example.setName(getForeignKeyName());
+            example.setName(new ObjectName(getForeignKeyName()));
             example.setForeignKeyTable(new Table());
             if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
-                example.getForeignKeyTable().setName(getForeignKeyTableName());
+                example.getForeignKeyTable().setName(new ObjectName(getForeignKeyTableName()));
             }
             example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 

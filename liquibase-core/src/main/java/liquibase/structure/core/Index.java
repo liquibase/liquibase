@@ -22,14 +22,14 @@ public class Index extends AbstractDatabaseObject {
         set("associatedWith", new HashSet<String>());
     }
 
-    public Index(String indexName) {
+    public Index(ObjectName indexName) {
         this();
         setName(indexName);
     }
 
     public Index(String indexName, String catalogName, String schemaName, String tableName, Column... columns) {
         this();
-        setName(indexName);
+        setName(new ObjectName(indexName));
         if (tableName != null) {
             setTable(new Table(catalogName, schemaName, tableName));
             if (columns != null && columns.length > 0) {
@@ -77,18 +77,12 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Index addColumn(Column column) {
-        column.relation = getTable();
         getColumns().add(column);
 
         return this;
     }
 
     public Index setColumns(List<Column> columns) {
-        if (get("table", Object.class) instanceof Table) {
-            for (Column column :columns) {
-                column.relation = getTable();
-            }
-        }
         set("columns", columns);
         return this;
     }

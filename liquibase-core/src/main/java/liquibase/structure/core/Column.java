@@ -16,7 +16,6 @@ import java.util.List;
 
 public class Column extends AbstractDatabaseObject {
 
-    public Relation relation;
     public Boolean computed;
     public Boolean descending;
     public Boolean certainDataType;
@@ -29,34 +28,12 @@ public class Column extends AbstractDatabaseObject {
     public Column() {
     }
 
-    public Column(ObjectName columnName) {
-        super(columnName);
-    }
-
-    public Column(String columnName) {
-        super(columnName);
-    }
-
-    public Column(Class<? extends Relation> relationType, ObjectName tableName, String columnName) {
-        if (Table.class.isAssignableFrom(relationType)) {
-            this.relation = new Table(tableName);
-        } else if (View.class.isAssignableFrom(relationType)) {
-            this.relation = new View(tableName);
-        }
-        setName(columnName);
-    }
-
-    public Column(Class<? extends Relation> relationType, String catalogName, String schemaName, String tableName, String columnName) {
-        if (Table.class.isAssignableFrom(relationType)) {
-            this.relation = new Table(catalogName, schemaName, tableName);
-        } else if (View.class.isAssignableFrom(relationType)) {
-            this.relation = new View(catalogName, schemaName, tableName);
-        }
-        setName(columnName);
+    public Column(ObjectName name) {
+        super(name);
     }
 
     public Column(ColumnConfig columnConfig) {
-        setName(columnConfig.getName());
+        super(new ObjectName(columnConfig.getName()));
         this.descending = columnConfig.getDescending();
         this.type = new DataType(columnConfig.getType());
 
@@ -78,21 +55,19 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[]{
-                relation
-        };
+        return null; // new DatabaseObject[]{ relation };
     }
 
-    @Override
+//    @Override
     public Schema getSchema() {
-        if (relation == null) {
+//        if (relation == null) {
             return null;
-        }
-        return relation.getSchema();
+//        }
+//        return relation.getSchema();
     }
 
     public Column setName(String name, boolean computed) {
-        setName(name);
+        setName(new ObjectName(name));
         this.computed = computed;
 
         return this;
@@ -112,37 +87,13 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
-        String name = getName().toShortString();
-        if (relation == null) {
-            return name + (descending != null && descending ? " DESC" : "");
-        } else {
-            return relation.getName().toString()+"." + name + (descending != null && descending ? " DESC" : "");
-        }
+        return getName().toString() + (descending != null && descending ? " DESC" : "");
     }
 
 
     @Override
     public int compareTo(Object other) {
-        Column o = (Column) other;
-        try {
-            //noinspection UnusedAssignment
-            int returnValue = 0;
-            if (this.relation != null && o.relation == null) {
-                return 1;
-            } else if (this.relation == null && o.relation != null) {
-                return -1;
-            } else {
-                returnValue = this.relation.compareTo(o.relation);
-            }
-
-            if (returnValue == 0) {
-                returnValue = this.toString().compareTo(o.toString());
-            }
-
-            return returnValue;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return this.getName().compareTo(((Column) other).getName());
     }
 
 
@@ -196,7 +147,7 @@ public class Column extends AbstractDatabaseObject {
             columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
             descending = false;
         }
-        Column column = new Column(columnName);
+        Column column = new Column(new ObjectName(columnName));
         column.descending = descending;
         return column;
     }
@@ -230,6 +181,18 @@ public class Column extends AbstractDatabaseObject {
             type.load(typeNode, resourceAccessor);
             this.type = type;
         }
+    }
+
+    public String getRelationName() {
+        return name.asList(2).get(1);
+    }
+
+    public String getSchemaName() {
+        return name.asList(3).get(2);
+    }
+
+    public String getCatalogName() {
+        return name.asList(4).get(3);
     }
 
     public static class AutoIncrementInformation {

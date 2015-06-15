@@ -18,6 +18,7 @@ import liquibase.util.Validate;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.List;
 
 /**
  * Logic to snapshot database column(s). Delegates to {@link QueryJdbcMetaDataAction} getColumns().
@@ -43,8 +44,7 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException, ActionPerformException {
         DatabaseObject relatedTo = action.relatedTo;
 
-        ObjectName relationName = null;
-        String columnName = null;
+        ObjectName columnName;
 
         Database database = scope.getDatabase();
 
@@ -52,43 +52,20 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
             if (!database.supportsCatalogs()) {
                 throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
             }
-            relationName = new ObjectName(relatedTo.getSimpleName(), null, null);
+            columnName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
         } else if (relatedTo instanceof Schema) {
-            relationName = new ObjectName(relatedTo.getName(), null);
+            columnName = new ObjectName(relatedTo.getSimpleName(), null, null);
         } else if (relatedTo instanceof Relation) {
-            relationName = relatedTo.getName();
-            if (database.getMaxContainerDepth(relatedTo.getClass()) < relationName.depth()) {
-                throw new ActionPerformException("Cannot snapshot a "+relatedTo.getClass().getSimpleName().toLowerCase()+" with "+relationName.depth()+" level(s) of hierarchy on "+database.getShortName());
-            }
+            columnName = new ObjectName(relatedTo.getName(), null);
         } else if (relatedTo instanceof Column) {
-            columnName = relatedTo.getSimpleName();
-
-            Relation relation = ((Column) relatedTo).relation;
-            if (relation != null) {
-                relationName = relation.getName();
-            }
+            columnName = relatedTo.getName();
         } else {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }
 
-        String catalogName = null;
-        String schemaName = null;
-        String tableName = null;
+        List<String> nameParts = columnName.asList(4);
 
-        if (relationName != null) {
-            tableName = relationName.name;
-            ObjectName container = relationName.container;
-            if (container != null) {
-                schemaName = container.name;
-                container = container.container;
-
-                if (container != null) {
-                    catalogName = container.name;
-                }
-            }
-        }
-
-        return new QueryJdbcMetaDataAction("getColumns", catalogName, schemaName, tableName, columnName);
+        return new QueryJdbcMetaDataAction("getColumns", nameParts.get(0), nameParts.get(1), nameParts.get(2), nameParts.get(3));
 
     }
 
@@ -107,21 +84,8 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
 
 
         Column column = new Column();
-        column.setName(rawColumnName);
-        ObjectName container;
-        int maxContainerDepth = database.getMaxContainerDepth(Table.class);
-        if (maxContainerDepth == 0) {
-            container = null;
-        } else if (maxContainerDepth == 1) {
-            if (rawCatalogName != null && rawSchemaName == null) {
-                container = new ObjectName(rawCatalogName);
-            } else {
-                container = new ObjectName(rawSchemaName);
-            }
-        } else {
-            container = new ObjectName(rawCatalogName, rawSchemaName);
-        }
-        column.relation = new Table(new ObjectName(container, rawTableName));
+        column.setName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName));
+
         column.remarks = remarks;
 
 //        if (database instanceof OracleDatabase) {

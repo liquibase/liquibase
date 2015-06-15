@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
@@ -123,7 +124,7 @@ public class AlterSequenceChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), database);
+            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName())), database);
             if (sequence == null) {
                 return result.unknown("Sequence " + getSequenceName() + " does not exist");
             }

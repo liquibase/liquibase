@@ -80,6 +80,33 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return obj instanceof ObjectName && toString().equals(obj.toString());
     }
 
+    public boolean equals(ObjectName obj, boolean ignoreLengthDifferences) {
+        if (ignoreLengthDifferences) {
+            List<String> thisNames = this.asList();
+            List<String> otherNames = obj.asList();
+            int precision = Math.min(thisNames.size(), otherNames.size());
+
+            thisNames = thisNames.subList(thisNames.size() - precision, thisNames.size());
+            otherNames = otherNames.subList(otherNames.size() - precision, otherNames.size());
+
+            for (int i=0; i<thisNames.size(); i++) {
+                String thisName = thisNames.get(i);
+                String otherName = otherNames.get(i);
+
+                if (thisName == null) {
+                    return otherName == null;
+                }
+                if (!thisName.equals(otherName)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return this.equals(obj);
+        }
+
+    }
+
     @Override
     public int hashCode() {
         return toString().hashCode();

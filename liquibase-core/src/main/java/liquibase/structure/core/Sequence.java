@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 
 import java.math.BigInteger;
 
@@ -10,12 +11,7 @@ public class Sequence extends AbstractDatabaseObject {
     public Sequence() {
     }
 
-    public Sequence(String catalogName, String schemaName, String sequenceName) {
-        this.setSchema(new Schema(catalogName, schemaName));
-        this.setName(sequenceName);
-    }
-
-    public Sequence(String name) {
+    public Sequence(ObjectName name) {
         setName(name);
     }
 

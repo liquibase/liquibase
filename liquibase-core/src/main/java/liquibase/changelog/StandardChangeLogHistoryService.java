@@ -19,6 +19,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import org.slf4j.LoggerFactory;
@@ -363,7 +364,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void destroy() throws DatabaseException {
         Database database = getDatabase();
         try {
-            if (SnapshotGeneratorFactory.getInstance().has(new Table(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+            if (SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(database.getDatabaseChangeLogTableName())).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), false));
             }
             reset();

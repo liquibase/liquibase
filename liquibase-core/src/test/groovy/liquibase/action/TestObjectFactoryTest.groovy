@@ -6,15 +6,18 @@ import spock.lang.Specification
 
 class TestObjectFactoryTest extends Specification {
 
-    def "creates permutations with no default value"() {
+    def "createAllPermutations"() {
         when:
-        def permutations = JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(AddAutoIncrementAction, JUnitScope.instance)
-        def permutationsAsStrings = (permutations.collect {it.toString()}).unique()
+        def permutations = JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(AddAutoIncrementAction, [
+                columnName: null,
+                columnDataType: null,
+                startWith  : [1, 2, 10],
+                incrementBy: [1, 5, 20]
+        ])
 
         then:
         permutations.size() > 10
-        permutations.size() == permutationsAsStrings.size()
-
-
+        permutations*.toString().contains("addAutoIncrement()") //empty permutation is included
+        permutations*.toString().sort() == (permutations.collect { it.toString() }).unique().sort() //nothing is duplicated
     }
 }

@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
@@ -81,7 +82,7 @@ public class DropDefaultValueChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(Database database) {
         try {
-            Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName())), database);
             return new ChangeStatus().assertComplete(snapshot.defaultValue == null, "Column has a default value");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);

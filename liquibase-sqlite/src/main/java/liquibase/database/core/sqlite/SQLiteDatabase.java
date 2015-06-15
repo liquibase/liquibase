@@ -131,7 +131,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
         Table table = null;
         try {
-            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(tableName).setSchema(new Schema(new Catalog((ObjectName) null), null)), database);
+            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(new ObjectName(tableName)).setSchema(new Schema(new Catalog((ObjectName) null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
             List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();

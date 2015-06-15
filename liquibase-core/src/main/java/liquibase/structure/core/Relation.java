@@ -17,10 +17,6 @@ public abstract class Relation extends AbstractDatabaseObject {
     protected Relation() {
     }
 
-    protected Relation(String name) {
-        super(name);
-    }
-
     protected Relation(ObjectName name) {
         super(name);
     }

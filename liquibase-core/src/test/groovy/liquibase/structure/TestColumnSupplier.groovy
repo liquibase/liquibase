@@ -17,8 +17,8 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
     List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         def returnList = []
         for (Table table : snapshot.get(Table)) {
-            for (Column column : super.getTestObjects(type, snapshot, scope)) {
-                column.relation = new Table(table.getName())
+            for (Column baseColumn : super.getTestObjects(type, snapshot, scope)) {
+                Column column = new Column(new ObjectName(table.name, baseColumn.name.name));
                 column.type = new DataType("int")
                 returnList.add(column)
             }

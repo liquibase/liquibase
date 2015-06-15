@@ -8,6 +8,7 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
@@ -230,7 +231,7 @@ public class AddDefaultValueChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName())), database);
             if (column == null) {
                 return result.unknown("Column " + getColumnName() + " does not exist");
             }

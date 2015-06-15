@@ -108,5 +108,34 @@ class ObjectNameTest extends Specification {
         new ObjectName("a")            | 1      | ["a"]
         new ObjectName("a", "b")       | 1      | ["b"]
     }
+
+    @Unroll
+    def "equals ignoring length differences"() {
+        expect:
+        name1.equals(name2, ignore) == expected
+
+        where:
+        name1                               | name2                               | ignore | expected
+        new ObjectName("a")                 | new ObjectName("a")                 | true   | true
+        new ObjectName("a")                 | new ObjectName("a")                 | false  | true
+        new ObjectName("a")                 | new ObjectName("b")                 | true   | false
+        new ObjectName("a")                 | new ObjectName("b")                 | false  | false
+        new ObjectName("a")                 | new ObjectName("b", "a")            | true   | true
+        new ObjectName("a")                 | new ObjectName("b", "a")            | false  | false
+        new ObjectName("b", "a")            | new ObjectName("a")                 | true   | true
+        new ObjectName("b", "a")            | new ObjectName("a")                 | false  | false
+        new ObjectName("b", "a")            | new ObjectName("b", "a")            | true   | true
+        new ObjectName("b", "a")            | new ObjectName("b", "a")            | false  | true
+        new ObjectName("c", "b", "a")       | new ObjectName("c", "b", "a")       | true   | true
+        new ObjectName("c", "b", "a")       | new ObjectName("c", "b", "a")       | false  | true
+        new ObjectName("c", "x", "a")       | new ObjectName("c", "b", "a")       | true   | false
+        new ObjectName("c", "b", "a")       | new ObjectName("c", "x", "a")       | true   | false
+        new ObjectName("c", null, "a")      | new ObjectName("c", "b", "a")       | true   | false
+        new ObjectName("c", "b", "a")       | new ObjectName("c", null, "a")      | true   | false
+        new ObjectName(null, "c", "b", "a") | new ObjectName("c", "b", "a")       | true   | true
+        new ObjectName("c", "b", "a")       | new ObjectName(null, "c", "b", "a") | true   | true
+        new ObjectName(null, "c", "b", "a") | new ObjectName("c", "b", "a")       | false  | true
+
+    }
 }
 

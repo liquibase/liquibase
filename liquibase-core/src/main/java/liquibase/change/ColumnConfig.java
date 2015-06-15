@@ -71,7 +71,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             setType(columnSnapshot.type.toString());
         }
 
-        if (columnSnapshot.relation != null && columnSnapshot.relation instanceof Table) {
             if (columnSnapshot.defaultValue != null) {
                 setDefaultValue(columnSnapshot.defaultValue.toString());
             }
@@ -93,36 +92,36 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             }
 
 
-            Table table = (Table) columnSnapshot.relation;
-            PrimaryKey primaryKey = table.primaryKey;
-            if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
-                constraints.setPrimaryKey(true);
-                constraints.setPrimaryKeyName(primaryKey.getSimpleName());
-                constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
-                nonDefaultConstraints = true;
-            }
+//            Table table = (Table) columnSnapshot.relation;
+//            PrimaryKey primaryKey = table.primaryKey;
+//            if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
+//                constraints.setPrimaryKey(true);
+//                constraints.setPrimaryKeyName(primaryKey.getSimpleName());
+//                constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
+//                nonDefaultConstraints = true;
+//            }
 
-            Set<UniqueConstraint> uniqueConstraints = table.uniqueConstraints;
-            if (uniqueConstraints != null) {
-                for (UniqueConstraint constraint : uniqueConstraints) {
-                    if (constraint.getColumnNames().contains(getName())) {
-                        constraints.setUnique(true);
-                        constraints.setUniqueConstraintName(constraint.getSimpleName());
-                        nonDefaultConstraints = true;
-                    }
-                }
-            }
+//            Set<UniqueConstraint> uniqueConstraints = table.uniqueConstraints;
+//            if (uniqueConstraints != null) {
+//                for (UniqueConstraint constraint : uniqueConstraints) {
+//                    if (constraint.getColumnNames().contains(getName())) {
+//                        constraints.setUnique(true);
+//                        constraints.setUniqueConstraintName(constraint.getSimpleName());
+//                        nonDefaultConstraints = true;
+//                    }
+//                }
+//            }
 
-            Set<ForeignKey> fks = table.outgoingForeignKeys;
-            if (fks != null) {
-                for (ForeignKey fk : fks) {
-                    if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
-                        constraints.setForeignKeyName(fk.getSimpleName());
-                        constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns().get(0).getName() + ")");
-                        nonDefaultConstraints = true;
-                    }
-                }
-            }
+//            Set<ForeignKey> fks = table.outgoingForeignKeys;
+//            if (fks != null) {
+//                for (ForeignKey fk : fks) {
+//                    if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
+//                        constraints.setForeignKeyName(fk.getSimpleName());
+//                        constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns().get(0).getName() + ")");
+//                        nonDefaultConstraints = true;
+//                    }
+//                }
+//            }
 
 //            if (constraints.isPrimaryKey() == null) {
 //                constraints.setPrimaryKey(false);
@@ -133,7 +132,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             if (nonDefaultConstraints) {
                 setConstraints(constraints);
             }
-        }
 
         setRemarks(columnSnapshot.remarks);
     }

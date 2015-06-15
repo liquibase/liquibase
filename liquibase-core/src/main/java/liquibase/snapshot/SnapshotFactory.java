@@ -16,4 +16,11 @@ public class SnapshotFactory {
         QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(example.getClass(), example), scope);
         return result.size() > 0;
     }
+
+    public <T extends DatabaseObject> T get(T example, Scope scope) throws ActionPerformException, InvalidExampleException {
+        QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(example.getClass(), example), scope);
+
+        return (T) result.asObject(example.getClass());
+
+    }
 }

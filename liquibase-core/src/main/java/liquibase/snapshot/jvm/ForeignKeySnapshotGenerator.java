@@ -10,6 +10,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
@@ -79,7 +80,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                         database.correctObjectName(table.getSimpleName(), Table.class), null);
 
                 for (CachedRow row : importedKeyMetadataResultSet) {
-                    ForeignKey fk = new ForeignKey(row.getString("FK_NAME")).setForeignKeyTable(table);
+                    ForeignKey fk = new ForeignKey(new ObjectName(row.getString("FK_NAME"))).setForeignKeyTable(table);
                     if (seenFks.add(fk.getSimpleName())) {
                         table.outgoingForeignKeys.add(fk);
                     }
@@ -118,17 +119,16 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     foreignKey = new ForeignKey();
                 }
 
-                foreignKey.setName(fk_name);
+                foreignKey.setName(new ObjectName(fk_name));
 
                 String fkTableCatalog = cleanNameFromDatabase(row.getString("FKTABLE_CAT"), database);
                 String fkTableSchema = cleanNameFromDatabase(row.getString("FKTABLE_SCHEM"), database);
                 String fkTableName = cleanNameFromDatabase(row.getString("FKTABLE_NAME"), database);
-                Table foreignKeyTable = new Table().setName(fkTableName);
+                Table foreignKeyTable = new Table().setName(new ObjectName(fkTableName));
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
                 foreignKey.setForeignKeyTable(foreignKeyTable);
-                Column fkColumn = new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database));
-                fkColumn.relation = foreignKeyTable;
+                Column fkColumn = new Column(new ObjectName(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)));
                 boolean alreadyAdded = false;
                 for (Column existing : foreignKey.getForeignKeyColumns()) {
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(existing, fkColumn, database)) {
@@ -141,10 +141,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
 
                 CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
-                Table tempPkTable = (Table) new Table(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
+                Table tempPkTable = (Table) new Table(new ObjectName(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName(), row.getString("PKTABLE_NAME")));
                 foreignKey.setPrimaryKeyTable(tempPkTable);
-                Column pkColumn = new Column(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database));
-                pkColumn.relation = tempPkTable;
+                Column pkColumn = new Column(new ObjectName(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database)));
+//                pkColumn.relation = tempPkTable;
 
                 foreignKey.addForeignKeyColumn(fkColumn);
                 foreignKey.addPrimaryKeyColumn(pkColumn);

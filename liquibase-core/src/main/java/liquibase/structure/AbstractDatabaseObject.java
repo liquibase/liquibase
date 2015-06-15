@@ -32,10 +32,6 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
     public AbstractDatabaseObject() {
     }
 
-    public AbstractDatabaseObject(String name) {
-        setName(name);
-    }
-
     public AbstractDatabaseObject(ObjectName name) {
         setName(name);
     }
@@ -51,12 +47,6 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     public ObjectName getName() {
         return name;
-    }
-
-    @Override
-    public <T> T setName(String name) {
-        this.name = new ObjectName(name);
-        return (T) this;
     }
 
     @Override

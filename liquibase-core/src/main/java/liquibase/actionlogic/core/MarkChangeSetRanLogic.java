@@ -79,7 +79,7 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic<MarkChangeSetRanA
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", execType.value)
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
-                ((UpdateDataAction) runAction).whereClause = new StringClauses("ID=? AND AUTHOR=? AND FILENAME=?");
+                ((UpdateDataAction) runAction).whereClause = new StringClauses().append("ID=? AND AUTHOR=? AND FILENAME=?");
 
                 if (tag != null) {
                     ((UpdateDataAction) runAction).addNewColumnValue("TAG", tag);

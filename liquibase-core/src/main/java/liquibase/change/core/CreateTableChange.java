@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
@@ -142,7 +143,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @Override
     public ChangeStatus checkStatus(Database database) {
         try {
-            Table example = (Table) new Table(getTableName()).setSchema(getCatalogName(), getSchemaName());
+            Table example = (Table) new Table(new ObjectName(getCatalogName(), getSchemaName(), getTableName()));
             ChangeStatus status = new ChangeStatus();
             Table tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             status.assertComplete(tableSnapshot != null, "Table does not exist");
@@ -150,7 +151,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             if (tableSnapshot != null) {
                 for (ColumnConfig columnConfig : getColumns()) {
                     Column exampleToSnapshot = new Column(columnConfig);
-                    exampleToSnapshot.relation = tableSnapshot;
+//                    exampleToSnapshot.relation = tableSnapshot;
                     Column columnSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(exampleToSnapshot, database);
                     status.assertCorrect(columnSnapshot != null, "Column "+columnConfig.getName()+" is missing");
                     if (columnSnapshot != null) {

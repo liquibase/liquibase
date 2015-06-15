@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
@@ -171,7 +172,7 @@ public class AddLookupTableChange extends AbstractChange {
         ChangeStatus result = new ChangeStatus();
         try {
             Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
-            Column newColumnExample = new Column(Table.class, getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName());
+            Column newColumnExample = new Column(new ObjectName(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName()));
 
             ForeignKey foreignKeyExample = new ForeignKey(getConstraintName(), getExistingTableCatalogName(), getExistingTableSchemaName(), getExistingTableName());
             foreignKeyExample.setPrimaryKeyTable(newTableExample);

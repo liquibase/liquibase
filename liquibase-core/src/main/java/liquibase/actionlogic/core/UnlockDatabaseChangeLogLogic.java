@@ -28,7 +28,7 @@ public class UnlockDatabaseChangeLogLogic extends AbstractActionLogic<UnlockData
                 .addNewColumnValue("LOCKED", false)
                 .addNewColumnValue("LOCKGRANTED", null)
                 .addNewColumnValue("LOCKEDBY", null);
-        updateDataAction.whereClause = new StringClauses(database.escapeObjectName("ID", Column.class) + " = 1");
+        updateDataAction.whereClause = new StringClauses().append(database.escapeObjectName("ID", Column.class) + " = 1");
 
         return new DelegateResult(updateDataAction);
     }

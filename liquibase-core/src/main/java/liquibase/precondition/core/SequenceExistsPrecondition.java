@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 import liquibase.exception.*;
@@ -56,7 +57,7 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
         DatabaseSnapshot snapshot;
         Schema schema = new Schema(getCatalogName(), getSchemaName());
         try {
-            if (!SnapshotGeneratorFactory.getInstance().has(new Sequence(getSequenceName()).setSchema(schema), database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new Sequence(new ObjectName(getSequenceName())).setSchema(schema), database)) {
                 throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
             }
         } catch (LiquibaseException e) {

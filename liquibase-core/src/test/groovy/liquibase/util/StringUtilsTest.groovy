@@ -1,5 +1,7 @@
 package liquibase.util
 
+import liquibase.action.core.AddAutoIncrementAction
+import liquibase.structure.ObjectName
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -104,6 +106,18 @@ class StringUtilsTest extends Specification {
         array     | sorted | expected
         [1, 3, 2] | true   | "1,2,3"
         [1, 3, 2] | false  | "1,3,2"
+    }
+
+    def "join with extensibleObject"() {
+        when:
+        def emptyObject = new AddAutoIncrementAction()
+        def populatedObject = new AddAutoIncrementAction()
+        populatedObject.columnName = new ObjectName("a", "b", "columnName")
+        populatedObject.incrementBy = new BigInteger(12)
+
+        then:
+        StringUtils.join(emptyObject, ", ", new StringUtils.DefaultFormatter()) == ""
+        StringUtils.join(populatedObject, ", ", new StringUtils.DefaultFormatter()) == "asddg"
     }
 
 

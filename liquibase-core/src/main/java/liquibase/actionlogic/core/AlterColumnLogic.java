@@ -36,7 +36,7 @@ public class AlterColumnLogic extends AbstractActionLogic<AlterColumnAction> {
         return new DelegateResult(new ExecuteSqlAction("ALTER TABLE "
                 + database.escapeObjectName(action.columnName.container, Table.class)
                 + " ALTER COLUMN "
-                + database.escapeObjectName(action.columnName, Column.class)
+                + database.escapeObjectName(action.columnName.name, Column.class)
                 + " "
                 + action.newDefinition.toString().trim()));
     }

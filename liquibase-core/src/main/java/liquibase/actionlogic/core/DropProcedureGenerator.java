@@ -7,6 +7,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.DropProcedureStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 
@@ -22,7 +23,7 @@ public class DropProcedureGenerator extends AbstractSqlGenerator<DropProcedureSt
     public Sql[] generateSql(DropProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
                 new UnparsedSql("DROP PROCEDURE "+database.escapeObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getProcedureName(), StoredProcedure.class),
-                        new StoredProcedure(statement.getProcedureName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                        new StoredProcedure(new ObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getProcedureName())))
         };
     }
 }

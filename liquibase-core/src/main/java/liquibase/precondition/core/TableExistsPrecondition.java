@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Schema;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -56,7 +57,7 @@ public class TableExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
             String correctedTableName = database.correctObjectName(getTableName(), Table.class);
-            if (!SnapshotGeneratorFactory.getInstance().has(new Table(correctedTableName).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(getCatalogName(), getSchemaName(), correctedTableName)), database)) {
                 throw new PreconditionFailedException("Table "+database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

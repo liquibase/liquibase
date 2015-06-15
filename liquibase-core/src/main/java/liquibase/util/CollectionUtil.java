@@ -110,4 +110,12 @@ public class CollectionUtil {
             return arguments;
         }
     }
+
+    public static <T> Set<T> createIfNull(Set<T> currentValue) {
+        if (currentValue == null) {
+            return new HashSet<>();
+        } else {
+            return currentValue;
+        }
+    }
 }

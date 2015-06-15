@@ -21,14 +21,14 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         set("disabled", false);
     }
 
-    public UniqueConstraint(String name) {
+    public UniqueConstraint(ObjectName name) {
         setName(name);
     }
 
 
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
         this();
-        setName(name);
+        setName(new ObjectName(name));
         if (tableName != null && columns != null) {
             setTable(new Table(tableCatalog, tableSchema, tableName));
             setColumns(new ArrayList<Column>(Arrays.asList(columns)));
@@ -64,11 +64,6 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     public UniqueConstraint setColumns(List<Column> columns) {
         set("columns", columns);
-		if (get("table", Object.class) instanceof Table) {
-			for (Column column : getColumns()) {
-				column.relation = getTable();
-			}
-		}
         return this;
     }
 

@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -71,10 +72,10 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
             Table table = new Table();
             table.setSchema(new Schema(getCatalogName(), getSchemaName()));
             if (StringUtils.trimToNull(getTableName()) != null) {
-                table.setName(getTableName());
+                table.setName(new ObjectName(getTableName()));
             }
             example.setTable(table);
-            example.setName(getPrimaryKeyName());
+            example.setName(new ObjectName(getPrimaryKeyName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 if (tableName != null) {

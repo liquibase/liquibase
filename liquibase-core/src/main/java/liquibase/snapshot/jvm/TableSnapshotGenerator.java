@@ -9,6 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
@@ -60,7 +61,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
-                    Table tableExample = (Table) new Table(cleanNameFromDatabase(tableName, database)).setSchema(schema);
+                    Table tableExample = (Table) new Table(new ObjectName(cleanNameFromDatabase(tableName, database))).setSchema(schema);
 
                     schema.addDatabaseObject(tableExample);
                 }
@@ -81,7 +82,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
-        Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
+        Table table = new Table().setName(new ObjectName(cleanNameFromDatabase(rawTableName, database)));
         table.setRemarks(remarks);
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);

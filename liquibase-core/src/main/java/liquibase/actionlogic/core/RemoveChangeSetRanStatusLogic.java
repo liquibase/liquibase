@@ -34,7 +34,7 @@ public class RemoveChangeSetRanStatusLogic extends AbstractActionLogic<RemoveCha
 
         DeleteDataAction deleteDataAction = new DeleteDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
-        deleteDataAction.where = new StringClauses("ID=? AND AUTHOR=? AND FILENAME=?");
+        deleteDataAction.where = new StringClauses().append("ID=? AND AUTHOR=? AND FILENAME=?");
         return new DelegateResult(deleteDataAction);
     }
 }

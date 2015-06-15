@@ -13,7 +13,7 @@ public abstract class AbstractSqlAction extends AbstractAction {
     public String endDelimiter;
 
     public AbstractSqlAction(String sql) {
-        this.sql = new StringClauses(sql);
+        this.sql = new StringClauses().append(sql);
     }
 
     public AbstractSqlAction(StringClauses sql) {

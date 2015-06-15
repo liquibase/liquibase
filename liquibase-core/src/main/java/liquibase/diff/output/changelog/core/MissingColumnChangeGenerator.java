@@ -45,22 +45,22 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 //            continue;
 //        }
 
-        if (column.relation instanceof View) {
-            return null;
-        }
-
-        if (column.relation.getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
-            return null;
-        }
+//        if (column.relation instanceof View) {
+//            return null;
+//        }
+//
+//        if (column.relation.getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
+//            return null;
+//        }
 
 
         AddColumnChange change = new AddColumnChange();
-        change.setTableName(column.relation.getSimpleName());
+        change.setTableName(column.getRelationName());
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(column.relation.getSchema().getCatalogName());
+            change.setCatalogName(column.getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(column.relation.getSchema().getSimpleName());
+            change.setSchemaName(column.getSchemaName());
         }
 
         AddColumnConfig columnConfig = new AddColumnConfig();

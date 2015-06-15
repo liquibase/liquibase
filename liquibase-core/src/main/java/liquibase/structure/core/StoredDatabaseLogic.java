@@ -2,13 +2,14 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 
 public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends AbstractDatabaseObject {
 
     public StoredDatabaseLogic() {
     }
 
-    public StoredDatabaseLogic(String name) {
+    public StoredDatabaseLogic(ObjectName name) {
         super(name);
     }
 

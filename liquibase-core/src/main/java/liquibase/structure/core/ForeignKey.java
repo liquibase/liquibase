@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -15,13 +16,13 @@ public class ForeignKey extends AbstractDatabaseObject{
         setPrimaryKeyColumns(new ArrayList<Column>());
     }
 
-    public ForeignKey(String name) {
+    public ForeignKey(ObjectName name) {
         this();
         setName(name);
     }
 
     public ForeignKey(String name, String foreignKeyCatalog, String foreignKeySchema, String foreignKeyTable, Column... baseTableColumns) {
-        this(name);
+        this(new ObjectName(name));
 
         if (foreignKeyTable != null) {
             setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
@@ -76,16 +77,15 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
         this.get("primaryKeyColumns", List.class).add(primaryKeyColumn);
-        primaryKeyColumn.relation = getPrimaryKeyTable();
 
         return this;
     }
 
     public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
         this.set("primaryKeyColumns", primaryKeyColumns);
-        for (Column column : getPrimaryKeyColumns()) {
-            column.relation = getPrimaryKeyTable();
-        }
+//        for (Column column : getPrimaryKeyColumns()) {
+//            column.relation = getPrimaryKeyTable();
+//        }
         return this;
     }
 
@@ -103,16 +103,16 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     public void addForeignKeyColumn(Column foreignKeyColumn) {
-        foreignKeyColumn.relation = getForeignKeyTable();
+//        foreignKeyColumn.relation = getForeignKeyTable();
         get("foreignKeyColumns", List.class).add(foreignKeyColumn);
     }
 
     public ForeignKey setForeignKeyColumns(List<Column> foreignKeyColumns) {
         this.set("foreignKeyColumns", foreignKeyColumns);
 
-        for (Column column : getForeignKeyColumns()) {
-            column.relation = getForeignKeyTable();
-        }
+//        for (Column column : getForeignKeyColumns()) {
+//            column.relation = getForeignKeyTable();
+//        }
 
         return this;
     }

@@ -9,6 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 
 import java.sql.SQLException;
@@ -45,8 +46,8 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 if (returnKey == null) {
                     returnKey = new PrimaryKey();
                     CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
-                    returnKey.setTable((Table) new Table(row.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
-                    returnKey.setName(row.getString("PK_NAME"));
+                    returnKey.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
+                    returnKey.setName(new ObjectName(row.getString("PK_NAME")));
                 }
 
 //todo: move for action logic                if (database instanceof SQLiteDatabase) { //SQLite is zero based position?
@@ -55,9 +56,8 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String ascOrDesc = row.getString("ASC_OR_DESC");
                 Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                Column column = new Column(columnName);
+                Column column = new Column(new ObjectName(((PrimaryKey) example).name, columnName));
                 column.descending = descending;
-                column.relation = ((PrimaryKey) example).getTable();
                 returnKey.addColumn(position - 1, column);
             }
 
@@ -92,7 +92,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getSimpleName());
                 if (rs.size() > 0) {
-                    table.primaryKey = new PrimaryKey(rs.get(0).getString("PK_NAME")).setTable(table);
+                    table.primaryKey = new PrimaryKey(new ObjectName(rs.get(0).getString("PK_NAME"))).setTable(table);
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

@@ -12,13 +12,9 @@ public class View extends Relation {
     public View(ObjectName name) {
         super(name);
     }
-    public View(String name) {
-        super(name);
-    }
 
     public View(String catalogName, String schemaName, String tableName) {
-        this.setSchema(new Schema(catalogName, schemaName));
-        setName(tableName);
+        this(new ObjectName(catalogName,schemaName, tableName));
     }
 
     public String getDefinition() {

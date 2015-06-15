@@ -38,6 +38,6 @@ public class TagDatabaseLogic extends AbstractActionLogic<TagDatabaseAction> {
 
     protected StringClauses generateWhereClause(TagDatabaseAction action, Scope scope) {
         Database database = scope.getDatabase();
-        return new StringClauses("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + ")");
+        return new StringClauses().append("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + ")");
     }
 }

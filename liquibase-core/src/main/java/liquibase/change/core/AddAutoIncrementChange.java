@@ -9,6 +9,7 @@ import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
@@ -109,7 +110,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     @Override
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
-        Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
+        Column example = new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
         try {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             if (column == null) return result.unknown("Column does not exist");
