@@ -5,6 +5,7 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -324,9 +325,15 @@ public class Column extends AbstractDatabaseObject {
             type.load(typeNode, resourceAccessor);
             setType(type);
         }
+        ParsedNode autoIncrementInformation = parsedNode.getChild(null, "autoIncrementInformation");
+        if (autoIncrementInformation != null) {
+            AutoIncrementInformation info = new AutoIncrementInformation();
+            info.load(autoIncrementInformation, resourceAccessor);
+            setAutoIncrementInformation(info);
+        }
     }
 
-    public static class AutoIncrementInformation {
+    public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
         private BigInteger startWith;
         private BigInteger incrementBy;
 
@@ -350,6 +357,22 @@ public class Column extends AbstractDatabaseObject {
         @Override
         public String toString() {
             return "AUTO INCREMENT START WITH " + startWith + " INCREMENT BY " + incrementBy;
+        }
+
+        @Override
+        public String getSerializedObjectName() {
+            return "autoIncrementInformation";
+        }
+
+        @Override
+        public String getSerializedObjectNamespace() {
+            return STANDARD_CHANGELOG_NAMESPACE;
+        }
+
+        @Override
+        public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+            this.startWith = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "startWith"));
+            this.incrementBy = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "incrementBy"));
         }
     }
 }

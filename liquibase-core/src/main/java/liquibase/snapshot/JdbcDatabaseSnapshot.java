@@ -186,11 +186,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "AND i.OWNER = c.TABLE_OWNER";
 
                         if (!bulkFetch && tableName != null) {
-                            sql += " AND c.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " AND c.TABLE_NAME='" + tableName + "'";
                         }
 
                         if (!bulkFetch && indexName != null) {
-                            sql += " AND c.INDEX_NAME='" + database.correctObjectName(indexName, Index.class) + "'";
+                            sql += " AND c.INDEX_NAME='" + indexName + "'";
                         }
 
                         sql += " ORDER BY c.INDEX_NAME, ORDINAL_POSITION";
@@ -360,7 +360,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, schema, table, new String[]{"TABLE"}));
                 }
 
                 @Override
@@ -384,7 +384,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
                         "WHERE a.OWNER='" + ownerName + "'";
                     if (tableName != null) {
-                        sql += " AND a.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                        sql += " AND a.TABLE_NAME='" + tableName + "'";
                     }
 
                     return executeAndExtract(sql, database);
@@ -418,7 +418,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(view, View.class), new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, schema, view, new String[]{"VIEW"}));
                 }
 
 
@@ -443,7 +443,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
                         "WHERE a.OWNER='" + ownerName + "'";
                     if (viewName != null) {
-                        sql += " AND a.VIEW_NAME='" + database.correctObjectName(viewName, View.class) + "'";
+                        sql += " AND a.VIEW_NAME='" + viewName + "'";
                     }
                     sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner='"+ownerName+"')";
 
@@ -628,7 +628,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "where constraint_schema='" + jdbcCatalogName + "' "
                                 + "and constraint_type='UNIQUE'";
                         if (tableName != null) {
-                            sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and table_name='" + tableName + "'";
                         }
                     } else if (database instanceof PostgresDatabase) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
@@ -637,7 +637,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "and constraint_schema='" + jdbcSchemaName + "' "
                                 + "and constraint_type='UNIQUE'";
                         if (tableName != null) {
-                            sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and table_name='" + tableName + "'";
                         }
                     } else if (database instanceof MSSQLDatabase) {
                         sql =
@@ -657,14 +657,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "and uc.owner = '" + jdbcSchemaName + "' "
                                 + "and ui.table_owner = '" + jdbcSchemaName + "' ";
                         if (tableName != null) {
-                            sql += " and uc.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and uc.table_name = '" + tableName + "'";
                         }
                     } else if (database instanceof DB2Database) {
                         // if we are on DB2 AS400 iSeries
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
                             if (tableName != null) {
-                                sql += " and table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                                sql += " and table_name = '" + tableName + "'";
                             }
                         }
                         // here we are on DB2 UDB
@@ -674,7 +674,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     + "and t.tabschema = '" + jdbcSchemaName + "' "
                                     + "and t.type='U'";
                             if (tableName != null) {
-                                sql += " and t.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
+                                sql += " and t.tabname = '" + tableName + "'";
                             }
                         }
                     } else if (database instanceof FirebirdDatabase) {
@@ -684,7 +684,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "
                                 + "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
                         if (tableName != null) {
-                            sql += " AND RDB$INDICES.RDB$RELATION_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " AND RDB$INDICES.RDB$RELATION_NAME='" + tableName + "'";
                         }
                     } else if (database instanceof DerbyDatabase) {
                         sql = "select c.constraintname as CONSTRAINT_NAME, tablename AS TABLE_NAME "
@@ -694,7 +694,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "and t.schemaid=s.schemaid "
                                 + "and c.type = 'U'";
                         if (tableName != null) {
-                            sql += " AND t.tablename = '" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " AND t.tablename = '" + tableName + "'";
                         }
                     } else if (database instanceof InformixDatabase) {
                         sql = "select unique sysindexes.idxname as CONSTRAINT_NAME, sysindexes.idxtype, systables.tabname as TABLE_NAME "
@@ -715,7 +715,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "where sysconstraint.table_object_id = systable.object_id " +
                                 "and sysconstraint.constraint_type = 'U'";
                         if (tableName != null) {
-                            sql += " and systable.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and systable.table_name = '" + tableName + "'";
                         }
                     } else {
                         sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME "
@@ -724,7 +724,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "and constraint_catalog='" + jdbcCatalogName + "' "
                                 + "and constraint_type='UNIQUE'";
                         if (tableName != null) {
-                            sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " and table_name='" + tableName + "'";
                         }
 
                     }

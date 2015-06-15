@@ -64,6 +64,22 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         handleDefaultValueDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
         handleAutoIncrementDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
 
+        Difference remarksDiff = differences.getDifference("remarks");
+        if (remarksDiff != null) {
+            SetColumnRemarksChange change = new SetColumnRemarksChange();
+            if (control.getIncludeCatalog()) {
+                change.setCatalogName(column.getSchema().getCatalogName());
+            }
+            if (control.getIncludeSchema()) {
+                change.setSchemaName(column.getSchema().getName());
+            }
+            change.setTableName(column.getRelation().getName());
+            change.setColumnName(column.getName());
+            change.setRemarks(column.getRemarks());
+
+            changes.add(change);
+        }
+
         return changes.toArray(new Change[changes.size()]);
     }
 

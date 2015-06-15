@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
 	@Override
@@ -28,7 +29,6 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
-		validationErrors.checkRequiredField("remarks", setColumnRemarksStatement.getRemarks());
 		return validationErrors;
 	}
 
@@ -36,7 +36,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		return new Sql[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 				+ "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
-				+ database.escapeStringForDatabase(statement.getRemarks()) + "'", getAffectedColumn(statement)) };
+				+ database.escapeStringForDatabase(StringUtils.trimToEmpty(statement.getRemarks())) + "'", getAffectedColumn(statement)) };
 	}
 
     protected Column getAffectedColumn(SetColumnRemarksStatement statement) {
