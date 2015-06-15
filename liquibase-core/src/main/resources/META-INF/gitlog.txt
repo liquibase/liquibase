@@ -1,3 +1,10 @@
+cec53e9 CORE-2386 Set the connection default catalog/schema if defaultCatalogName or defaultSchemaName is set
+82d888c By the time we get to TableSnapshotGenerator and JdbcSnapshotGenerator we need to trust the object captialization. Otherwise things get lost
+330de28 By the time we get to TableSnapshotGenerator and JdbcSnapshotGenerator we need to trust the object captialization. Otherwise things get lost
+cd09802 CORE-1732 Handle object comments/remarks in diffChangeLog and generateChangeLog
+68b5b55 Additional debug logging for where files are found by the ResourceAccessor
+d115fd7 Log if liquibase XSD cannot be loaded due to an exception
+25414be CORE-2355 Improve updateSQL performance
 dba9bdb CORE-2371 Improve performance
 f0142c8 CORE-2371 Improve performance
 bab5eb6 CORE-2371 Improve performance
