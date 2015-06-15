@@ -125,7 +125,8 @@
                                     <xsd:annotation>
                                         <xsd:appinfo>
                                             <xsd:documentation>onChangeLogPreconditionOnSqlOutput determines what should happen when evaluating this precondition in updateSQL mode. TEST: Run precondition, FAIL: Fail precondition,
-                                                IGNORE: Skip precondition check [DEFAULT]</xsd:documentation>
+                                                IGNORE: Skip precondition check [DEFAULT]
+                                            </xsd:documentation>
                                         </xsd:appinfo>
                                     </xsd:annotation>
                                     <xsd:complexType>
@@ -577,7 +578,7 @@
         <xsd:attribute name="columnName" type="xsd:string" use="required"/>
         <xsd:attribute name="defaultNullValue" type="xsd:string"/>
         <xsd:attribute name="columnDataType" type="xsd:string"/>
-        <xsd:attribute name="constraintName" type="xsd:string" />
+        <xsd:attribute name="constraintName" type="xsd:string"/>
     </xsd:attributeGroup>
 
 
@@ -795,30 +796,30 @@
         </xsd:complexType>
     </xsd:element>
 
-	<xsd:element name="setTableRemarks">
-		<xsd:complexType>
-			<xsd:attribute name="catalogName" type="xsd:string" />
-			<xsd:attribute name="schemaName" type="xsd:string" />
-			<xsd:attribute name="tableName" type="xsd:string" use="required" />
-			<xsd:attribute name="remarks" type="xsd:string"/>
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:element name="setTableRemarks">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="remarks" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
 
-	<xsd:element name="setColumnRemarks">
-		<xsd:complexType>
-			<xsd:attribute name="catalogName" type="xsd:string" />
-			<xsd:attribute name="schemaName" type="xsd:string" />
-			<xsd:attribute name="tableName" type="xsd:string" use="required" />
-			<xsd:attribute name="columnName" type="xsd:string" use="required" />
-			<xsd:attribute name="remarks" type="xsd:string"/>
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:element name="setColumnRemarks">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string"/>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="columnName" type="xsd:string" use="required"/>
+            <xsd:attribute name="remarks" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
 
-	<xsd:element name="constraints">
-		<xsd:complexType>
-			<xsd:attributeGroup ref="constraintsAttributes" />
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:element name="constraints">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="constraintsAttributes"/>
+        </xsd:complexType>
+    </xsd:element>
 
 
     <xsd:element name="column">
@@ -1144,62 +1145,62 @@
     </xsd:element>
 
 
-	<!-- Children for changeSet -->
-	<xsd:group name="changeSetChildren">
-		<xsd:choice>
-			<xsd:element ref="comment" maxOccurs="1" />
-			<xsd:element ref="createTable" maxOccurs="unbounded" />
-			<xsd:element ref="dropTable" maxOccurs="unbounded" />
-			<xsd:element ref="createView" maxOccurs="unbounded" />
-			<xsd:element ref="renameView" maxOccurs="unbounded" />
-			<xsd:element ref="dropView" maxOccurs="unbounded" />
-			<xsd:element ref="insert" maxOccurs="unbounded" />
-			<xsd:element ref="addColumn" maxOccurs="unbounded" />
-			<xsd:element ref="sql" maxOccurs="unbounded" />
-			<xsd:element ref="createProcedure" maxOccurs="unbounded" />
-            <xsd:element ref="dropProcedure" maxOccurs="unbounded" />
-			<xsd:element ref="sqlFile" maxOccurs="unbounded" />
-			<xsd:element ref="renameTable" maxOccurs="unbounded" />
-			<xsd:element ref="renameColumn" maxOccurs="unbounded" />
-			<xsd:element ref="dropColumn" maxOccurs="unbounded" />
-			<xsd:element ref="mergeColumns" maxOccurs="unbounded" />
-			<xsd:element ref="modifyDataType" maxOccurs="unbounded" />
-			<xsd:element ref="createSequence" maxOccurs="unbounded" />
-			<xsd:element ref="alterSequence" maxOccurs="unbounded" />
-			<xsd:element ref="dropSequence" maxOccurs="unbounded" />
-			<xsd:element ref="renameSequence" maxOccurs="unbounded" />
-			<xsd:element ref="createIndex" maxOccurs="unbounded" />
-			<xsd:element ref="dropIndex" maxOccurs="unbounded" />
-			<xsd:element ref="addNotNullConstraint" maxOccurs="unbounded" />
-			<xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded" />
-			<xsd:element ref="addForeignKeyConstraint" maxOccurs="unbounded" />
-			<xsd:element ref="dropForeignKeyConstraint" maxOccurs="unbounded" />
-			<xsd:element ref="dropAllForeignKeyConstraints"
-				maxOccurs="unbounded" />
-			<xsd:element ref="addPrimaryKey" maxOccurs="unbounded" />
-			<xsd:element ref="dropPrimaryKey" maxOccurs="unbounded" />
-			<xsd:element ref="addLookupTable" maxOccurs="unbounded" />
-			<xsd:element ref="addAutoIncrement" maxOccurs="unbounded" />
-			<xsd:element ref="addDefaultValue" maxOccurs="unbounded" />
-			<xsd:element ref="dropDefaultValue" maxOccurs="unbounded" />
-			<xsd:element ref="addUniqueConstraint" maxOccurs="unbounded" />
-			<xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded" />
-			<xsd:element ref="setTableRemarks" maxOccurs="unbounded" />
-			<xsd:element ref="setColumnRemarks" maxOccurs="unbounded" />
-			<xsd:element ref="customChange" maxOccurs="unbounded" />
-			<xsd:element ref="update" maxOccurs="unbounded" />
-			<xsd:element ref="delete" maxOccurs="unbounded" />
-			<xsd:element ref="loadData" maxOccurs="unbounded" />
-			<xsd:element ref="loadUpdateData" maxOccurs="unbounded" />
-			<xsd:element ref="executeCommand" maxOccurs="unbounded" />
-			<xsd:element ref="stop" maxOccurs="unbounded" />
-            <xsd:element ref="output" maxOccurs="unbounded" />
-            <xsd:element ref="empty" maxOccurs="unbounded" />
-			<xsd:element ref="rollback" maxOccurs="1" />
-			<xsd:any namespace="##other" processContents="lax" minOccurs="0"
-				maxOccurs="unbounded" />
-		</xsd:choice>
-	</xsd:group>
+    <!-- Children for changeSet -->
+    <xsd:group name="changeSetChildren">
+        <xsd:choice>
+            <xsd:element ref="comment" maxOccurs="1"/>
+            <xsd:element ref="createTable" maxOccurs="unbounded"/>
+            <xsd:element ref="dropTable" maxOccurs="unbounded"/>
+            <xsd:element ref="createView" maxOccurs="unbounded"/>
+            <xsd:element ref="renameView" maxOccurs="unbounded"/>
+            <xsd:element ref="dropView" maxOccurs="unbounded"/>
+            <xsd:element ref="insert" maxOccurs="unbounded"/>
+            <xsd:element ref="addColumn" maxOccurs="unbounded"/>
+            <xsd:element ref="sql" maxOccurs="unbounded"/>
+            <xsd:element ref="createProcedure" maxOccurs="unbounded"/>
+            <xsd:element ref="dropProcedure" maxOccurs="unbounded"/>
+            <xsd:element ref="sqlFile" maxOccurs="unbounded"/>
+            <xsd:element ref="renameTable" maxOccurs="unbounded"/>
+            <xsd:element ref="renameColumn" maxOccurs="unbounded"/>
+            <xsd:element ref="dropColumn" maxOccurs="unbounded"/>
+            <xsd:element ref="mergeColumns" maxOccurs="unbounded"/>
+            <xsd:element ref="modifyDataType" maxOccurs="unbounded"/>
+            <xsd:element ref="createSequence" maxOccurs="unbounded"/>
+            <xsd:element ref="alterSequence" maxOccurs="unbounded"/>
+            <xsd:element ref="dropSequence" maxOccurs="unbounded"/>
+            <xsd:element ref="renameSequence" maxOccurs="unbounded"/>
+            <xsd:element ref="createIndex" maxOccurs="unbounded"/>
+            <xsd:element ref="dropIndex" maxOccurs="unbounded"/>
+            <xsd:element ref="addNotNullConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="addForeignKeyConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropForeignKeyConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropAllForeignKeyConstraints"
+                         maxOccurs="unbounded"/>
+            <xsd:element ref="addPrimaryKey" maxOccurs="unbounded"/>
+            <xsd:element ref="dropPrimaryKey" maxOccurs="unbounded"/>
+            <xsd:element ref="addLookupTable" maxOccurs="unbounded"/>
+            <xsd:element ref="addAutoIncrement" maxOccurs="unbounded"/>
+            <xsd:element ref="addDefaultValue" maxOccurs="unbounded"/>
+            <xsd:element ref="dropDefaultValue" maxOccurs="unbounded"/>
+            <xsd:element ref="addUniqueConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="setTableRemarks" maxOccurs="unbounded"/>
+            <xsd:element ref="setColumnRemarks" maxOccurs="unbounded"/>
+            <xsd:element ref="customChange" maxOccurs="unbounded"/>
+            <xsd:element ref="update" maxOccurs="unbounded"/>
+            <xsd:element ref="delete" maxOccurs="unbounded"/>
+            <xsd:element ref="loadData" maxOccurs="unbounded"/>
+            <xsd:element ref="loadUpdateData" maxOccurs="unbounded"/>
+            <xsd:element ref="executeCommand" maxOccurs="unbounded"/>
+            <xsd:element ref="stop" maxOccurs="unbounded"/>
+            <xsd:element ref="output" maxOccurs="unbounded"/>
+            <xsd:element ref="empty" maxOccurs="unbounded"/>
+            <xsd:element ref="rollback" maxOccurs="1"/>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0"
+                     maxOccurs="unbounded"/>
+        </xsd:choice>
+    </xsd:group>
 
     <!-- Children for Precondition -->
     <xsd:group name="PreConditionChildren">
