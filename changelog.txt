@@ -1,6 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.3.4 (2015.05.28)
+
+[CORE-2379] - Project.version set to 3.3.4-SNAPSHOT in 3.3.4 final
+
+
 Changes in version 3.3.4 (2015.05.27)
 
 [CORE-2360] - Maven - Skip is active by default
