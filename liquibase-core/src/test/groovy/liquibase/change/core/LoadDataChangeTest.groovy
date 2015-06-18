@@ -10,6 +10,7 @@ import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement
+import liquibase.statement.core.InsertSetStatement;
 import spock.lang.Unroll
 import liquibase.test.JUnitResourceAccessor
 
@@ -26,9 +27,15 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-
-        then:
+		SqlStatement[] sqlStatement = refactoring.generateStatements(new MockDatabase());
+		then:
+		sqlStatement.length == 1
+		assert sqlStatement[0] instanceof InsertSetStatement
+		
+		when:	
+        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
+		
+		then:
         sqlStatements.length == 0
     }
 
@@ -48,9 +55,15 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-
-        then:
+		SqlStatement[] sqlStatement = refactoring.generateStatements(new MockDatabase());
+		then:
+		sqlStatement.length == 1
+		assert sqlStatement[0] instanceof InsertSetStatement
+		
+		when:	
+        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
+		
+		then:
         sqlStatements.length == 2
         assert sqlStatements[0] instanceof InsertStatement
         assert sqlStatements[1] instanceof InsertStatement
@@ -91,10 +104,16 @@ public class LoadDataChangeTest extends StandardChangeTest {
         activeConfig.setHeader("active");
         activeConfig.setType("BOOLEAN");
         refactoring.addColumn(activeConfig);
-
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-
-        then:
+        
+		SqlStatement[] sqlStatement = refactoring.generateStatements(new MockDatabase());
+		then:
+		sqlStatement.length == 1
+		assert sqlStatement[0] instanceof InsertSetStatement
+		
+		when:	
+        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
+		
+		then:
         sqlStatements.length == 2
         assert sqlStatements[0] instanceof InsertStatement
         assert sqlStatements[1] instanceof InsertStatement
