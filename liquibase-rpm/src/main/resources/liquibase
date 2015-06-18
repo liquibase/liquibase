@@ -1,7 +1,7 @@
 #! /bin/sh
 
 if [ ! -n "${LIQUIBASE_HOME+x}" ]; then
-  # echo "Liquibase Home is not set."
+  echo "Liquibase Home is not set."
 
   ## resolve links - $0 may be a symlink
   PRG="$0"
