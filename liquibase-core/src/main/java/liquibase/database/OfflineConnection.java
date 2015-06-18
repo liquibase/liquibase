@@ -26,7 +26,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
     private DatabaseSnapshot snapshot = null;
-    private boolean outputLiquibaseSql = false;
+    private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
     private boolean caseSensitive = false;
     private String productName;
@@ -79,7 +79,7 @@ public class OfflineConnection implements DatabaseConnection {
             } else if (paramEntry.getKey().equals("changeLogFile")) {
                 this.changeLogFile = paramEntry.getValue();
             } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
-                this.outputLiquibaseSql = Boolean.valueOf(paramEntry.getValue());
+                this.outputLiquibaseSql = OutputLiquibaseSql.fromString(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("snapshot")) {
                 String snapshotFile = paramEntry.getValue();
                 try {
@@ -124,7 +124,10 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
-        return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql);
+        return new OfflineChangeLogHistoryService(database, new File(changeLogFile),
+            outputLiquibaseSql != OutputLiquibaseSql.NONE, // Output DML
+            outputLiquibaseSql == OutputLiquibaseSql.ALL   // Output DDL
+        );
     }
 
     public DatabaseSnapshot getSnapshot() {
@@ -221,12 +224,37 @@ public class OfflineConnection implements DatabaseConnection {
         return false;
     }
 
-    public boolean getOutputLiquibaseSql() {
-        return outputLiquibaseSql;
-    }
+    /**
+     * Output Liquibase SQL
+     */
+    private static enum OutputLiquibaseSql {
+        /**
+         * Don't output anything
+         */
+        NONE,
+        /**
+         * Output only INSERT/UPDATE/DELETE
+         */
+        DATA_ONLY,
+        /**
+         * Output CREATE TABLE as well
+         */
+        ALL;
 
-    public void setOutputLiquibaseSql(Boolean outputLiquibaseSql) {
-        this.outputLiquibaseSql = outputLiquibaseSql;
+        public static OutputLiquibaseSql fromString(String s) {
+            if (s == null) {
+                return null;
+            }
+            s = s.toUpperCase();
+            // For backward compatibility true is translated in ALL and false in NONE
+            if (s.equals("TRUE")) {
+                return ALL;
+            } else if (s.equals("FALSE")) {
+                return NONE;
+            } else {
+                return valueOf(s);
+            }
+        }
     }
 
     public boolean getSendsStringParametersAsUnicode() {
