@@ -1,8 +1,12 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutorService;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -13,7 +17,9 @@ import liquibase.statement.core.InsertSetStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement> {
 
@@ -34,7 +40,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 
     @Override
     public Sql[] generateSql(InsertSetStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-       
+
     	if(statement.peek() == null) {
     		return new UnparsedSql[0];
     	}
