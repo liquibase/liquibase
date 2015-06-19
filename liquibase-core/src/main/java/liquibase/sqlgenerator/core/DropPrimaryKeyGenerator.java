@@ -55,9 +55,9 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 				query.append(" join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'");
 				query.append(" join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid");
 				query.append(" join syscolumns c ON ik.id = c.id AND ik.colid = c.colid");
-				query.append(" INNER JOIN sysusers su ON o.uid = su.uid");
+				query.append(" INNER JOIN schemas s ON o.uid = s.schema_id");
 				query.append(" where o.name = '").append(statement.getTableName()).append("'");
-				query.append(" and su.name='").append(schemaName).append("'");
+				query.append(" and s.name='").append(schemaName).append("'");
 				query.append("\n");
 				query.append("set @sql='alter table ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" drop constraint ' + @pkname");
 				query.append("\n");
