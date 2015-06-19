@@ -183,6 +183,19 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } else if (value instanceof LiquibaseSerializable) {
             node.appendChild(createNode((LiquibaseSerializable) value));
+        } else if (value instanceof Object[]) {
+            if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
+                String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
+                Element newNode = createNode(namespace, objectName, "");
+                for (Object child : (Object[]) value) {
+                    setValueOnNode(newNode, namespace, objectName, child, serializationType, parentNamespace);
+                }
+                node.appendChild(newNode);
+            } else {
+                for (Object child : (Object[]) value) {
+                    setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
+                }
+            }
         } else {
             if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
                 String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
