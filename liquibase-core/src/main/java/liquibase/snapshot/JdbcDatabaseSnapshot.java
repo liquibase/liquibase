@@ -99,7 +99,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                        String sql = "SELECT  " +
+                        String sql = "SELECT  /*+rule*/" +
                                 "  NULL AS pktable_cat,  " +
                                 "  p.owner as pktable_schem,  " +
                                 "  p.table_name as pktable_name,  " +
