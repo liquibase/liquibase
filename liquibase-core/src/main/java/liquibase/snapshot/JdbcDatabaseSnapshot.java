@@ -178,7 +178,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "CASE c.DESCEND WHEN 'Y' THEN 'D' WHEN 'N' THEN 'A' END AS ASC_OR_DESC " +
                                 "FROM ALL_IND_COLUMNS c " +
                                 "JOIN ALL_INDEXES i " +
-                                "ON i.index_name = c.index_name " +
+                                "ON (i.index_name = c.index_name and i.table_owner = c.table_owner)" +
                                 "LEFT JOIN all_ind_expressions e " +
                                 "ON e.column_position = c.column_position " +
                                 "AND e.index_name = c.index_name " +
