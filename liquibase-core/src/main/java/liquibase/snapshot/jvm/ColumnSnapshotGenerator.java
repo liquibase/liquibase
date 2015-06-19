@@ -224,7 +224,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
 
         if (database instanceof OracleDatabase) {
-            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
+            String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
             dataType = dataType.replace("VARCHAR2", "VARCHAR");
             dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
 
