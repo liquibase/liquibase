@@ -41,11 +41,16 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
             DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
 
-            List rootList = (List) parsedYaml.get("databaseChangeLog");
+            Object rootList = parsedYaml.get("databaseChangeLog");
             if (rootList == null) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
             }
-            for (Object obj : rootList) {
+
+            if (!(rootList instanceof List)) {
+                throw new ChangeLogParseException("databaseChangeLog does not contain a list of entries. Each changeSet must begin ' - changeSet:'");
+            }
+
+            for (Object obj : (List) rootList) {
                 if (obj instanceof Map && ((Map) obj).containsKey("property")) {
                     Map property = (Map) ((Map) obj).get("property");
                     ContextExpression context = new ContextExpression((String) property.get("context"));
@@ -90,7 +95,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             if (e instanceof ChangeLogParseException) {
                 throw (ChangeLogParseException) e;
             }
-            throw new ChangeLogParseException(e);
+            throw new ChangeLogParseException("Error parsing "+physicalChangeLogLocation, e);
         }
     }
 
