@@ -533,7 +533,22 @@ public abstract class AbstractChange implements Change {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         this.setResourceAccessor(resourceAccessor);
         try {
-            for (ChangeParameterMetaData param : metaData.getParameters().values()) {
+            Collection<ChangeParameterMetaData> changeParameters = metaData.getParameters().values();
+            for (ParsedNode node : parsedNode.getChildren()) {
+                boolean validNode = false;
+                for (ChangeParameterMetaData changeParam : changeParameters) {
+                    if (changeParam.getParameterName().equals(node.getName())) {
+                        validNode = true;
+                        break;
+                    }
+                }
+
+                if (!validNode) {
+                    throw new ParsedNodeException("Unexpected node: "+node.getName());
+                }
+            }
+
+            for (ChangeParameterMetaData param : changeParameters) {
                 if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                     if (param.getDataTypeClassParameters().length == 1) {
                         Class collectionType = (Class) param.getDataTypeClassParameters()[0];

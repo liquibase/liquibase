@@ -410,11 +410,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         if (change == null) {
             return null;
         } else {
-            try {
-                change.load(value, resourceAccessor);
-            } catch (ParsedNodeException e) {
-                e.printStackTrace();
-            }
+            change.load(value, resourceAccessor);
+
             return change;
         }
     }

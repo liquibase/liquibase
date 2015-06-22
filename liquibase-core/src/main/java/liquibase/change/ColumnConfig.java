@@ -20,6 +20,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 /**
@@ -766,6 +767,13 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        for (ParsedNode child : parsedNode.getChildren()) {
+            if (!ObjectUtil.hasProperty(this, child.getName())) {
+                throw new ParsedNodeException("Unexpected node: "+child.getName());
+            }
+        }
+
+
         name = parsedNode.getChildValue(null, "name", String.class);
         computed = parsedNode.getChildValue(null, "computed", Boolean.class);
         type = parsedNode.getChildValue(null, "type", String.class);
