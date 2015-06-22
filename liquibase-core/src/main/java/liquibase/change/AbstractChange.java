@@ -534,19 +534,6 @@ public abstract class AbstractChange implements Change {
         this.setResourceAccessor(resourceAccessor);
         try {
             Collection<ChangeParameterMetaData> changeParameters = metaData.getParameters().values();
-            for (ParsedNode node : parsedNode.getChildren()) {
-                boolean validNode = false;
-                for (ChangeParameterMetaData changeParam : changeParameters) {
-                    if (changeParam.getParameterName().equals(node.getName())) {
-                        validNode = true;
-                        break;
-                    }
-                }
-
-                if (!validNode) {
-                    throw new ParsedNodeException("Unexpected node: "+node.getName());
-                }
-            }
 
             for (ChangeParameterMetaData param : changeParameters) {
                 if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
