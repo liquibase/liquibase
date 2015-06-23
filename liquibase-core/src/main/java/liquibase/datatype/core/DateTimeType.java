@@ -33,6 +33,15 @@ public class DateTimeType extends LiquibaseDataType {
             if ((getParameters().length > 0 && "16".equals(getParameters()[0])) || "SMALLDATETIME".equalsIgnoreCase(getRawDefinition())) {
                    return new DatabaseDataType("SMALLDATETIME");
             }
+            if (getRawDefinition().toLowerCase().startsWith("datetime2")) {
+                if (getParameters().length == 0) {
+                    return new DatabaseDataType("DATETIME2");
+                } else if (getParameters().length == 1) {
+                    return new DatabaseDataType("DATETIME2", getParameters()[0]);
+                } else {
+                    return new DatabaseDataType("DATETIME2", getParameters()[1]);
+                }
+            }
         }
         if (database instanceof InformixDatabase) {
 
