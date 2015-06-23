@@ -19,10 +19,12 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
-import javax.annotation.Resource;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 
 /**
@@ -118,7 +120,7 @@ public class CommandLineUtils {
                     }
                     ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
                 } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + username + " WITH DEFAULT_SCHEMA=[" + defaultSchemaName + "]"));
+                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + database.escapeObjectName(username, DatabaseObject.class) + " WITH DEFAULT_SCHEMA = " + database.escapeObjectName(defaultSchemaName, Schema.class)));
                 } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
                     ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + defaultSchemaName));
                 } else if (database instanceof DB2Database) {
