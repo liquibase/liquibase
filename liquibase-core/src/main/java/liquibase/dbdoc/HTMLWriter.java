@@ -33,12 +33,12 @@ public abstract class HTMLWriter {
 
     protected abstract void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
-    private Writer createFileWriter(Object object) throws IOException {
+    private Writer createWriter(Object object) throws IOException {
         return new OutputStreamWriter(new FileOutputStream(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), outputFileEncoding);
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
-        Writer fileWriter = createFileWriter(object);
+        Writer fileWriter = createWriter(object);
 
 
         try {
