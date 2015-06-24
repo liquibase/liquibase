@@ -90,7 +90,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
 		expect(connection.getUnderlyingConnection()).andReturn(sqlConnection).anyTimes();
 		expect( sqlConnection.createStatement()).andReturn(statement);
-		expect( statement.executeQuery("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('catalog', 'COLLATION'))")).andReturn(resultSet);
+		expect( statement.executeQuery("SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'catalog', 'Collation'))")).andReturn(resultSet);
 		expect( resultSet.next() ).andReturn(true);
 		expect( resultSet.getMetaData() ).andReturn(metadata);
 		expect( metadata.getColumnCount() ).andReturn(1);

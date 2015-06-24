@@ -12,6 +12,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
 
@@ -25,7 +26,6 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
     public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
-		validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
 		return validationErrors;
 	}
 
@@ -34,7 +34,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 		String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());
 		if (database instanceof MySQLDatabase) {
-			sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarks
+			sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + StringUtils.trimToEmpty(remarks)
 					+ "'";
 		} else {
 			String command = "COMMENT";

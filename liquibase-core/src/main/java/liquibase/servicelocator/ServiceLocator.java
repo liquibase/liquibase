@@ -123,7 +123,7 @@ public class ServiceLocator {
                 addPackageToScan("liquibase.structure");
                 addPackageToScan("liquibase.structurecompare");
                 addPackageToScan("liquibase.lockservice");
-                addPackageToScan("liquibase.sdk");
+                addPackageToScan("liquibase.sdk.database");
                 addPackageToScan("liquibase.ext");
             }
         }

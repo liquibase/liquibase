@@ -227,10 +227,16 @@ public class DataTypeFactory {
     }
 
     public LiquibaseDataType from(DataType type, Database database) {
+        if (type == null) {
+            return null;
+        }
         return fromDescription(type.toString(), database);
     }
 
     public LiquibaseDataType from(DatabaseDataType type, Database database) {
+        if (type == null) {
+            return null;
+        }
         return fromDescription(type.toString(), database);
     }
 

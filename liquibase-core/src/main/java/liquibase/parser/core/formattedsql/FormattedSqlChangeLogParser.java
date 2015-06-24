@@ -140,7 +140,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
                     Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
 
-                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
+                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, false);
                     boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
@@ -227,7 +227,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
 
                 if (StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
-                    change.setEndDelimiter("\n/");
+                    change.setEndDelimiter("\n/$");
                 }
 
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {

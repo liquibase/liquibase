@@ -217,9 +217,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     public int getDatabasePatchVersion() throws DatabaseException {
-        String versionStrings[] = this.getDatabaseProductVersion().split("\\.");
+        String databaseProductVersion = this.getDatabaseProductVersion();
+        if (databaseProductVersion == null) {
+            return 0;
+        }
+
+        String versionStrings[] = databaseProductVersion.split("\\.");
         try {
             return Integer.parseInt(versionStrings[2].replaceFirst("\\D.*", ""));
+        } catch (IndexOutOfBoundsException e) {
+            return 0;
         } catch (NumberFormatException e) {
             return 0;
         }

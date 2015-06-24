@@ -533,7 +533,9 @@ public abstract class AbstractChange implements Change {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         this.setResourceAccessor(resourceAccessor);
         try {
-            for (ChangeParameterMetaData param : metaData.getParameters().values()) {
+            Collection<ChangeParameterMetaData> changeParameters = metaData.getParameters().values();
+
+            for (ChangeParameterMetaData param : changeParameters) {
                 if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                     if (param.getDataTypeClassParameters().length == 1) {
                         Class collectionType = (Class) param.getDataTypeClassParameters()[0];

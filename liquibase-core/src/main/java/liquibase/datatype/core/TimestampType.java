@@ -1,5 +1,7 @@
 package liquibase.datatype.core;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
@@ -21,7 +23,11 @@ public class TimestampType extends DateTimeType {
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
+            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("timestamp")) {
+                return new DatabaseDataType(database.escapeDataTypeName("TIMESTAMP"));
+            }
+
+            return new DatabaseDataType(database.escapeDataTypeName("DATETIME"));
         }
         return super.toDatabaseDataType(database);
     }
