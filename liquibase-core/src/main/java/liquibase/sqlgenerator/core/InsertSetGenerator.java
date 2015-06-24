@@ -1,25 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutorService;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.InsertGenerator;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertSetStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement> {
 
@@ -56,7 +45,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
     
     public void generateHeader(StringBuffer sql,InsertSetStatement statement, Database database) {
         InsertStatement insert=statement.peek();
-        myGenerator.generateHeader(sql,insert,database);
+//        myGenerator.generateHeader(sql,insert,database);
     }
     
     public void generateValues(StringBuffer sql,InsertSetStatement statements, Database database) {
@@ -69,7 +58,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
             generateHeader(sql,statements,database);
             index=0;
           }
-          myGenerator.generateValues(sql,statement,database);
+//          myGenerator.generateValues(sql,statement,database);
           sql.append(",");
         }
         sql.deleteCharAt(sql.lastIndexOf(","));
@@ -77,8 +66,8 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
     }
 
     protected Relation getAffectedTable(InsertSetStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Table(); //.setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
     
-    private InsertGenerator myGenerator= new InsertGenerator();
+//    private InsertGenerator myGenerator= new InsertGenerator();
 }

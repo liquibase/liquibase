@@ -3,9 +3,6 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
@@ -229,12 +226,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 statements.addInsertStatement(insertStatement);
             }
 
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
-                // we only return a single "statement" - it's capable of emitting multiple sub-statements, should the need arise, on generation.
-                return new SqlStatement[]{statements};
-            } else {
+//            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+//                // we only return a single "statement" - it's capable of emitting multiple sub-statements, should the need arise, on generation.
+//                return new SqlStatement[]{statements};
+//            } else {
                 return statements.getStatementsArray();
-            }
+//            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {

@@ -32,6 +32,11 @@ public class ReorganizeTableLogicDB2 extends AbstractActionLogic<ReorganizeTable
     }
 
     @Override
+    protected boolean supportsScope(Scope scope) {
+        return super.supportsScope(scope) && !((DB2Database) scope.getDatabase()).isZOS();
+    }
+
+    @Override
     public ValidationErrors validate(ReorganizeTableAction action, Scope scope) {
         return super.validate(action, scope)
                 .checkForRequiredField("tableName", action);

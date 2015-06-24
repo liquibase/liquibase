@@ -41,6 +41,10 @@ public class UpdateDataLogic extends AbstractSqlBuilderLogic<UpdateDataAction> {
         if (CollectionUtil.createIfNull(action.columnNames).size() != CollectionUtil.createIfNull(action.newColumnValues).size()) {
             errors.addError("UpdateData columnNames and newColumnValues must be of the same length");
         }
+        if (action.whereParameters != null && action.whereParameters.size() > 0 && action.whereClause == null) {
+            errors.addError("whereParams set but no whereClause");
+        }
+
         return errors;
     }
 

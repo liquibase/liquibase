@@ -8,6 +8,7 @@ import liquibase.action.core.CopyRowsAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
+import liquibase.actionlogic.NoOpResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -37,6 +38,10 @@ public class CopyRowsLogic extends AbstractActionLogic<CopyRowsAction> {
     @Override
     public ActionResult execute(CopyRowsAction action, Scope scope) throws ActionPerformException {
         final Database database = scope.getDatabase();
+
+        if (action.sourceColumns.size() == 0) {
+            return new NoOpResult();
+        }
 
         List<String> sourceColumns = action.sourceColumns;
         List<String> targetColumns = action.targetColumns;

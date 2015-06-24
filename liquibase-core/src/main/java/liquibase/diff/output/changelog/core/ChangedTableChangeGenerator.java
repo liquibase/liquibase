@@ -41,11 +41,11 @@ public class ChangedTableChangeGenerator implements ChangedObjectChangeGenerator
             if (control.getIncludeCatalog()) {
                 change.setCatalogName(table.getSchema().getCatalogName());
             }
-            if (control.getIncludeSchema()) {
-                change.setSchemaName(table.getSchema().getName());
-            }
-
-            change.setTableName(table.getName());
+//            if (control.getIncludeSchema()) {
+//                change.setSchemaName(table.getSchema().getName());
+//            }
+//
+//            change.setTableName(table.getName());
             change.setRemarks(table.getRemarks());
 
             return new Change[] {

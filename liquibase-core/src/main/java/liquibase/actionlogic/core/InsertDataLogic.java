@@ -45,6 +45,7 @@ public class InsertDataLogic extends AbstractSqlBuilderLogic<InsertDataAction> {
         return errors;
     }
 
+    //TODO: Ensure it supports better performing InsertSetStatement type-logic at fdf10a472b
     @Override
     protected StringClauses generateSql(InsertDataAction action, Scope scope) {
         final Database database = scope.getDatabase();

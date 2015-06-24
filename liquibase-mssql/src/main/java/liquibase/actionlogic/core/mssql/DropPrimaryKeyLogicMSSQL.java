@@ -33,21 +33,23 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
         String constraintName = action.constraintName;
         if (constraintName == null) {
             return new DelegateResult(new ExecuteSqlAction(
-                    "DECLARE @pkname nvarchar(255)"
-            +"\n"
-            +"DECLARE @sql nvarchar(2048)"
-            +"\n"
-            +"select @pkname=i.name from sysindexes i"
-            +" join sysobjects o ON i.id = o.id"
-            +" join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'"
-            +" join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid"
-            +" join syscolumns c ON ik.id = c.id AND ik.colid = c.colid"
-            +" where o.name = '"+action.tableName.name+"'"
-            +"\n"
-            +"set @sql='alter table "+database.escapeObjectName(action.tableName, Table.class)+" drop constraint ' + @pkname"
-            +"\n"
-            +"exec(@sql)"
-            +"\n"));
+                "DECLARE @pkname nvarchar(255)" +
+                "\n" +
+                "DECLARE @sql nvarchar(2048)" +
+                "\n" +
+                "select @pkname=i.name from sysindexes i" +
+                " join sysobjects o ON i.id = o.id" +
+                " join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'" +
+                " join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid" +
+                " join syscolumns c ON ik.id = c.id AND ik.colid = c.colid" +
+                " INNER JOIN schemas s ON o.uid = s.schema_id" +
+                " where o.name = '"+action.tableName.name+"'" +
+                " and s.name='"+action.tableName.container.name+"'" +
+                "\n" +
+                "set @sql='alter table "+database.escapeObjectName(action.tableName, Table.class)+" drop constraint ' + @pkname" +
+                "\n" +
+                "exec(@sql)" +
+                "\n"));
         } else {
             return super.execute(action, scope);
         }

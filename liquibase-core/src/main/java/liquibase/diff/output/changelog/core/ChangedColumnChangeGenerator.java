@@ -67,12 +67,12 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             if (control.getIncludeCatalog()) {
                 change.setCatalogName(column.getSchema().getCatalogName());
             }
-            if (control.getIncludeSchema()) {
-                change.setSchemaName(column.getSchema().getName());
-            }
-            change.setTableName(column.getRelation().getName());
-            change.setColumnName(column.getName());
-            change.setRemarks(column.getRemarks());
+//            if (control.getIncludeSchema()) {
+//                change.setSchemaName(column.getSchema().getName());
+//            }
+//            change.setTableName(column.getRelation().getName());
+//            change.setColumnName(column.getName());
+//            change.setRemarks(column.getRemarks());
 
             changes.add(change);
         }

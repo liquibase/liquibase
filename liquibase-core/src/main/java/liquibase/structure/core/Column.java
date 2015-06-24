@@ -187,7 +187,7 @@ public class Column extends AbstractDatabaseObject {
         if (autoIncrementInformation != null) {
             AutoIncrementInformation info = new AutoIncrementInformation();
             info.load(autoIncrementInformation, resourceAccessor);
-            setAutoIncrementInformation(info);
+//            setAutoIncrementInformation(info);
         }
 
     }

@@ -8,13 +8,12 @@ import liquibase.command.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
-import liquibase.database.core.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
@@ -25,7 +24,6 @@ import liquibase.util.StringUtils;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.IOException;
 
 /**
@@ -113,32 +111,32 @@ public class CommandLineUtils {
             }
             
             //Todo: move to database object methods in 4.0
-            if ((defaultCatalogName != null || defaultSchemaName != null) && !(database.getConnection() instanceof OfflineConnection)) {
-                if (database instanceof OracleDatabase) {
-                    String schema = defaultCatalogName;
-                    if (schema == null) {
-                        schema = defaultSchemaName;
-                    }
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
-                } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + database.escapeObjectName(username, DatabaseObject.class) + " WITH DEFAULT_SCHEMA = " + database.escapeObjectName(defaultSchemaName, Schema.class)));
-                } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + defaultSchemaName));
-                } else if (database instanceof DB2Database) {
-                    String schema = defaultCatalogName;
-                    if (schema == null) {
-                        schema = defaultSchemaName;
-                    }
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "+schema));
-                } else if (database instanceof MySQLDatabase) {
-                    String schema = defaultCatalogName;
-                    if (schema == null) {
-                        schema = defaultSchemaName;
-                    }
-                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE "+schema));
-                }
-
-            }
+//            if ((defaultCatalogName != null || defaultSchemaName != null) && !(database.getConnection() instanceof OfflineConnection)) {
+//                if (database instanceof OracleDatabase) {
+//                    String schema = defaultCatalogName;
+//                    if (schema == null) {
+//                        schema = defaultSchemaName;
+//                    }
+//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
+//                } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
+//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + database.escapeObjectName(username, DatabaseObject.class) + " WITH DEFAULT_SCHEMA = " + database.escapeObjectName(defaultSchemaName, Schema.class)));
+//                } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + defaultSchemaName));
+//                } else if (database instanceof DB2Database) {
+//                    String schema = defaultCatalogName;
+//                    if (schema == null) {
+//                        schema = defaultSchemaName;
+//                    }
+//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET CURRENT SCHEMA "+schema));
+//                } else if (database instanceof MySQLDatabase) {
+//                    String schema = defaultCatalogName;
+//                    if (schema == null) {
+//                        schema = defaultSchemaName;
+//                    }
+//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("USE "+schema));
+//                }
+//
+//            }
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);

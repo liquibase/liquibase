@@ -1,10 +1,10 @@
 package liquibase.changelog;
 
 import liquibase.database.OfflineConnection;
-import liquibase.database.core.HsqlDatabase;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @see https://liquibase.jira.com/browse/CORE-2334
+ * @see http://liquibase.jira.com/browse/CORE-2334
  */
 public class OfflineChangeLogHistoryServiceTest  {
     @Rule
@@ -75,9 +75,9 @@ public class OfflineChangeLogHistoryServiceTest  {
      * Create OfflineChangeLogHistoryService and register LoggingExecutor
      */
     private OfflineChangeLogHistoryService createService(Writer writer, String outputLiquibaseSql) {
-        HsqlDatabase database = new HsqlDatabase();
+        MockDatabase database = new MockDatabase();
         File changeLogCsvFile = new File(temporaryFolder.getRoot(), "changeLog.csv");
-        OfflineConnection connection = new OfflineConnection("offline:hsqldb?changeLogFile="+changeLogCsvFile.getAbsolutePath()+"&outputLiquibaseSql="+outputLiquibaseSql, new ClassLoaderResourceAccessor());
+        OfflineConnection connection = new OfflineConnection("offline:mock?changeLogFile="+changeLogCsvFile.getAbsolutePath()+"&outputLiquibaseSql="+outputLiquibaseSql, new ClassLoaderResourceAccessor());
         database.setConnection(connection);
         connection.attached(database);
         OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);

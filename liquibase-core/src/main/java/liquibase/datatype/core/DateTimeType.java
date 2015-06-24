@@ -5,6 +5,8 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
+import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -134,11 +136,37 @@ public class DateTimeType extends LiquibaseDataType {
     protected boolean supportsFractionalDigits(Database database) {
         if (database.getConnection() == null) {
             // if no connection is there we cannot do anything...
-            LogFactory.getInstance().getLog().warning(
+            LoggerFactory.getLogger(DateTimeType.class).warn(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
             return true;
         }
+
+//        try {
+//            String minimumVersion = "0";
+//            int major = database.getDatabaseMajorVersion();
+//            int minor = database.getDatabaseMinorVersion();
+//            int patch = 0;
+//
+//            if (MySQLDatabase.class.isInstance(database)) {
+//                patch = ((MySQLDatabase) database).getDatabasePatchVersion();
+//
+//                // MySQL 5.6.4 introduced fractional support...
+//                minimumVersion = "5.6.4";
+//            } else if (PostgresDatabase.class.isInstance(database)) {
+//                // PostgreSQL 7.2 introduced fractional support...
+//                minimumVersion = "7.2";
+//            }
+//
+//            return isMinimumVersion(minimumVersion, major, minor, patch);
+//        } catch (DatabaseException x) {
+        LoggerFactory.getLogger(DateTimeType.class).warn(
+                    "Unable to determine exact database server version"
+                            + " - specified TIMESTAMP precision"
+                            + " will not be set");
+            return false;
+//        }
+    }
 
     protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
         String[] parts = minimumVersion.split("\\.", 3);

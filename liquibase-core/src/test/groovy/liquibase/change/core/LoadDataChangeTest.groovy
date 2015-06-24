@@ -3,9 +3,6 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeSet
-import liquibase.database.core.MSSQLDatabase
-import liquibase.database.core.MySQLDatabase
-import liquibase.database.core.OracleDatabase;
 import liquibase.sdk.database.MockDatabase
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
@@ -20,27 +17,27 @@ import liquibase.test.JUnitResourceAccessor
 public class LoadDataChangeTest extends StandardChangeTest {
 
 
-    def "loadDataEmpty using InsertSetStatement"() throws Exception {
-        when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/empty.data.csv");
-        refactoring.setSeparator(",");
-
-        refactoring.setResourceAccessor(new JUnitResourceAccessor());
-
-		SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
-		then:
-		sqlStatement.length == 1
-		assert sqlStatement[0] instanceof InsertSetStatement
-
-		when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
-
-		then:
-        sqlStatements.length == 0
-    }
+//    def "loadDataEmpty using InsertSetStatement"() throws Exception {
+//        when:
+//        LoadDataChange refactoring = new LoadDataChange();
+//        refactoring.setSchemaName("SCHEMA_NAME");
+//        refactoring.setTableName("TABLE_NAME");
+//        refactoring.setFile("liquibase/change/core/empty.data.csv");
+//        refactoring.setSeparator(",");
+//
+//        refactoring.setResourceAccessor(new JUnitResourceAccessor());
+//
+//		SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+//		then:
+//		sqlStatement.length == 1
+//		assert sqlStatement[0] instanceof InsertSetStatement
+//
+//		when:
+//        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
+//
+//		then:
+//        sqlStatements.length == 0
+//    }
 
     def "loadDataEmpty not using InsertSetStatement"() throws Exception {
         when:
@@ -58,52 +55,52 @@ public class LoadDataChangeTest extends StandardChangeTest {
         sqlStatements.length == 0
     }
 
-    @Unroll("multiple formats with the same data for #fileName")
-    def "multiple formats with the same data using InsertSetStatement"() throws Exception {
-        when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile(fileName);
-        if (separator != null) {
-            refactoring.setSeparator(separator);
-        }
-        if (quotChar != null) {
-            refactoring.setQuotchar(quotChar);
-        }
-
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-
-        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
-        then:
-        sqlStatement.length == 1
-        assert sqlStatement[0] instanceof InsertSetStatement
-
-        when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
-
-        then:
-        sqlStatements.length == 2
-        assert sqlStatements[0] instanceof InsertStatement
-        assert sqlStatements[1] instanceof InsertStatement
-
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
-        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
-        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
-
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
-        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
-        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
-
-        where:
-        fileName                                    | separator | quotChar
-        "liquibase/change/core/sample.data1.tsv"    | "\t"      | null
-        "liquibase/change/core/sample.quotchar.tsv" | "\t"      | "'"
-        "liquibase/change/core/sample.data1.csv"    | ","       | null
-        "liquibase/change/core/sample.data1.csv"    | null      | null
-    }
+//    @Unroll("multiple formats with the same data for #fileName")
+//    def "multiple formats with the same data using InsertSetStatement"() throws Exception {
+//        when:
+//        LoadDataChange refactoring = new LoadDataChange();
+//        refactoring.setSchemaName("SCHEMA_NAME");
+//        refactoring.setTableName("TABLE_NAME");
+//        refactoring.setFile(fileName);
+//        if (separator != null) {
+//            refactoring.setSeparator(separator);
+//        }
+//        if (quotChar != null) {
+//            refactoring.setQuotchar(quotChar);
+//        }
+//
+//        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+//
+//        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+//        then:
+//        sqlStatement.length == 1
+//        assert sqlStatement[0] instanceof InsertSetStatement
+//
+//        when:
+//        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+//
+//        then:
+//        sqlStatements.length == 2
+//        assert sqlStatements[0] instanceof InsertStatement
+//        assert sqlStatements[1] instanceof InsertStatement
+//
+//        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+//        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+//        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+//        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+//
+//        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+//        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+//        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+//        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+//
+//        where:
+//        fileName                                    | separator | quotChar
+//        "liquibase/change/core/sample.data1.tsv"    | "\t"      | null
+//        "liquibase/change/core/sample.quotchar.tsv" | "\t"      | "'"
+//        "liquibase/change/core/sample.data1.csv"    | ","       | null
+//        "liquibase/change/core/sample.data1.csv"    | null      | null
+//    }
 
     @Unroll("multiple formats with the same data for #fileName")
     def "multiple formats with the same data not using InsertSetStatement"() throws Exception {
@@ -146,52 +143,52 @@ public class LoadDataChangeTest extends StandardChangeTest {
         "liquibase/change/core/sample.data1.csv" | null | null
     }
 
-    def "generateStatement_excel using InsertSetStatement"() throws Exception {
-        when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
-        //refactoring.setResourceAccessor(new JUnitResourceAccessor());
-
-        LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
-        ageConfig.setHeader("age");
-        ageConfig.setType("NUMERIC");
-        refactoring.addColumn(ageConfig);
-
-        LoadDataColumnConfig activeConfig = new LoadDataColumnConfig();
-        activeConfig.setHeader("active");
-        activeConfig.setType("BOOLEAN");
-        refactoring.addColumn(activeConfig);
-
-        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
-        then:
-        sqlStatement.length == 1
-        assert sqlStatement[0] instanceof InsertSetStatement
-
-        when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
-
-        then:
-        sqlStatements.length == 2
-        assert sqlStatements[0] instanceof InsertStatement
-        assert sqlStatements[1] instanceof InsertStatement
-
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
-        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
-        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
-        "15" == ((InsertStatement) sqlStatements[0]).getColumnValue("age").toString()
-        Boolean.TRUE == ((InsertStatement) sqlStatements[0]).getColumnValue("active")
-
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
-        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
-        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
-        "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
-        Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
-    }
+//    def "generateStatement_excel using InsertSetStatement"() throws Exception {
+//        when:
+//        LoadDataChange refactoring = new LoadDataChange();
+//        refactoring.setSchemaName("SCHEMA_NAME");
+//        refactoring.setTableName("TABLE_NAME");
+//        refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
+//        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+//        //refactoring.setResourceAccessor(new JUnitResourceAccessor());
+//
+//        LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
+//        ageConfig.setHeader("age");
+//        ageConfig.setType("NUMERIC");
+//        refactoring.addColumn(ageConfig);
+//
+//        LoadDataColumnConfig activeConfig = new LoadDataColumnConfig();
+//        activeConfig.setHeader("active");
+//        activeConfig.setType("BOOLEAN");
+//        refactoring.addColumn(activeConfig);
+//
+//        SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
+//        then:
+//        sqlStatement.length == 1
+//        assert sqlStatement[0] instanceof InsertSetStatement
+//
+//        when:
+//        SqlStatement[] sqlStatements = ((InsertSetStatement) sqlStatement[0]).getStatementsArray();
+//
+//        then:
+//        sqlStatements.length == 2
+//        assert sqlStatements[0] instanceof InsertStatement
+//        assert sqlStatements[1] instanceof InsertStatement
+//
+//        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
+//        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
+//        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
+//        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+//        "15" == ((InsertStatement) sqlStatements[0]).getColumnValue("age").toString()
+//        Boolean.TRUE == ((InsertStatement) sqlStatements[0]).getColumnValue("active")
+//
+//        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
+//        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
+//        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
+//        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+//        "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
+//        Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
+//    }
 
     def "generateStatement_excel not using InsertStatement"() throws Exception {
         when:
