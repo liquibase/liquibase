@@ -31,7 +31,8 @@
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <url>scm:git:git@github.com:liquibase/liquibase.git</url>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 
     <developers>
         <developer>

@@ -18,5 +18,5 @@ Liquibase-Package: liquibase.action,
  liquibase.structure,
  liquibase.structurecompare,
  liquibase.lockservice,
- liquibase.sdk,
+ liquibase.sdk.database,
  liquibase.ext

@@ -70,7 +70,7 @@ public class ChangeLogSerializerFactoryTest {
     @Test
     public void builtInSerializersAreFound() {
         Map<String, List<ChangeLogSerializer>> serializers = ChangeLogSerializerFactory.getInstance().getSerializers();
-        assertEquals(5, serializers.size());
+        assertEquals(6, serializers.size());
     }
 
     @Test

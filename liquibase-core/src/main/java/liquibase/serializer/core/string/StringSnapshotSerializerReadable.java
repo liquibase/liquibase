@@ -6,6 +6,8 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
+import liquibase.structure.CatalogLevelObject;
+import liquibase.structure.DatabaseLevelObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -68,8 +70,17 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     List<DatabaseObject> objects = new ArrayList<DatabaseObject>(snapshot.get(type));
                     ListIterator<DatabaseObject> iterator = objects.listIterator();
                     while (iterator.hasNext()) {
-                        Schema objectSchema = iterator.next().getSchema();
-                        if (objectSchema == null || !objectSchema.equals(schema)) {
+                        DatabaseObject next = iterator.next();
+                        if (next instanceof DatabaseLevelObject) {
+                            continue;
+                        }
+
+                        Schema objectSchema = next.getSchema();
+                        if (objectSchema == null) {
+                            if (!(next instanceof CatalogLevelObject) || !((CatalogLevelObject) next).getCatalog().equals(schema.getCatalog())) {
+                                iterator.remove();
+                            }
+                        } else if (!objectSchema.equals(schema)) {
                             iterator.remove();
                         }
                     }

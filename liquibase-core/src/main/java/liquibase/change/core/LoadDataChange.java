@@ -3,12 +3,16 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.InsertSetStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -162,7 +166,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
             }
 
-            List<SqlStatement> statements = new ArrayList<SqlStatement>();
+            InsertSetStatement statements = this.createStatementSet(getCatalogName(), getSchemaName(), getTableName());
             String[] line;
             int lineNumber = 0;
 
@@ -222,10 +226,15 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                     insertStatement.addColumnValue(columnName, value);
                 }
-                statements.add(insertStatement);
+                statements.addInsertStatement(insertStatement);
             }
 
-            return statements.toArray(new SqlStatement[statements.size()]);
+            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+                // we only return a single "statement" - it's capable of emitting multiple sub-statements, should the need arise, on generation.
+                return new SqlStatement[]{statements};
+            } else {
+                return statements.getStatementsArray();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
@@ -285,6 +294,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     protected InsertStatement createStatement(String catalogName, String schemaName, String tableName){
         return new InsertStatement(catalogName, schemaName,tableName);
+    }
+
+    protected InsertSetStatement createStatementSet(String catalogName, String schemaName, String tableName){
+        return new InsertSetStatement(catalogName, schemaName,tableName);
     }
 
     protected ColumnConfig getColumnConfig(int index, String header) {

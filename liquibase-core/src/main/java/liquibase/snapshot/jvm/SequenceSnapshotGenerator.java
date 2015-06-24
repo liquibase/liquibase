@@ -144,7 +144,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 //                    "  sch.SCHEMAID = seq.SCHEMAID";
 //        } else if (database instanceof FirebirdDatabase) {
 //            return "SELECT RDB$GENERATOR_NAME AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";
-//        } else if (database instanceof H2DatabaseTemp) {
+//        } else if (database instanceof H2Database) {
 //            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "' AND IS_GENERATED=FALSE";
 //        } else if (database instanceof HsqlDatabase) {
 //            return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() + "'";
@@ -156,11 +156,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 //            return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
 //                    "WHERE relkind='S' " +
 //                    "AND pg_class.relnamespace = pg_namespace.oid " +
-//                    "AND nspname = '" + schema.getName() + "' " +
-//                    "AND 'nextval(''" + schema.getName() + "." + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
-//                    "AND 'nextval(''" + schema.getName() + "." + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
-//                    "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)" +
-//                    "AND 'nextval(''\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)";
+//                    "AND nspname = '" + schema.getName() + "'";
 //        } else if (database instanceof MSSQLDatabase) {
 //            return "SELECT SEQUENCE_NAME, " +
 //                    "cast(START_VALUE AS BIGINT) AS START_VALUE, " +

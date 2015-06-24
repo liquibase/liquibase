@@ -1,4 +1,4 @@
-!!! update project.version in liquibase-core/pom.xml !!!
+!!! update project.version in liquibase-core/pom.xml to the new version without snapshot!!!
 release version in jira
 update changelog.txt
 

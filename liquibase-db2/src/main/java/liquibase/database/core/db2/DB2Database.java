@@ -20,12 +20,14 @@ import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
+    private Boolean isZOS;
+
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
     }
-    
+
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2");
@@ -161,7 +163,6 @@ public class DB2Database extends AbstractJdbcDatabase {
     }
 
 
-
     @Override
     public boolean supportsTablespaces() {
         return true;
@@ -235,6 +236,21 @@ public class DB2Database extends AbstractJdbcDatabase {
     @Override
     public boolean jdbcCallsCatalogsSchemas() {
         return true;
+    }
+
+    public boolean isZOS() {
+        if (this.isZOS == null) {
+            if (getConnection() != null && getConnection() instanceof JdbcConnection) {
+                try {
+                    this.isZOS = getConnection().getDatabaseProductName().toLowerCase().contains("zos");
+                } catch (DatabaseException e) {
+                    this.isZOS = false;
+                }
+            } else {
+                this.isZOS = false;
+            }
+        }
+        return this.isZOS;
     }
 
     @Override

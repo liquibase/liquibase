@@ -221,46 +221,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
 
-//todo: action refactoring        if (database instanceof OracleDatabase) {
-//            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
+//        if (database instanceof OracleDatabase) {
+//            String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
 //            dataType = dataType.replace("VARCHAR2", "VARCHAR");
 //            dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
-//
-//            DataType type = new DataType(dataType);
-////            type.setDataTypeId(dataType);
-//            if (dataType.equalsIgnoreCase("NUMBER")) {
-//                type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
-////                if (type.getColumnSize() == null) {
-////                    type.setColumnSize(38);
-////                }
-//                type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
-////                if (type.getDecimalDigits() == null) {
-////                    type.setDecimalDigits(0);
-////                }
-////            type.setRadix(10);
-//            } else {
-//                type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
-//
-//        if (dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
-//            type.setColumnSize(null);
-//        } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
-//            type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
-//            type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
-//        } else {
-//            String charUsed = columnMetadataResultSet.getString("CHAR_USED");
-//            DataType.ColumnSizeUnit unit = null;
-//            if ("C".equals(charUsed)) {
-//                unit = DataType.ColumnSizeUnit.CHAR;
-//                type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
-//            }
-//            type.setColumnSizeUnit(unit);
-//        }
-        //                }
-//            }
-//
-//
-//            return type;
-//        }
 
 //            return type;
 //        }

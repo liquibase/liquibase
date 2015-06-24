@@ -178,7 +178,7 @@ public class SqlUtil {
             return new DatabaseFunction(stringVal);
         } else if (typeId == Types.LONGVARCHAR) {
             return stringVal;
-        } else if (liquibaseDataType instanceof NCharType || typeId == Types.NCHAR) {
+        } else if (liquibaseDataType instanceof NCharType || typeId == Types.NCHAR || liquibaseDataType.getName().equalsIgnoreCase("NCLOB")) {
             return stringVal;
         } else if (typeId == Types.NCLOB) {
             return stringVal;

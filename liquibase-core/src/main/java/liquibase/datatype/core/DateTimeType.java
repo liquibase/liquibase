@@ -16,12 +16,12 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-//        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-//        boolean allowFractional = supportsFractionalDigits(database);
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        boolean allowFractional = supportsFractionalDigits(database);
 //        if (database instanceof DB2Database
 //                || database instanceof DerbyDatabase
 //                || database instanceof FirebirdDatabase
-////                || database instanceof H2Database
+//                || database instanceof H2Database
 //                || database instanceof HsqlDatabase) {
 //            return new DatabaseDataType("TIMESTAMP");
 //        }
@@ -50,7 +50,7 @@ public class DateTimeType extends LiquibaseDataType {
 //                if (parameters.length == 0) {
 //                    parameters = new Object[] { 7 };
 //                } else if (parameters.length > 1) {
-//                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+//                    parameters = new Object[] {parameters[1]};
 //                }
 //                return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
 //            }
@@ -119,7 +119,7 @@ public class DateTimeType extends LiquibaseDataType {
 //            Object[] params = getParameters();
 //            Integer precision = Integer.valueOf(params[0].toString());
 //            if (precision > 6) {
-//                LoggerFactory.getLogger(getClass()).warn(
+//                LogFactory.getInstance().getLog().warning(
 //                        "MySQL does not support a timestamp precision"
 //                                + " of '" + precision + "' - resetting to"
 //                                + " the maximum of '6'");
@@ -131,40 +131,14 @@ public class DateTimeType extends LiquibaseDataType {
         return new DatabaseDataType(getName());
     }
 
-//    protected boolean supportsFractionalDigits(Database database) {
-//        if (database.getConnection() == null) {
-//            // if no connection is there we cannot do anything...
-//            LoggerFactory.getLogger(getClass()).warn(
-//                    "No database connection available - specified"
-//                            + " DATETIME/TIMESTAMP precision will be tried");
-//            return true;
-//        }
-//
-//        try {
-//            String minimumVersion = "0";
-//            int major = database.getDatabaseMajorVersion();
-//            int minor = database.getDatabaseMinorVersion();
-//            int patch = 0;
-//
-//            if (MySQLDatabase.class.isInstance(database)) {
-//                patch = ((MySQLDatabase) database).getDatabasePatchVersion();
-//
-//                // MySQL 5.6.4 introduced fractional support...
-//                minimumVersion = "5.6.4";
-//            } else if (PostgresDatabase.class.isInstance(database)) {
-//                // PostgreSQL 7.2 introduced fractional support...
-//                minimumVersion = "7.2";
-//            }
-//
-//            return isMinimumVersion(minimumVersion, major, minor, patch);
-//        } catch (DatabaseException x) {
-//            LoggerFactory.getLogger(getClass()).warn(
-//                    "Unable to determine exact database server version"
-//                            + " - specified TIMESTAMP precision"
-//                            + " will not be set: ", x);
-//            return false;
-//        }
-//    }
+    protected boolean supportsFractionalDigits(Database database) {
+        if (database.getConnection() == null) {
+            // if no connection is there we cannot do anything...
+            LogFactory.getInstance().getLog().warning(
+                    "No database connection available - specified"
+                            + " DATETIME/TIMESTAMP precision will be tried");
+            return true;
+        }
 
     protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
         String[] parts = minimumVersion.split("\\.", 3);
