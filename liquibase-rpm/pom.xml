@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-rpm</artifactId>
-    <version>3.4.0</version>
+    <version>3.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <url>http://www.liquibase.org/</url>
 
