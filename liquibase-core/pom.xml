@@ -16,7 +16,7 @@
 
     <properties>
         <bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.4.0-SNAPSHOT</project.version>
+        <project.version>3.4.0</project.version>
     </properties>
 
     <dependencies>
