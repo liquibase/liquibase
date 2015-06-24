@@ -1318,17 +1318,21 @@ public class Liquibase {
 
         return changeSet.generateCheckSum();
     }
+    
+    private String getDefaultEncoding() {
+        return System.getProperty("file.encoding", "UTF-8");
+    };
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
         // call without context
-        generateDocumentation(outputDirectory, new Contexts(), new LabelExpression());
+        generateDocumentation(outputDirectory, null, new Contexts(), new LabelExpression());
     }
 
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
-        generateDocumentation(outputDirectory, new Contexts(contexts), new LabelExpression());
+        generateDocumentation(outputDirectory, null, new Contexts(contexts), new LabelExpression());
     }
 
-    public void generateDocumentation(String outputDirectory, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+    public void generateDocumentation(String outputDirectory, String outputFileEncoding, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         log.info("Generating Database Documentation");
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -1347,7 +1351,10 @@ public class Liquibase {
             DBDocVisitor visitor = new DBDocVisitor(database);
             logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
-            visitor.writeHTML(new File(outputDirectory), resourceAccessor);
+            if (outputFileEncoding == null) {
+                outputFileEncoding = getDefaultEncoding();
+            }
+            visitor.writeHTML(new File(outputDirectory), outputFileEncoding, resourceAccessor);
         } catch (IOException e) {
             throw new LiquibaseException(e);
         } finally {

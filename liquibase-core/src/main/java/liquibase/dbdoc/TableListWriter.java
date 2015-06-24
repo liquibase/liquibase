@@ -4,8 +4,8 @@ import java.io.File;
 
 public class TableListWriter extends HTMLListWriter {
 
-    public TableListWriter(File outputDir) {
-        super("Current Tables", "currenttables.html", "tables", outputDir);
+    public TableListWriter(File outputDir, String outputFileEncoding) {
+        super("Current Tables", "currenttables.html", "tables", outputDir, outputFileEncoding);
     }
 
 

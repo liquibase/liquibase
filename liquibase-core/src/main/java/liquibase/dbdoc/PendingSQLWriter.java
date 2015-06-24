@@ -14,16 +14,16 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 public class PendingSQLWriter extends HTMLWriter {
 
     private DatabaseChangeLog databaseChangeLog;
 
-    public PendingSQLWriter(File rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
-        super(new File(rootOutputDir, "pending"), database);
+    public PendingSQLWriter(File rootOutputDir, String outputFileEncoding, Database database, DatabaseChangeLog databaseChangeLog) {
+        super(new File(rootOutputDir, "pending"), outputFileEncoding, database);
         this.databaseChangeLog = databaseChangeLog;
     }
 
@@ -33,7 +33,7 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeBody(Writer fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
 
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
@@ -69,6 +69,6 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

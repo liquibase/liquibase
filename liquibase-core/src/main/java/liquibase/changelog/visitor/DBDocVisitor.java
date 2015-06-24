@@ -118,14 +118,14 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, LiquibaseException, DatabaseHistoryException {
-        ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
-        HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
-        HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
-        HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);
-        HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputDir, database);
-        HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, database);
-        HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, database, rootChangeLog);
+    public void writeHTML(File rootOutputDir, String outputFileEncoding, ResourceAccessor resourceAccessor) throws IOException, LiquibaseException, DatabaseHistoryException {
+        ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir, outputFileEncoding);
+        HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, outputFileEncoding, database);
+        HTMLWriter tableWriter = new TableWriter(rootOutputDir, outputFileEncoding, database);
+        HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, outputFileEncoding, database);
+        HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputDir, outputFileEncoding, database);
+        HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, outputFileEncoding, database);
+        HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, outputFileEncoding, database, rootChangeLog);
 
         copyFile("liquibase/dbdoc/stylesheet.css", rootOutputDir);
         copyFile("liquibase/dbdoc/index.html", rootOutputDir);
@@ -134,9 +134,9 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
-        new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
-        new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));
-        new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
+        new ChangeLogListWriter(rootOutputDir, outputFileEncoding).writeHTML(changeLogs);
+        new TableListWriter(rootOutputDir, outputFileEncoding).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));
+        new AuthorListWriter(rootOutputDir, outputFileEncoding).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
             authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);

@@ -1,5 +1,7 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
@@ -22,7 +24,7 @@ public class LiquibaseDBDocMojo extends AbstractLiquibaseChangeLogMojo {
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException
     {
-        liquibase.generateDocumentation(outputDirectory);
+        liquibase.generateDocumentation(outputDirectory, outputFileEncoding, new Contexts(contexts), new LabelExpression());
     }
 
 

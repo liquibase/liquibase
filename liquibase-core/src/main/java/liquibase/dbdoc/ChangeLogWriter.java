@@ -8,10 +8,12 @@ import java.io.*;
 public class ChangeLogWriter {
     protected File outputDir;
     private ResourceAccessor resourceAccessor;
+    private String outputFileEncoding;
 
-    public ChangeLogWriter(ResourceAccessor resourceAccessor, File rootOutputDir) {
+    public ChangeLogWriter(ResourceAccessor resourceAccessor, File rootOutputDir, String outputFileEncoding) {
         this.outputDir = new File(rootOutputDir, "changelogs");
         this.resourceAccessor = resourceAccessor;
+        this.outputFileEncoding = outputFileEncoding;
     }
 
     public void writeChangeLog(String changeLog, String physicalFilePath) throws IOException {
@@ -35,9 +37,13 @@ public class ChangeLogWriter {
         File xmlFile = new File(outputDir, changeLogOutFile + ".html");
         xmlFile.getParentFile().mkdirs();
 
-        BufferedWriter changeLogStream = new BufferedWriter(new FileWriter(xmlFile, false));
+        Writer changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile), outputFileEncoding));
         try {
-            changeLogStream.write("<html><body><pre>\n");
+            changeLogStream.write("<html>\n");
+            changeLogStream.append("<head>");
+            changeLogStream.append("<META http-equiv=\"Content-Type\" content=\"text/html; charset=").append(outputFileEncoding).append("\">");
+            changeLogStream.append("</head>\n");
+            changeLogStream.append("<body><pre>\n");
             changeLogStream.write(StreamUtil.getStreamContents(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));
             changeLogStream.write("\n</pre></body></html>");
         } finally {

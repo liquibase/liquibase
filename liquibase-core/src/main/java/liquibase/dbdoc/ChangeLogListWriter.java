@@ -4,8 +4,8 @@ import java.io.File;
 
 public class ChangeLogListWriter extends HTMLListWriter {
 
-    public ChangeLogListWriter(File outputDir) {
-        super("All Change Logs", "changelogs.html", "changelogs", outputDir);
+    public ChangeLogListWriter(File outputDir, String outputFileEncoding) {
+        super("All Change Logs", "changelogs.html", "changelogs", outputDir, outputFileEncoding);
     }
 
     @Override

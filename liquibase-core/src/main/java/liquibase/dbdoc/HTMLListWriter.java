@@ -1,19 +1,22 @@
 package liquibase.dbdoc;
 
-import liquibase.util.StringUtils;
-
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.SortedSet;
+
+import liquibase.util.StringUtils;
 
 public class HTMLListWriter {
     private File outputDir;
     private String directory;
     private String filename;
     private String title;
+    private String outputFileEncoding;
 
-    public HTMLListWriter(String title, String filename, String subdir, File outputDir) {
+    public HTMLListWriter(String title, String filename, String subdir, File outputDir, String outputFileEncoding) {
         this.title = title;
         this.outputDir = outputDir;
         this.filename = filename;
@@ -21,15 +24,20 @@ public class HTMLListWriter {
             outputDir.mkdir();
         }
         this.directory = subdir;
+        this.outputFileEncoding = outputFileEncoding;
     }
 
     public void writeHTML(SortedSet objects) throws IOException {
-        FileWriter fileWriter = new FileWriter(new File(outputDir, filename));
+        Writer fileWriter = new OutputStreamWriter(new FileOutputStream(new File(outputDir, filename)), outputFileEncoding);
 
         try {
-            fileWriter.append("<HTML>\n" + "<HEAD>\n" + "<TITLE>\n");
+            fileWriter.append("<HTML>\n" + "<HEAD>\n");
+            fileWriter.append("<META http-equiv=\"Content-Type\" content=\"text/html; charset=").append(outputFileEncoding).append("\">");
+            fileWriter.append("<TITLE>\n");
             fileWriter.append(title);
-            fileWriter.append("\n" + "</TITLE>\n" + "<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"stylesheet.css\" TITLE=\"Style\">\n" + "</HEAD>\n" + "<BODY BGCOLOR=\"white\">\n" + "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n" + "<B>");
+            fileWriter.append("\n" + "</TITLE>\n" + "<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"stylesheet.css\" TITLE=\"Style\">\n");
+            fileWriter.append("</HEAD>\n");
+            fileWriter.append("<BODY BGCOLOR=\"white\">\n" + "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n" + "<B>");
             fileWriter.append(title);
             fileWriter.append("</B></FONT>\n" + "<BR>\n" + "<TABLE BORDER=\"0\" WIDTH=\"100%\" SUMMARY=\"\">" + "<TR>\n" + "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">");
 

@@ -6,14 +6,14 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 public class RecentChangesWriter extends HTMLWriter {
 
-    public RecentChangesWriter(File rootOutputDir, Database database) {
-        super(new File(rootOutputDir, "recent"), database);
+    public RecentChangesWriter(File rootOutputDir, String outputFileEncoding, Database database) {
+        super(new File(rootOutputDir, "recent"), outputFileEncoding, database);
     }
 
     @Override
@@ -22,12 +22,12 @@ public class RecentChangesWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeBody(Writer fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
         writeCustomHTML(fileWriter, object, ranChanges, database);
         writeChanges("Most Recent Changes", fileWriter, ranChanges);
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }
