@@ -43,7 +43,9 @@ public class ClobType extends LiquibaseDataType {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
             if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text")) {
-                return new DatabaseDataType(database.escapeDataTypeName("text"));
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("text"));
+                type.addAdditionalInformation(getAdditionalInformation());
+                return type;
             }
         }
 
