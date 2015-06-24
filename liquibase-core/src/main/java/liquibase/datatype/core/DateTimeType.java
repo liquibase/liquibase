@@ -55,7 +55,7 @@ public class DateTimeType extends LiquibaseDataType {
                 if (parameters.length == 0) {
                     parameters = new Object[] { 7 };
                 } else if (parameters.length > 1) {
-                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+                    parameters = new Object[] {parameters[1]};
                 }
                 return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
             }
