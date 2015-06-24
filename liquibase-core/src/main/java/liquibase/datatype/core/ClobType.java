@@ -1,5 +1,7 @@
 package liquibase.datatype.core;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -34,6 +36,11 @@ public class ClobType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        if (database instanceof MSSQLDatabase) {
+            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text")) {
+                return new DatabaseDataType("TEXT");
+            }
+        }
 
         if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB SUB_TYPE TEXT");
