@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.ChangeFactory
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -56,13 +56,13 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.columnName = testColumn.name
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
 
         when: "Objects exist but not auto-increment"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column is auto-increment"
         testColumn.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartWith, columnIncrementBy)
@@ -73,13 +73,13 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
         where:
         columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedResult
-        null | null | null | null | ChangeStatus.Status.complete
-        2    | 4    | null | null | ChangeStatus.Status.complete
-        2    | 4    | 2    | null | ChangeStatus.Status.complete
-        2    | 4    | null | 4    | ChangeStatus.Status.complete
-        2    | 4    | 2    | 4    | ChangeStatus.Status.complete
-        3    | 5    | 1    | 5    | ChangeStatus.Status.incorrect
-        3    | 5    | 3    | 2    | ChangeStatus.Status.incorrect
+        null | null | null | null | ActionStatus.Status.applied
+        2    | 4    | null | null | ActionStatus.Status.applied
+        2    | 4    | 2    | null | ActionStatus.Status.applied
+        2    | 4    | null | 4    | ActionStatus.Status.applied
+        2    | 4    | 2    | 4    | ActionStatus.Status.applied
+        3    | 5    | 1    | 5    | ActionStatus.Status.incorrect
+        3    | 5    | 3    | 2    | ActionStatus.Status.incorrect
 
     }
 }

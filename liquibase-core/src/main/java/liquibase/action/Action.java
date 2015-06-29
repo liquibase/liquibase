@@ -1,6 +1,7 @@
 package liquibase.action;
 
 import liquibase.ExtensibleObject;
+import liquibase.Scope;
 
 /**
  * Implementations of Action describe interactions to perform against the outside environment.
@@ -20,5 +21,10 @@ public interface Action extends ExtensibleObject {
      * Used for equals() testing as well as logging and testing.
      */
     String describe();
+
+    /**
+     * Check if this action has already been executed against the given scope. Return {@link liquibase.action.ActionStatus.Status#unknown} if it is impossible to test.
+     */
+    ActionStatus checkStatus(Scope scope);
 
 }

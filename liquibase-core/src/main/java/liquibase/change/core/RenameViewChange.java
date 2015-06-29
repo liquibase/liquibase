@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -70,23 +71,23 @@ public class RenameViewChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
-            ChangeStatus changeStatus = new ChangeStatus();
+            ActionStatus actionStatus = new ActionStatus();
             View newView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
             View oldView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
 
             if (newView == null && oldView == null) {
-                return changeStatus.unknown("Neither view exists");
+                return actionStatus.unknown("Neither view exists");
             }
             if (newView != null && oldView != null) {
-                return changeStatus.unknown("Both views exist");
+                return actionStatus.unknown("Both views exist");
             }
-            changeStatus.assertComplete(newView != null, "New view does not exist");
+            actionStatus.assertApplied(newView != null, "New view does not exist");
 
-            return changeStatus;
+            return actionStatus;
         } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
 
     }

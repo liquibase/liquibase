@@ -86,8 +86,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
-                setStartWith(columnSnapshot.autoIncrementInformation.getStartWith());
-                setIncrementBy(columnSnapshot.autoIncrementInformation.getIncrementBy());
+                setStartWith(columnSnapshot.autoIncrementInformation.startWith);
+                setIncrementBy(columnSnapshot.autoIncrementInformation.incrementBy);
             } else {
                 setAutoIncrement(false);
             }

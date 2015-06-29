@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -42,8 +42,8 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
 
         where:
         tagExists | expectedStatus
-        true  | ChangeStatus.Status.complete
-        false | ChangeStatus.Status.notApplied
+        true  | ActionStatus.Status.applied
+        false | ActionStatus.Status.notApplied
 
 
     }

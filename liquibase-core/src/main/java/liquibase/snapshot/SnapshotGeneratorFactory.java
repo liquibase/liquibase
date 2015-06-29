@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -148,6 +149,10 @@ public class SnapshotGeneratorFactory {
             return snapshot;
         }
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
+    }
+
+    public <T extends DatabaseObject> T createSnapshot(T example, Scope scope) throws DatabaseException, InvalidExampleException {
+        return createSnapshot(example, scope.getDatabase());
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database) throws DatabaseException, InvalidExampleException {

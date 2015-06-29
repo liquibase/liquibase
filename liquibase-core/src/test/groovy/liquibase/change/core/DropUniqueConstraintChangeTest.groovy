@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -38,22 +38,22 @@ public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
         change.uniqueColumns = testColumn.name
 
         then: "table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "Table exists but not column"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "Column is there without a constraint"
         table.getColumns().add(testColumn)
         snapshotFactory.addObjects(testColumn)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "Column is there with a constraint"
         snapshotFactory.addObjects(constraint)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
     }
 }

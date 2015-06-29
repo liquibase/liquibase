@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -70,23 +71,23 @@ public class RenameTableChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
-            ChangeStatus changeStatus = new ChangeStatus();
+            ActionStatus actionStatus = new ActionStatus();
             Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
             Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
 
             if (newTable == null && oldTable == null) {
-                return changeStatus.unknown("Neither table exists");
+                return actionStatus.unknown("Neither table exists");
             }
             if (newTable != null && oldTable != null) {
-                return changeStatus.unknown("Both tables exist");
+                return actionStatus.unknown("Both tables exist");
             }
-            changeStatus.assertComplete(newTable != null, "New table does not exist");
+            actionStatus.assertApplied(newTable != null, "New table does not exist");
 
-            return changeStatus;
+            return actionStatus;
         } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
 
     }

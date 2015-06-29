@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -37,18 +37,18 @@ public class AddPrimaryKeyChangeTest extends StandardChangeTest {
         change.columnNames = testColumn.name
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column exists but not primary key"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column is a primary"
         def pk = new PrimaryKey(null, null, null, table.name, new Column(testColumn.name))
         table.setPrimaryKey(pk)
         snapshotFactory.addObjects(pk)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 }

@@ -2,7 +2,7 @@ package liquibase.change.core
 
 import liquibase.change.AddColumnConfig
 import liquibase.change.Change
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.SetupException
@@ -83,29 +83,29 @@ public class AddColumnChangeTest extends StandardChangeTest {
         change.addColumn(testColumnConfig)
 
         then: "table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Table exists but not column"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column 1 is added"
         table.getColumns().add(testColumn)
         snapshotFactory.addObjects(testColumn)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "Change expects two columns"
         change.addColumn(testColumnConfig2)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+        assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "Column 2 is added"
         table.getColumns().add(testColumn2)
         snapshotFactory.addObjects(testColumn2)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 
     @Unroll
@@ -119,13 +119,13 @@ public class AddColumnChangeTest extends StandardChangeTest {
         snapshotFactory.addObjects(table)
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column is added"
         addColumnsToSnapshot(table, change, snapshotFactory)
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         where:
         change << changeSupplier
@@ -146,13 +146,13 @@ public class AddColumnChangeTest extends StandardChangeTest {
         snapshotFactory.addObjects(table)
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column is added"
         addColumnsToSnapshot(table, change, snapshotFactory)
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         where:
         change << changeSupplier
@@ -169,19 +169,19 @@ public class AddColumnChangeTest extends StandardChangeTest {
         SnapshotGeneratorFactory.instance = snapshotFactory
 
         then: "table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Table exists but not column"
         def table = new Table(((AddColumnChange) change).getCatalogName(), ((AddColumnChange) change).getSchemaName(), ((AddColumnChange) change).getTableName())
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column is added"
         addColumnsToSnapshot(table, change, snapshotFactory)
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         where:
         change << changeSupplier

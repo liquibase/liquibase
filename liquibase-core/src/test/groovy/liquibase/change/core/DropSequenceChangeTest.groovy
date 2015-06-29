@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -29,11 +29,11 @@ public class DropSequenceChangeTest extends StandardChangeTest {
         change.sequenceName = sequence.name
 
         then: "sequence is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "sequence is there"
         snapshotFactory.addObjects(sequence)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
     }
 }

@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -170,13 +171,13 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
 
             UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertComplete(snapshot != null, "Unique constraint does not exist");
+            result.assertApplied(snapshot != null, "Unique constraint does not exist");
 
             return result;
 

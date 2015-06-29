@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.parser.core.ParsedNode
@@ -29,7 +29,7 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         def change = new UpdateDataChange()
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check updateData status"
     }
 

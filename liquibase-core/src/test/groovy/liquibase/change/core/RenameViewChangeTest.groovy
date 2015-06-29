@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -33,21 +33,21 @@ public class RenameViewChangeTest extends StandardChangeTest {
         change.newViewName= newView.name
 
         then: "neither view is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "old view is there"
         snapshotFactory.addObjects(oldView)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "old and new views are there"
         snapshotFactory.addObjects(newView)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "just new view is there"
         snapshotFactory.removeObjects(oldView)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 }

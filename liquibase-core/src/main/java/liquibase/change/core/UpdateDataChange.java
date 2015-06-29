@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -104,8 +105,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check updateData status");
+    public ActionStatus checkStatus(Database database) {
+        return new ActionStatus().unknown("Cannot check updateData status");
     }
 
     @Override

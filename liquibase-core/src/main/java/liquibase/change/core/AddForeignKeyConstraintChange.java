@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -260,8 +261,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
             example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
@@ -269,7 +270,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             example.setPrimaryKeyColumns(Column.listFromNames(getReferencedColumnNames()));
 
             ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertComplete(snapshot != null, "Foreign key does not exist");
+            result.assertApplied(snapshot != null, "Foreign key does not exist");
 
             if (snapshot != null) {
                 if (getInitiallyDeferred() != null) {

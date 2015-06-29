@@ -1,7 +1,7 @@
 package liquibase.change.core
 
 import liquibase.change.AddColumnConfig
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -34,22 +34,22 @@ public class CreateIndexChangeTest extends StandardChangeTest {
         change.columns = [new AddColumnConfig().setName("test_col")]
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "index created"
         snapshotFactory.addObjects(index)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "we care about unique and they do not match"
         change.unique = false;
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+        assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "we care about unique and they match"
         change.unique = true;
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
     }
 }

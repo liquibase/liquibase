@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.SetupException
@@ -33,12 +33,12 @@ public class CreateViewChangeTest extends StandardChangeTest {
         change.viewName = view.name
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "view created"
         snapshotFactory.addObjects(view)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 
     def "load works with nested query"() {

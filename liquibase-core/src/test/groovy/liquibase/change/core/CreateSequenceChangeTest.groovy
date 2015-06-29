@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -43,7 +43,7 @@ public class CreateSequenceChangeTest extends StandardChangeTest {
         change.cycle = changeCycle
 
         then: "sequence does not exist yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "sequence exists"
         snapshotFactory.addObjects(sequence)
@@ -52,21 +52,21 @@ public class CreateSequenceChangeTest extends StandardChangeTest {
 
         where:
         changeIncrementBy | changeMaxValue | changeMinValue | changeOrdered | changeCacheSize | changeCycle | snapshotIncrementBy | snapshotMaxValue | snapshotMinValue | snapshotOrdered | snapshotCacheSize | snapshotCycle | expectedResult
-        null | null | null | null  | null | null  | null | null | null | null  | null | null  | ChangeStatus.Status.complete
-        2    | 4    | 6    | true  | 10   | true  | 2    | 4    | 6    | true  | 10   | true  | ChangeStatus.Status.complete
-        2    | null | null | null  | null | null  | 2    | null | null | null  | null | null  | ChangeStatus.Status.complete
-        null | 4    | null | null  | null | null  | null | 4    | null | null  | null  | null | ChangeStatus.Status.complete
-        null | null | 6    | null  | null | null  | null | null | 6    | null  | null | null  | ChangeStatus.Status.complete
-        null | null | null | true  | null | null  | null | null | null | true  | null | null  | ChangeStatus.Status.complete
-        null | null | null | false | null | null  | null | null | null | false | null | null  | ChangeStatus.Status.complete
-        null | null | null | null  | 10   | null  | null | null | null | null  | 10   | null  | ChangeStatus.Status.complete
-        null | null | null | null  | null | true  | null | null | null | null  | null | true  | ChangeStatus.Status.complete
-        null | null | null | null  | null | false | null | null | null | null  | null | false | ChangeStatus.Status.complete
-        2    | null | null | null  | null | null  | 3    | null | null | null  | null | null  | ChangeStatus.Status.incorrect
-        null | 4    | null | null  | null | null  | null | 5    | null | null  | null | null  | ChangeStatus.Status.incorrect
-        null | null | 6    | null  | null | null  | 7    | null | null | null  | null | null  | ChangeStatus.Status.incorrect
-        null | null | null | true  | null | null  | null | null | null | false | null | null  | ChangeStatus.Status.incorrect
-        null | null | null | null  | 10   | null  | null | null | null | null  | 11   | null  | ChangeStatus.Status.incorrect
-        null | null | null | null  | null | true  | null | null | null | null  | null | false | ChangeStatus.Status.incorrect
+        null | null | null | null  | null | null  | null | null | null | null  | null | null  | ActionStatus.Status.applied
+        2    | 4    | 6    | true  | 10   | true  | 2    | 4    | 6    | true  | 10   | true  | ActionStatus.Status.applied
+        2    | null | null | null  | null | null  | 2    | null | null | null  | null | null  | ActionStatus.Status.applied
+        null | 4    | null | null  | null | null  | null | 4    | null | null  | null  | null | ActionStatus.Status.applied
+        null | null | 6    | null  | null | null  | null | null | 6    | null  | null | null  | ActionStatus.Status.applied
+        null | null | null | true  | null | null  | null | null | null | true  | null | null  | ActionStatus.Status.applied
+        null | null | null | false | null | null  | null | null | null | false | null | null  | ActionStatus.Status.applied
+        null | null | null | null  | 10   | null  | null | null | null | null  | 10   | null  | ActionStatus.Status.applied
+        null | null | null | null  | null | true  | null | null | null | null  | null | true  | ActionStatus.Status.applied
+        null | null | null | null  | null | false | null | null | null | null  | null | false | ActionStatus.Status.applied
+        2    | null | null | null  | null | null  | 3    | null | null | null  | null | null  | ActionStatus.Status.incorrect
+        null | 4    | null | null  | null | null  | null | 5    | null | null  | null | null  | ActionStatus.Status.incorrect
+        null | null | 6    | null  | null | null  | 7    | null | null | null  | null | null  | ActionStatus.Status.incorrect
+        null | null | null | true  | null | null  | null | null | null | false | null | null  | ActionStatus.Status.incorrect
+        null | null | null | null  | 10   | null  | null | null | null | null  | 11   | null  | ActionStatus.Status.incorrect
+        null | null | null | null  | null | true  | null | null | null | null  | null | false | ActionStatus.Status.incorrect
     }
 }

@@ -5,19 +5,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 /**
@@ -189,12 +187,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             for (AddColumnConfig column : getColumns()) {
                 Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), column.getName())), database);
-                result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
+                result.assertApplied(snapshot != null, "Column " + column.getName() + " does not exist");
 
 //                if (snapshot != null) {
 //                    PrimaryKey snapshotPK = ((Table) snapshot.relation).primaryKey;

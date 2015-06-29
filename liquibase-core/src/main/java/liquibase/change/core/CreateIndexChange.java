@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -121,8 +122,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
             if (getColumns() != null) {
@@ -132,7 +133,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             }
 
             Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertComplete(snapshot != null, "Index does not exist");
+            result.assertApplied(snapshot != null, "Index does not exist");
 
             if (snapshot != null) {
                 if (isUnique() != null) {

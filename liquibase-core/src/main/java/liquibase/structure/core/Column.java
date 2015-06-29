@@ -1,11 +1,13 @@
 package liquibase.structure.core;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
@@ -14,6 +16,7 @@ import liquibase.util.StringUtils;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class Column extends AbstractDatabaseObject {
 
@@ -186,7 +189,7 @@ public class Column extends AbstractDatabaseObject {
         ParsedNode autoIncrementInformation = parsedNode.getChild(null, "autoIncrementInformation");
         if (autoIncrementInformation != null) {
             AutoIncrementInformation info = new AutoIncrementInformation();
-            info.load(autoIncrementInformation, resourceAccessor);
+//            info.load(autoIncrementInformation, resourceAccessor);
 //            setAutoIncrementInformation(info);
         }
 
@@ -204,25 +207,16 @@ public class Column extends AbstractDatabaseObject {
         return name.asList(4).get(3);
     }
 
-    public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
-        private BigInteger startWith;
-        private BigInteger incrementBy;
+    public static class AutoIncrementInformation extends AbstractExtensibleObject implements LiquibaseSerializable {
+        public BigInteger startWith;
+        public BigInteger incrementBy;
 
         public AutoIncrementInformation() {
-            this(1, 1);
         }
 
         public AutoIncrementInformation(Number startWith, Number incrementBy) {
             this.startWith = startWith == null ? null : BigInteger.valueOf(startWith.longValue());
             this.incrementBy = incrementBy == null ? null : BigInteger.valueOf(incrementBy.longValue());
-        }
-
-        public BigInteger getStartWith() {
-            return startWith;
-        }
-
-        public BigInteger getIncrementBy() {
-            return incrementBy;
         }
 
         @Override
@@ -242,8 +236,33 @@ public class Column extends AbstractDatabaseObject {
 
         @Override
         public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-            this.startWith = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "startWith"));
-            this.incrementBy = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "incrementBy"));
+//            this.startWith = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "startWith"));
+//            this.incrementBy = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "incrementBy"));
+        }
+
+        @Override
+        public Set<String> getSerializableFields() {
+            return null;
+        }
+
+        @Override
+        public Object getSerializableFieldValue(String field) {
+            return null;
+        }
+
+        @Override
+        public SerializationType getSerializableFieldType(String field) {
+            return null;
+        }
+
+        @Override
+        public String getSerializableFieldNamespace(String field) {
+            return null;
+        }
+
+        @Override
+        public ParsedNode serialize() throws ParsedNodeException {
+            return null;
         }
     }
 }

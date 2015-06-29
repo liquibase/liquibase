@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -121,8 +122,8 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName())), database);
             if (sequence == null) {

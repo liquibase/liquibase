@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -33,21 +33,21 @@ public class RenameTableChangeTest extends StandardChangeTest {
         change.newTableName= newTable.name
 
         then: "neither table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "old table is there"
         snapshotFactory.addObjects(oldTable)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "old and new tables are there"
         snapshotFactory.addObjects(newTable)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "just new table is there"
         snapshotFactory.removeObjects(oldTable)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 }

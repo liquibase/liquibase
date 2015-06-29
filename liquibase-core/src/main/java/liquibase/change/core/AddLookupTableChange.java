@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -168,8 +169,8 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
             Column newColumnExample = new Column(new ObjectName(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName()));
@@ -179,9 +180,9 @@ public class AddLookupTableChange extends AbstractChange {
             foreignKeyExample.setForeignKeyColumns(Column.listFromNames(getExistingColumnName()));
             foreignKeyExample.setPrimaryKeyColumns(Column.listFromNames(getNewColumnName()));
 
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
-            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
+            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
+            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
+            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
 
             return result;
 

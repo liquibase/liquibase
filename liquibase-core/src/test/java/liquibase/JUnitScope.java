@@ -4,15 +4,18 @@ import liquibase.database.ConnectionSupplier;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.util.SmartMap;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Singleton root scope for JUnit tests. Use this for all Scope objects in tests to avoid re-initialization of singletons. If you want fresh Singletons for a test, use {@link JUnitEmptyScope}.
  */
 public class JUnitScope extends Scope {
 
-    private static Scope instance;
+    private static JUnitScope instance;
+    private SmartMap singletons = new SmartMap();
 
     public enum Attr {
         connectionSupplier,
@@ -28,7 +31,11 @@ public class JUnitScope extends Scope {
         super(new JUnitResourceAccessor(), new HashMap<String, Object>());
     }
 
-    public static Scope getInstance() {
+    private JUnitScope(Scope parent, Map<String, Object> scopeValues) {
+        super(parent, scopeValues);
+    }
+
+    public static JUnitScope getInstance() {
         if (instance == null) {
             try {
                 instance = new JUnitScope();
@@ -47,5 +54,27 @@ public class JUnitScope extends Scope {
         return getInstance()
                 .child(Scope.Attr.database, supplier.getDatabase())
                 .child(Attr.connectionSupplier, supplier);
+    }
+
+    @Override
+    public Scope child(Map<String, Object> scopeValues) {
+        return new JUnitScope(this, scopeValues);
+    }
+
+    public <T> JUnitScope overrideSingleton(Class<T> type, T singleton) {
+        JUnitScope childScope = (JUnitScope) child(new HashMap<String, Object>());
+        childScope.singletons.put(type.getName(), singleton);
+
+        return childScope;
+    }
+
+    @Override
+    public <T> T getSingleton(Class<T> type) {
+        T singleton = this.singletons.get(type.getName(), type);
+        if (singleton == null) {
+            return super.getSingleton(type);
+        } else {
+            return singleton;
+        }
     }
 }

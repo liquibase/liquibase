@@ -1,20 +1,17 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -120,11 +117,11 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName())), database), "Column exists");
+            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName())), database), "Column exists");
         } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
 
     }

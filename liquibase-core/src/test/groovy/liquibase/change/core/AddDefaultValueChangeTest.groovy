@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.StandardChangeTest;
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -44,12 +44,12 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         change."$methodName" = changeDefaultValue
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "Objects exist no default value"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column has a default value"
         testColumn.defaultValue = snapshotDefaultValue
@@ -58,21 +58,21 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
 
         where:
         snapshotDefaultValue | changeDefaultValue | methodName | expectedResult
-        "car"                                                                                  | "car"                                     | "defaultValue"             | ChangeStatus.Status.complete
-        "car"                                                                                  | "boat"                                    | "defaultValue"             | ChangeStatus.Status.incorrect
-        2                                                                                      | 2                                         | "defaultValueNumeric"      | ChangeStatus.Status.complete
-        2.1                                                                                    | 2.1                                       | "defaultValueNumeric"      | ChangeStatus.Status.complete
-        2.1                                                                                    | 8                                         | "defaultValueNumeric"      | ChangeStatus.Status.incorrect
-        new java.sql.Date(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime())      | "1970-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.complete
-        new java.sql.Date(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime())      | "1870-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.incorrect
-        new java.sql.Timestamp(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime()) | "1970-02-13T21:24:58.913"                 | "defaultValueDate"         | ChangeStatus.Status.complete
-        true                                                                                   | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.complete
-        true                                                                                   | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
-        false                                                                                  | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.complete
-        false                                                                                  | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
-        new DatabaseFunction("now()")                                                          | new DatabaseFunction("now()")             | "defaultValueComputed"     | ChangeStatus.Status.complete
-        new DatabaseFunction("now()")                                                          | new DatabaseFunction("later()")           | "defaultValueComputed"     | ChangeStatus.Status.incorrect
-        new SequenceNextValueFunction("seq_test")                                              | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.complete
-        new SequenceNextValueFunction("seq_other")                                             | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.incorrect
+        "car"                                                                                  | "car"                                     | "defaultValue"             | ActionStatus.Status.applied
+        "car"                                                                                  | "boat"                                    | "defaultValue"             | ActionStatus.Status.incorrect
+        2                                                                                      | 2                                         | "defaultValueNumeric"      | ActionStatus.Status.applied
+        2.1                                                                                    | 2.1                                       | "defaultValueNumeric"      | ActionStatus.Status.applied
+        2.1                                                                                    | 8                                         | "defaultValueNumeric"      | ActionStatus.Status.incorrect
+        new java.sql.Date(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime())      | "1970-02-13"                              | "defaultValueDate"         | ActionStatus.Status.applied
+        new java.sql.Date(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime())      | "1870-02-13"                              | "defaultValueDate"         | ActionStatus.Status.incorrect
+        new java.sql.Timestamp(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime()) | "1970-02-13T21:24:58.913"                 | "defaultValueDate"         | ActionStatus.Status.applied
+        true                                                                                   | true                                      | "defaultValueBoolean"      | ActionStatus.Status.applied
+        true                                                                                   | false                                     | "defaultValueBoolean"      | ActionStatus.Status.incorrect
+        false                                                                                  | false                                     | "defaultValueBoolean"      | ActionStatus.Status.applied
+        false                                                                                  | true                                      | "defaultValueBoolean"      | ActionStatus.Status.incorrect
+        new DatabaseFunction("now()")                                                          | new DatabaseFunction("now()")             | "defaultValueComputed"     | ActionStatus.Status.applied
+        new DatabaseFunction("now()")                                                          | new DatabaseFunction("later()")           | "defaultValueComputed"     | ActionStatus.Status.incorrect
+        new SequenceNextValueFunction("seq_test")                                              | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ActionStatus.Status.applied
+        new SequenceNextValueFunction("seq_other")                                             | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ActionStatus.Status.incorrect
     }
 }

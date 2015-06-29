@@ -1,7 +1,7 @@
 package liquibase.change.core
 
 import liquibase.change.Change
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
@@ -85,7 +85,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
         def change = new RawSQLChange()
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check raw sql status"
     }
 

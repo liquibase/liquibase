@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -141,12 +142,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
             Table example = (Table) new Table(new ObjectName(getCatalogName(), getSchemaName(), getTableName()));
-            ChangeStatus status = new ChangeStatus();
+            ActionStatus status = new ActionStatus();
             Table tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            status.assertComplete(tableSnapshot != null, "Table does not exist");
+            status.assertApplied(tableSnapshot != null, "Table does not exist");
 
             if (tableSnapshot != null) {
                 for (ColumnConfig columnConfig : getColumns()) {
@@ -175,7 +176,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             return status;
         } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
     }
 

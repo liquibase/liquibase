@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -53,12 +53,12 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         }
 
         then: "no table yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Objects exist no FK"
         snapshotFactory.addObjects(baseTable, refTable)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "FK exists"
         def fk = new ForeignKey(null, null, null, baseTable.name, new Column(baseColumn.name)).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(new Column(refColumn.name))
@@ -75,13 +75,13 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
 
         where:
         snapshotRefTable | snapshotRefColumn | changeDeferrable | changeInitiallyDeferred | snapshotDeferrable | snapshotInitiallyDeferred | expectedResult
-        "ref_table"  | "ref_col"  | null | null | null | null | ChangeStatus.Status.complete
-        "ref_table2" | "ref_col"  | null | null | null | null | ChangeStatus.Status.notApplied
-        "ref_table"  | "ref_col2" | null | null | null | null | ChangeStatus.Status.notApplied
-        "ref_table"  | "ref_col"  | true | true | true | true | ChangeStatus.Status.complete
-        "ref_table"  | "ref_col"  | null | null | null | true | ChangeStatus.Status.complete
-        "ref_table"  | "ref_col"  | null | null | true | null | ChangeStatus.Status.complete
-        "ref_table"  | "ref_col"  | true | null | null | null | ChangeStatus.Status.incorrect
-        "ref_table"  | "ref_col"  | null | true | null | null | ChangeStatus.Status.incorrect
+        "ref_table"  | "ref_col"  | null | null | null | null | ActionStatus.Status.applied
+        "ref_table2" | "ref_col"  | null | null | null | null | ActionStatus.Status.notApplied
+        "ref_table"  | "ref_col2" | null | null | null | null | ActionStatus.Status.notApplied
+        "ref_table"  | "ref_col"  | true | true | true | true | ActionStatus.Status.applied
+        "ref_table"  | "ref_col"  | null | null | null | true | ActionStatus.Status.applied
+        "ref_table"  | "ref_col"  | null | null | true | null | ActionStatus.Status.applied
+        "ref_table"  | "ref_col"  | true | null | null | null | ActionStatus.Status.incorrect
+        "ref_table"  | "ref_col"  | null | true | null | null | ActionStatus.Status.incorrect
     }
 }

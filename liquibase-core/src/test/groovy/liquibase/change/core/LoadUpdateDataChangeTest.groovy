@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.change.StandardChangeTest;
@@ -72,7 +72,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         def change = new LoadUpdateDataChange()
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check loadUpdateData status"
     }
 }

@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -39,29 +39,29 @@ public class RenameColumnChangeTest extends StandardChangeTest {
         change.newColumnName = testColumnNew.name
 
         then: "neither table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "table exists but not old or new column"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "old column is there"
         table.getColumns().add(testColumnOld)
         snapshotFactory.addObjects(testColumnOld)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "old and new columns are there"
         table.getColumns().add(testColumnNew)
         snapshotFactory.addObjects(testColumnNew)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "just new column is there"
         table.getColumns().remove(testColumnOld)
         snapshotFactory.removeObjects(testColumnOld)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 }

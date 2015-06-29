@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -131,11 +132,11 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName())), database);
-            result.assertComplete(sequence != null, "Sequence " + getSequenceName() + " does not exist");
+            result.assertApplied(sequence != null, "Sequence " + getSequenceName() + " does not exist");
             if (sequence != null) {
                 if (getIncrementBy() != null) {
                     result.assertCorrect(getIncrementBy().equals(sequence.getIncrementBy()), "Increment by has a different value");

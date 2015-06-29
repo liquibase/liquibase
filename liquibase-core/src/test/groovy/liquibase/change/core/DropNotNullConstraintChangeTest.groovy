@@ -1,7 +1,7 @@
 package liquibase.change.core
 
 import liquibase.change.AddColumnConfig
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -39,27 +39,27 @@ public class DropNotNullConstraintChangeTest extends StandardChangeTest {
         change.columnName = testColumn.name
 
         then: "table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "Table exists but not column"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
 
         when: "Column is there with a not null constraint"
         table.getColumns().add(testColumn)
         snapshotFactory.addObjects(testColumn)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "Column is there without a not null constraint"
         testColumn.nullable = true
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "Column is there with an unknown (null) null constraint"
         testColumn.nullable = null
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 }

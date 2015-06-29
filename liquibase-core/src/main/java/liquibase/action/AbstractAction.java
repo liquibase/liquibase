@@ -1,6 +1,7 @@
 package liquibase.action;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
@@ -20,6 +21,14 @@ public abstract class AbstractAction extends AbstractExtensibleObject implements
         name = name.replaceFirst("Action$", "");
         name = StringUtils.lowerCaseFirst(name);
         return name+"("+ StringUtils.join(this, ", ", new StringUtils.DefaultFormatter())+")";
+    }
+
+    /**
+     * Default implementation of {@link Action#checkStatus(Scope)} returns an {@link liquibase.action.ActionStatus.Status#unknown}.
+     */
+    @Override
+    public ActionStatus checkStatus(Scope scope) {
+        return new ActionStatus().unknown("No checkStatus defined");
     }
 
     /**

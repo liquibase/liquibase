@@ -2,6 +2,7 @@ package liquibase.change;
 
 import java.util.Set;
 
+import liquibase.action.ActionStatus;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
@@ -125,6 +126,6 @@ public interface Change extends LiquibaseSerializable {
      * Validate that this change executed successfully against the given database. This will check that the update completed at a high level plus check details of the change.
      * For example, a change to add a column will check that the column exists plus data type, default values, etc.
      */
-    public ChangeStatus checkStatus(Database database);
+    public ActionStatus checkStatus(Database database);
 
 }

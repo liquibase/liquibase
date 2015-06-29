@@ -67,7 +67,7 @@ public class Scope {
         Map<String, Object> scopeValues = new HashMap<String, Object>();
         scopeValues.put(newValueKey, newValue);
 
-        return new Scope(this, scopeValues);
+        return child(scopeValues);
     }
 
     public Scope child(Enum newValueKey, Object newValue) {

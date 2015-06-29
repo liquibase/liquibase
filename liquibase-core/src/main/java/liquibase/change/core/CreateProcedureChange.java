@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.UnsupportedDatabase;
@@ -245,8 +246,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check createProcedure status");
+    public ActionStatus checkStatus(Database database) {
+        return new ActionStatus().unknown("Cannot check createProcedure status");
     }
 
     @Override

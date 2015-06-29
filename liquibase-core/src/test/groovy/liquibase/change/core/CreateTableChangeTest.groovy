@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
@@ -182,47 +182,47 @@ public class CreateTableChangeTest extends StandardChangeTest {
         SnapshotGeneratorFactory.instance = snapshotFactory
 
         then: "when no tables"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "another table exists but not the target table"
         snapshotFactory.addObjects(new Table(null, null, "other_table"))
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "expected table exists but is missing columns"
         table.getColumns().add(column1)
         table.getColumns().add(column2)
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+        assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "all columns exist"
         table.getColumns().add(column3)
         snapshotFactory.addObjects(column3)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "column is supposed to be primary key but table is not"
         change.getColumns().get(0).setConstraints(new ConstraintsConfig().setPrimaryKey(true))
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+        assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "table has primary key as expected"
         def pk = new PrimaryKey("pk_test", table.schema.catalogName, table.schema.name, table.name, new Column(column1.name))
         table.setPrimaryKey(pk)
         snapshotFactory.addObjects(pk)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
 
         when: "nullability is different"
         change.getColumns().get(1).setConstraints(new ConstraintsConfig().setNullable(false))
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+        assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "column nullability matches"
         table.getColumns().get(1).nullable = false
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 
     def "load can take nested 'column' nodes, not just 'columns' nodes"() {

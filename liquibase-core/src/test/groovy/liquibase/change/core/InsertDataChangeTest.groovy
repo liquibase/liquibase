@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
@@ -53,7 +53,7 @@ public class InsertDataChangeTest extends StandardChangeTest {
         def change = new InsertDataChange()
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).status == ActionStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check insertData status"
     }
 }

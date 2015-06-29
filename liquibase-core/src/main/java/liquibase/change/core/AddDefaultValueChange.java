@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -10,7 +11,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;
@@ -228,15 +228,15 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
+    public ActionStatus checkStatus(Database database) {
+        ActionStatus result = new ActionStatus();
         try {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName())), database);
             if (column == null) {
                 return result.unknown("Column " + getColumnName() + " does not exist");
             }
 
-            result.assertComplete(column.defaultValue != null, "Column "+getColumnName()+" has no default value");
+            result.assertApplied(column.defaultValue != null, "Column " + getColumnName() + " has no default value");
             if (column.defaultValue == null) {
                 return result;
             }

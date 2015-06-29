@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -85,7 +86,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
             UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName());
             if (getUniqueColumns() != null) {
@@ -93,9 +94,9 @@ public class DropUniqueConstraintChange extends AbstractChange {
                     example.addColumn(example.getColumns().size(), new Column(new ObjectName(column)));
                 }
             }
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(example, database), "Unique constraint exists");
+            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(example, database), "Unique constraint exists");
         } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
     }
 //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {

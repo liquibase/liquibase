@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -122,8 +123,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check insertData status");
+    public ActionStatus checkStatus(Database database) {
+        return new ActionStatus().unknown("Cannot check insertData status");
     }
 
     /**

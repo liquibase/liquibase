@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -7,7 +8,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,23 +105,23 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
-            ChangeStatus changeStatus = new ChangeStatus();
+            ActionStatus actionStatus = new ActionStatus();
             Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getNewColumnName())), database);
             Column oldColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getOldColumnName())), database);
 
             if (newColumn == null && oldColumn == null) {
-                return changeStatus.unknown("Neither column exists");
+                return actionStatus.unknown("Neither column exists");
             }
             if (newColumn != null && oldColumn != null) {
-                return changeStatus.unknown("Both columns exist");
+                return actionStatus.unknown("Both columns exist");
             }
-            changeStatus.assertComplete(newColumn != null, "New column does not exist");
+            actionStatus.assertApplied(newColumn != null, "New column does not exist");
 
-            return changeStatus;
+            return actionStatus;
         } catch (Exception e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
     }
 

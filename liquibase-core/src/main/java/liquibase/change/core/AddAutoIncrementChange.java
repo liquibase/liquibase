@@ -1,17 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
 
@@ -105,33 +101,6 @@ public class AddAutoIncrementChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Auto-increment added to " + getTableName() + "." + getColumnName();
-    }
-
-    @Override
-    public ChangeStatus checkStatus(Database database) {
-        ChangeStatus result = new ChangeStatus();
-        Column example = new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
-        try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            if (column == null) return result.unknown("Column does not exist");
-
-
-            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
-            if (getStartWith() != null && column.autoIncrementInformation.getStartWith() != null) {
-                result.assertCorrect(getStartWith().equals(column.autoIncrementInformation.getStartWith()), "startsWith incorrect");
-            }
-
-            if (getIncrementBy() != null && column.autoIncrementInformation.getIncrementBy() != null) {
-                result.assertCorrect(getIncrementBy().equals(column.autoIncrementInformation.getIncrementBy()), "Increment by incorrect");
-            }
-
-            return result;
-        } catch (Exception e) {
-            return result.unknown(e);
-
-        }
-
-
     }
 
     @Override

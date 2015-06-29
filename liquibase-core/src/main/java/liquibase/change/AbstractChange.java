@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import liquibase.action.ActionStatus;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
@@ -385,8 +386,8 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Not implemented");
+    public ActionStatus checkStatus(Database database) {
+        return new ActionStatus().unknown("Not implemented");
     }
 
     /**

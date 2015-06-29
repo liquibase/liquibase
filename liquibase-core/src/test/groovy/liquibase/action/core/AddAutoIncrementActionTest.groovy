@@ -1,26 +1,63 @@
 package liquibase.action.core
 
 import liquibase.JUnitScope
-import liquibase.Scope
-import liquibase.action.Action
+import liquibase.action.ActionStatus
 import liquibase.action.TestObjectFactory
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.ActionResult
-import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplierFactory
+import liquibase.snapshot.MockSnapshotFactory
 import liquibase.snapshot.SnapshotFactory
 import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.AbstractSnapshotTransformer
 import liquibase.snapshot.transformer.LimitTransformer
-import liquibase.structure.DatabaseObject
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
-import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
-import spock.lang.Specification
 import spock.lang.Unroll
 
 class AddAutoIncrementActionTest extends AbstractActionTest {
+
+    @Unroll
+    def "checkStatus"() {
+        when:
+        def columnName = new ObjectName("testTable", "testColumn")
+        def column = new Column(columnName)
+        if (columnStartsWith != null && columnIncrementBy != null) {
+            column.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartsWith, columnIncrementBy)
+        }
+        def mockSnapshotFactory = new MockSnapshotFactory(column)
+        def scope = JUnitScope.instance.overrideSingleton(SnapshotFactory, mockSnapshotFactory)
+
+        def action = new AddAutoIncrementAction()
+        action.columnName = columnName
+        action.columnDataType = "int"
+        action.startWith = actionStartsWith
+        action.incrementBy = actionIncrementBy
+
+        then:
+        action.checkStatus(scope).toString() == expected
+
+        where:
+        actionStartsWith | columnStartsWith | actionIncrementBy | columnIncrementBy | expected
+        2                | 2                | 4                 | 4                 | "Applied"
+        2                | 3                | 4                 | 4                 | "Incorrect: 'startWith' is incorrect ('2' vs '3')"
+        2                | 2                | 4                 | 3                 | "Incorrect: 'incrementBy' is incorrect ('4' vs '3')"
+        null             | null             | 1                 | 1                 | "Not Applied: Column 'testTable.testColumn' is not auto-increment"
+        null             | 1                | null              | 1                 | "Applied"
+
+    }
+
+    def "checkStatus with no column"() {
+        when:
+        def scope = JUnitScope.instance.overrideSingleton(SnapshotFactory, new MockSnapshotFactory())
+
+        def action = new AddAutoIncrementAction()
+        action.columnName = new ObjectName("testTable", "testColumn")
+
+        then:
+        action.checkStatus(scope).toString() == "Unknown: Column 'testTable.testColumn' does not exist"
+
+    }
 
     @Unroll("#featureName: #column on #conn")
     def "Can apply standard settings to complex names"() {
@@ -38,15 +75,9 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
         ])
                 .addOperations(plan: plan)
                 .run({
-            ActionResult result = plan.execute(scope)
+            plan.execute(scope)
 
-            assert action.checkStatus(scope)
-
-            println result
-//            assert result.asList(Column).size() == 1
-//            assert result.asObject(Object) instanceof Column
-//            assert result.asObject(Column).getName().toShortString() == column.getName().toShortString()
-//            assert result.asObject(Column).getRelation().getName() == column.getRelation().getName()
+            assert action.checkStatus(scope).applied
         })
 
         where:
@@ -64,7 +95,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
     }
 
     @Unroll("#featureName: #action for #column on #conn")
-    def "!Valid parameter permutations work"() {
+    def "Valid parameter permutations work"() {
         when:
         action.columnName = column.name
         action.columnDataType = column.type
@@ -82,12 +113,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
                 .run({
             plan.execute(scope)
 
-            assert action.checkStatus(scope)
-
-            def columnSnapshot = scope.getSingleton(SnapshotFactory).get(new Column(action.columnName), scope)
-            assert columnSnapshot.autoIncrement
-            assert columnSnapshot.autoIncrementInformation.startWith == action.startWith
-            assert columnSnapshot.autoIncrementInformation.incrementBy == action.incrementBy
+            assert action.checkStatus(scope).applied
         })
 
         where:

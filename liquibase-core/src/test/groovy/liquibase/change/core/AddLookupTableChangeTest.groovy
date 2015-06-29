@@ -1,6 +1,6 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus
+import liquibase.action.ActionStatus
 import liquibase.change.StandardChangeTest
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -48,16 +48,16 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
         change.setConstraintName(fk.name)
 
         then: "no new table yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(database).status == ActionStatus.Status.notApplied
 
         when: "new table exists but no FK"
         snapshotFactory.addObjects(newTable)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+        assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "FK and table exist"
         snapshotFactory.addObjects(fk)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+        assert change.checkStatus(database).status == ActionStatus.Status.applied
     }
 }

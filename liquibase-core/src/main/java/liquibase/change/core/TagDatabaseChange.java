@@ -1,12 +1,11 @@
 package liquibase.change.core;
 
+import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.MarkChangeSetRanStatement;
 
 @DatabaseChange(name="tagDatabase", description = "Applies a tag to the database for future rollback", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.6")
 public class TagDatabaseChange extends AbstractChange {
@@ -28,11 +27,11 @@ public class TagDatabaseChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ActionStatus checkStatus(Database database) {
         try {
-            return new ChangeStatus().assertComplete(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).tagExists(getTag()), "Database not tagged");
+            return new ActionStatus().assertApplied(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).tagExists(getTag()), "Database not tagged");
         } catch (DatabaseException e) {
-            return new ChangeStatus().unknown(e);
+            return new ActionStatus().unknown(e);
         }
     }
 

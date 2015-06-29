@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.ChangeStatus;
+import liquibase.action.ActionStatus;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
@@ -101,7 +101,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check loadUpdateData status");
+    public ActionStatus checkStatus(Database database) {
+        return new ActionStatus().unknown("Cannot check loadUpdateData status");
     }
 }

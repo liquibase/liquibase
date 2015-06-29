@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import liquibase.action.ActionStatus;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -242,8 +243,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
-        return new ChangeStatus().unknown("Cannot check raw sql status");
+    public ActionStatus checkStatus(Database database) {
+        return new ActionStatus().unknown("Cannot check raw sql status");
     }
 
     protected String normalizeLineEndings(String string) {
