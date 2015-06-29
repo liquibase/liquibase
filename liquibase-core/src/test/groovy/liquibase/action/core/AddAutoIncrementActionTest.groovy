@@ -40,6 +40,8 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
                 .run({
             ActionResult result = plan.execute(scope)
 
+            assert action.checkStatus(scope)
+
             println result
 //            assert result.asList(Column).size() == 1
 //            assert result.asObject(Object) instanceof Column
@@ -50,7 +52,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
         where:
         [conn, scope, snapshot, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(scope)
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(new LimitTransformer(2), scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],

@@ -45,10 +45,9 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         [conn, scope, snapshot, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
-            def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(scope)
+            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
@@ -85,7 +84,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(scope)
+            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
@@ -122,7 +121,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(scope)
+            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
@@ -160,7 +159,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(scope)
+            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope]
