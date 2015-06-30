@@ -3,13 +3,13 @@
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-parent</artifactId>
-        <version>3.4.0-SNAPSHOT</version>
+        <version>3.5.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>liquibase-debian</artifactId>
     
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.5.0-SNAPSHOT</version>
     <name>Liquibase Debian Packager</name>
     <description>Debian package builder for liquibase.</description>
      <organization>
@@ -41,6 +41,7 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${snakeyaml.version}</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>

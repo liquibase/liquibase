@@ -57,7 +57,8 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
            }
             resolved=tryResolveLiquibaseSchema(systemId, publicId);
        }
-       if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
+
+	   if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
             resolved=tryResolveFromResourceAccessor(systemId);
        }
 
@@ -110,6 +111,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 source.setSystemId(systemId);
                 return source;
             } catch (Exception ex) {
+                log.debug("Error loading XSD", ex);
                 return null; // We don't have the schema, try the network
             }
         }

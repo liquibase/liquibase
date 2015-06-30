@@ -181,8 +181,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
             addArg(arg.getChildValue(null, "value", String.class));
         }
         List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os", String.class)), ",");
-        if (os.size() > 0) {
+        if (os.size() == 1 && os.get(0).equals("")) {
+            this.os = null;
+        } else  if (os.size() > 0) {
             this.os = os;
         }
+
     }
 }

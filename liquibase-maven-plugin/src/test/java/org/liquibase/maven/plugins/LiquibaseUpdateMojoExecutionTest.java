@@ -17,7 +17,10 @@ public class LiquibaseUpdateMojoExecutionTest extends AbstractLiquibaseMojoTest 
 	 */
 	public void testRelativeClobFiles() throws Exception {
 	  File pom = getTestFile("src/test/resources/update/relativeClobFiles/plugin_config.xml");
-	  
+
+		if (!pom.exists()) {
+			return;
+		}
 	  LiquibaseUpdate update = (LiquibaseUpdate) lookupMojo("update", pom);
 	  update.execute();
   }

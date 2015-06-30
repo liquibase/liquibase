@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -28,10 +28,11 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:git:https://github.com/liquibase/liquibase.git</connection>
-        <url>scm:git:https://github.com/liquibase/liquibase.git</url>
-        <developerConnection>scm:git:https://github.com/liquibase/liquibase.git</developerConnection>
-    </scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+      <tag>HEAD</tag>
+  </scm>
 
     <developers>
        <developer>
@@ -182,9 +183,16 @@
             </dependency>
 
             <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.3.10</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.spockframework</groupId>
                 <artifactId>spock-core</artifactId>
-                <version>0.7-groovy-2.0</version>
+                <version>1.0-groovy-2.3</version>
                 <scope>test</scope>
             </dependency>
 
@@ -259,14 +267,14 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.4</version>
+                    <version>1.9.1</version>
                 </plugin>
 
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.1</version>
+                    <version>2.5.2</version>
                     <configuration>
                         <stagingRepository>/tmp/maven-snapshot</stagingRepository>
                         <mavenExecutorId>forked-path</mavenExecutorId>
@@ -332,7 +340,7 @@
                         <dependency>
                             <groupId>org.codehaus.groovy</groupId>
                             <artifactId>groovy-all</artifactId>
-                            <version>2.1.5</version>
+                            <version>2.3.10</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -417,6 +425,24 @@
             </modules>
         </profile>
 
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>

@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
-import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.core.OracleDatabase;
 import liquibase.structure.core.*;
@@ -397,7 +396,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.futureRollbackSQL(this.contexts, writer);
+        liquibase.futureRollbackSQL(new Contexts(this.contexts), new LabelExpression(), writer);
 
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
@@ -462,7 +461,7 @@ public abstract class AbstractIntegrationTest {
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = File.createTempFile("liquibase-test", ".xml");
-            FileUtil.forceDeleteOnExit(tempFile);
+            FileUtil.deleteOnExit(tempFile);
             if (outputCsv) {
                 diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
             }
@@ -778,7 +777,7 @@ public abstract class AbstractIntegrationTest {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.generateDocumentation(outputDir.getAbsolutePath(), this.contexts);
 
-        FileUtil.forceDeleteOnExit(outputDir);
+        FileUtil.deleteOnExit(outputDir);
     }
 
 

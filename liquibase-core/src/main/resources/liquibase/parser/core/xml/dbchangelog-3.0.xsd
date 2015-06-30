@@ -183,7 +183,7 @@
 						<xsd:complexType>
 							<xsd:attribute name="path" type="xsd:string" use="required" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-                            <xsd:attribute name="filter" type="xsd:string" />
+                            <xsd:attribute name="resourceFilter" type="xsd:string" />
 							<xsd:anyAttribute namespace="##other" />
 						</xsd:complexType>
 					</xsd:element>

@@ -1,6 +1,5 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -43,8 +42,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint constraint = new UniqueConstraint();
         constraint.setTable(table);
         constraint.setName(example.getName());
+        constraint.setBackingIndex(exampleConstraint.getBackingIndex());
         for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setRelation(table));
+            String ascOrDesc = (String) col.get("ASC_OR_DESC");
+            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
         }
 
         return constraint;
@@ -74,6 +76,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
             for (CachedRow constraint : metadata) {
                 UniqueConstraint uq = new UniqueConstraint().setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
+                if (constraint.containsColumn("INDEX_NAME")) {
+                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getName()));
+                }
                 if (seenConstraints.add(uq.getName())) {
                     table.getUniqueConstraints().add(uq);
                 }
@@ -115,12 +120,70 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
                     + "order by ordinal_position";
         } else if (database instanceof MSSQLDatabase) {
-            sql = "select TC.CONSTRAINT_NAME as CONSTRAINT_NAME, CC.COLUMN_NAME as COLUMN_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC "
-                    + "inner join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC on TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME "
-                    + "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "' "
-                    + "and TC.TABLE_NAME='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
-                    + "and TC.CONSTRAINT_NAME='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
-                    + "order by TC.CONSTRAINT_NAME";
+            if (database.getDatabaseMajorVersion() >= 9) {
+                sql =
+                        "SELECT " +
+                            "[kc].[name] AS [CONSTRAINT_NAME], " +
+                            "[c].[name] AS [COLUMN_NAME], " +
+                            "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
+                        "FROM [sys].[schemas] AS [s] " +
+                        "INNER JOIN [sys].[tables] AS [t] " +
+                        "ON [t].[schema_id] = [s].[schema_id] " +
+                        "INNER JOIN [sys].[key_constraints] AS [kc] " +
+                        "ON [kc].[parent_object_id] = [t].[object_id] " +
+                        "INNER JOIN [sys].[indexes] AS [i] " +
+                        "ON [i].[object_id] = [kc].[parent_object_id] " +
+                        "AND [i].[index_id] = [kc].[unique_index_id] " +
+                        "INNER JOIN [sys].[index_columns] AS [ic] " +
+                        "ON [ic].[object_id] = [i].[object_id] " +
+                        "AND [ic].[index_id] = [i].[index_id] " +
+                        "INNER JOIN [sys].[columns] AS [c] " +
+                        "ON [c].[object_id] = [ic].[object_id] " +
+                        "AND [c].[column_id] = [ic].[column_id] " +
+                        "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                        "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                        "ORDER BY " +
+                            "[ic].[key_ordinal]";
+            } else if (database.getDatabaseMajorVersion() >= 8) {
+                sql =
+                        "SELECT " +
+                            "[kc].[name] AS [CONSTRAINT_NAME], " +
+                            "[c].[name] AS [COLUMN_NAME], " +
+                            "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
+                        "FROM [dbo].[sysusers] AS [s] " +
+                        "INNER JOIN [dbo].[sysobjects] AS [t] " +
+                        "ON [t].[uid] = [s].[uid] " +
+                        "INNER JOIN [dbo].[sysobjects] AS [kc] " +
+                        "ON [kc].[parent_obj] = [t].[id] " +
+                        "INNER JOIN [dbo].[sysindexes] AS [i] " +
+                        "ON [i].[id] = [kc].[parent_obj] " +
+                        "AND [i].[name] = [kc].[name] " +
+                        "INNER JOIN [dbo].[sysindexkeys] AS [ic] " +
+                        "ON [ic].[id] = [i].[id] " +
+                        "AND [ic].[indid] = [i].[indid] " +
+                        "INNER JOIN [dbo].[syscolumns] AS [c] " +
+                        "ON [c].[id] = [ic].[id] " +
+                        "AND [c].[colid] = [ic].[colid] " +
+                        "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                        "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                        "ORDER BY " +
+                            "[ic].[keyno]";
+            } else {
+                sql =
+                        "SELECT " +
+                            "[TC].[CONSTRAINT_NAME], " +
+                            "[KCU].[COLUMN_NAME] " +
+                        "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
+                        "INNER JOIN [INFORMATION_SCHEMA].[KEY_COLUMN_USAGE] AS [KCU] " +
+                        "ON [KCU].[CONSTRAINT_NAME] = [TC].[CONSTRAINT_NAME] " +
+                        "WHERE [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                        "AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                        "AND [TC].[CONSTRAINT_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                        "ORDER BY " +
+                            "[KCU].[ORDINAL_POSITION]";
+            }
         } else if (database instanceof OracleDatabase) {
             sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' order by ucc.position";
         } else if (database instanceof DB2Database) {
@@ -172,7 +235,34 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 return returnList;
             }
-
+        } else if (database instanceof InformixDatabase) {
+            sql = "select sysindexes.idxname as CONSTRAINT_NAME, syscolumns.colname as COLUMN_NAME " +
+                  "from sysindexes, systables, syscolumns " +
+                  "where sysindexes.tabid = systables.tabid and sysindexes.tabid = syscolumns.tabid " +
+                  "and syscolumns.colno in (sysindexes.part1,sysindexes.part2,sysindexes.part3,sysindexes.part4," +
+                                           "sysindexes.part5,sysindexes.part6,sysindexes.part7,sysindexes.part8," +
+                                           "sysindexes.part9,sysindexes.part10,sysindexes.part11,sysindexes.part12," +
+                                           "sysindexes.part13,sysindexes.part14,sysindexes.part15,sysindexes.part16)" +
+                  "and sysindexes.idxtype ='U' " +
+                  "and sysindexes.idxname = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                  "order by case syscolumns.colno " +
+                      "when sysindexes.part1 then 1 " +
+                      "when sysindexes.part2 then 2 " +
+                      "when sysindexes.part3 then 3 " +
+                      "when sysindexes.part4 then 4 " +
+                      "when sysindexes.part5 then 5 " +
+                      "when sysindexes.part6 then 6 " +
+                      "when sysindexes.part7 then 7 " +
+                      "when sysindexes.part8 then 8 " +
+                      "when sysindexes.part9 then 9 " +
+                      "when sysindexes.part10 then 10 " +
+                      "when sysindexes.part11 then 11 " +
+                      "when sysindexes.part12 then 12 " +
+                      "when sysindexes.part13 then 13 " +
+                      "when sysindexes.part14 then 14 " +
+                      "when sysindexes.part15 then 15 " +
+                      "when sysindexes.part16 then 16 " +
+                  "end asc";
         } else if (database instanceof FirebirdDatabase) {
             sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
                     "FROM RDB$INDEX_SEGMENTS " +

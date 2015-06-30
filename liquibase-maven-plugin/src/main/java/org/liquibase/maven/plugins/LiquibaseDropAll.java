@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drops all database objects owned by the user. Note that functions, procedures and packages are not dropped.
+ * Drops all database objects in the configured schema(s). Note that functions, procedures and packages are not dropped.
  * 
  * @author Ferenc Gratzer
  * @description Liquibase DropAll Maven plugin

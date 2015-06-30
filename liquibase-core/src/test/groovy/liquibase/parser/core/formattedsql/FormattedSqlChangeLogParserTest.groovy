@@ -116,7 +116,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "select * from table1;"
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplitStatements()
-        assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
+        assert !((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
         assert !changeLog.getChangeSets().get(0).isAlwaysRun()
         assert !changeLog.getChangeSets().get(0).isRunOnChange()
         assert changeLog.getChangeSets().get(0).isRunInTransaction()
@@ -139,8 +139,8 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         assert !changeLog.getChangeSets().get(1).isRunInTransaction()
         changeLog.getChangeSets().get(1).getContexts().toString() == "y"
         StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
-        changeLog.getChangeSets().get(1).getRollBackChanges().length == 1
-        ((RawSQLChange) changeLog.getChangeSets().get(1).getRollBackChanges()[0]).getSql() == "delete from table1;\ndrop table table1;"
+        changeLog.getChangeSets().get(1).rollback.changes.size() == 1
+        ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql() == "delete from table1;\ndrop table table1;"
 
 
         changeLog.getChangeSets().get(2).getAuthor() == "nvoxland"
@@ -149,29 +149,29 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql() == "create table table2 (\n  id int primary key\n);\ncreate table table3 (\n  id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplitStatements()
-        assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
-        changeLog.getChangeSets().get(2).getRollBackChanges().length == 1
-        assert changeLog.getChangeSets().get(2).getRollBackChanges()[0] instanceof RawSQLChange
-        ((RawSQLChange) changeLog.getChangeSets().get(2).getRollBackChanges()[0]).getSql() == "drop table table2;"
+        assert !((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
+        changeLog.getChangeSets().get(2).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(2).rollback.changes[0] instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(2).rollback.changes[0]).getSql() == "drop table table2;"
 
         changeLog.getChangeSets().get(3).getAuthor() == "alwyn"
         changeLog.getChangeSets().get(3).getId() == "4"
-        changeLog.getChangeSets().get(3).getRollBackChanges().length == 1
-        assert changeLog.getChangeSets().get(3).getRollBackChanges()[0] instanceof EmptyChange
+        changeLog.getChangeSets().get(3).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(3).rollback.changes[0] instanceof EmptyChange
 
         changeLog.getChangeSets().get(4).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(4).getId() == "5"
-        changeLog.getChangeSets().get(4).getRollBackChanges().length == 1
-        assert changeLog.getChangeSets().get(4).getRollBackChanges()[0] instanceof EmptyChange
+        changeLog.getChangeSets().get(4).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(4).rollback.changes[0] instanceof EmptyChange
 
         changeLog.getChangeSets().get(5).getAuthor() == "paikens"
         changeLog.getChangeSets().get(5).getId() == "6"
         changeLog.getChangeSets().get(5).getChanges().size() == 1
         assert changeLog.getChangeSets().get(5).getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(5).getChanges().get(0)).getSql() == "create table table4 (\n  id int primary key\n);"
-        changeLog.getChangeSets().get(5).getRollBackChanges().length == 1
-        assert changeLog.getChangeSets().get(5).getRollBackChanges()[0] instanceof RawSQLChange
-        ((RawSQLChange) changeLog.getChangeSets().get(5).getRollBackChanges()[0]).getSql() == "drop table table4;"
+        changeLog.getChangeSets().get(5).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(5).rollback.changes[0] instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(5).rollback.changes[0]).getSql() == "drop table table4;"
 
 
         changeLog.getChangeSets().get(6).getAuthor() == "mysql"
@@ -179,16 +179,16 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         changeLog.getChangeSets().get(6).getChanges().size() == 1
         assert changeLog.getChangeSets().get(6).getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getSql() == "create table mysql_boo (\n  id int primary key\n);"
-        changeLog.getChangeSets().get(6).getRollBackChanges().length == 1
-        assert changeLog.getChangeSets().get(6).getRollBackChanges()[0] instanceof RawSQLChange
-        ((RawSQLChange) changeLog.getChangeSets().get(6).getRollBackChanges()[0]).getSql() == "drop table mysql_boo;"
+        changeLog.getChangeSets().get(6).rollback.changes.size() == 1
+        assert changeLog.getChangeSets().get(6).rollback.changes[0] instanceof RawSQLChange
+        ((RawSQLChange) changeLog.getChangeSets().get(6).rollback.changes[0]).getSql() == "drop table mysql_boo;"
 
         changeLog.getChangeSets().get(7).getAuthor() == "multicontext"
         changeLog.getChangeSets().get(7).getId() == "1"
         changeLog.getChangeSets().get(7).getChanges().size() == 1
         assert changeLog.getChangeSets().get(7).getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(7).getChanges().get(0)).getSql() == "select 1;"
-        changeLog.getChangeSets().get(7).getRollBackChanges().length == 0
+        changeLog.getChangeSets().get(7).rollback.changes.size() == 0
 //         changeLog.getChangeSets().get(7).getContexts().size() == 3
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("first")
         assert changeLog.getChangeSets().get(7).getContexts().toString().contains("second")
@@ -215,9 +215,9 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         cs.getChanges().size() == 1
         assert cs.getChanges().get(0) instanceof RawSQLChange
         ((RawSQLChange) cs.getChanges().get(0)).getSql() == "create table my_table (\n  id int primary key\n);"
-        cs.getRollBackChanges().length == 1
-        assert cs.getRollBackChanges()[0] instanceof RawSQLChange
-        ((RawSQLChange) cs.getRollBackChanges()[0]).getSql() == "drop table my_table;"
+        cs.rollback.changes.size() == 1
+        assert cs.rollback.changes[0] instanceof RawSQLChange
+        ((RawSQLChange) cs.rollback.changes[0]).getSql() == "drop table my_table;"
     }
 
     def parse_authorWithSpace() throws Exception {

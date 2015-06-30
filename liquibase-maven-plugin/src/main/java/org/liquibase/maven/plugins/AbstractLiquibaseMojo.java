@@ -235,12 +235,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Properties expressionVars;
 
     /**
-     * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
+     * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
      * @parameter expression="${liquibase.should.run}"
      */
-    protected boolean skip;
+    protected boolean liquibaseShouldRun = true;
 
     /**
      * Array to put a expression variable to maven plugin.
@@ -261,12 +261,34 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.changelogCatalogName}"
      */
     protected String changelogCatalogName;
+
     /**
      * Schema against which Liquibase changelog tables will be created.
      *
      * @parameter expression="${liquibase.changelogSchemaName}"
      */
     protected String changelogSchemaName;
+
+    /**
+     * Location of a properties file containing JDBC connection properties for use by the driver.
+     *
+     * @parameter
+     */
+    private File driverPropertiesFile;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogTableName}"
+     */
+    protected String databaseChangeLogTableName;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogLockTableName}"
+     */
+    protected String databaseChangeLogLockTableName;
 
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
@@ -298,8 +320,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
-
-        if (skip) {
+        if (!liquibaseShouldRun) {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
@@ -319,7 +340,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         Database database = null;
         try {
             String dbPassword = emptyPassword || password == null ? "" : password;
-            database = CommandLineUtils.createDatabaseObject(fileOpener,
+            String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
+            database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
                     url,
                     username,
                     dbPassword,
@@ -329,10 +351,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     outputDefaultCatalog,
                     outputDefaultSchema,
                     databaseClass,
-                    null,
+                    driverPropsFile,
                     propertyProviderClass,
                     changelogCatalogName,
-                    changelogSchemaName);
+                    changelogSchemaName,
+                    databaseChangeLogTableName,
+                    databaseChangeLogLockTableName);
             liquibase = createLiquibase(fileOpener, database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));

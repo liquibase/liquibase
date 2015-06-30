@@ -12,14 +12,13 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.util.ISODateFormat;
+
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.math.BigInteger;
 import java.util.*;
 
 public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSerializer {
@@ -75,6 +74,11 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         return new SnapshotLiquibaseRepresenter();
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public static class SnapshotLiquibaseRepresenter extends LiquibaseRepresenter {
 
         protected void init() {
@@ -83,6 +87,9 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
             multiRepresenters.put(SequenceCurrentValueFunction.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(java.util.Date.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(java.sql.Date.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(Integer.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(BigInteger.class, new TypeStoringAsStringRepresenter());
+            multiRepresenters.put(Number.class, new TypeStoringAsStringRepresenter());
             multiRepresenters.put(Enum.class, new TypeStoringAsStringRepresenter());
         }
 

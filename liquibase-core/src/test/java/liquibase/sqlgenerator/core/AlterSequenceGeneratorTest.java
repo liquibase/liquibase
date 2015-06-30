@@ -1,113 +1,52 @@
 package liquibase.sqlgenerator.core;
 
-public abstract class AlterSequenceGeneratorTest {
-////    @Test
-////    public void supports() throws Exception {
-////        for (Database database : TestContext.getWriteExecutor().getAllDatabases()) {
-////            if (database.supportsSequences()) {
-////                assertTrue(createGeneratorUnderTest().supportsDatabase(database));
-////            } else {
-////                assertFalse(createGeneratorUnderTest().supportsDatabase(database));
-////            }
-////        }
-////    }
-//
-//    @Test
-//    public void execute_incrementBy() throws Exception {
-//        new DatabaseTestTemplate().testOnAvailableDatabases(
-//                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setIncrementBy(5)) {
-//                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
-//                    }
-//
-//                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert increment by is 1
-//                    }
-//
-//                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert increment by value
-//                    }
-//                });
-//    }
-//
-//    @Test
-//    public void execute_minValue() throws Exception {
-//        new DatabaseTestTemplate().testOnAvailableDatabases(
-//                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setMinValue(0)) {
-//                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo; assert minValue is 1
-//                    }
-//
-//                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert min valuevalue
-//                    }
-//                });
-//    }
-//
-//    @Test
-//    public void execute_maxValue() throws Exception {
-//        new DatabaseTestTemplate().testOnAvailableDatabases(
-//                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setMaxValue(50)) {
-//
-//                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
-//                    }
-//
-//                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert initial max value
-//                    }
-//
-//                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert max value
-//                    }
-//                });
-//    }
-//
-//    @Test
-//    public void execute_order() throws Exception {
-//        new DatabaseTestTemplate().testOnAvailableDatabases(
-//                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setOrdered(true)) {
-//
-//                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return !(database instanceof OracleDatabase || database instanceof DB2Database);
-//                    }
-//
-//                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert order default
-//                    }
-//
-//                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert max value
-//                    }
-//                });
-//    }
-//
-//    @Test
-//    public void execute_schemaSet() throws Exception {
-//        new DatabaseTestTemplate().testOnAvailableDatabases(
-//                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new AlterSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME).setIncrementBy(5)) {
-//                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
-//                    }
-//
-//                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert increment by is 1
-//                    }
-//
-//                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) {
-//                        assertNotNull(snapshot.getSequence(SEQ_NAME));
-//                        //todo: assert increment by value
-//                    }
-//                });
-//    }
+import static org.junit.Assert.assertEquals;
 
+import java.math.BigInteger;
+
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
+import liquibase.statement.core.AlterSequenceStatement;
+import liquibase.test.TestContext;
+
+import org.junit.Test;
+
+public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSequenceStatement> {
+	
+	protected static final String SEQUENCE_NAME = "SEQUENCE_NAME";
+    protected static final String CATALOG_NAME = "CATALOG_NAME";
+    protected static final String SCHEMA_NAME = "SCHEMA_NAME";
+	
+    public AlterSequenceGeneratorTest() throws Exception {
+        super(new AlterSequenceGenerator());
+    }
+
+	@Test
+    public void testAlterSequenceDatabase() throws Exception {
+    	for (Database database : TestContext.getInstance().getAllDatabases()) {
+    		if (database instanceof OracleDatabase) {
+    			AlterSequenceStatement statement = new AlterSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+	    		statement.setCacheSize(BigInteger.valueOf(3000L));
+
+	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+
+    			assertEquals("ALTER SEQUENCE CATALOG_NAME.SEQUENCE_NAME CACHE 3000", generatedSql[0].toSql());
+    		}
+    	}
+    }
+
+	@Override
+	protected AlterSequenceStatement createSampleSqlStatement() {
+		AlterSequenceStatement statement = new AlterSequenceStatement(CATALOG_NAME, SCHEMA_NAME, SEQUENCE_NAME);
+        return statement;
+	}
+	
+	@Override
+	protected boolean shouldBeImplementation(Database database) {
+		return database.supportsSequences();
+	}
 }
