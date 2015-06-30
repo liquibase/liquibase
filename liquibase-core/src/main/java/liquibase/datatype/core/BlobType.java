@@ -60,6 +60,17 @@ public class BlobType extends LiquibaseDataType {
         return super.toDatabaseDataType(database);
     }
 
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof String) {
+            return "'"+value+"'";
+        } else {
+            return value.toString();
+        }
+    }
+
     //sqlite
     //        } else if (columnTypeString.toLowerCase(Locale.ENGLISH).contains("blob") ||
 //                columnTypeString.toLowerCase(Locale.ENGLISH).contains("binary")) {
