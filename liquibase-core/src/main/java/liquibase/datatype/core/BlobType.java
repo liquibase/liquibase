@@ -7,7 +7,7 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "bfile"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
 
     @Override
@@ -51,6 +51,9 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("IMAGE");
         }
         if (database instanceof OracleDatabase) {
+            if (getRawDefinition().toLowerCase().startsWith("bfile")) {
+                return new DatabaseDataType("BFILE");
+            }
             return new DatabaseDataType("BLOB");
         }
 
