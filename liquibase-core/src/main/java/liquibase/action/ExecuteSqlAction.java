@@ -1,6 +1,6 @@
 package liquibase.action;
 
-import liquibase.action.core.StringClauses;
+import liquibase.util.StringClauses;
 
 /**
  * Describes a SQL-based action that is neither a query nor an update of existing data.

@@ -1,27 +1,18 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.InsertDataAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.InsertStatement;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 public class InsertDataLogic extends AbstractSqlBuilderLogic<InsertDataAction> {

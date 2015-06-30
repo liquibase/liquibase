@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddUniqueConstraintAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddUniqueConstraintLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
+import liquibase.util.StringClauses;
 
 public class AddUniqueConstraintLogicMSSQL extends AddUniqueConstraintLogic {
 

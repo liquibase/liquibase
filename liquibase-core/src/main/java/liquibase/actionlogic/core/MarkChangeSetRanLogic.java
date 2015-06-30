@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.InsertDataAction;
 import liquibase.action.core.MarkChangeSetRanAction;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
@@ -19,20 +18,11 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.InsertStatement;
-import liquibase.statement.core.MarkChangeSetRanStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.ObjectName;
-import liquibase.structure.core.Column;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
-
-import java.util.List;
 
 public class MarkChangeSetRanLogic extends AbstractActionLogic<MarkChangeSetRanAction> {
 

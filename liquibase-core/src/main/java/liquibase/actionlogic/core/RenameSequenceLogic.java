@@ -1,14 +1,12 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.RenameSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Sequence;
+import liquibase.util.StringClauses;
 
 public class RenameSequenceLogic extends AbstractSqlBuilderLogic<RenameSequenceAction> {
 

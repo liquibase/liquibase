@@ -1,11 +1,9 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateIndexAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
@@ -16,9 +14,8 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
-
-import java.util.List;
 
 public class CreateIndexLogic extends AbstractSqlBuilderLogic<CreateIndexAction> {
 

@@ -1,14 +1,13 @@
 package liquibase.actionlogic.core.informix;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.SetNullableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.util.StringClauses;
 
 public class SetNullableLogicInformix extends SetNullableLogic {
 

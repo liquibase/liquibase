@@ -1,13 +1,11 @@
 package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.AddUniqueConstraintAction;
 import liquibase.action.core.DropUniqueConstraintActon;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropUniqueConstraintLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
+import liquibase.util.StringClauses;
 
 public class DropUniqueConstraintLogicOracle extends DropUniqueConstraintLogic {
     @Override

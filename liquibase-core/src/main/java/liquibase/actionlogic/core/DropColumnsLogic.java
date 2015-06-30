@@ -7,17 +7,16 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropColumnsAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
+import liquibase.util.StringClauses;
 
 public class DropColumnsLogic extends AbstractActionLogic<DropColumnsAction> {
 

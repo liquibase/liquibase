@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.RenameSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameSequenceLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
 import liquibase.structure.core.Sequence;
+import liquibase.util.StringClauses;
 
 public class RenameSequenceLogicOracle extends RenameSequenceLogic {
     @Override

@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.informix;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropColumnsAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
+import liquibase.util.StringClauses;
 
 public class DropColumnsLogicInformix extends DropColumnsLogic {
     @Override

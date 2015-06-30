@@ -1,11 +1,9 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.QuerySqlAction;
 import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.SelectDataAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
@@ -15,9 +13,9 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {

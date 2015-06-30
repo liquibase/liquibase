@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.derby;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.derby.DerbyDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.util.StringClauses;
 
 public class AddDefaultValueLogicDerby extends AddDefaultValueLogic {
 

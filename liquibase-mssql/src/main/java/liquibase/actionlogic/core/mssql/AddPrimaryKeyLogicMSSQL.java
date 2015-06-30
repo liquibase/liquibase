@@ -1,14 +1,13 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddPrimaryKeyAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddPrimaryKeyLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 public class AddPrimaryKeyLogicMSSQL extends AddPrimaryKeyLogic {
 

@@ -3,6 +3,7 @@ package liquibase.action.core;
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
 import liquibase.util.CollectionUtil;
+import liquibase.util.StringClauses;
 
 import java.util.ArrayList;
 import java.util.Collections;

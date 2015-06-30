@@ -1,10 +1,8 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DeleteDataAction;
 import liquibase.action.core.RemoveChangeSetRunStatusAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
@@ -13,6 +11,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class RemoveChangeSetRanStatusLogic extends AbstractActionLogic<RemoveChangeSetRunStatusAction> {
 

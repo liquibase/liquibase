@@ -1,18 +1,16 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddPrimaryKeyAction;
 import liquibase.action.core.AlterTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
 public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic<AddPrimaryKeyAction> {

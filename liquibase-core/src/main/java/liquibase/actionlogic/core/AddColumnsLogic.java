@@ -15,6 +15,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;

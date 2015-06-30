@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateIndexAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateIndexLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 public class CreateIndexLogicMSSQL extends CreateIndexLogic {
 

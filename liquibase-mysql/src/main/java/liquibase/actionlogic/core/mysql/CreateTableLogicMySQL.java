@@ -2,11 +2,9 @@ package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateTableAction;
 import liquibase.action.core.SetColumnRemarksAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateTableLogic;
@@ -15,9 +13,8 @@ import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.util.CollectionUtil;
-import liquibase.util.StringUtils;
+import liquibase.util.StringClauses;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CreateTableLogicMySQL extends CreateTableLogic {

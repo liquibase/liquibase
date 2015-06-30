@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateProcedureAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateProcedureLogic;

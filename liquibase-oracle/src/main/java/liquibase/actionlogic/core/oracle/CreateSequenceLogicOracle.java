@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateSequenceLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.util.StringClauses;
 
 import java.math.BigInteger;
 

@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.StoredProcedureAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.CollectionUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
 public class StoredProcedureLogic extends AbstractSqlBuilderLogic<StoredProcedureAction> {

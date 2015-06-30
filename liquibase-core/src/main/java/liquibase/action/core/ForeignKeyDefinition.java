@@ -2,6 +2,7 @@ package liquibase.action.core;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 import java.util.List;
 

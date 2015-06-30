@@ -2,12 +2,12 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.core.DropTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 public class DropTableLogic extends AbstractSqlBuilderLogic<DropTableAction> {
 

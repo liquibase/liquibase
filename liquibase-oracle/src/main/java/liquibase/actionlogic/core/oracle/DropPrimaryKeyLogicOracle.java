@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropPrimaryKeyAction;
-import liquibase.action.core.StringClauses;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
 import liquibase.actionlogic.core.DropPrimaryKeyLogic;
+import liquibase.util.StringClauses;
 
 public class DropPrimaryKeyLogicOracle extends DropPrimaryKeyLogic {
     @Override

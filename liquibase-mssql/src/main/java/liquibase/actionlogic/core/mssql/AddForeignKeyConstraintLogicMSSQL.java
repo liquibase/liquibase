@@ -1,13 +1,11 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddForeignKeyConstraintAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddForeignKeyConstraintLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
-import liquibase.exception.ActionPerformException;
+import liquibase.util.StringClauses;
 
 public class AddForeignKeyConstraintLogicMSSQL extends AddForeignKeyConstraintLogic {
 

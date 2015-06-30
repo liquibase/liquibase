@@ -1,14 +1,12 @@
 package liquibase.actionlogic.core.firebird;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateViewAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.firebird.FirebirdDatabase;
-import liquibase.exception.ValidationErrors;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 public class CreateViewLogicFirebird extends CreateViewLogic {
     @Override

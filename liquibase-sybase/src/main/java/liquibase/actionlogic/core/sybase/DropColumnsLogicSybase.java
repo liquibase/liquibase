@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.sybase;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropColumnsAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.sybase.SybaseDatabase;
+import liquibase.util.StringClauses;
 
 public class DropColumnsLogicSybase extends DropColumnsLogic {
     @Override

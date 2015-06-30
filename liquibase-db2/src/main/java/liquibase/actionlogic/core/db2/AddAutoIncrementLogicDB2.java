@@ -1,15 +1,12 @@
 package liquibase.actionlogic.core.db2;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddAutoIncrementAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddAutoIncrementLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ValidationErrors;
-
-import java.math.BigInteger;
+import liquibase.util.StringClauses;
 
 public class AddAutoIncrementLogicDB2 extends AddAutoIncrementLogic {
 

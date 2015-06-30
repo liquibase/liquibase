@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropUniqueConstraintActon;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropUniqueConstraintLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
+import liquibase.util.StringClauses;
 
 public class DropUniqueConstraintLogicMysql extends DropUniqueConstraintLogic {
     @Override

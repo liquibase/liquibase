@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.ModifyDataTypeAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.ModifyDataTypeLogic;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
+import liquibase.util.StringClauses;
 
 public class ModifyDataTypeLogicPostgresql extends ModifyDataTypeLogic {
     @Override

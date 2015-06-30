@@ -1,14 +1,12 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.SetTableRemarksAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetTableRemarksLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
+import liquibase.util.StringClauses;
 
 public class SetTableRemarksLogicMSSQL extends SetTableRemarksLogic {
     @Override

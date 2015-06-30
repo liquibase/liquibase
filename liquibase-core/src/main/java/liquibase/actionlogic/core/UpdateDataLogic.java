@@ -1,9 +1,7 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.UpdateSqlAction;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -12,15 +10,11 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
+import liquibase.util.StringClauses;
 
 import java.util.Date;
 import java.util.List;

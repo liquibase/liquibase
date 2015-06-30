@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.TagDatabaseAction;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -12,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class TagDatabaseLogic extends AbstractActionLogic<TagDatabaseAction> {
 

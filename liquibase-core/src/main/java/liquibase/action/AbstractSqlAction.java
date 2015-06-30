@@ -1,7 +1,7 @@
 package liquibase.action;
 
-import liquibase.action.core.StringClauses;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 /**
  * Standard base class for sql-based actions.

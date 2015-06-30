@@ -1,9 +1,7 @@
 package liquibase.actionlogic.core.hsql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AlterSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AlterSequenceLogic;
 import liquibase.database.Database;
 import liquibase.database.core.hsql.HsqlDatabase;

@@ -2,10 +2,10 @@ package liquibase.actionlogic.core.asany;
 
 import liquibase.Scope;
 import liquibase.action.core.RenameTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.asany.SybaseASADatabase;
+import liquibase.util.StringClauses;
 
 public class RenameTableLogicSybaseASA extends RenameTableLogic {
     @Override

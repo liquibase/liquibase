@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.hsql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.SetNullableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.hsql.HsqlDatabase;
+import liquibase.util.StringClauses;
 
 public class SetNullableLogicHsql extends SetNullableLogic {
 

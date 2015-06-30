@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.firebird;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.RenameColumnAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
 import liquibase.database.core.firebird.FirebirdDatabase;
+import liquibase.util.StringClauses;
 
 public class RenameColumnLogicFirebird extends RenameColumnLogic {
     @Override

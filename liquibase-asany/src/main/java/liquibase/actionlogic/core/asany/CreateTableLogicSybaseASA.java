@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.asany;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.asany.SybaseASADatabase;
+import liquibase.util.StringClauses;
 
 public class CreateTableLogicSybaseASA extends CreateTableLogic {
 

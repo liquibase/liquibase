@@ -1,9 +1,7 @@
 package liquibase.actionlogic.core;
 
-import liquibase.ExtensibleObject;
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.UpdateChangeSetChecksumAction;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -14,9 +12,9 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class UpdateChangeSetChecksumLogic extends AbstractActionLogic<UpdateChangeSetChecksumAction> {
 

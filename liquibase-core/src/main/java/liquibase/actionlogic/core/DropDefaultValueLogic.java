@@ -1,16 +1,14 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropDefaultValueAction;
 import liquibase.action.core.AlterColumnAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class DropDefaultValueLogic extends AbstractSqlBuilderLogic<DropDefaultValueAction> {
 

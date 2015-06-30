@@ -7,6 +7,7 @@ import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 import java.util.List;
 

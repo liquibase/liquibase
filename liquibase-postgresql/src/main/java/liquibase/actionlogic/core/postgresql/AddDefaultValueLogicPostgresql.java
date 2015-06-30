@@ -1,10 +1,8 @@
 package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
 import liquibase.action.core.RedefineSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.AddDefaultValueLogic;
@@ -14,8 +12,8 @@ import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.util.StringClauses;
 
 /**
  * Adds functionality for setting the sequence to be owned by the column with the default value

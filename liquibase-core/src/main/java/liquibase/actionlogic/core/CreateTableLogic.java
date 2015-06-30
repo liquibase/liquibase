@@ -15,6 +15,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 import org.slf4j.LoggerFactory;
 

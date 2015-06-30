@@ -1,19 +1,15 @@
 package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddAutoIncrementAction;
 import liquibase.action.core.AlterTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.AddAutoIncrementLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
-
-import java.math.BigInteger;
+import liquibase.util.StringClauses;
 
 public class AddAutoIncrementLogicMysql extends AddAutoIncrementLogic {
 

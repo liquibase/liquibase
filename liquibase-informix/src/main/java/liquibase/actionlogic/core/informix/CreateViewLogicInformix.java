@@ -1,10 +1,8 @@
 package liquibase.actionlogic.core.informix;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CreateViewAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.core.CreateViewLogic;
@@ -14,6 +12,7 @@ import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.View;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 public class CreateViewLogicInformix extends CreateViewLogic {
 

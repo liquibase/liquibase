@@ -2,6 +2,7 @@ package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class AlterColumnAction extends AbstractAction {
 

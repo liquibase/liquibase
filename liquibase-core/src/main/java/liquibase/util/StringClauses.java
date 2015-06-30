@@ -107,7 +107,9 @@ public class StringClauses {
     }
 
     public StringClauses append(LiteralClause literal) {
-        clauses.put(literal.getClass().getName().toLowerCase()+" #"+clauses.size(), literal);
+        if (literal != null) {
+            clauses.put(literal.getClass().getName().toLowerCase()+" #"+clauses.size(), literal);
+        }
         return this;
     }
 

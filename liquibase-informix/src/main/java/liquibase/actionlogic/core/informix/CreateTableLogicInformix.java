@@ -1,14 +1,13 @@
 package liquibase.actionlogic.core.informix;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateTableAction;
 import liquibase.action.core.ForeignKeyDefinition;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.UniqueConstraintDefinition;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
+import liquibase.util.StringClauses;
 
 public class CreateTableLogicInformix extends CreateTableLogic {
 

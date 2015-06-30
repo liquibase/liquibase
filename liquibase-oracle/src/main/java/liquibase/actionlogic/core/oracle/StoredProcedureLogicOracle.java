@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.StoredProcedureAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.StoredProcedureLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
+import liquibase.util.StringClauses;
 
 public class StoredProcedureLogicOracle extends StoredProcedureLogic {
     @Override

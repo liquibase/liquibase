@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddPrimaryKeyAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddPrimaryKeyLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
+import liquibase.util.StringClauses;
 
 public class AddPrimaryKeyLogicMysql extends AddPrimaryKeyLogic {
 

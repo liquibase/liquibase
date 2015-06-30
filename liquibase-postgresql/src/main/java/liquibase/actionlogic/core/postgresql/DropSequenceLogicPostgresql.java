@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.DropSequenceLogic;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
+import liquibase.util.StringClauses;
 
 public class DropSequenceLogicPostgresql extends DropSequenceLogic {
     @Override

@@ -1,10 +1,8 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
 import liquibase.action.core.AlterColumnAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
@@ -16,7 +14,7 @@ import liquibase.datatype.core.CharType;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class AddDefaultValueLogic extends AbstractSqlBuilderLogic<AddDefaultValueAction> {
 

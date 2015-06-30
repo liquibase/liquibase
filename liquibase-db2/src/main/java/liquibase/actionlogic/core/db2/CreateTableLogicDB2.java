@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.db2;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
+import liquibase.util.StringClauses;
 
 public class CreateTableLogicDB2 extends CreateTableLogic {
 

@@ -1,15 +1,13 @@
 package liquibase.actionlogic.core.derby;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.RenameColumnAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
 import liquibase.database.core.derby.DerbyDatabase;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.StringClauses;
 
 public class RenameColumnLogicDerby extends RenameColumnLogic {
     @Override

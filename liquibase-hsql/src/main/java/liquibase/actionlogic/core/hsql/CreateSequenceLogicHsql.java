@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.hsql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateSequenceAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateSequenceLogic;
 import liquibase.database.Database;
 import liquibase.database.core.hsql.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.util.StringClauses;
 
 public class CreateSequenceLogicHsql extends CreateSequenceLogic {
     @Override

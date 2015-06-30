@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.derby;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.ModifyDataTypeAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.ModifyDataTypeLogic;
 import liquibase.database.Database;
 import liquibase.database.core.derby.DerbyDatabase;
+import liquibase.util.StringClauses;
 
 public class ModifyDataTypeLogicDerby extends ModifyDataTypeLogic {
     @Override

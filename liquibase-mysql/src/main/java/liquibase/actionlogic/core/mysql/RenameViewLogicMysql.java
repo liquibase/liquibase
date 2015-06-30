@@ -1,12 +1,11 @@
 package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.RenameViewAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.RenameViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
+import liquibase.util.StringClauses;
 
 public class RenameViewLogicMysql extends RenameViewLogic {
     @Override

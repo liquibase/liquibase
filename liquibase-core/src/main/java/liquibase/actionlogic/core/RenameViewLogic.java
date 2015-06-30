@@ -1,14 +1,12 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.RenameViewAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.View;
+import liquibase.util.StringClauses;
 
 public class RenameViewLogic extends AbstractSqlBuilderLogic<RenameViewAction> {
 

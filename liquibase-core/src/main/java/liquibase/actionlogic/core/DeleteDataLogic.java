@@ -1,9 +1,7 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DeleteDataAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -14,8 +12,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
-
-import java.util.ArrayList;
+import liquibase.util.StringClauses;
 
 public class DeleteDataLogic extends AbstractSqlBuilderLogic<DeleteDataAction> {
 

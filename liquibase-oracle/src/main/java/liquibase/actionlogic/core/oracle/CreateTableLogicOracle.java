@@ -4,10 +4,10 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
+import liquibase.util.StringClauses;
 
 import java.util.List;
 

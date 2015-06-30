@@ -1,14 +1,11 @@
 package liquibase.actionlogic.core.h2;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.SetNullableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.SetNullableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.h2.H2Database;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.ValidationErrors;
+import liquibase.util.StringClauses;
 
 public class SetNullableLogicH2 extends SetNullableLogic {
 

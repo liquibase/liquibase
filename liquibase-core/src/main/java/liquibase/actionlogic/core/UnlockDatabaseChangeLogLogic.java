@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.UnlockDatabaseChangeLogAction;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -12,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.util.StringClauses;
 
 public class UnlockDatabaseChangeLogLogic extends AbstractActionLogic<UnlockDatabaseChangeLogAction> {
 

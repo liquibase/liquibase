@@ -1,17 +1,15 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropPrimaryKeyAction;
 import liquibase.action.core.AlterTableAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class DropPrimaryKeyLogic extends AbstractSqlBuilderLogic<DropPrimaryKeyAction> {
 

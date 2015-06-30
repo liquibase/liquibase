@@ -1,14 +1,12 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddDefaultValueAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.AddDefaultValueLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.ObjectName;
+import liquibase.util.StringClauses;
 
 public class AddDefaultValueLogicMSSQL extends AddDefaultValueLogic {
 

@@ -4,6 +4,7 @@ import liquibase.action.AbstractAction;
 import liquibase.actionlogic.UpdateResult;
 import liquibase.structure.ObjectName;
 import liquibase.util.CollectionUtil;
+import liquibase.util.StringClauses;
 
 import java.util.Arrays;
 import java.util.List;

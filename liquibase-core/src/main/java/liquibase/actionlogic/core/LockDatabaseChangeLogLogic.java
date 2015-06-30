@@ -1,9 +1,7 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.LockDatabaseChangeLogAction;
-import liquibase.action.core.StringClauses;
 import liquibase.action.core.UpdateDataAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
@@ -15,6 +13,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.util.NetUtil;
+import liquibase.util.StringClauses;
 
 import java.sql.Timestamp;
 import java.util.Date;

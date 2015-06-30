@@ -1,22 +1,12 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.DropViewAction;
-import liquibase.action.core.StringClauses;
-import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
-import liquibase.statement.core.DropViewStatement;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
+import liquibase.util.StringClauses;
 
 public class DropViewLogic extends AbstractSqlBuilderLogic<DropViewAction> {
 

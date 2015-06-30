@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.db2;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.CreateIndexAction;
-import liquibase.action.core.StringClauses;
 import liquibase.actionlogic.core.CreateIndexLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringClauses;
 
 public class CreateIndexLogicDB2 extends CreateIndexLogic {
 
