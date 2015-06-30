@@ -9,6 +9,7 @@ import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.statement.SqlStatement
+import spock.lang.Unroll
 
 import static org.junit.Assert.assertEquals
 
@@ -26,6 +27,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
          thrown(UnexpectedLiquibaseException.class)
     }
 
+    @Unroll
     def "lines from file parse into one or more statements correctly"() throws Exception {
         when:
         SQLFileChange change2 = new SQLFileChange();
@@ -48,7 +50,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
         "SELECT * FROM customer\ngo\nSELECT * FROM table\ngo" | ["SELECT * FROM customer", "SELECT * FROM table"]
         "SELECT * FROM go\ngo\nSELECT * from gogo\ngo\n" | ["SELECT * FROM go", "SELECT * from gogo"]
         "insert into table ( col ) values (' value with; semicolon ');" | ["insert into table ( col ) values (' value with; semicolon ')"]
-        "--\n-- This is a comment\nUPDATE tablename SET column = 1;\nGO" | ["--\n-- This is a comment\nUPDATE tablename SET column = 1", "GO"]
+        "--\n-- This is a comment\nUPDATE tablename SET column = 1;\nGO" | ["--\n-- This is a comment\nUPDATE tablename SET column = 1"]
     }
 
 

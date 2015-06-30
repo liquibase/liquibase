@@ -145,16 +145,16 @@ public class AbstractSQLChangeTest {
         assertEquals("LINE 3", ((RawSqlStatement) statements[2]).getSql());
     }
 
-//    @Test
-//    public void generateStatements_convertsEndingsOnSqlServer() {
+    @Test
+    public void generateStatements_convertsEndingsOnSqlServer() {
 //        ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("LINE 1;\n--a comment\nLINE 2;\nLINE 3;");
 //
 //        change.setSplitStatements(false);
 //        change.setStripComments(true);
 //        SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
 //        assertEquals(1, statements.length);
-//        assertEquals("LINE 1;\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
-//    }
+//        assertEquals("LINE 1;\r\n\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+    }
 
     @Test
     public void generateStatements_keepComments() {
@@ -177,7 +177,7 @@ public class AbstractSQLChangeTest {
         change.setStripComments(true);
         SqlStatement[] statements = change.generateStatements(mock(Database.class));
         assertEquals(1, statements.length);
-        assertEquals("LINE 1;\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+        assertEquals("LINE 1;\n\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
 
     @Test
