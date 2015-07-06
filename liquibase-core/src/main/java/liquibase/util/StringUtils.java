@@ -46,7 +46,8 @@ public class StringUtils {
                 .replace("\\n", "")
                 .replace(";", "")
                 .replace(" ", "")
-                .replace("go", "")) == null) {
+                .replace("go", "")
+        ) == null) {
             endDelimiter = null;
         }
 
@@ -57,12 +58,11 @@ public class StringUtils {
 
         List<String> returnArray = new ArrayList<String>();
 
+        String currentString = "";
         for (StringClauses parsed : parsedList) {
-            String currentString;
             if (useDefaultDelimiter) {
                 currentString = parsed.toString();
             } else {
-                currentString = "";
                 for (Object piece : parsed.toArray(false)) {
                     if (splitStatements && piece instanceof String && ((String) piece).matches(endDelimiter)) {
                         currentString = StringUtils.trimToNull(currentString);
@@ -76,8 +76,19 @@ public class StringUtils {
                 }
             }
 
+            if (useDefaultDelimiter) {
+                currentString = StringUtils.trimToNull(currentString);
+                if (currentString != null) {
+                    returnArray.add(currentString);
+                }
+            } else {
+                currentString += ";";
+            }
+        }
+
+        if (!useDefaultDelimiter) {
             currentString = StringUtils.trimToNull(currentString);
-            if (currentString != null) {
+            if (currentString != null && !currentString.equals(";")) {
                 returnArray.add(currentString);
             }
         }

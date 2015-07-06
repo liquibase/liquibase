@@ -144,7 +144,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (statement.getNotNullColumns().contains(column)) {
                 buffer.append(" NOT NULL");
             } else {
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
+                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
                     buffer.append(" NULL");
                 }
             }
