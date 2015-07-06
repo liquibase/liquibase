@@ -41,18 +41,28 @@ public class StringUtils {
      */
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
 
-        boolean defaultDelimiter = endDelimiter == null;
+        if (endDelimiter != null && StringUtils.trimToNull(endDelimiter.toLowerCase()
+                .replace("\\r", "")
+                .replace("\\n", "")
+                .replace(";", "")
+                .replace(" ", "")
+                .replace("go", "")
+        ) == null) {
+            endDelimiter = null;
+        }
+
+
+        boolean useDefaultDelimiter = endDelimiter == null;
 
         StringClauses[] parsedList = SqlParser.parse(multiLineSQL, splitStatements, true, !stripComments, !splitStatements);
 
         List<String> returnArray = new ArrayList<String>();
 
+        String currentString = "";
         for (StringClauses parsed : parsedList) {
-            String currentString;
-            if (defaultDelimiter) {
+            if (useDefaultDelimiter) {
                 currentString = parsed.toString();
             } else {
-                currentString = "";
                 for (Object piece : parsed.toArray(false)) {
                     if (splitStatements && piece instanceof String && ((String) piece).matches(endDelimiter)) {
                         currentString = StringUtils.trimToNull(currentString);
@@ -66,8 +76,19 @@ public class StringUtils {
                 }
             }
 
+            if (useDefaultDelimiter) {
+                currentString = StringUtils.trimToNull(currentString);
+                if (currentString != null) {
+                    returnArray.add(currentString);
+                }
+            } else {
+                currentString += ";";
+            }
+        }
+
+        if (!useDefaultDelimiter) {
             currentString = StringUtils.trimToNull(currentString);
-            if (currentString != null) {
+            if (currentString != null && !currentString.equals(";")) {
                 returnArray.add(currentString);
             }
         }
