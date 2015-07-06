@@ -58,6 +58,9 @@ public class UnknownType extends LiquibaseDataType {
                 || getName().equalsIgnoreCase("NTEXT")
                 || getName().equalsIgnoreCase("SYSNAME")
                 || getName().equalsIgnoreCase("SMALLMONEY")
+                || getName().equalsIgnoreCase("GEOGRAPHY")
+                || getName().equalsIgnoreCase("GEOMETRY")
+                || getName().equalsIgnoreCase("SQL_VARIANT")
         )) {
             parameters = new Object[0];
         }

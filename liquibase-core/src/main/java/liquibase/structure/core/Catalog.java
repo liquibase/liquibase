@@ -99,5 +99,10 @@ public class Catalog extends AbstractDatabaseObject {
         return getName() != null ? getName().hashCode() : 0;
     }
 
-
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> fields = super.getSerializableFields();
+        fields.remove("objects");
+        return fields;
+    }
 }

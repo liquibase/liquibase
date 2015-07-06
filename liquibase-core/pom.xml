@@ -19,7 +19,7 @@
       liquibase-parent
     </artifactId>
     <version>
-      3.3.497
+      3.3.526
     </version>
     <relativePath>
       ../pom.xml

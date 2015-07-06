@@ -1,3 +1,18 @@
+692026b CORE-2401 MSSQL handling timestamp according to sql standard,
+546b0df CORE-2412 Handle Oracle BFILE types
+2734e21 CORE-2411 BLOB string default values not quoted
+cd22eae Handle smalldatetime with parameters
+fc0d769 CORE-2401 MSSQL handling timestamp according to sql standard, not sqlserver usage (cherry picked from commit b7d1f44)
+f37d362 CORE-2401 MSSQL handling timestamp according to sql standard, not sqlserver usage (cherry picked from commit b7d1f44)
+a500871 CORE-2410 Snapshot should not include paramaters for MSSQL geometry, geography or sql_variant types
+ddb6ed8 CORE-1924 SQLServer diff - DATETIME2 not being handled correctly
+c516725 CORE-2404 Ability to preserve TEXT type in mssql snapshot and update
+29f9083 CORE-2402 Oracle NCLOB defaultValues not read correctly
+63fcbbf CORE-1924 SQLServer diff - DATETIME2 not being handled correctly
+93074d5 CORE-1924 SQLServer diff - DATETIME2 not being handled correctly
+624b10a CORE-2397 MSSQL View Snapshot should not use sp_helptext
+4aa5887 Merge branch 'dvone-2772' into ddb
+76415c4 Merge branch 'dvone-2704' into ddb
 cec53e9 CORE-2386 Set the connection default catalog/schema if defaultCatalogName or defaultSchemaName is set
 82d888c By the time we get to TableSnapshotGenerator and JdbcSnapshotGenerator we need to trust the object captialization. Otherwise things get lost
 330de28 By the time we get to TableSnapshotGenerator and JdbcSnapshotGenerator we need to trust the object captialization. Otherwise things get lost
@@ -18,6 +33,8 @@ f3b9acc Temporarily revert change 007701b due to issues with some columns not be
 acfa6bd Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
 2bfa4c1 CORE-2364 Better handling of referenceDefaultSchemaName and referenceDefaultCatalogName
 3132bc4 Don't have a max line length or we produce invalid json
+7977204 Handle catalog-level and database-level objects better in snapshot output
+e491096 Improved snapshot parsing and serialization
 1adb065 Fixed type due to mistyped ctrl-k
 5aa5313 Fixing failing test
 8c46d9a Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb

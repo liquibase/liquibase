@@ -2,23 +2,17 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Column extends AbstractDatabaseObject {
 
@@ -305,9 +299,15 @@ public class Column extends AbstractDatabaseObject {
             type.load(typeNode, resourceAccessor);
             setType(type);
         }
+        ParsedNode autoIncrementInformation = parsedNode.getChild(null, "autoIncrementInformation");
+        if (autoIncrementInformation != null) {
+            AutoIncrementInformation info = new AutoIncrementInformation();
+            info.load(autoIncrementInformation, resourceAccessor);
+            setAutoIncrementInformation(info);
+        }
     }
 
-    public static class AutoIncrementInformation {
+    public static class AutoIncrementInformation extends AbstractLiquibaseSerializable {
         private BigInteger startWith;
         private BigInteger incrementBy;
 
@@ -331,6 +331,22 @@ public class Column extends AbstractDatabaseObject {
         @Override
         public String toString() {
             return "AUTO INCREMENT START WITH " + startWith + " INCREMENT BY " + incrementBy;
+        }
+
+        @Override
+        public String getSerializedObjectName() {
+            return "autoIncrementInformation";
+        }
+
+        @Override
+        public String getSerializedObjectNamespace() {
+            return STANDARD_CHANGELOG_NAMESPACE;
+        }
+
+        @Override
+        public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+            this.startWith = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "startWith"));
+            this.incrementBy = (BigInteger) convertEscaped(parsedNode.getChildValue(null, "incrementBy"));
         }
     }
 }
