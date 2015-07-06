@@ -13,9 +13,10 @@ import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertSetStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
+import liquibase.util.BooleanParser;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
@@ -23,11 +24,10 @@ import liquibase.util.csv.CSVReader;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import liquibase.util.BooleanParser;
 
 
 @DatabaseChange(name="loadData",
-        description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be converted to a database NULL rather than the string 'NULL'\n" +
+        description = "Loads data from a CSV file into an existing table. Ignores lines starting with # (hash sign). A value of NULL in a cell will be converted to a database NULL rather than the string 'NULL'\n" +
                 "\n" +
                 "Date/Time values included in the CSV file should be in ISO formathttp://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will initially set the date format to be 'yyyy-MM-dd'T'HH:mm:ss' and then it checks for two special cases which will override the data format string.\n" +
                 "\n" +
@@ -173,7 +173,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
 
-                if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
+                if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)
+                        || isCsvCommentLine(line)) {
                     continue; //nothing on this line
                 }
                 InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
@@ -254,6 +255,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 				}
 			}
 		}
+    }
+
+    private boolean isCsvCommentLine(String[] line) {
+        String firstSegmentOfString = line[0];
+        return org.apache.commons.lang.StringUtils.startsWith(firstSegmentOfString, "#");
     }
 
     @Override

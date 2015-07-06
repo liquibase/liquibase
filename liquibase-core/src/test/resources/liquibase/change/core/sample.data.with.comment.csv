@@ -1,0 +1,12 @@
+name,username,security_level,last_login,locked
+
+#This is Fred entry, someone may need that descripton
+Fred,fred,2,2008-03-02T12:13:00,true
+
+#This Willy entry, someone may need that descripton
+Willy,willy,15,2007-03-19T18:23:30,false
+
+#another comment
+Willy2,willy,15,2007-03-19T18:23:30,false
+Willy3,willy,15,2007-03-19T18:23:30,false
+Willy4,willy,15,2007-03-19T18:23:30,false
