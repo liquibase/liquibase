@@ -87,17 +87,18 @@ public class DropUniqueConstraintChange extends AbstractChange {
 
     @Override
     public ActionStatus checkStatus(Database database) {
-        try {
-            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName());
-            if (getUniqueColumns() != null) {
-                for (String column : getUniqueColumns().split("\\s*,\\s*")) {
-                    example.addColumn(example.getColumns().size(), new Column(new ObjectName(column)));
-                }
-            }
-            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(example, database), "Unique constraint exists");
-        } catch (Exception e) {
-            return new ActionStatus().unknown(e);
-        }
+//        try {
+//            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName());
+//            if (getUniqueColumns() != null) {
+//                for (String column : getUniqueColumns().split("\\s*,\\s*")) {
+//                    example.addColumn(example.getColumns().size(), new Column(new ObjectName(column)));
+//                }
+//            }
+//            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(example, database), "Unique constraint exists");
+//        } catch (Exception e) {
+//            return new ActionStatus().unknown(e);
+//        }
+        return null;
     }
 //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
 //

@@ -59,12 +59,12 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             List<CachedRow> tableMetaDataRs = null;
             try {
                 tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
-                for (CachedRow row : tableMetaDataRs) {
-                    String tableName = row.getString("TABLE_NAME");
-                    Table tableExample = (Table) new Table(new ObjectName(cleanNameFromDatabase(tableName, database))).setSchema(schema);
+//                for (CachedRow row : tableMetaDataRs) {
+//                    String tableName = row.getString("TABLE_NAME");
+//                    Table tableExample = (Table) new Table(new ObjectName(cleanNameFromDatabase(tableName, database))).setSchema(schema);
 
-                    schema.addDatabaseObject(tableExample);
-                }
+//                    schema.addDatabaseObject(tableExample);
+//                }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }
@@ -83,10 +83,10 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         Table table = new Table().setName(new ObjectName(cleanNameFromDatabase(rawTableName, database)));
-        table.setRemarks(remarks);
+        table.remarks = remarks;
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
-        table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
+//        table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
         if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
             table.set("temporary", "GLOBAL");

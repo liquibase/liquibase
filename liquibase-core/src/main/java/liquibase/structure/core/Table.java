@@ -9,11 +9,6 @@ import java.util.Set;
 
 public class Table extends Relation {
 
-    public PrimaryKey primaryKey;
-    public Set<ForeignKey> outgoingForeignKeys;
-    public Set<Index> indexes;
-    public Set<UniqueConstraint> uniqueConstraints;
-
     public Table() {
     }
 
@@ -22,7 +17,6 @@ public class Table extends Relation {
     }
 
     public Table(String catalogName, String schemaName, String tableName) {
-        this.setSchema(new Schema(catalogName, schemaName));
-        setName(new ObjectName(catalogName, schemaName, tableName));
+        this(new ObjectName(catalogName, schemaName, tableName));
     }
 }

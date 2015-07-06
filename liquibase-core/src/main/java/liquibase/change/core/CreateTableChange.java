@@ -159,8 +159,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                         ConstraintsConfig constraints = columnConfig.getConstraints();
                         if (constraints != null) {
                             if (constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
-                                PrimaryKey tablePk = tableSnapshot.primaryKey;
-                                status.assertCorrect(tablePk != null && tablePk.getColumnNamesAsList().contains(columnConfig.getName()), "Column "+columnConfig.getName()+" is not part of the primary key");
+//                                PrimaryKey tablePk = tableSnapshot.primaryKey;
+//                                status.assertCorrect(tablePk != null && tablePk.getColumnNamesAsList().contains(columnConfig.getName()), "Column "+columnConfig.getName()+" is not part of the primary key");
                             }
                             if (constraints.isNullable() != null) {
                                 if (constraints.isNullable()) {

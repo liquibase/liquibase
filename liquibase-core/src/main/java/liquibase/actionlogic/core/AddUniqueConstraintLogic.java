@@ -9,6 +9,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.core.Column;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -36,13 +37,13 @@ public class AddUniqueConstraintLogic extends AbstractSqlBuilderLogic<AddUniqueC
     @Override
     public ActionResult execute(AddUniqueConstraintAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterTableAction(
-                action.tableName,
+                action.uniqueConstraint.getTableName(),
                 generateSql(action, scope)
         ));
     }
 
     protected StringClauses generateSql(AddUniqueConstraintAction action, Scope scope) {
-        String constraintName = action.constraintName;
+        String constraintName = action.uniqueConstraint.name.name;
         Database database = scope.getDatabase();
 
         StringClauses clauses = new StringClauses();
@@ -51,23 +52,23 @@ public class AddUniqueConstraintLogic extends AbstractSqlBuilderLogic<AddUniqueC
             clauses.append(Clauses.constraintName, database.escapeConstraintName(constraintName));
         }
         clauses.append("UNIQUE");
-        clauses.append("(" + database.escapeColumnNameList(StringUtils.join(action.columnNames, ",")) + "");
+        clauses.append("(" + database.escapeColumnNameList(StringUtils.join(action.uniqueConstraint.columns, ", ", new StringUtils.ObjectNameFormatter(Column.class, scope.getDatabase()))) + "");
 
         if (database.supportsInitiallyDeferrableColumns()) {
-            if (ObjectUtil.defaultIfEmpty(action.deferrable, false)) {
+            if (ObjectUtil.defaultIfEmpty(action.uniqueConstraint.deferrable, false)) {
                 clauses.append("DEFERRABLE");
             }
 
-            if (ObjectUtil.defaultIfEmpty(action.initiallyDeferred, false)) {
+            if (ObjectUtil.defaultIfEmpty(action.uniqueConstraint.initiallyDeferred, false)) {
                 clauses.append("INITIALLY DEFERRED");
             }
         }
 
-        if (ObjectUtil.defaultIfEmpty(action.disabled, false)) {
+        if (ObjectUtil.defaultIfEmpty(action.uniqueConstraint.disabled, false)) {
             clauses.append("DISABLE");
         }
 
-        String tablespace = action.tablespace;
+        String tablespace = action.uniqueConstraint.tablespace;
 
         if (tablespace != null && database.supportsTablespaces()) {
             clauses.append(Clauses.tablespace, "USING INDEX TABLESPACE " + tablespace);

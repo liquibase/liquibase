@@ -55,17 +55,17 @@ public class ViewExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	String currentSchemaName;
         String currentCatalogName;
-    	try {
+//    	try {
             currentCatalogName = getCatalogName();
             currentSchemaName = getSchemaName();
-            if (!SnapshotGeneratorFactory.getInstance().has(new View(new ObjectName(getViewName())).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
-                throw new PreconditionFailedException("View "+database.escapeTableName(currentCatalogName, currentSchemaName, getViewName())+" does not exist", changeLog, this);
-            }
-        } catch (PreconditionFailedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new PreconditionErrorException(e, changeLog, this);
-        }
+//            if (!SnapshotGeneratorFactory.getInstance().has(new View(new ObjectName(getViewName())).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
+//                throw new PreconditionFailedException("View "+database.escapeTableName(currentCatalogName, currentSchemaName, getViewName())+" does not exist", changeLog, this);
+//            }
+//        } catch (PreconditionFailedException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            throw new PreconditionErrorException(e, changeLog, this);
+//        }
     }
 
     @Override

@@ -29,7 +29,7 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         Set<String> hashes = new HashSet<String>();
-        hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), accordingTo)));
+//        hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), accordingTo)));
         hashes.addAll(Arrays.asList(chain.hash(databaseObject, accordingTo)));
 
         return hashes.toArray(new String[hashes.size()]);
@@ -51,29 +51,29 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
             }
         }
 
-        if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
-                otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
-        boolean columnsTheSame;
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+//        if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
+//                otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
+//        boolean columnsTheSame;
+//        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
+//            @Override
+//            public String toString(Column obj) {
+//                return obj.toString(false);
+//            }
+//        };
+//
+//        if (accordingTo.isCaseSensitive(ForeignKey.class)) {
+//                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
+//                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
+//        } else {
+//                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
+//                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
+//        }
+//
+//        return columnsTheSame &&
+//                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo) &&
+//                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), accordingTo);
 
-        if (accordingTo.isCaseSensitive(ForeignKey.class)) {
-                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
-                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
-        } else {
-                columnsTheSame = StringUtils.join(thisForeignKey.getForeignKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getForeignKeyColumns(), ",", formatter)) &&
-                        StringUtils.join(thisForeignKey.getPrimaryKeyColumns(), ",", formatter).equalsIgnoreCase(StringUtils.join(otherForeignKey.getPrimaryKeyColumns(), ",", formatter));
-        }
-
-        return columnsTheSame &&
-                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo) &&
-                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), accordingTo);
-
-    }
+//    }
 
         return false;
     }

@@ -24,14 +24,6 @@ public abstract class AbstractAction extends AbstractExtensibleObject implements
     }
 
     /**
-     * Default implementation of {@link Action#checkStatus(Scope)} returns an {@link liquibase.action.ActionStatus.Status#unknown}.
-     */
-    @Override
-    public ActionStatus checkStatus(Scope scope) {
-        return new ActionStatus().unknown("No checkStatus defined");
-    }
-
-    /**
      * Default implementation compares the output of the {@link #describe()} method.
      */
     @Override

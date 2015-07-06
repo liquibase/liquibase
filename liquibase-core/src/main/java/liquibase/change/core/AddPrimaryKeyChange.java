@@ -135,10 +135,10 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
         try {
-            PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
+//            PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
 
-            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertApplied(snapshot != null, "Primary key does not exist");
+//            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+//            result.assertApplied(snapshot != null, "Primary key does not exist");
 
             return result;
 

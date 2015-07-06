@@ -26,15 +26,15 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         PrimaryKey pk = (PrimaryKey) databaseObject;
-        if (databaseObject.getName() == null) {
-            return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(), accordingTo);
-        } else {
-            if (pk.getTable() == null || pk.getTable().getName() == null) {
+//        if (databaseObject.getName() == null) {
+//            return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(), accordingTo);
+//        } else {
+//            if (pk.getTable() == null || pk.getTable().getName() == null) {
                 return new String[] {pk.getSimpleName().toLowerCase() };
-            } else {
-                return new String[] {pk.getSimpleName().toLowerCase(), pk.getTable().getSimpleName().toLowerCase()};
-            }
-        }
+//            } else {
+//                return new String[] {pk.getSimpleName().toLowerCase(), pk.getTable().getSimpleName().toLowerCase()};
+//            }
+//        }
     }
 
     @Override
@@ -46,11 +46,11 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
         PrimaryKey thisPrimaryKey = (PrimaryKey) databaseObject1;
         PrimaryKey otherPrimaryKey = (PrimaryKey) databaseObject2;
 
-        if (thisPrimaryKey.getTable() != null && thisPrimaryKey.getTable().getName() != null && otherPrimaryKey.getTable() != null && otherPrimaryKey.getTable().getName() != null) {
-            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
-        } else {
+//        if (thisPrimaryKey.getTable() != null && thisPrimaryKey.getTable().getName() != null && otherPrimaryKey.getTable() != null && otherPrimaryKey.getTable().getName() != null) {
+//            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
+//        } else {
             return StringUtils.trimToEmpty(thisPrimaryKey.getSimpleName()).equalsIgnoreCase(otherPrimaryKey.getSimpleName());
-        }
+//        }
     }
 
 

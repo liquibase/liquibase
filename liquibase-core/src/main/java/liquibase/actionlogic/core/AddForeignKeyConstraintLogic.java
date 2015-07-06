@@ -9,9 +9,12 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
+import liquibase.util.StringUtils;
 
 public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<AddForeignKeyConstraintAction> {
 
@@ -50,25 +53,24 @@ public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<AddFor
 
         StringClauses clauses = new StringClauses()
                 .append("ADD CONSTRAINT")
-                .append(AddForeignKeyConstraintLogic.Clauses.constraintName, action.constraintName)
+                .append(AddForeignKeyConstraintLogic.Clauses.constraintName, action.foreignKey.getSimpleName())
                 .append("FOREIGN KEY")
-                .append(Clauses.baseColumnNames, "(" + database.escapeColumnNameList(action.baseColumnNames) + ")")
+                .append(Clauses.baseColumnNames, "(" + StringUtils.join(action.foreignKey.foreignKeyColumns, ", ", new StringUtils.ObjectSimpleNameFormatter(Column.class, scope.getDatabase())) + ")")
                 .append("REFERENCES")
-                .append(Clauses.referencedTableName, database.escapeObjectName(action.referencedTableName, Table.class))
-                .append(Clauses.referencedColumnNames, "(" + database.escapeColumnNameList(action.referencedColumnNames) + ")");
+                .append(Clauses.referencedTableName, database.escapeObjectName(action.foreignKey.foreignKeyColumns.get(0).container, Table.class))
+                .append(Clauses.referencedColumnNames, "(" + StringUtils.join(action.foreignKey.primaryKeyColumns, ", ", new StringUtils.ObjectSimpleNameFormatter(Column.class, scope.getDatabase())) + ")");
 
-        if (ObjectUtil.defaultIfEmpty(action.onUpdate, false)) {
+        if (action.foreignKey.updateRule != null) {
             clauses.append("ON UPDATE");
         }
 
-        String onDelete = action.onDelete;
-        if (onDelete != null) {
-            clauses.append("ON DELETE " + onDelete);
+        if (action.foreignKey.deleteRule != null) {
+            clauses.append("ON DELETE " + action.foreignKey.deleteRule);
         }
 
 
-        boolean deferrable = ObjectUtil.defaultIfEmpty(action.deferrable, false);
-        boolean initiallyDeferred = ObjectUtil.defaultIfEmpty(action.initiallyDeferred, false);
+        boolean deferrable = ObjectUtil.defaultIfEmpty(action.foreignKey.deferrable, false);
+        boolean initiallyDeferred = ObjectUtil.defaultIfEmpty(action.foreignKey.initiallyDeferred, false);
         if (deferrable || initiallyDeferred) {
             if (deferrable) {
                 clauses.append("DEFERRABLE");
@@ -86,7 +88,7 @@ public class AddForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<AddFor
     public ActionResult execute(AddForeignKeyConstraintAction action, Scope scope) throws ActionPerformException {
 
         return new DelegateResult(new AlterTableAction(
-                action.baseTableName,
+                action.foreignKey.foreignKeyColumns.get(0).container,
                 generateSql(action, scope)
         ));
     }

@@ -174,10 +174,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
         try {
-            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
+//            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
 
-            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertApplied(snapshot != null, "Unique constraint does not exist");
+//            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+//            result.assertApplied(snapshot != null, "Unique constraint does not exist");
 
             return result;
 

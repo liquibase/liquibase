@@ -71,11 +71,11 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
         try {
             ForeignKey example = new ForeignKey();
             example.setName(new ObjectName(getForeignKeyName()));
-            example.setForeignKeyTable(new Table());
-            if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
-                example.getForeignKeyTable().setName(new ObjectName(getForeignKeyTableName()));
-            }
-            example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
+//            example.setForeignKeyTable(new Table());
+//            if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
+//                example.getForeignKeyTable().setName(new ObjectName(getForeignKeyTableName()));
+//            }
+//            example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                     throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);

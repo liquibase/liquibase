@@ -2,11 +2,11 @@ package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateTableAction;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
+import liquibase.structure.core.Column;
 import liquibase.util.StringClauses;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public class CreateTableLogicOracle extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
+    protected StringClauses generateColumnSql(Column column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         StringClauses clauses = super.generateColumnSql(column, action, scope, additionalActions);
 
         String defaultValue = clauses.get(ColumnClauses.defaultValue);

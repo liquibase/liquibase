@@ -46,7 +46,7 @@ public class ChangedTableChangeGenerator implements ChangedObjectChangeGenerator
 //            }
 //
 //            change.setTableName(table.getName());
-            change.setRemarks(table.getRemarks());
+//            change.setRemarks(table.getRemarks());
 
             return new Change[] {
                     change

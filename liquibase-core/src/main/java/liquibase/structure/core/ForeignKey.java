@@ -3,168 +3,52 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ForeignKey extends AbstractDatabaseObject{
+public class ForeignKey extends AbstractDatabaseObject {
+
+    public List<ObjectName> primaryKeyColumns = new ArrayList<>();
+    public List<ObjectName> foreignKeyColumns = new ArrayList<>();
+    public Boolean deferrable;
+    public Boolean initiallyDeferred;
+    public ForeignKeyConstraintType updateRule;
+    public ForeignKeyConstraintType deleteRule;
+    public ObjectName backingIndex;
 
     public ForeignKey() {
-        setForeignKeyColumns(new ArrayList<Column>());
-        setPrimaryKeyColumns(new ArrayList<Column>());
     }
 
     public ForeignKey(ObjectName name) {
-        this();
-        setName(name);
+        super(name);
     }
 
-    public ForeignKey(String name, String foreignKeyCatalog, String foreignKeySchema, String foreignKeyTable, Column... baseTableColumns) {
-        this(new ObjectName(name));
-
-        if (foreignKeyTable != null) {
-            setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
-        }
-        if (baseTableColumns != null && baseTableColumns.length > 0 && baseTableColumns[0] != null) {
-            setForeignKeyColumns(Arrays.asList(baseTableColumns));
-        }
-
+    public ForeignKey(ObjectName name, List<ObjectName> foreignKeyColumns, List<ObjectName> primaryKeyColumns) {
+        this(name);
+        this.foreignKeyColumns = CollectionUtil.createIfNull(foreignKeyColumns);
+        this.primaryKeyColumns = CollectionUtil.createIfNull(primaryKeyColumns);
     }
 
     @Override
     public DatabaseObject[] getContainingObjects() {
-
-        List<Column> objects = new ArrayList<Column>();
-        if (getPrimaryKeyColumns() != null) {
-            for (Column column : getPrimaryKeyColumns()) {
-                objects.add(column);
-            }
-        }
-
-        if (getForeignKeyColumns() != null) {
-            for (Column column : getForeignKeyColumns()) {
-                objects.add(column);
-            }
-        }
-
-        return objects.toArray(new DatabaseObject[objects.size()]);
+        return null;
     }
 
     @Override
     public Schema getSchema() {
-        if (getForeignKeyTable() == null) {
-            return null;
-        }
-
-        return getForeignKeyTable().getSchema();
+        return null;
     }
 
-
-    public Table getPrimaryKeyTable() {
-        return get("primaryKeyTable", Table.class);
-    }
-
-    public ForeignKey setPrimaryKeyTable(Table primaryKeyTable) {
-        this.set("primaryKeyTable", primaryKeyTable);
-        return this;
-    }
-
-    public List<Column> getPrimaryKeyColumns() {
-        return get("primaryKeyColumns", List.class);
-    }
-
-    public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
-        this.get("primaryKeyColumns", List.class).add(primaryKeyColumn);
-
-        return this;
-    }
-
-    public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
-        this.set("primaryKeyColumns", primaryKeyColumns);
-//        for (Column column : getPrimaryKeyColumns()) {
-//            column.relation = getPrimaryKeyTable();
-//        }
-        return this;
-    }
-
-    public Table getForeignKeyTable() {
-        return get("foreignKeyTable", Table.class);
-    }
-
-    public ForeignKey setForeignKeyTable(Table foreignKeyTable) {
-        this.set("foreignKeyTable", foreignKeyTable);
-        return this;
-    }
-
-    public List<Column> getForeignKeyColumns() {
-        return get("foreignKeyColumns", List.class);
-    }
-
-    public void addForeignKeyColumn(Column foreignKeyColumn) {
-//        foreignKeyColumn.relation = getForeignKeyTable();
-        get("foreignKeyColumns", List.class).add(foreignKeyColumn);
-    }
-
-    public ForeignKey setForeignKeyColumns(List<Column> foreignKeyColumns) {
-        this.set("foreignKeyColumns", foreignKeyColumns);
-
-//        for (Column column : getForeignKeyColumns()) {
-//            column.relation = getForeignKeyTable();
-//        }
-
-        return this;
-    }
 
     @Override
     public String toString() {
-        StringUtils.StringUtilsFormatter<Column> columnFormatter = new StringUtils.StringUtilsFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.getName().toShortString();
-            }
-        };
-        return getName() + "(" + getForeignKeyTable() + "." + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + " -> " + getPrimaryKeyTable() + "." + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + ")";
+        return getName() + "(" + StringUtils.join(foreignKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + " -> " + StringUtils.join(primaryKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + ")";
     }
 
-
-    public boolean isDeferrable() {
-        return get("deferrable", false);
-    }
-
-    public ForeignKey setDeferrable(boolean deferrable) {
-        this.set("deferrable", deferrable);
-        return this;
-    }
-
-
-    public boolean isInitiallyDeferred() {
-        return get("initiallyDeferred", false);
-    }
-
-    public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {
-        this.set("initiallyDeferred", initiallyDeferred);
-        return this;
-    }
-
-    public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
-        this.set("updateRule", rule);
-        return this;
-    }
-
-    public ForeignKeyConstraintType getUpdateRule() {
-        return get("updateRule", ForeignKeyConstraintType.class);
-    }
-
-    public ForeignKey setDeleteRule(ForeignKeyConstraintType rule) {
-        this.set("deleteRule", rule);
-        return this;
-    }
-
-    public ForeignKeyConstraintType getDeleteRule() {
-        return get("deleteRule", ForeignKeyConstraintType.class);
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -173,105 +57,27 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         ForeignKey that = (ForeignKey) o;
 
-        if (getForeignKeyColumns() == null) {
-            return this.getName().equals(that.getName());
-        }
+        String thisString = StringUtils.join(this.foreignKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + " -> " + StringUtils.join(this.primaryKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null));
+        String thatString = StringUtils.join(that.foreignKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + " -> " + StringUtils.join(that.primaryKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null));
 
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+        return thisString.equals(thatString);
 
-        return (StringUtils.join(getForeignKeyColumns(), ",", formatter).equals(StringUtils.join(that.getForeignKeyColumns(), ",", formatter))
-                && (getForeignKeyTable() != null && that.getForeignKeyTable() != null && getForeignKeyTable().equals(that.getForeignKeyTable()))
-                && (StringUtils.join(getPrimaryKeyColumns(), ",", formatter).equals(StringUtils.join(that.getPrimaryKeyColumns(), ",", formatter)))
-                && (getPrimaryKeyTable() != null && that.getPrimaryKeyTable() != null && getPrimaryKeyTable().equals(that.getPrimaryKeyTable())));
     }
 
     @Override
     public int hashCode() {
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
-
-        int result = 0;
-        if (getPrimaryKeyTable() != null) {
-            result = getPrimaryKeyTable().hashCode();
-        }
-        if (getPrimaryKeyColumns() != null) {
-            result = 31 * result + StringUtils.join(getPrimaryKeyColumns(), ",", formatter).toUpperCase().hashCode();
-        }
-
-        if (getForeignKeyTable() != null) {
-            result = 31 * result + getForeignKeyTable().hashCode();
-        }
-
-        if (getForeignKeyColumns() != null) {
-            result = 31 * result + StringUtils.join(getForeignKeyColumns(), ",", formatter).toUpperCase().hashCode();
-        }
-
-        return result;
+        String string = StringUtils.join(this.foreignKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + " -> " + StringUtils.join(this.primaryKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null));
+        return string.hashCode();
     }
 
 
     @Override
     public int compareTo(Object other) {
-        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
-            @Override
-            public String toString(Column obj) {
-                return obj.toString(false);
-            }
-        };
+        ForeignKey that = (ForeignKey) other;
 
-        ForeignKey o = (ForeignKey) other;
-        int returnValue = 0;
-        if (this.getForeignKeyTable() != null && o.getForeignKeyTable() != null) {
-            returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
-        }
-        if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
-            returnValue = StringUtils.join(this.getForeignKeyColumns(), ",", formatter).compareTo(StringUtils.join(o.getForeignKeyColumns(), ",", formatter));
-        }
-        if (returnValue == 0 && this.getName() != null && o.getName() != null) {
-            returnValue = this.getName().compareTo(o.getName());
-        }
-        if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
-            returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
-        }
+        String thisString = StringUtils.join(this.foreignKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + " -> " + StringUtils.join(this.primaryKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null));
+        String thatString = StringUtils.join(that.foreignKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null)) + " -> " + StringUtils.join(that.primaryKeyColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, null));
 
-        if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
-            returnValue = StringUtils.join(this.getPrimaryKeyColumns(), ",", formatter).compareTo(StringUtils.join(o.getPrimaryKeyColumns(), ",", formatter));
-        }
-        if (returnValue == 0 && this.getUpdateRule() != null && o.getUpdateRule() != null)
-            returnValue = this.getUpdateRule().compareTo(o.getUpdateRule());
-        if (returnValue == 0 && this.getDeleteRule() != null && o.getDeleteRule() != null)
-            returnValue = this.getDeleteRule().compareTo(o.getDeleteRule());
-        return returnValue;
-    }
-
-    private String toDisplayString(List<String> columnsNames) {
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        for (String columnName : columnsNames) {
-            i++;
-            sb.append(columnName);
-            if (i < columnsNames.size()) {
-                sb.append(", ");
-            }
-        }
-        return sb.toString();
-    }
-
-    public Index getBackingIndex() {
-        return get("backingIndex", Index.class);
-    }
-
-    public ForeignKey setBackingIndex(Index backingIndex) {
-        this.set("backingIndex", backingIndex);
-        return this;
+        return thisString.compareTo(thatString);
     }
 }

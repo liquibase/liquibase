@@ -51,18 +51,18 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
         PrimaryKey pk = (PrimaryKey) missingObject;
 
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-        change.setTableName(pk.getTable().getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(pk.getTable().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(pk.getTable().getSchema().getSimpleName());
-        }
-        change.setConstraintName(pk.getSimpleName());
-        change.setColumnNames(pk.getColumnNames());
-        if (control.getIncludeTablespace()) {
-            change.setTablespace(pk.getTablespace());
-        }
+//        change.setTableName(pk.getTable().getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(pk.getTable().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(pk.getTable().getSchema().getSimpleName());
+//        }
+//        change.setConstraintName(pk.getSimpleName());
+////        change.setColumnNames(pk.getColumnNames());
+//        if (control.getIncludeTablespace()) {
+//            change.setTablespace(pk.getTablespace());
+//        }
 
 //todo: action refactoring        if (referenceDatabase instanceof MSSQLDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && !pk.getBackingIndex().getClustered()) {
 //            change.setClustered(false);
@@ -86,7 +86,7 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 //            }
 //        }
 
-        control.setAlreadyHandledMissing(pk.getBackingIndex());
+//        control.setAlreadyHandledMissing(pk.getBackingIndex());
         returnList.add(change);
 
         return returnList.toArray(new Change[returnList.size()]);

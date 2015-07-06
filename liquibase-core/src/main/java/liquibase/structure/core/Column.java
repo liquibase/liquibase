@@ -20,9 +20,6 @@ import java.util.Set;
 
 public class Column extends AbstractDatabaseObject {
 
-    public Boolean computed;
-    public Boolean descending;
-    public Boolean certainDataType;
     public DataType type;
     public AutoIncrementInformation autoIncrementInformation;
     public Boolean nullable;
@@ -36,9 +33,18 @@ public class Column extends AbstractDatabaseObject {
         super(name);
     }
 
+    public Column(ObjectName name, String type, Boolean nullable) {
+        this(name);
+        this.type = new DataType(type);
+        this.nullable = nullable;
+    }
+
+    public Column(ObjectName name, String type) {
+        this(name, type, null);
+    }
+
     public Column(ColumnConfig columnConfig) {
         super(new ObjectName(columnConfig.getName()));
-        this.descending = columnConfig.getDescending();
         this.type = new DataType(columnConfig.getType());
 
         if (columnConfig.getDefaultValue() != null) {
@@ -71,8 +77,9 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Column setName(String name, boolean computed) {
-        setName(new ObjectName(name));
-        this.computed = computed;
+        ObjectName objectName = new ObjectName(name);
+        setName(objectName);
+        objectName.virtual = computed;
 
         return this;
     }
@@ -85,13 +92,13 @@ public class Column extends AbstractDatabaseObject {
         if (includeRelation) {
             return toString();
         } else {
-            return getName().toShortString()  + (descending != null && descending ? " DESC" : "");
+            return getName().toShortString();
         }
     }
 
     @Override
     public String toString() {
-        return getName().toString() + (descending != null && descending ? " DESC" : "");
+        return getName().toString();
     }
 
 
@@ -114,48 +121,6 @@ public class Column extends AbstractDatabaseObject {
         return toString().hashCode();
     }
 
-    public boolean isDataTypeDifferent(Column otherColumn) {
-        if (!this.certainDataType || !otherColumn.certainDataType) {
-            return false;
-        } else {
-            return !this.type.equals(otherColumn.type);
-        }
-    }
-
-    @SuppressWarnings({"SimplifiableIfStatement"})
-    public boolean isNullabilityDifferent(Column otherColumn) {
-        if (this.nullable == null && otherColumn.nullable == null) {
-            return false;
-        }
-        if (this.nullable == null && otherColumn.nullable != null) {
-            return true;
-        }
-        if (this.nullable != null && otherColumn.nullable == null) {
-            return true;
-        }
-        return !this.nullable.equals(otherColumn.nullable);
-    }
-
-    public boolean isDifferent(Column otherColumn) {
-        return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
-    }
-
-
-    public static Column fromName(String columnName) {
-        columnName = columnName.trim();
-        Boolean descending = null;
-        if (columnName.matches("(?i).*\\s+DESC")) {
-            columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
-            descending = true;
-        } else if (columnName.matches("(?i).*\\s+ASC")) {
-            columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
-            descending = false;
-        }
-        Column column = new Column(new ObjectName(columnName));
-        column.descending = descending;
-        return column;
-    }
-
     public static Column[] arrayFromNames(String columnNames) {
         if (columnNames == null) {
             return null;
@@ -164,7 +129,7 @@ public class Column extends AbstractDatabaseObject {
         List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
         Column[] returnArray = new Column[columnNameList.size()];
         for (int i = 0; i < columnNameList.size(); i++) {
-            returnArray[i] = fromName(columnNameList.get(i));
+            returnArray[i] = new Column(new ObjectName(columnNameList.get(i)));
         }
         return returnArray;
     }

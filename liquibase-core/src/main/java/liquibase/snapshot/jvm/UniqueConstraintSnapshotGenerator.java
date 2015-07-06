@@ -36,26 +36,27 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
-        Table table = exampleConstraint.getTable();
+//        Table table = exampleConstraint.getTable();
 
         List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
 
         if (metadata.size() == 0) {
             return null;
         }
-        UniqueConstraint constraint = new UniqueConstraint();
-        constraint.setTable(table);
-        constraint.setName(example.getName());
-        constraint.setBackingIndex(exampleConstraint.getBackingIndex());
-        for (Map<String, ?> col : metadata) {
-            String ascOrDesc = (String) col.get("ASC_OR_DESC");
-            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-            Column column = new Column(new ObjectName((String) col.get("COLUMN_NAME")));
-            column.descending = descending;
-            constraint.getColumns().add(column);
-        }
+//        UniqueConstraint constraint = new UniqueConstraint();
+//        constraint.setTable(table);
+//        constraint.setName(example.getName());
+//        constraint.setBackingIndex(exampleConstraint.getBackingIndex());
+//        for (Map<String, ?> col : metadata) {
+//            String ascOrDesc = (String) col.get("ASC_OR_DESC");
+//            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+//            Index.IndexedColumn column = new Index.IndexedColumn(new ObjectName((String) col.get("COLUMN_NAME")));
+//            column.descending = descending;
+//            constraint.getColumns().add(column);
+//        }
 
-        return constraint;
+//        return constraint;
+        return null;
     }
 
     @Override
@@ -80,15 +81,15 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
             Set<String> seenConstraints = new HashSet<String>();
 
-            for (CachedRow constraint : metadata) {
-                UniqueConstraint uq = new UniqueConstraint(new ObjectName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database))).setTable(table);
-                if (constraint.containsColumn("INDEX_NAME")) {
-                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
-                }
-                if (seenConstraints.add(uq.getSimpleName())) {
-                    table.uniqueConstraints.add(uq);
-                }
-            }
+//            for (CachedRow constraint : metadata) {
+//                UniqueConstraint uq = new UniqueConstraint(new ObjectName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database))).setTable(table);
+//                if (constraint.containsColumn("INDEX_NAME")) {
+//                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
+//                }
+////                if (seenConstraints.add(uq.getSimpleName())) {
+////                    table.uniqueConstraints.add(uq);
+////                }
+//            }
         }
     }
 
@@ -97,8 +98,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
-        Table table = example.getTable();
-        Schema schema = table.getSchema();
+//        Table table = example.getTable();
+//        Schema schema = table.getSchema();
         String name = example.getSimpleName();
 
         String sql = null;
@@ -379,25 +380,25 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 //                    "and sysconstraint.constraint_name = '"+database.correctObjectName(name, UniqueConstraint.class)+"' " +
 //                    "and systable.table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
 //        } else {
-            String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
-            String schemaName = database.correctObjectName(schema.getSimpleName(), Schema.class);
-            String constraintName = database.correctObjectName(name, UniqueConstraint.class);
-            String tableName = database.correctObjectName(table.getSimpleName(), Table.class);
-            sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME "
-                    + "from " + database.getSystemSchema() + ".constraints "
-                    + "where constraint_type='UNIQUE' ";
-            if (catalogName != null) {
-                sql += "and constraint_catalog='" + catalogName + "' ";
-            }
-            if (schemaName != null) {
-                sql += "and constraint_schema='" + schemaName + "' ";
-            }
-            if (tableName != null) {
-                sql += "and table_name='" + tableName + "' ";
-            }
-            if (constraintName != null) {
-                sql += "and constraint_name='" + constraintName + "'";
-            }
+//            String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
+//            String schemaName = database.correctObjectName(schema.getSimpleName(), Schema.class);
+//            String constraintName = database.correctObjectName(name, UniqueConstraint.class);
+//            String tableName = database.correctObjectName(table.getSimpleName(), Table.class);
+//            sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME "
+//                    + "from " + database.getSystemSchema() + ".constraints "
+//                    + "where constraint_type='UNIQUE' ";
+//            if (catalogName != null) {
+//                sql += "and constraint_catalog='" + catalogName + "' ";
+//            }
+//            if (schemaName != null) {
+//                sql += "and constraint_schema='" + schemaName + "' ";
+//            }
+//            if (tableName != null) {
+//                sql += "and table_name='" + tableName + "' ";
+//            }
+//            if (constraintName != null) {
+//                sql += "and constraint_name='" + constraintName + "'";
+//            }
 //        }
         return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
     }

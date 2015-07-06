@@ -2,11 +2,11 @@ package liquibase.actionlogic.core.informix;
 
 import liquibase.Scope;
 import liquibase.action.core.CreateTableAction;
-import liquibase.action.core.ForeignKeyDefinition;
-import liquibase.action.core.UniqueConstraintDefinition;
 import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringClauses;
 
 public class CreateTableLogicInformix extends CreateTableLogic {
@@ -30,7 +30,7 @@ public class CreateTableLogicInformix extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateUniqueConstraintSql(UniqueConstraintDefinition uniqueConstraint, CreateTableAction action, Scope scope) {
+    protected StringClauses generateUniqueConstraintSql(UniqueConstraint uniqueConstraint, CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateUniqueConstraintSql(uniqueConstraint, action, scope);
 
         String constraintClause = clauses.get(UniqueConstraintClauses.constraintName);
@@ -43,8 +43,8 @@ public class CreateTableLogicInformix extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateForeignKeySql(ForeignKeyDefinition foreignKeyDefinition, CreateTableAction action, Scope scope) {
-        StringClauses clauses = super.generateForeignKeySql(foreignKeyDefinition, action, scope);
+    protected StringClauses generateForeignKeySql(ForeignKey foreignKey, CreateTableAction action, Scope scope) {
+        StringClauses clauses = super.generateForeignKeySql(foreignKey, action, scope);
         String nameClause = clauses.get(ForeignKeyClauses.constraintName);
 
         clauses.remove(ForeignKeyClauses.constraintName);

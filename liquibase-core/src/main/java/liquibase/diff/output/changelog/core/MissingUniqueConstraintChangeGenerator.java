@@ -41,27 +41,27 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         List<Change> returnList = new ArrayList<Change>();
 
         UniqueConstraint uc = (UniqueConstraint) missingObject;
-
-        if (uc.getTable() == null) {
-            return null;
-        }
-
-        AddUniqueConstraintChange change = new AddUniqueConstraintChange();
-        change.setTableName(uc.getTable().getSimpleName());
-        if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
-            change.setTablespace(uc.getBackingIndex().getTablespace());
-        }
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(uc.getTable().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(uc.getTable().getSchema().getSimpleName());
-        }
-        change.setConstraintName(uc.getSimpleName());
-        change.setColumnNames(uc.getColumnNames());
-        change.setDeferrable(uc.isDeferrable() ? Boolean.TRUE : null);
-        change.setInitiallyDeferred(uc.isInitiallyDeferred() ? Boolean.TRUE : null);
-        change.setDisabled(uc.isDisabled() ? Boolean.TRUE : null);
+//
+//        if (uc.getTable() == null) {
+//            return null;
+//        }
+//
+//        AddUniqueConstraintChange change = new AddUniqueConstraintChange();
+//        change.setTableName(uc.getTable().getSimpleName());
+//        if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
+//            change.setTablespace(uc.getBackingIndex().getTablespace());
+//        }
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(uc.getTable().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(uc.getTable().getSchema().getSimpleName());
+//        }
+//        change.setConstraintName(uc.getSimpleName());
+//        change.setColumnNames(uc.getColumnNames());
+//        change.setDeferrable(uc.isDeferrable() ? Boolean.TRUE : null);
+//        change.setInitiallyDeferred(uc.isInitiallyDeferred() ? Boolean.TRUE : null);
+//        change.setDisabled(uc.isDisabled() ? Boolean.TRUE : null);
 
 //        if (comparisonDatabase instanceof OracleDatabase) {
 //            Index backingIndex = uc.getBackingIndex();
@@ -85,7 +85,7 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
 //        }
 
 
-        Index backingIndex = uc.getBackingIndex();
+//        Index backingIndex = uc.getBackingIndex();
 //        if (backingIndex == null) {
 //            Index exampleIndex = new Index().setTable(uc.getTable());
 //            for (String col : uc.getColumns()) {
@@ -93,10 +93,10 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
 //            }
 //            control.setAlreadyHandledMissing(exampleIndex);
 //        } else {
-            control.setAlreadyHandledMissing(backingIndex);
+//            control.setAlreadyHandledMissing(backingIndex);
 //        }
 
-        returnList.add(change);
+//        returnList.add(change);
 
         return returnList.toArray(new Change[returnList.size()]);
 

@@ -45,12 +45,12 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         List<Change> returnList = new ArrayList<Change>();
 
         DropPrimaryKeyChange dropPkChange = new DropPrimaryKeyChange();
-        dropPkChange.setTableName(pk.getTable().getSimpleName());
+//        dropPkChange.setTableName(pk.getTable().getSimpleName());
         returnList.add(dropPkChange);
 
         AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange();
-        addPkChange.setTableName(pk.getTable().getSimpleName());
-        addPkChange.setColumnNames(pk.getColumnNames());
+//        addPkChange.setTableName(pk.getTable().getSimpleName());
+//        addPkChange.setColumnNames(pk.getColumnNames());
         addPkChange.setConstraintName(pk.getSimpleName());
 
 //        if (comparisonDatabase instanceof OracleDatabase) {
@@ -87,25 +87,25 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         Difference columnDifferences = differences.getDifference("columns");
         List<Column> referenceColumns;
         List<Column> comparedColumns;
-        if (columnDifferences == null) {
-            referenceColumns = pk.getColumns();
-            comparedColumns = pk.getColumns();
-        } else {
+//        if (columnDifferences == null) {
+//            referenceColumns = pk.getColumns();
+//            comparedColumns = pk.getColumns();
+//        } else {
             referenceColumns = (List<Column>) columnDifferences.getReferenceValue();
             comparedColumns = (List<Column>) columnDifferences.getComparedValue();
-        }
+//        }
 
         StringUtils.ToStringFormatter formatter = new StringUtils.ToStringFormatter();
 
-        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
-        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
-            control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
-        }
+//        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
+//        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
+//            control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
+//        }
 
-        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
-        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, "," , formatter))) {
-            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
-        }
+//        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
+//        if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, "," , formatter))) {
+//            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
+//        }
 
         return returnList.toArray(new Change[returnList.size()]);
     }

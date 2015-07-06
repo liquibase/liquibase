@@ -103,73 +103,73 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         boolean changeLogCreateAttempted = false;
         if (changeLogTable != null) {
-            boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
-            boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
-            boolean hasTag = changeLogTable.getColumn("TAG") != null;
-            boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
-            boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
-            boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
-            boolean liquibaseColumnNotRightSize = false;
+//            boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
+//            boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
+//            boolean hasTag = changeLogTable.getColumn("TAG") != null;
+//            boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
+//            boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
+//            boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
+//            boolean liquibaseColumnNotRightSize = false;
 //todo: action            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
 //                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
 //                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
 //            }
-            boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
+//            boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
 //            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
 //                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
 //                checksumNotRightSize = columnSize != null && columnSize != 35;
 //            }
-            boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
+//            boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             String charTypeName = getCharTypeName();
 
-            if (!hasDescription) {
-                executor.comment("Adding missing databasechangelog.description column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", charTypeName + "(255)", null));
-            }
-            if (!hasTag) {
-                executor.comment("Adding missing databasechangelog.tag column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", charTypeName + "(255)", null));
-            }
-            if (!hasComments) {
-                executor.comment("Adding missing databasechangelog.comments column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", charTypeName + "(255)", null));
-            }
-            if (!hasLiquibase) {
-                executor.comment("Adding missing databasechangelog.liquibase column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)", null));
-            }
-            if (!hasOrderExecuted) {
-                executor.comment("Adding missing databasechangelog.orderexecuted column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "int", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "int", false));
-            }
-            if (checksumNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.md5sum column");
+//            if (!hasDescription) {
+//                executor.comment("Adding missing databasechangelog.description column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", charTypeName + "(255)", null));
+//            }
+//            if (!hasTag) {
+//                executor.comment("Adding missing databasechangelog.tag column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", charTypeName + "(255)", null));
+//            }
+//            if (!hasComments) {
+//                executor.comment("Adding missing databasechangelog.comments column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", charTypeName + "(255)", null));
+//            }
+//            if (!hasLiquibase) {
+//                executor.comment("Adding missing databasechangelog.liquibase column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)", null));
+//            }
+//            if (!hasOrderExecuted) {
+//                executor.comment("Adding missing databasechangelog.orderexecuted column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "int", null));
+//                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
+//                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "int", false));
+//            }
+//            if (checksumNotRightSize) {
+//                executor.comment("Modifying size of databasechangelog.md5sum column");
+//
+//                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)"));
+//            }
+//            if (liquibaseColumnNotRightSize) {
+//                executor.comment("Modifying size of databasechangelog.liquibase column");
+//
+//                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)"));
+//            }
+//            if (!hasExecTypeColumn) {
+//                executor.comment("Adding missing databasechangelog.exectype column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", charTypeName + "(10)", null));
+//                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
+//                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", charTypeName + "(10)", false));
+//            }
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", charTypeName + "(35)"));
-            }
-            if (liquibaseColumnNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.liquibase column");
-
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", charTypeName + "(20)"));
-            }
-            if (!hasExecTypeColumn) {
-                executor.comment("Adding missing databasechangelog.exectype column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", charTypeName + "(10)", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", charTypeName + "(10)", false));
-            }
-
-            if (!hasContexts) {
-                executor.comment("Adding missing databasechangelog.contexts column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "(255)", null));
-            }
-            if (!hasLabels) {
-                executor.comment("Adding missing databasechangelog.labels column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName + "(255)", null));
-            }
+//            if (!hasContexts) {
+//                executor.comment("Adding missing databasechangelog.contexts column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "(255)", null));
+//            }
+//            if (!hasLabels) {
+//                executor.comment("Adding missing databasechangelog.labels column");
+//                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName + "(255)", null));
+//            }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
             if (md5sumRS.size() > 0) {
@@ -363,13 +363,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public void destroy() throws DatabaseException {
         Database database = getDatabase();
-        try {
-            if (SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(database.getDatabaseChangeLogTableName())).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
-                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), false));
-            }
+//        try {
+//            if (SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(database.getDatabaseChangeLogTableName())).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+//                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), false));
+//            }
             reset();
-        } catch (InvalidExampleException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+//        } catch (InvalidExampleException e) {
+//            throw new UnexpectedLiquibaseException(e);
+//        }
     }
 }

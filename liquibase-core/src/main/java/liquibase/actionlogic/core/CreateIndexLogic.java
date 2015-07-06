@@ -2,7 +2,6 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.ExecuteSqlAction;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateIndexAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -37,7 +36,7 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic<CreateIndexAction>
 
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkForRequiredField("tableName", action);
-        validationErrors.checkForRequiredField("columnDefinitions", action);
+        validationErrors.checkForRequiredField("columns", action);
 
         if (!database.supportsClustered(Index.class)) {
             if (ObjectUtil.defaultIfEmpty(action.clustered, false)) {
@@ -77,17 +76,17 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic<CreateIndexAction>
 
 	    clauses.append(Clauses.tableName, database.escapeObjectName(tableName, Table.class));
 
-        clauses.append(Clauses.columns, "("+ StringUtils.join(action.columnDefinitions, ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
+        clauses.append(Clauses.columns, "("+ StringUtils.join(action.columns, ", ", new StringUtils.StringUtilsFormatter<Index.IndexedColumn>() {
             @Override
-            public String toString(ColumnDefinition column) {
+            public String toString(Index.IndexedColumn column) {
                 Boolean computed = column.computed;
                 String name;
                 if (computed == null) {
-                    name = database.escapeColumnName(column.columnName.name, true);
+                    name = database.escapeColumnName(column.getSimpleName(), true);
                 } else if (computed) {
-                    name = column.columnName.name;
+                    name = column.getSimpleName();
                 } else {
-                    name = database.escapeColumnName(column.columnName.name, false);
+                    name = database.escapeColumnName(column.getSimpleName(), false);
                 }
 
                 if (ObjectUtil.defaultIfEmpty(column.descending, false)) {

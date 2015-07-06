@@ -66,8 +66,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getSimpleName());
-        setComputed(columnSnapshot.computed);
-        setDescending(columnSnapshot.descending != null && columnSnapshot.descending ? Boolean.TRUE : null);
+        setComputed(columnSnapshot.name.virtual);
+//        setDescending(columnSnapshot.descending != null && columnSnapshot.descending ? Boolean.TRUE : null);
         if (columnSnapshot.type != null) {
             setType(columnSnapshot.type.toString());
         }

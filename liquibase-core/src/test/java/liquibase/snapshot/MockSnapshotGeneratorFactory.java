@@ -30,13 +30,6 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
     public void addObjects(DatabaseObject... objects) {
         for (DatabaseObject object : objects) {
             this.objects.add(object);
-
-            if (object instanceof Relation) {
-                for (Column column : ((Relation) object).getColumns()) {
-                    this.objects.add(column);
-                }
-                this.objects.add(object.getSchema());
-            }
         }
 
     }
@@ -45,11 +38,6 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
         for (DatabaseObject object : objects) {
             this.objects.remove(object);
 
-            if (object instanceof Relation) {
-                for (Column column : ((Relation) object).getColumns()) {
-                    this.objects.remove(column);
-                }
-            }
         }
 
     }

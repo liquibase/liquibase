@@ -12,6 +12,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
 
     public String name;
     public ObjectName container;
+    public boolean virtual;
 
     /**
      * Construct an ObjectName from the given string. If the string contains dots, it will be split into containers on the dots.

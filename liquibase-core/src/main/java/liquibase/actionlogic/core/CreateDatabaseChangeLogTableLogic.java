@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateDatabaseChangeLogTableAction;
 import liquibase.action.core.CreateTableAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -11,6 +9,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
 
 public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic<CreateDatabaseChangeLogTableAction> {
 
@@ -26,18 +25,19 @@ public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic<Creat
         String charTypeName = getCharTypeName(database);
         String dateTimeTypeString = getDateTimeTypeString(database);
 
-        CreateTableAction createTableAction = new CreateTableAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
-                .addColumn(new ColumnDefinition("ID", charTypeName + "(255)", false))
-                .addColumn(new ColumnDefinition("AUTHOR", charTypeName + "(255)", false))
-                .addColumn(new ColumnDefinition("FILENAME", charTypeName + "(255)", false))
-                .addColumn(new ColumnDefinition("DATEEXECUTED", dateTimeTypeString, false))
-                .addColumn(new ColumnDefinition("ORDEREXECUTED", "INT", false))
-                .addColumn(new ColumnDefinition("EXECTYPE", charTypeName + "(10)", false))
-                .addColumn(new ColumnDefinition("MD5SUM", charTypeName + "(35)"))
-                .addColumn(new ColumnDefinition("DESCRIPTION", charTypeName + "(255)"))
-                .addColumn(new ColumnDefinition("COMMENTS", charTypeName + "(255)"))
-                .addColumn(new ColumnDefinition("TAG", charTypeName + "(255)"))
-                .addColumn(new ColumnDefinition("LIQUIBASE", charTypeName + "(20)"));
+        ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+        CreateTableAction createTableAction = new CreateTableAction(tableName)
+                .addColumn(new Column(new ObjectName(tableName, "ID"), charTypeName + "(255)", false))
+                .addColumn(new Column(new ObjectName(tableName, "AUTHOR"), charTypeName + "(255)", false))
+                .addColumn(new Column(new ObjectName(tableName, "FILENAME"), charTypeName + "(255)", false))
+                .addColumn(new Column(new ObjectName(tableName, "DATEEXECUTED"), dateTimeTypeString, false))
+                .addColumn(new Column(new ObjectName(tableName, "ORDEREXECUTED"), "INT", false))
+                .addColumn(new Column(new ObjectName(tableName, "EXECTYPE"), charTypeName + "(10)", false))
+                .addColumn(new Column(new ObjectName(tableName, "MD5SUM"), charTypeName + "(35)"))
+                .addColumn(new Column(new ObjectName(tableName, "DESCRIPTION"), charTypeName + "(255)"))
+                .addColumn(new Column(new ObjectName(tableName, "COMMENTS"), charTypeName + "(255)"))
+                .addColumn(new Column(new ObjectName(tableName, "TAG"), charTypeName + "(255)"))
+                .addColumn(new Column(new ObjectName(tableName, "LIQUIBASE"), charTypeName + "(20)"));
         createTableAction.tablespace = database.getLiquibaseTablespaceName();
 
         return new DelegateResult(createTableAction);

@@ -11,6 +11,7 @@ import liquibase.util.ObjectUtil;
 import java.util.*;
 
 public class Snapshot {
+
     private final SnapshotIdService snapshotIdService;
     private Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> objects = new HashMap<>();
 
@@ -45,6 +46,10 @@ public class Snapshot {
 
     public <T extends DatabaseObject> Set<T> get(Class<T> type) {
         return (Set<T>) Collections.unmodifiableSet(CollectionUtil.createIfNull(objects.get(type)));
+    }
+
+    public <T extends DatabaseObject> Set<T> getAll(T example) {
+
     }
 
     public <T extends DatabaseObject> T get(T example) {

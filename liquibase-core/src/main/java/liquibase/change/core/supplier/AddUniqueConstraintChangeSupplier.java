@@ -33,6 +33,6 @@ public class AddUniqueConstraintChangeSupplier extends AbstractChangeSupplier<Ad
 
     @Override
     public void checkDiffResult(DiffResult diffResult, AddUniqueConstraintChange change) {
-        diffResult.getUnexpectedObject(new UniqueConstraint(change.getConstraintName(), change.getCatalogName(), change.getSchemaName(), change.getTableName()));
+//        diffResult.getUnexpectedObject(new UniqueConstraint(change.getConstraintName(), change.getCatalogName(), change.getSchemaName(), change.getTableName()));
     }
 }

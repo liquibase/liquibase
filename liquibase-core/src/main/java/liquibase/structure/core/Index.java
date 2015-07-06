@@ -72,11 +72,11 @@ public class Index extends AbstractDatabaseObject {
         return this;
 	}
 
-    public List<Column> getColumns() {
+    public List<Index.IndexedColumn> getColumns() {
         return get("columns", List.class);
     }
 
-    public Index addColumn(Column column) {
+    public Index addColumn(Index.IndexedColumn column) {
         getColumns().add(column);
 
         return this;
@@ -191,7 +191,7 @@ public class Index extends AbstractDatabaseObject {
             stringBuffer.append(" on ").append(getTable().getName());
             if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
-                for (Column column : getColumns()) {
+                for (Index.IndexedColumn column : getColumns()) {
                     stringBuffer.append(column.toString(false)).append(", ");
                 }
                 stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
@@ -201,5 +201,41 @@ public class Index extends AbstractDatabaseObject {
             }
         }
         return stringBuffer.toString();
+    }
+
+    public static class IndexedColumn extends AbstractDatabaseObject {
+        public Boolean computed;
+        public Boolean descending;
+
+        public IndexedColumn() {
+        }
+
+        public IndexedColumn(ObjectName name) {
+            super(name);
+        }
+
+        @Override
+        public DatabaseObject[] getContainingObjects() {
+            return null;
+        }
+
+        @Override
+        public Schema getSchema() {
+            return null;
+        }
+
+        public String toString(boolean includeRelation) {
+            if (includeRelation) {
+                return toString();
+            } else {
+                return getName().toShortString()  + (descending != null && descending ? " DESC" : "");
+            }
+        }
+
+        @Override
+        public String toString() {
+            return getName().toString() + (descending != null && descending ? " DESC" : "");
+        }
+
     }
 }

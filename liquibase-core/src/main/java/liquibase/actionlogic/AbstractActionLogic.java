@@ -3,6 +3,7 @@ package liquibase.actionlogic;
 import liquibase.Scope;
 import liquibase.action.AbstractAction;
 import liquibase.action.Action;
+import liquibase.action.ActionStatus;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 
@@ -60,4 +61,14 @@ public abstract class AbstractActionLogic<T extends Action> implements ActionLog
     public ValidationErrors validate(T action, Scope scope) {
         return new ValidationErrors();
     }
+
+    /**
+     * Default implementation of {@link ActionLogic#checkStatus(Action, Scope)} returns an {@link liquibase.action.ActionStatus.Status#unknown}.
+     */
+    @Override
+    public ActionStatus checkStatus(T action, Scope scope) {
+        return new ActionStatus().unknown("No checkStatus logic defined");
+    }
+
+
 }

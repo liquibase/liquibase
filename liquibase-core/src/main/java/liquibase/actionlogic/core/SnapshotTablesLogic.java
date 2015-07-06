@@ -94,7 +94,7 @@ public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
         }
 
         Table table = new Table().setName(new ObjectName(container, rawTableName));
-        table.setRemarks(remarks);
+        table.remarks = remarks;
 
         if ("Y".equals(row.get("TEMPORARY", String.class))) {
             table.set("temporary", "GLOBAL");

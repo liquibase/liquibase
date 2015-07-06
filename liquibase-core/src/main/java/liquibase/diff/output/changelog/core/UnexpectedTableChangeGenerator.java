@@ -41,18 +41,18 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
             change.setSchemaName(unexpectedTable.getSchema().getSimpleName());
         }
 
-        for (Column column : unexpectedTable.getColumns()) {
-            control.setAlreadyHandledUnexpected(column);
-        };
-        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
+//        for (Column column : unexpectedTable.getColumns()) {
+//            control.setAlreadyHandledUnexpected(column);
+//        };
+//        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
 
-        for (Index index : unexpectedTable.indexes) {
-            control.setAlreadyHandledUnexpected(index);
-        }
-        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
-        if (unexpectedTable.primaryKey != null) {
-            control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey.getBackingIndex());
-        }
+//        for (Index index : unexpectedTable.indexes) {
+//            control.setAlreadyHandledUnexpected(index);
+//        }
+//        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
+//        if (unexpectedTable.primaryKey != null) {
+//            control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey.getBackingIndex());
+//        }
 
         return new Change[] { change };
 

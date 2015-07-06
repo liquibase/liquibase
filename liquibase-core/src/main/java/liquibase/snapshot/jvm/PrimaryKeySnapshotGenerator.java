@@ -26,10 +26,10 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
         String searchTableName = null;
-        if (((PrimaryKey) example).getTable() != null) {
-            searchTableName = ((PrimaryKey) example).getTable().getSimpleName();
-            searchTableName = database.correctObjectName(searchTableName, Table.class);
-        }
+//        if (((PrimaryKey) example).getTable() != null) {
+//            searchTableName = ((PrimaryKey) example).getTable().getSimpleName();
+//            searchTableName = database.correctObjectName(searchTableName, Table.class);
+//        }
 
         List<CachedRow> rs = null;
         try {
@@ -46,7 +46,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 if (returnKey == null) {
                     returnKey = new PrimaryKey();
                     CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
-                    returnKey.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
+//                    returnKey.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
                     returnKey.setName(new ObjectName(row.getString("PK_NAME")));
                 }
 
@@ -57,17 +57,17 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 String ascOrDesc = row.getString("ASC_OR_DESC");
                 Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
                 Column column = new Column(new ObjectName(((PrimaryKey) example).name, columnName));
-                column.descending = descending;
-                returnKey.addColumn(position - 1, column);
+//                column.descending = descending;
+//                returnKey.addColumn(position - 1, column);
             }
 
             if (returnKey != null) {
-                Index exampleIndex = new Index().setTable(returnKey.getTable());
-                exampleIndex.setColumns(returnKey.getColumns());
+//                Index exampleIndex = new Index().setTable(returnKey.getTable());
+//                exampleIndex.setColumns(returnKey.getColumns());
 //todo: move for action logic                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
 //                    exampleIndex.setName(returnKey.getName());
 //                }
-                returnKey.setBackingIndex(exampleIndex);
+//                returnKey.setBackingIndex(exampleIndex);
             }
 
             return returnKey;
@@ -92,7 +92,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getSimpleName());
                 if (rs.size() > 0) {
-                    table.primaryKey = new PrimaryKey(new ObjectName(rs.get(0).getString("PK_NAME"))).setTable(table);
+//                    table.primaryKey = new PrimaryKey(new ObjectName(rs.get(0).getString("PK_NAME"))).setTable(table);
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

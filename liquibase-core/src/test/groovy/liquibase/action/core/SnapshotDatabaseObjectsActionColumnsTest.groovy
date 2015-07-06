@@ -170,7 +170,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     }
 
     @Unroll("#featureName: #column on #conn")
-    def "!autoIncrement information set correctly"() {
+    def "autoIncrement information set correctly"() {
         expect:
         def action = new SnapshotDatabaseObjectsAction(Column, column)
 

@@ -35,17 +35,17 @@ public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChan
 //        if (!diffResult.getObjectDiff(Table.class).getUnexpected().contains(pk.getTable())) {
         PrimaryKey pk = (PrimaryKey) unexpectedObject;
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
-        change.setTableName(pk.getTable().getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(pk.getTable().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(pk.getTable().getSchema().getSimpleName());
-        }
-        change.setConstraintName(pk.getSimpleName());
-
-        Index backingIndex = pk.getBackingIndex();
-        control.setAlreadyHandledUnexpected(backingIndex);
+//        change.setTableName(pk.getTable().getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(pk.getTable().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(pk.getTable().getSchema().getSimpleName());
+//        }
+//        change.setConstraintName(pk.getSimpleName());
+//
+//        Index backingIndex = pk.getBackingIndex();
+//        control.setAlreadyHandledUnexpected(backingIndex);
 
 
         return new Change[] { change };

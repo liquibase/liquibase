@@ -1,12 +1,10 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.datatype.LiquibaseDataType;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.statement.UniqueConstraint;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.CollectionUtil;
 
 import java.math.BigInteger;
@@ -17,14 +15,14 @@ public class CreateTableAction extends AbstractAction {
     public ObjectName tableName;
     public String tablespace;
     public String remarks;
-    public List<ColumnDefinition> columnDefinitions;
+    public List<Column> columns;
     public String autoIncrementColumnName;
     public BigInteger autoIncrementStartWith;
     public BigInteger autoIncrementBy;
     public String primaryKeyName;
-    public List<ForeignKeyDefinition> foreignKeyDefinitions;
+    public List<ForeignKey> foreignKeys;
     public String primaryKeyTablespace;
-    public List<UniqueConstraintDefinition> uniqueConstraintDefinitions;
+    public List<UniqueConstraint> uniqueConstraintDefinitions;
 
 
     public CreateTableAction() {
@@ -36,18 +34,18 @@ public class CreateTableAction extends AbstractAction {
     }
 
     public CreateTableAction addColumn(ObjectName columnName, String type) {
-        return addColumn(new ColumnDefinition(columnName, type));
+        return addColumn(new Column(columnName, type));
     }
 
     public CreateTableAction addColumn(String columnName, String type) {
-        return addColumn(new ColumnDefinition(columnName, type));
+        return addColumn(new Column(new ObjectName(tableName, columnName), type));
     }
 
-    public CreateTableAction addColumn(ColumnDefinition columnDefinition) {
-        if (!CollectionUtil.hasValue(columnDefinitions)) {
-            this.columnDefinitions = new ArrayList<>();
+    public CreateTableAction addColumn(Column column) {
+        if (!CollectionUtil.hasValue(columns)) {
+            this.columns = new ArrayList<>();
         }
-        columnDefinitions.add(columnDefinition);
+        columns.add(column);
 
         return this;
     }

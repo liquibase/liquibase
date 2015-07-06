@@ -41,7 +41,6 @@ class StringClausesTest extends Specification {
         where:
         clauses                                                                                                                                    | expected
         new StringClauses().append("first").append("innerClause", new StringClauses().append("inner first").append("inner SECOND")).append("next") | "first inner first inner SECOND next"
-        new StringClauses().append("first").append((String) null, new StringClauses().append("inner first").append("inner SECOND")).append("next") | "first inner first inner SECOND next"
         new StringClauses().append("first").append("innerClause", new StringClauses()).append("next")                                              | "first next"
     }
 
@@ -279,13 +278,34 @@ class StringClausesTest extends Specification {
 
         where:
         testMethod << [
-                {new StringClauses().append("a").append("a")},
                 {new StringClauses().append("a").append("a", new StringClauses())},
-                {new StringClauses().append("a").prepend("a")},
                 {new StringClauses().append("a").prepend("a", new StringClauses())},
                 {new StringClauses().append("a").append("b").insertBefore("b", "a")},
                 {new StringClauses().append("a").append("b").insertAfter("b", "a")},
         ]
+    }
+
+    @Unroll
+    def "can add a duplicate unkeyed clauses"() {
+        expect:
+        testMethod.run()
+
+        where:
+        testMethod << [
+                {new StringClauses().append("a").append("a")},
+                {new StringClauses().append("a").prepend("a")},
+        ]
+    }
+
+    @Unroll
+    def "adding a empty or null string with a clause name keep the clause name for later insert before/after"() {
+        when:
+        def base = new StringClauses(" ").append("first", "first clause").append("nullClause", (String) null).append("emptyClause", "").append("last", "last clause")
+
+        then:
+        base.toString() == "first clause last clause"
+        base.insertBefore("nullClause", "preNull", "pre null").toString() == "first clause pre null last clause"
+        base.insertBefore("emptyClause", "preEmpty", "pre empty").toString() == "first clause pre null pre empty last clause"
     }
 
 }

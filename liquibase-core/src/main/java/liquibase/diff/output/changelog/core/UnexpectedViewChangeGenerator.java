@@ -46,9 +46,9 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
             change.setSchemaName(view.getSchema().getSimpleName());
         }
 
-        for (Column column : view.getColumns()) {
-            control.setAlreadyHandledUnexpected(column);
-        };
+//        for (Column column : view.getColumns()) {
+//            control.setAlreadyHandledUnexpected(column);
+//        };
 
 
         return new Change[]{change};

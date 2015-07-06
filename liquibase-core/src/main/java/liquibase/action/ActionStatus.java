@@ -4,21 +4,19 @@ import liquibase.ExtensibleObject;
 import liquibase.Scope;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Returned by {@link Action#checkStatus(Scope)} to describe if the action has already been applied.
  * Possible values:
  * <ul>
- *     <li>Complete: The action has been fully completed</li>
- *     <li>Incorrect: The action was executed, but the current state doesn't quite match. For example, a CreateTableAction was ran, but some of the column definitions don't match</li>
- *     <li>Not Applied: The action was not applied</li>
- *     <li>Unknown: The current state cannot be checked</li>
- *     <li>Cannot Verify: The action cannot be verified</li>
+ * <li>Complete: The action has been fully completed</li>
+ * <li>Incorrect: The action was executed, but the current state doesn't quite match. For example, a CreateTableAction was ran, but some of the column definitions don't match</li>
+ * <li>Not Applied: The action was not applied</li>
+ * <li>Unknown: The current state cannot be checked</li>
+ * <li>Cannot Verify: The action cannot be verified</li>
  * </ul>
  */
 public class ActionStatus {
@@ -37,7 +35,6 @@ public class ActionStatus {
 
     /**
      * Adds the given incompleteMessage to this status if the complete flag is false.
-     *
      */
     public ActionStatus assertApplied(boolean complete, String incompleteMessage) {
         if (!complete) {
@@ -47,24 +44,35 @@ public class ActionStatus {
         return this;
     }
 
+    /**
+     * Convenience method like {@link #assertCorrect(ExtensibleObject, ExtensibleObject, String)} but tests all properties
+     */
+    public <T extends ExtensibleObject> ActionStatus assertCorrect(T correctObject, T objectToCheck) {
+        for (String property : correctObject.getAttributeNames()) {
+            assertCorrect(correctObject, objectToCheck, property);
+        }
+
+        return this;
+
+    }
 
     /**
      * Convenience method for {@link #assertCorrect(boolean, String)} when you are comparing properties that are the same across two objects.
+     * If the value is defined in the correctObject, it must have the same value in objectToCheck. If the object is null in correctObject, it doesn't matter what the value is in the objectToCheck.
+     *
+     * Does not support and therefore does not check Collection values.
      */
-    public ActionStatus assertCorrect(ExtensibleObject object1, ExtensibleObject object2, String propertyName, boolean validIfEitherValueNull) {
-        Object object1Value = object1.get(propertyName, Object.class);
-        Object object2Value = object2.get(propertyName, Object.class);
-        boolean correct;
+    public ActionStatus assertCorrect(ExtensibleObject correctObject, ExtensibleObject objectToCheck, String propertyName) {
+        Object correctValue = correctObject.get(propertyName, Object.class);
+        Object checkValue = objectToCheck.get(propertyName, Object.class);
 
-        if (object1Value == null && object2Value == null) {
-            correct = true;
-        } else if (object1Value == null || object2Value == null) {
-            correct = validIfEitherValueNull;
-        } else {
-            correct = object1Value.equals(object2Value);
+        if (correctValue instanceof Collection) {
+            return this;
         }
 
-        return assertCorrect(correct, "'" + propertyName + "' is incorrect ('"+object1Value+"' vs '"+object2Value+"')");
+        boolean correct = correctValue == null || correctValue.equals(checkValue);
+
+        return assertCorrect(correct, "'" + propertyName + "' is incorrect (expected '" + correctValue + "' got '" + checkValue + "')");
     }
 
     /**
@@ -92,9 +100,10 @@ public class ActionStatus {
     /**
      * Marks this status as unknown because of the given exception.
      */
-    public ActionStatus unknown(Exception exception) {
+    public ActionStatus unknown(Throwable exception) {
         this.exception = exception;
-        return unknown(exception.getMessage());
+        LoggerFactory.getLogger(getClass()).error("ActionStatus: Unknown", exception);
+        return unknown(exception.getMessage() + " (" + exception.getClass().getName() + ")");
     }
 
     /**
@@ -110,12 +119,12 @@ public class ActionStatus {
      * Returns the {@link liquibase.action.ActionStatus.Status} enum value based on what has been set on this object.
      * The priority order for a response is:
      * <ol>
-     *     <li>Nothing previously set: return unknown</li>
-     *     <li>Cannot verify message(s)</li>
-     *     <li>Unknown message(s)</li>
-     *     <li>Not applied message(s)</li>
-     *     <li>Incorrect message(s)</li>
-     *     <li>Complete</li>
+     * <li>Nothing previously set: return unknown</li>
+     * <li>Cannot verify message(s)</li>
+     * <li>Unknown message(s)</li>
+     * <li>Not applied message(s)</li>
+     * <li>Incorrect message(s)</li>
+     * <li>Complete</li>
      * </ol>
      */
     public Status getStatus() {
@@ -167,7 +176,7 @@ public class ActionStatus {
 
         String message = getMessage();
         if (message != null) {
-            out += ": "+ message;
+            out += ": " + message;
         }
 
         return out;

@@ -22,7 +22,7 @@ public class AddColumnsLogicMysql extends AddColumnsLogic {
 //todo: support multiple columns in a single alter table
 //        String alterTable = generateSingleColumBaseSQL(columns.get(0), database);
 //        for (int i = 0; i < columns.size(); i++) {
-//            alterTable += getColumnDefinitionClauses(columns.get(i), database);
+//            alterTable += getColumnClause(columns.get(i), database);
 //            if (i < columns.size() - 1) {
 //                alterTable += ",";
 //            }

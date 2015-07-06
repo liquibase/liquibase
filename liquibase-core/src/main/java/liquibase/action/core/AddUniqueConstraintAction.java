@@ -2,28 +2,23 @@ package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.UniqueConstraint;
 
 import java.util.List;
 
 public class AddUniqueConstraintAction extends AbstractAction {
 
-    public ObjectName tableName;
-    public List<String> columnNames;
-    public String constraintName;
-    public String tablespace;
-
-    public Boolean deferrable;
-    public Boolean initiallyDeferred;
-    public Boolean disabled;
+    public UniqueConstraint uniqueConstraint;
 
     public AddUniqueConstraintAction() {
 
     }
 
-    public AddUniqueConstraintAction(ObjectName tableName, String constraintName, List<String> columnNames) {
-        this.tableName = tableName;
-        this.columnNames = columnNames;
-        this.constraintName = constraintName;
+    public AddUniqueConstraintAction(ObjectName name, String... columnNames) {
+        this(new UniqueConstraint(name, columnNames));
     }
 
+    public AddUniqueConstraintAction(UniqueConstraint uniqueConstraint) {
+        this.uniqueConstraint = uniqueConstraint;
+    }
 }

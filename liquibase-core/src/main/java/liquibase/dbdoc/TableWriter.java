@@ -38,21 +38,21 @@ public class TableWriter extends HTMLWriter {
     private void writeColumns(FileWriter fileWriter, Table table, Database database) throws IOException {
         List<List<String>> cells = new ArrayList<List<String>>();
 
-        for (Column column : table.getColumns()) {
+//        for (Column column : table.getColumns()) {
 //            String remarks = column.getRemarks();
 //            cells.add(Arrays.asList(column.getType().toString(),
 //                    column.isNullable() ? "NULL" : "NOT NULL",
 //                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>",
 //                    remarks != null ? remarks : ""));
 //            //todo: add foreign key info to columns?
-        }
+//        }
 
 
         writeTable("Current Columns", cells, fileWriter);
     }
     
     private void writeTableRemarks(FileWriter fileWriter, Table table, Database database) throws IOException {
-        final String tableRemarks = table.getRemarks();
+        final String tableRemarks = table.remarks;
         if (tableRemarks != null && tableRemarks.length() > 0) {
         	final List<List<String>> cells = new ArrayList<List<String>>();
         	cells.add(Arrays.asList(tableRemarks));

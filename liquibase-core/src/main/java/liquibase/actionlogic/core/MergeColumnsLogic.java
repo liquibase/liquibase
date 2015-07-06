@@ -46,8 +46,7 @@ public class MergeColumnsLogic extends AbstractActionLogic<MergeColumnsAction> {
         String column2Name = action.column2Name;
 
         AddColumnsAction addColumnsAction = new AddColumnsAction();
-        addColumnsAction.tableName = tableName;
-        addColumnsAction.columnDefinitions = Collections.singletonList(new ColumnDefinition(finalColumnName, finalColumnType));
+        addColumnsAction.columns = Collections.singletonList(new Column(new ObjectName(action.tableName, finalColumnName), finalColumnType));
         actions.add(addColumnsAction);
 
         actions.add(new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName, Table.class) +

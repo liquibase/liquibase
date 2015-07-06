@@ -7,6 +7,7 @@ import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
 import liquibase.util.StringClauses;
 
 import java.util.List;
@@ -18,17 +19,17 @@ public class CreateTableLogicPostgresql extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
-        AutoIncrementDefinition autoIncrementDefinition = column.autoIncrementDefinition;
+    protected StringClauses generateColumnSql(Column column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
+        Column.AutoIncrementInformation autoIncrementInformation = column.autoIncrementInformation;
 
-        if (autoIncrementDefinition != null) {
-            String sequenceName = action.tableName.name + "_" + column.columnName.name + "_seq";
+        if (autoIncrementInformation != null) {
+            String sequenceName = action.tableName.name + "_" + column.getSimpleName() + "_seq";
 
             AlterSequenceAction alterSequenceAction = (AlterSequenceAction) new AlterSequenceAction();
             alterSequenceAction.sequenceName = new ObjectName(action.tableName.container, sequenceName);
 
-            alterSequenceAction.minValue = autoIncrementDefinition.startWith;
-            alterSequenceAction.incrementBy = autoIncrementDefinition.incrementBy;
+            alterSequenceAction.minValue = autoIncrementInformation.startWith;
+            alterSequenceAction.incrementBy = autoIncrementInformation.incrementBy;
             additionalActions.add(alterSequenceAction
             );
         }

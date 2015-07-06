@@ -12,7 +12,7 @@ import java.util.List;
  */
 public abstract class Relation extends AbstractDatabaseObject {
 
-    public List<Column> columns;
+    public String remarks;
 
     protected Relation() {
     }
@@ -29,50 +29,12 @@ public abstract class Relation extends AbstractDatabaseObject {
 
     }
 
-    public String getRemarks() {
-        return get("remarks", String.class);
-    }
-
-    public Relation setRemarks(String remarks) {
-        set("remarks", remarks);
-        return this;
-    }
-
-    public List<Column> getColumns() {
-        return columns;
-    }
-
-    /**
-     * Returns the column object for the given columnName.  If the column does not exist in this table,
-     * return null.
-     */
-    public Column getColumn(String columnName) {
-        for (Column column : getColumns()) {
-            if (column.getName().equals(columnName)) {
-                return column;
-            }
-        }
-        return null;
-    }
-
     /**
      * @return Returns the schema.
      */
     @Override
     public Schema getSchema() {
-        return get("schema", Schema.class);
-    }
-
-    /**
-     * @param schema The schema to set.
-     */
-    public Relation setSchema(Schema schema) {
-        set("schema", schema);
-        return this;
-    }
-
-    public Relation setSchema(String catalog, String schema) {
-        return setSchema(new Schema(catalog, schema));
+        return null;
     }
 
     public int compareTo(Object o) {

@@ -34,21 +34,21 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
     @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         UniqueConstraint uc = (UniqueConstraint) unexpectedObject;
-        if (uc.getTable() == null) {
-            return null;
-        }
+//        if (uc.getTable() == null) {
+//            return null;
+//        }
 
         DropUniqueConstraintChange change = new DropUniqueConstraintChange();
-        change.setTableName(uc.getTable().getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(uc.getTable().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(uc.getTable().getSchema().getSimpleName());
-        }
-        change.setConstraintName(uc.getSimpleName());
-
-        Index backingIndex = uc.getBackingIndex();
+//        change.setTableName(uc.getTable().getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(uc.getTable().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(uc.getTable().getSchema().getSimpleName());
+//        }
+//        change.setConstraintName(uc.getSimpleName());
+//
+//        Index backingIndex = uc.getBackingIndex();
 //        if (backingIndex == null) {
 //            Index exampleIndex = new Index().setTable(uc.getTable());
 //            for (String col : uc.getColumns()) {
@@ -56,7 +56,7 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
 //            }
 //            control.setAlreadyHandledUnexpected(exampleIndex);
 //        } else {
-            control.setAlreadyHandledUnexpected(backingIndex);
+//            control.setAlreadyHandledUnexpected(backingIndex);
 //        }
 
         return new Change[] { change };

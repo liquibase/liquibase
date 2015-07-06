@@ -264,22 +264,22 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
         try {
-            ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
-            example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
-            example.setForeignKeyColumns(Column.listFromNames(getBaseColumnNames()));
-            example.setPrimaryKeyColumns(Column.listFromNames(getReferencedColumnNames()));
+//            ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
+//            example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
+//            example.setForeignKeyColumns(Column.listFromNames(getBaseColumnNames()));
+//            example.setPrimaryKeyColumns(Column.listFromNames(getReferencedColumnNames()));
 
-            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertApplied(snapshot != null, "Foreign key does not exist");
-
-            if (snapshot != null) {
-                if (getInitiallyDeferred() != null) {
-                    result.assertCorrect(getInitiallyDeferred().equals(snapshot.isInitiallyDeferred()), "Initially deferred incorrect");
-                }
-                if (getDeferrable() != null) {
-                    result.assertCorrect(getDeferrable().equals(snapshot.isDeferrable()), "Initially deferred incorrect");
-                }
-            }
+//            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+//            result.assertApplied(snapshot != null, "Foreign key does not exist");
+//
+//            if (snapshot != null) {
+//                if (getInitiallyDeferred() != null) {
+//                    result.assertCorrect(getInitiallyDeferred().equals(snapshot.isInitiallyDeferred()), "Initially deferred incorrect");
+//                }
+//                if (getDeferrable() != null) {
+//                    result.assertCorrect(getDeferrable().equals(snapshot.isDeferrable()), "Initially deferred incorrect");
+//                }
+//            }
 
             return result;
 

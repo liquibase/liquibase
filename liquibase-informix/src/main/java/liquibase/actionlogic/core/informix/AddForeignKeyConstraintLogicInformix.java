@@ -21,7 +21,7 @@ public class AddForeignKeyConstraintLogicInformix extends AddForeignKeyConstrain
                 .remove("ON UPDATE")
                 .remove("ON DELETE CASCADE");
 
-        clauses.append("CONSTRAINT "+action.constraintName);
+        clauses.append("CONSTRAINT "+action.foreignKey.name);
 
         return clauses;
     }

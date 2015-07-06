@@ -1,14 +1,14 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.GetNextChangeSetSequenceValueAction;
 import liquibase.action.core.SelectFromDatabaseChangeLogAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.exception.ActionPerformException;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
 
 public class GetNextChangeSetSequenceValueLogic extends AbstractActionLogic<GetNextChangeSetSequenceValueAction> {
 
@@ -19,6 +19,6 @@ public class GetNextChangeSetSequenceValueLogic extends AbstractActionLogic<GetN
 
     @Override
     public ActionResult execute(GetNextChangeSetSequenceValueAction action, Scope scope) throws ActionPerformException {
-        return new DelegateResult(new SelectFromDatabaseChangeLogAction(new ColumnDefinition("MAX(ORDEREXECUTED)", null)));
+        return new DelegateResult(new SelectFromDatabaseChangeLogAction(new Column(new ObjectName("MAX(ORDEREXECUTED)"))));
     }
 }

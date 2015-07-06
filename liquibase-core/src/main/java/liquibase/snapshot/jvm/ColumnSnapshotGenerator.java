@@ -27,7 +27,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        if (((Column) example).computed != null && ((Column) example).computed) {
+        if (((Column) example).name.virtual) {
             return example;
         }
 
@@ -112,7 +112,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, foundObject.getName(), database);
                     column.set(LIQUIBASE_COMPLETE, true);
-                    relation.getColumns().add(column);
+//                    relation.getColumns().add(column);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);

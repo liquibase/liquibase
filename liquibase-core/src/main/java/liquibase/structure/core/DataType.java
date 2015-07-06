@@ -128,4 +128,17 @@ public class DataType extends AbstractLiquibaseSerializable {
     public String getSerializedObjectNamespace() {
         return STANDARD_SNAPSHOT_NAMESPACE;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DataType)) {
+            return false;
+        }
+        return toString().equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }

@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 
@@ -128,7 +129,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
             if (getColumns() != null) {
                 for (ColumnConfig column : getColumns() ) {
-                    example.addColumn(new Column(column));
+                    example.addColumn(new Index.IndexedColumn(new ObjectName(tableName, column.getName())));
                 }
             }
 

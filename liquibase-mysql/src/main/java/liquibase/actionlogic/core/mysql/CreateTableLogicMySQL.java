@@ -2,7 +2,6 @@ package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.CreateTableAction;
 import liquibase.action.core.SetColumnRemarksAction;
 import liquibase.actionlogic.ActionResult;
@@ -12,6 +11,7 @@ import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 
@@ -27,11 +27,11 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
     public ActionResult execute(CreateTableAction action, Scope scope) throws ActionPerformException {
         DelegateResult result = (DelegateResult) super.execute(action, scope);
 
-        for (ColumnDefinition column : CollectionUtil.createIfNull(action.columnDefinitions)) {
+        for (Column column : CollectionUtil.createIfNull(action.columns)) {
             String columnRemarks = column.remarks;
             if (columnRemarks != null) {
                 SetColumnRemarksAction remarksAction = new SetColumnRemarksAction();
-                remarksAction.columnName = new ObjectName(action.tableName, column.columnName.name);
+                remarksAction.columnName = new ObjectName(action.tableName, column.getSimpleName());
                 remarksAction.remarks = columnRemarks;
                 return new DelegateResult(result, remarksAction);
             }
@@ -54,7 +54,7 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
     }
 
     @Override
-    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
+    protected StringClauses generateColumnSql(Column column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         StringClauses clauses = super.generateColumnSql(column, action, scope, additionalActions);
 
         Database database = scope.getDatabase();

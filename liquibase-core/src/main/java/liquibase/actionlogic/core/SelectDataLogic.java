@@ -2,7 +2,6 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.QuerySqlAction;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.SelectDataAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -29,7 +28,7 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
     public ValidationErrors validate(SelectDataAction action, Scope scope) {
         return super.validate(action, scope)
                 .checkForRequiredField("tableName", action)
-                .checkForRequiredField("selectColumnDefinitions", action);
+                .checkForRequiredField("selectColumns", action);
     }
 
     @Override
@@ -43,11 +42,11 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
 
         StringClauses clauses = new StringClauses()
         .append("SELECT")
-                        .append(StringUtils.join(CollectionUtil.createIfNull(action.selectColumnDefinitions), ", ", new StringUtils.StringUtilsFormatter<ColumnDefinition>() {
+                        .append(StringUtils.join(CollectionUtil.createIfNull(action.selectColumns), ", ", new StringUtils.StringUtilsFormatter<Column>() {
                     @Override
-                    public String toString(ColumnDefinition column) {
-                        String columnName = column.columnName.name;
-                        if (ObjectUtil.defaultIfEmpty(column.computed, false)) {
+                    public String toString(Column column) {
+                        String columnName = column.getSimpleName();
+                        if (column.name.virtual) {
                             return columnName;
                         } else {
                             return database.escapeObjectName(columnName, Column.class);

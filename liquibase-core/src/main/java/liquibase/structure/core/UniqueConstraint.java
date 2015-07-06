@@ -14,193 +14,110 @@ import java.util.List;
 
 public class UniqueConstraint extends AbstractDatabaseObject {
 
-    public UniqueConstraint() {
-        set("columns", new ArrayList());
-        set("deferrable", false);
-        set("initiallyDeferred", false);
-        set("disabled", false);
-    }
+	public List<ObjectName> columns = new ArrayList<>();
+	public Boolean deferrable;
+	public Boolean initiallyDeferred;
+	public Boolean disabled;
+	public ObjectName backingIndex;
+	public String tablespace;
 
-    public UniqueConstraint(ObjectName name) {
-        setName(name);
-    }
+	public UniqueConstraint() {
+	}
 
+	public UniqueConstraint(ObjectName name, String... columns) {
+		setName(name);
+		ObjectName tableName = name.container;
 
-    public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
-        this();
-        setName(new ObjectName(name));
-        if (tableName != null && columns != null) {
-            setTable(new Table(tableCatalog, tableSchema, tableName));
-            setColumns(new ArrayList<Column>(Arrays.asList(columns)));
-        }
-    }
+		for (String columnName : columns) {
+			this.columns.add(new ObjectName(tableName, columnName));
+		}
+	}
+
 
 	@Override
-    public DatabaseObject[] getContainingObjects() {
-		return getColumns().toArray(new Column[getColumns().size()]);
+	public DatabaseObject[] getContainingObjects() {
+		return null;
 	}
 
-    @Override
-    public Schema getSchema() {
-        if (getTable() == null) {
-            return null;
-        }
-
-        return getTable().getSchema();
-    }
-
-	public Table getTable() {
-		return get("table", Table.class);
+	@Override
+	public Schema getSchema() {
+		return null;
 	}
 
-	public UniqueConstraint setTable(Table table) {
-		this.set("table", table);
-        return this;
-    }
-
-	public List<Column> getColumns() {
-		return get("columns", List.class);
+	public ObjectName getTableName() {
+		if (name == null) {
+			return null;
+		}
+		return name.container;
 	}
 
-    public UniqueConstraint setColumns(List<Column> columns) {
-        set("columns", columns);
-        return this;
-    }
+	@Override
+	public int compareTo(Object other) {
+		UniqueConstraint that = (UniqueConstraint) other;
 
-    public UniqueConstraint addColumn(int position, Column column) {
-        if (position >= getColumns().size()) {
-            for (int i = getColumns().size()-1; i < position; i++) {
-                this.getColumns().add(null);
-            }
-        }
-        this.getColumns().set(position, column);
-        return this;
-    }
+		if (that == null) {
+			return -1;
+		}
 
-    public boolean isDeferrable() {
-		return get("deferrable", Boolean.class);
-	}
+		ObjectName thisTableName = getTableName();
+		ObjectName thatTableName = that.getTableName();
 
-	public UniqueConstraint setDeferrable(boolean deferrable) {
-		this.set("deferrable", deferrable);
-        return this;
-    }
 
-	public boolean isInitiallyDeferred() {
-		return get("initiallyDeferred", Boolean.class);
-	}
-
-	public UniqueConstraint setInitiallyDeferred(boolean initiallyDeferred) {
-		this.set("initiallyDeferred", initiallyDeferred);
-        return this;
-    }
-
-	public String getColumnNames() {
-		return StringUtils.join(getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
-            @Override
-            public String toString(Object obj) {
-                return ((Column) obj).toString(false);
-            }
-        });
-	}
-
-	public UniqueConstraint setDisabled(boolean disabled) {
-		this.set("disabled", disabled);
-        return this;
-	}
-
-	public boolean isDisabled() {
-		return get("disabled", Boolean.class);
-	}
-
-    public Index getBackingIndex() {
-        return get("backingIndex", Index.class);
-    }
-
-    public UniqueConstraint setBackingIndex(Index backingIndex) {
-        this.set("backingIndex", backingIndex);
-        return this;
-
-    }
-
-    @Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		if (null == this.getColumnNames())
-			return false;
-		UniqueConstraint that = (UniqueConstraint) o;
-		boolean result = false;
-		result = !(getColumnNames() != null ? !getColumnNames()
-				.equalsIgnoreCase(that.getColumnNames()) : that
-				.getColumnNames() != null)
-				&& isDeferrable() == that.isDeferrable()
-				&& isInitiallyDeferred() == that.isInitiallyDeferred()
-				&& isDisabled() == that.isDisabled();
-		// Need check for nulls here due to NullPointerException using
-		// Postgres
-		if (result) {
-			if (null == this.getTable()) {
-				result = null == that.getTable();
-			} else if (null == that.getTable()) {
-				result = false;
+		if (thisTableName != null && thatTableName != null) {
+			return thisTableName.compareTo(thatTableName);
+		} else {
+			if (this.getSimpleName() == null) {
+				if (that.getSimpleName() == null) {
+					return 0;
+				} else {
+					return 1;
+				}
 			} else {
-				result = this.getTable().getName().equals(
-						that.getTable().getName());
+				return this.getSimpleName().compareTo(that.getSimpleName());
 			}
 		}
+	}
 
-		return result;
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		UniqueConstraint that = (UniqueConstraint) o;
+
+		ObjectName thisTableName = getTableName();
+		ObjectName thatTableName = that.getTableName();
+
+		if (thisTableName != null && thatTableName != null) {
+			return thisTableName.equals(thatTableName);
+		} else {
+			if (this.getSimpleName() == null) {
+				return that.getSimpleName() == null;
+			} else {
+				return this.getSimpleName().equals(that.getSimpleName());
+			}
+		}
 	}
 
 	@Override
-    public int compareTo(Object other) {
-        UniqueConstraint o = (UniqueConstraint) other;
-		// Need check for nulls here due to NullPointerException using Postgres
-		ObjectName thisTableName;
-        ObjectName thatTableName;
-		thisTableName = null == this.getTable() ? new ObjectName() : this.getTable().getName();
-		thatTableName = null == o.getTable() ? new ObjectName() : o.getTable().getName();
-		int returnValue = thisTableName.compareTo(thatTableName);
-		if (returnValue == 0) {
-			returnValue = this.getName().compareTo(o.getName());
-		}
-		if (returnValue == 0) {
-			returnValue = this.getColumnNames().compareTo(o.getColumnNames());
-		}
-		return returnValue;
-	}
-
-    @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        super.load(parsedNode, resourceAccessor);
-    }
-
-    @Override
 	public int hashCode() {
-		int result = 0;
-		if (this.getTable() != null) {
-			result = this.getTable().hashCode();
+		int result;
+		if (name == null) {
+			return 0;
 		}
-		if (this.getName() != null) {
-			result = 31 * result + this.getSimpleName().toUpperCase().hashCode();
+
+		ObjectName tableName = getTableName();
+		if (tableName == null) {
+			return 0;
+		} else {
+			return tableName.hashCode();
 		}
-		if (getColumnNames() != null) {
-			result = 31 * result + getColumnNames().hashCode();
-		}
-		return result;
 	}
 
 	@Override
 	public String toString() {
-        if (getTable() == null) {
-            return getSimpleName();
-        } else {
-            return getName() + " on " + getTable().getName() + "("
-                    + getColumnNames() + ")";
-        }
-    }
+		return getName() + "(" + StringUtils.join(this.columns, ",", new StringUtils.ToStringFormatter()) + ")";
+	}
+
 }

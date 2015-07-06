@@ -22,7 +22,7 @@ public class ColumnConfigTest extends Specification {
         when:
         def table = new Table();
 
-        table.setPrimaryKey(new PrimaryKey().addColumn(0, new Column("colName")).setName("pk_name").setTablespace("pk_tablespace"));
+//        table.setPrimaryKey(new PrimaryKey().addColumn(0, new Column("colName")).setName("pk_name").setTablespace("pk_tablespace"));
         table.getUniqueConstraints().add(new UniqueConstraint().setName("uq1").addColumn(0, new Column("otherCol")));
         table.getUniqueConstraints().add(new UniqueConstraint().setName("uq2").addColumn(0, new Column("colName")));
 

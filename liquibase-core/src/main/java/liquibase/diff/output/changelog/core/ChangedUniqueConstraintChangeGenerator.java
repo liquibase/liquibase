@@ -48,13 +48,13 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
-        dropUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
+//        dropUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
         dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getSimpleName());
 
         AddUniqueConstraintChange addUniqueConstraintChange = createAddUniqueConstraintChange();
         addUniqueConstraintChange.setConstraintName(uniqueConstraint.getSimpleName());
-        addUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
-        addUniqueConstraintChange.setColumnNames(uniqueConstraint.getColumnNames());
+//        addUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
+//        addUniqueConstraintChange.setColumnNames(uniqueConstraint.getColumnNames());
 
         returnList.add(dropUniqueConstraintChange);
 
@@ -67,7 +67,7 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
             addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getSimpleName());
         }
 
-        Index backingIndex = uniqueConstraint.getBackingIndex();
+//        Index backingIndex = uniqueConstraint.getBackingIndex();
 //        if (comparisonDatabase instanceof OracleDatabase) {
 //            if (backingIndex != null && backingIndex.getName() != null) {
 //                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
@@ -85,7 +85,7 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
 //            }
 //        }
 
-        control.setAlreadyHandledChanged(backingIndex);
+//        control.setAlreadyHandledChanged(backingIndex);
 
         returnList.add(addUniqueConstraintChange);
 

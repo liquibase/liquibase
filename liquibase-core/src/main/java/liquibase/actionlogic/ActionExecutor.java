@@ -23,6 +23,23 @@ public class ActionExecutor {
 
     }
 
+    public ValidationErrors validate(Action action, Scope scope) {
+        ActionLogicFactory actionLogicFactory = scope.getSingleton(ActionLogicFactory.class);
+
+        ActionLogic actionLogic = actionLogicFactory.getActionLogic(action, scope);
+        if (actionLogic == null) {
+            String scopeDescription;
+            if (scope.getDatabase() == null) {
+                scopeDescription = "No Database";
+            } else {
+                scopeDescription = scope.getDatabase().getShortName();
+            }
+            return new ValidationErrors().addUnsupportedError("No supported ActionLogic implementation found for '" + action.describe() + "'", scopeDescription);
+        }
+
+        return actionLogic.validate(action, scope);
+    }
+
     /**
      * Generates a Plan listing the Actions and corresponding ActionLogic implementations that will interact with external systems.
      * Normally {@link #execute(liquibase.action.Action, liquibase.Scope)} should be called, but this method is public for logging and testing purposes.
@@ -46,7 +63,7 @@ public class ActionExecutor {
 
         ValidationErrors validationErrors = actionLogic.validate(action, scope);
         if (validationErrors.hasErrors()) {
-            throw new ActionPerformException("Validation Error(s): "+ StringUtils.join(validationErrors.getErrorMessages(), "; "));
+            throw new ActionPerformException("Validation Error(s): "+ StringUtils.join(validationErrors.getErrorMessages(), "; ")+" for "+action.describe()+" with "+actionLogic.getClass().getName());
         }
 
         if (actionLogic instanceof ActionLogic.InteractsExternally && ((ActionLogic.InteractsExternally) actionLogic).interactsExternally(action, scope)) {

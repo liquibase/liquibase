@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.SelectDataAction;
 import liquibase.action.core.SelectFromDatabaseChangeLogAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -25,7 +23,7 @@ public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic<Select
 
         SelectDataAction selectDataAction = new SelectDataAction(
                 new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()),
-                action.selectColumnDefinitions
+                action.selectColumns
         );
         selectDataAction.where = action.where;
         selectDataAction.orderByColumnNames = action.orderByColumnNames;

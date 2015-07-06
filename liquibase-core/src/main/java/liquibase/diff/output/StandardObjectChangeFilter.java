@@ -111,11 +111,11 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 if (object instanceof Index) {
                     return matches(((Index) object).getTable());
                 }
-                if (object instanceof ForeignKey) {
-                    return matches(((ForeignKey) object).getForeignKeyTable());
-                }
+//                if (object instanceof ForeignKey) {
+//                    return matches(((ForeignKey) object).getForeignKeyTable());
+//                }
                 if (object instanceof PrimaryKey) {
-                    return matches(((PrimaryKey) object).getTable());
+                    return matches(new Table(((PrimaryKey) object).getTableName()));
                 }
                 if (object instanceof Data) {
                     return matches(((Data) object).getTable());

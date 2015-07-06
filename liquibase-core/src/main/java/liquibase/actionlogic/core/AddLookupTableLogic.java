@@ -47,12 +47,12 @@ public class AddLookupTableLogic extends AbstractActionLogic<AddLookupTableActio
 
         actions.add(addPkAction);
 
-        actions.add(new AddForeignKeyConstraintAction(
-                action.constraintName,
-                newTableName,
-                newColumnName.name,
-                existingTableName,
-                existingColumnName.name));
+//        actions.add(new AddForeignKeyConstraintAction(
+//                action.constraintName,
+//                newTableName,
+//                newColumnName.name,
+//                existingTableName,
+//                existingColumnName.name));
 
         return new DelegateResult(actions);
     }

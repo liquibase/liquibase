@@ -870,19 +870,19 @@ public abstract class AbstractJdbcDatabase implements Database {
     public boolean isLiquibaseObject(final DatabaseObject object) {
         if (object instanceof Table) {
             Schema liquibaseSchema = new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName());
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogTableName())).setSchema(liquibaseSchema), this)) {
-                return true;
-            }
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogLockTableName())).setSchema(liquibaseSchema), this)) {
-                return true;
-            }
+//            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogTableName())).setSchema(liquibaseSchema), this)) {
+//                return true;
+//            }
+//            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogLockTableName())).setSchema(liquibaseSchema), this)) {
+//                return true;
+//            }
             return false;
         } else if (object instanceof Column) {
             return isLiquibaseObject(new Table(object.getName().container));
         } else if (object instanceof Index) {
             return isLiquibaseObject(((Index) object).getTable());
         } else if (object instanceof PrimaryKey) {
-            return isLiquibaseObject(((PrimaryKey) object).getTable());
+//            return isLiquibaseObject(((PrimaryKey) object).getTable());
         }
         return false;
     }
@@ -1036,7 +1036,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
-        return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
+        return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {

@@ -70,11 +70,11 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
         try {
             PrimaryKey example = new PrimaryKey();
             Table table = new Table();
-            table.setSchema(new Schema(getCatalogName(), getSchemaName()));
+//            table.setSchema(new Schema(getCatalogName(), getSchemaName()));
             if (StringUtils.trimToNull(getTableName()) != null) {
                 table.setName(new ObjectName(getTableName()));
             }
-            example.setTable(table);
+//            example.setTable(table);
             example.setName(new ObjectName(getPrimaryKeyName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {

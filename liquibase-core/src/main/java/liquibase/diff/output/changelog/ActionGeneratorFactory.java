@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.servicelocator.AbstractServiceFactory;
+import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 
 import java.util.*;
@@ -27,13 +28,13 @@ public class ActionGeneratorFactory extends AbstractServiceFactory<ActionGenerat
         return 0;
     }
 
-    public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Scope referenceScope, Scope targetScope) {
-        MissingObjectActionGenerator generator = getGenerator(MissingObjectActionGenerator.class, missingObject.getClass(), referenceScope, targetScope);
-        return generator.fixMissing(missingObject, control, referenceScope, targetScope);
+    public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
+        MissingObjectActionGenerator generator = getGenerator(MissingObjectActionGenerator.class, missingObject.getClass(), referenceSnapshot, targetSnapshot, scope);
+        return generator.fixMissing(missingObject, control, referenceSnapshot, targetSnapshot, scope);
     }
 
-    protected MissingObjectActionGenerator getGenerator(Class<? extends ActionGenerator> generatorType, Class<? extends DatabaseObject> objectType, Scope referenceScope, Scope targetScope) {
-        return (MissingObjectActionGenerator) getService(targetScope, generatorType, objectType, referenceScope);
+    protected MissingObjectActionGenerator getGenerator(Class<? extends ActionGenerator> generatorType, Class<? extends DatabaseObject> objectType, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
+        return (MissingObjectActionGenerator) getService(scope, generatorType, objectType, referenceSnapshot);
     }
 
 }

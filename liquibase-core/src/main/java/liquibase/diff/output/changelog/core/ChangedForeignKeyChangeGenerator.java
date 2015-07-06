@@ -46,32 +46,32 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
         };
 
         DropForeignKeyConstraintChange dropFkChange = new DropForeignKeyConstraintChange();
-        dropFkChange.setConstraintName(fk.getSimpleName());
-        dropFkChange.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
-
+//        dropFkChange.setConstraintName(fk.getSimpleName());
+//        dropFkChange.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
+//
         AddForeignKeyConstraintChange addFkChange = new AddForeignKeyConstraintChange();
-        addFkChange.setConstraintName(fk.getSimpleName());
-        addFkChange.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
-        addFkChange.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", formatter));
-        addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getSimpleName());
-        addFkChange.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", formatter));
-
-        if (control.getIncludeCatalog()) {
-            dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
-
-            addFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
-            addFkChange.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
-
-            addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
-            addFkChange.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getSimpleName());
-        }
-
-        if (fk.getBackingIndex() != null) {
-            control.setAlreadyHandledChanged(fk.getBackingIndex());
-        }
+//        addFkChange.setConstraintName(fk.getSimpleName());
+//        addFkChange.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
+//        addFkChange.setBaseColumnNames(StringUtils.join(fk.getForeignKeyColumns(), ",", formatter));
+//        addFkChange.setReferencedTableName(fk.getPrimaryKeyTable().getSimpleName());
+//        addFkChange.setReferencedColumnNames(StringUtils.join(fk.getPrimaryKeyColumns(), ",", formatter));
+//
+//        if (control.getIncludeCatalog()) {
+//            dropFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+//
+//            addFkChange.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+//            addFkChange.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            dropFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
+//
+//            addFkChange.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
+//            addFkChange.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getSimpleName());
+//        }
+//
+//        if (fk.getBackingIndex() != null) {
+//            control.setAlreadyHandledChanged(fk.getBackingIndex());
+//        }
 
         return new Change[] { dropFkChange, addFkChange };
     }

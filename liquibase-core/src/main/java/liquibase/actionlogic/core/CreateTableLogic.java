@@ -11,8 +11,8 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.*;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
@@ -50,7 +50,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
     public ValidationErrors validate(CreateTableAction action, Scope scope) {
         return super.validate(action, scope)
                 .checkForRequiredField("tableName", action)
-                .checkForRequiredField("columnDefinitions", action);
+                .checkForRequiredField("columns", action);
     }
 
     @Override
@@ -71,16 +71,16 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
         StringClauses createTableClauses = new StringClauses(", ");
 
         List<String> primaryKeyColumnNames = new ArrayList<>();
-        List<ColumnDefinition> columns = CollectionUtil.createIfNull(action.columnDefinitions);
-        for (ColumnDefinition column : columns) {
-            if (ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false)) {
-                primaryKeyColumnNames.add(column.columnName.name);
-            }
-        }
+        List<Column> columns = CollectionUtil.createIfNull(action.columns);
+//        for (Column column : columns) {
+//            if (ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false)) {
+//                primaryKeyColumnNames.add(column.columnName.name);
+//            }
+//        }
 
         StringClauses columnsClause = new StringClauses("(", ", ", ")");
         int i=0;
-        for (ColumnDefinition column : columns) {
+        for (Column column : columns) {
             StringClauses columnClause = generateColumnSql(column, action, scope, additionalActions);
 
             columnsClause.append("column " + i++, columnClause);
@@ -120,15 +120,15 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 //        }
 
         StringClauses foreignKeyClauses = new StringClauses(", ");
-        for (ForeignKeyDefinition fk : CollectionUtil.createIfNull(action.foreignKeyDefinitions)) {
-            foreignKeyClauses.append("foreignKey " + fk.columnNames, generateForeignKeySql(fk, action, scope));
+        for (ForeignKey fk : CollectionUtil.createIfNull(action.foreignKeys)) {
+            foreignKeyClauses.append("foreignKey " + StringUtils.join(fk.foreignKeyColumns, ",", new StringUtils.ToStringFormatter()), generateForeignKeySql(fk, action, scope));
         }
         createTableClauses.append(Clauses.foreignKeyClauses, foreignKeyClauses);
 
         StringClauses uniqueConstraintClauses = new StringClauses(", ");
-        for (UniqueConstraintDefinition uniqueConstraint : CollectionUtil.createIfNull(action.uniqueConstraintDefinitions)) {
-            uniqueConstraintClauses.append("uniqueConstraint "+uniqueConstraint.columnNames, generateUniqueConstraintSql(uniqueConstraint, action, scope));
-        }
+//        for (UniqueConstraint uniqueConstraint : CollectionUtil.createIfNull(action.uniqueConstraints)) {
+//            uniqueConstraintClauses.append("uniqueConstraint "+uniqueConstraint.columnNames, generateUniqueConstraintSql(uniqueConstraint, action, scope));
+//        }
         createTableClauses.append(Clauses.uniqueConstraintClauses, uniqueConstraintClauses);
 //    }
 
@@ -161,10 +161,10 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
         return mainClause;
     }
 
-    protected StringClauses generateUniqueConstraintSql(UniqueConstraintDefinition uniqueConstraint, CreateTableAction action, Scope scope) {
+    protected StringClauses generateUniqueConstraintSql(UniqueConstraint uniqueConstraint, CreateTableAction action, Scope scope) {
         Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses();
-        String constraintName = uniqueConstraint.constraintName;
+        String constraintName = uniqueConstraint.getSimpleName();
 
         if (constraintName != null) {
             clauses.append(UniqueConstraintClauses.constraintName, "CONSTRAINT "+database.escapeConstraintName(constraintName));
@@ -172,64 +172,56 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 
         clauses.append("UNIQUE");
 
-        clauses.append(UniqueConstraintClauses.columns, "("+database.escapeColumnNameList(StringUtils.join(CollectionUtil.createIfNull(uniqueConstraint.columnNames, ", "), ", "))+")");
+        clauses.append(UniqueConstraintClauses.columns, "("+database.escapeColumnNameList(StringUtils.join(CollectionUtil.createIfNull(uniqueConstraint.columns), ", ", new StringUtils.ObjectNameFormatter(Column.class, scope.getDatabase())))+")");
 
         return clauses;
     }
 
-    protected StringClauses generateForeignKeySql(ForeignKeyDefinition foreignKeyDefinition, CreateTableAction action, Scope scope) {
+    protected StringClauses generateForeignKeySql(ForeignKey foreignKey, CreateTableAction action, Scope scope) {
         StringClauses clauses = new StringClauses();
         Database database = scope.getDatabase();
 
-        String name = foreignKeyDefinition.foreignKeyName;
+        ObjectName name = foreignKey.name;
         if (name != null) {
-            clauses.append(ForeignKeyClauses.constraintName, "CONSTRAINT "+database.escapeConstraintName(name));
+            clauses.append(ForeignKeyClauses.constraintName, "CONSTRAINT "+database.escapeObjectName(name, ForeignKey.class));
         }
 
-        String referencesString = foreignKeyDefinition.references.toString();
+        String referencesString = StringUtils.join(foreignKey.primaryKeyColumns, ", ", new StringUtils.ObjectSimpleNameFormatter(Column.class, database));
 
         clauses.append("FOREIGN KEY");
-        clauses.append(ForeignKeyClauses.columns, "(" + StringUtils.join(CollectionUtil.createIfNull(foreignKeyDefinition.columnNames), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))+")");
+        clauses.append(ForeignKeyClauses.columns, "(" + StringUtils.join(foreignKey.foreignKeyColumns, ", ", new StringUtils.ObjectSimpleNameFormatter(Column.class, database))+")");
         clauses.append("REFERENCES");
 
-        if (referencesString != null) {
-            if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
-                referencesString = database.getDefaultSchemaName() +"."+referencesString;
-            }
-            clauses.append(ForeignKeyClauses.referencesTarget, referencesString);
-        } else {
-            clauses.append(database.escapeObjectName(foreignKeyDefinition.referencedTableName, Table.class)
-                    + "(" +
-                    database.escapeColumnNameList(StringUtils.join(foreignKeyDefinition.referencedColumnNames, ", "))
-                    + ")");
+        if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
+            referencesString = database.getDefaultSchemaName() +"."+referencesString;
         }
+        clauses.append(ForeignKeyClauses.referencesTarget, referencesString);
 
-
-        if (ObjectUtil.defaultIfEmpty(foreignKeyDefinition.deleteCascade, false)) {
+        if (foreignKey.deleteRule == ForeignKeyConstraintType.importedKeyCascade) {
             clauses.append("ON DELETE CASCADE");
         }
 
-        if (ObjectUtil.defaultIfEmpty(foreignKeyDefinition.initiallyDeferred, false)) {
+        if (ObjectUtil.defaultIfEmpty(foreignKey.initiallyDeferred, false)) {
             clauses.append("INITIALLY DEFERRED");
         }
-        if (ObjectUtil.defaultIfEmpty(foreignKeyDefinition.deferrable, false)) {
+        if (ObjectUtil.defaultIfEmpty(foreignKey.deferrable, false)) {
             clauses.append("DEFERRABLE");
         }
 
         return clauses;
     }
 
-    protected StringClauses generateColumnSql(ColumnDefinition column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
+    protected StringClauses generateColumnSql(Column column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         Database database = scope.getDatabase();
 
-        String columnName = column.columnName.name;
+        String columnName = column.getSimpleName();
         StringClauses columnClause = new StringClauses().append(database.escapeObjectName(columnName, Column.class));
-        columnClause.append(column.columnType);
+        columnClause.append(column.type.toString());
 
-        AutoIncrementDefinition autoIncrementDefinition = column.autoIncrementDefinition;
+        Column.AutoIncrementInformation autoIncrementInformation = column.autoIncrementInformation;
 
 
-        boolean isPrimaryKeyColumn = ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false);
+//        boolean isPrimaryKeyColumn = ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false);
 //        boolean isPrimaryKeyAutoIncrement = isPrimaryKeyColumn && isAutoIncrementColumn;
 
 //            if ((database instanceof SQLiteDatabase) &&
@@ -250,7 +242,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
         Object defaultValue = column.defaultValue;
 
         // auto-increment columns, there should be no default value
-        if (defaultValue != null && autoIncrementDefinition == null) {
+        if (defaultValue != null && autoIncrementInformation == null) {
             String defaultValueString;
             if (defaultValue instanceof SequenceNextValueFunction) {
                 defaultValueString = database.generateDatabaseFunctionValue((SequenceNextValueFunction) defaultValue);
@@ -261,11 +253,11 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             columnClause.append(ColumnClauses.defaultValue, "DEFAULT "+defaultValueString);
         }
 
-        if (autoIncrementDefinition != null) {
+        if (autoIncrementInformation != null) {
             // TODO: check if database supports auto increment on non primary key column
             if (database.supportsAutoIncrement()) {
-                BigInteger startWith = autoIncrementDefinition.startWith;
-                BigInteger incrementBy = autoIncrementDefinition.incrementBy;
+                BigInteger startWith = autoIncrementInformation.startWith;
+                BigInteger incrementBy = autoIncrementInformation.incrementBy;
                 String autoIncrementClause = database.getAutoIncrementClause(startWith, incrementBy);
 
                 if (!"".equals(autoIncrementClause)) {
@@ -282,7 +274,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             }
         }
 
-        boolean nullable =  ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false) || ObjectUtil.defaultIfEmpty(column.isNullable, false);
+        boolean nullable = false; //ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false) || ObjectUtil.defaultIfEmpty(column.nullable, false);
 
         if (nullable) {
             if (database.requiresDefiningColumnsAsNull()) {

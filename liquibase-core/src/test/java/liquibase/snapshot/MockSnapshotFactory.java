@@ -19,6 +19,13 @@ public class MockSnapshotFactory extends SnapshotFactory {
         }
     }
 
+    public MockSnapshotFactory add(DatabaseObject... objects) {
+        if (objects != null) {
+            this.objects.addAll(Arrays.asList(objects));
+        }
+        return this;
+    }
+
     @Override
     public boolean has(DatabaseObject example, Scope scope) throws ActionPerformException, InvalidExampleException {
         return this.get(example, scope) != null;
@@ -27,7 +34,7 @@ public class MockSnapshotFactory extends SnapshotFactory {
     @Override
     public <T extends DatabaseObject> T get(T example, Scope scope) throws ActionPerformException, InvalidExampleException {
         for (DatabaseObject  object : objects) {
-            if (example.getName().equals(object.getName())) {
+            if (example.equals(object)) {
                 return (T) object;
             }
         }

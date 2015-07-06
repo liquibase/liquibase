@@ -1,13 +1,12 @@
 package liquibase.actionlogic.core.oracle;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddColumnsAction;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.actionlogic.core.AddColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.structure.core.Column;
 
 public class AddColumnsLogicOracle extends AddColumnsLogic {
 
@@ -17,7 +16,7 @@ public class AddColumnsLogicOracle extends AddColumnsLogic {
     }
 
     @Override
-    protected String getDefaultValueClause(ColumnDefinition column, AddColumnsAction action, Scope scope) {
+    protected String getDefaultValueClause(Column column, AddColumnsAction action, Scope scope) {
         Database database = scope.getDatabase();
         Object defaultValue = column.defaultValue;
         if (defaultValue != null) {

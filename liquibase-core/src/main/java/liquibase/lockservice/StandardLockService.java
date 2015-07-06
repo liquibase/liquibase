@@ -302,14 +302,14 @@ public class StandardLockService implements LockService {
 
     @Override
     public void destroy() throws DatabaseException {
-        try {
-            if (SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(database.getDatabaseChangeLogLockTableName())).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
-                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
-                hasDatabaseChangeLogLockTable = null;
-            }
+//        try {
+//            if (SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(database.getDatabaseChangeLogLockTableName())).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+//                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
+//                hasDatabaseChangeLogLockTable = null;
+//            }
             reset();
-        } catch (InvalidExampleException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+//        } catch (InvalidExampleException e) {
+//            throw new UnexpectedLiquibaseException(e);
+//        }
     }
 }

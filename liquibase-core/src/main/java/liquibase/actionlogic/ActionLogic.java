@@ -2,6 +2,7 @@ package liquibase.actionlogic;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.ActionStatus;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.servicelocator.Service;
@@ -24,6 +25,12 @@ public interface ActionLogic<T extends Action> extends Service{
      * Validates the given action. Validation can include both errors and warnings.
      */
     ValidationErrors validate(T action, Scope scope);
+
+    /**
+     * Check if the action has already been executed against the given scope. Return {@link liquibase.action.ActionStatus.Status#unknown} if it is impossible to test.
+     */
+    ActionStatus checkStatus(T action, Scope scope);
+
 
     ActionResult execute(T action, Scope scope) throws ActionPerformException;
 

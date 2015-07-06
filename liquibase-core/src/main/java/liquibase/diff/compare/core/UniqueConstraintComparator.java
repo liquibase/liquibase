@@ -32,10 +32,10 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getSimpleName().toLowerCase());
         }
 
-        Table table = ((UniqueConstraint) databaseObject).getTable();
-        if (table != null) {
-            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
-        }
+//        Table table = ((UniqueConstraint) databaseObject).getTable();
+//        if (table != null) {
+//            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
+//        }
 
         return hashes.toArray(new String[hashes.size()]);
     }
@@ -50,55 +50,56 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
         UniqueConstraint thisConstraint = (UniqueConstraint) databaseObject1;
         UniqueConstraint otherConstraint = (UniqueConstraint) databaseObject2;
 
-        int thisConstraintSize = thisConstraint.getColumns().size();
-        int otherConstraintSize = otherConstraint.getColumns().size();
+//        int thisConstraintSize = thisConstraint.getColumns().size();
+//        int otherConstraintSize = otherConstraint.getColumns().size();
 
-        if (thisConstraint.getTable() != null && otherConstraint.getTable() != null) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getTable(), otherConstraint.getTable(), accordingTo)) {
-                return false;
-            }
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
-                return false;
-            }
+//        if (thisConstraint.getTable() != null && otherConstraint.getTable() != null) {
+//            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getTable(), otherConstraint.getTable(), accordingTo)) {
+//                return false;
+//            }
+//            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+//                return false;
+//            }
+//
+//            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+//                return true;
+//            } else {
+//                if (thisConstraintSize == 0 || otherConstraintSize == 0) {
+//                    return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
+//                }
+//
+//                if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
+//                    return false;
+//                }
+//
+//                for (int i = 0; i < otherConstraintSize; i++) {
+//                    Column thisColumn = thisConstraint.getColumns().get(i);
+//
+//                    Column otherColumn = otherConstraint.getColumns().get(i);
+//
+//                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn, otherColumn, accordingTo)) {
+//                        return false;
+//                    }
+//                }
+//                return true;
+//            }
+//        } else {
+//            if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
+//                return false;
+//            }
+//
+//            if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+//                return false;
+//            }
+//
+//            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
+//                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo);
+//            } else {
+//                return true;
+//            }
+//        }
 
-            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
-                return true;
-            } else {
-                if (thisConstraintSize == 0 || otherConstraintSize == 0) {
-                    return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
-                }
-
-                if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
-                    return false;
-                }
-
-                for (int i = 0; i < otherConstraintSize; i++) {
-                    Column thisColumn = thisConstraint.getColumns().get(i);
-
-                    Column otherColumn = otherConstraint.getColumns().get(i);
-
-                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn, otherColumn, accordingTo)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        } else {
-            if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
-                return false;
-            }
-
-            if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
-                return false;
-            }
-
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
-                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo);
-            } else {
-                return true;
-            }
-        }
-
+        return false;
     }
 
 

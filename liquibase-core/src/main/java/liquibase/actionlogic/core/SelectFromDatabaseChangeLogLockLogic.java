@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.ColumnDefinition;
 import liquibase.action.core.SelectDataAction;
 import liquibase.action.core.SelectFromDatabaseChangeLogLockAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -23,7 +21,7 @@ public class SelectFromDatabaseChangeLogLockLogic extends AbstractActionLogic<Se
     @Override
     public ValidationErrors validate(SelectFromDatabaseChangeLogLockAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForRequiredField("selectColumnDefinitions", action);
+                .checkForRequiredField("selectColumns", action);
     }
 
     @Override
@@ -35,7 +33,7 @@ public class SelectFromDatabaseChangeLogLockLogic extends AbstractActionLogic<Se
                         new ObjectName(database.getLiquibaseCatalogName(),
                                 database.getLiquibaseSchemaName(),
                                 database.getDatabaseChangeLogTableName()),
-                        action.selectColumnDefinitions)
+                        action.selectColumns)
         );
     }
 

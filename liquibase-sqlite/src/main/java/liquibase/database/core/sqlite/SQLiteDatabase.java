@@ -131,23 +131,23 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
         Table table = null;
         try {
-            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(new ObjectName(tableName)).setSchema(new Schema(new Catalog((ObjectName) null), null)), database);
+//            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table(new ObjectName(tableName)).setSchema(new Schema(new Catalog((ObjectName) null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
             List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();
-            if (table != null) {
-                for (Column column : table.getColumns()) {
-                    ColumnConfig new_column = new ColumnConfig(column);
-                    if (alterTableVisitor.createThisColumn(new_column)) {
-                        createColumns.add(new_column);
-                    }
-                    ColumnConfig copy_column = new ColumnConfig(column);
-                    if (alterTableVisitor.copyThisColumn(copy_column)) {
-                        copyColumns.add(copy_column);
-                    }
-
-                }
-            }
+//            if (table != null) {
+//                for (Column column : table.getColumns()) {
+//                    ColumnConfig new_column = new ColumnConfig(column);
+//                    if (alterTableVisitor.createThisColumn(new_column)) {
+//                        createColumns.add(new_column);
+//                    }
+//                    ColumnConfig copy_column = new ColumnConfig(column);
+//                    if (alterTableVisitor.copyThisColumn(copy_column)) {
+//                        copyColumns.add(copy_column);
+//                    }
+//
+//                }
+//            }
             for (ColumnConfig column : alterTableVisitor.getColumnsToAdd()) {
                 if (alterTableVisitor.createThisColumn(column)) {
                     createColumns.add(column);
@@ -187,9 +187,9 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             // add remaining indices
             for (Index index_config : newIndices) {
                 AddColumnConfig[] columns = new AddColumnConfig[index_config.getColumns().size()];
-                for (int i=0; i<index_config.getColumns().size(); i++) {
-                    columns[i] = new AddColumnConfig(index_config.getColumns().get(i));
-                }
+//                for (int i=0; i<index_config.getColumns().size(); i++) {
+//                    columns[i] = new AddColumnConfig(index_config.getColumns().get(i));
+//                }
 
                 statements.addAll(Arrays.asList(new CreateIndexStatement(
                         index_config.getSimpleName(),

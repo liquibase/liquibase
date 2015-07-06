@@ -18,13 +18,13 @@ public class ColumnRelateLogic implements SnapshotRelateLogic {
 
     @Override
     public void relate(Snapshot snapshot) {
-        for (Column column : snapshot.get(Column.class)) {
-            ObjectName relationName = column.name.container;
-            if (relationName != null) {
-                Relation realRelation = snapshot.get(Table.class, relationName);
-                realRelation.columns = CollectionUtil.createIfNull(realRelation.columns);
-                realRelation.columns.add(column);
-            }
-        }
+//        for (Column column : snapshot.get(Column.class)) {
+//            ObjectName relationName = column.name.container;
+//            if (relationName != null) {
+//                Relation realRelation = snapshot.get(Table.class, relationName);
+//                realRelation.columns = CollectionUtil.createIfNull(realRelation.columns);
+//                realRelation.columns.add(column);
+//            }
+//        }
     }
 }

@@ -1,6 +1,8 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
+import liquibase.action.Action;
+import liquibase.action.ActionStatus;
 import liquibase.action.core.AddAutoIncrementAction;
 import liquibase.action.core.AlterColumnAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
@@ -10,6 +12,8 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.snapshot.SnapshotFactory;
+import liquibase.structure.core.Column;
 import liquibase.util.StringClauses;
 
 public class AddAutoIncrementLogic extends AbstractSqlBuilderLogic<AddAutoIncrementAction> {
@@ -41,6 +45,29 @@ public class AddAutoIncrementLogic extends AbstractSqlBuilderLogic<AddAutoIncrem
         }
 
         return validationErrors;
+    }
+
+    @Override
+    public ActionStatus checkStatus(AddAutoIncrementAction action, Scope scope) {
+        ActionStatus result = new ActionStatus();
+        Column example = new Column(action.columnName);
+        try {
+            Column column = scope.getSingleton(SnapshotFactory.class).get(example, scope);
+            if (column == null) return result.unknown("Column '"+action.columnName+"' does not exist");
+
+
+            result.assertApplied(column.isAutoIncrement(), "Column '"+action.columnName+"' is not auto-increment");
+
+            if (column.autoIncrementInformation != null) {
+                result.assertCorrect(action, column.autoIncrementInformation, "startWith");
+                result.assertCorrect(action, column.autoIncrementInformation, "incrementBy");
+            }
+
+            return result;
+        } catch (Exception e) {
+            return result.unknown(e);
+
+        }
     }
 
     @Override

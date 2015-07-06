@@ -2,7 +2,9 @@ package liquibase.util;
 
 import liquibase.ExtensibleObject;
 import liquibase.database.Database;
+import liquibase.database.core.UnsupportedDatabase;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -349,7 +351,7 @@ public class StringUtils {
         }
     }
 
-    public static class ObjectNameFormatter implements StringUtilsFormatter<String> {
+    public static class ObjectNameFormatter implements StringUtilsFormatter<ObjectName> {
 
         private Database database;
         private Class<? extends DatabaseObject> objectType;
@@ -357,6 +359,50 @@ public class StringUtils {
         public ObjectNameFormatter(Class<? extends DatabaseObject> objectType, Database database) {
             this.objectType = objectType;
             this.database = database;
+
+            if (this.database == null) {
+                this.database = new UnsupportedDatabase();
+            }
+        }
+
+        @Override
+        public String toString(ObjectName obj) {
+            return database.escapeObjectName(obj, objectType);
+        }
+    }
+
+    public static class ObjectSimpleNameFormatter implements StringUtilsFormatter<ObjectName> {
+
+        private Database database;
+        private Class<? extends DatabaseObject> objectType;
+
+        public ObjectSimpleNameFormatter(Class<? extends DatabaseObject> objectType, Database database) {
+            this.objectType = objectType;
+            this.database = database;
+
+            if (this.database == null) {
+                this.database = new UnsupportedDatabase();
+            }
+        }
+
+        @Override
+        public String toString(ObjectName obj) {
+            return database.escapeObjectName(obj.name, objectType);
+        }
+    }
+
+    public static class ObjectStringNameFormatter implements StringUtilsFormatter<String> {
+
+        private Database database;
+        private Class<? extends DatabaseObject> objectType;
+
+        public ObjectStringNameFormatter(Class<? extends DatabaseObject> objectType, Database database) {
+            this.objectType = objectType;
+            this.database = database;
+
+            if (this.database == null) {
+                this.database = new UnsupportedDatabase();
+            }
         }
 
         @Override

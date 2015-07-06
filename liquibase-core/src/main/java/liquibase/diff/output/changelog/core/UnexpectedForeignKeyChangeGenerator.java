@@ -39,15 +39,15 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
 
         DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
         change.setConstraintName(fk.getSimpleName());
-        change.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
-        }
-
-        Index backingIndex = fk.getBackingIndex();
+//        change.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getSimpleName());
+//        }
+//
+//        Index backingIndex = fk.getBackingIndex();
 //        if (backingIndex == null) {
 //            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
 //            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
@@ -55,7 +55,7 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
 //            }
 //            control.setAlreadyHandledUnexpected(exampleIndex);
 //        } else {
-            control.setAlreadyHandledUnexpected(backingIndex);
+//            control.setAlreadyHandledUnexpected(backingIndex);
 //        }
 
         return new Change[] { change };

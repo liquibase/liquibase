@@ -73,11 +73,12 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     @Override
     public ActionStatus checkStatus(Database database) {
-        try {
-            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), database), "Foreign key exists");
-        } catch (Exception e) {
-            return new ActionStatus().unknown(e);
-        }
+//        try {
+//            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), database), "Foreign key exists");
+//        } catch (Exception e) {
+//            return new ActionStatus().unknown(e);
+//        }
+        return null;
     }
 
     private SqlStatement[] generateStatementsForSQLiteDatabase() {

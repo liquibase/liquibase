@@ -172,15 +172,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     String ascOrDesc = row.getString("ASC_OR_DESC");
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    Column column = new Column(new ObjectName(index.getTable().name, row.getString("COLUMN_NAME")));
+                    Index.IndexedColumn column = new Index.IndexedColumn(new ObjectName(index.getTable().name, row.getString("COLUMN_NAME")));
                     column.computed = false;
                     column.descending = descending;
                     index.addColumn(column);
                 }
 
-                for (Index exampleIndex : foundIndexes.values()) {
-                    table.indexes.add(exampleIndex);
-                }
+//                for (Index exampleIndex : foundIndexes.values()) {
+//                    table.indexes.add(exampleIndex);
+//                }
 
             } catch (Exception e) {
                 throw new DatabaseException(e);
@@ -190,9 +190,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
         if (foundObject instanceof UniqueConstraint) { //todo action refactor && ((UniqueConstraint) foundObject).getBackingIndex() == null && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
-            Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
-            exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
-            ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
+//            Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
+//            exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
+//            ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
         }
     }
 
@@ -289,7 +289,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
-                    returnIndex.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(schema));
+//                    returnIndex.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(schema));
                     returnIndex.setName(new ObjectName(indexName));
                     returnIndex.setUnique(!nonUnique);
 
@@ -309,12 +309,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     String ascOrDesc = row.getString("ASC_OR_DESC");
                     Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
                     Column column = new Column(new ObjectName(returnIndex.getTable().name, columnName));
-                    column.descending = descending;
-                    returnIndex.getColumns().set(position - 1, column);
+//                    column.descending = descending;
+//                    returnIndex.getColumns().set(position - 1, column);
                 } else {
                     Column column = new Column();
                     column.setName(definition, true);
-                    returnIndex.getColumns().set(position - 1, column);
+//                    returnIndex.getColumns().set(position - 1, column);
                 }
             }
         } catch (Exception e) {
