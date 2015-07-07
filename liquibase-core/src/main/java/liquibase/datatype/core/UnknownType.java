@@ -85,7 +85,12 @@ public class UnknownType extends LiquibaseDataType {
         if (dataTypeMaxParameters < parameters.length) {
             parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
         }
-        DatabaseDataType type = new DatabaseDataType(getName().toUpperCase(), parameters);
+        DatabaseDataType type;
+        if (database instanceof  MSSQLDatabase) {
+            type = new DatabaseDataType(database.escapeDataTypeName(getName()), parameters);
+        } else {
+            type = new DatabaseDataType(getName().toUpperCase(), parameters);
+        }
         type.addAdditionalInformation(getAdditionalInformation());
 
         return type;
