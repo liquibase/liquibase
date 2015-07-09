@@ -45,37 +45,37 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 //            continue;
 //        }
 
-//        if (column.relation instanceof View) {
-//            return null;
-//        }
-//
-//        if (column.relation.getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
-//            return null;
-//        }
+        if (column.getRelation() instanceof View) {
+            return null;
+        }
+
+        if (column.getRelation().getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
+            return null;
+        }
 
 
-        AddColumnChange change = new AddColumnChange();
-        change.setTableName(column.getRelationName());
+        AddColumnChange change = createAddColumnChange();
+        change.setTableName(column.getRelation().getName());
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(column.getCatalogName());
+            change.setCatalogName(column.getRelation().getSchema().getCatalogName());
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(column.getSchemaName());
+            change.setSchemaName(column.getRelation().getSchema().getName());
         }
 
-        AddColumnConfig columnConfig = new AddColumnConfig();
-        columnConfig.setName(column.getSimpleName());
+        AddColumnConfig columnConfig = createAddColumnConfig();
+        columnConfig.setName(column.getName());
 
-        String dataType = column.type.toString();
+        String dataType = column.getType().toString();
 
         columnConfig.setType(dataType);
 
-        Object defaultValue = column.defaultValue;
-//todo: action refactor        MissingTableActionGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
+        Object defaultValue = column.getDefaultValue();
+        MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
         if (defaultValue != null) {
             String defaultValueString = null;
             try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.type, comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
+                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
             } catch (NullPointerException e) {
                 throw e;
             }
@@ -86,11 +86,11 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
             columnConfig.setDefaultValue(defaultValueString);
         }
 
-        if (column.remarks != null) {
-            columnConfig.setRemarks(column.remarks);
+        if (column.getRemarks() != null) {
+            columnConfig.setRemarks(column.getRemarks());
         }
         ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
-        if (column.nullable != null && !column.nullable) {
+        if (column.isNullable() != null && !column.isNullable()) {
             if (constraintsConfig == null) {
                 constraintsConfig = new ConstraintsConfig();
             }
@@ -103,5 +103,13 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         change.addColumn(columnConfig);
 
         return new Change[] { change };
+    }
+
+    protected AddColumnConfig createAddColumnConfig() {
+        return new AddColumnConfig();
+    }
+
+    protected AddColumnChange createAddColumnChange() {
+        return new AddColumnChange();
     }
 }

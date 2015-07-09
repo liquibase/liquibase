@@ -94,8 +94,10 @@ public class SqlUtil {
 //            }
 //        }
 
+        boolean strippedSingleQuotes = false;
         if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
             stringVal = stringVal.substring(1, stringVal.length() - 1);
+            strippedSingleQuotes = true;
         } else if (stringVal.startsWith("((") && stringVal.endsWith("))")) {
             stringVal = stringVal.substring(2, stringVal.length() - 2);
         } else if (stringVal.startsWith("('") && stringVal.endsWith("')")) {
@@ -126,7 +128,11 @@ public class SqlUtil {
                 return new Integer(stringVal);
             }
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
-            return new DatabaseFunction(stringVal);
+            if (strippedSingleQuotes) {
+                return stringVal;
+            } else {
+                return new DatabaseFunction(stringVal);
+            }
         } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN )) {
             if (scanner.hasNextBoolean()) {
                 return scanner.nextBoolean();
