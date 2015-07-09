@@ -45,64 +45,66 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 //            continue;
 //        }
 
-        if (column.getRelation() instanceof View) {
-            return null;
-        }
+//        if (column.getRelation() instanceof View) {
+//            return null;
+//        }
+//
+//        if (column.getRelation().getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
+//            return null;
+//        }
+//
+//
+//        AddColumnChange change = createAddColumnChange();
+//        change.setTableName(column.getRelation().getName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(column.getRelation().getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(column.getRelation().getSchema().getName());
+//        }
+//
+//        AddColumnConfig columnConfig = createAddColumnConfig();
+//        columnConfig.setName(column.getName());
+//
+//        String dataType = column.getType().toString();
+//
+//        columnConfig.setType(dataType);
+//
+//        Object defaultValue = column.getDefaultValue();
+//        MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
+//        if (defaultValue != null) {
+//            String defaultValueString = null;
+//            try {
+//                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
+//            } catch (NullPointerException e) {
+//                throw e;
+//            }
+//            if (defaultValueString != null) {
+//                defaultValueString = defaultValueString.replaceFirst("'",
+//                        "").replaceAll("'$", "");
+//            }
+//            columnConfig.setDefaultValue(defaultValueString);
+//        }
+//
+//        if (column.getRemarks() != null) {
+//            columnConfig.setRemarks(column.getRemarks());
+//        }
+//        ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
+//        if (column.isNullable() != null && !column.isNullable()) {
+//            if (constraintsConfig == null) {
+//                constraintsConfig = new ConstraintsConfig();
+//            }
+//            constraintsConfig.setNullable(false);
+//        }
+//        if (constraintsConfig != null) {
+//            columnConfig.setConstraints(constraintsConfig);
+//        }
+//
+//        change.addColumn(columnConfig);
 
-        if (column.getRelation().getSnapshotId() == null) { //not an actual table, maybe an alias, maybe in a different schema. Don't fix it.
-            return null;
-        }
+//        return new Change[] { change };
 
-
-        AddColumnChange change = createAddColumnChange();
-        change.setTableName(column.getRelation().getName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(column.getRelation().getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(column.getRelation().getSchema().getName());
-        }
-
-        AddColumnConfig columnConfig = createAddColumnConfig();
-        columnConfig.setName(column.getName());
-
-        String dataType = column.getType().toString();
-
-        columnConfig.setType(dataType);
-
-        Object defaultValue = column.getDefaultValue();
-        MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
-        if (defaultValue != null) {
-            String defaultValueString = null;
-            try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
-            } catch (NullPointerException e) {
-                throw e;
-            }
-            if (defaultValueString != null) {
-                defaultValueString = defaultValueString.replaceFirst("'",
-                        "").replaceAll("'$", "");
-            }
-            columnConfig.setDefaultValue(defaultValueString);
-        }
-
-        if (column.getRemarks() != null) {
-            columnConfig.setRemarks(column.getRemarks());
-        }
-        ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
-        if (column.isNullable() != null && !column.isNullable()) {
-            if (constraintsConfig == null) {
-                constraintsConfig = new ConstraintsConfig();
-            }
-            constraintsConfig.setNullable(false);
-        }
-        if (constraintsConfig != null) {
-            columnConfig.setConstraints(constraintsConfig);
-        }
-
-        change.addColumn(columnConfig);
-
-        return new Change[] { change };
+        return null;
     }
 
     protected AddColumnConfig createAddColumnConfig() {

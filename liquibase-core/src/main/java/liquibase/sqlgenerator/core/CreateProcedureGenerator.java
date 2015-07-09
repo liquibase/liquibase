@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -20,13 +19,13 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         if (statement.getReplaceIfExists() != null) {
-            if (database instanceof MSSQLDatabase) {
-                if (statement.getReplaceIfExists() && statement.getProcedureName() == null) {
-                    validationErrors.addError("procedureName is required if replaceIfExists = true");
-                }
-            } else {
-                validationErrors.checkDisallowedField("replaceIfExists", statement.getReplaceIfExists(), null);
-            }
+//            if (database instanceof MSSQLDatabase) {
+//                if (statement.getReplaceIfExists() && statement.getProcedureName() == null) {
+//                    validationErrors.addError("procedureName is required if replaceIfExists = true");
+//                }
+//            } else {
+//                validationErrors.checkDisallowedField("replaceIfExists", statement.getReplaceIfExists(), null);
+//            }
 
         }
         return validationErrors;

@@ -49,7 +49,7 @@ public class Snapshot {
     }
 
     public <T extends DatabaseObject> Set<T> getAll(T example) {
-
+        return null;
     }
 
     public <T extends DatabaseObject> T get(T example) {
