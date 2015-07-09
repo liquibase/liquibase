@@ -28,11 +28,6 @@ TOKEN:
 |  < MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 }
 
-TOKEN:
-{
-   < DELIMITER: (";" | "\ngo") >
-}
-
 TOKEN : /* Numeric Constants */
 {
    < S_DOUBLE: ((<S_LONG>)? "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?

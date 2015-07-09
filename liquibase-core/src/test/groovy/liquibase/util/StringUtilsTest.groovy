@@ -32,7 +32,6 @@ class StringUtilsTest extends Specification {
     def "stripComments examples"() {
         expect:
         StringUtils.stripComments(rawString) == expected
-\
 
         where:
         rawString                                                 | expected
