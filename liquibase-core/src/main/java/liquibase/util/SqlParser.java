@@ -11,13 +11,11 @@ import java.util.List;
 
 public class SqlParser {
 
-    public static StringClauses[] parse(String sqlBlock) {
-        return parse(sqlBlock, true, false, false, false);
+    public static StringClauses parse(String sqlBlock) {
+        return parse(sqlBlock, false, false);
     }
 
-    public static StringClauses[] parse(String sqlBlock, boolean split, boolean preserveWhitespace, boolean preserveComments, boolean includeDelimiters) {
-        List<StringClauses> returnList = new ArrayList<StringClauses>();
-
+    public static StringClauses parse(String sqlBlock, boolean preserveWhitespace, boolean preserveComments) {
         StringClauses clauses = new StringClauses(preserveWhitespace?"":" ");
 
         int i =0;
@@ -29,20 +27,6 @@ public class SqlParser {
                     if (preserveWhitespace) {
                         clauses.append(new StringClauses.Whitespace(token.image));
                     }
-                } else if (token.kind == SimpleSqlGrammerConstants.DELIMITER) {
-                    if (split) {
-                        if (!clauses.isEmpty()) {
-                            if (includeDelimiters) {
-                                clauses.append(new StringClauses.Delimiter(token.image));
-                            }
-                            returnList.add(clauses);
-                            clauses = new StringClauses(preserveWhitespace ? "" : " ");
-                        }
-                    } else {
-                        if (includeDelimiters) {
-                            clauses.append(new StringClauses.Delimiter(token.image));
-                        }
-                    }
                 } else if (token.kind == SimpleSqlGrammerConstants.LINE_COMMENT || token.kind == SimpleSqlGrammerConstants.MULTI_LINE_COMMENT) {
                     if (preserveComments) {
                         clauses.append(new StringClauses.Comment(token.image));
@@ -53,13 +37,9 @@ public class SqlParser {
                 token = t.getNextToken();
             }
 
-            if (!clauses.isEmpty()) {
-                returnList.add(clauses);
-            }
-
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        return returnList.toArray(new StringClauses[returnList.size()]);
+        return clauses;
     }
 }
