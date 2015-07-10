@@ -82,7 +82,10 @@ public class StringUtils {
         if (endDelimiter == null) {
             return piece.equals(";") || (piece.equalsIgnoreCase("go") && (previousPiece == null || previousPiece.endsWith("\n")));
         }
-        return piece.matches(endDelimiter);
+
+        endDelimiter = endDelimiter.replace("\\n", "").replace("\\r", "");
+
+        return piece.toLowerCase().matches(endDelimiter.toLowerCase());
     }
 
     /**
