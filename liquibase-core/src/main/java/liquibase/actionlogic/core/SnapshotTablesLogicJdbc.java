@@ -19,7 +19,7 @@ import liquibase.util.Validate;
 /**
  * Logic to snapshot database table(s). Delegates to {@link QueryJdbcMetaDataAction} getTables().
  */
-public class SnapshotTablesLogic extends AbstractSnapshotDatabaseObjectsLogic {
+public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogicJdbc {
 
     @Override
     protected Class<? extends DatabaseObject> getTypeToSnapshot() {

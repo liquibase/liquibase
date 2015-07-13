@@ -16,10 +16,7 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.InternalDatabase;
-import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.DateParseException;
@@ -37,6 +34,8 @@ import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 public class MockDatabase implements Database, InternalDatabase {
+
+    private DatabaseConnection connection;
 
     private int maxContainerDepth = 2;
     private boolean outputDefaultSchema;
@@ -107,14 +106,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public DatabaseConnection getConnection() {
-        return null;
-    }
-
-    public void setConnection(final Connection conn) {
+        return connection;
     }
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
+        this.connection = conn;
     }
 
     @Override

@@ -34,6 +34,13 @@ public class Snapshot {
         return this;
     }
 
+    public Snapshot addAll(Collection<? extends DatabaseObject> objects) {
+        for (DatabaseObject obj : objects) {
+            add(obj);
+        }
+        return this;
+    }
+
     public <T extends DatabaseObject> T get(Class<T> type, ObjectName name) {
         Set<T> objects = get(type);
         for (T obj : objects) {

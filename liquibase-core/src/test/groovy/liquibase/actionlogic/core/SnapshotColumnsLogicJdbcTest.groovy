@@ -1,12 +1,10 @@
 package liquibase.actionlogic.core
 
 import liquibase.JUnitScope
-import liquibase.Scope
 import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
 import liquibase.exception.ActionPerformException
 import liquibase.sdk.database.MockDatabase
-import liquibase.structure.DatabaseObject
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
@@ -16,7 +14,7 @@ import spock.lang.Unroll
 import java.sql.DatabaseMetaData
 import java.sql.Types
 
-class SnapshotColumnsLogicTest extends Specification {
+class SnapshotColumnsLogicJdbcTest extends Specification {
 
     @Unroll
     def "cannot snapshot using a table with a name longer than the database supports"() {
@@ -24,7 +22,7 @@ class SnapshotColumnsLogicTest extends Specification {
         def database = new MockDatabase()
         database.setMaxContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(database)
-        new SnapshotColumnsLogic().execute(new SnapshotDatabaseObjectsAction(Column, object), scope)
+        new SnapshotColumnsLogicJdbc().execute(new SnapshotDatabaseObjectsAction(Column, object), scope)
 
         then:
         def e = thrown(ActionPerformException)
@@ -45,7 +43,7 @@ class SnapshotColumnsLogicTest extends Specification {
         database.setMaxContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(database)
 
-        def object = new SnapshotColumnsLogic().convertToObject(new RowBasedQueryResult.Row([
+        def object = new SnapshotColumnsLogicJdbc().convertToObject(new RowBasedQueryResult.Row([
                 TABLE_CAT  : tableCat,
                 TABLE_SCHEM: tableSchema,
                 TABLE_NAME : tableName,

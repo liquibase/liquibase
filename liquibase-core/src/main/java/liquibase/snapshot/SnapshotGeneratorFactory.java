@@ -141,13 +141,13 @@ public class SnapshotGeneratorFactory {
     }
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        if (database.getConnection() instanceof OfflineConnection) {
-            DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot();
-            if (snapshot == null) {
-                throw new DatabaseException("No snapshotFile parameter specified for offline database");
-            }
-            return snapshot;
-        }
+//        if (database.getConnection() instanceof OfflineConnection) {
+//            DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot();
+//            if (snapshot == null) {
+//                throw new DatabaseException("No snapshotFile parameter specified for offline database");
+//            }
+//            return snapshot;
+//        }
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }
 

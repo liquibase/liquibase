@@ -118,4 +118,40 @@ public class CollectionUtil {
             return currentValue;
         }
     }
+
+
+    /**
+     * Return a new list, filtered by the collectionFilter
+     */
+    public static <T> List<T> select(List<T> collection, CollectionFilter<T> collectionFilter) {
+        List<T> newCollection = new ArrayList<>();
+
+        for (T obj : collection) {
+            if (collectionFilter.include(obj)) {
+                newCollection.add(obj);
+            }
+        }
+
+        return newCollection;
+    }
+
+    /**
+     * Return a new set, filtered by the collectionFilter
+     */
+    public static <T> Set<T> select(Set<T> collection, CollectionFilter<T> collectionFilter) {
+        Set<T> newCollection = new HashSet<>();
+
+        for (T obj : collection) {
+            if (collectionFilter.include(obj)) {
+                newCollection.add(obj);
+            }
+        }
+
+        return newCollection;
+    }
+
+    public interface CollectionFilter<T> {
+
+        boolean include(T obj);
+    }
 }

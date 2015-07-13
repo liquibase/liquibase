@@ -5,6 +5,7 @@ import liquibase.action.AbstractAction;
 import liquibase.action.Action;
 import liquibase.action.ActionStatus;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.ValidationErrors;
 
 /**
@@ -18,10 +19,23 @@ public abstract class AbstractActionLogic<T extends Action> implements ActionLog
     protected abstract Class<? extends T> getSupportedAction();
 
     /**
-     * Return true if this ActionLogic requires a database in the scope. Used by {@link #supportsScope(liquibase.Scope)}
+     * Return the type of {@link Database} this this ActionLogic requires.
+     * Return liquibase.database.Database if any database is supported, but one is required (default).
+     * Return null if no database is required.
+     * Used by {@link #supportsScope(liquibase.Scope)}. If more complex logic is required than just one Database subclass, override supportsScope(Scope).
      */
     protected Class<? extends Database> getRequiredDatabase() {
         return Database.class;
+    }
+
+    /**
+     * Return the type of {@link liquibase.database.DatabaseConnection} this this ActionLogic requires.
+     * Return liquibase.database.DatabaseConnection if any database is supported, but one is required (default).
+     * Return null if no database is required.
+     * Used by {@link #supportsScope(liquibase.Scope)}. If more complex logic is required than just one DatabaseConnection subclass, override supportsScope(Scope).
+     */
+    protected Class<? extends DatabaseConnection> getRequiredConnection() {
+        return DatabaseConnection.class;
     }
 
     /**
@@ -31,7 +45,17 @@ public abstract class AbstractActionLogic<T extends Action> implements ActionLog
         Class<? extends Database> requiredDatabase = getRequiredDatabase();
         if (requiredDatabase != null) {
             Database database = scope.getDatabase();
-            return database != null && requiredDatabase.isAssignableFrom(database.getClass());
+            boolean databaseCorrect = database != null && requiredDatabase.isAssignableFrom(database.getClass());
+
+            if (databaseCorrect) {
+                Class<? extends DatabaseConnection> requiredConnection = getRequiredConnection();
+
+                if (requiredConnection != null) {
+                    DatabaseConnection connection = database.getConnection();
+                    databaseCorrect = connection != null && requiredConnection.isAssignableFrom(connection.getClass());
+                }
+            }
+            return databaseCorrect;
         }
 
         return true;

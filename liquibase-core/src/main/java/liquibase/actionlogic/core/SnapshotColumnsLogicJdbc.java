@@ -6,6 +6,8 @@ import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -23,7 +25,7 @@ import java.util.List;
 /**
  * Logic to snapshot database column(s). Delegates to {@link QueryJdbcMetaDataAction} getColumns().
  */
-public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
+public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLogicJdbc {
 
     @Override
     protected Class<? extends DatabaseObject> getTypeToSnapshot() {
@@ -41,6 +43,9 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
     }
 
     @Override
+    /**
+     * Creates an ObjectName with null values for "unknown" portions and calls {@link #createColumnSnapshotAction(ObjectName)}.
+     */
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException, ActionPerformException {
         DatabaseObject relatedTo = action.relatedTo;
 
@@ -63,11 +68,15 @@ public class SnapshotColumnsLogic extends AbstractSnapshotDatabaseObjectsLogic {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }
 
+        return createColumnSnapshotAction(columnName);
+    }
+
+    protected Action createColumnSnapshotAction(ObjectName columnName) {
         List<String> nameParts = columnName.asList(4);
 
         return new QueryJdbcMetaDataAction("getColumns", nameParts.get(0), nameParts.get(1), nameParts.get(2), nameParts.get(3));
-
     }
+
 
     @Override
     protected DatabaseObject convertToObject(RowBasedQueryResult.Row row, SnapshotDatabaseObjectsAction originalAction, Scope scope) throws ActionPerformException {

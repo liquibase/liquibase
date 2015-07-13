@@ -10,6 +10,7 @@ import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.Snapshot;
 import liquibase.structure.core.Catalog;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -25,7 +26,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
-    private DatabaseSnapshot snapshot = null;
+    private Snapshot snapshot = null;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
     private boolean caseSensitive = false;
@@ -38,6 +39,11 @@ public class OfflineConnection implements DatabaseConnection {
 
     private final Map<String, String> databaseParams = new HashMap<String, String>();
     private String connectionUserName;
+
+    public OfflineConnection(String url, Snapshot snapshot, ResourceAccessor resourceAccessor) {
+        this(url, resourceAccessor);
+        this.snapshot = snapshot;
+    }
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
         this.url = url;
@@ -82,19 +88,19 @@ public class OfflineConnection implements DatabaseConnection {
                 this.outputLiquibaseSql = OutputLiquibaseSql.fromString(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("snapshot")) {
                 String snapshotFile = paramEntry.getValue();
-                try {
-                    SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
-                    this.snapshot = parser.parse(snapshotFile, resourceAccessor);
-                    this.snapshot.getDatabase().setConnection(this);
+//                try {
+//                    SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
+//                    this.snapshot = parser.parse(snapshotFile, resourceAccessor);
+//                    this.snapshot.getDatabase().setConnection(this);
 
-                    for (Catalog catalog : this.snapshot.get(Catalog.class)) {
-                        if (catalog.isDefault) {
-                            this.catalog = catalog.getSimpleName();
-                        }
-                    }
-                } catch (LiquibaseException e) {
-                    throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
-                }
+//                    for (Catalog catalog : this.snapshot.get(Catalog.class)) {
+//                        if (catalog.isDefault) {
+//                            this.catalog = catalog.getSimpleName();
+//                        }
+//                    }
+//                } catch (LiquibaseException e) {
+//                    throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
+//                }
             } else if (paramEntry.getKey().equals("sendsStringParametersAsUnicode")) {
                 this.sendsStringParametersAsUnicode = Boolean.parseBoolean(paramEntry.getValue());
             } else {
@@ -130,7 +136,7 @@ public class OfflineConnection implements DatabaseConnection {
         );
     }
 
-    public DatabaseSnapshot getSnapshot() {
+    public Snapshot getSnapshot() {
         return snapshot;
     }
 
