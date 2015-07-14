@@ -9,6 +9,7 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
@@ -38,23 +39,22 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
     @Override
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException {
 
-        DatabaseObject relatedTo = action.relatedTo;
+        ObjectReference relatedTo = action.relatedTo;
         String catalogName = null;
         String schemaName = null;
         String tableName = null;
 
-        if (Catalog.class.isAssignableFrom(relatedTo.getClass())) {
+        if (relatedTo.instanceOf(Catalog.class)) {
             catalogName = relatedTo.getSimpleName();
         } else if (Schema.class.isAssignableFrom(relatedTo.getClass())) {
-            if (relatedTo.getName().container != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
-                catalogName = relatedTo.getName().container.name;
+            if (relatedTo.objectName.container != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
+                catalogName = relatedTo.objectName.container.name;
             }
             schemaName = relatedTo.getSimpleName();
-        } else if (Table.class.isAssignableFrom(relatedTo.getClass())) {
-            Table table = (Table) relatedTo;
-            ObjectName name = table.name;
+        } else if (relatedTo.instanceOf(Table.class)) {
+            ObjectName name = relatedTo.objectName;
+            tableName = relatedTo.getSimpleName();
             if (name != null) {
-                tableName = table.getSimpleName();
                 if (name.container != null) {
                     schemaName = name.container.name;
                     if (name.container.container != null) {

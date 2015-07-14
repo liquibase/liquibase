@@ -7,6 +7,7 @@ import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.TestSnapshotFactory
 import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
@@ -22,7 +23,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #tableName on #conn")
     def "can snapshot fully qualified table"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table(tableName))
+        def action = new SnapshotDatabaseObjectsAction(Table, tableName)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -45,7 +46,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
                     [scope]
                     [it],
                     [snapshot],
-                    snapshot.get(Table)*.getName()
+                    snapshot.get(Table)*.getObjectReference()
             ])
         }
     }
@@ -53,7 +54,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #schemaName on #conn")
     def "can snapshot all tables in schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Schema(schemaName))
+        def action = new SnapshotDatabaseObjectsAction(Table, schemaName.getObjectReference())
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -88,7 +89,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #schemaName on #conn")
     def "can snapshot all tables in schema with a null table name"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(schemaName, null)))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Table, new ObjectName(schemaName, null)))
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -121,7 +122,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #catalogName on #conn")
     def "can snapshot all tables in catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Table(new ObjectName(new ObjectName(catalogName, null), null)))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Table, new ObjectName(new ObjectName(catalogName, null), null)))
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -156,7 +157,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #schemaName on #conn")
     def "can snapshot tables related to a schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Schema(schemaName))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Schema, schemaName))
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -190,7 +191,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #catalogName on #conn")
     def "can snapshot tables related to a catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new Catalog(catalogName))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Catalog, catalogName))
 
         def plan = new ActionExecutor().createPlan(action, scope)
 

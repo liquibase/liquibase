@@ -13,6 +13,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
@@ -47,23 +48,23 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
      * Creates an ObjectName with null values for "unknown" portions and calls {@link #createColumnSnapshotAction(ObjectName)}.
      */
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException, ActionPerformException {
-        DatabaseObject relatedTo = action.relatedTo;
+        ObjectReference relatedTo = action.relatedTo;
 
         ObjectName columnName;
 
         Database database = scope.getDatabase();
 
-        if (relatedTo instanceof Catalog) {
+        if (relatedTo.instanceOf(Catalog.class)) {
             if (!database.supportsCatalogs()) {
                 throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
             }
             columnName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
-        } else if (relatedTo instanceof Schema) {
+        } else if (relatedTo.instanceOf(Schema.class)) {
             columnName = new ObjectName(relatedTo.getSimpleName(), null, null);
-        } else if (relatedTo instanceof Relation) {
-            columnName = new ObjectName(relatedTo.getName(), null);
-        } else if (relatedTo instanceof Column) {
-            columnName = relatedTo.getName();
+        } else if (relatedTo.instanceOf(Relation.class)) {
+            columnName = new ObjectName(relatedTo.objectName, null);
+        } else if (relatedTo.instanceOf(Column.class)) {
+            columnName = relatedTo.objectName;
         } else {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }

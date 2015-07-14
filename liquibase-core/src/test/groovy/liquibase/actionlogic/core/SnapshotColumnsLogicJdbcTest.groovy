@@ -6,6 +6,7 @@ import liquibase.actionlogic.RowBasedQueryResult
 import liquibase.exception.ActionPerformException
 import liquibase.sdk.database.MockDatabase
 import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import spock.lang.Specification
@@ -22,7 +23,7 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
         def database = new MockDatabase()
         database.setMaxContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(database)
-        new SnapshotColumnsLogicJdbc().execute(new SnapshotDatabaseObjectsAction(Column, object), scope)
+        new SnapshotColumnsLogicJdbc().execute(new SnapshotDatabaseObjectsAction(Column, object.getObjectReference()), scope)
 
         then:
         def e = thrown(ActionPerformException)
@@ -50,7 +51,7 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
                 COLUMN_NAME: "columnName",
                 NULLABLE   : DatabaseMetaData.columnNoNulls,
                 DATA_TYPE  : Types.INTEGER,
-        ]), new SnapshotDatabaseObjectsAction(Column, new Table()), scope)
+        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectReference(Table.class)), scope)
 
         then:
         object instanceof Column

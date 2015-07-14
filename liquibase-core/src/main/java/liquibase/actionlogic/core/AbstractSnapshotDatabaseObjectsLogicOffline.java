@@ -10,6 +10,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.ActionPerformException;
 import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
@@ -36,13 +37,13 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicOffline<T extends Snap
             throw new ActionPerformException("No snapshot found");
         }
 
-        final DatabaseObject relatedTo = action.relatedTo;
+        final ObjectReference relatedTo = action.relatedTo;
 
-        if (relatedTo instanceof Catalog && !database.supportsCatalogs()) {
+        if (relatedTo.instanceOf(Catalog.class) && !database.supportsCatalogs()) {
             throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
         }
 
-        if (relatedTo instanceof Schema && !database.supportsSchemas()) {
+        if (relatedTo.instanceOf(Schema.class) && !database.supportsSchemas()) {
             throw new ActionPerformException("Cannot snapshot schemas on "+database.getShortName());
         }
 

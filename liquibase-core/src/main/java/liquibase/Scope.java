@@ -169,5 +169,13 @@ public class Scope {
         return get(Attr.resourceAccessor, ResourceAccessor.class);
     }
 
+    public String describe() {
+        String databaseName = null;
+        Database database = getDatabase();
+        if (database != null) {
+            databaseName = database.getShortName();
+        }
+        return "scope(database="+ database +")";
+    }
 
 }

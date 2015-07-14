@@ -25,7 +25,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #column on #conn")
     def "can find fully qualified complex column names"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, new Column(column.getName()))
+        def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -60,7 +60,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #table on #conn")
     def "can find all columns in a fully qualified complex table name"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, new Table(table.getName()))
+        def action = new SnapshotDatabaseObjectsAction(Column, table.getObjectReference())
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -97,7 +97,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #schema on #conn")
     def "can find all columns in a schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, new Schema(schema.getName()))
+        def action = new SnapshotDatabaseObjectsAction(Column, schema.getObjectReference())
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -134,7 +134,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #catalog on #conn")
     def "can find all columns in a catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, new Catalog(catalog.getName()))
+        def action = new SnapshotDatabaseObjectsAction(Column, catalog.getObjectReference())
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -172,7 +172,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #column on #conn")
     def "autoIncrement information set correctly"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, column)
+        def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
 
         def plan = new ActionExecutor().createPlan(action, scope)
 

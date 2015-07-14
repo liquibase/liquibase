@@ -2,6 +2,7 @@ package liquibase;
 
 import liquibase.database.ConnectionSupplier;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.SmartMap;
@@ -50,10 +51,12 @@ public class JUnitScope extends Scope {
         return getInstance().child(Scope.Attr.database, database);
     }
 
-    public static Scope getInstance(ConnectionSupplier supplier) {
-        return getInstance()
+    public static Scope getInstance(ConnectionSupplier supplier) throws DatabaseException {
+        Scope scope = getInstance()
                 .child(Scope.Attr.database, supplier.getDatabase())
                 .child(Attr.connectionSupplier, supplier);
+
+        return supplier.connect(scope);
     }
 
     @Override

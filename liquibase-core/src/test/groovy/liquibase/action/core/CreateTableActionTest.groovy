@@ -38,7 +38,6 @@ class CreateTableActionTest extends Specification {
                 .withPermutation([connection: conn, tableName_asTable: tableName.toString(), columnName_asTable: columnName.toString()])
                 .addOperations(plan: plan)
                 .setup({
-            conn.connect(scope)
             throw SetupResult.OK
         })
                 .cleanup({

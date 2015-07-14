@@ -6,21 +6,22 @@ import liquibase.actionlogic.ActionExecutor;
 import liquibase.actionlogic.QueryResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
 
 public class SnapshotFactory {
 
     protected SnapshotFactory() {
     }
 
-    public boolean has(DatabaseObject example, Scope scope) throws ActionPerformException, InvalidExampleException {
-        QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(example.getClass(), example), scope);
+    public boolean has(ObjectReference object, Scope scope) throws ActionPerformException, InvalidExampleException {
+        QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(object), scope);
         return result.size() > 0;
     }
 
-    public <T extends DatabaseObject> T get(T example, Scope scope) throws ActionPerformException, InvalidExampleException {
-        QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(example.getClass(), example), scope);
+    public <T extends DatabaseObject> T get(ObjectReference object, Scope scope) throws ActionPerformException, InvalidExampleException {
+        QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(object), scope);
 
-        return (T) result.asObject(example.getClass());
+        return (T) result.asObject(object.objectType);
 
     }
 }

@@ -20,6 +20,8 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable, Exten
 
     String getSimpleName();
 
+    ObjectReference getObjectReference();
+
     <T> T setName(ObjectName name);
 
     Schema getSchema();

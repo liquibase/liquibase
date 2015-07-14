@@ -58,7 +58,7 @@ public class ActionExecutor {
 
         ActionLogic actionLogic = actionLogicFactory.getActionLogic(action, scope);
         if (actionLogic == null) {
-            throw new ActionPerformException("No supported ActionLogic implementation found for '"+action.describe()+"'");
+            throw new ActionPerformException("No supported ActionLogic implementation found for '"+action.describe()+"' against "+scope.describe());
         }
 
         ValidationErrors validationErrors = actionLogic.validate(action, scope);

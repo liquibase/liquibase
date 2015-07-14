@@ -3,6 +3,7 @@ package liquibase.action.core;
 import liquibase.action.AbstractAction;
 import liquibase.action.QueryAction;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
 
 /**
  * Action describing objects to snapshot.
@@ -17,9 +18,14 @@ import liquibase.structure.DatabaseObject;
 public class SnapshotDatabaseObjectsAction extends AbstractAction implements QueryAction {
 
     public Class<? extends DatabaseObject> typeToSnapshot;
-    public DatabaseObject relatedTo;
+    public ObjectReference relatedTo;
 
-    public SnapshotDatabaseObjectsAction(Class<? extends DatabaseObject> typeToLookup, DatabaseObject relatedTo) {
+    public SnapshotDatabaseObjectsAction(ObjectReference objectToSnapshot) {
+        this.typeToSnapshot = objectToSnapshot.objectType;
+        relatedTo = objectToSnapshot;
+    }
+
+    public SnapshotDatabaseObjectsAction(Class<? extends DatabaseObject> typeToLookup, ObjectReference relatedTo) {
         this.typeToSnapshot = typeToLookup;
         this.relatedTo = relatedTo;
     }

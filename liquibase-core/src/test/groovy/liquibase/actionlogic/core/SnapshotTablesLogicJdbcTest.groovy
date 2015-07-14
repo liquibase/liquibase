@@ -4,6 +4,7 @@ import liquibase.JUnitScope
 import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
 import liquibase.sdk.database.MockDatabase
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import spock.lang.Specification
@@ -22,7 +23,7 @@ class SnapshotTablesLogicJdbcTest extends Specification {
                 TABLE_CAT  : tableCat,
                 TABLE_SCHEM: tableSchema,
                 TABLE_NAME : tableName,
-        ]), new SnapshotDatabaseObjectsAction(Column, new Table()), scope)
+        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectReference(Table)), scope)
 
         then:
         object instanceof Table

@@ -76,6 +76,10 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return this.name.equalsIgnoreCase(name.name);
     }
 
+    public boolean equals(ObjectReference objectReference) {
+        return this.equals(objectReference.objectName);
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof ObjectName && toString().equals(obj.toString());

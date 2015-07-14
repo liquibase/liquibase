@@ -39,7 +39,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic<T extends SnapshotDat
 
         if (action.typeToSnapshot.isAssignableFrom(getTypeToSnapshot())) {
             for (Class clazz : getSupportedRelatedTypes()) {
-                if (clazz.isAssignableFrom(action.relatedTo.getClass())) {
+                if (clazz.isAssignableFrom(action.relatedTo.objectType)) {
                     return priority;
                 }
             }

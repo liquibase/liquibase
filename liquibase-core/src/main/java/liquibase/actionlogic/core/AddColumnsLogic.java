@@ -12,6 +12,7 @@ import liquibase.exception.ActionPerformException;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -86,11 +87,11 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
         try {
             for (Column actionColumn : action.columns) {
-                Column snapshotColumn = scope.getSingleton(SnapshotFactory.class).get(actionColumn, scope);
+                Column snapshotColumn = scope.getSingleton(SnapshotFactory.class).get(actionColumn.getObjectReference(), scope);
                 if (snapshotColumn == null) {
                     result.assertApplied(false, "Column '"+actionColumn.name+"' not found");
                 } else {
-                    Table table = scope.getSingleton(SnapshotFactory.class).get(new Table(snapshotColumn.name.container), scope);
+                    Table table = scope.getSingleton(SnapshotFactory.class).get(new ObjectReference(Table.class, snapshotColumn.name.container), scope);
                     if (table == null) {
                         result.unknown("Cannot find table "+snapshotColumn.name.container);
                     } else {
@@ -100,7 +101,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             }
 
             if (action.primaryKey != null) {
-                PrimaryKey snapshotPK = scope.getSingleton(SnapshotFactory.class).get(new PrimaryKey(new ObjectName(tableName, null)), scope);
+                PrimaryKey snapshotPK = scope.getSingleton(SnapshotFactory.class).get(new ObjectReference(PrimaryKey.class, new ObjectName(tableName, null)), scope);
                 if (snapshotPK == null) {
                     result.assertApplied(false, "No primary key on '"+tableName+"'");
                 } else {
@@ -119,7 +120,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             }
 
             for (ForeignKey actionFK : action.foreignKeys) {
-                ForeignKey snapshotFK = scope.getSingleton(SnapshotFactory.class).get(actionFK, scope);
+                ForeignKey snapshotFK = scope.getSingleton(SnapshotFactory.class).get(actionFK.getObjectReference(), scope);
                 if (snapshotFK == null) {
                     result.assertApplied(false, "Foreign Key not created on '"+tableName+"'");
                 } else {
