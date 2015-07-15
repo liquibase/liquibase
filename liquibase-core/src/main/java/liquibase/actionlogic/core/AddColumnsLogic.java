@@ -16,16 +16,12 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
-import liquibase.util.StringUtils;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
@@ -165,7 +161,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
         Database database = scope.getDatabase();
 
         ObjectName columnName = column.name;
-        DataType columnType = column.type;
+        OldDataType columnType = column.type;
         Column.AutoIncrementInformation autoIncrement = column.autoIncrementInformation;
         boolean primaryKey = false; //ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false);
         boolean nullable = false; // primaryKey || ObjectUtil.defaultIfEmpty(column.nullable, false);

@@ -7,7 +7,7 @@ import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.structure.core.DataType;
+import liquibase.structure.core.OldDataType;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
@@ -226,7 +226,7 @@ public class DataTypeFactory {
         return fromDescription(object.getClass().getName(), database);
     }
 
-    public LiquibaseDataType from(DataType type, Database database) {
+    public LiquibaseDataType from(OldDataType type, Database database) {
         if (type == null) {
             return null;
         }

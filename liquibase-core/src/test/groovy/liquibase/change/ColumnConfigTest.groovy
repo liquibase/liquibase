@@ -33,7 +33,7 @@ public class ColumnConfigTest extends Specification {
         column.setName("colName");
         column.setRelation(table);
         column.setAutoIncrementInformation(new Column.AutoIncrementInformation(3, 5));
-        column.setType(new DataType("BIGINT"));
+        column.setType(new OldDataType("BIGINT"));
         column.setNullable(false);
         column.setDefaultValue(123);
         column.setRemarks("A Test Column");
@@ -69,7 +69,7 @@ public class ColumnConfigTest extends Specification {
         Column column = new Column();
         column.setName("colName");
         column.setRelation(table);
-        column.setType(new DataType("BIGINT"));
+        column.setType(new OldDataType("BIGINT"));
 
         ColumnConfig config = new ColumnConfig(column);
         config.getName() == "colName"
@@ -92,7 +92,7 @@ public class ColumnConfigTest extends Specification {
         Column column = new Column();
         column.setName("colName");
         column.setRelation(view);
-        column.setType(new DataType("BIGINT"));
+        column.setType(new OldDataType("BIGINT"));
 
         ColumnConfig config = new ColumnConfig(column);
 

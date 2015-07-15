@@ -3,10 +3,9 @@ package liquibase.snapshot.transformer
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.snapshot.Snapshot
-import liquibase.structure.DatabaseObject
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
-import liquibase.structure.core.DataType
+import liquibase.structure.core.OldDataType
 import liquibase.structure.core.Table
 import spock.lang.Specification
 
@@ -18,7 +17,7 @@ class AbstractSnapshotTransformerTest extends Specification {
 
             @Override
             Column transformObject(Column object, Scope scope) {
-                object.type = new DataType("int");
+                object.type = new OldDataType("int");
                 return object;
             }
         }

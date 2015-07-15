@@ -3,7 +3,7 @@ package liquibase.structure
 import liquibase.Scope
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Column
-import liquibase.structure.core.DataType
+import liquibase.structure.core.OldDataType
 import liquibase.structure.core.Table
 
 class TestColumnSupplier extends DefaultTestStructureSupplier{
@@ -19,7 +19,7 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
         for (Table table : snapshot.get(Table)) {
             for (Column baseColumn : super.getTestObjects(type, snapshot, scope)) {
                 Column column = new Column(new ObjectName(table.name, baseColumn.name.name));
-                column.type = new DataType("int")
+                column.type = new OldDataType("int")
                 returnList.add(column)
             }
         }

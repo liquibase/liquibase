@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.DataType;
+import liquibase.structure.core.OldDataType;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -238,8 +238,8 @@ public class ObjectDifferences {
                 return false;
             }
 
-            DataType referenceType = (DataType) referenceValue;
-            DataType compareToType = (DataType) compareToValue;
+            OldDataType referenceType = (OldDataType) referenceValue;
+            OldDataType compareToType = (OldDataType) compareToValue;
 
             if (!referenceType.getTypeName().equalsIgnoreCase(compareToType.getTypeName())) {
                 return false;

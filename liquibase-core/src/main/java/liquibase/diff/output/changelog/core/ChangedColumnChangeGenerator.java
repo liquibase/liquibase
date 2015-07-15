@@ -188,7 +188,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 change.setSchemaName(schemaName);
                 change.setTableName(tableName);
                 change.setColumnName(column.getSimpleName());
-                DataType referenceType = (DataType) typeDifference.getReferenceValue();
+                OldDataType referenceType = (OldDataType) typeDifference.getReferenceValue();
                 change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
 
                 changes.add(change);

@@ -10,7 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.DataType;
+import liquibase.structure.core.OldDataType;
 
 public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic<CreateDatabaseChangeLogLockTableAction> {
 
@@ -28,11 +28,11 @@ public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic<C
         ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
 
         Column idColumn = new Column(new ObjectName(tableName, "ID"));
-        idColumn.type = new DataType("int");
+        idColumn.type = new OldDataType("int");
         idColumn.nullable = false;
 
         Column lockedColumn = new Column(new ObjectName(tableName, "LOCKED"));
-        lockedColumn.type = new DataType("BOOLEAN");
+        lockedColumn.type = new OldDataType("BOOLEAN");
         lockedColumn.nullable = false;
 
         CreateTableAction createTableAction = new CreateTableAction(tableName)

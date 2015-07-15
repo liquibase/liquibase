@@ -6,8 +6,6 @@ import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -177,7 +175,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
             }
         }
 
-        DataType type = readDataType(row, column, database);
+        OldDataType type = readDataType(row, column, database);
         column.type = type;
 
         column.defaultValue= readDefaultValue(row, column, database);
@@ -185,7 +183,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
         return column;
     }
 
-    protected DataType readDataType(RowBasedQueryResult.Row row, Column column, Database database) {
+    protected OldDataType readDataType(RowBasedQueryResult.Row row, Column column, Database database) {
 
 //        if (database instanceof OracleDatabase) {
 //            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
@@ -261,7 +259,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //                LoggerFactory.getLogger(getClass()).warn("Error fetching enum values", e);
 //            }
 //        }
-        DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
+        OldDataType.ColumnSizeUnit columnSizeUnit = OldDataType.ColumnSizeUnit.BYTE;
 
         int dataType = row.get("DATA_TYPE", Integer.class);
         Integer columnSize = null;
@@ -288,7 +286,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //        }
 
 
-        DataType type = new DataType(columnTypeName);
+        OldDataType type = new OldDataType(columnTypeName);
         type.setDataTypeId(dataType);
         type.setColumnSize(columnSize);
         type.setDecimalDigits(decimalDigits);

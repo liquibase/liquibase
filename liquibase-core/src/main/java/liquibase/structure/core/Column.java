@@ -6,7 +6,6 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
@@ -20,7 +19,7 @@ import java.util.Set;
 
 public class Column extends AbstractDatabaseObject {
 
-    public DataType type;
+    public OldDataType type;
     public AutoIncrementInformation autoIncrementInformation;
     public Boolean nullable;
     public Object defaultValue;
@@ -35,7 +34,7 @@ public class Column extends AbstractDatabaseObject {
 
     public Column(ObjectName name, String type, Boolean nullable) {
         this(name);
-        this.type = new DataType(type);
+        this.type = new OldDataType(type);
         this.nullable = nullable;
     }
 
@@ -45,7 +44,7 @@ public class Column extends AbstractDatabaseObject {
 
     public Column(ColumnConfig columnConfig) {
         super(new ObjectName(columnConfig.getName()));
-        this.type = new DataType(columnConfig.getType());
+        this.type = new OldDataType(columnConfig.getType());
 
         if (columnConfig.getDefaultValue() != null) {
             this.defaultValue = columnConfig.getDefaultValueObject();
@@ -146,7 +145,7 @@ public class Column extends AbstractDatabaseObject {
         super.load(parsedNode, resourceAccessor);
         ParsedNode typeNode = parsedNode.getChild(null, "type");
         if (typeNode != null) {
-            DataType type = new DataType();
+            OldDataType type = new OldDataType();
             type.load(typeNode, resourceAccessor);
             this.type = type;
         }

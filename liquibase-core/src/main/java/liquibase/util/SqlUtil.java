@@ -5,7 +5,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
 import liquibase.statement.DatabaseFunction;
-import liquibase.structure.core.DataType;
+import liquibase.structure.core.OldDataType;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
@@ -47,7 +47,7 @@ public class SqlUtil {
         return validTypes.contains(dataType);
     }
 
-    public static Object parseValue(Database database, Object val, DataType type) {
+    public static Object parseValue(Database database, Object val, OldDataType type) {
         if (!(val instanceof String)) {
             return val;
         }

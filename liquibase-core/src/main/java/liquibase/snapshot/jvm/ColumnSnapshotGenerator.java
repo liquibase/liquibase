@@ -211,7 +211,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        DataType type = readDataType(columnMetadataResultSet, column, database);
+        OldDataType type = readDataType(columnMetadataResultSet, column, database);
         column.type = type;
 
         column.defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
@@ -219,7 +219,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         return column;
     }
 
-    protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
+    protected OldDataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
 
 //        if (database instanceof OracleDatabase) {
 //            String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
@@ -263,7 +263,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                LoggerFactory.getLogger(getClass()).warn("Error fetching enum values", e);
 //            }
 //        }
-        DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
+        OldDataType.ColumnSizeUnit columnSizeUnit = OldDataType.ColumnSizeUnit.BYTE;
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = null;
@@ -290,7 +290,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //        }
 
 
-        DataType type = new DataType(columnTypeName);
+        OldDataType type = new OldDataType(columnTypeName);
         type.setDataTypeId(dataType);
         type.setColumnSize(columnSize);
         type.setDecimalDigits(decimalDigits);

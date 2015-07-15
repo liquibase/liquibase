@@ -2,7 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.serializer.AbstractLiquibaseSerializable;
 
-public class DataType extends AbstractLiquibaseSerializable {
+public class OldDataType extends AbstractLiquibaseSerializable {
 
     private String typeName;
 
@@ -14,10 +14,10 @@ public class DataType extends AbstractLiquibaseSerializable {
     private Integer radix;
     private Integer characterOctetLength;
 
-    public DataType() {
+    public OldDataType() {
     }
 
-    public DataType(String typeName) {
+    public OldDataType(String typeName) {
         this.typeName = typeName;
     }
 
@@ -131,7 +131,7 @@ public class DataType extends AbstractLiquibaseSerializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof DataType)) {
+        if (!(obj instanceof OldDataType)) {
             return false;
         }
         return toString().equals(obj.toString());

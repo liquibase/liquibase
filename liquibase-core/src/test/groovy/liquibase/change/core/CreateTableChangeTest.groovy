@@ -14,7 +14,7 @@ import liquibase.statement.ForeignKeyConstraint
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.statement.core.CreateTableStatement
 import liquibase.structure.core.Column
-import liquibase.structure.core.DataType
+import liquibase.structure.core.OldDataType
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
 import spock.lang.Unroll
@@ -167,9 +167,9 @@ public class CreateTableChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def table = new Table(null, null, "test_table")
-        def column1 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_1").setType(new DataType("int")).setRelation(table)
-        def column2 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_2").setType(new DataType("boolean")).setRelation(table)
-        def column3 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_3").setType(new DataType("varchar(10)")).setRelation(table)
+        def column1 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_1").setType(new OldDataType("int")).setRelation(table)
+        def column2 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_2").setType(new OldDataType("boolean")).setRelation(table)
+        def column3 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_3").setType(new OldDataType("varchar(10)")).setRelation(table)
 
         def change = new CreateTableChange()
         change.tableName = table.name
