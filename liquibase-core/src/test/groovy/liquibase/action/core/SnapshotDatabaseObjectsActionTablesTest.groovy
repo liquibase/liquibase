@@ -20,30 +20,30 @@ import static org.hamcrest.Matchers.containsInAnyOrder
 
 class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
-    @Unroll("#featureName: #tableName on #conn")
+    @Unroll("#featureName: #tableRef on #conn")
     def "can snapshot fully qualified table"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, tableName)
+        def action = new SnapshotDatabaseObjectsAction(Table, tableRef)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
-        testMDPermutation(snapshot, conn, scope).addParameters([tableName_asTable: tableName])
+        testMDPermutation(snapshot, conn, scope).addParameters([tableName_asTable: tableRef])
                 .addOperations(plan: plan)
                 .run({
             def result = plan.execute(scope) as QueryResult
 
             assert result.asList(Table).size() == 1
             assert result.asObject(Object) instanceof Table
-            assert result.asObject(Table).getName() == tableName
+            assert result.asObject(Table).getName() == tableRef.objectName
         })
 
         where:
-        [scope, conn, snapshot, tableName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [scope, conn, snapshot, tableRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
-                    [scope]
+                    [scope],
                     [it],
                     [snapshot],
                     snapshot.get(Table)*.getObjectReference()
@@ -54,7 +54,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
     @Unroll("#featureName: #schemaName on #conn")
     def "can snapshot all tables in schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, schemaName.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Schema, schemaName))
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -180,7 +180,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
-                    [scope]
+                    [scope],
                     [it],
                     [snapshot],
                     snapshot.get(Schema)*.getName()

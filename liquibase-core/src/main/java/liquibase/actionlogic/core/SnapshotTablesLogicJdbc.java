@@ -46,7 +46,7 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
 
         if (relatedTo.instanceOf(Catalog.class)) {
             catalogName = relatedTo.getSimpleName();
-        } else if (Schema.class.isAssignableFrom(relatedTo.getClass())) {
+        } else if (relatedTo.instanceOf(Schema.class)) {
             if (relatedTo.objectName.container != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
                 catalogName = relatedTo.objectName.container.name;
             }
@@ -63,7 +63,7 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
                 }
             }
         } else {
-            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass());
+            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.objectType.getName());
         }
 
         return new QueryJdbcMetaDataAction("getTables", catalogName, schemaName, tableName, new String[]{"TABLE"});

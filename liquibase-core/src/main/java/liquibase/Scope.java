@@ -1,6 +1,9 @@
 package liquibase;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.SmartMap;
@@ -174,8 +177,17 @@ public class Scope {
         Database database = getDatabase();
         if (database != null) {
             databaseName = database.getShortName();
+
+            DatabaseConnection connection = database.getConnection();
+            if (connection == null) {
+                databaseName = "unconnected " + databaseName;
+            } else if (connection instanceof OfflineConnection) {
+                databaseName = "offline " + databaseName;
+            } else if (connection instanceof JdbcConnection) {
+                databaseName = "jdbc " + databaseName;
+            }
         }
-        return "scope(database="+ database +")";
+        return "scope(database="+ databaseName +")";
     }
 
 }

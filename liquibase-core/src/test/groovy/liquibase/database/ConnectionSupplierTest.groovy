@@ -31,8 +31,8 @@ class ConnectionSupplierTest extends Specification {
         2     | false            | false        | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2"]
         1     | true            | false        | ["lbschema", "lbschema2"]
         2     | true            | false         | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2", "lbschema", "lbschema2"]
-        1     | true            | true         | ["lbschema", "lbschema2", "#DEFAULT"]
-        2     | true            | true         | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2", "lbschema", "lbschema2", "lbcat.#DEFAULT", "lbcat2.#DEFAULT", "#DEFAULT.lbschema", "#DEFAULT.lbschema2", "#DEFAULT.#DEFAULT", "#DEFAULT"]
+        1     | true            | true         | ["lbschema", "lbschema2", "#UNSET"]
+        2     | true            | true         | ["lbcat.lbschema", "lbcat.lbschema2","lbcat2.lbschema", "lbcat2.lbschema2", "lbschema", "lbschema2", "lbcat.#UNSET", "lbcat2.#UNSET", "#UNSET.lbschema", "#UNSET.lbschema2", "#UNSET.#UNSET", "#UNSET"]
     }
 
     def "getReferenceContainers: depth 2"() {
@@ -47,14 +47,14 @@ class ConnectionSupplierTest extends Specification {
         that supplier.getReferenceContainers(true)*.toString(), containsInAnyOrder([
                 "lbschema",
                 "lbschema2",
-                "#DEFAULT",
+                "#UNSET",
                 "lbcat.lbschema",
                 "lbcat2.lbschema",
                 "lbcat.lbschema2",
                 "lbcat2.lbschema2",
-                "#DEFAULT.lbschema",
-                "#DEFAULT.lbschema2",
-                "#DEFAULT.#DEFAULT",
+                "#UNSET.lbschema",
+                "#UNSET.lbschema2",
+                "#UNSET.#UNSET",
         ].toArray())
 
         that supplier.getReferenceContainers(false)*.toString(), containsInAnyOrder([
@@ -71,13 +71,13 @@ class ConnectionSupplierTest extends Specification {
 
         that supplier.getObjectNames(Table.class, true)*.toString(), containsInAnyOrder([
                 "lbschema.test_table",
-                "#DEFAULT.test_table",
+                "#UNSET.test_table",
                 "lbschema2.test_table",
                 "lbschema.TEST_TABLE",
-                "#DEFAULT.TEST_TABLE",
+                "#UNSET.TEST_TABLE",
                 "lbschema2.TEST_TABLE",
                 "lbschema.TestTable",
-                "#DEFAULT.TestTable",
+                "#UNSET.TestTable",
                 "lbschema2.TestTable"].toArray())
     }
 }

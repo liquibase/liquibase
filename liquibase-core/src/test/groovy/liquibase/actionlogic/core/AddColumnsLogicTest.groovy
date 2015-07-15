@@ -1,7 +1,8 @@
 package liquibase.actionlogic.core;
 
 import liquibase.JUnitScope;
-import liquibase.action.core.AddColumnsAction;
+import liquibase.action.core.AddColumnsAction
+import liquibase.actionlogic.ActionExecutor;
 import liquibase.snapshot.MockSnapshotFactory;
 import liquibase.snapshot.SnapshotFactory;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
@@ -33,7 +34,7 @@ public class AddColumnsLogicTest extends Specification {
         def notAppliedAction = new AddColumnsAction()
         notAppliedAction.columns = [new Column(new ObjectName(tableName, "otherColumnName"), "int")]
 
-        def logic = new AddColumnsLogic()
+        def logic = scope.getSingleton(ActionExecutor)
 
         then:
         assert logic.checkStatus(appliedAction, scope).applied
@@ -129,7 +130,7 @@ public class AddColumnsLogicTest extends Specification {
         def notAppliedAction = new AddColumnsAction()
         notAppliedAction.columns = [new Column(new ObjectName(tableName, "column1"), "int"), new Column(new ObjectName(tableName, "columnX"), "int")]
 
-        def logic = new AddColumnsLogic()
+        def logic = scope.getSingleton(ActionExecutor)
 
         then:
         assert logic.checkStatus(appliedAction, scope).applied

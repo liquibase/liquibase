@@ -258,11 +258,11 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             if (database.supportsAutoIncrement()) {
                 BigInteger startWith = autoIncrementInformation.startWith;
                 BigInteger incrementBy = autoIncrementInformation.incrementBy;
-                String autoIncrementClause = database.getAutoIncrementClause(startWith, incrementBy);
+//                String autoIncrementClause = database.getAutoIncrementClause(startWith, incrementBy);
 
-                if (!"".equals(autoIncrementClause)) {
-                    columnClause.append(ColumnClauses.autoIncrement, autoIncrementClause);
-                }
+//                if (!"".equals(autoIncrementClause)) {
+//                    columnClause.append(ColumnClauses.autoIncrement, autoIncrementClause);
+//                }
 
 //                if( autoIncrementConstraint.getStartWith() != null ){
 //                    if (database instanceof MySQLDatabase){

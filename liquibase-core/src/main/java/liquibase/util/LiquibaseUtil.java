@@ -1,9 +1,17 @@
 package liquibase.util;
 
+import liquibase.Scope;
+import liquibase.action.core.SnapshotDatabaseObjectsAction;
+import liquibase.actionlogic.ActionExecutor;
+import liquibase.exception.ActionPerformException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.Properties;
 
 public class LiquibaseUtil {
@@ -41,5 +49,23 @@ public class LiquibaseUtil {
         }
 
         return buildVersion;
+    }
+
+    /**
+     * Convenience method for snapshotting a particular object. Returns null if none are found.
+     */
+    public static <T extends DatabaseObject> T snapshotObject(Class<T> type, ObjectReference relatedTo, Scope scope) throws ActionPerformException {
+        ActionExecutor actionExecutor = scope.getSingleton(ActionExecutor.class);
+
+        return actionExecutor.query(new SnapshotDatabaseObjectsAction(type, relatedTo), scope).asObject(type);
+    }
+
+    /**
+     * Convenience method for snapshotting multiple objects. Returns empty list if none are found.
+     */
+    public static <T extends DatabaseObject> List<T> snapshotAll(Class<T> type, ObjectReference relatedTo, Scope scope) throws ActionPerformException {
+        ActionExecutor actionExecutor = scope.getSingleton(ActionExecutor.class);
+
+        return actionExecutor.query(new SnapshotDatabaseObjectsAction(type, relatedTo), scope).asList(type);
     }
 }

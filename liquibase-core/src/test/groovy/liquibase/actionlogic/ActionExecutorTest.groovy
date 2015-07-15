@@ -3,6 +3,7 @@ package liquibase.actionlogic
 import liquibase.JUnitEmptyScope
 import liquibase.Scope
 import liquibase.action.*
+import liquibase.database.jvm.MockJdbcConnection
 import liquibase.exception.ActionPerformException
 import liquibase.exception.ValidationErrors
 import liquibase.sdk.database.MockDatabase
@@ -25,6 +26,7 @@ class ActionExecutorTest extends Specification {
                 return new TemplateActionLogic[0];
             }
         }])
+        scope.database.setConnection(new MockJdbcConnection())
     }
 
     def "execute when null actionLogic"() {
@@ -33,7 +35,7 @@ class ActionExecutorTest extends Specification {
 
         then:
         def e = thrown(ActionPerformException)
-        e.message == "No supported ActionLogic implementation found for 'mock()'"
+        e.message == "No supported ActionLogic implementation found for 'mock()' against scope(database=jdbc mock)"
     }
 
     def "execute when validation fails with errors"() {
@@ -51,7 +53,7 @@ class ActionExecutorTest extends Specification {
 
         then:
         def e = thrown(ActionPerformException)
-        e.message == "Validation Error(s): Mock Validation Error; Another Error"
+        e.message == "Validation Error(s): Mock Validation Error; Another Error for mock() with liquibase.actionlogic.ActionExecutorTest\$2"
     }
 
     def "execute update logic"() {

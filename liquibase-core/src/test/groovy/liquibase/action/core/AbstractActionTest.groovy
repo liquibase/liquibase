@@ -39,7 +39,7 @@ abstract class AbstractActionTest extends Specification {
         def executor = new ActionExecutor()
 
         for (def obj : snapshot.get(Table.class)) {
-            for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot())) {
+            for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
                 LoggerFactory.getLogger(this.getClass()).debug("Executing: "+executor.createPlan(action, scope).describe())
                 executor.execute(action, scope)
             }

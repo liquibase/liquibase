@@ -2,6 +2,7 @@ package liquibase.actionlogic;
 
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.action.ActionStatus;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.StringUtils;
@@ -20,7 +21,23 @@ public class ActionExecutor {
      */
     public ActionResult execute(Action action, Scope scope) throws ActionPerformException {
         return createPlan(action, scope).execute(scope);
+    }
 
+    /**
+     * Convenience version of {@link #execute(Action, Scope)} for performing a query
+     */
+    public QueryResult query(Action action, Scope scope) throws ActionPerformException {
+        return (QueryResult) createPlan(action, scope).execute(scope);
+    }
+
+    public ActionStatus checkStatus(Action action, Scope scope) {
+        ActionLogic logic = getActionLogic(action, scope);
+
+        if (logic == null) {
+            return new ActionStatus().unknown("No ActionLogic implementation for "+action.describe()+" for "+scope.describe());
+        }
+
+        return logic.checkStatus(action, scope);
     }
 
     public ValidationErrors validate(Action action, Scope scope) {
@@ -54,9 +71,8 @@ public class ActionExecutor {
     }
 
     protected void buildPlan(Action action, Scope scope, Plan plan, Deque<ActionResult.Modifier> modifiers) throws ActionPerformException {
-        ActionLogicFactory actionLogicFactory = scope.getSingleton(ActionLogicFactory.class);
+        ActionLogic actionLogic = getActionLogic(action, scope);
 
-        ActionLogic actionLogic = actionLogicFactory.getActionLogic(action, scope);
         if (actionLogic == null) {
             throw new ActionPerformException("No supported ActionLogic implementation found for '"+action.describe()+"' against "+scope.describe());
         }
@@ -87,6 +103,12 @@ public class ActionExecutor {
                 }
             }
         }
+    }
+
+    protected ActionLogic getActionLogic(Action action, Scope scope) {
+        ActionLogicFactory actionLogicFactory = scope.getSingleton(ActionLogicFactory.class);
+
+        return actionLogicFactory.getActionLogic(action, scope);
     }
 
     /**

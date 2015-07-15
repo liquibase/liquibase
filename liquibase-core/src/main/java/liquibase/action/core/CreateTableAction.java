@@ -15,7 +15,7 @@ public class CreateTableAction extends AbstractAction {
     public ObjectName tableName;
     public String tablespace;
     public String remarks;
-    public List<Column> columns;
+    public List<Column> columns = new ArrayList<>();
     public String autoIncrementColumnName;
     public BigInteger autoIncrementStartWith;
     public BigInteger autoIncrementBy;

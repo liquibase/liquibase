@@ -38,12 +38,12 @@ public interface ActionLogic<T extends Action> extends Service{
      * All ActionLogic implementations that (potentially) interact with external systems should implement this interface.
      * Implementations of this interface are used by {@link liquibase.actionlogic.ActionExecutor.Plan} to know when to stop decomposing actions as well as for logging.
      */
-    public static interface InteractsExternally<T extends Action> {
+    interface InteractsExternally<T extends Action> {
 
         /**
          * Returns true if this ActionLogic implementation will interact with an external system (database, server, etc.) for the given action and scope.
          */
-        public boolean interactsExternally(T action, Scope scope);
+        boolean interactsExternally(T action, Scope scope);
     }
 
 }

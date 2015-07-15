@@ -13,6 +13,7 @@ import liquibase.snapshot.transformer.LimitTransformer
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
 import liquibase.util.CollectionUtil
+import org.junit.Assume
 import spock.lang.Unroll
 
 class AddAutoIncrementActionTest extends AbstractActionTest {
@@ -35,7 +36,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
                 .run({
             plan.execute(scope)
 
-            assert action.checkStatus(scope).applied
+            assert scope.getSingleton(ActionExecutor).checkStatus(action, scope).applied
         })
 
         where:
@@ -59,6 +60,9 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
         action.columnDataType = column.type
 
         then:
+        def errors = new ActionExecutor().validate(action, scope)
+        Assume.assumeFalse(errors.toString(), errors.hasErrors())
+
         def plan = new ActionExecutor().createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
@@ -69,9 +73,17 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
         ])
                 .addOperations(plan: plan)
                 .run({
+
+            if (action.incrementBy != null) { //need to check because checkStatus does not get incrementBy metadata
+                assert plan.toString().contains(action.incrementBy.toString()) : "IncrementBy value not used"
+            }
+            if (action.startWith != null) { //need to check because checkStatus does not get startWith metadata
+                assert plan.toString().contains(action.startWith.toString()) : "StartWith value not used"
+            }
+
             plan.execute(scope)
 
-            assert action.checkStatus(scope).applied
+            assert scope.getSingleton(ActionExecutor).checkStatus(action, scope).applied
         })
 
         where:
@@ -86,8 +98,8 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
                     JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(AddAutoIncrementAction, [
                             columnName    : null,
                             columnDataType: null,
-                            startWith     : [1, 2, 10],
-                            incrementBy   : [1, 5, 20]
+                            startWith     : [null, 1, 2, 10],
+                            incrementBy   : [null, 1, 5, 20]
                     ]),
             ])
         }

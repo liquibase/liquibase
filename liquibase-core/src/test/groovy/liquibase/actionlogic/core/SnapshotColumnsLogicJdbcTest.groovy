@@ -61,8 +61,8 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
         where:
         tableCat   | tableSchema  | tableName   | maxDepth | expected
         "tableCat" | "schemaName" | "tableName" | 2        | "tableCat.schemaName.tableName"
-        null       | "schemaName" | "tableName" | 2        | "#DEFAULT.schemaName.tableName"
-        "tableCat" | null         | "tableName" | 2        | "tableCat.#DEFAULT.tableName"
+        null       | "schemaName" | "tableName" | 2        | "#UNSET.schemaName.tableName"
+        "tableCat" | null         | "tableName" | 2        | "tableCat.#UNSET.tableName"
         "tableCat" | "schemaName" | "tableName" | 1        | "schemaName.tableName"
         "tableCat" | null         | "tableName" | 1        | "tableCat.tableName"
         null       | "schemaName" | "tableName" | 1        | "schemaName.tableName"

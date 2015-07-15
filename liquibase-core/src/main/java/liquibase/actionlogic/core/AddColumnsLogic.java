@@ -5,6 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ActionStatus;
 import liquibase.action.core.*;
 import liquibase.actionlogic.AbstractActionLogic;
+import liquibase.actionlogic.ActionExecutor;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
@@ -101,7 +102,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             }
 
             if (action.primaryKey != null) {
-                PrimaryKey snapshotPK = scope.getSingleton(SnapshotFactory.class).get(new ObjectReference(PrimaryKey.class, new ObjectName(tableName, null)), scope);
+                PrimaryKey snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, new ObjectReference(Table.class, tableName)), scope).asObject(PrimaryKey.class);
                 if (snapshotPK == null) {
                     result.assertApplied(false, "No primary key on '"+tableName+"'");
                 } else {
@@ -174,9 +175,9 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
         clauses.append(getDefaultValueClause(column, action, scope));
 
-        if (autoIncrement != null && database.supportsAutoIncrement()) {
-            clauses.append(database.getAutoIncrementClause(autoIncrement.startWith, autoIncrement.incrementBy));
-        }
+//        if (autoIncrement != null && database.supportsAutoIncrement()) {
+//            clauses.append(database.getAutoIncrementClause(autoIncrement.startWith, autoIncrement.incrementBy));
+//        }
 
         if (nullable) {
             if (database.requiresDefiningColumnsAsNull()) {

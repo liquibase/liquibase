@@ -1,7 +1,9 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
+import liquibase.action.Action;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
+import liquibase.actionlogic.ActionLogic;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
@@ -9,7 +11,7 @@ import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.CollectionUtil;
 
-public class SnapshotTablesLogicOffline extends AbstractSnapshotDatabaseObjectsLogicOffline {
+public class SnapshotTablesLogicOffline extends AbstractSnapshotDatabaseObjectsLogicOffline implements ActionLogic.InteractsExternally {
 
     @Override
     protected Class<? extends DatabaseObject> getTypeToSnapshot() {
@@ -23,6 +25,11 @@ public class SnapshotTablesLogicOffline extends AbstractSnapshotDatabaseObjectsL
                 Catalog.class,
                 Table.class
         };
+    }
+
+    @Override
+    public boolean interactsExternally(Action action, Scope scope) {
+        return true;
     }
 
     @Override

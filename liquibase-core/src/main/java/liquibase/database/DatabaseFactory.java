@@ -3,9 +3,11 @@ package liquibase.database;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.snapshot.Snapshot;
 import liquibase.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -267,6 +269,25 @@ public class DatabaseFactory {
         }
         return implementedDatabases.get(shortName).iterator().next();
 
+    }
+
+    /**
+     * Creates a new Database instance with an offline connection pointing to the given snapshot
+     */
+    public Database fromSnapshot(Snapshot snapshot) {
+        Database database = snapshot.getScope().getDatabase();
+
+        DatabaseConnection conn = new OfflineConnection("offline:" + database.getShortName(), snapshot, snapshot.getScope().getResourceAccessor());
+
+        Database returnDatabase = null;
+        try {
+            returnDatabase = findCorrectDatabaseImplementation(conn);
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        returnDatabase.setConnection(conn);
+
+        return returnDatabase;
     }
 
     private static class DatabaseComparator implements Comparator<Database> {

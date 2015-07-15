@@ -13,10 +13,16 @@ import java.util.*;
 public class Snapshot {
 
     private final SnapshotIdService snapshotIdService;
+    private final Scope scope;
     private Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> objects = new HashMap<>();
 
     public Snapshot(Scope scope) {
         this.snapshotIdService = scope.getSingleton(SnapshotIdService.class);
+        this.scope = scope;
+    }
+
+    public Scope getScope() {
+        return scope;
     }
 
     public Snapshot add(DatabaseObject object) {
@@ -55,8 +61,16 @@ public class Snapshot {
         return (Set<T>) Collections.unmodifiableSet(CollectionUtil.createIfNull(objects.get(type)));
     }
 
-    public <T extends DatabaseObject> Set<T> getAll(T example) {
-        return null;
+    public <T extends DatabaseObject> Set<T> getAll(Class<T> type, final ObjectName objectName) {
+        return CollectionUtil.select(CollectionUtil.createIfNull(objects.get(type)),
+                new CollectionUtil.CollectionFilter() {
+                    @Override
+                    public boolean include(Object obj) {
+                        ObjectName name = ((DatabaseObject) obj).getName();
+                        return name.matches(objectName);
+                    }
+                });
+
     }
 
     public <T extends DatabaseObject> T get(T example) {
@@ -90,4 +104,6 @@ public class Snapshot {
 
         return this;
     }
+
+
 }

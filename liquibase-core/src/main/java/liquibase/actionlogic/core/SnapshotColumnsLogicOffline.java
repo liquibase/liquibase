@@ -1,7 +1,9 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
+import liquibase.action.Action;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
+import liquibase.actionlogic.ActionLogic;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
@@ -12,7 +14,7 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.util.CollectionUtil;
 
-public class SnapshotColumnsLogicOffline extends AbstractSnapshotDatabaseObjectsLogicOffline {
+public class SnapshotColumnsLogicOffline extends AbstractSnapshotDatabaseObjectsLogicOffline implements ActionLogic.InteractsExternally {
 
     @Override
     protected Class<? extends DatabaseObject> getTypeToSnapshot() {
@@ -27,6 +29,11 @@ public class SnapshotColumnsLogicOffline extends AbstractSnapshotDatabaseObjects
                 Schema.class,
                 Catalog.class
         };
+    }
+
+    @Override
+    public boolean interactsExternally(Action action, Scope scope) {
+        return true;
     }
 
     protected CollectionUtil.CollectionFilter<? extends DatabaseObject> getDatabaseObjectFilter(SnapshotDatabaseObjectsAction action, Scope scope) {

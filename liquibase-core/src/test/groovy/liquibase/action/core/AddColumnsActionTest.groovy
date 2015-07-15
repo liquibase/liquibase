@@ -27,7 +27,7 @@ class AddColumnsActionTest extends AbstractActionTest {
         action.columns = [new Column(new ObjectName(table.name, columnName), "int")]
 
         then:
-        def plan = new ActionExecutor().createPlan(action, scope)
+        def plan = scope.getSingleton(ActionExecutor).createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
                 .addParameters([
@@ -38,7 +38,7 @@ class AddColumnsActionTest extends AbstractActionTest {
                 .run({
             plan.execute(scope)
 
-            assert action.checkStatus(scope).applied
+            assert scope.getSingleton(ActionExecutor).checkStatus(action, scope).applied
         })
 
         where:
@@ -92,7 +92,7 @@ class AddColumnsActionTest extends AbstractActionTest {
     }
 
     @Unroll("#featureName: add #columnName to #table on #conn")
-    def "!Can apply single column with various settings"() {
+    def "Can apply single column with various settings"() {
         when:
         def action = new AddColumnsAction()
 
@@ -126,11 +126,13 @@ class AddColumnsActionTest extends AbstractActionTest {
 
         action.columns = [columnDef]
 
+
+        def executor = scope.getSingleton(ActionExecutor.class)
         then:
-        def errors = new ActionExecutor().validate(action, scope)
+        def errors = executor.validate(action, scope)
         Assume.assumeFalse(errors.toString(), errors.hasErrors())
 
-        def plan = new ActionExecutor().createPlan(action, scope)
+        def plan = executor.createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
                 .addParameters([
@@ -147,7 +149,7 @@ class AddColumnsActionTest extends AbstractActionTest {
                 .run({
             plan.execute(scope)
 
-            assert action.checkStatus(scope).applied
+            assert executor.checkStatus(action, scope).applied
         })
 
         where:

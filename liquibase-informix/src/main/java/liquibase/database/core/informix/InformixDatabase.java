@@ -182,12 +182,6 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
-		return "";
-	}
-
-
-	@Override
     public String getDateLiteral(final String isoDate) {
         if (isTimeOnly(isoDate)) {
             return "INTERVAL (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + INTERVAL_FIELD_QUALIFIER;

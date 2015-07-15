@@ -2,6 +2,7 @@ package liquibase.actionlogic.core
 
 import liquibase.JUnitScope
 import liquibase.action.core.AddAutoIncrementAction
+import liquibase.actionlogic.ActionExecutor
 import liquibase.snapshot.MockSnapshotFactory
 import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.ObjectName
@@ -29,7 +30,7 @@ class AddAutoIncrementLogicTest extends Specification {
         action.incrementBy = actionIncrementBy
 
         then:
-        new AddAutoIncrementLogic().checkStatus(action, scope).toString() == expected
+        new ActionExecutor().checkStatus(action, scope).toString() == expected
 
         where:
         actionStartsWith | columnStartsWith | actionIncrementBy | columnIncrementBy | expected
@@ -49,7 +50,7 @@ class AddAutoIncrementLogicTest extends Specification {
         action.columnName = new ObjectName("testTable", "testColumn")
 
         then:
-        new AddAutoIncrementLogic().checkStatus(action, scope).toString() == "Unknown: Column 'testTable.testColumn' does not exist"
+        scope.getSingleton(ActionExecutor).checkStatus(action, scope).toString() == "Unknown: Column 'testTable.testColumn' does not exist"
 
     }
 }

@@ -14,8 +14,8 @@ class ObjectNameTest extends Specification {
 
         where:
         objectName                    | expected
-        new ObjectName()              | "#DEFAULT"
-        new ObjectName(null)          | "#DEFAULT"
+        new ObjectName()              | "#UNSET"
+        new ObjectName(null)          | "#UNSET"
         new ObjectName("a")           | "a"
         new ObjectName("a", "b")      | "a.b"
         new ObjectName("a", "b", "c") | "a.b.c"
@@ -48,14 +48,14 @@ class ObjectNameTest extends Specification {
 
         where:
         objectName                         | expected
-        new ObjectName()                   | "#DEFAULT"
+        new ObjectName()                   | "#UNSET"
         new ObjectName("abc")              | "abc"
         new ObjectName("ABC")              | "ABC"
         new ObjectName("ABC", "xyz")       | "ABC.xyz"
-        new ObjectName("ABC", "XYZ", null) | "ABC.XYZ.#DEFAULT"
+        new ObjectName("ABC", "XYZ", null) | "ABC.XYZ.#UNSET"
         new ObjectName(null, "XYZ")        | "XYZ"
         new ObjectName("a", "b", "c")      | "a.b.c"
-        new ObjectName("a", null, "c")     | "a.#DEFAULT.c"
+        new ObjectName("a", null, "c")     | "a.#UNSET.c"
     }
 
     @Unroll
@@ -135,6 +135,29 @@ class ObjectNameTest extends Specification {
         new ObjectName(null, "c", "b", "a") | new ObjectName("c", "b", "a")       | true   | true
         new ObjectName("c", "b", "a")       | new ObjectName(null, "c", "b", "a") | true   | true
         new ObjectName(null, "c", "b", "a") | new ObjectName("c", "b", "a")       | false  | true
+
+    }
+
+    @Unroll("#featureName: #name1 vs #name2")
+    def "matches"() {
+        expect:
+        name1.matches(name2) == expected
+
+        where:
+        name1                          | name2                         | expected
+        new ObjectName("a")            | null                          | true
+        new ObjectName("a")            | new ObjectName()              | true
+        new ObjectName("a")            | new ObjectName(null)          | true
+        new ObjectName("a")            | new ObjectName("a")           | true
+        new ObjectName("a")            | new ObjectName("b")           | false
+        new ObjectName(null, "a")      | new ObjectName("a")           | true
+        new ObjectName("a")            | new ObjectName(null, "a")     | true
+        new ObjectName("a")            | new ObjectName(null, "b")     | false
+        new ObjectName("a", null)      | new ObjectName("a", "b")      | true
+        new ObjectName("a", null, "c") | new ObjectName("a", "b", "c") | true
+        new ObjectName("a", null, "c") | new ObjectName("a", "b", "c") | true
+        new ObjectName(null, "a")      | new ObjectName(null, "a")     | true
+
 
     }
 }

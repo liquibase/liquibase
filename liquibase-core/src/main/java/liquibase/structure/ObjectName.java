@@ -50,19 +50,19 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     }
 
     public String toShortString() {
-        return StringUtils.defaultIfEmpty(name, "#DEFAULT");
+        return StringUtils.defaultIfEmpty(name, "#UNSET");
     }
 
     @Override
     public String toString() {
         List<String> list = asList();
         if (list.size() == 0) {
-            return "#DEFAULT";
+            return "#UNSET";
         }
         return StringUtils.join(list, ".", new StringUtils.StringUtilsFormatter<String>() {
             @Override
             public String toString(String obj) {
-                return StringUtils.defaultIfEmpty(obj, "#DEFAULT");
+                return StringUtils.defaultIfEmpty(obj, "#UNSET");
             }
         });
     }
@@ -80,9 +80,16 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return this.equals(objectReference.objectName);
     }
 
+    /**
+     * Same logic as {@link #equals(ObjectName, boolean)} with true for ignoreLengthDifferences
+     */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ObjectName && toString().equals(obj.toString());
+        if (obj instanceof ObjectName) {
+            return equals(((ObjectName) obj), true);
+        } else {
+            return false;
+        }
     }
 
     public boolean equals(ObjectName obj, boolean ignoreLengthDifferences) {
@@ -107,7 +114,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
             }
             return true;
         } else {
-            return this.equals(obj);
+            return this.toString().equals(obj.toString());
         }
 
     }
@@ -180,4 +187,36 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     }
 
 
+    /**
+     * Returns true if the names are equivilant, not counting null-value positions in either name
+     */
+    public boolean matches(ObjectName objectName) {
+        if (objectName == null) {
+            return true;
+        }
+
+        List<String> thisList = this.asList();
+        List<String> otherList = objectName.asList();
+
+        if (otherList.size() == 0) {
+            return true;
+        }
+
+        int length = Math.max(thisList.size(), otherList.size());
+
+        for (int i=0; i<length; i++) {
+            if (thisList.size() < i || otherList.size() < i) {
+                return true;
+            }
+
+            String thisName = thisList.get(i);
+            String otherName = otherList.get(i);
+            if (thisName != null && otherName != null) {
+                if (!thisName.equals(otherName)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
