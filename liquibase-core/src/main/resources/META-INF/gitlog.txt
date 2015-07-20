@@ -1,3 +1,12 @@
+f0880d6 Handle NPE when no changes in backing index but a changed unique constraint
+3b309d8 CORE-931 addColumn should support not-null constraint with an initial default value
+b28c89a Improved test error message
+01699b5 CORE-2336 Use a grammer for parsing SQL rather than regexps
+c9ab76f CORE-2336 Use a grammer for parsing SQL rather than regexps
+644d503 CORE-2427 Better handle MSSQL stored procedures with a different defaultSchema and replaceOnExists=true
+c1091d2 Better support for addColumn extensions
+ed6d259 CORE-2336 Improve parsing of non-standard delimiters with javacc (cherry picked from commit 038a0e5)
+75277de CORE-2336 Use a grammer for parsing SQL rather than regexps (cherry picked from commit 09dbb35)
 692026b CORE-2401 MSSQL handling timestamp according to sql standard,
 546b0df CORE-2412 Handle Oracle BFILE types
 2734e21 CORE-2411 BLOB string default values not quoted

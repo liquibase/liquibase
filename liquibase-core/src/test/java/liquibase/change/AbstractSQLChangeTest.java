@@ -154,7 +154,7 @@ public class AbstractSQLChangeTest {
         change.setStripComments(true);
         SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
         assertEquals(1, statements.length);
-        assertEquals("LINE 1;\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+        assertEquals("LINE 1;\r\n\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
 
     @Test
@@ -178,7 +178,7 @@ public class AbstractSQLChangeTest {
         change.setStripComments(true);
         SqlStatement[] statements = change.generateStatements(mock(Database.class));
         assertEquals(1, statements.length);
-        assertEquals("LINE 1;\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
+        assertEquals("LINE 1;\n\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
 
     @Test

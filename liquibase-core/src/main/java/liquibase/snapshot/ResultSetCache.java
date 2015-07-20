@@ -9,8 +9,6 @@ import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
