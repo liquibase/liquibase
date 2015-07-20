@@ -1,25 +1,21 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.DiffCommand;
 import liquibase.command.DiffToChangeLogCommand;
 import liquibase.command.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.OfflineConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +154,7 @@ public class CommandLineUtils {
         System.out.println("");
         System.out.println("Diff Results:");
         try {
-            diffCommand.execute();
+            diffCommand.execute(null);
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
@@ -191,7 +187,7 @@ public class CommandLineUtils {
                 .setDiffOutputControl(diffOutputControl);
 
         try {
-            command.execute();
+            command.execute(null);
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }
@@ -223,7 +219,7 @@ public class CommandLineUtils {
                 .setContext(context);
 
         try {
-            command.execute();
+            command.execute(null);
         } catch (CommandExecutionException e) {
             throw new LiquibaseException(e);
         }

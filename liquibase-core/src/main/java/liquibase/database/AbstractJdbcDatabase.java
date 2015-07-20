@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
@@ -11,7 +12,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;

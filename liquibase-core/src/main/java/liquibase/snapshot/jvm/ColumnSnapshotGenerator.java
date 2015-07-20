@@ -211,8 +211,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        OldDataType type = readDataType(columnMetadataResultSet, column, database);
-        column.type = type;
+//        OldDataType type = readDataType(columnMetadataResultSet, column, database);
+//        column.type = type;
 
         column.defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
 
@@ -335,7 +335,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //        }
 
-        return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.type);
+        return null; //SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.type);
     }
 
     //START CODE FROM SQLITEDatabaseSnapshotGenerator

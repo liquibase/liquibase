@@ -22,6 +22,5 @@ public class SnapshotFactory {
         QueryResult result = (QueryResult) new ActionExecutor().execute(new SnapshotDatabaseObjectsAction(object), scope);
 
         return (T) result.asObject(object.objectType);
-
     }
 }

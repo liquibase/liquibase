@@ -94,7 +94,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 }
                 change.setTableName(column.getRelationName());
                 change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.type, comparisonDatabase).toString());
+                change.setColumnDataType(column.type.toString());
                 changes.add(change);
             } else {
                 AddNotNullConstraintChange change = new AddNotNullConstraintChange();
@@ -106,7 +106,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 }
                 change.setTableName(column.getRelationName());
                 change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.type, comparisonDatabase).toString());
+                change.setColumnDataType(column.type.toString());
                 changes.add(change);
             }
         }
@@ -128,7 +128,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 }
                 change.setTableName(column.getRelationName());
                 change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(DataTypeFactory.getInstance().from(column.type, comparisonDatabase).toString());
+                change.setColumnDataType(column.type.toString());
                 changes.add(change);
             }
         }
@@ -202,7 +202,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         if (difference != null) {
             Object value = difference.getReferenceValue();
 
-            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.type, comparisonDatabase);
+//            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.type, comparisonDatabase);
             if (value == null) {
                 DropDefaultValueChange change = new DropDefaultValueChange();
                 if (control.getIncludeCatalog()) {
@@ -213,7 +213,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 }
                 change.setTableName(column.getRelationName());
                 change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(columnDataType.toString());
+//                change.setColumnDataType(columnDataType.toString());
 
                 changes.add(change);
 
@@ -227,7 +227,7 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 }
                 change.setTableName(column.getRelationName());
                 change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(columnDataType.toString());
+//                change.setColumnDataType(columnDataType.toString());
 
                 if (value instanceof Boolean) {
                     change.setDefaultValueBoolean((Boolean) value);

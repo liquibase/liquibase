@@ -278,10 +278,10 @@ class StringClausesTest extends Specification {
 
         where:
         testMethod << [
-                {new StringClauses().append("a").append("a", new StringClauses())},
-                {new StringClauses().append("a").prepend("a", new StringClauses())},
-                {new StringClauses().append("a").append("b").insertBefore("b", "a")},
-                {new StringClauses().append("a").append("b").insertAfter("b", "a")},
+                { new StringClauses().append("a").append("a", new StringClauses()) },
+                { new StringClauses().append("a").prepend("a", new StringClauses()) },
+                { new StringClauses().append("a").append("b").insertBefore("b", "a") },
+                { new StringClauses().append("a").append("b").insertAfter("b", "a") },
         ]
     }
 
@@ -292,8 +292,8 @@ class StringClausesTest extends Specification {
 
         where:
         testMethod << [
-                {new StringClauses().append("a").append("a")},
-                {new StringClauses().append("a").prepend("a")},
+                { new StringClauses().append("a").append("a") },
+                { new StringClauses().append("a").prepend("a") },
         ]
     }
 
@@ -306,6 +306,18 @@ class StringClausesTest extends Specification {
         base.toString() == "first clause last clause"
         base.insertBefore("nullClause", "preNull", "pre null").toString() == "first clause pre null last clause"
         base.insertBefore("emptyClause", "preEmpty", "pre empty").toString() == "first clause pre null pre empty last clause"
+    }
+
+    @Unroll
+    def "toArray"() {
+        expect:
+        clauses.toArray(true) == expected as Object[]
+
+        where:
+        clauses                                                   | expected
+        new StringClauses()                                       | []
+        new StringClauses(" ").append("a").append("b")            | ["a", "b"]
+        new StringClauses(" ").append("a").append("").append("b") | ["a", "b"]
     }
 
 }

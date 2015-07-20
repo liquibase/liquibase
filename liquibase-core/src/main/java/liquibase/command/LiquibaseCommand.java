@@ -1,10 +1,12 @@
 package liquibase.command;
 
-public interface LiquibaseCommand {
+import liquibase.Scope;
+
+public interface LiquibaseCommand<T extends CommandResult> {
 
     String getName();
 
     CommandValidationErrors validate();
 
-    Object execute() throws CommandExecutionException;
+    T execute(Scope scope) throws CommandExecutionException;
 }

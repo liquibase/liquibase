@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -12,6 +13,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.DataType;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -46,7 +48,7 @@ public interface Database extends PrioritizedService {
     /**
      * Auto-commit mode to run in
      */
-    public boolean getAutoCommitMode();
+    boolean getAutoCommitMode();
 
     /**
      * Determines if the database supports DDL within a transaction or not.
@@ -92,11 +94,11 @@ public interface Database extends PrioritizedService {
      */
     boolean supportsInitiallyDeferrableColumns();
 
-    public boolean supportsSequences();
+    boolean supportsSequences();
 
-    public boolean supportsDropTableCascadeConstraints();
+    boolean supportsDropTableCascadeConstraints();
 
-    public boolean supportsAutoIncrement();
+    boolean supportsAutoIncrement();
 
     String getDateLiteral(String isoDate);
 
@@ -122,21 +124,21 @@ public interface Database extends PrioritizedService {
      *
      * @param tableName
      */
-    public void setDatabaseChangeLogTableName(String tableName);
+    void setDatabaseChangeLogTableName(String tableName);
 
     /**
      * Set the table name of the change log lock to the given table name
      *
      * @param tableName
      */
-    public void setDatabaseChangeLogLockTableName(String tableName);
+    void setDatabaseChangeLogLockTableName(String tableName);
 
     /**
      * Returns SQL to concat the passed values.
      */
     String getConcatSql(String... values);
 
-    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
+    void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
 
@@ -254,12 +256,12 @@ public interface Database extends PrioritizedService {
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
-    public Date parseDate(String dateAsString) throws DateParseException;
+    Date parseDate(String dateAsString) throws DateParseException;
 
     /**
      * Returns list of database native date functions
      */
-    public List<DatabaseFunction> getDateFunctions();
+    List<DatabaseFunction> getDateFunctions();
 
     void resetInternalState();
 
@@ -269,16 +271,16 @@ public interface Database extends PrioritizedService {
 
     void enableForeignKeyChecks() throws DatabaseException;
 
-    public boolean isCaseSensitive(Class<? extends DatabaseObject> type);
+    boolean isCaseSensitive(Class<? extends DatabaseObject> type);
 
     /**
      * Return true if the database is able to store the given name as is.
      */
-    public boolean canStoreObjectName(String name, Class<? extends DatabaseObject> type);
+    boolean canStoreObjectName(String name, Class<? extends DatabaseObject> type);
 
-    public boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type);
+    boolean canStoreObjectName(String name, boolean quoted, Class<? extends DatabaseObject> type);
 
-    public boolean isReservedWord(String string);
+    boolean isReservedWord(String string);
 
     /**
      * Returns a new CatalogAndSchema adjusted for this database. Examples of adjustments include:
@@ -340,9 +342,9 @@ public interface Database extends PrioritizedService {
 
     boolean supportsPrimaryKeyNames();
 
-    public String getSystemSchema();
+    String getSystemSchema();
 
-    public void addReservedWords(Collection<String> words);
+    void addReservedWords(Collection<String> words);
 
     String escapeDataTypeName(String dataTypeName);
 
@@ -352,10 +354,10 @@ public interface Database extends PrioritizedService {
 
     boolean requiresDefiningColumnsAsNull();
 
-    public boolean supportsClustered(Class<? extends DatabaseObject> objectType);
+    boolean supportsClustered(Class<? extends DatabaseObject> objectType);
 
-    public boolean looksLikeFunctionCall(String value);
+    boolean looksLikeFunctionCall(String value);
 
-    public int getMaxContainerDepth(Class<? extends DatabaseObject> type);
+    int getMaxContainerDepth(Class<? extends DatabaseObject> type);
 }
 

@@ -83,7 +83,7 @@ public class Main {
                 throw new UserError("Unknown command: "+main.command);
             }
 
-            command.execute();
+            command.execute(null);
 
             main.divider();
             main.out("Command executed successfully");

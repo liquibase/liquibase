@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class Column extends AbstractDatabaseObject {
 
-    public OldDataType type;
+    public DataType type;
     public AutoIncrementInformation autoIncrementInformation;
     public Boolean nullable;
     public Object defaultValue;
@@ -34,7 +34,7 @@ public class Column extends AbstractDatabaseObject {
 
     public Column(ObjectName name, String type, Boolean nullable) {
         this(name);
-        this.type = new OldDataType(type);
+        this.type = DataType.parse(type);
         this.nullable = nullable;
     }
 
@@ -44,7 +44,7 @@ public class Column extends AbstractDatabaseObject {
 
     public Column(ColumnConfig columnConfig) {
         super(new ObjectName(columnConfig.getName()));
-        this.type = new OldDataType(columnConfig.getType());
+        this.type = new DataType(columnConfig.getType());
 
         if (columnConfig.getDefaultValue() != null) {
             this.defaultValue = columnConfig.getDefaultValueObject();
@@ -145,8 +145,8 @@ public class Column extends AbstractDatabaseObject {
         super.load(parsedNode, resourceAccessor);
         ParsedNode typeNode = parsedNode.getChild(null, "type");
         if (typeNode != null) {
-            OldDataType type = new OldDataType();
-            type.load(typeNode, resourceAccessor);
+            DataType type = new DataType();
+//            type.load(typeNode, resourceAccessor);
             this.type = type;
         }
 

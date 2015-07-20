@@ -137,4 +137,19 @@ class AbstractExtensibleObjectTest extends Specification {
         obj.get("name", ObjectName).toString() == "newTableName"
 
     }
+
+    def "final fields are not included in getAttributeNames"() {
+        when:
+        def object = new AbstractExtensibleObject() {
+            public static final String staticFinal = "STATIC_FINAL";
+            public final String nonstaticFinal = "NON_STATIC_FINAL";
+            public static String staticNonFinal = "STATIC_NON_FINAL";
+        }
+
+        then:
+        assert !object.getAttributeNames().contains("staticFinal")
+        assert !object.getAttributeNames().contains("nonstaticFinal")
+        assert !object.getAttributeNames().contains("staticNonFinal")
+
+    }
 }

@@ -17,6 +17,8 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 
+import java.util.List;
+
 /**
  * Logic to snapshot database table(s). Delegates to {@link QueryJdbcMetaDataAction} getTables().
  */
@@ -47,19 +49,23 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
         if (relatedTo.instanceOf(Catalog.class)) {
             catalogName = relatedTo.getSimpleName();
         } else if (relatedTo.instanceOf(Schema.class)) {
-            if (relatedTo.objectName.container != null && scope.getDatabase().getMaxContainerDepth(Table.class) > 1) {
-                catalogName = relatedTo.objectName.container.name;
+            if (scope.getDatabase().supportsCatalogs()) {
+                if (relatedTo.objectName.container != null) {
+                    catalogName = relatedTo.objectName.container.name;
+                }
+                schemaName = relatedTo.getSimpleName();
+            } else {
+                catalogName = relatedTo.getSimpleName();
             }
-            schemaName = relatedTo.getSimpleName();
         } else if (relatedTo.instanceOf(Table.class)) {
-            ObjectName name = relatedTo.objectName;
             tableName = relatedTo.getSimpleName();
-            if (name != null) {
-                if (name.container != null) {
-                    schemaName = name.container.name;
-                    if (name.container.container != null) {
-                        catalogName = name.container.container.name;
-                    }
+            if (relatedTo.objectName != null && relatedTo.objectName.container != null) {
+                List<String> parents = relatedTo.objectName.container.asList(2);
+                if (parents.get(0) != null || scope.getDatabase().supportsCatalogs()) {
+                    catalogName = parents.get(0);
+                    schemaName = parents.get(1);
+                } else {
+                    catalogName = parents.get(1);
                 }
             }
         } else {

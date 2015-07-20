@@ -103,7 +103,7 @@ public abstract class AbstractExecuteTest {
                     int index = 0;
                     for (String convertedSql : expectedSql) {
                         convertedSql = replaceEscaping(convertedSql, database);
-                        convertedSql = replaceDatabaseClauses(convertedSql, database);
+//                        convertedSql = replaceDatabaseClauses(convertedSql, database);
                         convertedSql = replaceStandardTypes(convertedSql, database);
 
                         assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase().trim(), sql[index].toSql().toLowerCase());
@@ -146,9 +146,9 @@ public abstract class AbstractExecuteTest {
                 .replaceAll(" " + type + ",", " " + DataTypeFactory.getInstance().fromDescription(type, database).toDatabaseDataType(database).toString() + ",");
     }
 
-    private String replaceDatabaseClauses(String convertedSql, Database database) {
-        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null));
-    }
+//    private String replaceDatabaseClauses(String convertedSql, Database database) {
+//        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause(null, null));
+//    }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {
         if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {

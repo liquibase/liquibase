@@ -6,7 +6,7 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.command.ExecuteSqlCommand;
-import liquibase.command.SnapshotCommand;
+import liquibase.command.OldSnapshotCommand;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
@@ -981,12 +981,12 @@ public class Main {
 	            CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
                 return;
             } else if ("snapshot".equalsIgnoreCase(command)) {
-                SnapshotCommand command = new SnapshotCommand();
+                OldSnapshotCommand command = new OldSnapshotCommand();
                 command.setDatabase(database);
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
                 command.setSerializerFormat(getCommandParam("snapshotFormat", null));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(command.execute().toString());
+                outputWriter.write(command.execute(null).toString());
                 outputWriter.flush();
                 outputWriter.close();
                 return;
@@ -997,17 +997,17 @@ public class Main {
                 command.setSqlFile(getCommandParam("sqlFile", null));
                 command.setDelimiter(getCommandParam("delimiter", ";"));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(command.execute().toString());
+                outputWriter.write(command.execute(null).toString());
                 outputWriter.flush();
                 outputWriter.close();
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {
-                SnapshotCommand command = new SnapshotCommand();
+                OldSnapshotCommand command = new OldSnapshotCommand();
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 command.setDatabase(referenceDatabase);
                 command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(command.execute().toString());
+                outputWriter.write(command.execute(null).toString());
                 outputWriter.flush();
                 outputWriter.close();
 

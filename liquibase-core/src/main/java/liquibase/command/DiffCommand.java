@@ -1,6 +1,7 @@
 package liquibase.command;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -10,12 +11,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 
 public class DiffCommand extends AbstractCommand {
@@ -128,7 +126,7 @@ public class DiffCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run(Scope scope) throws Exception {
         DiffResult diffResult = createDiffResult();
 
         new DiffToReport(diffResult, outputStream).print();

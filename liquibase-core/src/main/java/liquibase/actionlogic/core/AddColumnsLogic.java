@@ -4,19 +4,18 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ActionStatus;
 import liquibase.action.core.*;
-import liquibase.actionlogic.AbstractActionLogic;
-import liquibase.actionlogic.ActionExecutor;
-import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.DelegateResult;
+import liquibase.actionlogic.*;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.ObjectName;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.CollectionUtil;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringClauses;
 
 import java.util.List;
@@ -26,8 +25,11 @@ import java.util.Arrays;
 public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
     public static enum Clauses {
+        columnName,
+        dataType,
         nullable,
         primaryKey,
+        autoIncrement,
     }
 
     @Override
@@ -43,11 +45,18 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
         if (errors.hasErrors()) {
             return errors;
         }
+
+        Database database = scope.getDatabase();
+
         List<Column> columns = action.columns;
 
         for (Column column : columns) {
             errors.checkForRequiredField("name", column)
                     .checkForRequiredField("type", column);
+
+            if (column.isAutoIncrement() && !database.supportsAutoIncrement()) {
+                errors.addUnsupportedError("Auto-increment columns are not supported", database.getShortName());
+            }
         }
 
 
@@ -84,7 +93,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
         try {
             for (Column actionColumn : action.columns) {
-                Column snapshotColumn = scope.getSingleton(SnapshotFactory.class).get(actionColumn.getObjectReference(), scope);
+                Column snapshotColumn = LiquibaseUtil.snapshotObject(Column.class, actionColumn.getObjectReference(), scope);
                 if (snapshotColumn == null) {
                     result.assertApplied(false, "Column '"+actionColumn.name+"' not found");
                 } else {
@@ -92,7 +101,13 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
                     if (table == null) {
                         result.unknown("Cannot find table "+snapshotColumn.name.container);
                     } else {
-                        result.assertCorrect(actionColumn, snapshotColumn);
+                        result.assertCorrect(actionColumn, snapshotColumn, Arrays.asList("type", "autoIncrementInformation"));
+
+                        result.assertCorrect(actionColumn.type.standardType == snapshotColumn.type.standardType, "Data types do not match (expected "+actionColumn.type.standardType+", got "+snapshotColumn.type.standardType+")");
+                        if (actionColumn.isAutoIncrement()) {
+                            result.assertCorrect(snapshotColumn.isAutoIncrement(), "Column is not auto-increment");
+                        }
+
                     }
                 }
             }
@@ -157,23 +172,28 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
     }
 
     protected StringClauses getColumnClause(Column column, AddColumnsAction action, Scope scope) {
-        StringClauses clauses = new StringClauses();
+        StringClauses clauses = new StringClauses(" ");
         Database database = scope.getDatabase();
 
         ObjectName columnName = column.name;
-        OldDataType columnType = column.type;
-        Column.AutoIncrementInformation autoIncrement = column.autoIncrementInformation;
+        DataType columnType = column.type;
         boolean primaryKey = false; //ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false);
         boolean nullable = false; // primaryKey || ObjectUtil.defaultIfEmpty(column.nullable, false);
 //        String addAfterColumn = column.addAfterColumn;
 
-        clauses.append("ADD " + database.escapeObjectName(columnName.name, Column.class) + " " + DataTypeFactory.getInstance().fromDescription(columnType + (autoIncrement == null ? "" : "{autoIncrement:true}"), database).toDatabaseDataType(database));
+        clauses.append("ADD")
+                .append(Clauses.columnName, database.escapeObjectName(columnName.name, Column.class))
+                .append(Clauses.dataType, scope.getSingleton(DataTypeTranslatorFactory.class).getTranslator(scope).toSql(columnType, scope))
+                .append(getDefaultValueClause(column, action, scope));
 
-        clauses.append(getDefaultValueClause(column, action, scope));
-
-//        if (autoIncrement != null && database.supportsAutoIncrement()) {
-//            clauses.append(database.getAutoIncrementClause(autoIncrement.startWith, autoIncrement.incrementBy));
-//        }
+        if (column.autoIncrementInformation != null) {
+            ActionLogic addAutoIncrementLogic = scope.getSingleton(ActionLogicFactory.class).getActionLogic(new AddAutoIncrementAction(), scope);
+            if (addAutoIncrementLogic != null && addAutoIncrementLogic instanceof AddAutoIncrementLogic) {
+                clauses.append(Clauses.autoIncrement, ((AddAutoIncrementLogic) addAutoIncrementLogic).generateAutoIncrementClause(column.autoIncrementInformation.startWith, column.autoIncrementInformation.incrementBy));
+            } else {
+                throw new UnexpectedLiquibaseException("Cannot use AddAutoIncrementLogic class "+addAutoIncrementLogic+" to build auto increment clauses");
+            }
+        }
 
         if (nullable) {
             if (database.requiresDefiningColumnsAsNull()) {

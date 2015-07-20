@@ -1,8 +1,6 @@
 package liquibase;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.structure.ObjectReference;
 import liquibase.util.ObjectUtil;
 import liquibase.util.SmartMap;
 
@@ -13,7 +11,7 @@ import java.util.*;
 /**
  * Convenience class implementing ExtensibleObject. It is usually easiest to extend this class rather than implement all of ExtensibleObject yourself.
  */
-public class AbstractExtensibleObject implements ExtensibleObject {
+public class AbstractExtensibleObject implements ExtensibleObject, Cloneable {
 
     private SmartMap attributes = new SmartMap();
     private Set<String> standardAttributeNames;
@@ -73,7 +71,7 @@ public class AbstractExtensibleObject implements ExtensibleObject {
             fields = new HashMap<>();
             for (Field field : this.getClass().getFields()) {
                 int modifiers = field.getModifiers();
-                if (Modifier.isPublic(modifiers) && !field.isSynthetic()) {
+                if (Modifier.isPublic(modifiers) && !field.isSynthetic() && !Modifier.isFinal(modifiers) && !Modifier.isStatic(modifiers)) {
                     fields.put(field.getName(), field);
                 }
             }
@@ -154,5 +152,19 @@ public class AbstractExtensibleObject implements ExtensibleObject {
     @Override
     public ExtensibleObject add(Enum attribute, Object value) {
         return add(attribute.name(), value);
+    }
+
+    @Override
+    public Object clone() {
+        try {
+            AbstractExtensibleObject clone = (AbstractExtensibleObject) super.clone();
+            for (String attr : getAttributeNames()) {
+                clone.set(attr, this.get(attr, Object.class));
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 }

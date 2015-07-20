@@ -188,7 +188,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
 
 
     /**
-     * Returns true if the names are equivilant, not counting null-value positions in either name
+     * Returns true if the names are equivalent, not counting null-value positions in either name
      */
     public boolean matches(ObjectName objectName) {
         if (objectName == null) {
@@ -204,11 +204,10 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
 
         int length = Math.max(thisList.size(), otherList.size());
 
-        for (int i=0; i<length; i++) {
-            if (thisList.size() < i || otherList.size() < i) {
-                return true;
-            }
+        thisList = this.asList(length);
+        otherList = objectName.asList(length);
 
+        for (int i=0; i<length; i++) {
             String thisName = thisList.get(i);
             String otherName = otherList.get(i);
             if (thisName != null && otherName != null) {

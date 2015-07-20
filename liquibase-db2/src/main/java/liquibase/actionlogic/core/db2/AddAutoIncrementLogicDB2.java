@@ -30,9 +30,8 @@ public class AddAutoIncrementLogicDB2 extends AddAutoIncrementLogic {
 
     @Override
     protected StringClauses generateSql(AddAutoIncrementAction action, Scope scope) {
-        Database database = scope.getDatabase();
-        return new StringClauses().append("SET "+
-                        database.getAutoIncrementClause(action.startWith, action.incrementBy)
-        );
+        return super.generateSql(action, scope)
+                .replace(Clauses.dataType, "SET");
+
     }
 }

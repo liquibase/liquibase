@@ -14,6 +14,7 @@ import liquibase.datatype.core.CharType;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.core.DataType;
 import liquibase.util.StringClauses;
 
 public class AddDefaultValueLogic extends AbstractSqlBuilderLogic<AddDefaultValueAction> {
@@ -37,24 +38,23 @@ public class AddDefaultValueLogic extends AbstractSqlBuilderLogic<AddDefaultValu
             validationErrors.addError("Database " + database.getShortName() + " does not support sequences");
         }
 
-        String columnDataType = action.columnDataType;
-        if (columnDataType != null) {
-            LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
-            boolean typeMismatch = false;
-            if (dataType instanceof BooleanType) {
-                if (!(defaultValue instanceof Boolean)) {
-                    typeMismatch = true;
-                }
-            } else if (dataType instanceof CharType) {
-                if (!(defaultValue instanceof String)) {
-                    typeMismatch = true;
-                }
-            }
-
-            if (typeMismatch) {
-                validationErrors.addError("Default value of " + defaultValue + " does not match defined type of " + columnDataType);
-            }
-        }
+//        DataType columnDataType = action.columnDataType;
+//        if (columnDataType != null) {
+//            boolean typeMismatch = false;
+//            if (dataType instanceof BooleanType) {
+//                if (!(defaultValue instanceof Boolean)) {
+//                    typeMismatch = true;
+//                }
+//            } else if (dataType instanceof CharType) {
+//                if (!(defaultValue instanceof String)) {
+//                    typeMismatch = true;
+//                }
+//            }
+//
+//            if (typeMismatch) {
+//                validationErrors.addError("Default value of " + defaultValue + " does not match defined type of " + columnDataType);
+//            }
+//        }
 
         return validationErrors;
     }

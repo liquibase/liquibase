@@ -7,6 +7,7 @@ import liquibase.snapshot.MockSnapshotFactory
 import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
+import liquibase.structure.core.DataType
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -25,7 +26,7 @@ class AddAutoIncrementLogicTest extends Specification {
 
         def action = new AddAutoIncrementAction()
         action.columnName = columnName
-        action.columnDataType = "int"
+        action.columnDataType = DataType.parse("int")
         action.startWith = actionStartsWith
         action.incrementBy = actionIncrementBy
 

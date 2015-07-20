@@ -2,8 +2,6 @@ package liquibase.sdk.database;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -12,6 +10,7 @@ import java.util.List;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -30,6 +29,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.DataType;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 

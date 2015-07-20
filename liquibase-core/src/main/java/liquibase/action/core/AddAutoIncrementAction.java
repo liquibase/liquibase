@@ -6,13 +6,14 @@ import liquibase.action.ActionStatus;
 import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 
 import java.math.BigInteger;
 
 public class AddAutoIncrementAction extends AbstractAction {
 
     public ObjectName columnName;
-    public String columnDataType;
+    public DataType columnDataType;
     public BigInteger startWith;
     public BigInteger incrementBy;
 

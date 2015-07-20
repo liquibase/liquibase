@@ -1,8 +1,10 @@
 package liquibase.sdk.convert;
 
+import liquibase.Scope;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.command.AbstractCommand;
+import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -61,7 +63,7 @@ public class ConvertCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run(Scope scope) throws Exception {
         List<ResourceAccessor> openers = new ArrayList<ResourceAccessor>();
         openers.add(new FileSystemResourceAccessor());
         openers.add(new ClassLoaderResourceAccessor());
@@ -87,7 +89,7 @@ public class ConvertCommand extends AbstractCommand {
             outputStream.close();
         }
 
-        return "Converted successfully";
+        return new CommandResult("Converted successfully");
     }
 
     @Override

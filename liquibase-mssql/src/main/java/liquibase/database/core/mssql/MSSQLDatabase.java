@@ -3,6 +3,7 @@ package liquibase.database.core.mssql;
 import java.math.BigInteger;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -10,10 +11,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -423,7 +421,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         return 2;
     }
-
     @Override
     public String escapeDataTypeName(String dataTypeName) {
         int indexOfPeriod = dataTypeName.indexOf('.');

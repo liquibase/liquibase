@@ -1,6 +1,7 @@
 package liquibase.structure;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.util.StringUtils;
 
 public class ObjectReference extends AbstractExtensibleObject {
 
@@ -31,5 +32,18 @@ public class ObjectReference extends AbstractExtensibleObject {
             return null;
         }
         return objectName.name;
+    }
+
+    @Override
+    public String toString() {
+        String string = "";
+        if (objectType != null) {
+            string = objectType.getSimpleName()+" ";
+        }
+        if (objectName == null) {
+            return StringUtils.trimToEmpty(string);
+        } else {
+            return string + objectName.toString();
+        }
     }
 }

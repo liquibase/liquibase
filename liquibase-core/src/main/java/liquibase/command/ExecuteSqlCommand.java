@@ -1,5 +1,6 @@
 package liquibase.command;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.Executor;
@@ -61,7 +62,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run(Scope scope) throws Exception {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         String sqlText;
         if (sqlFile == null) {
@@ -103,7 +104,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
             out += "\n";
         }
         database.commit();
-        return out.trim();
+        return new CommandResult(out.trim());
     }
 
 }

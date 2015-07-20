@@ -54,7 +54,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 
         if (relatedTo.instanceOf(Catalog.class)) {
             if (!database.supportsCatalogs()) {
-                throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
+                throw new ActionPerformException("Cannot snapshot catalogs on " + database.getShortName());
             }
             columnName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
         } else if (relatedTo.instanceOf(Schema.class)) {
@@ -67,13 +67,17 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }
 
-        return createColumnSnapshotAction(columnName);
+        return createColumnSnapshotAction(columnName, scope);
     }
 
-    protected Action createColumnSnapshotAction(ObjectName columnName) {
+    protected Action createColumnSnapshotAction(ObjectName columnName, Scope scope) {
         List<String> nameParts = columnName.asList(4);
 
-        return new QueryJdbcMetaDataAction("getColumns", nameParts.get(0), nameParts.get(1), nameParts.get(2), nameParts.get(3));
+        if (nameParts.get(0) != null || scope.getDatabase().supportsCatalogs()) {
+            return new QueryJdbcMetaDataAction("getColumns", nameParts.get(0), nameParts.get(1), nameParts.get(2), nameParts.get(3));
+        } else {
+            return new QueryJdbcMetaDataAction("getColumns", nameParts.get(1), null, nameParts.get(2), nameParts.get(3));
+        }
     }
 
 
@@ -125,7 +129,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
                 } else if (isAutoincrement.equals("YES")) {
                     column.autoIncrementInformation = new Column.AutoIncrementInformation();
                 } else if (isAutoincrement.equals("NO")) {
-                    column.autoIncrementInformation =null;
+                    column.autoIncrementInformation = null;
                 } else if (isAutoincrement.equals("")) {
                     LoggerFactory.getLogger(getClass()).info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                     column.autoIncrementInformation = null;
@@ -175,16 +179,20 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
             }
         }
 
-        OldDataType type = readDataType(row, column, database);
-        column.type = type;
-
-        column.defaultValue= readDefaultValue(row, column, database);
+        column.type = readDataType(row, column, scope);
+        column.defaultValue = readDefaultValue(row, column, scope);
 
         return column;
     }
 
-    protected OldDataType readDataType(RowBasedQueryResult.Row row, Column column, Database database) {
+    protected DataType readDataType(RowBasedQueryResult.Row row, Column column, Scope scope) {
+        DataType dataType = new DataType(row.get("TYPE_NAME", String.class));
 
+        dataType.origin = scope.getDatabase().getShortName();
+        setDataTypeStandardType(dataType, row, column, scope);
+        setDataTypeParameters(dataType, row, column, scope);
+
+        return dataType;
 //        if (database instanceof OracleDatabase) {
 //            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
 //            dataType = dataType.replace("VARCHAR2", "VARCHAR");
@@ -225,7 +233,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //            return type;
 //        }
 
-        String columnTypeName = row.get("TYPE_NAME", String.class);
+//        String columnTypeName = row.get("TYPE_NAME", String.class);
 
 //        if (database instanceof FirebirdDatabase) {
 //            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
@@ -259,22 +267,22 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //                LoggerFactory.getLogger(getClass()).warn("Error fetching enum values", e);
 //            }
 //        }
-        OldDataType.ColumnSizeUnit columnSizeUnit = OldDataType.ColumnSizeUnit.BYTE;
-
-        int dataType = row.get("DATA_TYPE", Integer.class);
-        Integer columnSize = null;
-        Integer decimalDigits = null;
-        if (!database.dataTypeIsNotModifiable(columnTypeName)) { // don't set size for types like int4, int8 etc
-            columnSize = row.get("COLUMN_SIZE", Integer.class);
-            decimalDigits = row.get("DECIMAL_DIGITS", Integer.class);
-            if (decimalDigits != null && decimalDigits.equals(0)) {
-                decimalDigits = null;
-            }
-        }
-
-        Integer radix = row.get("NUM_PREC_RADIX", Integer.class);
-
-        Integer characterOctetLength = row.get("CHAR_OCTET_LENGTH", Integer.class);
+//        OldDataType.ColumnSizeUnit columnSizeUnit = OldDataType.ColumnSizeUnit.BYTE;
+//
+//        int dataType = row.get("DATA_TYPE", Integer.class);
+//        Integer columnSize = null;
+//        Integer decimalDigits = null;
+//        if (!database.dataTypeIsNotModifiable(columnTypeName)) { // don't set size for types like int4, int8 etc
+//            columnSize = row.get("COLUMN_SIZE", Integer.class);
+//            decimalDigits = row.get("DECIMAL_DIGITS", Integer.class);
+//            if (decimalDigits != null && decimalDigits.equals(0)) {
+//                decimalDigits = null;
+//            }
+//        }
+//
+//        Integer radix = row.get("NUM_PREC_RADIX", Integer.class);
+//
+//        Integer characterOctetLength = row.get("CHAR_OCTET_LENGTH", Integer.class);
 
 //TODO: refactor action        if (database instanceof DB2Database) {
 //            String typeName = row.get("TYPE_NAME", String.class);
@@ -286,18 +294,31 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //        }
 
 
-        OldDataType type = new OldDataType(columnTypeName);
-        type.setDataTypeId(dataType);
-        type.setColumnSize(columnSize);
-        type.setDecimalDigits(decimalDigits);
-        type.setRadix(radix);
-        type.setCharacterOctetLength(characterOctetLength);
-        type.setColumnSizeUnit(columnSizeUnit);
+//        DataType type = new DataType(columnTypeName);
+//        type.setDataTypeId(dataType);
+//        type.setColumnSize(columnSize);
+//        type.setDecimalDigits(decimalDigits);
+//        type.setRadix(radix);
+//        type.setCharacterOctetLength(characterOctetLength);
+//        type.setColumnSizeUnit(columnSizeUnit);
 
-        return type;
+//        return type;
     }
 
-    protected Object readDefaultValue(RowBasedQueryResult.Row row, Column columnInfo, Database database) {
+    protected void setDataTypeStandardType(DataType dataType, RowBasedQueryResult.Row row, Column column, Scope scope) {
+        dataType.standardType = DataType.standardType(dataType.name);
+    }
+
+    protected void setDataTypeParameters(DataType dataType, RowBasedQueryResult.Row row, Column column, Scope scope) {
+        if (dataType.standardType == DataType.StandardType.VARCHAR || dataType.standardType == DataType.StandardType.NVARCHAR) {
+            Long columnSize = row.get("COLUMN_SIZE", Long.class);
+            if (columnSize != null) {
+                dataType.parameters.add(columnSize.toString());
+            }
+        }
+    }
+
+    protected Object readDefaultValue(RowBasedQueryResult.Row row, Column columnInfo, Scope scope) {
 //TODO: refactor action        if (database instanceof MSSQLDatabase) {
 //            Object defaultValue = row.get("COLUMN_DEF", Object.class);
 //
@@ -323,6 +344,6 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //
 //        }
 
-        return SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.type);
+        return null; //SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.type);
     }
 }

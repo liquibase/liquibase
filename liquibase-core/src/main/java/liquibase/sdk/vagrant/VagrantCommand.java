@@ -1,12 +1,12 @@
 package liquibase.sdk.vagrant;
 
+import liquibase.Scope;
 import liquibase.command.AbstractCommand;
+import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
-import liquibase.sdk.supplier.database.ConnectionConfigurationFactory;
 import liquibase.util.StringUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -63,7 +63,7 @@ public class VagrantCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run(Scope scope) throws Exception {
         if (command.equals("init")) {
             this.init();
         } else if (command.equals("up")) {
@@ -85,7 +85,7 @@ public class VagrantCommand extends AbstractCommand {
         } else {
             mainApp.fatal("Unknown vagrant command '"+ command+"'");
         }
-        return "Successful";
+        return new CommandResult("Successful");
     }
 
     public void init() throws Exception {

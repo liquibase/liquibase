@@ -114,7 +114,7 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
     }
 
     public static void setDefaultValue(Column column, Scope referenceScope, Scope targetScope) {
-        LiquibaseDataType dataType = DataTypeFactory.getInstance().from(column.type, targetScope.getDatabase());
+//        LiquibaseDataType dataType = DataTypeFactory.getInstance().from(column.type, targetScope.getDatabase());
 
         Object defaultValue = column.defaultValue;
 //todo: action refactoring        if (defaultValue == null) {

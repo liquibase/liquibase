@@ -2,12 +2,14 @@ package liquibase.action.core
 
 import liquibase.Scope
 import liquibase.actionlogic.ActionExecutor
+import liquibase.command.DropAllCommand
 import liquibase.database.ConnectionSupplier
 import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.diff.output.DiffOutputControl
 import liquibase.diff.output.changelog.ActionGeneratorFactory
 import liquibase.snapshot.Snapshot
+import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import org.slf4j.LoggerFactory
 import org.spockframework.runtime.SpecificationContext
@@ -35,6 +37,10 @@ abstract class AbstractActionTest extends Specification {
             throw SetupResult.OK;
         }
 
+        for (Schema schema : snapshot.get(Schema.class)) {
+            new DropAllCommand(schema).execute(scope);
+        }
+
         def control = new DiffOutputControl()
         def executor = new ActionExecutor()
 
@@ -50,7 +56,7 @@ abstract class AbstractActionTest extends Specification {
 
 
 
-    def cleanupDatabase(Snapshot snapshot, ConnectionSupplier supplier, scope) {
+    def cleanupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {
         Database database = scope.database
         if (database instanceof UnsupportedDatabase) {
             return;

@@ -1,6 +1,6 @@
 package liquibase.command;
 
-import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -47,7 +47,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run(Scope scope) throws Exception {
         DiffResult diffResult = createDiffResult();
 
         PrintStream outputStream = this.getOutputStream();
@@ -60,6 +60,6 @@ public class DiffToChangeLogCommand extends DiffCommand {
         } else {
             new DiffToChangeLog(diffResult, diffOutputControl).print(changeLogFile);
         }
-        return null;
+        return new CommandResult();
     }
 }

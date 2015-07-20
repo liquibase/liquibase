@@ -7,6 +7,7 @@ import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
+import liquibase.structure.core.Table
 import liquibase.util.ObjectUtil
 import org.springframework.jmx.export.naming.ObjectNamingStrategy
 
@@ -78,7 +79,12 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         }
 
         if (!scope.database.isCaseSensitive(type)) {
-            returnList = returnList.findAll { it.name.matches("[^a-z]+")}
+            if (scope.database.canStoreObjectName("lowerobj", Table.class)) {
+                returnList = returnList.findAll { !it.name.find("[A-Z]") }
+            } else {
+                returnList = returnList.findAll { !it.name.find("[a-z]") }
+            }
+
         }
 
         return returnList;

@@ -1,96 +1,53 @@
 package liquibase.command;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
-import liquibase.serializer.SnapshotSerializerFactory;
-import liquibase.snapshot.*;
-import liquibase.util.StringUtils;
+import liquibase.Scope;
+import liquibase.snapshot.Snapshot;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
+import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.util.LiquibaseUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
-public class SnapshotCommand extends AbstractCommand {
+public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
-    private Database database;
-    private CatalogAndSchema[] schemas;
-    private String serializerFormat;
-    private SnapshotListener snapshotListener;
+    public Set<ObjectReference> relatedObjects;
 
     @Override
     public String getName() {
         return "snapshot";
     }
 
-
-    public void setDatabase(Database database) {
-        this.database = database;
-    }
-
-    public Database getDatabase() {
-        return database;
-    }
-
-    public SnapshotCommand setSchemas(CatalogAndSchema... catalogAndSchema) {
-        schemas = catalogAndSchema;
-        return this;
-    }
-
-    public SnapshotCommand setSchemas(String... schemas) {
-        if (schemas == null || schemas.length == 0 || schemas[0] == null) {
-            this.schemas = null;
-            return this;
-        }
-
-        schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
-        for (String schema : schemas) {
-            finalList.add(new CatalogAndSchema(null, schema).customize(database));
-        }
-
-        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
-
-
-        return this;
-    }
-
-
-    public String getSerializerFormat() {
-        return serializerFormat;
-    }
-
-    public SnapshotCommand setSerializerFormat(String serializerFormat) {
-        this.serializerFormat = serializerFormat;
-        return this;
-    }
-
-    public SnapshotListener getSnapshotListener() {
-        return snapshotListener;
-    }
-
-    public void setSnapshotListener(SnapshotListener snapshotListener) {
-        this.snapshotListener = snapshotListener;
-    }
-
     @Override
-    protected Object run() throws Exception {
-        SnapshotControl snapshotControl = new SnapshotControl(database);
-        snapshotControl.setSnapshotListener(snapshotListener);
+    protected SnapshotCommandResult run(Scope scope) throws Exception {
 
-        CatalogAndSchema[] schemas = this.schemas;
-        if (schemas == null) {
-            schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
-        }
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+        Set<Class<? extends DatabaseObject>> types = scope.getSingleton(DatabaseObjectFactory.class).getStandardTypes();
 
-        String format = getSerializerFormat();
-        if (format == null) {
-            format = "txt";
+        Snapshot snapshot = new Snapshot(scope);
+
+        for (ObjectReference related : relatedObjects) {
+            for (Class type : types) {
+                snapshot.addAll(LiquibaseUtil.snapshotAll(type, related, scope));
+            }
         }
-        return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
+
+        return new SnapshotCommandResult(snapshot);
     }
 
     @Override
     public CommandValidationErrors validate() {
         return new CommandValidationErrors(this);
+    }
+
+    public static class SnapshotCommandResult extends CommandResult {
+
+        public Snapshot snapshot;
+
+        public SnapshotCommandResult() {
+        }
+
+        public SnapshotCommandResult(Snapshot snapshot) {
+            this.snapshot = snapshot;
+        }
     }
 }

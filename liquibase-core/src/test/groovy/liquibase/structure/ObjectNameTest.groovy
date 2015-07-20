@@ -144,20 +144,21 @@ class ObjectNameTest extends Specification {
         name1.matches(name2) == expected
 
         where:
-        name1                          | name2                         | expected
-        new ObjectName("a")            | null                          | true
-        new ObjectName("a")            | new ObjectName()              | true
-        new ObjectName("a")            | new ObjectName(null)          | true
-        new ObjectName("a")            | new ObjectName("a")           | true
-        new ObjectName("a")            | new ObjectName("b")           | false
-        new ObjectName(null, "a")      | new ObjectName("a")           | true
-        new ObjectName("a")            | new ObjectName(null, "a")     | true
-        new ObjectName("a")            | new ObjectName(null, "b")     | false
-        new ObjectName("a", null)      | new ObjectName("a", "b")      | true
-        new ObjectName("a", null, "c") | new ObjectName("a", "b", "c") | true
-        new ObjectName("a", null, "c") | new ObjectName("a", "b", "c") | true
-        new ObjectName(null, "a")      | new ObjectName(null, "a")     | true
-
+        name1                                                      | name2                                         | expected
+        new ObjectName("a")                                        | null                                          | true
+        new ObjectName("a")                                        | new ObjectName()                              | true
+        new ObjectName("a")                                        | new ObjectName(null)                          | true
+        new ObjectName("a")                                        | new ObjectName("a")                           | true
+        new ObjectName("a")                                        | new ObjectName("b")                           | false
+        new ObjectName(null, "a")                                  | new ObjectName("a")                           | true
+        new ObjectName("a")                                        | new ObjectName(null, "a")                     | true
+        new ObjectName("a")                                        | new ObjectName(null, "b")                     | false
+        new ObjectName("a", null)                                  | new ObjectName("a", "b")                      | true
+        new ObjectName("a", null, "c")                             | new ObjectName("a", "b", "c")                 | true
+        new ObjectName("a", null, "c")                             | new ObjectName("a", "b", "c")                 | true
+        new ObjectName(null, "a")                                  | new ObjectName(null, "a")                     | true
+        new ObjectName("LIQUIBASE", "PUBLIC", "TABLE1", "COLUMN1") | new ObjectName("PUBLIC", "TABLE1", "COLUMN1") | true;
+        new ObjectName("PUBLIC", "TABLE1", "COLUMN1") | new ObjectName("LIQUIBASE", "PUBLIC", "TABLE1", "COLUMN1") | true;
 
     }
 }

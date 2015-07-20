@@ -14,6 +14,7 @@ import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.DataType;
 
 public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic<AddAutoIncrementAction> {
 
@@ -34,7 +35,7 @@ public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic<AddAuto
 
         ObjectName sequenceName = new ObjectName(tableName.container, (tableName.name + "_" + columnName.name + "_seq").toLowerCase());
 
-        String columnDataType = action.columnDataType;
+        DataType columnDataType = action.columnDataType;
 
         return new DelegateResult(
                 new CreateSequenceAction(sequenceName),

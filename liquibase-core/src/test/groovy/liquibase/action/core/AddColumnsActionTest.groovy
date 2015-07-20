@@ -1,6 +1,7 @@
 package liquibase.action.core
 
 import liquibase.JUnitScope
+import liquibase.action.Action
 import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.MockSnapshotFactory
@@ -15,6 +16,7 @@ import liquibase.structure.core.ForeignKey
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
+import liquibase.util.LiquibaseUtil
 import org.junit.Assert
 import org.junit.Assume
 import spock.lang.Unroll
@@ -61,9 +63,10 @@ class AddColumnsActionTest extends AbstractActionTest {
         when:
         def action = new AddColumnsAction()
         action.columns = [new Column(new ObjectName(table.name, columnNames[0]), "int"), new Column(new ObjectName(table.name, columnNames[1]), "int")]
+        ActionExecutor executor = scope.getSingleton(ActionExecutor.class)
 
         then:
-        def plan = new ActionExecutor().createPlan(action, scope)
+        def plan = executor.createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
                 .addParameters([
@@ -74,7 +77,7 @@ class AddColumnsActionTest extends AbstractActionTest {
                 .run({
             plan.execute(scope)
 
-            assert action.checkStatus(scope).applied
+            assert executor.checkStatus(action, scope).applied
         })
 
         where:

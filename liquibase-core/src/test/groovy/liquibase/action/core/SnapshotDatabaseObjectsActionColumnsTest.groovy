@@ -12,11 +12,14 @@ import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.snapshot.transformer.RoundRobinTransformer
 import liquibase.snapshot.transformer.TransformerList
 import liquibase.structure.DatabaseObject
+import liquibase.structure.ObjectName
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
+import liquibase.structure.core.DataType
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
+import liquibase.util.LiquibaseUtil
 import org.junit.Assume
 import spock.lang.Unroll
 
@@ -220,5 +223,68 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
                     new ArrayList(snapshot.get(Column)),
             ])
         }
+    }
+
+    @Unroll("#featureName: #typeString on #conn")
+    def "dataType comes through correctly"() {
+        when:
+        column.type = DataType.parse(typeString)
+        def executor = scope.getSingleton(ActionExecutor.class) as ActionExecutor
+
+        then:
+        def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
+
+
+        def plan = executor.createPlan(action, scope)
+
+        testMDPermutation(snapshot, conn, scope)
+                .addParameters([columnName_asTable: column.getName()])
+                .addParameters([type_asTable: ((Column) column).type])
+                .addOperations(plan: plan)
+                .run({
+            QueryResult result = plan.execute(scope)
+
+            assert result.asList(Column).size() == 1
+            def snapshotColumn = result.asObject(Column)
+            assert snapshotColumn.name.matches(column.name)
+
+            //do some minor checks based on things that are always consistent
+            if (typeString == "int") {
+                assert snapshotColumn.type.toString().toLowerCase().startsWith("int")
+            } else if (typeString == "varchar(10)") {
+                assert snapshotColumn.type.toString().toLowerCase().startsWith("varchar") && snapshotColumn.type.toString().contains("(10")
+            }
+
+            //since data types change to what the database thinks, test by adding a new column with the snapshot's datatype and check that those are consistant
+            def addColumnAction = new AddColumnsAction()
+            def columnToAdd = snapshotColumn.clone() as Column
+            columnToAdd.name = new ObjectName(snapshotColumn.name.container, snapshotColumn.simpleName+"_added")
+            addColumnAction.columns = [columnToAdd]
+
+            executor.execute(addColumnAction, scope)
+
+            def newColumnSnapshot = LiquibaseUtil.snapshotObject(Column, columnToAdd.getObjectReference(), scope)
+
+            assert snapshotColumn.type.toString() != null
+            assert snapshotColumn.type.toString() == newColumnSnapshot.type.toString()
+        })
+
+        where:
+        [conn, scope, snapshot, column, typeString] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it)
+
+            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(new LimitTransformer(1), scope)
+            return CollectionUtil.permutations([
+                    [it],
+                    [scope],
+                    [snapshot],
+                    [snapshot.get(Column).iterator().next()],
+                    getDataTypesToTest()
+            ])
+        }
+    }
+
+    protected ArrayList<String> getDataTypesToTest() {
+        ["int", "bigint", "smallint", "varchar(10)", "float", "double"]
     }
 }

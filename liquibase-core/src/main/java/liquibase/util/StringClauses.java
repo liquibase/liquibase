@@ -440,19 +440,40 @@ public class StringClauses {
                 + end;
     }
 
+    /**
+     * Returns the parts of this StringClases as an array. If any clauses are empty or null, they are not included.
+     * @param stringify If set to true, values of the array will be converted to a string.
+     */
     public Object[] toArray(boolean stringify) {
-        Object[] returnArray = new Object[clauses.size()];
+        List returnArray = new ArrayList();
         ArrayList<Object> currentValues = new ArrayList<Object>(clauses.values());
 
         for (int i=0; i<currentValues.size(); i++) {
-            if (stringify) {
-                returnArray[i] = currentValues.get(i).toString();
+            Object piece = currentValues.get(i);
+            if (piece instanceof StringClauses) {
+                if (((StringClauses) piece).isEmpty()) {
+                    continue; //skip
+                }
+                if (stringify) {
+                    returnArray.add(piece.toString());
+                } else {
+                    returnArray.add(piece);
+                }
             } else {
-                returnArray[i] = currentValues.get(i);
+                String pieceString = piece.toString();
+
+                if (pieceString.equals("")) {
+                    continue;
+                }
+                if (stringify) {
+                    returnArray.add(pieceString);
+                } else {
+                    returnArray.add(piece);
+                }
             }
         }
 
-        return returnArray;
+        return returnArray.toArray();
     }
 
     public boolean isEmpty() {

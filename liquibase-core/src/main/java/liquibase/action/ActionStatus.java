@@ -48,8 +48,18 @@ public class ActionStatus {
      * Convenience method like {@link #assertCorrect(ExtensibleObject, ExtensibleObject, String)} but tests all properties
      */
     public <T extends ExtensibleObject> ActionStatus assertCorrect(T correctObject, T objectToCheck) {
+        return assertCorrect(correctObject, objectToCheck, (Collection<String>) null);
+    }
+
+    public <T extends ExtensibleObject> ActionStatus assertCorrect(T correctObject, T objectToCheck, Collection<String> excludeFields) {
+        if (excludeFields == null) {
+            excludeFields = new HashSet<>();
+        }
+
         for (String property : correctObject.getAttributeNames()) {
-            assertCorrect(correctObject, objectToCheck, property);
+            if (!excludeFields.contains(property)) {
+                assertCorrect(correctObject, objectToCheck, property);
+            }
         }
 
         return this;

@@ -1,11 +1,13 @@
 package liquibase.command;
 
-public abstract class AbstractCommand implements LiquibaseCommand {
+import liquibase.Scope;
 
-    public final Object execute() throws CommandExecutionException {
+public abstract class AbstractCommand<T extends CommandResult> implements LiquibaseCommand<T> {
+
+    public final T execute(Scope scope) throws CommandExecutionException {
         this.validate();
         try {
-            return this.run();
+            return this.run(scope);
         } catch (Exception e) {
             if (e instanceof CommandExecutionException) {
                 throw (CommandExecutionException) e;
@@ -15,5 +17,5 @@ public abstract class AbstractCommand implements LiquibaseCommand {
         }
     }
 
-    protected abstract Object run() throws Exception;
+    protected abstract T run(Scope scope) throws Exception;
 }

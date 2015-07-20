@@ -1,6 +1,7 @@
 package liquibase.actionlogic.core
 
 import liquibase.JUnitScope
+import liquibase.action.core.QueryJdbcMetaDataAction
 import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
 import liquibase.exception.ActionPerformException
@@ -8,6 +9,7 @@ import liquibase.sdk.database.MockDatabase
 import liquibase.structure.ObjectName
 import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
+import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -18,30 +20,9 @@ import java.sql.Types
 class SnapshotColumnsLogicJdbcTest extends Specification {
 
     @Unroll
-    def "cannot snapshot using a table with a name longer than the database supports"() {
-        when:
-        def database = new MockDatabase()
-        database.setMaxContainerDepth(maxDepth)
-        def scope = JUnitScope.getInstance(database)
-        new SnapshotColumnsLogicJdbc().execute(new SnapshotDatabaseObjectsAction(Column, object.getObjectReference()), scope)
-
-        then:
-        def e = thrown(ActionPerformException)
-        e.message == message
-
-        where:
-        object                                                     | message                                                        | maxDepth
-        new Table("catName", "schemaName", "tableName")            | "Cannot snapshot a table with 2 level(s) of hierarchy on mock" | 1
-        new Table("catName", "schemaName", "tableName")            | "Cannot snapshot a table with 2 level(s) of hierarchy on mock" | 0
-        new Table(new ObjectName("schemaName", "tableName"))       | "Cannot snapshot a table with 1 level(s) of hierarchy on mock" | 0
-        new Table(new ObjectName(null, "schemaName", "tableName")) | "Cannot snapshot a table with 1 level(s) of hierarchy on mock" | 0
-    }
-
-    @Unroll
     def "convertObject handles column name and table plus container correctly"() {
         when:
         def database = new MockDatabase();
-        database.setMaxContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(database)
 
         def object = new SnapshotColumnsLogicJdbc().convertToObject(new RowBasedQueryResult.Row([
@@ -55,17 +36,60 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
 
         then:
         object instanceof Column
-        object.name.toString() == "columnName"
-        object.relation.name.toString() == expected
+        object.name.name.toString() == "columnName"
+        object.name.container.toString() == expected
 
         where:
-        tableCat   | tableSchema  | tableName   | maxDepth | expected
-        "tableCat" | "schemaName" | "tableName" | 2        | "tableCat.schemaName.tableName"
-        null       | "schemaName" | "tableName" | 2        | "#UNSET.schemaName.tableName"
-        "tableCat" | null         | "tableName" | 2        | "tableCat.#UNSET.tableName"
-        "tableCat" | "schemaName" | "tableName" | 1        | "schemaName.tableName"
-        "tableCat" | null         | "tableName" | 1        | "tableCat.tableName"
-        null       | "schemaName" | "tableName" | 1        | "schemaName.tableName"
-        null       | null         | "tableName" | 0        | "tableName"
+        tableCat   | tableSchema  | tableName   | expected
+        "tableCat" | "schemaName" | "tableName" | "tableCat.schemaName.tableName"
+        null       | "schemaName" | "tableName" | "schemaName.tableName"
+        "tableCat" | null         | "tableName" | "tableCat.#UNSET.tableName"
+        null       | "schemaName" | "tableName" | "schemaName.tableName"
+        null       | null         | "tableName" | "tableName"
+    }
+
+    @Unroll("#featureName: #expected")
+    def "readDataType handles various rows correctly"() {
+        when:
+        def data = [
+                COLUMN_SIZE: columnSize, DATA_TYPE: rowDataType, DECIMAL_DIGITS: decimalDigits, IS_AUTOINCREMENT: isAutoIncrement, TYPE_NAME: typeName, SQL_DATA_TYPE: sqlDataType, CHAR_OCTET_LENGTH: charOctetLength, NUM_PREC_RADIX: numPrecRadix
+        ]
+        def dataType = new SnapshotColumnsLogicJdbc().readDataType(new RowBasedQueryResult.Row(data), new Column(), JUnitScope.getInstance(new MockDatabase()))
+
+        then:
+        dataType.toString() == expected
+        dataType.standardType == expectedStandard
+        dataType.origin == "mock"
+
+        where:
+        expected      | expectedStandard               | columnSize | rowDataType | decimalDigits | isAutoIncrement | typeName   | sqlDataType | charOctetLength | numPrecRadix
+        "INTEGER"     | DataType.StandardType.INTEGER  | 10         | 4           | 0             | "NO"            | "INTEGER"  | 4           | 10              | 10
+        "BIGINT"      | DataType.StandardType.BIGINT   | 19         | -5          | 0             | "NO"            | "BIGINT"   | -5          | 19              | 10
+        "SMALLINT"    | DataType.StandardType.SMALLINT | 5          | 5           | 0             | "NO"            | "SMALLINT" | 5           | 5               | 10
+        "VARCHAR(10)" | DataType.StandardType.VARCHAR  | 10         | 12          | 0             | "NO"            | "VARCHAR"  | 12          | 10              | 10
+    }
+
+    @Unroll
+    def "createColumnSnapshotAction parameters are correct"() {
+        when:
+        def db = new MockDatabase()
+        db.setSupportsCatalogs(supportsCatalogs)
+        db.setSupportsSchemas(supportsSchemas)
+        def scope = JUnitScope.getInstance(db)
+
+        QueryJdbcMetaDataAction action = new SnapshotColumnsLogicJdbc().createColumnSnapshotAction(name, scope)
+
+        then:
+        action.method == "getColumns"
+        action.arguments == arguments
+
+        where:
+        name                                         | supportsCatalogs | supportsSchemas | arguments
+        new ObjectName("cat", "schem", "tab", "col") | true             | true            | ["cat", "schem", "tab", "col"]
+        new ObjectName("schem", "tab", "col")        | true             | true            | [null, "schem", "tab", "col"]
+        new ObjectName("schem", "tab", "col")        | false            | true            | ["schem", null, "tab", "col"]
+        new ObjectName("tab", "col")                 | true             | true            | [null, null, "tab", "col"]
+        new ObjectName("tab", "col")                 | false            | true            | [null, null, "tab", "col"]
+        new ObjectName("tab", "col")                 | false            | false           | [null, null, "tab", "col"]
     }
 }

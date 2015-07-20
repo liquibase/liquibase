@@ -1,7 +1,10 @@
 package liquibase.sdk.watch;
 
+import liquibase.Scope;
+import liquibase.actionlogic.ActionResult;
 import liquibase.change.ColumnConfig;
 import liquibase.command.AbstractCommand;
+import liquibase.command.CommandResult;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -98,7 +101,7 @@ public class WatchCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run(Scope scope) throws Exception {
         Server server = new Server(port);
 
         List<URL> jarUrls = new ArrayList<URL>();
@@ -131,7 +134,7 @@ public class WatchCommand extends AbstractCommand {
         server.join();
 
 
-        return "Started";
+        return new CommandResult("Started");
     }
 
     private static class DynamicContentHandler extends AbstractHandler {
