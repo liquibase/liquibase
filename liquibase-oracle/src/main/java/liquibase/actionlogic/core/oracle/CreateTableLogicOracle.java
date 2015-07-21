@@ -21,9 +21,8 @@ public class CreateTableLogicOracle extends CreateTableLogic {
     protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String primaryKeyDef = clauses.get(Clauses.primaryKey);
-        if (primaryKeyDef != null) {
-            String primaryKeyTablespace = action.primaryKeyTablespace;
+        if (action.primaryKey != null) {
+            String primaryKeyTablespace = action.primaryKey.tablespace;
             if (primaryKeyTablespace != null) {
                 clauses.append("USING INDEX TABLESPACE "+primaryKeyTablespace);
             }

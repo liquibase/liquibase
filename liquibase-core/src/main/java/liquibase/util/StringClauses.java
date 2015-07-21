@@ -1,5 +1,12 @@
 package liquibase.util;
 
+import liquibase.Scope;
+import liquibase.database.Database;
+import liquibase.database.core.UnsupportedDatabase;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
+
 import java.util.*;
 
 /**
@@ -129,6 +136,19 @@ public class StringClauses {
             clauses.put(literal.getClass().getName().toLowerCase()+" #"+clauses.size(), literal);
         }
         return this;
+    }
+
+    public StringClauses append(List<ObjectName> objectNames, Class<? extends DatabaseObject> type, Scope scope) {
+        Database database = scope.getDatabase();
+        if (database == null) {
+            database = new UnsupportedDatabase();
+        }
+        for (ObjectName name : objectNames) {
+            this.append(database.escapeObjectName(name.name, type));
+        }
+
+        return this;
+
     }
 
     /**

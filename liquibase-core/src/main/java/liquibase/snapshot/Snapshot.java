@@ -87,14 +87,6 @@ public class Snapshot {
         return null;
     }
 
-    public Snapshot relate(Scope scope) {
-        for (SnapshotRelateLogic logic : scope.getSingleton(ServiceLocator.class).findInstances(SnapshotRelateLogic.class)) {
-            logic.relate(this);
-        }
-
-        return this;
-    }
-
     public Snapshot transform(SnapshotTransformer transformer, Scope scope) {
         for (Set<? extends DatabaseObject> objects : this.objects.values()) {
             for (DatabaseObject databaseObject : objects) {

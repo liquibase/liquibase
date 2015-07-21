@@ -19,7 +19,7 @@ import java.math.BigInteger;
 
 public class AddAutoIncrementLogic extends AbstractSqlBuilderLogic<AddAutoIncrementAction> {
 
-    public static enum Clauses {
+    public enum Clauses {
         autoIncrement, dataType
     }
 

@@ -270,4 +270,9 @@ public class H2Database extends AbstractJdbcDatabase {
     public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
         return true;
     }
+
+    @Override
+    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
+        return 2;
+    }
 }

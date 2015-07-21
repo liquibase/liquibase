@@ -4,6 +4,7 @@ import liquibase.action.AbstractAction;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.CollectionUtil;
 
@@ -16,13 +17,9 @@ public class CreateTableAction extends AbstractAction {
     public String tablespace;
     public String remarks;
     public List<Column> columns = new ArrayList<>();
-    public String autoIncrementColumnName;
-    public BigInteger autoIncrementStartWith;
-    public BigInteger autoIncrementBy;
-    public String primaryKeyName;
+    public PrimaryKey primaryKey;
     public List<ForeignKey> foreignKeys;
-    public String primaryKeyTablespace;
-    public List<UniqueConstraint> uniqueConstraintDefinitions;
+    public List<UniqueConstraint> uniqueConstraints;
 
 
     public CreateTableAction() {

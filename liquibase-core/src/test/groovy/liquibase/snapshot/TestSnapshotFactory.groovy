@@ -3,6 +3,7 @@ package liquibase.snapshot
 import liquibase.Scope
 import liquibase.snapshot.transformer.SnapshotTransformer
 import liquibase.structure.DatabaseObject
+import liquibase.structure.ObjectName
 import liquibase.structure.TestStructureSupplierFactory
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
@@ -19,7 +20,7 @@ public class TestSnapshotFactory {
         Snapshot snapshot = new Snapshot(scope)
         def supplierFactory = scope.getSingleton(TestStructureSupplierFactory)
 
-        def types = [Catalog, Schema, Table, Column] //TODO: ensure correct sorting for scope.getSingleton(ServiceLocator).findClasses(DatabaseObject)
+        def types = [Table, Column] //TODO: ensure correct sorting for scope.getSingleton(ServiceLocator).findClasses(DatabaseObject)
 
         for (def type : types) {
             def structureSupplier = supplierFactory.getTestStructureSupplier(type, scope)
@@ -35,7 +36,23 @@ public class TestSnapshotFactory {
             }
         }
 
-        snapshot.relate(scope)
+        Set<ObjectName> schemas = new HashSet<>();
+        for (Table table : snapshot.get(Table)) {
+            schemas.add(table.name.container);
+        }
+
+
+        Set<ObjectName> catalogs = new HashSet<>();
+        for (ObjectName schema : schemas) {
+            snapshot.add(new Schema(schema))
+            if (schema.container != null) {
+                catalogs.add(schema.container);
+            }
+        }
+
+        for (ObjectName catalog : catalogs) {
+            snapshot.add(new Catalog(catalog))
+        }
 
         return snapshot;
     }

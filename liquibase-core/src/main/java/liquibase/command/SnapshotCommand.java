@@ -5,13 +5,26 @@ import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
-    public Set<ObjectReference> relatedObjects;
+    public Set<ObjectReference> relatedObjects = new HashSet<>();
+
+    public SnapshotCommand() {
+    }
+
+    public SnapshotCommand(ObjectReference... relatedObjects) {
+        if (relatedObjects != null) {
+            this.relatedObjects.addAll(Arrays.asList(relatedObjects));
+        }
+    }
 
     @Override
     public String getName() {
@@ -21,7 +34,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     @Override
     protected SnapshotCommandResult run(Scope scope) throws Exception {
 
-        Set<Class<? extends DatabaseObject>> types = scope.getSingleton(DatabaseObjectFactory.class).getStandardTypes();
+        Set<Class<? extends DatabaseObject>> types = new HashSet((List) Arrays.asList(Table.class)); //TODO: scope.getSingleton(DatabaseObjectFactory.class).getStandardTypes();
 
         Snapshot snapshot = new Snapshot(scope);
 

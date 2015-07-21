@@ -47,6 +47,14 @@ public class DelegateResult extends ActionResult {
         return Collections.unmodifiableList(actions);
     }
 
+    public DelegateResult addActions(Action... actions) {
+        if (actions != null) {
+            this.actions.addAll(Arrays.asList(actions));
+        }
+
+        return this;
+    }
+
     public ActionResult.Modifier getModifier() {
         return modifier;
     }

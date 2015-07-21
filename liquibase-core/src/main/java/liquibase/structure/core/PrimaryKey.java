@@ -14,6 +14,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     public List<ObjectName> columns = new ArrayList<>();
     public String tablespace;
     public ObjectName backingIndex;
+    public Boolean clustered;
 
     public PrimaryKey() {
     }

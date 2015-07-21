@@ -8,9 +8,10 @@ public class CommandResult extends AbstractExtensibleObject {
     public boolean succeeded;
 
     /**
-     * Creates new CommandResult with succeeded=true
+     * Creates new CommandResult with succeeded=true and message="Successful"
      */
     public CommandResult() {
+        this.message = "Successful";
         this.succeeded = true;
     }
 

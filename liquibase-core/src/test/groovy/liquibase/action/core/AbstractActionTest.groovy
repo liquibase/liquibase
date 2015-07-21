@@ -8,6 +8,8 @@ import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.diff.output.DiffOutputControl
 import liquibase.diff.output.changelog.ActionGeneratorFactory
+import liquibase.servicelocator.AbstractServiceFactory
+import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
@@ -38,7 +40,7 @@ abstract class AbstractActionTest extends Specification {
         }
 
         for (Schema schema : snapshot.get(Schema.class)) {
-            new DropAllCommand(schema).execute(scope);
+            new DropAllCommand(schema.getObjectReference()).execute(scope);
         }
 
         def control = new DiffOutputControl()
@@ -46,7 +48,7 @@ abstract class AbstractActionTest extends Specification {
 
         for (def obj : snapshot.get(Table.class)) {
             for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
-                LoggerFactory.getLogger(this.getClass()).debug("Executing: "+executor.createPlan(action, scope).describe())
+                LoggerFactory.getLogger(this.getClass()).debug("Executing: " + executor.createPlan(action, scope).describe())
                 executor.execute(action, scope)
             }
         }
@@ -55,18 +57,10 @@ abstract class AbstractActionTest extends Specification {
     }
 
 
+    def cleanupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {}
 
-    def cleanupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {
-        Database database = scope.database
-        if (database instanceof UnsupportedDatabase) {
-            return;
-        }
-
-        for (def obj : snapshot.get(Table.class)) {
-            def action = new DropTableAction(obj.getName())
-            LoggerFactory.getLogger(this.getClass()).debug("Executing: "+new ActionExecutor().createPlan(action, scope).describe())
-            new ActionExecutor().execute(action, scope)
-        }
+    AbstractActionTest.TestDetails getTestDetails(Scope scope) {
+        return scope.getSingleton(AbstractActionTest.TestDetailsFactory).getTestDetails(this, scope)
     }
 
     static class ActionTestPermutation extends Permutation {
@@ -84,7 +78,7 @@ abstract class AbstractActionTest extends Specification {
             this.snapshot = snapshot
             this.test = test;
 
-            this.setup({throw SetupResult.OK})
+            this.setup({ throw SetupResult.OK })
             this.cleanup({
                 test.cleanupDatabase(snapshot, connectionSupplier, scope)
             })
@@ -114,5 +108,41 @@ abstract class AbstractActionTest extends Specification {
                 setup.run();
             })
         }
+    }
+
+    public static class TestDetails implements Service {
+
+    }
+
+    public static class TestDetailsFactory<T extends AbstractActionTest.TestDetails> extends AbstractServiceFactory<T> {
+
+        public TestDetailsFactory(Scope scope) {
+            super(scope);
+        }
+
+        @Override
+        protected Class<T> getServiceClass() {
+            return (Class<T>) AbstractActionTest.TestDetails.class;
+        }
+
+        public T getTestDetails(AbstractActionTest test, Scope scope) {
+            return getService(scope, test);
+        }
+
+        @Override
+        protected int getPriority(AbstractActionTest.TestDetails obj, Scope scope, Object... args) {
+            AbstractActionTest test = (AbstractActionTest) args[0];
+            String testName = test.getClass().getName();
+            String testDetailsName = obj.getClass().getName();
+
+            if ((testName + '$TestDetails').equals(testDetailsName)) {
+                return Service.PRIORITY_DEFAULT;
+            } else if ((testName + "Details" + scope.getDatabase().getShortName()).equalsIgnoreCase(testDetailsName)) {
+                return Service.PRIORITY_SPECIALIZED;
+            } else {
+                return Service.PRIORITY_NOT_APPLICABLE;
+            }
+        }
+
     }
 }

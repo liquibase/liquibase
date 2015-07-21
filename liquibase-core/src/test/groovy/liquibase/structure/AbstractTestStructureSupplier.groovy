@@ -54,7 +54,8 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         returnList.add("AnotherMixed" + type.getSimpleName());
         returnList.add("4test_" + type.getSimpleName().toLowerCase());
         returnList.add("4TEST_" + type.getSimpleName().toLowerCase());
-        returnList.add("crazy!@#\$%^&*()_+{}[]" + type.getSimpleName());
+        returnList.add("crazy!@#\$%^&*()_+{}[]" + type.getSimpleName().toLowerCase());
+        returnList.add("CRAZY!@#\$%^&*()_+{}[]" + type.getSimpleName().toUpperCase());
 
         return returnList
     }
@@ -79,7 +80,7 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         }
 
         if (!scope.database.isCaseSensitive(type)) {
-            if (scope.database.canStoreObjectName("lowerobj", Table.class)) {
+            if (scope.database.canStoreObjectName("lowername", Table.class)) {
                 returnList = returnList.findAll { !it.name.find("[A-Z]") }
             } else {
                 returnList = returnList.findAll { !it.name.find("[a-z]") }

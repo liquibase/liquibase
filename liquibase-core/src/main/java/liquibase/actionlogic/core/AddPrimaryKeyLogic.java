@@ -9,6 +9,9 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -27,9 +30,8 @@ public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic<AddPrimaryKeyAct
     @Override
     public ValidationErrors validate(AddPrimaryKeyAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
-        errors.checkForRequiredField("columnNames", action);
-        errors.checkForRequiredField("tableName", action);
-        if (ObjectUtil.defaultIfEmpty(action.clustered, false)) {
+        errors.checkForRequiredField("columns", action.primaryKey);
+        if (ObjectUtil.defaultIfEmpty(action.primaryKey.clustered, false)) {
             errors.addUnsupportedError("Adding a clustered primary key", scope.getDatabase().getShortName());
         }
 
@@ -39,16 +41,16 @@ public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic<AddPrimaryKeyAct
     @Override
     public ActionResult execute(AddPrimaryKeyAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(
-                new AlterTableAction(action.tableName,
+                new AlterTableAction(action.primaryKey.name.container,
                         generateSql(action, scope)));
     }
 
     @Override
     protected StringClauses generateSql(AddPrimaryKeyAction action, Scope scope) {
         Database database = scope.getDatabase();
-        StringClauses clauses = new StringClauses();
+        StringClauses clauses = new StringClauses(" ");
 
-        clauses.append("ADD CONSTRAINT");
+        clauses.append("ADD").append("CONSTRAINT");
 
         //TODO: Informix logic from AddPrimaryKeyGeneratorInformix:
 //        // Using auto-generated names of the form <constraint_type><tabid>_<constraintid> can cause collisions
@@ -59,11 +61,11 @@ public class AddPrimaryKeyLogic extends AbstractSqlBuilderLogic<AddPrimaryKeyAct
 //            sql.append(database.escapeConstraintName(constraintName));
 //        }
 //
-        clauses.append(Clauses.constraintName, database.escapeConstraintName(action.constraintName));
+        clauses.append(Clauses.constraintName, database.escapeObjectName(action.primaryKey.getSimpleName(), PrimaryKey.class));
         clauses.append("PRIMARY KEY");
-        clauses.append(Clauses.columnNames, "(" + database.escapeColumnNameList(StringUtils.join(action.columnNames, ", ")) + ")");
+        clauses.append(Clauses.columnNames, new StringClauses("(", ", ", ")").append(action.primaryKey.columns, Column.class, scope));
 
-        String tablespace = action.tablespace;
+        String tablespace = action.primaryKey.tablespace;
         if (tablespace != null && database.supportsTablespaces()) {
             clauses.append(Clauses.tablespace, "USING INDEX TABLESPACE " + tablespace);
         }

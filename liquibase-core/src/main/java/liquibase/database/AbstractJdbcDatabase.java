@@ -107,6 +107,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultCatalogSet = false;
     private boolean defaultSchemaSet = false;
 
+    private Boolean storesLowerCaseIdentifiers;
+    private Boolean storesLowerCaseQuotedIdentifiers;
+    private Boolean storesMixedCaseIdentifiers;
+    private Boolean storesMixedCaseQuotedIdentifiers;
+    private Boolean storesUpperCaseIdentifiers;
+    private Boolean storesUpperCaseQuotedIdentifiers;
+
     public String getName() {
         return toString();
     }
@@ -632,27 +639,105 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean storesLowerCaseIdentifiers() {
-        return false;
+        if (storesLowerCaseIdentifiers == null) {
+            final boolean DEFAULT_VALUE = false;
+            try {
+                if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
+                    storesLowerCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesLowerCaseIdentifiers();
+                } else {
+                    storesLowerCaseIdentifiers = DEFAULT_VALUE;
+                }
+            } catch (SQLException e) {
+                LoggerFactory.getLogger(getClass()).warn("Cannot look up storesLowerCaseIdentifiers", e);
+                storesLowerCaseIdentifiers = DEFAULT_VALUE;
+            }
+        }
+        return storesLowerCaseIdentifiers;
     }
 
     public boolean storesLowerCaseQuotedIdentifiers() {
-        return true;
+        if (storesLowerCaseQuotedIdentifiers == null) {
+            final boolean DEFAULT_VALUE = false;
+            try {
+                if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
+                    storesLowerCaseQuotedIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesLowerCaseQuotedIdentifiers();
+                } else {
+                    storesLowerCaseQuotedIdentifiers = DEFAULT_VALUE;
+                }
+            } catch (SQLException e) {
+                LoggerFactory.getLogger(getClass()).warn("Cannot look up storesLowerCaseQuotedIdentifiers", e);
+                storesLowerCaseQuotedIdentifiers = DEFAULT_VALUE;
+            }
+        }
+        return storesLowerCaseQuotedIdentifiers;
     }
 
     public boolean storesMixedCaseIdentifiers() {
-        return false;
+        if (storesMixedCaseIdentifiers == null) {
+            final boolean DEFAULT_VALUE = false;
+            try {
+                if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
+                    storesMixedCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesMixedCaseIdentifiers();
+                } else {
+                    storesMixedCaseIdentifiers = DEFAULT_VALUE;
+                }
+            } catch (SQLException e) {
+                LoggerFactory.getLogger(getClass()).warn("Cannot look up storesMixedCaseIdentifiers", e);
+                storesMixedCaseIdentifiers = DEFAULT_VALUE;
+            }
+        }
+        return storesMixedCaseIdentifiers;
     }
 
     public boolean storesMixedCaseQuotedIdentifiers() {
-        return true;
+        if (storesMixedCaseQuotedIdentifiers == null) {
+            final boolean DEFAULT_VALUE = false;
+            try {
+                if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
+                    storesMixedCaseQuotedIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesMixedCaseQuotedIdentifiers();
+                } else {
+                    storesMixedCaseQuotedIdentifiers = DEFAULT_VALUE;
+                }
+            } catch (SQLException e) {
+                LoggerFactory.getLogger(getClass()).warn("Cannot look up storesMixedCaseQuotedIdentifiers", e);
+                storesMixedCaseQuotedIdentifiers = DEFAULT_VALUE;
+            }
+        }
+        return storesMixedCaseQuotedIdentifiers;
     }
 
     public boolean storesUpperCaseIdentifiers() {
-        return true;
+        if (storesUpperCaseIdentifiers == null) {
+            final boolean DEFAULT_VALUE = true;
+            try {
+                if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
+                    storesUpperCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesUpperCaseIdentifiers();
+                } else {
+                    storesUpperCaseIdentifiers = DEFAULT_VALUE;
+                }
+            } catch (SQLException e) {
+                LoggerFactory.getLogger(getClass()).warn("Cannot look up storesUpperCaseIdentifiers", e);
+                storesUpperCaseIdentifiers = DEFAULT_VALUE;
+            }
+        }
+        return storesUpperCaseIdentifiers;
     }
 
     public boolean storesUpperCaseQuotedIdentifiers() {
-        return true;
+        if (storesUpperCaseQuotedIdentifiers == null) {
+            final boolean DEFAULT_VALUE = true;
+            try {
+                if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
+                    storesUpperCaseQuotedIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesUpperCaseQuotedIdentifiers();
+                } else {
+                    storesUpperCaseQuotedIdentifiers = DEFAULT_VALUE;
+                }
+            } catch (SQLException e) {
+                LoggerFactory.getLogger(getClass()).warn("Cannot look up storesUpperCaseQuotedIdentifiers", e);
+                storesUpperCaseQuotedIdentifiers = DEFAULT_VALUE;
+            }
+        }
+        return storesUpperCaseQuotedIdentifiers;
     }
 
     public boolean canStoreObjectName(String name, Class<? extends DatabaseObject> type) {

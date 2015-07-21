@@ -64,13 +64,10 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 
         List<Action> additionalActions = new ArrayList<>();
 
-        StringClauses mainClause = new StringClauses();
-        mainClause.append("CREATE TABLE");
-        mainClause.append(Clauses.tableName, database.getQualifiedName(action.tableName, Table.class));
+        StringClauses createTable = new StringClauses(" ");
+        createTable.append("CREATE TABLE");
+        createTable.append(Clauses.tableName, database.getQualifiedName(action.tableName, Table.class));
 
-        StringClauses createTableClauses = new StringClauses(", ");
-
-        List<String> primaryKeyColumnNames = new ArrayList<>();
         List<Column> columns = CollectionUtil.createIfNull(action.columns);
 //        for (Column column : columns) {
 //            if (ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false)) {
@@ -78,15 +75,13 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 //            }
 //        }
 
-        StringClauses columnsClause = new StringClauses("(", ", ", ")");
+        StringClauses tableDefinition = new StringClauses("(", ", ", ")");
         int i=0;
         for (Column column : columns) {
             StringClauses columnClause = generateColumnSql(column, action, scope, additionalActions);
 
-            columnsClause.append("column " + i++, columnClause);
+            tableDefinition.append("column " + i++, columnClause);
         }
-
-        createTableClauses.append(Clauses.columnsClause, columnsClause);
 
 //        if (!( (database instanceof SQLiteDatabase) &&
 //                isSinglePrimaryKeyColumn &&
@@ -99,23 +94,26 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             // with an autoincrement constraint exists.
             // This constraint is added after the column type.
 
-            if (primaryKeyColumnNames.size() > 1) {
-                StringBuilder primaryKey = new StringBuilder();
+            if (action.primaryKey != null) {
+                StringClauses primaryKey = new StringClauses(" ");
                 if (database.supportsPrimaryKeyNames()) {
-                    String pkName = action.primaryKeyName;
+                    String pkName = action.primaryKey.getSimpleName();
                     if (pkName == null) {
                         pkName = database.generatePrimaryKeyName(action.tableName.name);
                     }
                     if (pkName != null) {
-                        primaryKey.append("CONSTRAINT ");
+                        primaryKey.append("CONSTRAINT");
                         primaryKey.append(database.escapeConstraintName(pkName));
                     }
                 }
-                primaryKey.append(" PRIMARY KEY (");
-                primaryKey.append(database.escapeColumnNameList(StringUtils.join(primaryKeyColumnNames, ", ")));
-                primaryKey.append(")");
+                primaryKey.append("PRIMARY KEY");
+                StringClauses columnClauses = new StringClauses("(", ", ", ")");
+                for (ObjectName col : action.primaryKey.columns) {
+                    columnClauses.append(database.escapeObjectName(col.name, Column.class));
+                }
+                primaryKey.append("columns", columnClauses);
 
-                createTableClauses.append(Clauses.primaryKey, primaryKey.toString() + ",");
+                tableDefinition.append(Clauses.primaryKey, primaryKey);
             }
 //        }
 
@@ -123,13 +121,13 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
         for (ForeignKey fk : CollectionUtil.createIfNull(action.foreignKeys)) {
             foreignKeyClauses.append("foreignKey " + StringUtils.join(fk.foreignKeyColumns, ",", new StringUtils.ToStringFormatter()), generateForeignKeySql(fk, action, scope));
         }
-        createTableClauses.append(Clauses.foreignKeyClauses, foreignKeyClauses);
+        tableDefinition.append(Clauses.foreignKeyClauses, foreignKeyClauses);
 
         StringClauses uniqueConstraintClauses = new StringClauses(", ");
 //        for (UniqueConstraint uniqueConstraint : CollectionUtil.createIfNull(action.uniqueConstraints)) {
 //            uniqueConstraintClauses.append("uniqueConstraint "+uniqueConstraint.columnNames, generateUniqueConstraintSql(uniqueConstraint, action, scope));
 //        }
-        createTableClauses.append(Clauses.uniqueConstraintClauses, uniqueConstraintClauses);
+        tableDefinition.append(Clauses.uniqueConstraintClauses, uniqueConstraintClauses);
 //    }
 
 
@@ -151,14 +149,14 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 //            }
 //        }
 
-        mainClause.append(Clauses.mainClauses, createTableClauses);
+        createTable.append(Clauses.columnsClause, tableDefinition);
 
         String tablespace = action.tablespace;
         if (tablespace != null && database.supportsTablespaces()) {
-            mainClause.append(Clauses.tablespace, "TABLESPACE " + tablespace);
+            createTable.append(Clauses.tablespace, "TABLESPACE " + tablespace);
         }
 
-        return mainClause;
+        return createTable;
     }
 
     protected StringClauses generateUniqueConstraintSql(UniqueConstraint uniqueConstraint, CreateTableAction action, Scope scope) {

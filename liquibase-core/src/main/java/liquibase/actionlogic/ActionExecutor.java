@@ -128,7 +128,7 @@ public class ActionExecutor {
         }
 
         public String describe() {
-            return StringUtils.join(getSteps(), " AND THEN: ", new StringUtils.StringUtilsFormatter<Step>() {
+            return StringUtils.join(getSteps(), "\nAND THEN: ", new StringUtils.StringUtilsFormatter<Step>() {
                 @Override
                 public String toString(Step step) {
                     return step.getAction().describe();

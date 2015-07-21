@@ -208,6 +208,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [scope, conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            Assume.assumeTrue("Database does not support catalogs", it.database.supportsCatalogs());
+
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
