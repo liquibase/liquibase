@@ -8,10 +8,8 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.actionlogic.ObjectBasedQueryResult;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.ActionPerformException;
-import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
@@ -32,11 +30,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicJdbc<T extends Snapsho
      */
     @Override
     public ActionResult execute(T action, Scope scope) throws ActionPerformException {
-        try {
-            return new DelegateResult(createModifier(action, scope), createSnapshotAction(action, scope));
-        } catch (DatabaseException e) {
-            throw new ActionPerformException(e);
-        }
+        return new DelegateResult(createModifier(action, scope), createSnapshotAction(action, scope));
 
     }
 
@@ -44,7 +38,7 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicJdbc<T extends Snapsho
      * Return a lower-level action that will snapshot given type of objects that are related to the given object.
      * The QueryResult from the Action returned by this method will be fed through the object returned by {@link #createModifier(T, liquibase.Scope)}.
      */
-    protected abstract Action createSnapshotAction(T action, Scope scope) throws DatabaseException, ActionPerformException;
+    protected abstract Action createSnapshotAction(T action, Scope scope) throws ActionPerformException;
 
     /**
      * Returns a {@link liquibase.actionlogic.ActionResult.Modifier} that will convert the raw results from the action returned by {@link #createSnapshotAction(T, liquibase.Scope)}

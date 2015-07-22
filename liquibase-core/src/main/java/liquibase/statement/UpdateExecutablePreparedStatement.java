@@ -9,7 +9,9 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
@@ -25,11 +27,11 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 	@Override
 	protected String generateSql(List<ColumnConfig> cols) {
 
-		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
+		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeObjectName(new ObjectName(getCatalogName(), getSchemaName(), getTableName()), Table.class));
 
 		StringBuilder params = new StringBuilder(" SET ");
 	    for(ColumnConfig column : getColumns()) {
-	    	params.append(database.escapeColumnName(column.getName()));
+	    	params.append(database.escapeObjectName(column.getName(), Column.class));
 	    	params.append(" = ");
 	        params.append("?, ");
 	        cols.add(column);

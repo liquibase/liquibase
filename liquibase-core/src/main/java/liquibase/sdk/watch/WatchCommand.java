@@ -272,7 +272,7 @@ public class WatchCommand extends AbstractCommand {
                     throw new UnexpectedLiquibaseException("Can only display one schema");
                 }
                 Schema schema = schemas.iterator().next();
-                if (database.supportsSchemas()) {
+                if (database.getMaxSnapshotContainerDepth() > 1) {
                     buffer.append("<strong>Catalog & Schema:</strong> ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("<br>\n");
                 } else {
                     buffer.append("<strong>Catalog:</strong> ").append(schema.getCatalogName()).append("<br>\n");

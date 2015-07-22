@@ -94,19 +94,9 @@ public abstract class AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tableName", database.escapeObjectName("tableName", Table.class));
     }
 
-    @Test
-    public void escapeTableName_withSchema() {
-        Database database = getDatabase();
-        if (database.supportsCatalogInObjectName(Table.class)) {
-            assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
-        } else {
-            assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
-        }
-    }
-    
     @Test
     public void executeRollbackStatements_WithStatementsOverload_ShouldNotIncludeAppendTextFromApplyToRollbackFalseVisitor() throws Exception {
         Database database = getDatabase();

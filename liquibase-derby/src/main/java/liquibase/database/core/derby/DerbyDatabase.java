@@ -52,8 +52,13 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsSchemas() {
-        return false;
+    public int getMaxReferenceContainerDepth() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxSnapshotContainerDepth() {
+        return 0;
     }
 
     @Override
@@ -200,11 +205,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
-
-    @Override
-    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
-        return true;
-    }
 
     public boolean supportsBooleanDataType() {
         if (getConnection() == null) {

@@ -9,7 +9,9 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
@@ -54,7 +56,7 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
                     }
                 }))
                    .append("FROM")
-                        .append(database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                        .append(database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
 
         StringClauses whereClause = action.where;
         if (whereClause != null) {

@@ -56,7 +56,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             });
 
             for (Schema schema : schemas) {
-                if (database.supportsSchemas()) {
+                if (database.getMaxSnapshotContainerDepth() > 1) {
                     buffer.append("\nCatalog & Schema: ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("\n");
                 } else {
                     buffer.append("\nCatalog: ").append(schema.getCatalogName()).append("\n");

@@ -22,7 +22,7 @@ public class DropProcedureGenerator extends AbstractSqlGenerator<DropProcedureSt
     @Override
     public Sql[] generateSql(DropProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("DROP PROCEDURE "+database.escapeObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getProcedureName(), StoredProcedure.class),
+                new UnparsedSql("DROP PROCEDURE "+database.escapeObjectName(new ObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getProcedureName()), StoredProcedure.class),
                         new StoredProcedure(new ObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getProcedureName())))
         };
     }

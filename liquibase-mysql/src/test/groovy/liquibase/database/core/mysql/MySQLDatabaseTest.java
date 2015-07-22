@@ -2,6 +2,8 @@ package liquibase.database.core.mysql;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 import org.junit.Assert;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -46,14 +48,13 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tableName", database.escapeObjectName(new ObjectName("tableName"), Table.class));
     }
 
-    @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals("catalogName.tableName", database.escapeObjectName(new ObjectName("catalogName", "schemaName", "tableName"), Table.class));
     }
 
     @Test

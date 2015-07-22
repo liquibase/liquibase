@@ -160,53 +160,13 @@ public interface Database extends PrioritizedService {
 
     String getDateLiteral(Date defaultDateValue);
 
-    String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
-
-    String escapeTableName(String catalogName, String schemaName, String tableName);
-
-    String escapeIndexName(String catalogName, String schemaName, String indexName);
-
     String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
 
     String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType);
 
-    String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType);
-
-    /**
-     * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
-     * name (i.e. "return").
-     *
-     * @param columnName column name
-     * @return escaped column name
-     */
-    String escapeColumnName(String columnName);
-
-    String escapeColumnName(String columnName, boolean quoteNamesThatMayBeFunctions);
-
-    /**
-     * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column
-     * name (i.e. "return").
-     *
-     * @param columnNames list of column names
-     * @return escaped column name list
-     */
-    String escapeColumnNameList(String columnNames);
-
-//    Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
-
     boolean supportsTablespaces();
 
-    boolean supportsCatalogs();
-
-    boolean supportsSchemas();
-
-    boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type);
-
     String generatePrimaryKeyName(String tableName);
-
-    String escapeSequenceName(String catalogName, String schemaName, String sequenceName);
-
-    String escapeViewName(String catalogName, String schemaName, String viewName);
 
     ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
@@ -229,8 +189,6 @@ public interface Database extends PrioritizedService {
     void close() throws DatabaseException;
 
     boolean supportsRestrictForeignKeys();
-
-    String escapeConstraintName(String constraintName);
 
     boolean isAutoCommit() throws DatabaseException;
 
@@ -358,6 +316,8 @@ public interface Database extends PrioritizedService {
 
     boolean looksLikeFunctionCall(String value);
 
-    int getMaxContainerDepth(Class<? extends DatabaseObject> type);
+    int getMaxReferenceContainerDepth();
+
+    int getMaxSnapshotContainerDepth();
 }
 

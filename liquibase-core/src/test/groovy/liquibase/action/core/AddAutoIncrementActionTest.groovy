@@ -89,7 +89,9 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
                 assert plan.toString().contains(action.startWith.toString()): "StartWith value not used"
             }
 
-            executor.execute(new AddPrimaryKeyAction(new PrimaryKey(new ObjectName(column.name.container, null), column.getSimpleName())), scope)
+            if (((TestDetails) getTestDetails(scope)).createPrimaryKeyBeforeAutoIncrement()) {
+                executor.execute(new AddPrimaryKeyAction(new PrimaryKey(new ObjectName(column.name.container, null), column.getSimpleName())), scope)
+            }
 
             plan.execute(scope)
 

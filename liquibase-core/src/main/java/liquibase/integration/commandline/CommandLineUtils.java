@@ -79,7 +79,7 @@ public class CommandLineUtils {
 
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
-            if (!database.supportsSchemas()) {
+            if (database.getMaxSnapshotContainerDepth() == 0) {
                 if (defaultSchemaName != null && defaultCatalogName == null) {
                     defaultCatalogName = defaultSchemaName;
                 }

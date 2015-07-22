@@ -12,6 +12,7 @@ import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class TagDatabaseLogicInformix extends TagDatabaseLogic {
     @Override
@@ -25,8 +26,8 @@ public class TagDatabaseLogicInformix extends TagDatabaseLogic {
         DropTableAction dropTableAction = new DropTableAction();
         dropTableAction.tableName = new ObjectName("max_date_temp");
 
-        return new DelegateResult(new ExecuteSqlAction("SELECT MAX(dateexecuted) max_date FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + " INTO TEMP max_date_temp WITH NO LOG"),
-                new ExecuteSqlAction("UPDATE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())+" SET TAG = '"+database.escapeStringForDatabase(action.tag)+"' WHERE DATEEXECUTED = (SELECT max_date FROM max_date_temp);"),
+        return new DelegateResult(new ExecuteSqlAction("SELECT MAX(dateexecuted) max_date FROM " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class) + " INTO TEMP max_date_temp WITH NO LOG"),
+                new ExecuteSqlAction("UPDATE "+database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class)+" SET TAG = '"+database.escapeStringForDatabase(action.tag)+"' WHERE DATEEXECUTED = (SELECT max_date FROM max_date_temp);"),
                 dropTableAction);
     }
 }

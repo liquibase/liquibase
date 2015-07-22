@@ -9,7 +9,6 @@ import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import org.slf4j.LoggerFactory;
 import testmd.logic.SetupResult;
@@ -252,14 +251,14 @@ public abstract class ConnectionSupplier implements Cloneable {
         if (Column.class.isAssignableFrom(type)) {
             return getObjectNames(type, 0, includePartials, includeNulls);
         }
-        return getObjectNames(type, getDatabase().getMaxContainerDepth(type), includePartials, includeNulls);
+        return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
     }
 
     public List<ObjectName> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
         if (Column.class.isAssignableFrom(type)) {
             return getObjectNames(type, 0, includePartials, includeNulls);
         }
-        return getObjectNames(type, getDatabase().getMaxContainerDepth(type), includePartials, includeNulls);
+        return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
     }
 
     public List<ObjectName> getObjectNames(Class<? extends DatabaseObject> type, int maxDepth, boolean includePartials, boolean includeNulls) {
@@ -280,7 +279,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public List<ObjectName> getAllContainers() {
-        int depth = getDatabase().getMaxContainerDepth(Table.class);
+        int depth = getDatabase().getMaxReferenceContainerDepth();
 
         if (depth == 0) {
             return Arrays.asList();

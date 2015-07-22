@@ -86,7 +86,7 @@ public class StandardLockService implements LockService {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             database.commit();
-            LoggerFactory.getLogger(getClass()).debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            LoggerFactory.getLogger(getClass()).debug("Created database lock table with name: " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
             hasDatabaseChangeLogLockTable = true;
@@ -116,7 +116,7 @@ public class StandardLockService implements LockService {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
 
             try {
-                isDatabaseChangeLogLockTableInitialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))) > 0;
+                isDatabaseChangeLogLockTableInitialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class))) > 0;
             } catch (LiquibaseException e) {
                 if (executor.updatesDatabase()) {
                     throw new UnexpectedLiquibaseException(e);

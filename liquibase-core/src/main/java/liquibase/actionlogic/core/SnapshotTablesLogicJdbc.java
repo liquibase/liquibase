@@ -5,13 +5,12 @@ import liquibase.action.Action;
 import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -39,40 +38,31 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
     }
 
     @Override
-    protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException {
+    protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
 
         ObjectReference relatedTo = action.relatedTo;
-        String catalogName = null;
-        String schemaName = null;
-        String tableName = null;
-
+        ObjectName objectName;
         if (relatedTo.instanceOf(Catalog.class)) {
-            catalogName = relatedTo.getSimpleName();
+            if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
+                throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
+            }
+            objectName = new ObjectName(relatedTo.getSimpleName(), null, null);
         } else if (relatedTo.instanceOf(Schema.class)) {
-            if (scope.getDatabase().supportsCatalogs()) {
-                if (relatedTo.objectName.container != null) {
-                    catalogName = relatedTo.objectName.container.name;
-                }
-                schemaName = relatedTo.getSimpleName();
-            } else {
-                catalogName = relatedTo.getSimpleName();
-            }
+            objectName = new ObjectName(new ObjectName(relatedTo.objectName.container, relatedTo.getSimpleName()), null);
         } else if (relatedTo.instanceOf(Table.class)) {
-            tableName = relatedTo.getSimpleName();
-            if (relatedTo.objectName != null && relatedTo.objectName.container != null) {
-                List<String> parents = relatedTo.objectName.container.asList(2);
-                if (parents.get(0) != null || scope.getDatabase().supportsCatalogs()) {
-                    catalogName = parents.get(0);
-                    schemaName = parents.get(1);
-                } else {
-                    catalogName = parents.get(1);
-                }
-            }
+            objectName = relatedTo.objectName;
         } else {
             throw Validate.failure("Unexpected relatedTo type: " + relatedTo.objectType.getName());
         }
 
-        return new QueryJdbcMetaDataAction("getTables", catalogName, schemaName, tableName, new String[]{"TABLE"});
+        objectName = objectName.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 1);
+        List<String> nameParts = objectName.asList(3);
+
+        if (scope.getDatabase().getMaxSnapshotContainerDepth() >= 2) {
+            return new QueryJdbcMetaDataAction("getTables", nameParts.get(0), nameParts.get(1), nameParts.get(2), new String[]{"TABLE"});
+        } else { //usually calls the top level "catalogs"
+            return new QueryJdbcMetaDataAction("getTables", nameParts.get(1), null, nameParts.get(2), new String[]{"TABLE"});
+        }
     }
 
     @Override
@@ -86,7 +76,7 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
         }
 
         ObjectName container;
-        int maxContainerDepth = scope.getDatabase().getMaxContainerDepth(Table.class);
+        int maxContainerDepth = scope.getDatabase().getMaxReferenceContainerDepth();
         if (maxContainerDepth == 0) {
             container = null;
         } else if (maxContainerDepth == 1) {

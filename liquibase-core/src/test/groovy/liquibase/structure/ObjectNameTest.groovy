@@ -161,5 +161,27 @@ class ObjectNameTest extends Specification {
         new ObjectName("PUBLIC", "TABLE1", "COLUMN1") | new ObjectName("LIQUIBASE", "PUBLIC", "TABLE1", "COLUMN1") | true;
 
     }
+
+    @Unroll
+    def "truncate"() {
+        expect:
+        name.truncate(length).toString() == expected
+
+        where:
+        name                          | length | expected
+        new ObjectName()              | 1      | "#UNSET"
+        new ObjectName()              | 2      | "#UNSET"
+        new ObjectName("a")           | 1      | "a"
+        new ObjectName("a")           | 2      | "a"
+        new ObjectName("a")           | 3      | "a"
+        new ObjectName("a", "b")      | 1      | "b"
+        new ObjectName("a", "b")      | 2      | "a.b"
+        new ObjectName("a", "b")      | 3      | "a.b"
+        new ObjectName("a", "b", "c") | 1      | "c"
+        new ObjectName("a", "b", "c") | 2      | "b.c"
+        new ObjectName("a", "b", "c") | 3      | "a.b.c"
+
+
+    }
 }
 

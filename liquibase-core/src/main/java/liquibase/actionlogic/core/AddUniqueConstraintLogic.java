@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -49,10 +50,10 @@ public class AddUniqueConstraintLogic extends AbstractSqlBuilderLogic<AddUniqueC
         StringClauses clauses = new StringClauses();
         clauses.append("ADD CONSTRAINT");
         if (constraintName != null) {
-            clauses.append(Clauses.constraintName, database.escapeConstraintName(constraintName));
+            clauses.append(Clauses.constraintName, database.escapeObjectName(constraintName, Index.class));
         }
         clauses.append("UNIQUE");
-        clauses.append("(" + database.escapeColumnNameList(StringUtils.join(action.uniqueConstraint.columns, ", ", new StringUtils.ObjectNameFormatter(Column.class, scope.getDatabase()))) + "");
+        clauses.append("(" + (StringUtils.join(action.uniqueConstraint.columns, ", ", new StringUtils.ObjectNameFormatter(Column.class, scope.getDatabase()))) + "");
 
         if (database.supportsInitiallyDeferrableColumns()) {
             if (ObjectUtil.defaultIfEmpty(action.uniqueConstraint.deferrable, false)) {

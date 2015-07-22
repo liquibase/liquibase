@@ -32,7 +32,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Catalog match = null;
         String catalogName = example.getSimpleName();
-        if (catalogName == null && database.supportsCatalogs()) {
+        if (catalogName == null && database.getMaxSnapshotContainerDepth() > 1) {
             catalogName = database.getDefaultCatalogName();
         }
         example = new Catalog(catalogName);

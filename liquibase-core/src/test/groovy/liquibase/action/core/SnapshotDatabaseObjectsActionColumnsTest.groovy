@@ -5,17 +5,18 @@ import liquibase.Scope
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplierFactory
+import liquibase.snapshot.Snapshot
 import liquibase.snapshot.TestSnapshotFactory
 import liquibase.snapshot.transformer.CustomTransformer
 import liquibase.snapshot.transformer.LimitTransformer
 import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.snapshot.transformer.RoundRobinTransformer
 import liquibase.snapshot.transformer.TransformerList
-import liquibase.structure.DatabaseObject
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
+import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
@@ -157,7 +158,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         where:
         [conn, scope, snapshot, catalog] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
-            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxContainerDepth(Table) >= 2);
+            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxReferenceContainerDepth() >= 2);
 
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
@@ -165,36 +166,43 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
-                    [scope]
-                            [snapshot],
+                    [scope],
+                    [snapshot],
                     new ArrayList(snapshot.get(Catalog)),
             ])
         }
     }
 
-    @Unroll("#featureName: #column on #conn")
+    @Unroll("#featureName: #column (autoIncrement: #autoIncrement) on #conn")
     def "autoIncrement information set correctly"() {
         expect:
         def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
-
-        def plan = new ActionExecutor().createPlan(action, scope)
+        def executor = scope.getSingleton(ActionExecutor.class)
+        def plan = executor.createPlan(action, scope)
 
         testMDPermutation(snapshot, conn, scope)
                 .addParameters([columnName_asTable: column.getName()])
-                .addParameters([isAutoIncrement_asTable: ((Column) column).autoIncrement])
+                .addParameters([autoIncrement_asTable: autoIncrement])
                 .addOperations(plan: plan)
                 .run({
+
+            if (autoIncrement) {
+                if (((AddAutoIncrementActionTest.TestDetails) new AddAutoIncrementActionTest().getTestDetails(scope)).createPrimaryKeyBeforeAutoIncrement()) {
+                    executor.execute(new AddPrimaryKeyAction(new PrimaryKey(new ObjectName(column.name.container, null), column.getSimpleName())), scope)
+                }
+                executor.execute(new AddAutoIncrementAction(column.name, column.type), scope)
+            }
+
+
             QueryResult result = plan.execute(scope)
 
             assert result.asList(Column).size() > 0
             result.asList(Object).each {
                 assert it instanceof Column;
                 assert it.name.equals(column.name, true)
-                if (column.autoIncrement) {
+                if (autoIncrement) {
                     assert it.autoIncrement
-                    //no jdbc interface to get auto increment start/incrementBy info?
-//                    assert it.autoIncrementInformation.startWith == new BigInteger(2)
-//                    assert it.autoIncrementInformation.incrementBy == new BigInteger(3)
+                    //no jdbc interface to get auto increment start/incrementBy info
                 } else {
                     assert !it.autoIncrement
                 }
@@ -202,24 +210,17 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         })
 
         where:
-        [conn, scope, snapshot, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, scope, snapshot, autoIncrement, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
             def scope = JUnitScope.getInstance(it)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(new TransformerList(
-                    new LimitTransformer(2),
-                    new RoundRobinTransformer([Column] as Class[], new CustomTransformer<Column>() {
-                        @Override
-                        Column transformObject(Column object, Scope transformScope) {
-                            object.autoIncrementInformation=new Column.AutoIncrementInformation(2, 3)
-                            return object
-                        }
-                    }, NoOpTransformer.instance)), scope)
+            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(new LimitTransformer(1), scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
                     [snapshot],
+                    [true, false],
                     new ArrayList(snapshot.get(Column)),
             ])
         }
@@ -258,7 +259,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             //since data types change to what the database thinks, test by adding a new column with the snapshot's datatype and check that those are consistant
             def addColumnAction = new AddColumnsAction()
             def columnToAdd = snapshotColumn.clone() as Column
-            columnToAdd.name = new ObjectName(snapshotColumn.name.container, snapshotColumn.simpleName+"_added")
+            columnToAdd.name = new ObjectName(snapshotColumn.name.container, snapshotColumn.simpleName + "_added")
             addColumnAction.columns = [columnToAdd]
 
             executor.execute(addColumnAction, scope)

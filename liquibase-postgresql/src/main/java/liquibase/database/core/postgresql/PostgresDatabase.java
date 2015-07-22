@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -79,11 +80,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             return "org.postgresql.Driver";
         }
         return null;
-    }
-
-    @Override
-    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
-        return false;
     }
 
     @Override
@@ -165,11 +161,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
         if (Index.class.isAssignableFrom(objectType)) {
-            return this.escapeObjectName(objectName, Index.class);
+            return this.escapeObjectName(objectName.name, Index.class);
         } else {
-            return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+            return super.escapeObjectName(objectName, objectType);
         }
     }
 

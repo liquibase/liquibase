@@ -34,7 +34,7 @@ public class DropTableLogic extends AbstractSqlBuilderLogic<DropTableAction> {
         Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses()
                 .append("DROP TABLE")
-                .append(database.getQualifiedName(action.tableName, Table.class));
+                .append(database.escapeObjectName(action.tableName, Table.class));
 
         if (ObjectUtil.defaultIfEmpty(action.cascadeConstraints, false) && database.supportsDropTableCascadeConstraints()) {
             clauses.append("CASCADE");

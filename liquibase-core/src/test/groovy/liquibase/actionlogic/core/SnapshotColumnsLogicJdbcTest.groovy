@@ -73,8 +73,7 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
     def "createColumnSnapshotAction parameters are correct"() {
         when:
         def db = new MockDatabase()
-        db.setSupportsCatalogs(supportsCatalogs)
-        db.setSupportsSchemas(supportsSchemas)
+        db.setMaxSnapshotContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(db)
 
         QueryJdbcMetaDataAction action = new SnapshotColumnsLogicJdbc().createColumnSnapshotAction(name, scope)
@@ -84,12 +83,12 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
         action.arguments == arguments
 
         where:
-        name                                         | supportsCatalogs | supportsSchemas | arguments
-        new ObjectName("cat", "schem", "tab", "col") | true             | true            | ["cat", "schem", "tab", "col"]
-        new ObjectName("schem", "tab", "col")        | true             | true            | [null, "schem", "tab", "col"]
-        new ObjectName("schem", "tab", "col")        | false            | true            | ["schem", null, "tab", "col"]
-        new ObjectName("tab", "col")                 | true             | true            | [null, null, "tab", "col"]
-        new ObjectName("tab", "col")                 | false            | true            | [null, null, "tab", "col"]
-        new ObjectName("tab", "col")                 | false            | false           | [null, null, "tab", "col"]
+        name                                         | maxDepth | arguments
+        new ObjectName("cat", "schem", "tab", "col") | 2        | ["cat", "schem", "tab", "col"]
+        new ObjectName("schem", "tab", "col")        | 2        | [null, "schem", "tab", "col"]
+        new ObjectName("schem", "tab", "col")        | 1        | ["schem", null, "tab", "col"]
+        new ObjectName("tab", "col")                 | 2        | [null, null, "tab", "col"]
+        new ObjectName("tab", "col")                 | 1        | [null, null, "tab", "col"]
+        new ObjectName("tab", "col")                 | 0        | [null, null, "tab", "col"]
     }
 }

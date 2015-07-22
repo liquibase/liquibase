@@ -8,6 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
@@ -52,13 +53,13 @@ public class DB2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsSchemas() {
-        return false;
+    public int getMaxReferenceContainerDepth() {
+        return 1;
     }
 
     @Override
-    public boolean supportsCatalogs() {
-        return true;
+    public int getMaxSnapshotContainerDepth() {
+        return 1;
     }
 
     @Override
@@ -213,9 +214,12 @@ public class DB2Database extends AbstractJdbcDatabase {
 
 
     @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // does not support the schema name for the index -
-        return super.escapeIndexName(null, null, indexName);
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.isAssignableFrom(Index.class)) {
+            return super.escapeObjectName(objectName.name, objectType);
+        } else {
+            return super.escapeObjectName(objectName, objectType);
+        }
     }
 
     @Override

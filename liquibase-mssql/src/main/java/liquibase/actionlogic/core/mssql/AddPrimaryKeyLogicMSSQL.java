@@ -27,13 +27,13 @@ public class AddPrimaryKeyLogicMSSQL extends AddPrimaryKeyLogic {
     protected StringClauses generateSql(AddPrimaryKeyAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        if (ObjectUtil.defaultIfEmpty(action.clustered, true)) {
+        if (ObjectUtil.defaultIfEmpty(action.primaryKey.clustered, true)) {
             clauses.insertAfter("PRIMARY KEY", "CLUSTERED");
         } else {
             clauses.insertAfter("PRIMARY KEY", "NONCLUSTERED");
         }
 
-        String tablespace = action.tablespace;
+        String tablespace = action.primaryKey.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "ON " + tablespace);
         }

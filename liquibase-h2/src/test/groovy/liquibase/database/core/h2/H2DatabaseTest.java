@@ -2,9 +2,12 @@ package liquibase.database.core.h2;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 import org.junit.Assert;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
 
@@ -43,13 +46,12 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tableName", database.escapeObjectName("tableName", Table.class));
     }
 
-    @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals("schemaName.tableName", database.escapeObjectName(new ObjectName("catalogName", "schemaName", "tableName"), Table.class));
     }    
 }

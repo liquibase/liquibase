@@ -10,6 +10,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import org.slf4j.LoggerFactory;
@@ -291,8 +293,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeIndexName(String catalogName,String schemaName, String indexName) {
-        return indexName;
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.isAssignableFrom(Index.class)) {
+            return escapeObjectName(objectName.name, objectType);
+        }
+        return super.escapeObjectName(objectName, objectType);
     }
 
     @Override

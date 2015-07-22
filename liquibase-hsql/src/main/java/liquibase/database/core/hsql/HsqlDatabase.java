@@ -98,21 +98,26 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsCatalogs() {
+    public int getMaxSnapshotContainerDepth() {
         try {
             if (getDatabaseMajorVersion() < 2) {
-                return false;
+                return 1;
             } else {
-                return true;
+                return 2;
             }
         } catch (DatabaseException e) {
-            return true;
+            return 2;
         }
     }
 
     @Override
+    public int getMaxReferenceContainerDepth() {
+        return getMaxSnapshotContainerDepth();
+    }
+
+    @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (supportsCatalogs()) {
+        if (getMaxSnapshotContainerDepth() > 2) {
             return "PUBLIC";
         } else {
             return null;

@@ -134,20 +134,20 @@ class ResultSetCache {
         }
 
         public String createSchemaKey(Database database) {
-            if (!database.supportsCatalogs() && !database.supportsSchemas()) {
+//            if (!database.supportsCatalogs() && !database.supportsSchemas()) {
                 return "all";
-            } else if (database.supportsCatalogs() && database.supportsSchemas()) {
-                return (catalog + "." + schema).toLowerCase();
-            } else {
-                if (catalog == null && schema != null) {
-                    return schema.toLowerCase();
-                } else {
-                    if (catalog == null) {
-                        return "all";
-                    }
-                    return catalog.toLowerCase();
-                }
-            }
+//            } else if (database.supportsCatalogs() && database.supportsSchemas()) {
+//                return (catalog + "." + schema).toLowerCase();
+//            } else {
+//                if (catalog == null && schema != null) {
+//                    return schema.toLowerCase();
+//                } else {
+//                    if (catalog == null) {
+//                        return "all";
+//                    }
+//                    return catalog.toLowerCase();
+//                }
+//            }
         }
 
         public String createKey(Database database, String... params) {

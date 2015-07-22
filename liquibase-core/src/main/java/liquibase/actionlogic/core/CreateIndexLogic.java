@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
@@ -82,11 +83,11 @@ public class CreateIndexLogic extends AbstractSqlBuilderLogic<CreateIndexAction>
                 Boolean computed = column.computed;
                 String name;
                 if (computed == null) {
-                    name = database.escapeColumnName(column.getSimpleName(), true);
+                    name = database.escapeObjectName(column.getSimpleName(), Column.class);
                 } else if (computed) {
                     name = column.getSimpleName();
                 } else {
-                    name = database.escapeColumnName(column.getSimpleName(), false);
+                    name = database.escapeObjectName(column.getSimpleName(), Column.class);
                 }
 
                 if (ObjectUtil.defaultIfEmpty(column.descending, false)) {

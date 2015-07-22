@@ -139,7 +139,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxContainerDepth(Table) >= 2);
+            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxReferenceContainerDepth() >= 2);
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
 
@@ -208,7 +208,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [scope, conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support catalogs", it.database.supportsCatalogs());
+            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxSnapshotContainerDepth() > 1);
 
             def scope = JUnitScope.getInstance(it)
                     .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)

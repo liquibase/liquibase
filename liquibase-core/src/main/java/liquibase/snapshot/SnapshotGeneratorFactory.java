@@ -96,7 +96,7 @@ public class SnapshotGeneratorFactory {
         //workaround for common check for databasechangelog/lock table to not snapshot the whole database like we have to in order to handle case issues
         if (example instanceof Table && (example.getName().equals(database.getDatabaseChangeLogTableName()) || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
-                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), example.getSimpleName(), Table.class)));
+                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), example.getSimpleName()), Table.class)));
                 return true;
             } catch (DatabaseException e) {
 //                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection

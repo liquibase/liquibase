@@ -9,6 +9,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.core.Index;
 import liquibase.util.StringClauses;
 
 public class DropPrimaryKeyLogic extends AbstractSqlBuilderLogic<DropPrimaryKeyAction> {
@@ -40,7 +41,7 @@ public class DropPrimaryKeyLogic extends AbstractSqlBuilderLogic<DropPrimaryKeyA
 		if (constraintName == null) {
 			return new StringClauses().append("DROP PRIMARY KEY");
 		} else {
-			return new StringClauses().append("DROP CONSTRAINT "+database.escapeConstraintName(constraintName));
+			return new StringClauses().append("DROP CONSTRAINT "+database.escapeObjectName(constraintName, Index.class));
 		}
 	}
 }

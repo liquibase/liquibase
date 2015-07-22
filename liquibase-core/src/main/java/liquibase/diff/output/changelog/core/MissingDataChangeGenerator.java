@@ -10,6 +10,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
@@ -56,7 +57,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName());
+            String sql = "SELECT * FROM " + referenceDatabase.escapeObjectName(new ObjectName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName()), Table.class);
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(1000);

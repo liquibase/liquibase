@@ -12,7 +12,6 @@ import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.CollectionUtil;
 
@@ -39,11 +38,11 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicOffline<T extends Snap
 
         final ObjectReference relatedTo = action.relatedTo;
 
-        if (relatedTo.instanceOf(Catalog.class) && !database.supportsCatalogs()) {
+        if (relatedTo.instanceOf(Catalog.class) && database.getMaxSnapshotContainerDepth() < 2) {
             throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
         }
 
-        if (relatedTo.instanceOf(Schema.class) && !database.supportsSchemas()) {
+        if (relatedTo.instanceOf(Schema.class) && database.getMaxSnapshotContainerDepth() < 1) {
             throw new ActionPerformException("Cannot snapshot schemas on "+database.getShortName());
         }
 

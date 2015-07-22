@@ -33,32 +33,34 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (!accordingTo.supportsCatalogs()) {
-            return true;
-        }
+//        if (!accordingTo.supportsCatalogs()) {
+//            return true;
+//        }
+//
+//        String object1Name;
+//        if (((Catalog) databaseObject1).isDefault) {
+//            object1Name = null;
+//        } else {
+//            object1Name = databaseObject1.getSimpleName();
+//        }
+//
+//        String object2Name;
+//        if (((Catalog) databaseObject2).isDefault) {
+//            object2Name = null;
+//        } else {
+//            object2Name = databaseObject2.getSimpleName();
+//        }
+//
+//        CatalogAndSchema thisSchema = new CatalogAndSchema(object1Name, null).standardize(accordingTo);
+//        CatalogAndSchema otherSchema = new CatalogAndSchema(object2Name, null).standardize(accordingTo);
+//
+//        if (thisSchema.getCatalogName() == null) {
+//            return otherSchema.getCatalogName() == null;
+//        }
 
-        String object1Name;
-        if (((Catalog) databaseObject1).isDefault) {
-            object1Name = null;
-        } else {
-            object1Name = databaseObject1.getSimpleName();
-        }
+//        return thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
 
-        String object2Name;
-        if (((Catalog) databaseObject2).isDefault) {
-            object2Name = null;
-        } else {
-            object2Name = databaseObject2.getSimpleName();
-        }
-
-        CatalogAndSchema thisSchema = new CatalogAndSchema(object1Name, null).standardize(accordingTo);
-        CatalogAndSchema otherSchema = new CatalogAndSchema(object2Name, null).standardize(accordingTo);
-
-        if (thisSchema.getCatalogName() == null) {
-            return otherSchema.getCatalogName() == null;
-        }
-
-        return thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
+        return false;
     }
 
     @Override

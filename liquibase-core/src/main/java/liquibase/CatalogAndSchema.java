@@ -30,33 +30,34 @@ public class CatalogAndSchema {
     }
 
     public boolean equals(CatalogAndSchema catalogAndSchema, Database accordingTo) {
-        if (!accordingTo.supportsCatalogs()) {
-            return true;
-        }
-
-        catalogAndSchema = catalogAndSchema.customize(accordingTo);
-        CatalogAndSchema thisCatalogAndSchema = this.customize(accordingTo);
-
-        boolean catalogMatches;
-        if (catalogAndSchema.getCatalogName() == null) {
-            catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
-        } else {
-            catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
-        }
-
-        if (!catalogMatches) {
-            return false;
-        }
-
-        if (accordingTo.supportsSchemas()) {
-            if (catalogAndSchema.getSchemaName() == null) {
-                return thisCatalogAndSchema.getSchemaName() == null;
-            } else {
-                return catalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
-            }
-        } else {
-            return true;
-        }
+//        if (!accordingTo.supportsCatalogs()) {
+//            return true;
+//        }
+//
+//        catalogAndSchema = catalogAndSchema.customize(accordingTo);
+//        CatalogAndSchema thisCatalogAndSchema = this.customize(accordingTo);
+//
+//        boolean catalogMatches;
+//        if (catalogAndSchema.getCatalogName() == null) {
+//            catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
+//        } else {
+//            catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
+//        }
+//
+//        if (!catalogMatches) {
+//            return false;
+//        }
+//
+//        if (accordingTo.supportsSchemas()) {
+//            if (catalogAndSchema.getSchemaName() == null) {
+//                return thisCatalogAndSchema.getSchemaName() == null;
+//            } else {
+//                return catalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
+//            }
+//        } else {
+//            return true;
+//        }
+        return false;
     }
 
 
@@ -70,38 +71,38 @@ public class CatalogAndSchema {
      * @see {@link CatalogAndSchema#customize(liquibase.database.Database)}
      * */
     public CatalogAndSchema standardize(Database accordingTo) {
-        String catalogName = StringUtils.trimToNull(getCatalogName());
-        String schemaName = StringUtils.trimToNull(getSchemaName());
-
-        if (!accordingTo.supportsCatalogs()) {
-            return new CatalogAndSchema(null, null);
-        }
-
-        if (accordingTo.supportsSchemas()) {
-            if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
-                schemaName = null;
-            }
-        } else {
-            if (catalogName == null && schemaName != null) { //had names in the wrong order
-                catalogName = schemaName;
-            }
-            schemaName = catalogName;
-        }
-
-        if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
-            catalogName = null;
-        }
-
-        if (!accordingTo.supportsSchemas()) {
-            schemaName = null;
-        }
-
-        if (catalogName != null) {
-            catalogName = catalogName.toUpperCase();
-        }
-        if (schemaName != null) {
-            schemaName = schemaName.toUpperCase();
-        }
+//        String catalogName = StringUtils.trimToNull(getCatalogName());
+//        String schemaName = StringUtils.trimToNull(getSchemaName());
+//
+//        if (!accordingTo.supportsCatalogs()) {
+//            return new CatalogAndSchema(null, null);
+//        }
+//
+//        if (accordingTo.supportsSchemas()) {
+//            if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+//                schemaName = null;
+//            }
+//        } else {
+//            if (catalogName == null && schemaName != null) { //had names in the wrong order
+//                catalogName = schemaName;
+//            }
+//            schemaName = catalogName;
+//        }
+//
+//        if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
+//            catalogName = null;
+//        }
+//
+//        if (!accordingTo.supportsSchemas()) {
+//            schemaName = null;
+//        }
+//
+//        if (catalogName != null) {
+//            catalogName = catalogName.toUpperCase();
+//        }
+//        if (schemaName != null) {
+//            schemaName = schemaName.toUpperCase();
+//        }
 
         return new CatalogAndSchema(catalogName, schemaName);
 
@@ -116,28 +117,28 @@ public class CatalogAndSchema {
      * @see {@link CatalogAndSchema#standardize(liquibase.database.Database)}
      */
     public CatalogAndSchema customize(Database accordingTo) {
-        CatalogAndSchema standard = standardize(accordingTo);
-
-        String catalogName = standard.getCatalogName();
-        String schemaName = standard.getSchemaName();
-
-        if (catalogName == null) {
-            if (!accordingTo.supportsSchemas() && schemaName != null) {
-                return new CatalogAndSchema(accordingTo.correctObjectName(schemaName, Catalog.class), null);
-            }
-            catalogName = accordingTo.getDefaultCatalogName();
-        }
-
-        if (schemaName == null) {
-            schemaName = accordingTo.getDefaultSchemaName();
-        }
-
-        if (catalogName != null) {
-            catalogName = accordingTo.correctObjectName(catalogName, Catalog.class);
-        }
-        if (schemaName != null) {
-            schemaName = accordingTo.correctObjectName(schemaName, Schema.class);
-        }
+//        CatalogAndSchema standard = standardize(accordingTo);
+//
+//        String catalogName = standard.getCatalogName();
+//        String schemaName = standard.getSchemaName();
+//
+//        if (catalogName == null) {
+//            if (!accordingTo.supportsSchemas() && schemaName != null) {
+//                return new CatalogAndSchema(accordingTo.correctObjectName(schemaName, Catalog.class), null);
+//            }
+//            catalogName = accordingTo.getDefaultCatalogName();
+//        }
+//
+//        if (schemaName == null) {
+//            schemaName = accordingTo.getDefaultSchemaName();
+//        }
+//
+//        if (catalogName != null) {
+//            catalogName = accordingTo.correctObjectName(catalogName, Catalog.class);
+//        }
+//        if (schemaName != null) {
+//            schemaName = accordingTo.correctObjectName(schemaName, Schema.class);
+//        }
 
         return new CatalogAndSchema(catalogName, schemaName);
     }

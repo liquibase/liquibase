@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -309,7 +310,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
         if (args.length == 2) {
             return database.escapeObjectName(args[0], objectType);
         } else {
-            return database.escapeObjectName(args[0], args[1], args[2], objectType);
+            return database.escapeObjectName(new ObjectName(args[0], args[1], args[2]), objectType);
         }
     }
 

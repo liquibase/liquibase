@@ -64,7 +64,6 @@ public class ChangeLogParameters {
             this.set("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
             this.set("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
             this.set("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
-            this.set("database.supportsSchemas", database.supportsSchemas());
             this.set("database.supportsSequences", database.supportsSequences());
             this.set("database.supportsTablespaces", database.supportsTablespaces());
         }

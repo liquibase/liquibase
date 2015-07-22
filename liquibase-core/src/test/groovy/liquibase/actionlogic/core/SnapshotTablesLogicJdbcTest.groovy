@@ -4,6 +4,7 @@ import liquibase.JUnitScope
 import liquibase.action.core.QueryJdbcMetaDataAction
 import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
+import liquibase.exception.ActionPerformException
 import liquibase.sdk.database.MockDatabase
 import liquibase.structure.ObjectName
 import liquibase.structure.ObjectReference
@@ -20,7 +21,7 @@ class SnapshotTablesLogicJdbcTest extends Specification {
     def "convertObject handles column name and table plus container correctly"() {
         when:
         def database = new MockDatabase();
-        database.setMaxContainerDepth(maxDepth)
+        database.setMaxReferenceContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(database)
 
         def object = new SnapshotTablesLogicJdbc().convertToObject(new RowBasedQueryResult.Row([
@@ -48,8 +49,7 @@ class SnapshotTablesLogicJdbcTest extends Specification {
     def "createSnapshotAction parameters are correct"() {
         when:
         def db = new MockDatabase()
-        db.setSupportsCatalogs(supportsCatalogs)
-        db.setSupportsSchemas(supportsSchemas)
+        db.setMaxSnapshotContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(db)
 
         def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(relatedType, name))
@@ -61,16 +61,16 @@ class SnapshotTablesLogicJdbcTest extends Specification {
         queryAction.arguments == arguments
 
         where:
-        relatedType | name                                  | supportsCatalogs | supportsSchemas | arguments
-        Table       | new ObjectName("cat", "schem", "tab") | true             | true            | ["cat", "schem", "tab", ["TABLE"]]
-        Table       | new ObjectName("schem", "tab")        | true             | true            | [null, "schem", "tab", ["TABLE"]]
-        Table       | new ObjectName("schem", "tab")        | false            | true            | ["schem", null, "tab", ["TABLE"]]
-        Table       | new ObjectName("tab")                 | true             | true            | [null, null, "tab", ["TABLE"]]
-        Table       | new ObjectName("tab")                 | false            | true            | [null, null, "tab", ["TABLE"]]
-        Table       | new ObjectName("tab")                 | false            | false           | [null, null, "tab", ["TABLE"]]
-        Schema      | new ObjectName("cat", "schema")       | true             | true            | ["cat", "schema", null, ["TABLE"]]
-        Schema      | new ObjectName("schema")              | true             | true            | [null, "schema", null, ["TABLE"]]
-        Schema      | new ObjectName("schema")              | false            | true            | ["schema", null, null, ["TABLE"]]
-        Catalog     | new ObjectName("cat")                 | true             | true            | ["cat", null, null, ["TABLE"]]
+        relatedType | name                                  | maxDepth | arguments
+        Table       | new ObjectName("cat", "schem", "tab") | 2        | ["cat", "schem", "tab", ["TABLE"]]
+        Table       | new ObjectName("schem", "tab")        | 2        | [null, "schem", "tab", ["TABLE"]]
+        Table       | new ObjectName("schem", "tab")        | 1        | ["schem", null, "tab", ["TABLE"]]
+        Table       | new ObjectName("tab")                 | 2        | [null, null, "tab", ["TABLE"]]
+        Table       | new ObjectName("tab")                 | 1        | [null, null, "tab", ["TABLE"]]
+        Table       | new ObjectName("tab")                 | 0        | [null, null, "tab", ["TABLE"]]
+        Schema      | new ObjectName("cat", "schema")       | 2        | ["cat", "schema", null, ["TABLE"]]
+        Schema      | new ObjectName("schema")              | 2        | [null, "schema", null, ["TABLE"]]
+        Schema      | new ObjectName("schema")              | 1        | ["schema", null, null, ["TABLE"]]
+        Catalog     | new ObjectName("cat")                 | 2        | ["cat", null, null, ["TABLE"]]
     }
 }

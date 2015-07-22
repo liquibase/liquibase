@@ -9,6 +9,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.core.Index;
 import liquibase.util.StringClauses;
 
 public class DropUniqueConstraintLogic extends AbstractSqlBuilderLogic<DropUniqueConstraintActon> {
@@ -37,7 +38,7 @@ public class DropUniqueConstraintLogic extends AbstractSqlBuilderLogic<DropUniqu
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP CONSTRAINT")
-                .append(database.escapeConstraintName(action.constraintName));
+                .append(database.escapeObjectName(action.constraintName, Index.class));
 
     }
 }

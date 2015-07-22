@@ -3,7 +3,6 @@ package liquibase.database.core.mssql;
 import java.math.BigInteger;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -196,17 +195,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-    @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // MSSQL server does not support the schema name for the index -
-        return super.escapeObjectName(indexName, Index.class);
-    }
-
-    @Override
-    public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return escapeObjectName(null, schemaName, tableName, Table.class);
-    }
-
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
@@ -272,6 +260,18 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "DF_" + columnName.container.name + "_" + columnName.name;
     }
 
+    @Override
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.isAssignableFrom(Index.class)) {
+            // MSSQL server does not support the schema name for the index -
+            return super.escapeObjectName(objectName.name, objectType);
+        } else if (objectType.isAssignableFrom(View.class)) {
+            // SQLServer does not support specifying the database name as a prefix to the object name
+            return super.escapeObjectName(objectName.truncate(2), objectType);
+        }
+
+        return super.escapeObjectName(objectName, objectType);
+    }
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
@@ -330,16 +330,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
 
         return selectOnly;
-    }
-
-    /**
-     * SQLServer does not support specifying the database name as a prefix to the object name
-     * @return
-     */
-    @Override
-    public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        return escapeObjectName(null, schemaName, viewName, View.class);
-
     }
 
     @Override
@@ -518,7 +508,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
+    public int getMaxReferenceContainerDepth() {
         return 2;
     }
 }

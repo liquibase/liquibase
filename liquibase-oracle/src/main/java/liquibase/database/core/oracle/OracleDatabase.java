@@ -141,14 +141,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-    /**
-     * Oracle supports catalogs in liquibase terms
-     *
-     * @return
-     */
     @Override
-    public boolean supportsSchemas() {
-        return false;
+    public int getMaxReferenceContainerDepth() {
+        return 1;
+    }
+
+    @Override
+    public int getMaxSnapshotContainerDepth() {
+        return 1;
     }
 
     @Override

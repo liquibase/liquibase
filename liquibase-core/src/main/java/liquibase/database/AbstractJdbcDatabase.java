@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
@@ -244,7 +243,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
-            if (defaultSchemaName != null && !this.supportsSchemas()) {
+            if (defaultSchemaName != null) {
                 return defaultSchemaName;
             }
 
@@ -303,11 +302,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getDefaultSchemaName() {
-
-        if (!supportsSchemas()) {
-            return getDefaultCatalogName();
-        }
-
         if (defaultSchemaName == null && connection != null) {
             defaultSchemaName = getConnectionSchemaName();
         }
@@ -345,7 +339,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
         defaultSchemaSet = schemaName != null;
-        if (!supportsSchemas()) {
+        if (getMaxReferenceContainerDepth() == 0) {
             defaultCatalogSet = schemaName != null;
         }
     }
@@ -643,7 +637,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean DEFAULT_VALUE = false;
             try {
                 if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
-                    storesLowerCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesLowerCaseIdentifiers();
+                    DatabaseMetaData metaData = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData();
+                    if (metaData == null) {
+                        storesLowerCaseIdentifiers = DEFAULT_VALUE;
+                    } else {
+                        storesLowerCaseIdentifiers = metaData.storesLowerCaseIdentifiers();
+                    }
                 } else {
                     storesLowerCaseIdentifiers = DEFAULT_VALUE;
                 }
@@ -660,7 +659,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean DEFAULT_VALUE = false;
             try {
                 if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
-                    storesLowerCaseQuotedIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesLowerCaseQuotedIdentifiers();
+                    DatabaseMetaData metaData = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData();
+                    if (metaData == null) {
+                        storesLowerCaseQuotedIdentifiers = DEFAULT_VALUE;
+                    } else {
+                        storesLowerCaseQuotedIdentifiers = metaData.storesLowerCaseQuotedIdentifiers();
+                    }
                 } else {
                     storesLowerCaseQuotedIdentifiers = DEFAULT_VALUE;
                 }
@@ -677,7 +681,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean DEFAULT_VALUE = false;
             try {
                 if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
-                    storesMixedCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesMixedCaseIdentifiers();
+                    DatabaseMetaData metaData = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData();
+                    if (metaData == null) {
+                        storesMixedCaseIdentifiers = DEFAULT_VALUE;
+                    } else {
+                        storesMixedCaseIdentifiers = metaData.storesMixedCaseIdentifiers();
+                    }
                 } else {
                     storesMixedCaseIdentifiers = DEFAULT_VALUE;
                 }
@@ -694,7 +703,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean DEFAULT_VALUE = false;
             try {
                 if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
-                    storesMixedCaseQuotedIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesMixedCaseQuotedIdentifiers();
+                    DatabaseMetaData metaData = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData();
+                    if (metaData == null) {
+                        storesMixedCaseQuotedIdentifiers = DEFAULT_VALUE;
+                    } else {
+                        storesMixedCaseQuotedIdentifiers = metaData.storesMixedCaseQuotedIdentifiers();
+                    }
                 } else {
                     storesMixedCaseQuotedIdentifiers = DEFAULT_VALUE;
                 }
@@ -711,7 +725,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean DEFAULT_VALUE = true;
             try {
                 if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
-                    storesUpperCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesUpperCaseIdentifiers();
+                    DatabaseMetaData metaData = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData();
+                    if (metaData == null) {
+                        storesUpperCaseIdentifiers = DEFAULT_VALUE;
+                    } else {
+                        storesUpperCaseIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesUpperCaseIdentifiers();
+                    }
                 } else {
                     storesUpperCaseIdentifiers = DEFAULT_VALUE;
                 }
@@ -728,7 +747,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             final boolean DEFAULT_VALUE = true;
             try {
                 if (getConnection() != null && getConnection() instanceof JdbcConnection && ((JdbcConnection) getConnection()).getUnderlyingConnection() != null) {
-                    storesUpperCaseQuotedIdentifiers = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData().storesUpperCaseQuotedIdentifiers();
+                    DatabaseMetaData metaData = ((JdbcConnection) getConnection()).getUnderlyingConnection().getMetaData();
+                    if (metaData == null) {
+                        storesUpperCaseQuotedIdentifiers = DEFAULT_VALUE;
+                    } else {
+                        storesUpperCaseQuotedIdentifiers = metaData.storesUpperCaseQuotedIdentifiers();
+                    }
                 } else {
                     storesUpperCaseQuotedIdentifiers = DEFAULT_VALUE;
                 }
@@ -983,122 +1007,20 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
-        String name = this.escapeObjectName(objectName.name, objectType);
-        ObjectName container = objectName.container;
-        int depth = 0;
-        while (depth++ < this.getMaxContainerDepth(objectType) && container != null && container.name != null) {
-            name = this.escapeObjectName(container.name, Schema.class) + "."+name;
-            container = container.container;
-        }
-
-        return name;
-    }
-
-    @Override
-    public String escapeTableName(final String catalogName, final String schemaName, final String tableName) {
-        return escapeObjectName(catalogName, schemaName, tableName, Table.class);
-    }
-
-    @Override
-    public String escapeObjectName(String catalogName, String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
-//        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
-//        catalogName = catalogAndSchema.getCatalogName();
-//        schemaName = catalogAndSchema.getSchemaName();
-
-        if (supportsSchemas()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
-
-            if (catalogName == null) {
-                catalogName = this.getDefaultCatalogName();
-            }
-            if (schemaName == null) {
-                schemaName = this.getDefaultSchemaName();
-            }
-
-            if (!supportsCatalogInObjectName(objectType)) {
-                catalogName = null;
-            }
-            if (catalogName == null && schemaName == null) {
-                return escapeObjectName(objectName, objectType);
-            } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
-                if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
-                    return escapeObjectName(objectName, objectType);
-                } else {
-                    return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
-                }
-            } else {
-                if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
-                    return escapeObjectName(objectName, objectType);
-                } else if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
-                    return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
-                } else {
-                    return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
-                }
-            }
-        } else if (supportsCatalogs()) {
-            catalogName = StringUtils.trimToNull(catalogName);
-            schemaName = StringUtils.trimToNull(schemaName);
-
-            if (catalogName != null) {
-                if (getOutputDefaultCatalog()) {
-                    return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
-                } else {
-                    if (!defaultCatalogSet && isDefaultCatalog(catalogName)) {
-                        return escapeObjectName(objectName, objectType);
-                    } else {
-                        return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
-                    }
-                }
-            } else {
-                if (schemaName != null) { //they actually mean catalog name
-                    if (getOutputDefaultCatalog()) {
-                        return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
-                    } else {
-                        if (!defaultCatalogSet && isDefaultCatalog(schemaName)) {
-                            return escapeObjectName(objectName, objectType);
-                        } else {
-                            return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
-                        }
-                    }
-                } else {
-                    catalogName = this.getDefaultCatalogName();
-
-                    if (catalogName == null) {
-                        return escapeObjectName(objectName, objectType);
-                    } else {
-                        if (defaultCatalogSet || (isDefaultCatalog(catalogName) && getOutputDefaultCatalog())) {
-                            return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
-                        } else {
-                            return escapeObjectName(objectName, objectType);
-                        }
-                    }
-                }
-            }
-
-        } else {
-            return escapeObjectName(objectName, objectType);
-        }
-    }
-
-    @Override
     public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
-        if (objectName != null) {
-            objectName = objectName.trim();
-            if (mustQuoteObjectName(objectName, objectType)) {
-                return quoteObject(objectName, objectType);
-            } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-                return quoteObject(objectName, objectType);
-            }
-            objectName = objectName.trim();
+        if (objectName == null) {
+            return null;
+        } else {
+            return quoteObject(objectName.trim(), objectType);
         }
-        return objectName;
     }
 
     @Override
     public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
-        return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
+        if (objectType.isAssignableFrom(Column.class) || objectType.isAssignableFrom(PrimaryKey.class)  || objectType.isAssignableFrom(UniqueConstraint.class)) {
+            return escapeObjectName(objectName.name, objectType);
+        }
+        return StringUtils.join(objectName.truncate(getMaxReferenceContainerDepth() + 1).asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
@@ -1115,92 +1037,13 @@ public abstract class AbstractJdbcDatabase implements Database {
                 + quotingEndCharacter;
     }
 
-    @Override
-    public String escapeIndexName(final String catalogName, final String schemaName, final String indexName) {
-        return escapeObjectName(catalogName, schemaName, indexName, Index.class);
-    }
-
-    @Override
-    public String escapeSequenceName(final String catalogName, final String schemaName, final String sequenceName) {
-        return escapeObjectName(catalogName, schemaName, sequenceName, Sequence.class);
-    }
-
-    @Override
-    public String escapeConstraintName(final String constraintName) {
-        return escapeObjectName(constraintName, Index.class);
-    }
-
-    @Override
-    public String escapeColumnName(final String columnName) {
-        return escapeObjectName(columnName, Column.class);
-    }
-
-    /**
-     * Similar to {@link #escapeColumnName(String, String, String, String)} but allows control over whether function-like names should be left unquoted.
-     *
-     * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
-     */
-    @Override
-    public String escapeColumnName(String columnName, boolean quoteNamesThatMayBeFunctions) {
-        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-            return quoteObject(columnName, Column.class);
-        }
-
-        if (!quoteNamesThatMayBeFunctions && columnName.contains("(")) {
-            return columnName;
-        }
-        return escapeObjectName(columnName, Column.class);
-    }
-
-    @Override
-    public String escapeColumnNameList(final String columnNames) {
-        StringBuilder sb = new StringBuilder();
-        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-            boolean descending = false;
-            if (columnName.matches("(?i).*\\s+DESC")) {
-                columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
-                descending = true;
-            } else if (columnName.matches("(?i).*\\s+ASC")) {
-                columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
-            }
-            sb.append(escapeObjectName(columnName, Column.class));
-            if (descending) {
-                sb.append(" DESC");
-            }
-        }
-        return sb.toString();
-    }
-
-    @Override
-    public boolean supportsSchemas() {
-        return getMaxContainerDepth(Table.class) > 0;
-    }
-
-    @Override
-    public boolean supportsCatalogs() {
-        return getMaxContainerDepth(Table.class) > 1;
-    }
-
     public boolean jdbcCallsCatalogsSchemas() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsCatalogInObjectName(final Class<? extends DatabaseObject> type) {
         return false;
     }
 
     @Override
     public String generatePrimaryKeyName(final String tableName) {
         return "PK_" + tableName.toUpperCase();
-    }
-
-    @Override
-    public String escapeViewName(final String catalogName, final String schemaName, final String viewName) {
-        return escapeObjectName(catalogName, schemaName, viewName, View.class);
     }
 
     /**
@@ -1573,7 +1416,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isDefaultSchema(final String catalog, final String schema) {
-        if (!supportsSchemas()) {
+        if (getMaxReferenceContainerDepth() == 0) {
             return true;
         }
 
@@ -1585,7 +1428,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isDefaultCatalog(final String catalog) {
-        if (!supportsCatalogs()) {
+        if (getMaxReferenceContainerDepth() < 2) {
             return true;
         }
 
@@ -1643,7 +1486,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
+    public int getMaxReferenceContainerDepth() {
         return 1;
+    }
+
+    @Override
+    public int getMaxSnapshotContainerDepth() {
+        return 2;
     }
 }

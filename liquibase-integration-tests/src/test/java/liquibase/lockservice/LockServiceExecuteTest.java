@@ -5,6 +5,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.executor.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 import liquibase.test.TestContext;
 import org.junit.After;
 import static org.junit.Assert.assertFalse;
@@ -32,12 +34,12 @@ public class LockServiceExecuteTest {
                 try {
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
                     try {
-                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                        statement.execute("drop table " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
                     } catch (Exception e) {
                         //ok
                     }
                     try {
-                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                        statement.execute("drop table " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
                     } catch (Exception e) {
                         //ok
                     }

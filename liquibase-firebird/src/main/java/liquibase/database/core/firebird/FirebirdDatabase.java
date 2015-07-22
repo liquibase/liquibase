@@ -1,6 +1,5 @@
 package liquibase.database.core.firebird;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -86,13 +85,13 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsSchemas() {
-        return false;
+    public int getMaxReferenceContainerDepth() {
+        return 0;
     }
 
     @Override
-    public boolean supportsCatalogs() {
-        return false;
+    public int getMaxSnapshotContainerDepth() {
+        return 0;
     }
 
     @Override

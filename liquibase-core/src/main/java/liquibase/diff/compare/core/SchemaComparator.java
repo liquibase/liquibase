@@ -34,25 +34,25 @@ public class SchemaComparator implements DatabaseObjectComparator {
         CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
         CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
 
-        if (accordingTo.supportsCatalogs()) {
-            if (thisSchema.getCatalogName() == null) {
-                if (!(otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName()))) {
-                    return false;
-            }
-            } else {
-            if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
-                return false;
-                }
-            }
-        }
-        if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
-            String thisSchemaName = thisSchema.getSchemaName();
-            String otherSchemaName = otherSchema.getSchemaName();
-            if (thisSchemaName == null) {
-                return otherSchemaName == null;
-            }
-            return thisSchemaName.equalsIgnoreCase(otherSchemaName);
-        }
+//        if (accordingTo.supportsCatalogs()) {
+//            if (thisSchema.getCatalogName() == null) {
+//                if (!(otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName()))) {
+//                    return false;
+//            }
+//            } else {
+//            if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
+//                return false;
+//                }
+//            }
+//        }
+//        if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
+//            String thisSchemaName = thisSchema.getSchemaName();
+//            String otherSchemaName = otherSchema.getSchemaName();
+//            if (thisSchemaName == null) {
+//                return otherSchemaName == null;
+//            }
+//            return thisSchemaName.equalsIgnoreCase(otherSchemaName);
+//        }
         return true;
     }
 

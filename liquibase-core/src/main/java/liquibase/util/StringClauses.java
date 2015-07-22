@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 
 import java.util.*;
@@ -138,13 +139,23 @@ public class StringClauses {
         return this;
     }
 
-    public StringClauses append(List<ObjectName> objectNames, Class<? extends DatabaseObject> type, Scope scope) {
+    public StringClauses append(List objects, Class<? extends DatabaseObject> type, Scope scope) {
         Database database = scope.getDatabase();
         if (database == null) {
             database = new UnsupportedDatabase();
         }
-        for (ObjectName name : objectNames) {
-            this.append(database.escapeObjectName(name.name, type));
+        for (Object obj : objects) {
+            if (obj instanceof DatabaseObject) {
+                this.append(database.escapeObjectName(((DatabaseObject) obj).getName(), type));
+            } else if (obj instanceof ObjectName) {
+                this.append(database.escapeObjectName(((ObjectName) obj), type));
+            } else if (obj instanceof ObjectReference) {
+                this.append(database.escapeObjectName(((ObjectReference) obj).objectName, type));
+            } else if (obj instanceof StringClauses) {
+                this.append(obj.toString(), ((StringClauses) obj));
+            } else {
+                this.append(obj.toString());
+            }
         }
 
         return this;

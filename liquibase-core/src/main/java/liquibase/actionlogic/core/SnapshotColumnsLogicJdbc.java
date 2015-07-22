@@ -7,13 +7,11 @@ import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
-import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
     /**
      * Creates an ObjectName with null values for "unknown" portions and calls {@link #createColumnSnapshotAction(ObjectName)}.
      */
-    protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws DatabaseException, ActionPerformException {
+    protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
         ObjectReference relatedTo = action.relatedTo;
 
         ObjectName columnName;
@@ -53,7 +51,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
         Database database = scope.getDatabase();
 
         if (relatedTo.instanceOf(Catalog.class)) {
-            if (!database.supportsCatalogs()) {
+            if (database.getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + database.getShortName());
             }
             columnName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
@@ -73,7 +71,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
     protected Action createColumnSnapshotAction(ObjectName columnName, Scope scope) {
         List<String> nameParts = columnName.asList(4);
 
-        if (nameParts.get(0) != null || scope.getDatabase().supportsCatalogs()) {
+        if (nameParts.get(0) != null || scope.getDatabase().getMaxSnapshotContainerDepth() > 1) {
             return new QueryJdbcMetaDataAction("getColumns", nameParts.get(0), nameParts.get(1), nameParts.get(2), nameParts.get(3));
         } else {
             return new QueryJdbcMetaDataAction("getColumns", nameParts.get(1), null, nameParts.get(2), nameParts.get(3));
@@ -96,7 +94,12 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 
 
         Column column = new Column();
-        column.setName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName));
+        if (rawSchemaName == null) {
+            column.setName(new ObjectName(rawCatalogName, rawTableName, rawColumnName));
+        } else {
+            column.setName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName));
+
+        }
 
         column.remarks = remarks;
 

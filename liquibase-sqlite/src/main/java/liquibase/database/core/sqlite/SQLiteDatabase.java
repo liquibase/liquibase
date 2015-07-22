@@ -9,15 +9,11 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 
@@ -95,8 +91,13 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsSchemas() {
-        return false;
+    public int getMaxReferenceContainerDepth() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxSnapshotContainerDepth() {
+        return 0;
     }
 
     public String getTrigger(String table, String column) {

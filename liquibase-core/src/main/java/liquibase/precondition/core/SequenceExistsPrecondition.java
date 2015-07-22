@@ -58,7 +58,7 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
         Schema schema = new Schema(getCatalogName(), getSchemaName());
         try {
             if (!SnapshotGeneratorFactory.getInstance().has(new Sequence(new ObjectName(getSequenceName())).setSchema(schema), database)) {
-                throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
+                throw new PreconditionFailedException("Sequence "+database.escapeObjectName(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName()), Sequence.class)+" does not exist", changeLog, this);
             }
         } catch (LiquibaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);

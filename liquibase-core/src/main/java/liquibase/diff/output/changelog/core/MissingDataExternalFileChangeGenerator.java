@@ -10,6 +10,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Data;
 import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
@@ -55,7 +56,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName());
+            String sql = "SELECT * FROM " + referenceDatabase.escapeObjectName(new ObjectName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName()), Table.class);
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(100);

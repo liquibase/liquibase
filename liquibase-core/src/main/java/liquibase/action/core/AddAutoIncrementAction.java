@@ -17,4 +17,11 @@ public class AddAutoIncrementAction extends AbstractAction {
     public BigInteger startWith;
     public BigInteger incrementBy;
 
+    public AddAutoIncrementAction() {
+    }
+
+    public AddAutoIncrementAction(ObjectName columnName, DataType columnDataType) {
+        this.columnName = columnName;
+        this.columnDataType = columnDataType;
+    }
 }

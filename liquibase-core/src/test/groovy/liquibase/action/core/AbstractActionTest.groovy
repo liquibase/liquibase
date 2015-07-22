@@ -132,12 +132,12 @@ abstract class AbstractActionTest extends Specification {
         @Override
         protected int getPriority(AbstractActionTest.TestDetails obj, Scope scope, Object... args) {
             AbstractActionTest test = (AbstractActionTest) args[0];
-            String testName = test.getClass().getName();
-            String testDetailsName = obj.getClass().getName();
+            Class testName = test.getClass();
+            Class testDetails = obj.getClass();
 
-            if ((testName + '$TestDetails').equals(testDetailsName)) {
+            if ((testName.getName() + '$TestDetails').equals(testDetails.getName())) {
                 return Service.PRIORITY_DEFAULT;
-            } else if ((testName + "Details" + scope.getDatabase().getShortName()).equalsIgnoreCase(testDetailsName)) {
+            } else if ((testName.getSimpleName() + "Details" + scope.getDatabase().getShortName()).equalsIgnoreCase(testDetails.getSimpleName())) {
                 return Service.PRIORITY_SPECIALIZED;
             } else {
                 return Service.PRIORITY_NOT_APPLICABLE;

@@ -12,6 +12,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         for(String thisPkColumn:pkColumns)
         {
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
-            where.append(database.escapeColumnName(thisPkColumn)).append(newValue == null || newValue.toString().equalsIgnoreCase("NULL") ? " is " : " = ");
+            where.append(database.escapeObjectName(thisPkColumn, Column.class)).append(newValue == null || newValue.toString().equalsIgnoreCase("NULL") ? " is " : " = ");
 
             if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
                 where.append("NULL");

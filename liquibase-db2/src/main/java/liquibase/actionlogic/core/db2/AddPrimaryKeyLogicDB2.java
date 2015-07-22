@@ -21,6 +21,6 @@ public class AddPrimaryKeyLogicDB2 extends AddPrimaryKeyLogic {
     @Override
     public ActionResult execute(AddPrimaryKeyAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult((DelegateResult) super.execute(action, scope),
-                new ReorganizeTableAction(action.tableName));
+                new ReorganizeTableAction(action.primaryKey.name.container));
     }
 }

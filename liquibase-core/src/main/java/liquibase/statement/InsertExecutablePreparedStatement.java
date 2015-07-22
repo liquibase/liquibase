@@ -7,6 +7,9 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 /**
  * Handles INSERT Execution
@@ -21,14 +24,14 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	protected String generateSql(List<ColumnConfig> cols) {
 		StringBuilder sql = new StringBuilder("INSERT INTO ");
 	    StringBuilder params = new StringBuilder("VALUES(");
-	    sql.append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
+	    sql.append(database.escapeObjectName(new ObjectName(getCatalogName(), getSchemaName(), getTableName()), Table.class));
 	    sql.append("(");
 	    for(ColumnConfig column : getColumns()) {
 	        if(database.supportsAutoIncrement()
 	            && Boolean.TRUE.equals(column.isAutoIncrement())) {
 	            continue;
 	        }
-	        sql.append(database.escapeColumnName(column.getName()));
+	        sql.append(database.escapeObjectName(column.getName(), Column.class));
 	        sql.append(", ");
 	        params.append("?, ");
 	        cols.add(column);

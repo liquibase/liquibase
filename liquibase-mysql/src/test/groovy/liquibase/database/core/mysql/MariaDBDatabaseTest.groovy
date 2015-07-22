@@ -49,7 +49,6 @@ public class MariaDBDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
     }
 
-    @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();

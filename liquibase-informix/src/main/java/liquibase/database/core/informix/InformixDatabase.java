@@ -198,17 +198,17 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 		return false;
 	}
 
-
     @Override
-    public String escapeObjectName(final String catalogName, final String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
-        String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
-        if (name == null) {
-            return null;
-        }
-        if (name.matches(".*\\..*\\..*")) {
-            name = name.replaceFirst("\\.", ":"); //informix uses : to separate catalog and schema. Like "catalog:schema.table"
-        }
-        return name;
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+//        String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+//        if (name == null) {
+//            return null;
+//        }
+//        if (name.matches(".*\\..*\\..*")) {
+//            name = name.replaceFirst("\\.", ":"); //informix uses : to separate catalog and schema. Like "catalog:schema.table"
+//        }
+//        return name;
+        return super.escapeObjectName(objectName, objectType);
     }
 
     @Override

@@ -7,6 +7,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.exception.DatabaseException;
@@ -158,13 +159,21 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsCatalogs() {
-        return false;
+    public int getMaxSnapshotContainerDepth() {
+        return 1;
     }
 
     @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        return escapeObjectName(indexName, Index.class);
+    public int getMaxReferenceContainerDepth() {
+        return 1;
+    }
+
+    @Override
+    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectType.isAssignableFrom(Index.class)) {
+            return super.escapeObjectName(objectName.name, objectType);
+        }
+        return super.escapeObjectName(objectName, objectType);
     }
 
     @Override

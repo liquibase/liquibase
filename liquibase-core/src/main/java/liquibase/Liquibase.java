@@ -1415,7 +1415,6 @@ public class Liquibase {
             setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
             setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
             setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
-            setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
             setChangeLogParameter("database.supportsSequences", database.supportsSequences());
             setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
     }

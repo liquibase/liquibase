@@ -218,4 +218,14 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         }
         return true;
     }
+
+    /**
+     * Returns an objectName that is truncated to the given max length
+     */
+    public ObjectName truncate(int maxLength) {
+        List<String> names = this.asList();
+        int length = Math.min(maxLength, names.size());
+
+        return new ObjectName(names.subList(names.size()-length, names.size()).toArray(new String[length]));
+    }
 }

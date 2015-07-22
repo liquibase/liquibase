@@ -4,6 +4,8 @@ import liquibase.actionlogic.core.InsertOrUpdateLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.structure.ObjectName;
+import liquibase.structure.core.Table;
 
 public class InsertOrUpdateLogicMSSQL extends InsertOrUpdateLogic {
     @Override
@@ -16,7 +18,7 @@ public class InsertOrUpdateLogicMSSQL extends InsertOrUpdateLogic {
         StringBuffer recordCheck = new StringBuffer();
         recordCheck.append("DECLARE @reccount integer\n");
         recordCheck.append("SELECT @reccount = count(*) FROM ");
-        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
+        recordCheck.append(database.escapeObjectName(new ObjectName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()), Table.class));
         recordCheck.append(" WHERE ");
         recordCheck.append(whereClause);
         recordCheck.append("\n");

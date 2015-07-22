@@ -18,6 +18,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.example.ExampleCustomDatabase;
@@ -201,35 +202,35 @@ public abstract class AbstractExecuteTest {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
 
-            if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
-                connection.commit();
-
-                try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
-                } catch (SQLException e) {
-                    //ok
-                }
-                connection.commit();
-                try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
-                } catch (SQLException e) {
-                    //ok
-                }
-                connection.commit();
-            }
+//            if (database.supportsSchemas()) {
+//                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+//                connection.commit();
+//
+//                try {
+//                    connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()), Table.class));
+//                } catch (SQLException e) {
+//                    //ok
+//                }
+//                connection.commit();
+//                try {
+//                    connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()), Table.class));
+//                } catch (SQLException e) {
+//                    //ok
+//                }
+//                connection.commit();
+//            }
 
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {

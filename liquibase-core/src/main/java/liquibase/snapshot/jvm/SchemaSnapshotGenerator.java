@@ -35,56 +35,56 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
 
         String catalogName = ((Schema) example).getCatalogName();
         String schemaName = example.getSimpleName();
-        if (database.supportsSchemas()) {
-            if (catalogName == null) {
-                catalogName = database.getDefaultCatalogName();
-            }
-            if (schemaName == null) {
-                schemaName = database.getDefaultSchemaName();
-            }
-        } else {
-            if (database.supportsCatalogs()) {
-                if (catalogName == null && schemaName != null) {
-                    catalogName = schemaName;
-                    schemaName = null;
-                }
-            } else {
-                catalogName = null;
-                schemaName = null;
-            }
-        }
+//        if (database.supportsSchemas()) {
+//            if (catalogName == null) {
+//                catalogName = database.getDefaultCatalogName();
+//            }
+//            if (schemaName == null) {
+//                schemaName = database.getDefaultSchemaName();
+//            }
+//        } else {
+//            if (database.supportsCatalogs()) {
+//                if (catalogName == null && schemaName != null) {
+//                    catalogName = schemaName;
+//                    schemaName = null;
+//                }
+//            } else {
+//                catalogName = null;
+//                schemaName = null;
+//            }
+//        }
 
         example = new Schema(catalogName, schemaName);
 
         // use LEGACY quoting since we're dealing with system objects
         ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
-        try {
-            if (database.supportsSchemas()) {
-                for (String tableSchema : getDatabaseSchemaNames(database)) {
-                    CatalogAndSchema schemaFromJdbcInfo = toCatalogAndSchema(tableSchema, database);
-
-                    Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
-
-                    Schema schema = new Schema(catalog, tableSchema);
-                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, database)) {
-                        if (match == null) {
-                            match = schema;
-                        } else {
-                            throw new InvalidExampleException("Found multiple catalog/schemas matching " + ((Schema) example).getCatalogName() + "." + example.getName());
-                        }
-                    }
-                }
-            } else {
-                Catalog catalog = new Catalog(catalogName);
-                match = new Schema(catalog, catalogName);
-            }
-
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
-            database.setObjectQuotingStrategy(currentStrategy);
-        }
+//        try {
+//            if (database.supportsSchemas()) {
+//                for (String tableSchema : getDatabaseSchemaNames(database)) {
+//                    CatalogAndSchema schemaFromJdbcInfo = toCatalogAndSchema(tableSchema, database);
+//
+//                    Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
+//
+//                    Schema schema = new Schema(catalog, tableSchema);
+//                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, database)) {
+//                        if (match == null) {
+//                            match = schema;
+//                        } else {
+//                            throw new InvalidExampleException("Found multiple catalog/schemas matching " + ((Schema) example).getCatalogName() + "." + example.getName());
+//                        }
+//                    }
+//                }
+//            } else {
+//                Catalog catalog = new Catalog(catalogName);
+//                match = new Schema(catalog, catalogName);
+//            }
+//
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        } finally {
+//            database.setObjectQuotingStrategy(currentStrategy);
+//        }
 
         if (match != null && (match.getName() == null || match.getName().equals(database.getDefaultSchemaName()))) {
             match.setDefault(true);

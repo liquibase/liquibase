@@ -4,9 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.*;
-import liquibase.actionlogic.AbstractSqlBuilderLogic;
-import liquibase.actionlogic.ActionResult;
-import liquibase.actionlogic.DelegateResult;
+import liquibase.actionlogic.*;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
@@ -66,7 +64,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 
         StringClauses createTable = new StringClauses(" ");
         createTable.append("CREATE TABLE");
-        createTable.append(Clauses.tableName, database.getQualifiedName(action.tableName, Table.class));
+        createTable.append(Clauses.tableName, database.escapeObjectName(action.tableName, Table.class));
 
         List<Column> columns = CollectionUtil.createIfNull(action.columns);
 //        for (Column column : columns) {
@@ -103,7 +101,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
                     }
                     if (pkName != null) {
                         primaryKey.append("CONSTRAINT");
-                        primaryKey.append(database.escapeConstraintName(pkName));
+                        primaryKey.append(database.escapeObjectName(pkName, Index.class));
                     }
                 }
                 primaryKey.append("PRIMARY KEY");
@@ -165,12 +163,12 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
         String constraintName = uniqueConstraint.getSimpleName();
 
         if (constraintName != null) {
-            clauses.append(UniqueConstraintClauses.constraintName, "CONSTRAINT "+database.escapeConstraintName(constraintName));
+            clauses.append(UniqueConstraintClauses.constraintName, "CONSTRAINT "+database.escapeObjectName(constraintName, Index.class));
         }
 
         clauses.append("UNIQUE");
 
-        clauses.append(UniqueConstraintClauses.columns, "("+database.escapeColumnNameList(StringUtils.join(CollectionUtil.createIfNull(uniqueConstraint.columns), ", ", new StringUtils.ObjectNameFormatter(Column.class, scope.getDatabase())))+")");
+        clauses.append(UniqueConstraintClauses.columns, new StringClauses("(", ", ", ")").append(uniqueConstraint.columns, Column.class, scope));
 
         return clauses;
     }
@@ -256,8 +254,11 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             if (database.supportsAutoIncrement()) {
                 BigInteger startWith = autoIncrementInformation.startWith;
                 BigInteger incrementBy = autoIncrementInformation.incrementBy;
-//                String autoIncrementClause = database.getAutoIncrementClause(startWith, incrementBy);
+                ActionLogic addAutoIncrementLogic = scope.getSingleton(ActionLogicFactory.class).getActionLogic(new AddAutoIncrementAction(), scope);
 
+                StringClauses autoIncrementClause = ((AddAutoIncrementLogic) addAutoIncrementLogic).generateAutoIncrementClause(startWith, incrementBy);
+
+                columnClause.append(ColumnClauses.autoIncrement, autoIncrementClause);
 //                if (!"".equals(autoIncrementClause)) {
 //                    columnClause.append(ColumnClauses.autoIncrement, autoIncrementClause);
 //                }

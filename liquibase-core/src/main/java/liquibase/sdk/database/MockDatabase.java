@@ -10,7 +10,6 @@ import java.util.List;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -29,7 +28,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.structure.core.DataType;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
@@ -37,11 +35,10 @@ public class MockDatabase implements Database, InternalDatabase {
 
     private DatabaseConnection connection;
 
-    private int maxContainerDepth = 2;
+    private int maxReferenceContainerDepth = 2;
+    private int maxSnapshotContainerDepth = 2;
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
-    private boolean supportsCatalogs = true;
-    private boolean supportsSchemas = true;
     private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
@@ -364,68 +361,12 @@ public class MockDatabase implements Database, InternalDatabase {
         return defaultDateValue.toString();
     }
 
-    @Override
-    public String escapeTableName(final String catalogName, final String schemaName, final String tableName) {
-        if (schemaName == null) {
-            return tableName;
-        } else {
-            return schemaName+"."+tableName;
-        }
-    }
-
-    @Override
-    public String escapeIndexName(final String catalogName, final String schemaName, final String indexName) {
-        return escapeTableName(catalogName, schemaName, indexName);
-    }
-
-    @Override
-    public String escapeColumnName(final String columnName) {
-        return columnName;
-    }
-
-    @Override
-    public String escapeColumnName(String columnName, boolean quoteNamesThatMayBeFunctions) {
-        return columnName;
-    }
-
-    @Override
-    public String escapeColumnNameList(final String columnNames) {
-        return columnNames;
-    }
-
-    @Override
-    public String escapeSequenceName(final String catalogName, final String schemaName, final String sequenceName) {
-        if (sequenceName == null) {
-            return sequenceName;
-        } else {
-            return schemaName+"."+sequenceName;
-        }
-    }
-
     public String convertRequestedSchemaToSchema(final String requestedSchema) throws DatabaseException {
         return requestedSchema;
     }
 
     public String convertRequestedSchemaToCatalog(final String requestedSchema) throws DatabaseException {
         return null;
-    }
-
-    @Override
-    public boolean supportsSchemas() {
-        return supportsSchemas;
-    }
-
-    public void setSupportsSchemas(boolean supportsSchemas) {
-        this.supportsSchemas = supportsSchemas;
-    }
-
-    @Override
-    public boolean supportsCatalogs() {
-        return supportsCatalogs;
-    }
-
-    public void setSupportsCatalogs(boolean supportsCatalogs) {
-        this.supportsCatalogs = supportsCatalogs;
     }
 
     public boolean supportsCatalogInObjectName() {
@@ -435,11 +376,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public String generatePrimaryKeyName(final String tableName) {
         return "PK_"+tableName;
-    }
-
-    @Override
-    public String escapeViewName(final String catalogName, final String schemaName, final String viewName) {
-        return escapeTableName(catalogName, schemaName, viewName);
     }
 
     public boolean acquireLock() throws LockException {
@@ -506,11 +442,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String escapeConstraintName(final String constraintName) {
-        return constraintName;
-    }
-
-    @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
     	return true;
     }
@@ -523,11 +454,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
         return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
-    }
-
-    @Override
-    public String escapeObjectName(final String catalogName, final String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return "`"+catalogName +"`.`"+schemaName+"`.`"+objectName+"`";
     }
 
     @Override
@@ -704,11 +630,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean supportsCatalogInObjectName(final Class<? extends DatabaseObject> type) {
-        return true;
-    }
-
-    @Override
     public boolean createsIndexesForForeignKeys() {
         return false;
     }
@@ -782,17 +703,22 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String getQualifiedName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
-        return objectName.toString();
+    public int getMaxReferenceContainerDepth() {
+        return maxReferenceContainerDepth;
+    }
+
+    public MockDatabase setMaxReferenceContainerDepth(int maxReferenceContainerDepth) {
+        this.maxReferenceContainerDepth = maxReferenceContainerDepth;
+        return this;
     }
 
     @Override
-    public int getMaxContainerDepth(Class<? extends DatabaseObject> type) {
-        return maxContainerDepth;
+    public int getMaxSnapshotContainerDepth() {
+        return maxSnapshotContainerDepth;
     }
 
-    public MockDatabase setMaxContainerDepth(int maxContainerDepth) {
-        this.maxContainerDepth = maxContainerDepth;
+    public MockDatabase setMaxSnapshotContainerDepth(int maxContainerDepth) {
+        this.maxSnapshotContainerDepth = maxContainerDepth;
         return this;
     }
 
