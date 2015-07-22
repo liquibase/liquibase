@@ -405,7 +405,7 @@ public class FilenameUtils {
             return normalize(fullFilenameToAdd);
         }
         if (basePath == null) {
-            return null;
+            return fullFilenameToAdd;
         }
         int len = basePath.length();
         if (len == 0) {
