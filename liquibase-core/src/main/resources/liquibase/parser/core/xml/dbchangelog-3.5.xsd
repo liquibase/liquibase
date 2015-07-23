@@ -256,6 +256,7 @@
 		<xsd:attribute name="runInTransaction" type="booleanExp" default="true" />
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
+        <xsd:attribute name="created" type="xsd:string"/>
 	</xsd:attributeGroup>
 
 	<!-- Attributes for constraints -->

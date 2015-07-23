@@ -17,7 +17,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.parser.NamespaceDetails;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
@@ -177,6 +176,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     private DatabaseChangeLog changeLog;
 
+    private String created;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -255,6 +256,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.labels = new Labels(StringUtils.trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
+        this.created = node.getChildValue(null, "created", String.class);
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
@@ -427,6 +429,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
         return execute(databaseChangeLog, null, database);
     }
+
     /**
      * This method will actually execute each of the changes in the list against the
      * specified database.
@@ -904,7 +907,15 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
         return objectQuotingStrategy;
     }
- 
+
+    public String getCreated() {
+        return created;
+    }
+
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
     @Override
     public String getSerializedObjectName() {
         return "changeSet";
@@ -924,7 +935,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 "changes",
                 "rollback",
                 "labels",
-                "objectQuotingStrategy"));
+                "objectQuotingStrategy",
+                "created"));
 
     }
 
@@ -995,6 +1007,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         if (field.equals("changes")) {
             return getChanges();
+        }
+
+        if (field.equals("created")) {
+            return getCreated();
         }
 
         if (field.equals("rollback")) {
