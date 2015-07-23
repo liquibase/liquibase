@@ -70,6 +70,12 @@ public class DataTypeFactoryTest extends Specification {
         "[float]"                                            | new MSSQLDatabase()   | "[float](53)"                                        | FloatType     | false
         "float(53)"                                          | new MSSQLDatabase()   | "[float](53)"                                        | FloatType     | false
         "[float](53)"                                        | new MSSQLDatabase()   | "[float](53)"                                        | FloatType     | false
+        "geography"                                          | new MSSQLDatabase()   | "[geography]"                                        | UnknownType   | false
+        "[geography]"                                        | new MSSQLDatabase()   | "[geography]"                                        | UnknownType   | false
+        "geography(1, 2)"                                    | new MSSQLDatabase()   | "[geography]"                                        | UnknownType   | false
+        "geometry"                                           | new MSSQLDatabase()   | "[geometry]"                                         | UnknownType   | false
+        "[geometry]"                                         | new MSSQLDatabase()   | "[geometry]"                                         | UnknownType   | false
+        "geometry(3, 4)"                                     | new MSSQLDatabase()   | "[geometry]"                                         | UnknownType   | false
         "image"                                              | new MSSQLDatabase()   | "[image]"                                            | BlobType      | false
         "[image]"                                            | new MSSQLDatabase()   | "[image]"                                            | BlobType      | false
         "int"                                                | new MSSQLDatabase()   | "[int]"                                              | IntType       | false
@@ -106,6 +112,9 @@ public class DataTypeFactoryTest extends Specification {
         "[smallint]"                                         | new MSSQLDatabase()   | "[smallint]"                                         | SmallIntType  | false
         "smallmoney"                                         | new MSSQLDatabase()   | "[smallmoney]"                                       | CurrencyType  | false
         "[smallmoney]"                                       | new MSSQLDatabase()   | "[smallmoney]"                                       | CurrencyType  | false
+        "sql_variant"                                        | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
+        "[sql_variant]"                                      | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
+        "sql_variant(5, 6)"                                  | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
         "text"                                               | new MSSQLDatabase()   | "[text]"                                             | ClobType      | false
         "[text]"                                             | new MSSQLDatabase()   | "[text]"                                             | ClobType      | false
         "time"                                               | new MSSQLDatabase()   | "[time](7)"                                          | TimeType      | false
