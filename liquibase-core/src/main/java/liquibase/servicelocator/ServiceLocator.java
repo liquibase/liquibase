@@ -2,6 +2,7 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -28,7 +29,11 @@ public class ServiceLocator {
             Class<?> scanner = Class.forName("Liquibase.ServiceLocator.ClrServiceLocator, Liquibase");
             instance = (ServiceLocator) scanner.newInstance();
         } catch (Exception e) {
-            instance = new ServiceLocator();
+            try {
+                instance = new ServiceLocator();
+            } catch (Throwable e1) {
+                LogFactory.getInstance().getLog().severe("Cannot build ServiceLocator", e1);
+            }
         }
     }
 
