@@ -28,15 +28,17 @@ public class DefaultConstraintConfig extends AbstractLiquibaseSerializable {
         return name;
     }
 
-    public void setName(String name) {
+    public DefaultConstraintConfig setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getExpression() {
         return expression;
     }
 
-    public void setExpression(String expression) {
+    public DefaultConstraintConfig setExpression(String expression) {
         this.expression = expression;
+        return this;
     }
 }

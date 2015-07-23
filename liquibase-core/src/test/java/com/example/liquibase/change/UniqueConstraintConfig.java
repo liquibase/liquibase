@@ -23,15 +23,17 @@ public class UniqueConstraintConfig extends AbstractLiquibaseSerializable {
         return name;
     }
 
-    public void setName(String name) {
+    public UniqueConstraintConfig setName(String name) {
         this.name = name;
+        return this;
     }
 
     public List<KeyColumnConfig> getKeyColumns() {
         return keyColumns;
     }
 
-    public void setKeyColumns(List<KeyColumnConfig> keyColumns) {
+    public UniqueConstraintConfig setKeyColumns(List<KeyColumnConfig> keyColumns) {
         this.keyColumns = keyColumns;
+        return this;
     }
 }
