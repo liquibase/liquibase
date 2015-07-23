@@ -1,9 +1,9 @@
 package liquibase.util;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.grammer.SimpleSqlGrammer;
-import liquibase.util.grammer.SimpleSqlGrammerConstants;
-import liquibase.util.grammer.Token;
+import liquibase.util.grammar.SimpleSqlGrammar;
+import liquibase.util.grammar.SimpleSqlGrammarConstants;
+import liquibase.util.grammar.Token;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -19,15 +19,15 @@ public class SqlParser {
         StringClauses clauses = new StringClauses(preserveWhitespace?"":" ");
 
         int i =0;
-        SimpleSqlGrammer t = new SimpleSqlGrammer(new StringReader(sqlBlock));
+        SimpleSqlGrammar t = new SimpleSqlGrammar(new StringReader(sqlBlock));
         try {
             Token token = t.getNextToken();
             while (!token.toString().equals("")) {
-                if (token.kind == SimpleSqlGrammerConstants.WHITESPACE) {
+                if (token.kind == SimpleSqlGrammarConstants.WHITESPACE) {
                     if (preserveWhitespace) {
                         clauses.append(new StringClauses.Whitespace(token.image));
                     }
-                } else if (token.kind == SimpleSqlGrammerConstants.LINE_COMMENT || token.kind == SimpleSqlGrammerConstants.MULTI_LINE_COMMENT) {
+                } else if (token.kind == SimpleSqlGrammarConstants.LINE_COMMENT || token.kind == SimpleSqlGrammarConstants.MULTI_LINE_COMMENT) {
                     if (preserveComments) {
                         clauses.append(new StringClauses.Comment(token.image));
                     }
