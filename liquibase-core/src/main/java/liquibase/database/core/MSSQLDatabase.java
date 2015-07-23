@@ -201,7 +201,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         // MSSQL server does not support the schema name for the index -
-        return super.escapeObjectName(indexName, Index.class);
+        return escapeObjectName(indexName, Index.class);
     }
 
     @Override
