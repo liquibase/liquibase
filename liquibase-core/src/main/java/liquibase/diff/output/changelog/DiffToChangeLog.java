@@ -17,10 +17,12 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DiffToChangeLog {
@@ -128,6 +130,11 @@ public class DiffToChangeLog {
         final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
         DatabaseObjectComparator comparator = new DatabaseObjectComparator();
 
+        String created = null;
+        if (LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.GENERATE_CHANGESET_CREATED_VALUES).getValue(Boolean.class)) {
+            created = new SimpleDateFormat("yyyy-MM-dd HH:mmZ").format(new Date());
+        }
+
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
@@ -138,7 +145,7 @@ public class DiffToChangeLog {
                 }
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                    addToChangeSets(changes, changeSets, quotingStrategy);
+                    addToChangeSets(changes, changeSets, quotingStrategy, created);
                 }
             }
         }
@@ -149,7 +156,7 @@ public class DiffToChangeLog {
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type, comparator)) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                    addToChangeSets(changes, changeSets, quotingStrategy);
+                    addToChangeSets(changes, changeSets, quotingStrategy, created);
                 }
             }
         }
@@ -160,7 +167,7 @@ public class DiffToChangeLog {
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                    addToChangeSets(changes, changeSets, quotingStrategy);
+                    addToChangeSets(changes, changeSets, quotingStrategy, created);
                 }
             }
         }
@@ -188,7 +195,7 @@ public class DiffToChangeLog {
         return types;
     }
 
-    private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy) {
+    private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy, String created) {
         if (changes != null) {
             String changeSetContext = this.changeSetContext;
             if (diffOutputControl.getContext() != null) {
@@ -196,6 +203,7 @@ public class DiffToChangeLog {
             }
             ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, null, changeSetContext,
                     null, false, quotingStrategy, null);
+            changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {
                 changeSet.setLabels(diffOutputControl.getLabels());
             }

@@ -71,7 +71,10 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
         Index backingIndex = uniqueConstraint.getBackingIndex();
         if (comparisonDatabase instanceof OracleDatabase) {
             if (backingIndex != null && backingIndex.getName() != null) {
-                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+                Change[] missingIndexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+                if (missingIndexChanges != null) {
+                    returnList.addAll(Arrays.asList(missingIndexChanges));
+                }
 
                 addUniqueConstraintChange.setForIndexName(backingIndex.getName());
                 Schema schema = backingIndex.getSchema();
