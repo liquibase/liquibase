@@ -48,7 +48,7 @@ public class LogFactory {
                 }
                 value = (Logger) serviceLocator.newInstance(Logger.class);
             } catch (Exception e) {
-                throw new ServiceNotFoundException(e);
+                return new DefaultLogger();
             }
             value.setName(name);
             if (defaultLoggingLevel != null) {
