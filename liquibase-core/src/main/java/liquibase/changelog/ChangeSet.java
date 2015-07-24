@@ -788,29 +788,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return "Empty";
         }
 
-        StringBuffer returnString = new StringBuffer();
-        Class<? extends Change> lastChangeClass = null;
-        int changeCount = 0;
+        SortedSet<String> messages = new TreeSet<String>();
         for (Change change : changes) {
-            if (change.getClass().equals(lastChangeClass)) {
-                changeCount++;
-            } else if (changeCount > 1) {
-                returnString.append(" (x").append(changeCount).append(")");
-                returnString.append(", ");
-                returnString.append(ChangeFactory.getInstance().getChangeMetaData(change).getName());
-                changeCount = 1;
-            } else {
-                returnString.append(", ").append(ChangeFactory.getInstance().getChangeMetaData(change).getName());
-                changeCount = 1;
-            }
-            lastChangeClass = change.getClass();
+            messages.add(change.getConfirmationMessage());
         }
 
-        if (changeCount > 1) {
-            returnString.append(" (x").append(changeCount).append(")");
-        }
-
-        return returnString.toString().replaceFirst("^, ", "");
+        return StringUtils.limitSize(StringUtils.join(messages, ","), 255);
     }
 
     public Boolean getFailOnError() {

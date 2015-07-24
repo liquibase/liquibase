@@ -22,7 +22,7 @@ public class ChangeSetTest extends Specification {
 
     def getDescriptions() {
         when:
-        def insertDescription = "insert";
+        def insertDescription = "New row inserted into null";
         def changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
         then:
         changeSet.getDescription() == "Empty"
@@ -35,12 +35,12 @@ public class ChangeSetTest extends Specification {
         when:
         changeSet.addChange(new InsertDataChange());
         then:
-        changeSet.getDescription() == insertDescription + " (x2)"
+        changeSet.getDescription() == insertDescription
 
         when:
         changeSet.addChange(new CreateTableChange());
         then:
-        changeSet.getDescription() == insertDescription + " (x2), createTable"
+        changeSet.getDescription() == insertDescription + ",Table null created"
     }
 
     def generateCheckSum() {
