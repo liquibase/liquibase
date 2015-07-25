@@ -3,7 +3,6 @@ package liquibase.diff.output;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.statement.UniqueConstraint;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -116,6 +115,9 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 }
                 if (object instanceof PrimaryKey) {
                     return matches(((PrimaryKey) object).getTable());
+                }
+                if (object instanceof UniqueConstraint) {
+                    return matches(((UniqueConstraint) object).getTable());
                 }
                 if (object instanceof Data) {
                     return matches(((Data) object).getTable());
