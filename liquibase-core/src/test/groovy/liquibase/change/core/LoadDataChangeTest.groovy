@@ -1,18 +1,21 @@
 package liquibase.change.core
+
 import liquibase.change.ChangeStatus
-import liquibase.change.StandardChangeTest
+import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeSet
 import liquibase.database.core.MSSQLDatabase
-import liquibase.parser.core.ParsedNodeException
-import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.database.core.MySQLDatabase
+import liquibase.database.core.OracleDatabase;
 import liquibase.sdk.database.MockDatabase
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory
-import liquibase.statement.SqlStatement
-import liquibase.statement.core.InsertSetStatement
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement
-import liquibase.test.JUnitResourceAccessor
+import liquibase.statement.core.InsertSetStatement;
 import spock.lang.Unroll
+import liquibase.test.JUnitResourceAccessor
 
 public class LoadDataChangeTest extends StandardChangeTest {
 
@@ -330,28 +333,5 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert relativeStatements != null
         assert nonRelativeStatements != null
         assert relativeStatements.size() == nonRelativeStatements.size()
-    }
-
-    def "ignores CSV commented lines"() throws Exception {
-        when:
-        ChangeSet changeSet = new ChangeSet(null, null, true, false,
-                "liquibase/change/fakeChangeSet.xml",
-                null, null, false, null, null);
-
-        LoadDataChange relativeChange = new LoadDataChange();
-
-        relativeChange.setSchemaName("SCHEMA_NAME");
-        relativeChange.setTableName("TABLE_NAME");
-        relativeChange.setRelativeToChangelogFile(Boolean.TRUE);
-        relativeChange.setChangeSet(changeSet);
-        relativeChange.setFile("core/sample.data.with.comment.csv");
-        relativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
-
-        SqlStatement[] relativeStatements = relativeChange.generateStatements(new MockDatabase());
-
-
-        then:
-        assert relativeStatements != null
-        assert relativeStatements.length == 5;
     }
 }
