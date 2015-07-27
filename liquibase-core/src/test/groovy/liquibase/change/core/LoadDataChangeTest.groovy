@@ -1,21 +1,18 @@
 package liquibase.change.core
-
 import liquibase.change.ChangeStatus
-import liquibase.change.StandardChangeTest;
+import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeSet
 import liquibase.database.core.MSSQLDatabase
-import liquibase.database.core.MySQLDatabase
-import liquibase.database.core.OracleDatabase;
-import liquibase.sdk.database.MockDatabase
-import liquibase.parser.core.ParsedNodeException;
+import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.statement.SqlStatement
+import liquibase.statement.core.InsertSetStatement
 import liquibase.statement.core.InsertStatement
-import liquibase.statement.core.InsertSetStatement;
-import spock.lang.Unroll
 import liquibase.test.JUnitResourceAccessor
+import spock.lang.Unroll
 
 public class LoadDataChangeTest extends StandardChangeTest {
 
@@ -333,5 +330,62 @@ public class LoadDataChangeTest extends StandardChangeTest {
         assert relativeStatements != null
         assert nonRelativeStatements != null
         assert relativeStatements.size() == nonRelativeStatements.size()
+    }
+
+    def "checksum does not change when no comments in CSV and comment property changes"() {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.data1.csv");
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
+
+        refactoring.setCommentLineStartsWith("") //comments disabled
+        String md5sum1 = refactoring.generateCheckSum().toString();
+
+        refactoring.setCommentLineStartsWith("#");
+        String md5sum2 = refactoring.generateCheckSum().toString();
+
+        then:
+        assert md5sum1.equals(md5sum2)
+    }
+    def "checksum changes when there are comments in CSV"() {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
+
+        refactoring.setCommentLineStartsWith("") //comments disabled
+        String md5sum1 = refactoring.generateCheckSum().toString();
+
+        refactoring.setCommentLineStartsWith("#");
+        String md5sum2 = refactoring.generateCheckSum().toString();
+
+        then:
+        assert !md5sum1.equals(md5sum2)
+    }
+
+    def "checksum same for CSV files with comments and file with removed comments manually"() {
+        when:
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.data1-withComments.csv");
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
+
+        refactoring.setCommentLineStartsWith("#");
+        String md5sum1 = refactoring.generateCheckSum().toString();
+
+        refactoring.setFile("liquibase/change/core/sample.data1-removedComments.csv");
+        refactoring.setCommentLineStartsWith(""); //disable comments just in case
+        String md5sum2 = refactoring.generateCheckSum().toString();
+
+        then:
+        assert md5sum1.equals(md5sum2)
     }
 }
