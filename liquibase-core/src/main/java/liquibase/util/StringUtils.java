@@ -1,7 +1,5 @@
 package liquibase.util;
 
-import liquibase.database.Database;
-
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -125,7 +123,7 @@ public class StringUtils {
         }
 
         String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length()-delimiter.length());
+        return returnString.substring(0, returnString.length() - delimiter.length());
     }
 
     public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
@@ -210,7 +208,7 @@ public class StringUtils {
         }
 
         String returnString = buffer.toString();
-        return returnString.substring(0, returnString.length()-delimiter.length());
+        return returnString.substring(0, returnString.length() - delimiter.length());
     }
 
     public static String indent(String string) {
@@ -242,7 +240,7 @@ public class StringUtils {
         if (string == null) {
             return null;
         }
-        return string.replace("\r\n", "\n").replace("\r","\n");
+        return string.replace("\r\n", "\n").replace("\r", "\n");
     }
 
     public static boolean isAscii(String string) {
@@ -284,6 +282,40 @@ public class StringUtils {
         }
 
         return value + StringUtils.repeat(" ", length - value.length());
+    }
+
+    /**
+     * Null-safe check if string is empty.
+     *
+     * @param value String to be checked
+     * @return true if String is null or empty
+     */
+    public static boolean isEmpty(String value) {
+        return value == null || value.length() == 0;
+    }
+
+    /**
+     * Null-safe check if string is not empty
+     *
+     * @param value String to be checked
+     * @return true if string is not null and not empty (length > 0)
+     */
+    public static boolean isNotEmpty(String value) {
+        return !isEmpty(value);
+    }
+
+    /**
+     * Checks if <code>value</code> starts with <code>startsWith</code>.
+     * @param value
+     * @param startsWith
+     * @return true if <code>value</code> starts with <code>startsWith</code>, otherwise false. If any of arguments is null returns false
+     */
+    public static boolean startsWith(String value, String startsWith) {
+        if(value == null || startsWith == null){
+            return false;
+        }
+
+        return value.startsWith(startsWith);
     }
 
     public static interface StringUtilsFormatter<Type> {
