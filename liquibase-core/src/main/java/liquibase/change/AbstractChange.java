@@ -686,4 +686,27 @@ public abstract class AbstractChange implements Change {
             return value;
         }
     }
+
+    @Override
+    public String getDescription() {
+        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        String description = metaData.getName();
+
+        SortedSet<String> names = new TreeSet<String>();
+        for (Map.Entry<String, ChangeParameterMetaData> entry : metaData.getParameters().entrySet()) {
+            String lowerCaseKey = entry.getKey().toLowerCase();
+            if (lowerCaseKey.endsWith("name") && !lowerCaseKey.contains("schema") && !lowerCaseKey.contains("catalog")) {
+                Object currentValue = entry.getValue().getCurrentValue(this);
+                if (currentValue != null) {
+                    names.add(entry.getKey()+"="+ currentValue);
+                }
+            }
+        }
+
+        if (names.size() > 0) {
+            description += " "+StringUtils.join(names, ", ");
+        }
+
+        return description;
+    }
 }

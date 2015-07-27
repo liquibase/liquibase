@@ -785,15 +785,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public String getDescription() {
         List<Change> changes = getChanges();
         if (changes.size() == 0) {
-            return "Empty";
+            return "empty";
         }
 
-        SortedSet<String> messages = new TreeSet<String>();
+        List<String> messages = new ArrayList<String>();
         for (Change change : changes) {
-            messages.add(change.getConfirmationMessage());
+            messages.add(change.getDescription());
         }
 
-        return StringUtils.limitSize(StringUtils.join(messages, ","), 255);
+        return StringUtils.limitSize(StringUtils.join(messages, "; "), 255);
     }
 
     public Boolean getFailOnError() {
