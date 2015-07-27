@@ -60,6 +60,7 @@
         <module>liquibase-maven-plugin</module>
         <module>liquibase-osgi</module>
         <module>liquibase-cdi</module>
+        <module>liquibase-hibernate</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-debian</module>
     </modules>
@@ -135,6 +136,13 @@
                 <version>1.0-SP4</version>
                 <scope>provided</scope>
             </dependency>
+            
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>4.3.10.Final</version>
+				<scope>provided</scope>
+			</dependency>
 
             <dependency>
                 <groupId>javax.servlet</groupId>
