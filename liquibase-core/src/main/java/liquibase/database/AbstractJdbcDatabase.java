@@ -1013,8 +1013,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             return quoteObject(columnName, Column.class);
         }
 
-        if (!quoteNamesThatMayBeFunctions && columnName.contains("(")) {
-            return columnName;
+        if (columnName.contains("(")) {
+            if (quoteNamesThatMayBeFunctions) {
+                return quoteObject(columnName, Column.class);
+            } else {
+                return columnName;
+            }
         }
         return escapeObjectName(columnName, Column.class);
     }
