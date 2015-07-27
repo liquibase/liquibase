@@ -98,16 +98,18 @@ public class ServiceLocator {
 	        Set<InputStream> manifests;
 	        try {
 	            manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
-	            for (InputStream is : manifests) {
-	                Manifest manifest = new Manifest(is);
-	                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
-	                if (attributes != null) {
-	                    for (Object value : attributes.split(",")) {
-	                        addPackageToScan(value.toString());
-	                    }
-	                }
-	                is.close();
-	            }
+                if (manifests != null) {
+                    for (InputStream is : manifests) {
+                        Manifest manifest = new Manifest(is);
+                        String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
+                        if (attributes != null) {
+                            for (Object value : attributes.split(",")) {
+                                addPackageToScan(value.toString());
+                            }
+                        }
+                        is.close();
+                    }
+                }
 	        } catch (IOException e) {
 	            throw new UnexpectedLiquibaseException(e);
 	        }
