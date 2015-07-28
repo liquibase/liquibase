@@ -223,7 +223,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
-                    referencesString = database.getDefaultSchemaName() +"."+referencesString;
+                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) +"."+referencesString;
                 }
                 buffer.append(referencesString);
             } else {
