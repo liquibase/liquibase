@@ -58,10 +58,10 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
         exclude.add("name");
         exclude.add("backingIndex");
-        exclude.add("columnNames");
+        exclude.add("columns");
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
-        differences.compare("columnNames", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.StandardCompareFunction(accordingTo));
         return differences;
     }
 }
