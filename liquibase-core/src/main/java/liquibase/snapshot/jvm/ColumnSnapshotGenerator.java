@@ -229,7 +229,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
 
             DataType type = new DataType(dataType);
-//            type.setDataTypeId(dataType);
+            type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
 //                if (type.getColumnSize() == null) {

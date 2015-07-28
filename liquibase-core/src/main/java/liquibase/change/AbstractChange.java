@@ -16,8 +16,8 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
+import liquibase.util.beans.PropertyUtils;
 
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
@@ -61,7 +61,7 @@ public abstract class AbstractChange implements Change {
             }
 
             Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
-            for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+            for (PropertyDescriptor property : PropertyUtils.getInstance().getDescriptors(getClass())) {
                 if (isInvalidProperty(property)) {
                     continue;
                 }
@@ -112,7 +112,7 @@ public abstract class AbstractChange implements Change {
             displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
             PropertyDescriptor property = null;
-            for (PropertyDescriptor prop : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+            for (PropertyDescriptor prop : PropertyUtils.getInstance().getDescriptors(getClass())) {
                 if (prop.getDisplayName().equals(parameterName)) {
                     property = prop;
                     break;

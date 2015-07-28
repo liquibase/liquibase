@@ -10,6 +10,7 @@ import java.util.Map;
 public class LogFactory {
     private static Map<String, Logger> loggers = new HashMap<String, Logger>();
     private static String defaultLoggingLevel = null;
+    private static DefaultLogger defaultLogger = new DefaultLogger();
 
     private static LogFactory instance;
 
@@ -42,9 +43,13 @@ public class LogFactory {
         if (!loggers.containsKey(name)) {
             Logger value;
             try {
-                value = (Logger) ServiceLocator.getInstance().newInstance(Logger.class);
+                ServiceLocator serviceLocator = ServiceLocator.getInstance();
+                if (serviceLocator == null) {
+                    return defaultLogger; //ServiceLocator not yet running
+                }
+                value = (Logger) serviceLocator.newInstance(Logger.class);
             } catch (Exception e) {
-                value = new DefaultLogger();
+                return defaultLogger;
             }
             value.setName(name);
             if (defaultLoggingLevel != null) {
@@ -56,7 +61,7 @@ public class LogFactory {
         return loggers.get(name);
     }
 
-    /**
+   /**
      * @deprecated Use non-static {@link #getLog()} method
      */
     public static Logger getLogger() {
