@@ -9,6 +9,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.datatype.core.VarcharType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -23,6 +24,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 
 import java.text.DateFormat;
@@ -112,14 +114,24 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
             boolean liquibaseColumnNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
+                DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
+                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+                    Integer columnSize = type.getColumnSize();
+                    liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                } else {
+                    liquibaseColumnNotRightSize = false;
+                }
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize != 35;
+                DataType type = changeLogTable.getColumn("MD5SUM").getType();
+                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+                    Integer columnSize = type.getColumnSize();
+                    checksumNotRightSize = columnSize != null && columnSize < 35;
+                } else {
+                    liquibaseColumnNotRightSize = false;
+                }
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             String charTypeName = getCharTypeName();
