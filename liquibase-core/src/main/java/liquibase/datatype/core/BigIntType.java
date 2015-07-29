@@ -35,7 +35,7 @@ public class BigIntType extends LiquibaseDataType {
 //            return new DatabaseDataType(database.escapeDataTypeName("bigint"));
 //        }
 //        if (database instanceof MySQLDatabase) {
-//            DatabaseDataType type = new DatabaseDataType("BIGINT", getParameters());
+//            DatabaseDataType type = new DatabaseDataType("BIGINT");
 //            type.addAdditionalInformation(getAdditionalInformation());
 //            return type;
 //        }

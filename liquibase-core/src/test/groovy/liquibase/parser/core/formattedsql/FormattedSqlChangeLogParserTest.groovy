@@ -116,7 +116,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "select * from table1;"
         ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplitStatements()
-        assert !((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
+        assert ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments()
         assert !changeLog.getChangeSets().get(0).isAlwaysRun()
         assert !changeLog.getChangeSets().get(0).isRunOnChange()
         assert changeLog.getChangeSets().get(0).isRunInTransaction()
@@ -149,7 +149,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql() == "create table table2 (\n  id int primary key\n);\ncreate table table3 (\n  id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplitStatements()
-        assert !((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
+        assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
         changeLog.getChangeSets().get(2).rollback.changes.size() == 1
         assert changeLog.getChangeSets().get(2).rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(2).rollback.changes[0]).getSql() == "drop table table2;"

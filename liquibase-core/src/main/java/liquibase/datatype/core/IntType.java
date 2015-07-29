@@ -40,7 +40,7 @@ public class IntType extends LiquibaseDataType {
 //            return new DatabaseDataType(database.escapeDataTypeName("int"));
 //        }
 //        if (database instanceof MySQLDatabase) {
-//            DatabaseDataType type = new DatabaseDataType("INT", getParameters());
+//            DatabaseDataType type = new DatabaseDataType("INT");
 //            type.addAdditionalInformation(getAdditionalInformation());
 //            return type;
 //        }

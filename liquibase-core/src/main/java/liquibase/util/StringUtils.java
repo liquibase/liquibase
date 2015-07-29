@@ -409,4 +409,12 @@ public class StringUtils {
             return database.escapeObjectName(obj, objectType);
         }
     }
+
+    public static String limitSize(String string, int maxLength) {
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 3) + "...";
+        }
+        return string;
+    }
+
 }

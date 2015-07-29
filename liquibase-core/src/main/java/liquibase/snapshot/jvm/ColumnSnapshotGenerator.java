@@ -225,12 +225,44 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //            String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
 //            dataType = dataType.replace("VARCHAR2", "VARCHAR");
 //            dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
-
+//
+//            DataType type = new DataType(dataType);
+//            type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
+//            if (dataType.equalsIgnoreCase("NUMBER")) {
+//                type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
+////                if (type.getColumnSize() == null) {
+////                    type.setColumnSize(38);
+////                }
+//                type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
+////                if (type.getDecimalDigits() == null) {
+////                    type.setDecimalDigits(0);
+////                }
+////            type.setRadix(10);
+//            } else {
+//                type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
+//
+//                if (dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
+//                    type.setColumnSize(null);
+//                } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
+//                    type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
+//                    type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
+//                } else {
+//                    String charUsed = columnMetadataResultSet.getString("CHAR_USED");
+//                    DataType.ColumnSizeUnit unit = null;
+//                    if ("C".equals(charUsed)) {
+//                        unit = DataType.ColumnSizeUnit.CHAR;
+//                        type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
+//                    }
+//                    type.setColumnSizeUnit(unit);
+//                }
+//            }
+//
+//
 //            return type;
 //        }
-
-        String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
-
+//
+//        String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
+//
 //        if (database instanceof FirebirdDatabase) {
 //            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
 //                columnTypeName = "BLOB";
@@ -260,27 +292,27 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                enumClause = enumClause.replaceFirst(", $", "");
 //                return new DataType(columnTypeName + "(" + enumClause + ")");
 //            } catch (DatabaseException e) {
-//                LoggerFactory.getLogger(getClass()).warn("Error fetching enum values", e);
+//                LogFactory.getLogger().warning("Error fetching enum values", e);
 //            }
 //        }
-        OldDataType.ColumnSizeUnit columnSizeUnit = OldDataType.ColumnSizeUnit.BYTE;
-
-        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
-        Integer columnSize = null;
-        Integer decimalDigits = null;
-        if (!database.dataTypeIsNotModifiable(columnTypeName)) { // don't set size for types like int4, int8 etc
-            columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
-            decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
-            if (decimalDigits != null && decimalDigits.equals(0)) {
-                decimalDigits = null;
-            }
-        }
-
-        Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
-
-        Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
-
-//todo: action refactoring        if (database instanceof DB2Database) {
+//        DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
+//
+//        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
+//        Integer columnSize = null;
+//        Integer decimalDigits = null;
+//        if (!database.dataTypeIsNotModifiable(columnTypeName)) { // don't set size for types like int4, int8 etc
+//            columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
+//            decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
+//            if (decimalDigits != null && decimalDigits.equals(0)) {
+//                decimalDigits = null;
+//            }
+//        }
+//
+//        Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
+//
+//        Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
+//
+////todo: action refactoring        if (database instanceof DB2Database) {
 //            String typeName = columnMetadataResultSet.getString("TYPE_NAME");
 //            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
 //                if (columnSize != null) {

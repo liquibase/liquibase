@@ -22,10 +22,10 @@ public class TimestampType extends DateTimeType {
 //        }
 //        if (database instanceof MSSQLDatabase) {
 //            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("timestamp")) {
-//                return new DatabaseDataType(database.escapeDataTypeName("TIMESTAMP"));
+//                return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
 //            }
 //
-//            return new DatabaseDataType(database.escapeDataTypeName("DATETIME"));
+//            return new DatabaseDataType(database.escapeDataTypeName("datetime"));
 //        }
         return super.toDatabaseDataType(database);
     }

@@ -117,7 +117,7 @@ public class CommandLineUtils {
 //                } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
 //                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + database.escapeObjectName(username, DatabaseObject.class) + " WITH DEFAULT_SCHEMA = " + database.escapeObjectName(defaultSchemaName, Schema.class)));
 //                } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + defaultSchemaName));
+//                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
 //                } else if (database instanceof DB2Database) {
 //                    String schema = defaultCatalogName;
 //                    if (schema == null) {

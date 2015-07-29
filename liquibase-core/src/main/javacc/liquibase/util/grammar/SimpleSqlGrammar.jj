@@ -5,16 +5,16 @@ options {
   DEBUG_PARSER=false;
 }
 
-PARSER_BEGIN(SimpleSqlGrammer)
+PARSER_BEGIN(SimpleSqlGrammar)
 
-package liquibase.util.grammer;
+package liquibase.util.grammar;
 
 /** An Simple SQL Grammar. */
-public class SimpleSqlGrammer {
+public class SimpleSqlGrammar {
 
 }
 
-PARSER_END(SimpleSqlGrammer)
+PARSER_END(SimpleSqlGrammar)
 
 
 TOKEN :

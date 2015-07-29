@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
@@ -31,7 +32,11 @@ public class DatabaseFactory {
 
             //noinspection unchecked
             for (Class<? extends Database> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+                try {
+                    register(clazz.getConstructor().newInstance());
+                } catch (Throwable e) {
+                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
+                }
             }
 
         } catch (Exception e) {

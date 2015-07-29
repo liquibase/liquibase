@@ -13,8 +13,8 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
+import liquibase.util.beans.PropertyUtils;
 
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -241,7 +241,7 @@ public class ChangeParameterMetaData {
      */
     public Object getCurrentValue(Change change) {
         try {
-            for (PropertyDescriptor descriptor : Introspector.getBeanInfo(change.getClass()).getPropertyDescriptors()) {
+            for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
@@ -275,7 +275,7 @@ public class ChangeParameterMetaData {
         }
 
         try {
-            for (PropertyDescriptor descriptor : Introspector.getBeanInfo(change.getClass()).getPropertyDescriptors()) {
+            for (PropertyDescriptor descriptor : PropertyUtils.getInstance().getDescriptors(change.getClass())) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {

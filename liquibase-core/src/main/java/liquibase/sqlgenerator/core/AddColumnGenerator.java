@@ -139,6 +139,8 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 //            alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
 //        }
 
+//        alterTable += getDefaultClause(statement, database);
+//
 //        if (!statement.isNullable()) {
 //            alterTable += " NOT NULL";
 //        } else {
@@ -146,15 +148,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 //                alterTable += " NULL";
 //            }
 //        }
-
+//
 //        if (statement.isPrimaryKey()) {
 //            alterTable += " PRIMARY KEY";
-//        }
-//
-//        alterTable += getDefaultClause(statement, database);
-
-//        if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
-//            alterTable += " COMMENT '" + statement.getRemarks() + "' ";
 //        }
 
 //        if (statement.getAddAfterColumn() != null && !statement.getAddAfterColumn().isEmpty()) {

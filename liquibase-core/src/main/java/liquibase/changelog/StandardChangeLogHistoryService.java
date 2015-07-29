@@ -7,6 +7,7 @@ import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.datatype.core.VarcharType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -21,6 +22,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import org.slf4j.LoggerFactory;
 
@@ -110,15 +112,25 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 //            boolean hasContexts = changeLogTable.getColumn("CONTEXTS") != null;
 //            boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
 //            boolean liquibaseColumnNotRightSize = false;
-//todo: action            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-//                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-//                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
+//            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
+//                DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
+//                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+//                    Integer columnSize = type.getColumnSize();
+//                    liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+//                } else {
+//                    liquibaseColumnNotRightSize = false;
+//                }
 //            }
 //            boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
-            boolean checksumNotRightSize = false;
+//            boolean checksumNotRightSize = false;
 //            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-//                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-//                checksumNotRightSize = columnSize != null && columnSize != 35;
+//                DataType type = changeLogTable.getColumn("MD5SUM").getType();
+//                if (type.getTypeName().toLowerCase().startsWith("varchar")) {
+//                    Integer columnSize = type.getColumnSize();
+//                    checksumNotRightSize = columnSize != null && columnSize < 35;
+//                } else {
+//                    liquibaseColumnNotRightSize = false;
+//                }
 //            }
 //            boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             String charTypeName = getCharTypeName();
@@ -262,7 +274,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
-        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE", "LABELS", "CONTEXTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
         return ExecutorService.getInstance().getExecutor(database).queryForList(select);
     }
 

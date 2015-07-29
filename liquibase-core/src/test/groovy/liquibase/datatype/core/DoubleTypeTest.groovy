@@ -18,7 +18,7 @@ class DoubleTypeTest extends Specification {
 //
 //        where:
 //        params | database               | expected
-//        [22]   | new MySQLDatabase()    | "DOUBLE(22)"
+//        [22]   | new MySQLDatabase()    | "DOUBLE"
 //        [7, 3] | new MySQLDatabase()    | "DOUBLE(7, 3)"
 //        [22]   | new DB2Database()      | "DOUBLE"
 //        [22]   | new DerbyDatabase()    | "DOUBLE"

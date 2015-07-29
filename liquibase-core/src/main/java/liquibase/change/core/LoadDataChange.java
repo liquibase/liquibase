@@ -9,6 +9,7 @@ import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertSetStatement;
 import liquibase.structure.core.Column;
@@ -228,6 +229,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             }
 
 //            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+//                List<InsertStatement> innerStatements = statements.getStatements();
+//                if (innerStatements != null && innerStatements.size() > 0 && innerStatements.get(0) instanceof InsertOrUpdateStatement) {
+//                    //cannot do insert or update in a single statement
+//                    return statements.getStatementsArray();
+//                }
 //                // we only return a single "statement" - it's capable of emitting multiple sub-statements, should the need arise, on generation.
 //                return new SqlStatement[]{statements};
 //            } else {

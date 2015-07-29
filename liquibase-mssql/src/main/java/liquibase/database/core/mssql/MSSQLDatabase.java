@@ -194,6 +194,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
+    
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
 //        Statement dropStatement = null;

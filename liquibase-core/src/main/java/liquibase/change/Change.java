@@ -128,4 +128,8 @@ public interface Change extends LiquibaseSerializable {
      */
     public ActionStatus checkStatus(Database database);
 
+    /**
+     * Short, scannable description for the DATABASECHANGELOG.DESCRIPTION column
+     */
+    String getDescription();
 }

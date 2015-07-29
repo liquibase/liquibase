@@ -2,6 +2,8 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.Logger;
+import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -23,7 +25,11 @@ public class ServiceLocator {
             Class<?> scanner = Class.forName("Liquibase.ServiceLocator.ClrServiceLocator, Liquibase");
             instance = (ServiceLocator) scanner.newInstance();
         } catch (Exception e) {
-            instance = new ServiceLocator();
+            try {
+                instance = new ServiceLocator();
+            } catch (Throwable e1) {
+                LogFactory.getInstance().getLog().severe("Cannot build ServiceLocator", e1);
+            }
         }
     }
 
@@ -88,16 +94,18 @@ public class ServiceLocator {
 	        Set<InputStream> manifests;
 	        try {
 	            manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
-	            for (InputStream is : manifests) {
-	                Manifest manifest = new Manifest(is);
-	                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
-	                if (attributes != null) {
-	                    for (Object value : attributes.split(",")) {
-	                        addPackageToScan(value.toString());
-	                    }
-	                }
-	                is.close();
-	            }
+                if (manifests != null) {
+                    for (InputStream is : manifests) {
+                        Manifest manifest = new Manifest(is);
+                        String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
+                        if (attributes != null) {
+                            for (Object value : attributes.split(",")) {
+                                addPackageToScan(value.toString());
+                            }
+                        }
+                        is.close();
+                    }
+                }
 	        } catch (IOException e) {
 	            throw new UnexpectedLiquibaseException(e);
 	        }

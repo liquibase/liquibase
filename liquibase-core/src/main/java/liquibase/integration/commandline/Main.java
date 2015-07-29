@@ -830,7 +830,7 @@ public class Main {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                    return new URLClassLoader(urls.toArray(new URL[urls.size()]));
+                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), null);
                 }
             });
         }

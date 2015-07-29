@@ -44,6 +44,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -428,8 +429,11 @@ public class Liquibase {
         executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
 
-//TODO: move with action        if (database instanceof OracleDatabase) {
+//        if (database instanceof OracleDatabase) {
 //            executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
+//        }
+//        if (database instanceof MSSQLDatabase) {
+//            executor.execute(new RawSqlStatement("USE " + database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";"));
 //        }
     }
 

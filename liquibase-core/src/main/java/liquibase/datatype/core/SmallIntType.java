@@ -25,7 +25,7 @@ public class SmallIntType extends LiquibaseDataType {
 //            return new DatabaseDataType(database.escapeDataTypeName("smallint")); //always smallint regardless of parameters passed
 //        }
 //        if (database instanceof MySQLDatabase) {
-//            DatabaseDataType type = new DatabaseDataType("SMALLINT", getParameters());
+//            DatabaseDataType type = new DatabaseDataType("SMALLINT");
 //            type.addAdditionalInformation(getAdditionalInformation());
 //            return type;
 //        }

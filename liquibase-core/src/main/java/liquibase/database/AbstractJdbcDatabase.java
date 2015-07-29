@@ -1037,6 +1037,75 @@ public abstract class AbstractJdbcDatabase implements Database {
                 + quotingEndCharacter;
     }
 
+    @Override
+    public String escapeIndexName(final String catalogName, final String schemaName, final String indexName) {
+        return escapeObjectName(catalogName, schemaName, indexName, Index.class);
+    }
+
+    @Override
+    public String escapeSequenceName(final String catalogName, final String schemaName, final String sequenceName) {
+        return escapeObjectName(catalogName, schemaName, sequenceName, Sequence.class);
+    }
+
+    @Override
+    public String escapeConstraintName(final String constraintName) {
+        return escapeObjectName(constraintName, Index.class);
+    }
+
+    @Override
+    public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
+        return escapeObjectName(columnName, Column.class);
+    }
+
+    /**
+     * Similar to {@link #escapeColumnName(String, String, String, String)} but allows control over whether function-like names should be left unquoted.
+     *
+     * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
+     */
+    @Override
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
+        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return quoteObject(columnName, Column.class);
+        }
+
+        if (!quoteNamesThatMayBeFunctions && columnName.contains("(")) {
+            return columnName;
+        }
+        return escapeObjectName(columnName, Column.class);
+    }
+
+    @Override
+    public String escapeColumnNameList(final String columnNames) {
+        StringBuilder sb = new StringBuilder();
+        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            boolean descending = false;
+            if (columnName.matches("(?i).*\\s+DESC")) {
+                columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
+                descending = true;
+            } else if (columnName.matches("(?i).*\\s+ASC")) {
+                columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
+            }
+            sb.append(escapeObjectName(columnName, Column.class));
+            if (descending) {
+                sb.append(" DESC");
+            }
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
     public boolean jdbcCallsCatalogsSchemas() {
         return false;
     }
