@@ -159,7 +159,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         for (Column column : snapshot.get(Column.class)) {
-            if (database.isLiquibaseObject(column.getRelation())) {
+            if (database.isLiquibaseObject(new Table(column.getName().container))) {
                 continue;
             }
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
