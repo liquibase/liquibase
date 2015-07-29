@@ -2,8 +2,6 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.Logger;
-import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -28,7 +26,7 @@ public class ServiceLocator {
             try {
                 instance = new ServiceLocator();
             } catch (Throwable e1) {
-                LogFactory.getInstance().getLog().severe("Cannot build ServiceLocator", e1);
+                LoggerFactory.getLogger(ServiceLocator.class).error("Cannot build ServiceLocator", e1);
             }
         }
     }

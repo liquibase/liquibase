@@ -322,15 +322,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //        }
 
 
-        OldDataType type = new OldDataType(columnTypeName);
-        type.setDataTypeId(dataType);
-        type.setColumnSize(columnSize);
-        type.setDecimalDigits(decimalDigits);
-        type.setRadix(radix);
-        type.setCharacterOctetLength(characterOctetLength);
-        type.setColumnSizeUnit(columnSizeUnit);
-
-        return type;
+//        OldDataType type = new OldDataType(columnTypeName);
+//        type.setDataTypeId(dataType);
+//        type.setColumnSize(columnSize);
+//        type.setDecimalDigits(decimalDigits);
+//        type.setRadix(radix);
+//        type.setCharacterOctetLength(characterOctetLength);
+//        type.setColumnSizeUnit(columnSizeUnit);
+//
+//        return type;
+        return null;
     }
 
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {

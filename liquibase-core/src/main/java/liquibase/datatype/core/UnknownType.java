@@ -1,10 +1,6 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
