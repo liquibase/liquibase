@@ -1,12 +1,16 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class UnknownType extends LiquibaseDataType {
 
@@ -31,13 +35,6 @@ public class UnknownType extends LiquibaseDataType {
             dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
         }
         Object[] parameters = getParameters();
-        if (database instanceof MSSQLDatabase) {
-            String name = database.escapeDataTypeName(getName());
-            if (dataTypeMaxParameters < parameters.length) {
-                parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
-            }
-            return new DatabaseDataType(name, parameters);
-        }
 
         if (database instanceof OracleDatabase) {
             if (getName().equalsIgnoreCase("LONG")
@@ -57,7 +54,12 @@ public class UnknownType extends LiquibaseDataType {
         if (dataTypeMaxParameters < parameters.length) {
             parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
         }
-        DatabaseDataType type = new DatabaseDataType(getName().toUpperCase(), parameters);
+        DatabaseDataType type;
+        if (database instanceof  MSSQLDatabase) {
+            type = new DatabaseDataType(database.escapeDataTypeName(getName()), parameters);
+        } else {
+            type = new DatabaseDataType(getName().toUpperCase(), parameters);
+        }
         type.addAdditionalInformation(getAdditionalInformation());
 
         return type;

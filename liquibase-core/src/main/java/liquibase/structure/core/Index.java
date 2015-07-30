@@ -201,7 +201,7 @@ public class Index extends AbstractDatabaseObject {
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());
-        if (this.isUnique() != null && !this.isUnique()) {
+        if (this.isUnique() != null && this.isUnique()) {
             stringBuffer.append(" unique ");
         }
         if (getTable() != null && getColumns() != null) {

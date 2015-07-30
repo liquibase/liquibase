@@ -54,7 +54,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         }
 
 
-        AddColumnChange change = new AddColumnChange();
+        AddColumnChange change = createAddColumnChange();
         change.setTableName(column.getRelation().getName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(column.getRelation().getSchema().getCatalogName());
@@ -63,7 +63,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
             change.setSchemaName(column.getRelation().getSchema().getName());
         }
 
-        AddColumnConfig columnConfig = new AddColumnConfig();
+        AddColumnConfig columnConfig = createAddColumnConfig();
         columnConfig.setName(column.getName());
 
         String dataType = column.getType().toString();
@@ -103,5 +103,13 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         change.addColumn(columnConfig);
 
         return new Change[] { change };
+    }
+
+    protected AddColumnConfig createAddColumnConfig() {
+        return new AddColumnConfig();
+    }
+
+    protected AddColumnChange createAddColumnChange() {
+        return new AddColumnChange();
     }
 }

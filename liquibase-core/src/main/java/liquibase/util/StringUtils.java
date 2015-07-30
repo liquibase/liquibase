@@ -9,17 +9,9 @@ import java.util.regex.Pattern;
  * Various utility methods for working with strings.
  */
 public class StringUtils {
-    private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
 
-
-    /**
-     * This pattern is used to recognize end-of-line ANSI style comments at the end of lines of SQL. -- like this
-     * and strip them out.  We might need to watch the case of new space--like this
-     * and the case of having a space -- like this.
-     */
-    private static final Pattern dashPattern = Pattern.compile("\\-\\-.*$", Pattern.MULTILINE);
 
     public static String trimToEmpty(String string) {
         if (string == null) {
@@ -47,37 +39,56 @@ public class StringUtils {
      * @param multiLineSQL A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
-    public static String[] processMutliLineSQL(String multiLineSQL,boolean stripComments, boolean splitStatements, String endDelimiter) {
-        
-        String stripped = stripComments ? stripComments(multiLineSQL) : multiLineSQL;
-	if (splitStatements) {
-	    return splitSQL(stripped, endDelimiter);
-	} else {
-	    return new String[]{stripped};
-	}
+    public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
+
+        StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
+
+        List<String> returnArray = new ArrayList<String>();
+
+        String currentString = "";
+        String previousPiece = null;
+        boolean previousDelimiter = false;
+        for (Object piece : parsed.toArray(true)) {
+            if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+                currentString = StringUtils.trimToNull(currentString);
+                if (currentString != null) {
+                    returnArray.add(currentString);
+                }
+                currentString = "";
+                previousDelimiter = true;
+            } else {
+                if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
+                    if (!currentString.equals("") || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
+                        currentString += piece;
+                    }
+                }
+                previousDelimiter = false;
+            }
+            previousPiece = (String) piece;
+        }
+
+        if (StringUtils.trimToNull(currentString) != null) {
+            returnArray.add(currentString);
+        }
+
+        return returnArray.toArray(new String[returnArray.size()]);
+    }
+
+    protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
+        if (endDelimiter == null) {
+            return piece.equals(";") || (piece.equalsIgnoreCase("go") && (previousPiece == null || previousPiece.endsWith("\n")));
+        }
+
+        endDelimiter = endDelimiter.replace("\\n", "").replace("\\r", "");
+
+        return piece.toLowerCase().matches(endDelimiter.toLowerCase());
     }
 
     /**
      * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
-        if (endDelimiter == null) {
-            endDelimiter = ";\\s*\\n|;$|\\n[gG][oO]\\s*\\n|\\n[Gg][oO]\\s*$";
-        } else {
-            if (endDelimiter.equalsIgnoreCase("go")) {
-                endDelimiter = "\\n[gG][oO]\\s*\\n|\\n[Gg][oO]\\s*$";
-            }
-        }
-        String[] initialSplit = multiLineSQL.split(endDelimiter);
-        List<String> strings = new ArrayList<String>();
-        for (String anInitialSplit : initialSplit) {
-            String singleLineSQL = anInitialSplit.trim();
-            if (singleLineSQL.length() > 0) {
-                strings.add(singleLineSQL);
-            }
-        }
-
-        return strings.toArray(new String[strings.size()]);
+        return processMutliLineSQL(multiLineSQL, false, true, endDelimiter);
     }
 
     /**
@@ -89,9 +100,7 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedSingleLines = Pattern.compile("\\s*\\-\\-.*\\n").matcher(multiLineSQL).replaceAll("\n");
-        strippedSingleLines = Pattern.compile("\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("\n");
-        return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
+        return SqlParser.parse(multiLineSQL, true, false).toString().trim();
     }
 
     public static String join(Object[] array, String delimiter, StringUtilsFormatter formatter) {
@@ -299,4 +308,12 @@ public class StringUtils {
             return obj.toString();
         }
     }
+
+    public static String limitSize(String string, int maxLength) {
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 3) + "...";
+        }
+        return string;
+    }
+
 }

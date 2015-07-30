@@ -22,25 +22,34 @@ public class ChangeSetTest extends Specification {
 
     def getDescriptions() {
         when:
-        def insertDescription = "insert";
+        def insertDescription = "insert tableName=test_table";
         def changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
+
+        def insertData1 = new InsertDataChange()
+        insertData1.setTableName("test_table")
+
+        def insertData2 = new InsertDataChange()
+        insertData2.setTableName("test_table2")
+
         then:
-        changeSet.getDescription() == "Empty"
+        changeSet.getDescription() == "empty"
 
         when:
-        changeSet.addChange(new InsertDataChange());
+        changeSet.addChange(insertData1);
         then:
         changeSet.getDescription() == insertDescription
 
         when:
-        changeSet.addChange(new InsertDataChange());
+        changeSet.addChange(insertData2);
         then:
-        changeSet.getDescription() == insertDescription + " (x2)"
+        changeSet.getDescription() == insertDescription+"; insert tableName=test_table2"
 
         when:
-        changeSet.addChange(new CreateTableChange());
+        def createTableChange = new CreateTableChange()
+        createTableChange.setTableName("new_table")
+        changeSet.addChange(createTableChange);
         then:
-        changeSet.getDescription() == insertDescription + " (x2), createTable"
+        changeSet.getDescription() == insertDescription+"; insert tableName=test_table2; createTable tableName=new_table"
     }
 
     def generateCheckSum() {

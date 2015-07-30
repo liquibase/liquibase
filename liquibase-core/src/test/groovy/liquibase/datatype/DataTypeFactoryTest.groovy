@@ -70,6 +70,12 @@ public class DataTypeFactoryTest extends Specification {
         "[float]"                                            | new MSSQLDatabase()   | "[float](53)"                                        | FloatType     | false
         "float(53)"                                          | new MSSQLDatabase()   | "[float](53)"                                        | FloatType     | false
         "[float](53)"                                        | new MSSQLDatabase()   | "[float](53)"                                        | FloatType     | false
+        "geography"                                          | new MSSQLDatabase()   | "[geography]"                                        | UnknownType   | false
+        "[geography]"                                        | new MSSQLDatabase()   | "[geography]"                                        | UnknownType   | false
+        "geography(1, 2)"                                    | new MSSQLDatabase()   | "[geography]"                                        | UnknownType   | false
+        "geometry"                                           | new MSSQLDatabase()   | "[geometry]"                                         | UnknownType   | false
+        "[geometry]"                                         | new MSSQLDatabase()   | "[geometry]"                                         | UnknownType   | false
+        "geometry(3, 4)"                                     | new MSSQLDatabase()   | "[geometry]"                                         | UnknownType   | false
         "image"                                              | new MSSQLDatabase()   | "[image]"                                            | BlobType      | false
         "[image]"                                            | new MSSQLDatabase()   | "[image]"                                            | BlobType      | false
         "int"                                                | new MSSQLDatabase()   | "[int]"                                              | IntType       | false
@@ -106,6 +112,9 @@ public class DataTypeFactoryTest extends Specification {
         "[smallint]"                                         | new MSSQLDatabase()   | "[smallint]"                                         | SmallIntType  | false
         "smallmoney"                                         | new MSSQLDatabase()   | "[smallmoney]"                                       | CurrencyType  | false
         "[smallmoney]"                                       | new MSSQLDatabase()   | "[smallmoney]"                                       | CurrencyType  | false
+        "sql_variant"                                        | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
+        "[sql_variant]"                                      | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
+        "sql_variant(5, 6)"                                  | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
         "text"                                               | new MSSQLDatabase()   | "[text]"                                             | ClobType      | false
         "[text]"                                             | new MSSQLDatabase()   | "[text]"                                             | ClobType      | false
         "time"                                               | new MSSQLDatabase()   | "[time](7)"                                          | TimeType      | false
@@ -172,10 +181,10 @@ public class DataTypeFactoryTest extends Specification {
         "[varchar](MAX) COLLATE Latin1_General_BIN"          | new MSSQLDatabase()   | "[varchar](MAX) COLLATE Latin1_General_BIN"          | VarcharType   | false
         "INT"                                                | new MySQLDatabase()   | "INT"                                                | IntType       | false
         "INT UNSIGNED"                                       | new MySQLDatabase()   | "INT UNSIGNED"                                       | IntType       | false
-        "INT(11) UNSIGNED"                                   | new MySQLDatabase()   | "INT(11) UNSIGNED"                                   | IntType       | false
+        "INT(11) UNSIGNED"                                   | new MySQLDatabase()   | "INT UNSIGNED"                                   | IntType       | false
         "TINYINT"                                            | new MySQLDatabase()   | "TINYINT"                                            | TinyIntType   | false
         "TINYINT UNSIGNED"                                   | new MySQLDatabase()   | "TINYINT UNSIGNED"                                   | TinyIntType   | false
-        "TINYINT(1) UNSIGNED"                                | new MySQLDatabase()   | "TINYINT(1) UNSIGNED"                                | TinyIntType   | false
+        "TINYINT(1) UNSIGNED"                                | new MySQLDatabase()   | "TINYINT UNSIGNED"                                | TinyIntType   | false
         "SMALLINT"                                           | new MySQLDatabase()   | "SMALLINT"                                           | SmallIntType  | false
         "SMALLINT UNSIGNED"                                  | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
         "MEDIUMINT"                                          | new MySQLDatabase()   | "MEDIUMINT"                                          | MediumIntType | false

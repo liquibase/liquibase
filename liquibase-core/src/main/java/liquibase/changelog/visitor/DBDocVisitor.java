@@ -1,23 +1,19 @@
 package liquibase.changelog.visitor;
 
-import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
-import liquibase.diff.compare.CompareControl;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 
@@ -135,18 +131,33 @@ public class DBDocVisitor implements ChangeSetVisitor {
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir, outputFileEncoding).writeHTML(changeLogs);
-        new TableListWriter(rootOutputDir, outputFileEncoding).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));
+        SortedSet<Table> tables = new TreeSet<Table>(snapshot.get(Table.class));
+        Iterator<Table> tableIterator = tables.iterator();
+        while (tableIterator.hasNext()) {
+            if (database.isLiquibaseObject(tableIterator.next())) {
+                tableIterator.remove();
+            }
+
+        }
+
+        new TableListWriter(rootOutputDir, outputFileEncoding).writeHTML(tables);
         new AuthorListWriter(rootOutputDir, outputFileEncoding).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
             authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
         }
 
-        for (Table table : snapshot.get(Table.class)) {
+        for (Table table : tables) {
+            if (database.isLiquibaseObject(table)) {
+                continue;
+            }
             tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
         for (Column column : snapshot.get(Column.class)) {
+            if (database.isLiquibaseObject(column.getRelation())) {
+                continue;
+            }
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
         }
 

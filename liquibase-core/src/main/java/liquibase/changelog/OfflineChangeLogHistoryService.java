@@ -279,8 +279,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[COLUMN_COMMENTS] = changeSet.getComments();
             newLine[COLUMN_TAG] = "";
             newLine[COLUMN_LIQUIBASE] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
-            newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
-            newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
+            if (newLine.length > 11) {
+                newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
+                newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
+            }
 
             csvWriter.writeNext(newLine);
 

@@ -26,7 +26,7 @@ public class MediumIntType extends LiquibaseDataType {
             return new DatabaseDataType(database.escapeDataTypeName("int"));
         }
         if (database instanceof MySQLDatabase) {
-            DatabaseDataType type = new DatabaseDataType("MEDIUMINT", getParameters());
+            DatabaseDataType type = new DatabaseDataType("MEDIUMINT");
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }

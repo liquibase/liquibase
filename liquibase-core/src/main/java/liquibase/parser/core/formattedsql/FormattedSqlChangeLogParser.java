@@ -140,7 +140,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
                     Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
 
-                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, false);
+                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
                     boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);

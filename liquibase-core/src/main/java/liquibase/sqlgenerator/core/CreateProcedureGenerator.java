@@ -39,7 +39,15 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         String procedureText = statement.getProcedureText();
 
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
-            sql.add(new UnparsedSql("if object_id('dbo."+statement.getProcedureName()+"', 'p') is null exec ('create procedure "+database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class)+" as select 1 a')"));
+            String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
+            String schemaName = statement.getSchemaName();
+            if (schemaName == null) {
+                schemaName = database.getDefaultSchemaName();
+            }
+            if (schemaName != null) {
+                 fullyQualifiedName = database.escapeObjectName(schemaName, Schema.class)+"."+fullyQualifiedName;
+             }
+            sql.add(new UnparsedSql("if object_id('"+ fullyQualifiedName +"', 'p') is null exec ('create procedure "+fullyQualifiedName+" as select 1 a')"));
 
             procedureText = procedureText.replaceFirst("(?i)create\\s+procedure", "ALTER PROCEDURE");
         }

@@ -37,8 +37,8 @@ public class DateTimeType extends LiquibaseDataType {
 
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            if (originalDefinition.equalsIgnoreCase("smalldatetime")
-                    || originalDefinition.equals("[smalldatetime]")) {
+            if (originalDefinition.toLowerCase().startsWith("smalldatetime")
+                    || originalDefinition.toLowerCase().startsWith("[smalldatetime")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
             } else if (originalDefinition.equalsIgnoreCase("datetime2")
@@ -55,7 +55,7 @@ public class DateTimeType extends LiquibaseDataType {
                 if (parameters.length == 0) {
                     parameters = new Object[] { 7 };
                 } else if (parameters.length > 1) {
-                    parameters = Arrays.copyOfRange(parameters, 0, 1);
+                    parameters = new Object[] {parameters[1]};
                 }
                 return new DatabaseDataType(database.escapeDataTypeName("datetime2"), parameters);
             }

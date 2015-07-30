@@ -63,7 +63,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
-            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
+            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, true));
 
             buffer.append(" ").append(columnType);
 
@@ -144,7 +144,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (statement.getNotNullColumns().contains(column)) {
                 buffer.append(" NOT NULL");
             } else {
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
+                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
                     buffer.append(" NULL");
                 }
             }
@@ -223,7 +223,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
-                    referencesString = database.getDefaultSchemaName() +"."+referencesString;
+                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) +"."+referencesString;
                 }
                 buffer.append(referencesString);
             } else {

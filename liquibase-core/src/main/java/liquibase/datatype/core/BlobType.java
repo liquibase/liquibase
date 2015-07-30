@@ -101,6 +101,9 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("IMAGE");
         }
         if (database instanceof OracleDatabase) {
+            if (getRawDefinition().toLowerCase().startsWith("bfile")) {
+                return new DatabaseDataType("BFILE");
+            }
             return new DatabaseDataType("BLOB");
         }
 
@@ -108,6 +111,17 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("BLOB");
         }
         return super.toDatabaseDataType(database);
+    }
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof String) {
+            return "'"+value+"'";
+        } else {
+            return value.toString();
+        }
     }
 
     //sqlite

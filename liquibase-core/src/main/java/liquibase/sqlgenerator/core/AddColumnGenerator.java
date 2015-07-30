@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
@@ -128,17 +129,21 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected String generateSingleColumnSQL(AddColumnStatement statement, Database database) {
-        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+        DatabaseDataType columnType = DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+
+        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + columnType;
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
             alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
         }
 
+        alterTable += getDefaultClause(statement, database);
+
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
+            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase|| (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
                 alterTable += " NULL";
             }
         }
@@ -146,8 +151,6 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (statement.isPrimaryKey()) {
             alterTable += " PRIMARY KEY";
         }
-
-        alterTable += getDefaultClause(statement, database);
 
         if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
             alterTable += " COMMENT '" + statement.getRemarks() + "' ";
