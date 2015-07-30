@@ -160,6 +160,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void addChangeSet(ChangeSet changeSet) {
+        changeSet.setChangeLog(this);
         this.changeSets.add(changeSet);
     }
 
@@ -399,7 +400,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
-            this.changeSets.add(changeSet);
+            addChangeSet(changeSet);
         }
 
         return true;
