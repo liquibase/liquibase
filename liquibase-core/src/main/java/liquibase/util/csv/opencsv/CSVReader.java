@@ -17,6 +17,7 @@ package liquibase.util.csv.opencsv;
  */
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import java.util.List;
  * @author Glen Smith
  * 
  */
-public class CSVReader {
+public class CSVReader implements Closeable {
 
     private BufferedReader br;
 

@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public interface Database extends PrioritizedService {
+public interface Database extends PrioritizedService, AutoCloseablecl {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();

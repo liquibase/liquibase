@@ -16,6 +16,7 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -32,7 +33,7 @@ import java.util.List;
  * @author Glen Smith
  *
  */
-public class CSVWriter {
+public class CSVWriter implements Closeable {
     
     private Writer rawWriter;
 
@@ -391,6 +392,7 @@ public class CSVWriter {
      * @throws IOException if bad things happen
      *
      */
+    @Override
     public void close() throws IOException {
         pw.flush();
         pw.close();
