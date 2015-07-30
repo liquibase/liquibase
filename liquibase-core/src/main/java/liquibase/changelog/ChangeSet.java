@@ -215,6 +215,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         setDbms(dbmsList);
     }
 
+    void setChangeLog(DatabaseChangeLog changeLog) {
+        this.changeLog = changeLog;
+    }
+
     protected void setDbms(String dbmsList) {
         if (StringUtils.trimToNull(dbmsList) != null) {
             String[] strings = dbmsList.toLowerCase().split(",");
