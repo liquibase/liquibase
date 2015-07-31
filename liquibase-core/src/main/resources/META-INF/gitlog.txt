@@ -1,3 +1,10 @@
+4e2e763 CORE-2463 Don't include liquibase tables in dbdoc
+d36838a CORE-2455 Improve messages in databasechangelog.description column
+0fc73d7 CORE-2455 Improve messages in databasechangelog.description column
+036a368 CORE-2455 Improve messages in databasechangelog.description column
+d78aa9f Fixed "Grammar" misspelling
+3f677e1 CORE-2448 New "created" attribute on changeSet
+76a9bb4 Updated changelog version to 3.5
 f0880d6 Handle NPE when no changes in backing index but a changed unique constraint
 3b309d8 CORE-931 addColumn should support not-null constraint with an initial default value
 b28c89a Improved test error message

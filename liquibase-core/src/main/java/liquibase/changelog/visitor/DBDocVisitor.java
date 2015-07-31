@@ -135,18 +135,33 @@ public class DBDocVisitor implements ChangeSetVisitor {
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
-        new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));
+        SortedSet<Table> tables = new TreeSet<Table>(snapshot.get(Table.class));
+        Iterator<Table> tableIterator = tables.iterator();
+        while (tableIterator.hasNext()) {
+            if (database.isLiquibaseObject(tableIterator.next())) {
+                tableIterator.remove();
+            }
+
+        }
+
+        new TableListWriter(rootOutputDir).writeHTML(tables);
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
             authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
         }
 
-        for (Table table : snapshot.get(Table.class)) {
+        for (Table table : tables) {
+            if (database.isLiquibaseObject(table)) {
+                continue;
+            }
             tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
         for (Column column : snapshot.get(Column.class)) {
+            if (database.isLiquibaseObject(column.getRelation())) {
+                continue;
+            }
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
         }
 

@@ -1,5 +1,6 @@
 package liquibase.dbdoc;
 
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.io.File;
