@@ -16,6 +16,7 @@ import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -42,6 +43,12 @@ import java.util.TreeSet;
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditional {
+    private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<DatabaseChangeLog>();
+
+    public static DatabaseChangeLog getRootChangeLog() {
+        return ROOT_CHANGE_LOG.get();
+    }
+
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
@@ -386,7 +393,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         DatabaseChangeLog changeLog;
         try {
-            changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+            if (rootChangeLog == null) {
+                ROOT_CHANGE_LOG.set(this);
+            }
+            try {
+                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+                changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
+            } finally {
+                if (rootChangeLog == null) {
+                    ROOT_CHANGE_LOG.remove();
+                }
+            }
         } catch (UnknownChangelogFormatException e) {
             LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             return false;
