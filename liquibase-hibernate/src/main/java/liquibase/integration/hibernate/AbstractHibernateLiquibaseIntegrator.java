@@ -50,24 +50,24 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
  * 
  *     {@literal @}Override
  *     public ResourceAccessor create() {
- * 	return new ClassLoaderResourceAccessor(getClass().getClassLoader());
+ *          return new ClassLoaderResourceAccessor(getClass().getClassLoader());
  *     }
  * 
  *     {@literal @}Override
  *     public DataSource createDataSource() {
- * 	try {
- * 	    return (DataSource) InitialContext.doLookup("java:jboss/datasources/myDS");
- * 	} catch (NamingException e) {
- * 	    throw new IllegalStateException("The datasource couldn't be looked up!");
- * 	}
+ *          try {
+ *               return (DataSource) InitialContext.doLookup("java:jboss/datasources/myDS");
+ *          } catch (NamingException e) {
+ *               throw new IllegalStateException("The datasource couldn't be looked up!");
+ *          }
  *     }
  * 
  *     {@literal @}Override
  *     public LiquibaseHibernateIntegratorConfig createConfig() {
- * 	LiquibaseHibernateIntegratorConfig config = new LiquibaseHibernateIntegratorConfig();
- * 	config.setChangeLog("my/package/db.changelog.xml");
- * 	config.setDefaultSchema(System.getProperty("schema"));
- * 	return config;
+ *          LiquibaseHibernateIntegratorConfig config = new LiquibaseHibernateIntegratorConfig();
+ *          config.setChangeLog("my/package/db.changelog.xml");
+ *          config.setDefaultSchema(System.getProperty("schema"));
+ *          return config;
  *     }
  * }
  * 

@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-parent</artifactId>
-        <version>3.5.0-SNAPSHOT</version>
+        <version>3.4.1-SNAPSHOT</version>
     </parent>
     <artifactId>liquibase-hibernate</artifactId>
     <name>Liquibase Hibernate</name>
@@ -21,7 +21,7 @@
                             <goal>javadoc</goal>
                         </goals>
                         <configuration>
-                            <sourcepath>../liquibase-hibernate/src/main/java</sourcepath>
+                            <sourcepath>${project.sourceDirectory}</sourcepath>
                             <encoding>UTF-8</encoding>
                         </configuration>
                     </execution>
