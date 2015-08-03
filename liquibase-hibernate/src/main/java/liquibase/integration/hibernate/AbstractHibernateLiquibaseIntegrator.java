@@ -33,10 +33,10 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 /**
  * <p>
  * The abstract liquibase hibernate integrator is used to run liquibase before
- * hibernate validation (hibernate.hbm2ddl.auto -&gt; validate). You have to use (DataSource)
- * InitialContext.doLookup("java:jboss/datasources/myDS") to get the datasource /
- * System.getProperty("myProperty") for system properties. If you have a multi
- * module project use
+ * hibernate validation (hibernate.hbm2ddl.auto -&gt; validate). You have to use
+ * (DataSource) InitialContext.doLookup("java:jboss/datasources/myDS") to get
+ * the datasource / System.getProperty("myProperty") for system properties. If
+ * you have a multi module project use
  * <b>LiquibaseHibernateIntegratorConfig.setMultiProjectSetup(boolean)</b>, if
  * you want to drop the database schema afterwards
  * <b>LiquibaseHibernateIntegratorConfig.setDropAtShutdown(boolean)</b>
@@ -49,12 +49,12 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
  * public class LiquibaseIntegrator extends AbstractHibernateLiquibaseIntegrator {
  * 
  *     {@literal @}Override
- *     public ResourceAccessor create() {
+ *     public ResourceAccessor create(configuration, metaDataImplementor, sessionFactoryImplementor, sessionFactoryServiceRegistry) {
  *          return new ClassLoaderResourceAccessor(getClass().getClassLoader());
  *     }
  * 
  *     {@literal @}Override
- *     public DataSource createDataSource() {
+ *     public DataSource createDataSource(configuration, metaDataImplementor, sessionFactoryImplementor, sessionFactoryServiceRegistry) {
  *          try {
  *               return (DataSource) InitialContext.doLookup("java:jboss/datasources/myDS");
  *          } catch (NamingException e) {
@@ -63,7 +63,7 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
  *     }
  * 
  *     {@literal @}Override
- *     public LiquibaseHibernateIntegratorConfig createConfig() {
+ *     public LiquibaseHibernateIntegratorConfig createConfig(configuration, metaDataImplementor, sessionFactoryImplementor, sessionFactoryServiceRegistry) {
  *          LiquibaseHibernateIntegratorConfig config = new LiquibaseHibernateIntegratorConfig();
  *          config.setChangeLog("my/package/db.changelog.xml");
  *          config.setDefaultSchema(System.getProperty("schema"));
@@ -85,11 +85,9 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
  * @author Tobias Soloschenko
  *
  */
-public abstract class AbstractHibernateLiquibaseIntegrator implements
-	Integrator {
+public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator {
 
-    private static final Logger log = Logger
-	    .getLogger(AbstractHibernateLiquibaseIntegrator.class.getName());
+    private static final Logger log = Logger.getLogger(AbstractHibernateLiquibaseIntegrator.class.getName());
 
     private LiquibaseHibernateIntegratorConfig config;
 
@@ -109,28 +107,25 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
      * Runs the liquibase setup
      */
     @Override
-    public void integrate(Configuration configuration,
-	    SessionFactoryImplementor sessionFactory,
+    public void integrate(Configuration configuration, SessionFactoryImplementor sessionFactory,
 	    SessionFactoryServiceRegistry serviceRegistry) {
-	init();
+	init(configuration, null, sessionFactory, serviceRegistry);
     }
 
     /**
      * Runs the liquibase setup
      */
     @Override
-    public void integrate(MetadataImplementor metadata,
-	    SessionFactoryImplementor sessionFactory,
+    public void integrate(MetadataImplementor metadata, SessionFactoryImplementor sessionFactory,
 	    SessionFactoryServiceRegistry serviceRegistry) {
-	init();
+	init(null, metadata, sessionFactory, serviceRegistry);
     }
 
     /**
      * Runs the liquibase tear down
      */
     @Override
-    public void disintegrate(SessionFactoryImplementor sessionFactory,
-	    SessionFactoryServiceRegistry serviceRegistry) {
+    public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
 	destroy();
 	if (initalized && config.isDropAtShutdown()) {
 	    try {
@@ -146,42 +141,97 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
     /**
      * Creates the resource accessor
      * 
+     * @param configuration
+     *            the hibernate configuration or null if init is invoked from
+     *            integrate with metaDataImplementor
+     * @param metaDataImplementor
+     *            the hibernate meta data configuration or null if init is
+     *            invoked from integrate with configuration
+     * @param sessionFactoryServiceRegistry
+     *            the hibernate session factory service registry
+     * @param sessionFactoryImplementor
+     *            the hibernate session factory implementor
+     * 
      * @return the resource accessor
      * 
      * @see {@link liquibase.resource.ResourceAccessor}
      */
-    protected abstract ResourceAccessor create();
+    protected abstract ResourceAccessor create(Configuration configuration, MetadataImplementor metaDataImplementor,
+	    SessionFactoryImplementor sessionFactoryImplementor,
+	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry);
 
     /**
      * Creates the data source
+     * 
+     * @param configuration
+     *            the hibernate configuration or null if init is invoked from
+     *            integrate with metaDataImplementor
+     * @param metaDataImplementor
+     *            the hibernate meta data configuration or null if init is
+     *            invoked from integrate with configuration
+     * @param sessionFactoryServiceRegistry
+     *            the hibernate session factory service registry
+     * @param sessionFactoryImplementor
+     *            the hibernate session factory implementor
      * 
      * @return the datasource
      * 
      * @see {@link javax.sql.DataSource}
      */
-    protected abstract DataSource createDataSource();
+    protected abstract DataSource createDataSource(Configuration configuration,
+	    MetadataImplementor metaDataImplementor, SessionFactoryImplementor sessionFactoryImplementor,
+	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry);
 
     /**
      * Creates the liquibase hibernate integrator config
+     * 
+     * @param configuration
+     *            the hibernate configuration or null if init is invoked from
+     *            integrate with metaDataImplementor
+     * @param metaDataImplementor
+     *            the hibernate meta data configuration or null if init is
+     *            invoked from integrate with configuration
+     * @param sessionFactoryServiceRegistry
+     *            the hibernate session factory service registry
+     * @param sessionFactoryImplementor
+     *            the hibernate session factory implementor
      * 
      * @return the liquibase hibernate integrator config
      * 
      * @see {@link liquibase.integration.hibernate.LiquibaseHibernateIntegratorConfig}
      */
-    protected abstract LiquibaseHibernateIntegratorConfig createConfig();
+    protected abstract LiquibaseHibernateIntegratorConfig createConfig(Configuration configuration,
+	    MetadataImplementor metaDataImplementor, SessionFactoryImplementor sessionFactoryImplementor,
+	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry);
 
     /**
      * Initializes the liquibase context
+     * 
+     * @param configuration
+     *            the hibernate configuration or null if init is invoked from
+     *            integrate with metaDataImplementor
+     * @param metaDataImplementor
+     *            the hibernate meta data configuration or null if init is
+     *            invoked from integrate with configuration
+     * @param sessionFactoryServiceRegistry
+     *            the hibernate session factory service registry
+     * @param sessionFactoryImplementor
+     *            the hibernate session factory implementor
      */
-    protected void init() {
-	config = createConfig();
-	dataSource = createDataSource();
-	resourceAccessor = create();
+    protected void init(Configuration configuration, MetadataImplementor metaDataImplementor,
+	    SessionFactoryImplementor sessionFactoryImplementor,
+	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry) {
+	config = createConfig(configuration, metaDataImplementor, sessionFactoryImplementor,
+		sessionFactoryServiceRegistry);
+	dataSource = createDataSource(configuration, metaDataImplementor, sessionFactoryImplementor,
+		sessionFactoryServiceRegistry);
+	resourceAccessor = create(configuration, metaDataImplementor, sessionFactoryImplementor,
+		sessionFactoryServiceRegistry);
 	initLock();
 	runLiquibase();
 	releaseLock();
     }
-    
+
     /**
      * Executed if desintegrate is invoked
      */
@@ -196,8 +246,7 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
 	    try {
 		lockConnection = dataSource.getConnection();
 		lockConnection.setAutoCommit(false);
-		Statement databaseMultiProjectSetupCreateTableStatement = lockConnection
-			.createStatement();
+		Statement databaseMultiProjectSetupCreateTableStatement = lockConnection.createStatement();
 		try {
 		    databaseMultiProjectSetupCreateTableStatement
 			    .executeUpdate("CREATE TABLE DATABASEMULTIPROJECTSETUPLOCK (locked int)");
@@ -208,33 +257,26 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
 		} finally {
 		    try {
 			if (databaseMultiProjectSetupCreateTableStatement != null) {
-			    databaseMultiProjectSetupCreateTableStatement
-				    .close();
+			    databaseMultiProjectSetupCreateTableStatement.close();
 			}
 		    } catch (SQLException e) {
 			log.log(Level.WARNING,
-				"Error while closing the statement of create table database multi setup lock",
-				e);
+				"Error while closing the statement of create table database multi setup lock", e);
 		    }
 		}
 
-		databaseMultiProjectSetupLockStatement = lockConnection
-			.createStatement();
+		databaseMultiProjectSetupLockStatement = lockConnection.createStatement();
 		databaseMultiProjectSetupLockStatement
 			.execute("LOCK TABLE DATABASEMULTIPROJECTSETUPLOCK IN EXCLUSIVE MODE");
 	    } catch (SQLException e) {
 		try {
-		    if (lockConnection != null){			
+		    if (lockConnection != null) {
 			lockConnection.rollback();
 		    }
 		} catch (SQLException e1) {
-		    log.log(Level.WARNING,
-			    "Error while rolling back the transaction of multi project setup",
-			    e);
+		    log.log(Level.WARNING, "Error while rolling back the transaction of multi project setup", e);
 		}
-		log.log(Level.SEVERE,
-			"Error while aquiring the lock of multi project setup",
-			e);
+		log.log(Level.SEVERE, "Error while aquiring the lock of multi project setup", e);
 	    }
 	}
     }
@@ -247,8 +289,7 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
 	    try {
 		lockConnection.commit();
 	    } catch (SQLException e) {
-		log.log(Level.SEVERE,
-			"Error while committing the lock connection", e);
+		log.log(Level.SEVERE, "Error while committing the lock connection", e);
 	    } finally {
 		if (lockConnection != null) {
 		    try {
@@ -276,8 +317,7 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
      * Runs the liquibase setup
      */
     protected void runLiquibase() {
-	log.log(Level.INFO,
-		"Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+	log.log(Level.INFO, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
 	String hostName;
 	try {
 	    hostName = NetUtil.getLocalHostName();
@@ -286,17 +326,13 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
 	    return;
 	}
 
-	LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration
-		.getInstance();
-	if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class)
-		.getShouldRun()) {
+	LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+	if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
 	    log.info("Liquibase did not run on "
 		    + hostName
 		    + " because "
-		    + liquibaseConfiguration.describeValueLookupLogic(
-			    GlobalConfiguration.class,
-			    GlobalConfiguration.SHOULD_RUN)
-		    + " was set to false");
+		    + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class,
+			    GlobalConfiguration.SHOULD_RUN) + " was set to false");
 	    return;
 	}
 	try {
@@ -318,8 +354,7 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
 	    c = dataSource.getConnection();
 	    liquibase = createLiquibase(c);
 	    liquibase.getDatabase();
-	    liquibase.update(new Contexts(config.getContexts()),
-		    new LabelExpression(config.getLabels()));
+	    liquibase.update(new Contexts(config.getContexts()), new LabelExpression(config.getLabels()));
 	    initalized = true;
 	} catch (SQLException e) {
 	    initalized = false;
@@ -351,15 +386,11 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
      * @return liquibase
      * @throws LiquibaseException
      */
-    protected Liquibase createLiquibase(Connection connection)
-	    throws LiquibaseException {
-	Liquibase liquibase = new Liquibase(config.getChangeLog(),
-		resourceAccessor, createDatabase(connection));
+    protected Liquibase createLiquibase(Connection connection) throws LiquibaseException {
+	Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(connection));
 	if (config.getParameters() != null) {
-	    for (Map.Entry<String, String> entry : config.getParameters()
-		    .entrySet()) {
-		liquibase.setChangeLogParameter(entry.getKey(),
-			entry.getValue());
+	    for (Map.Entry<String, String> entry : config.getParameters().entrySet()) {
+		liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
 	    }
 	}
 
@@ -379,11 +410,9 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements
      * @throws DatabaseException
      *             if the database couldn't be created
      */
-    protected Database createDatabase(Connection connection)
-	    throws DatabaseException {
-	Database database = DatabaseFactory.getInstance()
-		.findCorrectDatabaseImplementation(
-			new JdbcConnection(connection));
+    protected Database createDatabase(Connection connection) throws DatabaseException {
+	Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
+		new JdbcConnection(connection));
 	if (config.getDefaultSchema() != null) {
 	    database.setDefaultSchemaName(config.getDefaultSchema());
 	}
