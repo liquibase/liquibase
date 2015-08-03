@@ -45,10 +45,6 @@ import java.util.TreeSet;
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditional {
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<DatabaseChangeLog>();
 
-    public static DatabaseChangeLog getRootChangeLog() {
-        return ROOT_CHANGE_LOG.get();
-    }
-
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
@@ -60,7 +56,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private RuntimeEnvironment runtimeEnvironment;
     private boolean ignoreClasspathPrefix = false;
 
+    private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+
     public DatabaseChangeLog() {
+    }
+
+    public DatabaseChangeLog getRootChangeLog() {
+        return rootChangeLog != null ? rootChangeLog : this;
     }
 
     public DatabaseChangeLog(String physicalFilePath) {
