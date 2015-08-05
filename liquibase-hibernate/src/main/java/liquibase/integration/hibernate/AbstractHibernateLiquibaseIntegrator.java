@@ -85,9 +85,11 @@ import org.hibernate.service.spi.SessionFactoryServiceRegistry;
  * @author Tobias Soloschenko
  *
  */
-public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator {
+public abstract class AbstractHibernateLiquibaseIntegrator implements
+	Integrator {
 
-    private static final Logger log = Logger.getLogger(AbstractHibernateLiquibaseIntegrator.class.getName());
+    private static final Logger log = Logger
+	    .getLogger(AbstractHibernateLiquibaseIntegrator.class.getName());
 
     private LiquibaseHibernateIntegratorConfig config;
 
@@ -107,7 +109,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * Runs the liquibase setup
      */
     @Override
-    public void integrate(Configuration configuration, SessionFactoryImplementor sessionFactory,
+    public void integrate(Configuration configuration,
+	    SessionFactoryImplementor sessionFactory,
 	    SessionFactoryServiceRegistry serviceRegistry) {
 	init(configuration, null, sessionFactory, serviceRegistry);
     }
@@ -116,7 +119,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * Runs the liquibase setup
      */
     @Override
-    public void integrate(MetadataImplementor metadata, SessionFactoryImplementor sessionFactory,
+    public void integrate(MetadataImplementor metadata,
+	    SessionFactoryImplementor sessionFactory,
 	    SessionFactoryServiceRegistry serviceRegistry) {
 	init(null, metadata, sessionFactory, serviceRegistry);
     }
@@ -125,7 +129,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * Runs the liquibase tear down
      */
     @Override
-    public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+    public void disintegrate(SessionFactoryImplementor sessionFactory,
+	    SessionFactoryServiceRegistry serviceRegistry) {
 	destroy();
 	if (initalized && config.isDropAtShutdown()) {
 	    try {
@@ -136,6 +141,15 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 		// NOOP - maybe an error if the schema has been droped already
 	    }
 	}
+    }
+
+    /**
+     * If updates based on liquibase should be performed
+     * 
+     * @return if updates should be performed
+     */
+    protected boolean isAutoUpdateActive() {
+	return true;
     }
 
     /**
@@ -156,7 +170,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * 
      * @see {@link liquibase.resource.ResourceAccessor}
      */
-    protected abstract ResourceAccessor create(Configuration configuration, MetadataImplementor metaDataImplementor,
+    protected abstract ResourceAccessor create(Configuration configuration,
+	    MetadataImplementor metaDataImplementor,
 	    SessionFactoryImplementor sessionFactoryImplementor,
 	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry);
 
@@ -179,7 +194,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * @see {@link javax.sql.DataSource}
      */
     protected abstract DataSource createDataSource(Configuration configuration,
-	    MetadataImplementor metaDataImplementor, SessionFactoryImplementor sessionFactoryImplementor,
+	    MetadataImplementor metaDataImplementor,
+	    SessionFactoryImplementor sessionFactoryImplementor,
 	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry);
 
     /**
@@ -200,8 +216,10 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * 
      * @see {@link liquibase.integration.hibernate.LiquibaseHibernateIntegratorConfig}
      */
-    protected abstract LiquibaseHibernateIntegratorConfig createConfig(Configuration configuration,
-	    MetadataImplementor metaDataImplementor, SessionFactoryImplementor sessionFactoryImplementor,
+    protected abstract LiquibaseHibernateIntegratorConfig createConfig(
+	    Configuration configuration,
+	    MetadataImplementor metaDataImplementor,
+	    SessionFactoryImplementor sessionFactoryImplementor,
 	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry);
 
     /**
@@ -218,15 +236,19 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * @param sessionFactoryImplementor
      *            the hibernate session factory implementor
      */
-    protected void init(Configuration configuration, MetadataImplementor metaDataImplementor,
+    protected void init(Configuration configuration,
+	    MetadataImplementor metaDataImplementor,
 	    SessionFactoryImplementor sessionFactoryImplementor,
 	    SessionFactoryServiceRegistry sessionFactoryServiceRegistry) {
-	config = createConfig(configuration, metaDataImplementor, sessionFactoryImplementor,
-		sessionFactoryServiceRegistry);
-	dataSource = createDataSource(configuration, metaDataImplementor, sessionFactoryImplementor,
-		sessionFactoryServiceRegistry);
-	resourceAccessor = create(configuration, metaDataImplementor, sessionFactoryImplementor,
-		sessionFactoryServiceRegistry);
+	if (!isAutoUpdateActive()) {
+	    return;
+	}
+	config = createConfig(configuration, metaDataImplementor,
+		sessionFactoryImplementor, sessionFactoryServiceRegistry);
+	dataSource = createDataSource(configuration, metaDataImplementor,
+		sessionFactoryImplementor, sessionFactoryServiceRegistry);
+	resourceAccessor = create(configuration, metaDataImplementor,
+		sessionFactoryImplementor, sessionFactoryServiceRegistry);
 	initLock();
 	runLiquibase();
 	releaseLock();
@@ -246,7 +268,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 	    try {
 		lockConnection = dataSource.getConnection();
 		lockConnection.setAutoCommit(false);
-		Statement databaseMultiProjectSetupCreateTableStatement = lockConnection.createStatement();
+		Statement databaseMultiProjectSetupCreateTableStatement = lockConnection
+			.createStatement();
 		try {
 		    databaseMultiProjectSetupCreateTableStatement
 			    .executeUpdate("CREATE TABLE DATABASEMULTIPROJECTSETUPLOCK (locked int)");
@@ -257,15 +280,18 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 		} finally {
 		    try {
 			if (databaseMultiProjectSetupCreateTableStatement != null) {
-			    databaseMultiProjectSetupCreateTableStatement.close();
+			    databaseMultiProjectSetupCreateTableStatement
+				    .close();
 			}
 		    } catch (SQLException e) {
 			log.log(Level.WARNING,
-				"Error while closing the statement of create table database multi setup lock", e);
+				"Error while closing the statement of create table database multi setup lock",
+				e);
 		    }
 		}
 
-		databaseMultiProjectSetupLockStatement = lockConnection.createStatement();
+		databaseMultiProjectSetupLockStatement = lockConnection
+			.createStatement();
 		databaseMultiProjectSetupLockStatement
 			.execute("LOCK TABLE DATABASEMULTIPROJECTSETUPLOCK IN EXCLUSIVE MODE");
 	    } catch (SQLException e) {
@@ -274,9 +300,13 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 			lockConnection.rollback();
 		    }
 		} catch (SQLException e1) {
-		    log.log(Level.WARNING, "Error while rolling back the transaction of multi project setup", e);
+		    log.log(Level.WARNING,
+			    "Error while rolling back the transaction of multi project setup",
+			    e);
 		}
-		log.log(Level.SEVERE, "Error while aquiring the lock of multi project setup", e);
+		log.log(Level.SEVERE,
+			"Error while aquiring the lock of multi project setup",
+			e);
 	    }
 	}
     }
@@ -289,7 +319,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 	    try {
 		lockConnection.commit();
 	    } catch (SQLException e) {
-		log.log(Level.SEVERE, "Error while committing the lock connection", e);
+		log.log(Level.SEVERE,
+			"Error while committing the lock connection", e);
 	    } finally {
 		if (lockConnection != null) {
 		    try {
@@ -317,7 +348,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * Runs the liquibase setup
      */
     protected void runLiquibase() {
-	log.log(Level.INFO, "Booting Liquibase " + LiquibaseUtil.getBuildVersion());
+	log.log(Level.INFO,
+		"Booting Liquibase " + LiquibaseUtil.getBuildVersion());
 	String hostName;
 	try {
 	    hostName = NetUtil.getLocalHostName();
@@ -326,13 +358,17 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 	    return;
 	}
 
-	LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
-	if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+	LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration
+		.getInstance();
+	if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class)
+		.getShouldRun()) {
 	    log.info("Liquibase did not run on "
 		    + hostName
 		    + " because "
-		    + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class,
-			    GlobalConfiguration.SHOULD_RUN) + " was set to false");
+		    + liquibaseConfiguration.describeValueLookupLogic(
+			    GlobalConfiguration.class,
+			    GlobalConfiguration.SHOULD_RUN)
+		    + " was set to false");
 	    return;
 	}
 	try {
@@ -354,7 +390,8 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
 	    c = dataSource.getConnection();
 	    liquibase = createLiquibase(c);
 	    liquibase.getDatabase();
-	    liquibase.update(new Contexts(config.getContexts()), new LabelExpression(config.getLabels()));
+	    liquibase.update(new Contexts(config.getContexts()),
+		    new LabelExpression(config.getLabels()));
 	    initalized = true;
 	} catch (SQLException e) {
 	    initalized = false;
@@ -386,11 +423,15 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * @return liquibase
      * @throws LiquibaseException
      */
-    protected Liquibase createLiquibase(Connection connection) throws LiquibaseException {
-	Liquibase liquibase = new Liquibase(config.getChangeLog(), resourceAccessor, createDatabase(connection));
+    protected Liquibase createLiquibase(Connection connection)
+	    throws LiquibaseException {
+	Liquibase liquibase = new Liquibase(config.getChangeLog(),
+		resourceAccessor, createDatabase(connection));
 	if (config.getParameters() != null) {
-	    for (Map.Entry<String, String> entry : config.getParameters().entrySet()) {
-		liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+	    for (Map.Entry<String, String> entry : config.getParameters()
+		    .entrySet()) {
+		liquibase.setChangeLogParameter(entry.getKey(),
+			entry.getValue());
 	    }
 	}
 
@@ -410,9 +451,11 @@ public abstract class AbstractHibernateLiquibaseIntegrator implements Integrator
      * @throws DatabaseException
      *             if the database couldn't be created
      */
-    protected Database createDatabase(Connection connection) throws DatabaseException {
-	Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
-		new JdbcConnection(connection));
+    protected Database createDatabase(Connection connection)
+	    throws DatabaseException {
+	Database database = DatabaseFactory.getInstance()
+		.findCorrectDatabaseImplementation(
+			new JdbcConnection(connection));
 	if (config.getDefaultSchema() != null) {
 	    database.setDefaultSchemaName(config.getDefaultSchema());
 	}
