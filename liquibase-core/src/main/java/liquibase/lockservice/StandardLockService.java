@@ -30,7 +30,7 @@ public class StandardLockService implements LockService {
     protected boolean hasChangeLogLock = false;
 
     private Long changeLogLockPollRate;
-    private long changeLogLockRecheckTime;
+    private Long changeLogLockRecheckTime;
 
     private Boolean hasDatabaseChangeLogLockTable = null;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
@@ -71,8 +71,8 @@ public class StandardLockService implements LockService {
     }
 
     public Long getChangeLogLockRecheckTime() {
-        if (changeLogLockPollRate != null) {
-            return changeLogLockPollRate;
+        if (changeLogLockRecheckTime != null) {
+            return changeLogLockRecheckTime;
         }
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockPollRate();
     }
