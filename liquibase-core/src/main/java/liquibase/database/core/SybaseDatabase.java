@@ -223,18 +223,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
-        }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
-        }
-        return null;
+    protected String getConnectionSchemaNameCallStatement() {
+        return "select user_name()";
     }
-
 
     @Override
     public boolean supportsRestrictForeignKeys() {

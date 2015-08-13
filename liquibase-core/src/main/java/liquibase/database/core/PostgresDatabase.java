@@ -245,15 +245,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaName() {
-        try {
-            String currentSchema = ExecutorService.getInstance().getExecutor(this)
-                    .queryForObject(new RawCallStatement("select current_schema"), String.class);
-            return currentSchema;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get current schema", e);
-        }
+    protected String getConnectionSchemaNameCallStatement() {
+        return "select current_schema";
     }
 
     private boolean catalogExists(String catalogName) throws DatabaseException {
