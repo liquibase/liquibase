@@ -32,7 +32,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhere() != null) {
-            String fixedWhereClause = "WHERE " + statement.getWhere();
+            String fixedWhereClause = "WHERE " + statement.getWhere().trim();
             Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(fixedWhereClause);
             StringBuffer sb = new StringBuffer();
             Iterator<String> columnNameIter = statement.getWhereColumnNames().iterator();
