@@ -1,18 +1,14 @@
 package liquibase.statement;
 
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
@@ -41,29 +37,7 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 	    params.deleteCharAt(params.lastIndexOf(","));
 	    sql.append(params);
         if (getWhereClause() != null) {
-            String fixedWhereClause = "WHERE " + getWhereClause().trim();
-            Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(fixedWhereClause);
-            StringBuffer sb = new StringBuffer();
-            Iterator<String> columnNameIter = getWhereColumnNames().iterator();
-            Iterator<Object> paramIter = getWhereParameters().iterator();
-            while (matcher.find()) {
-                if (matcher.group().equals(":name")) {
-                    while (columnNameIter.hasNext()) {
-                        String columnName = columnNameIter.next();
-                        if (columnName == null) {
-                            continue;
-                        }
-                        matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
-                        break;
-                    }
-                } else if (paramIter.hasNext()) {
-                    Object param = paramIter.next();
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
-                }
-            }
-            matcher.appendTail(sb);
-            fixedWhereClause = sb.toString();
-            sql.append(" ").append(fixedWhereClause);
+            sql.append(" WHERE ").append(replacePredicatePlaceholders(database, getWhereClause(), getWhereColumnNames(), getWhereParameters()));
         }
 
 		return sql.toString();

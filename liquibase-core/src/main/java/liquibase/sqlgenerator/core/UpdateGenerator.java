@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -8,14 +9,10 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
 import java.util.Date;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
@@ -44,29 +41,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sql.deleteCharAt(lastComma);
         }
         if (statement.getWhereClause() != null) {
-            String fixedWhereClause = "WHERE " + statement.getWhereClause().trim();
-            Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(fixedWhereClause);
-            StringBuffer sb = new StringBuffer();
-            Iterator<String> columnNameIter = statement.getWhereColumnNames().iterator();
-            Iterator<Object> paramIter = statement.getWhereParameters().iterator();
-            while (matcher.find()) {
-                if (matcher.group().equals(":name")) {
-                    while (columnNameIter.hasNext()) {
-                        String columnName = columnNameIter.next();
-                        if (columnName == null) {
-                            continue;
-                        }
-                        matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
-                        break;
-                    }
-                } else if (paramIter.hasNext()) {
-                    Object param = paramIter.next();
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
-                }
-            }
-            matcher.appendTail(sb);
-            fixedWhereClause = sb.toString();
-            sql.append(" ").append(fixedWhereClause);
+            sql.append(" WHERE ").append(replacePredicatePlaceholders(database, statement.getWhereClause(), statement.getWhereColumnNames(), statement.getWhereParameters()));
         }
 
         return new Sql[] {
