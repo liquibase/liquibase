@@ -42,6 +42,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
                             continue;
                         }
                         matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
+                        break;
                     }
                 } else if (paramIter.hasNext()) {
                     Object param = paramIter.next();
