@@ -263,7 +263,4 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 		return true;
 	}
 
-    @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return true;
-    }}
+}

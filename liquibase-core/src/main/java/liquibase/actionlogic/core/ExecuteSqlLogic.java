@@ -17,7 +17,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class ExecuteSqlLogic extends AbstractSqlLogic<ExecuteSqlAction> implements ActionLogic.InteractsExternally<ExecuteSqlAction> {
+public class ExecuteSqlLogic extends AbstractSqlLogic<ExecuteSqlAction>  {
 
     @Override
     protected Class<ExecuteSqlAction> getSupportedAction() {
@@ -38,10 +38,6 @@ public class ExecuteSqlLogic extends AbstractSqlLogic<ExecuteSqlAction> implemen
         }
     }
 
-    @Override
-    public boolean interactsExternally(ExecuteSqlAction action, Scope scope) {
-        return true;
-    }
 
     @Override
     public ActionResult execute(ExecuteSqlAction action, Scope scope) throws ActionPerformException {

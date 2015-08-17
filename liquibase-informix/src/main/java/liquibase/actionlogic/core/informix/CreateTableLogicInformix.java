@@ -21,7 +21,7 @@ public class CreateTableLogicInformix extends CreateTableLogic {
     protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.tablespace;
+        String tablespace = action.table.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "IN "+tablespace);
         }

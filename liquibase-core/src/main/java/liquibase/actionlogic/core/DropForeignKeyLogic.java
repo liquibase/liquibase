@@ -1,7 +1,7 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.core.DropForeignKeyConstraintAction;
+import liquibase.action.core.DropForeignKeyAction;
 import liquibase.action.core.AlterTableAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.actionlogic.ActionResult;
@@ -12,22 +12,22 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Index;
 import liquibase.util.StringClauses;
 
-public class DropForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<DropForeignKeyConstraintAction> {
+public class DropForeignKeyLogic extends AbstractSqlBuilderLogic<DropForeignKeyAction> {
 
     @Override
-    protected Class<DropForeignKeyConstraintAction> getSupportedAction() {
-        return DropForeignKeyConstraintAction.class;
+    protected Class<DropForeignKeyAction> getSupportedAction() {
+        return DropForeignKeyAction.class;
     }
 
     @Override
-    public ValidationErrors validate(DropForeignKeyConstraintAction action, Scope scope) {
+    public ValidationErrors validate(DropForeignKeyAction action, Scope scope) {
         return super.validate(action, scope)
                 .checkForRequiredField("baseTableName", action)
                 .checkForRequiredField("constraintName", action);
     }
 
     @Override
-    public ActionResult execute(DropForeignKeyConstraintAction action, Scope scope) throws ActionPerformException {
+    public ActionResult execute(DropForeignKeyAction action, Scope scope) throws ActionPerformException {
         return new DelegateResult(new AlterTableAction(
                 action.baseTableName,
                 generateSql(action, scope)
@@ -35,7 +35,7 @@ public class DropForeignKeyConstraintLogic extends AbstractSqlBuilderLogic<DropF
     }
 
     @Override
-    protected StringClauses generateSql(DropForeignKeyConstraintAction action, Scope scope) {
+    protected StringClauses generateSql(DropForeignKeyAction action, Scope scope) {
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP CONSTRAINT")

@@ -22,7 +22,7 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
     protected StringClauses generateSql(CreateTableAction action, Scope scope) {
         StringClauses clauses = super.generateSql(action, scope);
 
-        String tablespace = action.tablespace;
+        String tablespace = action.table.tablespace;
         if (tablespace != null) {
             clauses.replace(Clauses.tablespace, "ON "+tablespace);
         }
@@ -43,11 +43,11 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
         String remarks = column.remarks;
 
         if (remarks != null) {
-            String schemaName = action.tableName.container.name;
+            String schemaName = action.table.name.container.name;
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }
-            additionalActions.add(new ExecuteSqlAction("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+remarks+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+action.tableName+", @level2type = N'Column', @level2name = "+column));
+            additionalActions.add(new ExecuteSqlAction("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+remarks+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+action.table.getSimpleName()+", @level2type = N'Column', @level2name = "+column));
         }
 
         return clauses;

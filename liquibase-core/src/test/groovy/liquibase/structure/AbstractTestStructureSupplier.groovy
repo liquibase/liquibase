@@ -3,13 +3,11 @@ package liquibase.structure
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.database.ConnectionSupplier
-import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
 import liquibase.structure.core.Table
 import liquibase.util.ObjectUtil
-import org.springframework.jmx.export.naming.ObjectNamingStrategy
 
 abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implements Service {
 
@@ -24,7 +22,8 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
 
     abstract List<T> getTestObjects(Class<T> type, Snapshot snapshot, Scope scope);
 
-    List<String> getSimpleObjectNames(Class<T> type, Scope scope) {
+    List<String> getSimpleObjectNames(Scope scope) {
+        def type = getTypeCreates()
         List<String> returnList = new ArrayList<>();
 
         int objectsToCreate = 10;
@@ -43,8 +42,10 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         return returnList
     }
 
-    List<String> getComplexObjectNames(Class<T> type, Scope scope) {
+    List<String> getComplexObjectNames(Scope scope) {
         List<String> returnList = new ArrayList<>();
+
+        def type = getTypeCreates()
 
         returnList.add("lower" + type.getSimpleName().toLowerCase());
         returnList.add("UPPER" + type.getSimpleName().toUpperCase());
@@ -60,26 +61,28 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         return returnList
     }
 
-    List<ObjectName> getObjectNames(Class<T> type, Scope scope) {
+    List<ObjectName> getObjectNames(Scope scope) {
         List<ObjectName> returnList = new ArrayList<>();
 
-        def containers = ObjectUtil.defaultIfEmpty(getObjectContainers(type, scope), [null])
+        def containers = ObjectUtil.defaultIfEmpty(getObjectContainers(scope), [null])
 
         for (ObjectName container : containers) {
             def objectNames;
             if (scope.get(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.SIMPLE_NAMES) == JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES) {
-                objectNames = getComplexObjectNames(type, scope)
+                objectNames = getComplexObjectNames(scope)
             } else {
-                objectNames = getSimpleObjectNames(type, scope)
+                objectNames = getSimpleObjectNames(scope)
             }
 
             for (String simpleName : objectNames) {
                 returnList.add(new ObjectName(container, simpleName));
             }
-            returnList.add(new ObjectName(container, "only_in_" + container.name));
+            if (container != null) {
+                returnList.add(new ObjectName(container, "only_in_" + container.name));
+            }
         }
 
-        if (!scope.database.isCaseSensitive(type)) {
+        if (!scope.database.isCaseSensitive(getTypeCreates())) {
             if (scope.database.canStoreObjectName("lowername", Table.class)) {
                 returnList = returnList.findAll { !it.name.find("[A-Z]") }
             } else {
@@ -91,7 +94,7 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         return returnList;
     }
 
-    protected List<ObjectName> getObjectContainers(Class<T> objectType, Scope scope) {
+    protected List<ObjectName> getObjectContainers(Scope scope) {
         return scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()
     }
 

@@ -92,4 +92,14 @@ public class MySQLConnectionSupplier extends ConnectionSupplier {
         }
 
     }
+
+    @Override
+    public String getPrimarySchema() {
+        return super.getPrimarySchema().toLowerCase();
+    }
+
+    @Override
+    public String getAlternateSchema() {
+        return super.getAlternateSchema().toLowerCase();
+    }
 }

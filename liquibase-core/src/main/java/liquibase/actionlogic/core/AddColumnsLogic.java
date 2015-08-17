@@ -16,6 +16,7 @@ import liquibase.structure.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.CollectionUtil;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 
 import java.util.List;
@@ -57,6 +58,10 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             if (column.isAutoIncrement() && !database.supportsAutoIncrement()) {
                 errors.addUnsupportedError("Auto-increment columns are not supported", database.getShortName());
             }
+
+            if (column.isAutoIncrement() && column.defaultValue != null) {
+                errors.addUnsupportedError("Adding a default value on an auto-increment column", database.getShortName());
+            }
         }
 
 
@@ -65,11 +70,6 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 //                || database instanceof DerbyDatabase
 //                || database instanceof SQLiteDatabase)) {
 //            validationErrors.addError("Cannot add a primary key column");
-//        }
-//
-//        // TODO HsqlDatabase autoincrement on non primary key? other databases?
-//        if (database instanceof MySQLDatabase && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
-//            validationErrors.addError("Cannot add a non-primary key identity column");
 //        }
 //
 //        // TODO is this feature valid for other databases?
@@ -92,6 +92,12 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
         ObjectName tableName = action.columns.get(0).name.container;
 
         try {
+            PrimaryKey snapshotPK = null;
+
+            if (action.primaryKey != null) {
+                snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, new ObjectReference(Table.class, tableName)), scope).asObject(PrimaryKey.class);
+            }
+
             for (Column actionColumn : action.columns) {
                 Column snapshotColumn = LiquibaseUtil.snapshotObject(Column.class, actionColumn.getObjectReference(), scope);
                 if (snapshotColumn == null) {
@@ -99,21 +105,28 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
                 } else {
                     Table table = scope.getSingleton(SnapshotFactory.class).get(new ObjectReference(Table.class, snapshotColumn.name.container), scope);
                     if (table == null) {
-                        result.unknown("Cannot find table "+snapshotColumn.name.container);
+                        result.unknown("Cannot find table " + snapshotColumn.name.container);
                     } else {
-                        result.assertCorrect(actionColumn, snapshotColumn, Arrays.asList("type", "autoIncrementInformation"));
+                        List<String> excludeFields = new ArrayList<>(Arrays.asList("type", "autoIncrementInformation", "nullable"));
 
-                        result.assertCorrect(actionColumn.type.standardType == snapshotColumn.type.standardType, "Data types do not match (expected "+actionColumn.type.standardType+", got "+snapshotColumn.type.standardType+")");
+                        if (actionColumn.nullable == null && snapshotColumn.isAutoIncrement() || snapshotPK != null && snapshotPK.columns.contains(snapshotColumn.name)) {
+                            excludeFields.add("nullable"); //did not specify nullable, and auto-increment and/or PK usually auto-adds it but not always. Cannot check
+                        }
+
+                        result.assertCorrect(actionColumn, snapshotColumn, excludeFields);
+
+                        result.assertCorrect(assertDataTypesCorrect(actionColumn, snapshotColumn, scope), "Data types do not match (expected "+actionColumn.type.standardType+", got "+snapshotColumn.type.standardType+")");
+
                         if (actionColumn.isAutoIncrement()) {
                             result.assertCorrect(snapshotColumn.isAutoIncrement(), "Column is not auto-increment");
                         }
+
 
                     }
                 }
             }
 
             if (action.primaryKey != null) {
-                PrimaryKey snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, new ObjectReference(Table.class, tableName)), scope).asObject(PrimaryKey.class);
                 if (snapshotPK == null) {
                     result.assertApplied(false, "No primary key on '"+tableName+"'");
                 } else {
@@ -127,7 +140,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
                         }
                         result.assertCorrect(pkHasColumn, "Column '"+actionColumn.name+"' is not part of the primary key");
                     }
-                    result.assertCorrect(action.primaryKey, snapshotPK);
+                    result.assertCorrect(action.primaryKey, snapshotPK, Arrays.asList("name"));
                 }
             }
 
@@ -143,6 +156,10 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             return result.unknown(e);
         }
         return result;
+    }
+
+    protected boolean assertDataTypesCorrect(Column actionColumn, Column snapshotColumn, Scope scope) {
+        return actionColumn.type.standardType == snapshotColumn.type.standardType;
     }
 
 
@@ -177,8 +194,8 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
         ObjectName columnName = column.name;
         DataType columnType = column.type;
-        boolean primaryKey = false; //ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false);
-        boolean nullable = false; // primaryKey || ObjectUtil.defaultIfEmpty(column.nullable, false);
+        boolean primaryKey = action.primaryKey != null && action.primaryKey.containsColumn(column);
+        boolean nullable = ObjectUtil.defaultIfEmpty(column.nullable, false); // primaryKey || ObjectUtil.defaultIfEmpty(column.nullable, false);
 //        String addAfterColumn = column.addAfterColumn;
 
         clauses.append("ADD")
@@ -205,10 +222,6 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
 
         clauses.append(Clauses.primaryKey, primaryKey ? "PRIMARY KEY" : null);
 
-//        if (database instanceof MySQLDatabase && statement.getRemarks() != null) {
-//            alterTable += " COMMENT '" + statement.getRemarks() + "' ";
-//        }
-
 //        if (addAfterColumn != null) {
 //            clauses.append("AFTER " + database.escapeObjectName(addAfterColumn, Column.class));
 //        }
@@ -227,7 +240,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
         List<ForeignKey> constraints = CollectionUtil.createIfNull(action.foreignKeys);
 
         for (ForeignKey fkConstraint : constraints) {
-            returnActions.add(new AddForeignKeyConstraintAction(fkConstraint));
+            returnActions.add(new AddForeignKeysAction(fkConstraint));
         }
     }
 

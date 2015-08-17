@@ -3,7 +3,6 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
-import liquibase.action.core.AddForeignKeyConstraintAction;
 import liquibase.action.core.AddLookupTableAction;
 import liquibase.action.core.AddPrimaryKeyAction;
 import liquibase.action.core.SetNullableAction;
@@ -16,7 +15,6 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +42,7 @@ public class AddLookupTableLogic extends AbstractActionLogic<AddLookupTableActio
 
         AddPrimaryKeyAction addPkAction = new AddPrimaryKeyAction();
         addPkAction.primaryKey = new PrimaryKey(new ObjectName(newTableName, null));
-        addPkAction.primaryKey.columns = Arrays.asList(new ObjectName(newColumnName.name));
+        addPkAction.primaryKey.columns = Arrays.asList(new PrimaryKey.PrimaryKeyColumnName(newColumnName.name));
 
         actions.add(addPkAction);
 

@@ -243,11 +243,6 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return false;
-    }
-
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = schema.customize(this);

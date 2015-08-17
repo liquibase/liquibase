@@ -31,7 +31,7 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
             String columnRemarks = column.remarks;
             if (columnRemarks != null) {
                 SetColumnRemarksAction remarksAction = new SetColumnRemarksAction();
-                remarksAction.columnName = new ObjectName(action.tableName, column.getSimpleName());
+                remarksAction.columnName = new ObjectName(action.table.name, column.getSimpleName());
                 remarksAction.remarks = columnRemarks;
                 return new DelegateResult(result, remarksAction);
             }
@@ -45,7 +45,7 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
         Database database = scope.getDatabase();
 
         StringClauses clauses = super.generateSql(action, scope);
-        String remarks = action.remarks;
+        String remarks = action.table.remarks;
         if (remarks != null) {
             clauses.append("COMMENT='" + database.escapeStringForDatabase(remarks) + "'");
         }

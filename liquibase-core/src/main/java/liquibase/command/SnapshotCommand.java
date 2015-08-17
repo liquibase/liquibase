@@ -5,6 +5,7 @@ import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
 
@@ -34,7 +35,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     @Override
     protected SnapshotCommandResult run(Scope scope) throws Exception {
 
-        Set<Class<? extends DatabaseObject>> types = new HashSet((List) Arrays.asList(Table.class)); //TODO: scope.getSingleton(DatabaseObjectFactory.class).getStandardTypes();
+        Set<Class<? extends DatabaseObject>> types = new HashSet((List) Arrays.asList(Table.class, ForeignKey.class)); //TODO: scope.getSingleton(DatabaseObjectFactory.class).getStandardTypes();
 
         Snapshot snapshot = new Snapshot(scope);
 

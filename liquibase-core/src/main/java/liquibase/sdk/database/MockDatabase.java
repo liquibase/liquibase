@@ -220,11 +220,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return false;
-    }
-
-    @Override
     public boolean supportsAutoIncrement() {
         return true;
     }

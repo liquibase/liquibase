@@ -3,6 +3,7 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class PrimaryKey extends AbstractDatabaseObject {
 
-    public List<ObjectName> columns = new ArrayList<>();
+    public List<PrimaryKeyColumnName> columns = new ArrayList<>();
     public String tablespace;
     public ObjectName backingIndex;
     public Boolean clustered;
@@ -24,7 +25,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
         ObjectName tableName = pkName.container;
 
         for (String columnName : columns) {
-            this.columns.add(new ObjectName(tableName, columnName));
+            this.columns.add(new PrimaryKeyColumnName(tableName, columnName));
         }
     }
 
@@ -112,5 +113,28 @@ public class PrimaryKey extends AbstractDatabaseObject {
     @Override
     public String toString() {
         return getName() + "(" + StringUtils.join(this.columns, ",", new StringUtils.ToStringFormatter()) + ")";
+    }
+
+    public boolean containsColumn(Column column) {
+        for (PrimaryKeyColumnName name : CollectionUtil.createIfNull(columns)) {
+            if (name.equals(column.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static class PrimaryKeyColumnName extends ObjectName {
+
+        public Boolean descending;
+        public Integer position;
+
+        public PrimaryKeyColumnName(ObjectName container, String name) {
+            super(container, name);
+        }
+
+        public PrimaryKeyColumnName(String... names) {
+            super(names);
+        }
     }
 }

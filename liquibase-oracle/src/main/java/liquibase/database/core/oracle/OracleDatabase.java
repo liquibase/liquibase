@@ -35,7 +35,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Set<String> userDefinedTypes = null;
 
     public OracleDatabase() {
-        super.unquotedObjectsAreUppercased=true;
+        super.unquotedObjectsAreUppercased = true;
         super.setCurrentDateTimeFunction("SYSTIMESTAMP");
         // Setting list of Oracle's native functions
         dateFunctions.add(new DatabaseFunction("SYSDATE"));
@@ -235,7 +235,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
         String name = example.getSimpleName();
         if (example instanceof Schema) {
-            if ("SYSTEM".equals(name) || "SYS".equals(name) || "CTXSYS".equals(name)|| "XDB".equals(name)) {
+            if ("SYSTEM".equals(name) || "SYS".equals(name) || "CTXSYS".equals(name) || "XDB".equals(name)) {
                 return true;
             }
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
@@ -374,8 +374,4 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return Index.class.isAssignableFrom(objectType);
     }
 
-    @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return true;
-    }
 }

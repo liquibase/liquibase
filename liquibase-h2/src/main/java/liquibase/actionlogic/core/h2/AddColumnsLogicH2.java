@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.h2.H2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
@@ -20,12 +21,22 @@ public class AddColumnsLogicH2 extends AddColumnsLogic {
     @Override
     public ValidationErrors validate(AddColumnsAction action, Scope scope) {
         ValidationErrors errors = super.validate(action, scope);
-        for (Column column : action.columns) {
-//            if (ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false)) {
-//                errors.addUnsupportedError("Adding a primary key column is not supported", scope.getDatabase().getShortName());
-//            }
+        if (action.primaryKey != null) {
+            errors.addUnsupportedError("Adding a primary key column", scope.getDatabase().getShortName());
         }
         return errors;
+    }
+
+    @Override
+    protected boolean assertDataTypesCorrect(Column actionColumn, Column snapshotColumn, Scope scope) {
+        DataType.StandardType snapshotType = snapshotColumn.type.standardType;
+
+        if (snapshotColumn.isAutoIncrement()) { //auto-increment columns are always big_int
+            return true;
+        } else {
+            return super.assertDataTypesCorrect(actionColumn, snapshotColumn, scope);
+        }
+
     }
 
     @Override

@@ -262,11 +262,6 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return true;
-    }
-
-    @Override
     public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
         return true;
     }

@@ -268,8 +268,4 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public boolean supportsClustered(Class<? extends DatabaseObject> objectType) {
         return Index.class.isAssignableFrom(objectType);
     }
-    @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return true;
-    }
 }

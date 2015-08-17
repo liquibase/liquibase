@@ -1,7 +1,7 @@
 package liquibase
 
 import liquibase.action.core.AddAutoIncrementAction
-import liquibase.action.core.DropTableAction
+import liquibase.action.core.DropTablesAction
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
@@ -60,7 +60,7 @@ class AbstractExtensibleObjectTest extends Specification {
         that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["startWith", "columnDataType", "columnName", "incrementBy"] as String[])
         that new AddAutoIncrementAction().getStandardAttributeNames(), containsInAnyOrder(["startWith", "columnDataType", "columnName", "incrementBy"] as String[]) //caching works
 
-        that new DropTableAction().getStandardAttributeNames(), containsInAnyOrder(["tableName", "cascadeConstraints"] as String[])
+        that new DropTablesAction().getStandardAttributeNames(), containsInAnyOrder(["tableName", "cascadeConstraints"] as String[])
 
         (new AbstractExtensibleObject() {}).getStandardAttributeNames().size() == 0
     }

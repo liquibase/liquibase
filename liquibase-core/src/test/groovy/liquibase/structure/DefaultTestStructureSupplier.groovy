@@ -14,7 +14,7 @@ public class DefaultTestStructureSupplier extends AbstractTestStructureSupplier 
     public List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         List<? extends DatabaseObject> returnList = new ArrayList<>();
 
-        for (def name : getObjectNames(type, scope)) {
+        for (def name : getObjectNames(scope)) {
             def instance = type.newInstance()
             instance.name = name
             returnList.add(instance)

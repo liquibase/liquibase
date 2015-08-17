@@ -6,7 +6,6 @@ import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.SnapshotFactory
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Column
-import liquibase.structure.core.Relation
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
 import spock.lang.Specification
@@ -23,13 +22,13 @@ class CreateTableActionTest extends Specification {
 
     def "parametrized constructor"() {
         expect:
-        new CreateTableAction(new ObjectName("cat", "schem", "tab")).describe() == "createTable(tableName=cat.schem.tab)"
+        new CreateTableAction(new Table(new ObjectName("cat", "schem", "tab"))).describe() == "createTable(tableName=cat.schem.tab)"
     }
 
     @Unroll("#featureName #tableName with #columnName")
     def "create simple table"() {
         expect:
-        def action = new CreateTableAction(tableName).addColumn(columnName, "int")
+        def action = new CreateTableAction(new Table(tableName)).addColumn(columnName, "int")
 
         def scope = JUnitScope.getInstance(conn.getDatabase())
         def plan = new ActionExecutor().createPlan(action, scope)
@@ -41,7 +40,7 @@ class CreateTableActionTest extends Specification {
             throw SetupResult.OK
         })
                 .cleanup({
-            new ActionExecutor().execute(new DropTableAction(tableName as ObjectName), scope)
+            new ActionExecutor().execute(new DropTablesAction(tableName as ObjectName), scope)
         })
                 .run({
             plan.execute(scope)

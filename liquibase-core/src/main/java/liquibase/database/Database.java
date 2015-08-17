@@ -96,8 +96,6 @@ public interface Database extends PrioritizedService {
 
     boolean supportsSequences();
 
-    boolean supportsDropTableCascadeConstraints();
-
     boolean supportsAutoIncrement();
 
     String getDateLiteral(String isoDate);

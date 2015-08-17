@@ -9,6 +9,8 @@ import java.util.Set;
 
 public class Table extends Relation {
 
+    public String tablespace;
+
     public Table() {
     }
 

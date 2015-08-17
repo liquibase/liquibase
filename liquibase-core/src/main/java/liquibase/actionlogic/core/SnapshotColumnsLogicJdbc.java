@@ -8,10 +8,12 @@ import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.Validate;
 import org.slf4j.LoggerFactory;
@@ -193,6 +195,9 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 
         dataType.origin = scope.getDatabase().getShortName();
         setDataTypeStandardType(dataType, row, column, scope);
+        if (dataType.standardType != null) {
+            dataType.valueType = dataType.standardType.valueType;
+        }
         setDataTypeParameters(dataType, row, column, scope);
 
         return dataType;
@@ -321,7 +326,21 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
         }
     }
 
-    protected Object readDefaultValue(RowBasedQueryResult.Row row, Column columnInfo, Scope scope) {
+    protected Object readDefaultValue(RowBasedQueryResult.Row row, Column column, Scope scope) {
+        String defaultValueAsString = row.get("COLUMN_DEF", String.class);
+        if (defaultValueAsString == null) {
+            return null;
+        }
+
+        Class valueType = ObjectUtil.defaultIfEmpty(column.type.valueType, Object.class);
+        if (defaultValueAsString.startsWith("(") && defaultValueAsString.endsWith(")")) {
+            return new DatabaseFunction(defaultValueAsString.substring(1, defaultValueAsString.length()-1));
+        } else if (defaultValueAsString.startsWith("'") && defaultValueAsString.endsWith("'")) {
+            return ObjectUtil.convert(defaultValueAsString.substring(1, defaultValueAsString.length()-1), valueType);
+        } else {
+            return row.get("COLUMN_DEF", valueType);
+        }
+
 //TODO: refactor action        if (database instanceof MSSQLDatabase) {
 //            Object defaultValue = row.get("COLUMN_DEF", Object.class);
 //
@@ -347,6 +366,6 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 //
 //        }
 
-        return null; //SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.type);
+        //SqlUtil.parseValue(database, row.get("COLUMN_DEF", String.class), columnInfo.type);
     }
 }

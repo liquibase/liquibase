@@ -8,15 +8,15 @@ import spock.lang.Unroll
 import testmd.TestMD
 import testmd.logic.SetupResult
 
-class DropTableActionTest extends Specification {
+class DropTablesActionTest extends Specification {
     def "empty constructor"() {
         expect:
-        new DropTableAction().describe() == "dropTable()"
+        new DropTablesAction().describe() == "dropTable()"
     }
 
     def "parametrized constructor"() {
         expect:
-        new DropTableAction("cat", "schem", "tab").describe() == "dropTable(catalogName=cat, schemaName=schem, tableName=tab)"
+        new DropTablesAction("cat", "schem", "tab").describe() == "dropTable(catalogName=cat, schemaName=schem, tableName=tab)"
     }
 
     @Unroll
@@ -28,7 +28,7 @@ class DropTableActionTest extends Specification {
             if (catalogName == "_alt") catalogName = conn.alternateCatalog
             if (schemaName == "_alt") schemaName = conn.alternateSchema
 
-            def action = new DropTableAction(catalogName, schemaName, tableName)
+            def action = new DropTablesAction(catalogName, schemaName, tableName)
 
 
             def scope = JUnitScope.getInstance(conn.getDatabase())

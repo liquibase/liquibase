@@ -1,10 +1,11 @@
 package liquibase.command;
 
 import liquibase.Scope;
-import liquibase.action.core.DropTableAction;
+import liquibase.action.core.DropForeignKeyAction;
+import liquibase.action.core.DropTablesAction;
 import liquibase.actionlogic.ActionExecutor;
-import liquibase.actionlogic.ActionResult;
 import liquibase.structure.ObjectReference;
+import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
 import java.util.Arrays;
@@ -36,8 +37,12 @@ public class DropAllCommand extends AbstractCommand {
         snapshotCommand.relatedObjects.addAll(containers);
         SnapshotCommand.SnapshotCommandResult snapshotResult = snapshotCommand.execute(scope);
 
+        for (ForeignKey foreignKey : snapshotResult.snapshot.get(ForeignKey.class)) {
+            scope.getSingleton(ActionExecutor.class).execute(new DropForeignKeyAction(foreignKey.getName(), foreignKey.columnChecks.get(0).baseColumn.container), scope);
+        }
+
         for (Table table : snapshotResult.snapshot.get(Table.class)) {
-            scope.getSingleton(ActionExecutor.class).execute(new DropTableAction(table.getName()), scope);
+            scope.getSingleton(ActionExecutor.class).execute(new DropTablesAction(table.getName()), scope);
         }
 
         return new CommandResult();

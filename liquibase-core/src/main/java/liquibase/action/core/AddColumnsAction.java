@@ -11,6 +11,7 @@ import liquibase.structure.core.*;
 import liquibase.util.ObjectUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AddColumnsAction extends AbstractAction {
@@ -20,4 +21,12 @@ public class AddColumnsAction extends AbstractAction {
     public List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
     public List<ForeignKey> foreignKeys = new ArrayList<>();
 
+    public AddColumnsAction() {
+    }
+
+    public AddColumnsAction(Column... columns) {
+        if (columns != null) {
+            this.columns = new ArrayList<>(Arrays.asList(columns));
+        }
+    }
 }

@@ -300,11 +300,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return false;
-    }
-
-    @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = schema.customize(this);
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);

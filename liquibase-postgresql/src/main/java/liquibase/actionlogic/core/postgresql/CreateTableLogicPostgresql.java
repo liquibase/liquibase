@@ -23,10 +23,10 @@ public class CreateTableLogicPostgresql extends CreateTableLogic {
         Column.AutoIncrementInformation autoIncrementInformation = column.autoIncrementInformation;
 
         if (autoIncrementInformation != null) {
-            String sequenceName = action.tableName.name + "_" + column.getSimpleName() + "_seq";
+            String sequenceName = action.table.getSimpleName() + "_" + column.getSimpleName() + "_seq";
 
             AlterSequenceAction alterSequenceAction = (AlterSequenceAction) new AlterSequenceAction();
-            alterSequenceAction.sequenceName = new ObjectName(action.tableName.container, sequenceName);
+            alterSequenceAction.sequenceName = new ObjectName(action.table.name.container, sequenceName);
 
             alterSequenceAction.minValue = autoIncrementInformation.startWith;
             alterSequenceAction.incrementBy = autoIncrementInformation.incrementBy;

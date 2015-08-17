@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic<CreateDatabaseChangeLogTableAction> {
 
@@ -26,7 +27,7 @@ public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic<Creat
         String dateTimeTypeString = getDateTimeTypeString(database);
 
         ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
-        CreateTableAction createTableAction = new CreateTableAction(tableName)
+        CreateTableAction createTableAction = new CreateTableAction(new Table(tableName))
                 .addColumn(new Column(new ObjectName(tableName, "ID"), charTypeName + "(255)", false))
                 .addColumn(new Column(new ObjectName(tableName, "AUTHOR"), charTypeName + "(255)", false))
                 .addColumn(new Column(new ObjectName(tableName, "FILENAME"), charTypeName + "(255)", false))
@@ -38,7 +39,7 @@ public class CreateDatabaseChangeLogTableLogic extends AbstractActionLogic<Creat
                 .addColumn(new Column(new ObjectName(tableName, "COMMENTS"), charTypeName + "(255)"))
                 .addColumn(new Column(new ObjectName(tableName, "TAG"), charTypeName + "(255)"))
                 .addColumn(new Column(new ObjectName(tableName, "LIQUIBASE"), charTypeName + "(20)"));
-        createTableAction.tablespace = database.getLiquibaseTablespaceName();
+        createTableAction.table.tablespace = database.getLiquibaseTablespaceName();
 
         return new DelegateResult(createTableAction);
     }

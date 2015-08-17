@@ -6,6 +6,8 @@ import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
 import liquibase.exception.ActionPerformException
 import liquibase.sdk.database.MockDatabase
+import liquibase.statement.DatabaseFunction
+import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.ObjectName
 import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
@@ -67,6 +69,29 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
         "BIGINT"      | DataType.StandardType.BIGINT   | 19         | -5          | 0             | "NO"            | "BIGINT"   | -5          | 19              | 10
         "SMALLINT"    | DataType.StandardType.SMALLINT | 5          | 5           | 0             | "NO"            | "SMALLINT" | 5           | 5               | 10
         "VARCHAR(10)" | DataType.StandardType.VARCHAR  | 10         | 12          | 0             | "NO"            | "VARCHAR"  | 12          | 10              | 10
+    }
+
+    @Unroll()
+    def "readDefaultValue handles various rows correctly"() {
+        when:
+        def data = [COLUMN_DEF: columnDef]
+        def column = new Column(new ObjectName("testTable", "col_name"))
+        column.type = dataType
+
+        then:
+        new SnapshotColumnsLogicJdbc().readDefaultValue(new RowBasedQueryResult.Row(data), column, JUnitScope.getInstance(new MockDatabase())) == expected
+
+        where:
+        columnDef                                                                         | dataType                       | expected
+        "(NEXT VALUE FOR LBSCHEMA2.SYSTEM_SEQUENCE_CECABC79_AF80_4314_90F3_40B45A2B2071)" | DataType.parse("bigint")       | new DatabaseFunction("NEXT VALUE FOR LBSCHEMA2.SYSTEM_SEQUENCE_CECABC79_AF80_4314_90F3_40B45A2B2071")
+        "(NEXT VALUE FOR LBSCHEMA2.SYSTEM_SEQUENCE_CECABC79_AF80_4314_90F3_40B45A2B2071)" | DataType.parse("int")          | new DatabaseFunction("NEXT VALUE FOR LBSCHEMA2.SYSTEM_SEQUENCE_CECABC79_AF80_4314_90F3_40B45A2B2071")
+        "3"                                                                               | DataType.parse("int")          | 3I
+        "3"                                                                               | DataType.parse("bigint")       | new BigInteger("3")
+        "3"                                                                               | DataType.parse("varchar(10)")  | "3"
+        "'test value'"                                                                    | DataType.parse("varchar(10)")  | "test value"
+        "'test value'"                                                                    | DataType.parse("nvarchar(10)") | "test value"
+        null                                                                              | DataType.parse("int")          | null
+        null                                                                              | DataType.parse("varchar(10)")  | null
     }
 
     @Unroll

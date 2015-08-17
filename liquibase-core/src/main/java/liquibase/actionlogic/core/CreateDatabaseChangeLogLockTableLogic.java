@@ -12,6 +12,7 @@ import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.OldDataType;
+import liquibase.structure.core.Table;
 
 public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic<CreateDatabaseChangeLogLockTableAction> {
 
@@ -36,12 +37,12 @@ public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic<C
         lockedColumn.type = new DataType("BOOLEAN");
         lockedColumn.nullable = false;
 
-        CreateTableAction createTableAction = new CreateTableAction(tableName)
+        CreateTableAction createTableAction = new CreateTableAction(new Table(tableName))
                 .addColumn(idColumn)
                 .addColumn(lockedColumn)
                 .addColumn(new Column(new ObjectName(tableName, "LOCKGRANTED"), dateTimeTypeString))
                 .addColumn(new Column(new ObjectName(tableName, "LOCKEDBY"), charTypeName + "(255)"));
-        createTableAction.tablespace = database.getLiquibaseTablespaceName();
+        createTableAction.table.tablespace = database.getLiquibaseTablespaceName();
 
         return new DelegateResult(createTableAction);
     }

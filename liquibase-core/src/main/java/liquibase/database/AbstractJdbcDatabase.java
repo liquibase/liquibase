@@ -914,11 +914,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return false;
-    }
-
-    @Override
     public boolean requiresDefiningColumnsAsNull() {
         return false;
     }

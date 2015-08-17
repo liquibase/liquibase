@@ -95,11 +95,6 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return false;
-    }
-
-    @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;

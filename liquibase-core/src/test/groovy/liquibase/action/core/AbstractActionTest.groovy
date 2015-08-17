@@ -11,6 +11,8 @@ import liquibase.diff.output.changelog.ActionGeneratorFactory
 import liquibase.servicelocator.AbstractServiceFactory
 import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
+import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import org.slf4j.LoggerFactory
@@ -21,6 +23,10 @@ import testmd.TestMD
 import testmd.logic.SetupResult
 
 abstract class AbstractActionTest extends Specification {
+
+    def testMDPermutation(ConnectionSupplier conn, Scope scope) {
+        return testMDPermutation(null, conn, scope)
+    }
 
     def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
         def database = scope.database
@@ -39,17 +45,23 @@ abstract class AbstractActionTest extends Specification {
             throw SetupResult.OK;
         }
 
-        for (Schema schema : snapshot.get(Schema.class)) {
-            new DropAllCommand(schema.getObjectReference()).execute(scope);
-        }
+        if (snapshot == null) {
+            for (ObjectName name : supplier.getAllContainers()) {
+                new DropAllCommand(new ObjectReference(Schema.class, name)).execute(scope);
+            }
+        } else {
+            for (Schema schema : snapshot.get(Schema.class)) {
+                new DropAllCommand(schema.getObjectReference()).execute(scope);
+            }
 
-        def control = new DiffOutputControl()
-        def executor = new ActionExecutor()
+            def control = new DiffOutputControl()
+            def executor = new ActionExecutor()
 
-        for (def obj : snapshot.get(Table.class)) {
-            for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
-                LoggerFactory.getLogger(this.getClass()).debug("Executing: " + executor.createPlan(action, scope).describe())
-                executor.execute(action, scope)
+            for (def obj : snapshot.get(Table.class)) {
+                for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
+                    LoggerFactory.getLogger(this.getClass()).debug("Executing: " + executor.createPlan(action, scope).describe())
+                    executor.execute(action, scope)
+                }
             }
         }
 

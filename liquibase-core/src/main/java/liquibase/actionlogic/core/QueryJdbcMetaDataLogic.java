@@ -62,6 +62,12 @@ public class QueryJdbcMetaDataLogic extends AbstractActionLogic<QueryJdbcMetaDat
             } else if (method.equals("getColumns")) {
                 Validate.isTrue(arguments.size() == 4, "getColumns requires 4 arguments");
                 return new RowBasedQueryResult(JdbcUtils.extract(getMetaData(scope).getColumns((String) arguments.get(0), (String) arguments.get(1), (String) arguments.get(2), (String) arguments.get(3))));
+            } else if (method.equals("getPrimaryKeys")) {
+                Validate.isTrue(arguments.size() == 3, "getPrimaryKeys requires 3 arguments");
+                return new RowBasedQueryResult(JdbcUtils.extract(getMetaData(scope).getPrimaryKeys((String) arguments.get(0), (String) arguments.get(1), (String) arguments.get(2))));
+            } else if (method.equals("getImportedKeys")) {
+                Validate.isTrue(arguments.size() == 3, "getImportedKeys requires 3 arguments");
+                return new RowBasedQueryResult(JdbcUtils.extract(getMetaData(scope).getImportedKeys((String) arguments.get(0), (String) arguments.get(1), (String) arguments.get(2))));
             }
             throw new ActionPerformException("Unknown method '" + method + "'");
         } catch (Exception e) {

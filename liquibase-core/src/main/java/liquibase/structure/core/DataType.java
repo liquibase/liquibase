@@ -1,14 +1,14 @@
 package liquibase.structure.core;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.structure.DateWithTimezone;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +16,7 @@ public class DataType extends AbstractExtensibleObject {
 
     public String name;
     public StandardType standardType;
+    public Class valueType;
     public String origin;
     public StringClauses clausesBeforeParameters = new StringClauses();
     public List<String> parameters = new ArrayList<>();
@@ -73,6 +74,9 @@ public class DataType extends AbstractExtensibleObject {
         }
 
         dataType.standardType = standardType(dataType.name);
+        if (dataType.standardType != null) {
+            dataType.valueType = dataType.standardType.valueType;
+        }
         return dataType;
     }
 
@@ -126,33 +130,38 @@ public class DataType extends AbstractExtensibleObject {
     }
 
     public enum StandardType {
-        BIGINT,
-        BIT,
-        BLOB,
-        BOOLEAN,
-        CHAR,
-        CLOB,
-        CURRENCY,
-        DATE,
-        DECIMAL,
-        DOUBLE,
-        FLOAT,
-        INTEGER,
-        MEDIUMINT,
-        NCHAR,
-        NUMERIC,
-        NVARCHAR,
-        REAL,
-        SMALLINT,
-        TIMESTAMP,
-        TIMESTAMPZ,
-        TIME,
-        TIMEZ,
-        TINYINT,
-        UUID,
-        VARCHAR,
-        XML
+        BIGINT(BigInteger.class),
+        BIT(Short.class),
+        BLOB(Object.class),
+        BOOLEAN(Boolean.class),
+        CHAR(String.class),
+        CLOB(String.class),
+        CURRENCY(BigDecimal.class),
+        DATE(Date.class),
+        DECIMAL(BigDecimal.class),
+        DOUBLE(Double.class),
+        FLOAT(Float.class),
+        INTEGER(Integer.class),
+        MEDIUMINT(Integer.class),
+        NCHAR(String.class),
+        NUMERIC(BigDecimal.class),
+        NVARCHAR(String.class),
+        REAL(BigDecimal.class),
+        SMALLINT(Short.class),
+        TIMESTAMP(Date.class),
+        TIMESTAMPZ(DateWithTimezone.class),
+        TIME(Date.class),
+        TIMEZ(DateWithTimezone.class),
+        TINYINT(Short.class),
+        UUID(java.util.UUID.class),
+        VARCHAR(String.class),
+        XML(String.class);
 
+        public final Class valueType;
+
+        StandardType(Class valueType) {
+            this.valueType = valueType;
+        }
     }
 
 

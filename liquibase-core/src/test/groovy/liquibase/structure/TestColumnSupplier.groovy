@@ -33,7 +33,7 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
     }
 
     @Override
-    protected List<ObjectName> getObjectContainers(Class objectType, Scope scope) {
+    protected List<ObjectName> getObjectContainers(Scope scope) {
         return [new ObjectName()];
     }
 

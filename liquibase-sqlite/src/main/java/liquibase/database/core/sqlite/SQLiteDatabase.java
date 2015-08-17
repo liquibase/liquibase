@@ -233,8 +233,4 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         public boolean createThisIndex(Index index);
     }
 
-    @Override
-    public boolean supportsDropTableCascadeConstraints() {
-        return true;
-    }
 }

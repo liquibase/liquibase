@@ -1,9 +1,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="1" author="alice">
         <createTable tableName="debug_info">
@@ -74,5 +72,9 @@
     <include file="features/store.sql" relativeToChangelogFile="true"/>
 
     <includeAll path="com/example/versions"/>
+
+    <changeSet id="a" author="123">
+        <setColumnRemarks tableName="asd" columnName="fasd" remarks="asg"/>
+    </changeSet>
 
 </databaseChangeLog>
