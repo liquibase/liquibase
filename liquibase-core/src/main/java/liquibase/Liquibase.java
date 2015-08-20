@@ -2,12 +2,7 @@ package liquibase;
 
 import java.io.*;
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -1233,7 +1228,13 @@ public class Liquibase {
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database));
-        ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(database.getRanChangeSetList());
+        List<RanChangeSet> currentFileChangeSets = new LinkedList<RanChangeSet>();
+        for (RanChangeSet changeSet : database.getRanChangeSetList()) {
+            if (changeSet.getChangeLog().equals(changeLog.getLogicalFilePath())) {
+                currentFileChangeSets.add(changeSet);
+            }
+        }
+        ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(currentFileChangeSets);
         logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
         return visitor.getUnexpectedChangeSets();
     }
