@@ -111,11 +111,15 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     public void setCommentLineStartsWith(String commentLineStartsWith) {
+
         //if the value is null (not provided) we want to use default value
-        if(commentLineStartsWith == null){
-            return;
+        if (commentLineStartsWith == null) {
+            this.commentLineStartsWith = "#";
+        } else if(commentLineStartsWith.equals("")) {
+            this.commentLineStartsWith = null;
+        } else {
+            this.commentLineStartsWith = commentLineStartsWith;
         }
-        this.commentLineStartsWith = commentLineStartsWith;
     }
 
     public Boolean isRelativeToChangelogFile() {
