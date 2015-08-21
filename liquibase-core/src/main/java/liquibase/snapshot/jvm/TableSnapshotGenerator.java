@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
@@ -40,7 +41,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 return null;
             }
 
-            if (table != null) {
+            if (table != null && database instanceof MSSQLDatabase) {
                 String schemaName;
                 Schema tableSchema = table.getSchema();
                 if (tableSchema == null) {
