@@ -4,10 +4,12 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -37,6 +39,31 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 return null;
             }
+
+            if (table != null) {
+                String schemaName;
+                Schema tableSchema = table.getSchema();
+                if (tableSchema == null) {
+                    schemaName = database.getDefaultSchemaName();
+                } else {
+                    schemaName = tableSchema.getName();
+                }
+
+                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
+                        " CAST(value as varchar(max)) as REMARKS\n" +
+                        " FROM\n" +
+                        " sys.extended_properties\n" +
+                        "  WHERE\n" +
+                        " name='MS_Description' " +
+                        " AND major_id = OBJECT_ID('" + schemaName+"."+table.getName() + "')\n" +
+                        " AND\n" +
+                        " minor_id = 0"), String.class);
+
+                if (remarks != null && remarks.size() > 0) {
+                    table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+                }
+            }
+
 
             return table;
         } catch (SQLException e) {
