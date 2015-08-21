@@ -114,7 +114,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
         //if the value is null (not provided) we want to use default value
         if (commentLineStartsWith == null) {
-            this.commentLineStartsWith = "#";
+            this.commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
         } else if(commentLineStartsWith.equals("")) {
             this.commentLineStartsWith = null;
         } else {
