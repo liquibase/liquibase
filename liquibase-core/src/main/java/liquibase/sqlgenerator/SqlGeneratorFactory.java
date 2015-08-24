@@ -193,8 +193,13 @@ public class SqlGeneratorFactory {
 
     public Sql[] generateSql(SqlStatement[] statements, Database database) {
         List<Sql> returnList = new ArrayList<Sql>();
+        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
         for (SqlStatement statement : statements) {
-            returnList.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(statement, database)));
+            Sql[] sqlArray = factory.generateSql(statement, database);
+            if (sqlArray != null && sqlArray.length > 0) {
+              List<Sql> sqlList = Arrays.asList(sqlArray);
+              returnList.addAll(sqlList);
+            }
         }
 
         return returnList.toArray(new Sql[returnList.size()]);
