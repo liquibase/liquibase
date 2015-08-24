@@ -21,6 +21,9 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
     public ValidationErrors validate(DeleteStatement deleteStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
+        if (deleteStatement.getWhereParameters() != null && deleteStatement.getWhereParameters().size() > 0 && deleteStatement.getWhere() == null) {
+            validationErrors.addError("whereParams set but no whereClause");
+        }
         return validationErrors;
     }
 
@@ -29,7 +32,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhere() != null) {
-            String fixedWhereClause = "WHERE " + statement.getWhere();
+            String fixedWhereClause = "WHERE " + statement.getWhere().trim();
             Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(fixedWhereClause);
             StringBuffer sb = new StringBuffer();
             Iterator<String> columnNameIter = statement.getWhereColumnNames().iterator();
@@ -42,6 +45,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
                             continue;
                         }
                         matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
+                        break;
                     }
                 } else if (paramIter.hasNext()) {
                     Object param = paramIter.next();
