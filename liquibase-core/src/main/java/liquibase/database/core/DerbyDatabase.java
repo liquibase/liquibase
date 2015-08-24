@@ -33,7 +33,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
-        super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE %s='SEQ_TYPE')";
+        super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE sequencename = upper('%s'))";
         determineDriverVersion();
     }
 
