@@ -115,7 +115,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     try {
                         executeCommand(database);
                     } catch (Exception e) {
-                        throw new UnexpectedLiquibaseException("Error executing command: " + e);
+                        throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(), e);
                     }
 
                     return null;
