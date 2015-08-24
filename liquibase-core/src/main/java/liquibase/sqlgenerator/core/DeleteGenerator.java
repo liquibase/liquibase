@@ -1,17 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
@@ -21,6 +16,9 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
     public ValidationErrors validate(DeleteStatement deleteStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
+        if (deleteStatement.getWhereParameters() != null && deleteStatement.getWhereParameters().size() > 0 && deleteStatement.getWhere() == null) {
+            validationErrors.addError("whereParams set but no whereClause");
+        }
         return validationErrors;
     }
 
@@ -29,28 +27,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhere() != null) {
-            String fixedWhereClause = "WHERE " + statement.getWhere();
-            Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(fixedWhereClause);
-            StringBuffer sb = new StringBuffer();
-            Iterator<String> columnNameIter = statement.getWhereColumnNames().iterator();
-            Iterator<Object> paramIter = statement.getWhereParameters().iterator();
-            while (matcher.find()) {
-                if (matcher.group().equals(":name")) {
-                    while (columnNameIter.hasNext()) {
-                        String columnName = columnNameIter.next();
-                        if (columnName == null) {
-                            continue;
-                        }
-                        matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
-                    }
-                } else if (paramIter.hasNext()) {
-                    Object param = paramIter.next();
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
-                }
-            }
-            matcher.appendTail(sb);
-            fixedWhereClause = sb.toString();
-            sql.append(" ").append(fixedWhereClause);
+            sql.append(" WHERE ").append(replacePredicatePlaceholders(database, statement.getWhere(), statement.getWhereColumnNames(), statement.getWhereParameters()));
         }
 
         return new Sql[] { new UnparsedSql(sql.toString(), getAffectedTable(statement)) };

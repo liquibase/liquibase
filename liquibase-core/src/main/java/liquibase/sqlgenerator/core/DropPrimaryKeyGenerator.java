@@ -1,17 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
 import liquibase.structure.core.Schema;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
@@ -36,37 +34,37 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
     @Override
     public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
-
         if (database instanceof MSSQLDatabase) {
-			if (statement.getConstraintName() == null) {
-				String schemaName = statement.getSchemaName();
-				if (schemaName == null) {
-					schemaName = database.getDefaultSchemaName();
-				}
-				schemaName = StringUtils.trimToNull(schemaName);
-
-				StringBuilder query = new StringBuilder();
-				query.append("DECLARE @pkname nvarchar(255)");
-				query.append("\n");
-				query.append("DECLARE @sql nvarchar(2048)");
-				query.append("\n");
-				query.append("select @pkname=i.name from sysindexes i");
-				query.append(" join sysobjects o ON i.id = o.id");
-				query.append(" join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK'");
-				query.append(" join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid");
-				query.append(" join syscolumns c ON ik.id = c.id AND ik.colid = c.colid");
-				query.append(" INNER JOIN schemas s ON o.uid = s.schema_id");
-				query.append(" where o.name = '").append(statement.getTableName()).append("'");
-				query.append(" and s.name='").append(schemaName).append("'");
-				query.append("\n");
-				query.append("set @sql='alter table ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" drop constraint ' + @pkname");
-				query.append("\n");
-				query.append("exec(@sql)");
-				query.append("\n");
-				sql = query.toString();
-			} else {
-				sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
-			}
+            String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            if (statement.getConstraintName() == null) {
+                boolean sql2005OrLater = true;
+                try {
+                    sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
+                } catch (DatabaseException e) {
+                    // Assume SQL Server 2005 or later
+                }
+                if (sql2005OrLater) {
+                    // SQL Server 2005 or later
+                    sql =
+                            "DECLARE @sql [nvarchar](MAX)\r\n" +
+                            "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
+                            "FROM [sys].[key_constraints] AS [kc] " +
+                            "WHERE [kc].[parent_object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                            "AND [kc].[type] = 'PK'\r\n" +
+                            "EXEC sp_executesql @sql";
+                } else {
+                    // SQL Server 2000
+                    sql =
+                            "DECLARE @sql [nvarchar](4000)\r\n" +
+                            "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
+                            "FROM [dbo].[sysobjects] AS [kc] " +
+                            "WHERE [kc].[parent_obj] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                            "AND [kc].[xtype] = 'PK'\r\n" +
+                            "EXEC sp_executesql @sql";
+                }
+            } else {
+                sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+            }
         } else if (database instanceof PostgresDatabase) {
 			if (statement.getConstraintName() == null) {
 				String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
