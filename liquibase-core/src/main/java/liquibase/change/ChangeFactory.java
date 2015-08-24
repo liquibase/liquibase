@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -20,9 +22,16 @@ public class ChangeFactory {
     private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
     private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
 
+    private Logger log;
+
     private ChangeFactory() {
+      log = LogFactory.getInstance().getLog();
     }
 
+    protected Logger getLogger() {
+      return log;
+    }
+    
     private void init() {
         Class<? extends Change>[] classes;
         classes = ServiceLocator.getInstance().findClasses(Change.class);
@@ -133,6 +142,11 @@ public class ChangeFactory {
         SortedSet<Class<? extends Change>> classes = registry.get(name);
 
         if (classes == null) {
+            if (!"id".equals(name) && 
+                !"author".equals(name) && 
+                !"runInTransaction".equals(name)) {
+              log.warning("There is no handler for the change tag '" + name + "' so any changes with that tag will not be applied.");
+            }
             return null;
         }
 
@@ -164,5 +178,10 @@ public class ChangeFactory {
         }
 
         return returnMap;
+    }
+
+    // exposed for test only
+    protected void setLogger(Logger mockLogger) {
+      log = mockLogger;
     }
 }
