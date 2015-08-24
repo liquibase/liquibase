@@ -310,7 +310,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     /**
      * Overwrite this method to get the default schema name for the connection.
-     *
+     * If you only need to change the statement that obtains the current schema then override
+     *  @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      * @return
      */
     protected String getConnectionSchemaName() {
@@ -318,12 +319,24 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
-
+            String currentSchemaStatement = getConnectionSchemaNameCallStatement();
+            return ExecutorService.getInstance().getExecutor(this).
+            		queryForObject(new RawCallStatement(currentSchemaStatement), String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
         return null;
+    }
+
+    /**
+     * Used to obtain the connection schema name through a statement
+     * Override this method to change the statement.
+     * Only override this if getConnectionSchemaName is left unchanges or is using this method.
+     * @see AbstractJdbcDatabase#getConnectionSchemaName()
+     * @return
+     */
+    protected String getConnectionSchemaNameCallStatement(){
+        return "call current_schema";
     }
 
     @Override
