@@ -1,20 +1,23 @@
 package liquibase.change;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.TreeSet;
+
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.Logger;
 import liquibase.servicelocator.LiquibaseService;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.TreeSet;
-
-import static org.junit.Assert.*;
 
 public class ChangeFactoryTest {
 
@@ -164,16 +167,6 @@ public class ChangeFactoryTest {
 
     }
     
-    @Test
-    public void unknown_tags_should_log(){
-      Logger mockLogger = Mockito.mock(Logger.class);
-      ChangeFactory changeFactory = ChangeFactory.getInstance();
-      changeFactory.setLogger(mockLogger);
-      Change change = changeFactory.create("doesNotExistChange");
-      assertNull(change);
-      Mockito.verify(mockLogger).warning(Mockito.anyString());
-    }
-
     @LiquibaseService(skip = true)
     public static class Priority5Change extends CreateTableChange {
         @Override

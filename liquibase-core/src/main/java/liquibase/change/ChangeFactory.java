@@ -142,11 +142,6 @@ public class ChangeFactory {
         SortedSet<Class<? extends Change>> classes = registry.get(name);
 
         if (classes == null) {
-            if (!"id".equals(name) && 
-                !"author".equals(name) && 
-                !"runInTransaction".equals(name)) {
-              log.warning("There is no handler for the change tag '" + name + "' so any changes with that tag will not be applied.");
-            }
             return null;
         }
 
