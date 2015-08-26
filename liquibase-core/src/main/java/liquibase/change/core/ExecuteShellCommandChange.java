@@ -247,4 +247,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         }
     }
+    
+    @Override
+    public String toString() {
+      return "external process '" + getExecutable() + "' " + getArgs(); 
+    }
 }
