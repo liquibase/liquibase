@@ -116,10 +116,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 public Sql[] generate(Database database) {
 
                     try {
-                        executeCommand(database);
+                      executeCommand(database);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new UnexpectedLiquibaseException("Error executing command: " + e, e);
+                      throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(), e);
                     }
 
                     return null;
@@ -261,5 +260,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
 
         }
+    }
+    
+    @Override
+    public String toString() {
+      return "external process '" + getExecutable() + "' " + getArgs(); 
     }
 }
