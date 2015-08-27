@@ -238,7 +238,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 liquibase.statement.SequenceNextValueFunction function = new liquibase.statement.SequenceNextValueFunction(columnConfig.getDefaultValue());
                                 valueConfig.setValueComputed(function);
                             } else {
-                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
+                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE or SKIP");
                             }
                             value = valueConfig.getValueObject();
                         }
