@@ -17,7 +17,6 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
-import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -78,10 +77,10 @@ public class DiffToChangeLog {
             print(new PrintStream(out), changeLogSerializer);
 
             String xml = new String(out.toByteArray());
-            xml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
-            xml = xml.replaceFirst("</databaseChangeLog>", "");
-            xml = xml.trim();
-            if ("".equals(xml)) {
+            String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+            innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
+            innerXml = innerXml.trim();
+            if ("".equals(innerXml)) {
                 LogFactory.getLogger().info("No changes found, nothing to do");
                 return;
             }
@@ -89,9 +88,11 @@ public class DiffToChangeLog {
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
             String line;
             long offset = 0;
+            boolean foundEndTag = false;
             while ((line = randomAccessFile.readLine()) != null) {
                 int index = line.indexOf("</databaseChangeLog>");
                 if (index >= 0) {
+                    foundEndTag = true;
                     break;
                 } else {
                     offset = randomAccessFile.getFilePointer();
@@ -99,11 +100,17 @@ public class DiffToChangeLog {
             }
 
             String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
-            randomAccessFile.seek(offset);
-            randomAccessFile.writeBytes("    ");
-            randomAccessFile.write(xml.getBytes());
-            randomAccessFile.writeBytes(lineSeparator);
-            randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+
+            if (foundEndTag) {
+                randomAccessFile.seek(offset);
+                randomAccessFile.writeBytes("    ");
+                randomAccessFile.write(innerXml.getBytes());
+                randomAccessFile.writeBytes(lineSeparator);
+                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+            } else {
+                randomAccessFile.seek(0);
+                randomAccessFile.write(xml.getBytes());
+            }
             randomAccessFile.close();
 
             // BufferedWriter fileWriter = new BufferedWriter(new

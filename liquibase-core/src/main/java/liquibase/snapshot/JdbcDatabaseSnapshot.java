@@ -521,7 +521,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "INNER JOIN [sys].[columns] AS [c] " +
                                     "ON [c].[object_id] = [ic].[object_id] " +
                                     "AND [c].[column_id] = [ic].[column_id] " +
-                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schemaName, Schema.class)) + "' " +
+                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(catalogAndSchema.getSchemaName()) + "' " + // The schema name was corrected in the customized CatalogAndSchema
                                     "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
                                     "AND [kc].[type] = 'PK' " +
                                     "AND [ic].[key_ordinal] > 0 " +
@@ -551,7 +551,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "INNER JOIN [dbo].[syscolumns] AS [c] " +
                                     "ON [c].[id] = [ic].[id] " +
                                     "AND [c].[colid] = [ic].[colid] " +
-                                    "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schemaName, Schema.class)) + "' " +
+                                    "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(catalogAndSchema.getSchemaName()) + "' " + // The schema name was corrected in the customized CatalogAndSchema
                                     "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
                                     "AND [kc].[xtype] = 'PK' " +
                                     "ORDER BY " +
