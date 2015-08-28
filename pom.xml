@@ -58,7 +58,6 @@
     <modules>
         <module>liquibase-core</module>
         <module>liquibase-maven-plugin</module>
-        <module>liquibase-osgi</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
         <module>liquibase-debian</module>
