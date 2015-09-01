@@ -1,3 +1,18 @@
+2721e26 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+3edb4d7 CORE-2493 ExecuteShellCommand improvements
+a1c67cb DVONE-2669 Set the orderExecuted field on the RanChangeSet object
+d45b672 improve deebug output
+57d6d0e removing logged warning when converting a ParsedNode to a Change results in null. This is common for attributes in XML changelogs, so very noisy. Will need a better solution.
+0960a86 improve exception handling
+3213916 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+e1421ff prevent possible null pointer exception
+d34b1b2 Improve Exception handling
+4e3b93e Log a warning when there is a changelog tag that is not handled. Includes a test.
+22a781f CORE-2497 Support setColumnRemarks and setTableRemarks on MSSQL
+e3d0d43 CORE-2497 Support setColumnRemarks and setTableRemarks on MSSQL
+5d386b6 CORE-2493 ExecuteShellCommand improvements
+0ad7c42 Bumped version to 3.5-SNAPSHOT
+c2b931c CORE-2493 ExecuteShellCommand improvements
 4e2e763 CORE-2463 Don't include liquibase tables in dbdoc
 d36838a CORE-2455 Improve messages in databasechangelog.description column
 0fc73d7 CORE-2455 Improve messages in databasechangelog.description column

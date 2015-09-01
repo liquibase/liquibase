@@ -103,6 +103,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultCatalogSet = false;
     private boolean defaultSchemaSet = false;
 
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
     public String getName() {
         return toString();
     }
@@ -1473,5 +1475,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String unescapeDataTypeString(String dataTypeString) {
         return dataTypeString;
+    }
+
+    public Object get(String key) {
+        return attributes.get(key);
+    }
+
+    public AbstractJdbcDatabase set(String key, Object value) {
+        if (value == null) {
+            attributes.remove(key);
+        } else {
+            attributes.put(key, value);
+        }
+        return this;
     }
 }

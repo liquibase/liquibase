@@ -19,7 +19,7 @@
       liquibase-parent
     </artifactId>
     <version>
-      3.3.564
+      3.4.597
     </version>
     <relativePath>
       ../pom.xml
@@ -30,7 +30,7 @@
       liquibase.*
     </bundle.namespace>
     <project.version>
-      3.3.0
+      3.5.0
     </project.version>
   </properties>
   <dependencies>
