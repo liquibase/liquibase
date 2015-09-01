@@ -160,11 +160,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
                     "WHERE relkind='S' " +
                     "AND pg_class.relnamespace = pg_namespace.oid " +
-                    "AND nspname = '" + schema.getName() + "' " +
-                    "AND 'nextval(''" + schema.getName() + "." + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
-                    "AND 'nextval(''" + schema.getName() + "." + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
-                    "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)" +
-                    "AND 'nextval(''\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)";
+                    "AND nspname = '" + schema.getName() + "'";
         } else if (database instanceof MSSQLDatabase) {
             return "SELECT SEQUENCE_NAME, " +
                     "cast(START_VALUE AS BIGINT) AS START_VALUE, " +

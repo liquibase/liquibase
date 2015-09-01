@@ -53,6 +53,7 @@ public class TableComparator  implements DatabaseObjectComparator {
         exclude.add("uniqueConstraints");
         exclude.add("primaryKey");
         exclude.add("columns");
+        exclude.add("schema");
 
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Table.class, accordingTo));

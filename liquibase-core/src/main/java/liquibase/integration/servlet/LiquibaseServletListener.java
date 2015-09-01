@@ -230,7 +230,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             while (initParameters.hasMoreElements()) {
                 String name = initParameters.nextElement().trim();
                 if (name.startsWith(LIQUIBASE_PARAMETER + ".")) {
-                    liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length()), servletValueContainer.getValue(name));
+                    liquibase.setChangeLogParameter(name.substring(LIQUIBASE_PARAMETER.length() + 1), servletValueContainer.getValue(name));
                 }
             }
 

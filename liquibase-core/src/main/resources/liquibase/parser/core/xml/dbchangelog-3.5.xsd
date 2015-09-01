@@ -538,6 +538,7 @@
 			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
 			<xsd:attribute name="separator" type="xsd:string" default=","/>
 			<xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
+            <xsd:attribute name="commentLineStartsWith" type="xsd:string" default="#" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -555,6 +556,7 @@
 						<xsd:attribute name="defaultValueDate" type="xsd:string" />
 						<xsd:attribute name="defaultValueBoolean" type="booleanExp" />
 						<xsd:attribute name="defaultValueComputed" type="xsd:string" />
+                        <xsd:attribute name="commentLineStartsWith" type="xsd:string" default="#" />
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:sequence>

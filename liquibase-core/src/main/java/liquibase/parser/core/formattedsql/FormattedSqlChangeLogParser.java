@@ -82,7 +82,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
-            Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment: (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -107,7 +107,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
-                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()));
+                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeLog);
                     if (changeSet != null) {
 
                         if (finalCurrentSql == null) {
@@ -121,7 +121,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 changeSet.addRollbackChange(new EmptyChange());
                             } else {
                                 RawSQLChange rollbackChange = new RawSQLChange();
-                                rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
+                                rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeLog));
                                 changeSet.addRollbackChange(rollbackChange);
                             }
                         }
@@ -224,14 +224,18 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             }
 
             if (changeSet != null) {
-                change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString())));
+                change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
+
+                if (StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
+                    change.setEndDelimiter("\n/$");
+                }
 
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
                     if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
                         changeSet.addRollbackChange(new EmptyChange());
                     } else {
                         RawSQLChange rollbackChange = new RawSQLChange();
-                        rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
+                        rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
                         changeSet.addRollbackChange(rollbackChange);
                     }
                 }

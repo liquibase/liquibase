@@ -19,6 +19,7 @@ import liquibase.util.ObjectUtil;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
@@ -221,6 +222,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<String>(object.getAttributes())) {
+            if (object.getClass() == Index.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == PrimaryKey.class && field.equals("columns")) {
+                continue;
+            }
+            if (object.getClass() == UniqueConstraint.class && field.equals("columns")) {
+                continue;
+            }
             Object fieldValue = object.getAttribute(field, Object.class);
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
@@ -271,7 +281,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             //
             //                }
         } else if (fieldValue instanceof Collection) {
-            Iterator fieldValueIterator = ((Collection) fieldValue).iterator();
+            Iterator fieldValueIterator = new CopyOnWriteArrayList((Collection) fieldValue).iterator();
             List newValues = new ArrayList();
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
@@ -300,7 +310,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return newCollection;
         } else if (fieldValue instanceof Map) {
             Map newMap = (Map) fieldValue.getClass().newInstance();
-            for (Map.Entry entry : (Set<Map.Entry>) ((Map) fieldValue).entrySet()) {
+            for (Map.Entry entry : new HashSet<Map.Entry>((Set<Map.Entry>) ((Map) fieldValue).entrySet())) {
                 Object key = replaceObject(entry.getKey());
                 Object value = replaceObject(entry.getValue());
 

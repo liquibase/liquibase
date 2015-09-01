@@ -176,6 +176,10 @@ class ResultSetCache {
         }
 
         List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+            return executeAndExtract(sql, database, false);
+        }
+
+        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<CachedRow>();
             }
@@ -186,11 +190,10 @@ class ResultSetCache {
                 statement = connection.createStatement();
                 resultSet = statement.executeQuery(sql);
                 resultSet.setFetchSize(FETCH_SIZE);
-                return extract(resultSet);
+                return extract(resultSet, informixTrimHint);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
-
         }
 
         public boolean equals(Object expectedValue, Object foundValue) {

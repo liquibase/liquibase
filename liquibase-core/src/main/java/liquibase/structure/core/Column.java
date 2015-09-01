@@ -18,6 +18,7 @@ public class Column extends AbstractDatabaseObject {
 
     private String name;
     private Boolean computed;
+    private Boolean descending;
 
     public Column() {
     }
@@ -37,6 +38,7 @@ public class Column extends AbstractDatabaseObject {
 
     public Column(ColumnConfig columnConfig) {
         setName(columnConfig.getName());
+        setDescending(columnConfig.getDescending());
         setType(new DataType(columnConfig.getType()));
 
         if (columnConfig.getDefaultValue() != null) {
@@ -158,22 +160,32 @@ public class Column extends AbstractDatabaseObject {
         setAttribute("autoIncrementInformation", autoIncrementInformation);
     }
 
+    public Boolean getDescending() {
+        return descending;
+    }
+
+    public Column setDescending(Boolean descending) {
+        this.descending = descending;
+        setAttribute("descending", descending);
+
+        return this;
+    }
 
     public String toString(boolean includeRelation) {
         if (includeRelation) {
             return toString();
         } else {
-            return getName();
+            return getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         }
     }
 
     @Override
     public String toString() {
         if (getRelation() == null) {
-            return getName();
+            return getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         } else {
             String tableOrViewName = getRelation().getName();
-            return tableOrViewName + "." + getName();
+            return tableOrViewName + "." + getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         }
     }
 
@@ -270,6 +282,20 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
+    public static Column fromName(String columnName) {
+        columnName = columnName.trim();
+        Boolean descending = null;
+        if (columnName.matches("(?i).*\\s+DESC")) {
+            columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
+            descending = true;
+        } else if (columnName.matches("(?i).*\\s+ASC")) {
+            columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
+            descending = false;
+        }
+        return new Column(columnName)
+                .setDescending(descending);
+    }
+
     public static Column[] arrayFromNames(String columnNames) {
         if (columnNames == null) {
             return null;
@@ -277,8 +303,8 @@ public class Column extends AbstractDatabaseObject {
 
         List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
         Column[] returnArray = new Column[columnNameList.size()];
-        for (int i=0; i<columnNameList.size(); i++) {
-            returnArray[i] = new Column(columnNameList.get(i));
+        for (int i = 0; i < columnNameList.size(); i++) {
+            returnArray[i] = fromName(columnNameList.get(i));
         }
         return returnArray;
     }

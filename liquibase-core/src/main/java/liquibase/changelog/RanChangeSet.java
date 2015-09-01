@@ -23,6 +23,7 @@ public class RanChangeSet {
     private ContextExpression contextExpression;
     private Labels labels;
 
+
     public RanChangeSet(ChangeSet changeSet) {
         this(changeSet, null, null, null);
     }
@@ -156,7 +157,7 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return this.getChangeLog().replace('\\', '/').equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/'))
+        return this.getChangeLog().replace('\\', '/').replaceFirst("^classpath:", "").equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/'))
                 && this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor());
     }

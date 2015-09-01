@@ -27,6 +27,8 @@ public class UpdateVisitorTest {
 
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.NOT_RAN);
 
+        expect(database.getObjectQuotingStrategy()).andReturn(ObjectQuotingStrategy.LEGACY);
+
         listener.willRun(changeSet, databaseChangeLog, database, RunStatus.NOT_RAN);
         expectLastCall();
         listener.ran(changeSet, databaseChangeLog, database, ChangeSet.ExecType.EXECUTED);

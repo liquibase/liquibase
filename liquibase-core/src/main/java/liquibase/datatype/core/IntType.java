@@ -7,7 +7,7 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
-@DataTypeInfo(name = "int", aliases = {"integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "int", aliases = { "integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class IntType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -37,7 +37,15 @@ public class IntType extends LiquibaseDataType {
                 return new DatabaseDataType("SERIAL");
             }
         }
-        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase  || database instanceof MySQLDatabase) {
+        if (database instanceof MSSQLDatabase) {
+            return new DatabaseDataType(database.escapeDataTypeName("int"));
+        }
+        if (database instanceof MySQLDatabase) {
+            DatabaseDataType type = new DatabaseDataType("INT");
+            type.addAdditionalInformation(getAdditionalInformation());
+            return type;
+        }
+        if (database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase) {

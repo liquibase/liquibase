@@ -63,7 +63,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
-            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
+            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, true));
 
             buffer.append(" ").append(columnType);
 
@@ -223,7 +223,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
-                    referencesString = database.getDefaultSchemaName() +"."+referencesString;
+                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) +"."+referencesString;
                 }
                 buffer.append(referencesString);
             } else {

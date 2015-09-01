@@ -33,7 +33,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
-        super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE %s='SEQ_TYPE')";
+        super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE sequencename = upper('%s'))";
         determineDriverVersion();
     }
 
@@ -139,7 +139,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (driverName.toLowerCase().contains("embedded")) {
+        if (driverName != null && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
                     url = url.substring(0, url.indexOf(";")) + ";shutdown=true";

@@ -35,11 +35,16 @@ public class CompositeResourceAccessor implements ResourceAccessor {
 
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        Set<String> returnSet = new HashSet<String>();
         for (ResourceAccessor accessor : resourceAccessors) {
-            Set<String> returnSet = accessor.list(relativeTo, path, includeFiles, includeDirectories, recursive);
-            if (returnSet != null && returnSet.size() > 0) {
-                return returnSet;
+            Set<String> thisSet = accessor.list(relativeTo, path, includeFiles, includeDirectories, recursive);
+            if (thisSet != null) {
+                returnSet.addAll(thisSet);
             }
+        }
+
+        if (returnSet.size() > 0) {
+            return returnSet;
         }
         return null;
     }

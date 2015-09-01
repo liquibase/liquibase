@@ -9,6 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.util.StreamUtil;
@@ -58,13 +59,13 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     @Override
     public int update(SqlStatement sql) throws DatabaseException {
+        outputStatement(sql);
+
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return 1;
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
             return 1;
         }
-
-        outputStatement(sql);
 
         return 0;
     }
@@ -101,6 +102,10 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
+            if (sql instanceof ExecutablePreparedStatement) {
+                output.write("WARNING!: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode\n\n");
+            }
+
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (statement == null) {
                     continue;
@@ -116,11 +121,21 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     //                output.write("/");
                 } else {
                     String endDelimiter = ";";
+                    String potentialDelimiter = null;
                     if (sql instanceof RawSqlStatement) {
-                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
                     } else if (sql instanceof CreateProcedureStatement) {
-                        endDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
+                        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
+
+                    if (potentialDelimiter != null) {
+                        potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", ""); //ignore trailing $ as a regexp to determine if it should be output
+                    }
+                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n@\\-]+")) {
+                        endDelimiter = potentialDelimiter;
+                    }
+
+
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
                     }

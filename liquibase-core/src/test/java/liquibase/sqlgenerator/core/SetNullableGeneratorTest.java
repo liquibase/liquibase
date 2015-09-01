@@ -1,7 +1,43 @@
 package liquibase.sqlgenerator.core;
 
-public abstract class SetNullableGeneratorTest {
-////    @Test
+import liquibase.database.core.OracleDatabase;
+import liquibase.sql.Sql;
+import liquibase.statement.core.SetNullableStatement;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SetNullableGeneratorTest {
+
+  private final SetNullableGenerator generator = new SetNullableGenerator();
+  private final OracleDatabase oracle = new OracleDatabase();
+
+  @Test
+  public void testGenerateOracleNotNullSql() throws Exception {
+    final Sql[] sqls = generator.generateSql(
+        new SetNullableStatement(null, "schema_name", "table_name", "column_name", null, false), oracle, null);
+
+    assertEquals(1, sqls.length);
+
+    final Sql sql = sqls[0];
+
+    assertEquals("ALTER TABLE schema_name.table_name MODIFY column_name NOT NULL", sql.toSql());
+  }
+
+  @Test
+  public void testGenerateOracleNotNullSqlWithConstraintName() throws Exception {
+    final Sql[] sqls = generator.generateSql(
+        new SetNullableStatement(null, "schema_name", "table_name", "column_name", null, false, "constraint_name"),
+        oracle, null);
+
+    assertEquals(1, sqls.length);
+
+    final Sql sql = sqls[0];
+
+    assertEquals("ALTER TABLE schema_name.table_name MODIFY column_name CONSTRAINT constraint_name NOT NULL", sql.toSql());
+  }
+
+  ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 ////

@@ -226,4 +226,8 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName;
     }
+    @Override
+    protected String getConnectionSchemaName() {
+        return null;
+    }
 }
