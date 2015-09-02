@@ -32,13 +32,17 @@ public class Column extends AbstractDatabaseObject {
         super(name);
     }
 
-    public Column(ObjectName name, String type, Boolean nullable) {
+    public Column(ObjectName name, DataType type, Boolean nullable) {
         this(name);
-        this.type = DataType.parse(type);
+        this.type = type;
         this.nullable = nullable;
     }
 
     public Column(ObjectName name, String type) {
+        this(name, DataType.parse(type));
+    }
+
+    public Column(ObjectName name, DataType type) {
         this(name, type, null);
     }
 
@@ -97,6 +101,9 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
+        if (name == null) {
+            return "Unnamed Column";
+        }
         return getName().toString();
     }
 

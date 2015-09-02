@@ -961,7 +961,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else if (object instanceof Column) {
             return isLiquibaseObject(new Table(object.getName().container));
         } else if (object instanceof Index) {
-            return isLiquibaseObject(((Index) object).getTable());
+            return isLiquibaseObject(new Table(((Index) object).columns.get(0).name.container));
         } else if (object instanceof PrimaryKey) {
 //            return isLiquibaseObject(((PrimaryKey) object).getTable());
         }

@@ -190,7 +190,11 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     @Override
     public String toString() {
-        return getName().toString();
+        ObjectName name = getName();
+        if (name == null) {
+            return "unnamed";
+        }
+        return name.toString();
     }
 
     @Override

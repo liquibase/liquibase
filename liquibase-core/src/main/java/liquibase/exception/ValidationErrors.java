@@ -73,7 +73,7 @@ public class ValidationErrors {
     }
 
     public ValidationErrors addUnsupportedError(String message, String scopeDescription) {
-        addError(message+" is not supported in "+scopeDescription);
+        addError(message + " is not supported in " + scopeDescription);
         return this;
     }
 
@@ -82,9 +82,10 @@ public class ValidationErrors {
      * Instead, simply pass the field and the base object.
      */
     public ValidationErrors checkForDisallowedField(String disallowedField, ExtensibleObject object, String scopeDescription) {
-        Object value = object.get(disallowedField, Object.class);
-        checkDisallowedField(disallowedField, value, scopeDescription);
-
+        if (object != null) {
+            Object value = object.get(disallowedField, Object.class);
+            checkDisallowedField(disallowedField, value, scopeDescription);
+        }
         return this;
     }
 

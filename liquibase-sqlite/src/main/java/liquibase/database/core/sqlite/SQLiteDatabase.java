@@ -159,13 +159,13 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             }
 
             List<Index> newIndices = new ArrayList<Index>();
-            for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
-                if (index.getTable().getSimpleName().equalsIgnoreCase(tableName)) {
-                    if (alterTableVisitor.createThisIndex(index)) {
-                        newIndices.add(index);
-                    }
-                }
-            }
+//            for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
+//                if (index.getTable().getSimpleName().equalsIgnoreCase(tableName)) {
+//                    if (alterTableVisitor.createThisIndex(index)) {
+//                        newIndices.add(index);
+//                    }
+//                }
+//            }
 
             // rename table
             String temp_table_name = tableName + "_temporary";
@@ -186,22 +186,22 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             // validate indices
             statements.addAll(Arrays.asList(new ReindexStatement(catalogName, schemaName, tableName)));
             // add remaining indices
-            for (Index index_config : newIndices) {
-                AddColumnConfig[] columns = new AddColumnConfig[index_config.getColumns().size()];
-//                for (int i=0; i<index_config.getColumns().size(); i++) {
-//                    columns[i] = new AddColumnConfig(index_config.getColumns().get(i));
-//                }
-
-                statements.addAll(Arrays.asList(new CreateIndexStatement(
-                        index_config.getSimpleName(),
-                        catalogName, schemaName, tableName,
-                        index_config.isUnique(),
-                        index_config.getAssociatedWithAsString(),
-                        columns)));
-            }
+//            for (Index index_config : newIndices) {
+//                AddColumnConfig[] columns = new AddColumnConfig[index_config.getColumns().size()];
+////                for (int i=0; i<index_config.getColumns().size(); i++) {
+////                    columns[i] = new AddColumnConfig(index_config.getColumns().get(i));
+////                }
+//
+//                statements.addAll(Arrays.asList(new CreateIndexStatement(
+//                        index_config.getSimpleName(),
+//                        catalogName, schemaName, tableName,
+//                        index_config.isUnique(),
+//                        index_config.getAssociatedWithAsString(),
+//                        columns)));
+//            }
 
             return statements;
-        } catch (InvalidExampleException e) {
+        } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
 

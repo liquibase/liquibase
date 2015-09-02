@@ -2,16 +2,16 @@ package liquibase.action.core
 
 import liquibase.JUnitScope
 import liquibase.Scope
+import liquibase.action.Action
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.QueryResult
+import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.Snapshot
 import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.CustomTransformer
 import liquibase.snapshot.transformer.LimitTransformer
 import liquibase.snapshot.transformer.NoOpTransformer
-import liquibase.snapshot.transformer.RoundRobinTransformer
-import liquibase.snapshot.transformer.TransformerList
+import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectName
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
@@ -29,7 +29,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #column on #conn")
     def "can find fully qualified complex column names"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(column)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -49,7 +49,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         [conn, scope, snapshot, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -64,7 +64,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #table on #conn")
     def "can find all columns in a fully qualified complex table name"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, table.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(Column, table)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -86,7 +86,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -101,7 +101,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #schema on #conn")
     def "can find all columns in a schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, schema.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(Column, schema)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -123,7 +123,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -138,7 +138,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #catalog on #conn")
     def "can find all columns in a catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, catalog.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(Column, catalog)
 
         def plan = new ActionExecutor().createPlan(action, scope)
 
@@ -161,7 +161,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             Assume.assumeTrue("Database does not support catalogs", it.database.getMaxReferenceContainerDepth() >= 2);
 
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -176,7 +176,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #column (autoIncrement: #autoIncrement) on #conn")
     def "autoIncrement information set correctly"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(column)
         def executor = scope.getSingleton(ActionExecutor.class)
         def plan = executor.createPlan(action, scope)
 
@@ -233,7 +233,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         def executor = scope.getSingleton(ActionExecutor.class) as ActionExecutor
 
         then:
-        def action = new SnapshotDatabaseObjectsAction(Column, column.getObjectReference())
+        def action = new SnapshotDatabaseObjectsAction(column)
 
 
         def plan = executor.createPlan(action, scope)
@@ -264,7 +264,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
             executor.execute(addColumnAction, scope)
 
-            def newColumnSnapshot = LiquibaseUtil.snapshotObject(Column, columnToAdd.getObjectReference(), scope)
+            def newColumnSnapshot = LiquibaseUtil.snapshotObject(Column, columnToAdd, scope)
 
             assert snapshotColumn.type.toString() != null
             assert snapshotColumn.type.toString() == newColumnSnapshot.type.toString()
@@ -287,5 +287,10 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
     protected ArrayList<String> getDataTypesToTest() {
         ["int", "bigint", "smallint", "varchar(10)", "float", "double"]
+    }
+
+    @Override
+    protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
+        return null
     }
 }

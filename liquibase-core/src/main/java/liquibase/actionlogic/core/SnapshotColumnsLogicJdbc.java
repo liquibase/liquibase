@@ -46,23 +46,23 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
      * Creates an ObjectName with null values for "unknown" portions and calls {@link #createColumnSnapshotAction(ObjectName)}.
      */
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
-        ObjectReference relatedTo = action.relatedTo;
+        DatabaseObject relatedTo = action.relatedTo;
 
         ObjectName columnName;
 
         Database database = scope.getDatabase();
 
-        if (relatedTo.instanceOf(Catalog.class)) {
+        if (relatedTo instanceof Catalog) {
             if (database.getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + database.getShortName());
             }
             columnName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
-        } else if (relatedTo.instanceOf(Schema.class)) {
+        } else if (relatedTo instanceof Schema) {
             columnName = new ObjectName(relatedTo.getSimpleName(), null, null);
-        } else if (relatedTo.instanceOf(Relation.class)) {
-            columnName = new ObjectName(relatedTo.objectName, null);
-        } else if (relatedTo.instanceOf(Column.class)) {
-            columnName = relatedTo.objectName;
+        } else if (relatedTo instanceof Relation) {
+            columnName = new ObjectName(relatedTo.getName(), null);
+        } else if (relatedTo instanceof Column) {
+            columnName = relatedTo.getName();
         } else {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }

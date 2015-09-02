@@ -125,28 +125,28 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @Override
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
-        try {
-            Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
-            if (getColumns() != null) {
-                for (ColumnConfig column : getColumns() ) {
-                    example.addColumn(new Index.IndexedColumn(new ObjectName(tableName, column.getName())));
-                }
-            }
-
-            Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertApplied(snapshot != null, "Index does not exist");
-
-            if (snapshot != null) {
-                if (isUnique() != null) {
-                    result.assertCorrect(isUnique().equals(snapshot.isUnique()), "Unique does not match");
-                }
-            }
+//        try {
+//            Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
+//            if (getColumns() != null) {
+//                for (ColumnConfig column : getColumns() ) {
+//                    example.addColumn(new Index.IndexedColumn(new ObjectName(tableName, column.getName())));
+//                }
+//            }
+//
+//            Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+//            result.assertApplied(snapshot != null, "Index does not exist");
+//
+//            if (snapshot != null) {
+//                if (isUnique() != null) {
+//                    result.assertCorrect(isUnique().equals(snapshot.isUnique()), "Unique does not match");
+//                }
+//            }
 
             return result;
 
-        } catch (Exception e) {
-            return result.unknown(e);
-        }
+//        } catch (Exception e) {
+//            return result.unknown(e);
+//        }
     }
 
     @Override

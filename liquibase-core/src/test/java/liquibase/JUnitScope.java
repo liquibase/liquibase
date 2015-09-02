@@ -23,11 +23,6 @@ public class JUnitScope extends Scope {
         objectNameStrategy
     }
 
-    public enum TestObjectNameStrategy {
-        COMPLEX_NAMES,
-        SIMPLE_NAMES
-    }
-
     private JUnitScope() throws Exception {
         super(new JUnitResourceAccessor(), new HashMap<String, Object>());
     }

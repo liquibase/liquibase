@@ -14,14 +14,14 @@ public class AddAutoIncrementAction extends AbstractAction {
 
     public ObjectName columnName;
     public DataType columnDataType;
-    public BigInteger startWith;
-    public BigInteger incrementBy;
+    public Column.AutoIncrementInformation autoIncrementInformation;
 
     public AddAutoIncrementAction() {
     }
 
-    public AddAutoIncrementAction(ObjectName columnName, DataType columnDataType) {
+    public AddAutoIncrementAction(ObjectName columnName, DataType columnDataType, Column.AutoIncrementInformation autoIncrementInformation) {
         this.columnName = columnName;
         this.columnDataType = columnDataType;
+        this.autoIncrementInformation = autoIncrementInformation;
     }
 }

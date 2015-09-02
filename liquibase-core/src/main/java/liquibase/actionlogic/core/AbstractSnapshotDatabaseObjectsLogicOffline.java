@@ -36,13 +36,13 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicOffline<T extends Snap
             throw new ActionPerformException("No snapshot found");
         }
 
-        final ObjectReference relatedTo = action.relatedTo;
+        final DatabaseObject relatedTo = action.relatedTo;
 
-        if (relatedTo.instanceOf(Catalog.class) && database.getMaxSnapshotContainerDepth() < 2) {
+        if (relatedTo instanceof Catalog && database.getMaxSnapshotContainerDepth() < 2) {
             throw new ActionPerformException("Cannot snapshot catalogs on "+database.getShortName());
         }
 
-        if (relatedTo.instanceOf(Schema.class) && database.getMaxSnapshotContainerDepth() < 1) {
+        if (relatedTo instanceof Schema && database.getMaxSnapshotContainerDepth() < 1) {
             throw new ActionPerformException("Cannot snapshot schemas on "+database.getShortName());
         }
 

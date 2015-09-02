@@ -16,12 +16,12 @@ import java.util.Set;
 
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
-    public Set<ObjectReference> relatedObjects = new HashSet<>();
+    public Set<DatabaseObject> relatedObjects = new HashSet<>();
 
     public SnapshotCommand() {
     }
 
-    public SnapshotCommand(ObjectReference... relatedObjects) {
+    public SnapshotCommand(DatabaseObject... relatedObjects) {
         if (relatedObjects != null) {
             this.relatedObjects.addAll(Arrays.asList(relatedObjects));
         }
@@ -39,7 +39,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
 
         Snapshot snapshot = new Snapshot(scope);
 
-        for (ObjectReference related : relatedObjects) {
+        for (DatabaseObject related : relatedObjects) {
             for (Class type : types) {
                 snapshot.addAll(LiquibaseUtil.snapshotAll(type, related, scope));
             }

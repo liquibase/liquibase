@@ -4,6 +4,7 @@ import liquibase.Scope;
 import liquibase.action.core.DropForeignKeyAction;
 import liquibase.action.core.DropTablesAction;
 import liquibase.actionlogic.ActionExecutor;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
@@ -14,12 +15,12 @@ import java.util.Set;
 
 public class DropAllCommand extends AbstractCommand {
 
-    public Set<ObjectReference> containers = new HashSet<>();
+    public Set<DatabaseObject> containers = new HashSet<>();
 
     public DropAllCommand() {
     }
 
-    public DropAllCommand(ObjectReference... containers) {
+    public DropAllCommand(DatabaseObject... containers) {
         if (containers != null) {
             this.containers.addAll(Arrays.asList(containers));
         }

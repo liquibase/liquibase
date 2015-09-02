@@ -34,16 +34,16 @@ public class SnapshotTablesLogicOffline extends AbstractSnapshotDatabaseObjectsL
 
     @Override
     protected CollectionUtil.CollectionFilter<? extends DatabaseObject> getDatabaseObjectFilter(SnapshotDatabaseObjectsAction action, Scope scope) {
-        final ObjectReference relatedTo = action.relatedTo;
+        final DatabaseObject relatedTo = action.relatedTo;
 
         return new CollectionUtil.CollectionFilter<Relation>() {
             @Override
             public boolean include(Relation relation) {
-                if (relatedTo.instanceOf(Relation.class)) {
+                if (relatedTo instanceof Relation) {
                     return relation.name.equals(relatedTo);
-                } else if (relatedTo.instanceOf(Schema.class)) {
+                } else if (relatedTo instanceof Schema) {
                     return relation.name.container.equals(relatedTo);
-                } else if (relatedTo.instanceOf(Catalog.class)) {
+                } else if (relatedTo instanceof Catalog) {
                     ObjectName schemaName = relation.name.container;
 
                     return schemaName.container != null && schemaName.container.equals(relatedTo);

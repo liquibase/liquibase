@@ -85,16 +85,16 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
             Index example = new Index();
             String tableName = StringUtils.trimToNull(getTableName());
-            if (tableName != null) {
-                example.setTable((Table) new Table(new ObjectName(database.correctObjectName(getTableName(), Table.class))));
-//                        .setSchema(schema));
-            }
-            example.setName(new ObjectName(database.correctObjectName(getIndexName(), Index.class)));
-            if (StringUtils.trimToNull(getColumnNames()) != null) {
-                for (String column : getColumnNames().split("\\s*,\\s*")) {
-                    example.addColumn(new Index.IndexedColumn(new ObjectName(getTableName(), column)));
-                }
-            }
+//            if (tableName != null) {
+//                example.setTable((Table) new Table(new ObjectName(database.correctObjectName(getTableName(), Table.class))));
+////                        .setSchema(schema));
+//            }
+//            example.setName(new ObjectName(database.correctObjectName(getIndexName(), Index.class)));
+//            if (StringUtils.trimToNull(getColumnNames()) != null) {
+//                for (String column : getColumnNames().split("\\s*,\\s*")) {
+//                    example.addColumn(new Index.IndexedColumn(new ObjectName(getTableName(), column)));
+//                }
+//            }
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 String name = "";
 

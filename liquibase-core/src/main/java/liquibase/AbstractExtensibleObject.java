@@ -3,6 +3,7 @@ package liquibase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.ObjectUtil;
 import liquibase.util.SmartMap;
+import liquibase.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -152,6 +153,17 @@ public class AbstractExtensibleObject implements ExtensibleObject, Cloneable {
     @Override
     public ExtensibleObject add(Enum attribute, Object value) {
         return add(attribute.name(), value);
+    }
+
+    public String describe() {
+        String name = getClass().getSimpleName();
+        name = StringUtils.lowerCaseFirst(name);
+        return name+"("+ StringUtils.join(this, ", ", new StringUtils.DefaultFormatter())+")";
+    }
+
+    @Override
+    public String toString() {
+        return describe();
     }
 
     @Override

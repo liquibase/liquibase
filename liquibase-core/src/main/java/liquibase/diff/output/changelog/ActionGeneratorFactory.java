@@ -25,7 +25,7 @@ public class ActionGeneratorFactory extends AbstractServiceFactory<ActionGenerat
 
     @Override
     protected int getPriority(ActionGenerator obj, Scope scope, Object... args) {
-        return 0;
+        return obj.getPriority((Class<? extends DatabaseObject>) args[1], (Snapshot) args[2], (Snapshot) args[2], scope);
     }
 
     public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {

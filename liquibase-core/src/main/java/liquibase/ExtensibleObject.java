@@ -67,4 +67,6 @@ public interface ExtensibleObject {
     ExtensibleObject add(String attribute, Object value);
 
     ExtensibleObject add(Enum attribute, Object value);
+
+    String describe();
 }

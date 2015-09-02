@@ -36,22 +36,22 @@ public class SnapshotForeignKeysLogicJdbc extends AbstractSnapshotDatabaseObject
 
     @Override
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
-        ObjectReference relatedTo = action.relatedTo;
+        DatabaseObject relatedTo = action.relatedTo;
         ObjectName fkName = null;
         ObjectName tableName = null;
-        if (relatedTo.instanceOf(Catalog.class)) {
+        if (relatedTo instanceof Catalog) {
             if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
             }
             fkName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
-        } else if (relatedTo.instanceOf(Schema.class)) {
-            fkName = new ObjectName(new ObjectName(new ObjectName(relatedTo.objectName.container, relatedTo.getSimpleName()), null), null);
-        } else if (relatedTo.instanceOf(Table.class)) {
-            tableName = relatedTo.objectName;
-        } else if (relatedTo.instanceOf(ForeignKey.class)) {
-            fkName = relatedTo.objectName;
+        } else if (relatedTo instanceof Schema) {
+            fkName = new ObjectName(new ObjectName(new ObjectName(relatedTo.getName().container, relatedTo.getSimpleName()), null), null);
+        } else if (relatedTo instanceof Table) {
+            tableName = relatedTo.getName();
+        } else if (relatedTo instanceof ForeignKey) {
+            fkName = relatedTo.getName();
         } else {
-            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.objectType.getName());
+            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
         }
 
         if (tableName == null) {

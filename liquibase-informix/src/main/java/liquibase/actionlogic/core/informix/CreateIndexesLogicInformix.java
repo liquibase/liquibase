@@ -1,13 +1,14 @@
 package liquibase.actionlogic.core.informix;
 
 import liquibase.Scope;
-import liquibase.action.core.CreateIndexAction;
-import liquibase.actionlogic.core.CreateIndexLogic;
+import liquibase.action.core.CreateIndexesAction;
+import liquibase.actionlogic.core.CreateIndexesLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
+import liquibase.structure.core.Index;
 import liquibase.util.StringClauses;
 
-public class CreateIndexLogicInformix extends CreateIndexLogic {
+public class CreateIndexesLogicInformix extends CreateIndexesLogic {
 
     @Override
     protected Class<? extends Database> getRequiredDatabase() {
@@ -15,10 +16,10 @@ public class CreateIndexLogicInformix extends CreateIndexLogic {
     }
 
     @Override
-    protected StringClauses generateSql(CreateIndexAction action, Scope scope) {
-        StringClauses clauses = super.generateSql(action, scope);
+    protected StringClauses generateSql(Index index, CreateIndexesAction action, Scope scope) {
+        StringClauses clauses = super.generateSql(index, action, scope);
 
-        String tablespace = action.tablespace;
+        String tablespace = index.tablespace;
         if (tablespace != null) {
             clauses.replace(tablespace, "IN " + tablespace);
         }

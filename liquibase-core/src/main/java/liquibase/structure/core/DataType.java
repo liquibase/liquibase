@@ -41,6 +41,7 @@ public class DataType extends AbstractExtensibleObject {
 
     public DataType(StandardType type, Object... parameters) {
         this(type.name(), parameters);
+        this.standardType = type;
     }
 
     public DataType(String name, StringClauses clausesBeforeParameters, String[] parameters, StringClauses clausesAfterParameters) {

@@ -40,19 +40,19 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
     @Override
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
 
-        ObjectReference relatedTo = action.relatedTo;
+        DatabaseObject relatedTo = action.relatedTo;
         ObjectName objectName;
-        if (relatedTo.instanceOf(Catalog.class)) {
+        if (relatedTo instanceof Catalog) {
             if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
             }
             objectName = new ObjectName(relatedTo.getSimpleName(), null, null);
-        } else if (relatedTo.instanceOf(Schema.class)) {
-            objectName = new ObjectName(new ObjectName(relatedTo.objectName.container, relatedTo.getSimpleName()), null);
-        } else if (relatedTo.instanceOf(Table.class)) {
-            objectName = relatedTo.objectName;
+        } else if (relatedTo instanceof Schema) {
+            objectName = new ObjectName(new ObjectName(relatedTo.getName().container, relatedTo.getSimpleName()), null);
+        } else if (relatedTo instanceof Table) {
+            objectName = relatedTo.getName();
         } else {
-            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.objectType.getName());
+            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
         }
 
         objectName = objectName.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 1);

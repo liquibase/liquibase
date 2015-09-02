@@ -108,9 +108,9 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
 //                if (object instanceof Column) {
 //                    return matches(((Column) object).relation);
 //                }
-                if (object instanceof Index) {
-                    return matches(((Index) object).getTable());
-                }
+//                if (object instanceof Index) {
+//                    return matches(((Index) object).getTable());
+//                }
 //                if (object instanceof ForeignKey) {
 //                    return matches(((ForeignKey) object).getForeignKeyTable());
 //                }

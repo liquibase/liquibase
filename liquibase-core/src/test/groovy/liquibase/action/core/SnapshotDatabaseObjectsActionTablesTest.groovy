@@ -1,11 +1,16 @@
 package liquibase.action.core
 
 import liquibase.JUnitScope
+import liquibase.Scope
+import liquibase.action.Action
 import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.QueryResult
+import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
+import liquibase.snapshot.Snapshot
 import liquibase.snapshot.TestSnapshotFactory
 import liquibase.snapshot.transformer.NoOpTransformer
+import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectName
 import liquibase.structure.ObjectReference
 import liquibase.structure.core.Catalog
@@ -39,14 +44,14 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [scope, conn, snapshot, tableRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [scope],
                     [it],
                     [snapshot],
-                    snapshot.get(Table)*.getObjectReference()
+                    snapshot.get(Table)
             ])
         }
     }
@@ -74,7 +79,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         where:
         [scope, conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -108,7 +113,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [scope, conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [scope],
@@ -141,7 +146,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         [conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support catalogs", it.database.getMaxReferenceContainerDepth() >= 2);
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
@@ -176,7 +181,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         where:
         [scope, conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -211,7 +216,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
             Assume.assumeTrue("Database does not support catalogs", it.database.getMaxSnapshotContainerDepth() > 1);
 
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
             def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
@@ -223,4 +228,8 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         }
     }
 
+    @Override
+    protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
+        return null
+    }
 }

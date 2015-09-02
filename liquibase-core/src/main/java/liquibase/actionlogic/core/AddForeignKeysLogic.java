@@ -10,10 +10,12 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.ObjectUtil;
@@ -49,9 +51,8 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
             }
 
             validationErrors.checkForRequiredField("columnChecks", fk);
-            validationErrors.checkForRequiredField("name", fk);
 
-            if (fk.name.container != null && !supportsSeparateConstraintSchema() && !fk.name.container.equals(fk.columnChecks.get(0).baseColumn.container.container)) {
+            if (fk.name != null && fk.name.container != null && !supportsSeparateConstraintSchema() && !fk.name.container.equals(fk.columnChecks.get(0).baseColumn.container.container)) {
                 validationErrors.addUnsupportedError("Specifying a different foreign key schema", database.getShortName());
             }
         }
@@ -68,11 +69,19 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
         ActionStatus result = new ActionStatus();
         try {
             for (ForeignKey actionFK : action.foreignKeys) {
-                ForeignKey snapshotFK = LiquibaseUtil.snapshotObject(ForeignKey.class, actionFK.getObjectReference(), scope);
+                ForeignKey snapshotFK = LiquibaseUtil.snapshotObject(ForeignKey.class, actionFK, scope);
                 if (snapshotFK == null) {
                     result.assertApplied(false, "Foreign Key '" + actionFK.name + "' not found");
                 } else {
                     result.assertCorrect(actionFK, snapshotFK);
+                }
+
+                if (actionFK.columnChecks.size() == snapshotFK.columnChecks.size()) {
+                    for (int i=0; i <  actionFK.columnChecks.size(); i++) {
+                        result.assertCorrect(actionFK.columnChecks.get(i), snapshotFK.columnChecks.get(i));
+                    }
+                } else {
+                    result.assertCorrect(false, "columnCheck sizes are different");
                 }
             }
             return result;
@@ -125,14 +134,31 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
                     }
                 }) + ")");
 
-        if (foreignKey.updateRule != null) {
-            clauses.append("ON UPDATE");
-        }
-
         if (foreignKey.deleteRule != null) {
-            clauses.append("ON DELETE " + foreignKey.deleteRule);
+            String option;
+            switch (foreignKey.deleteRule) {
+                case importedKeyCascade: option = "CASCADE"; break;
+                case importedKeyNoAction: option = "NO ACTION"; break;
+                case importedKeyRestrict: option = "RESTRICT"; break;
+                case importedKeySetDefault: option = "SET DEFAULT"; break;
+                case importedKeySetNull: option = "SET NULL"; break;
+                default: throw new UnexpectedLiquibaseException("Unknown updateRule: "+foreignKey.updateRule);
+            }
+            clauses.append("ON DELETE", new StringClauses(" ").append("ON DELETE").append(option));
         }
 
+        if (foreignKey.updateRule != null) {
+            String option;
+            switch (foreignKey.updateRule) {
+                case importedKeyCascade: option = "CASCADE"; break;
+                case importedKeySetNull: option = "SET NULL"; break;
+                case importedKeySetDefault: option = "SET DEFAULT"; break;
+                case importedKeyRestrict: option = "RESTRICT"; break;
+                case importedKeyNoAction: option = "NO ACTION"; break;
+                default: throw new UnexpectedLiquibaseException("Unknown updateRule: "+foreignKey.updateRule);
+            }
+            clauses.append("ON UPDATE", new StringClauses(" ").append("ON UPDATE").append(option));
+        }
 
         boolean deferrable = ObjectUtil.defaultIfEmpty(foreignKey.deferrable, false);
         boolean initiallyDeferred = ObjectUtil.defaultIfEmpty(foreignKey.initiallyDeferred, false);

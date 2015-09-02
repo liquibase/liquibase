@@ -11,7 +11,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.ObjectName;
-import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.CollectionUtil;
@@ -95,15 +94,15 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             PrimaryKey snapshotPK = null;
 
             if (action.primaryKey != null) {
-                snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, new ObjectReference(Table.class, tableName)), scope).asObject(PrimaryKey.class);
+                snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, new Table(tableName)), scope).asObject(PrimaryKey.class);
             }
 
             for (Column actionColumn : action.columns) {
-                Column snapshotColumn = LiquibaseUtil.snapshotObject(Column.class, actionColumn.getObjectReference(), scope);
+                Column snapshotColumn = LiquibaseUtil.snapshotObject(Column.class, actionColumn, scope);
                 if (snapshotColumn == null) {
                     result.assertApplied(false, "Column '"+actionColumn.name+"' not found");
                 } else {
-                    Table table = scope.getSingleton(SnapshotFactory.class).get(new ObjectReference(Table.class, snapshotColumn.name.container), scope);
+                    Table table = scope.getSingleton(SnapshotFactory.class).get(new Table(snapshotColumn.name.container), scope);
                     if (table == null) {
                         result.unknown("Cannot find table " + snapshotColumn.name.container);
                     } else {
@@ -145,7 +144,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             }
 
             for (ForeignKey actionFK : action.foreignKeys) {
-                ForeignKey snapshotFK = scope.getSingleton(SnapshotFactory.class).get(actionFK.getObjectReference(), scope);
+                ForeignKey snapshotFK = scope.getSingleton(SnapshotFactory.class).get(actionFK, scope);
                 if (snapshotFK == null) {
                     result.assertApplied(false, "Foreign Key not created on '"+tableName+"'");
                 } else {
@@ -206,7 +205,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
         if (column.autoIncrementInformation != null) {
             ActionLogic addAutoIncrementLogic = scope.getSingleton(ActionLogicFactory.class).getActionLogic(new AddAutoIncrementAction(), scope);
             if (addAutoIncrementLogic != null && addAutoIncrementLogic instanceof AddAutoIncrementLogic) {
-                clauses.append(Clauses.autoIncrement, ((AddAutoIncrementLogic) addAutoIncrementLogic).generateAutoIncrementClause(column.autoIncrementInformation.startWith, column.autoIncrementInformation.incrementBy));
+                clauses.append(Clauses.autoIncrement, ((AddAutoIncrementLogic) addAutoIncrementLogic).generateAutoIncrementClause(column.autoIncrementInformation));
             } else {
                 throw new UnexpectedLiquibaseException("Cannot use AddAutoIncrementLogic class "+addAutoIncrementLogic+" to build auto increment clauses");
             }
@@ -232,7 +231,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
     protected void addUniqueConstraintActions(AddColumnsAction action, Scope scope, List<Action> returnActions) {
         List<UniqueConstraint> constraints = CollectionUtil.createIfNull(action.uniqueConstraints);
         for (UniqueConstraint constraint : constraints) {
-            returnActions.add(new AddUniqueConstraintAction(constraint));
+            returnActions.add(new AddUniqueConstraintsAction(constraint));
         }
     }
 

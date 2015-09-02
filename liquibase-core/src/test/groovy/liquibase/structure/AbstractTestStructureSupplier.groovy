@@ -61,14 +61,18 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         return returnList
     }
 
-    List<ObjectName> getObjectNames(Scope scope) {
+    public List<ObjectName> getObjectNames(Scope scope) {
+        return getObjectNames(scope.get(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.SIMPLE_NAMES), scope)
+    }
+
+    List<ObjectName> getObjectNames(ObjectNameStrategy nameStrategy, Scope scope) {
         List<ObjectName> returnList = new ArrayList<>();
 
         def containers = ObjectUtil.defaultIfEmpty(getObjectContainers(scope), [null])
 
         for (ObjectName container : containers) {
             def objectNames;
-            if (scope.get(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.SIMPLE_NAMES) == JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES) {
+            if (nameStrategy == ObjectNameStrategy.COMPLEX_NAMES) {
                 objectNames = getComplexObjectNames(scope)
             } else {
                 objectNames = getSimpleObjectNames(scope)

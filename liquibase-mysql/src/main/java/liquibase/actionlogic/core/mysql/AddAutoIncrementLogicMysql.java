@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
+import liquibase.structure.core.Column;
 import liquibase.util.StringClauses;
 
 import java.math.BigInteger;
@@ -19,7 +20,7 @@ public class AddAutoIncrementLogicMysql extends AddAutoIncrementLogic {
     @Override
     public ValidationErrors validate(AddAutoIncrementAction action, Scope scope) {
         return super.validate(action, scope)
-                .checkForDisallowedField("incrementBy", action, scope.getDatabase().getShortName());
+                .checkForDisallowedField("incrementBy", action.autoIncrementInformation, scope.getDatabase().getShortName());
     }
 
     @Override
@@ -30,14 +31,14 @@ public class AddAutoIncrementLogicMysql extends AddAutoIncrementLogic {
     @Override
     public ActionResult execute(AddAutoIncrementAction action, Scope scope) throws ActionPerformException {
         DelegateResult delegate = (DelegateResult) super.execute(action, scope);
-        if (action.startWith != null) {
-            delegate.addActions(new AlterTableAction(action.columnName.container, new StringClauses().append("AUTO_INCREMENT="+action.startWith)));
+        if (action.autoIncrementInformation != null && action.autoIncrementInformation.startWith != null) {
+            delegate.addActions(new AlterTableAction(action.columnName.container, new StringClauses().append("AUTO_INCREMENT="+action.autoIncrementInformation.startWith)));
         }
         return delegate;
     }
 
     @Override
-    public StringClauses generateAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
+    public StringClauses generateAutoIncrementClause(Column.AutoIncrementInformation autoIncrementInformation) {
         return new StringClauses().append("AUTO_INCREMENT");
     }
 }

@@ -37,27 +37,27 @@ public class SnapshotColumnsLogicOffline extends AbstractSnapshotDatabaseObjects
     }
 
     protected CollectionUtil.CollectionFilter<? extends DatabaseObject> getDatabaseObjectFilter(SnapshotDatabaseObjectsAction action, Scope scope) {
-        final ObjectReference relatedTo = action.relatedTo;
+        final DatabaseObject relatedTo = action.relatedTo;
 
         return new CollectionUtil.CollectionFilter<Column>() {
             @Override
             public boolean include(Column column) {
-                if (relatedTo.instanceOf(Column.class)) {
-                    return column.getName().equals(relatedTo.objectName);
-                } else if (relatedTo.instanceOf(Relation.class)) {
+                if (relatedTo instanceof Column) {
+                    return column.getName().equals(relatedTo.getName());
+                } else if (relatedTo instanceof Relation) {
                     ObjectName tableName = column.getName().container;
-                    return tableName != null && tableName.equals((relatedTo).objectName);
-                } else if (relatedTo.instanceOf(Schema.class)) {
+                    return tableName != null && tableName.equals((relatedTo).getName());
+                } else if (relatedTo instanceof Schema) {
                     ObjectName tableName = column.getName().container;
-                    return tableName != null && tableName.container != null && tableName.container.equals((relatedTo.objectName));
-                } else if (relatedTo.instanceOf(Catalog.class)) {
+                    return tableName != null && tableName.container != null && tableName.container.equals((relatedTo.getName()));
+                } else if (relatedTo instanceof Catalog) {
                     ObjectName tableName = column.getName().container;
                     if (tableName == null || tableName.container == null) {
                         return false;
                     }
                     ObjectName schemaName = tableName.container;
 
-                    return schemaName.container != null && schemaName.container.equals((relatedTo.objectName));
+                    return schemaName.container != null && schemaName.container.equals((relatedTo.getName()));
                 } else {
                     throw new UnexpectedLiquibaseException("Unexpected relatedTo type: "+relatedTo.getClass().getName());
                 }

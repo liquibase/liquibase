@@ -24,15 +24,16 @@ public class QuerySqlLogic extends AbstractSqlLogic<QuerySqlAction> {
 
     @Override
     public ActionResult execute(QuerySqlAction action, Scope scope) throws ActionPerformException {
+        String sql = action.sql.toString();
         try {
             AbstractJdbcDatabase database = (AbstractJdbcDatabase) scope.getDatabase();
             DatabaseConnection connection = database.getConnection();
 
             Connection jdbcConnection = ((JdbcConnection) connection).getUnderlyingConnection();
             Statement stmt = jdbcConnection.createStatement();
-            return new RowBasedQueryResult(JdbcUtils.extract(stmt.executeQuery(action.sql.toString())));
+            return new RowBasedQueryResult(JdbcUtils.extract(stmt.executeQuery(sql)));
         } catch (SQLException e) {
-            throw new ActionPerformException(e);
+            throw new ActionPerformException("Error executing query '"+ sql +"'"+e);
         }
     }
 }

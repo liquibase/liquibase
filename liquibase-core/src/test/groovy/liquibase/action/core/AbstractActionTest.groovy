@@ -1,9 +1,13 @@
 package liquibase.action.core
 
+import liquibase.JUnitScope
 import liquibase.Scope
+import liquibase.action.Action
+import liquibase.action.TestObjectFactory
 import liquibase.actionlogic.ActionExecutor
 import liquibase.command.DropAllCommand
 import liquibase.database.ConnectionSupplier
+import liquibase.database.ConnectionSupplierFactory
 import liquibase.database.Database
 import liquibase.database.core.UnsupportedDatabase
 import liquibase.diff.output.DiffOutputControl
@@ -11,10 +15,15 @@ import liquibase.diff.output.changelog.ActionGeneratorFactory
 import liquibase.servicelocator.AbstractServiceFactory
 import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
+import liquibase.structure.AbstractTestStructureSupplier
 import liquibase.structure.ObjectName
+import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectReference
+import liquibase.structure.core.Index
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
+import liquibase.structure.core.UniqueConstraint
+import org.junit.Assume
 import org.slf4j.LoggerFactory
 import org.spockframework.runtime.SpecificationContext
 import spock.lang.Specification
@@ -26,6 +35,42 @@ abstract class AbstractActionTest extends Specification {
 
     def testMDPermutation(ConnectionSupplier conn, Scope scope) {
         return testMDPermutation(null, conn, scope)
+    }
+
+    protected abstract Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope)
+
+    def runStandardTest(Map parameters, Action action, ConnectionSupplier connectionSupplier, Scope scope, Closure assertClosure = {}) {
+        def executor = scope.getSingleton(ActionExecutor)
+
+        def errors = executor.validate(action, scope)
+        Assume.assumeFalse(errors.toString() + " for action" + action.describe(), errors.hasErrors())
+
+        def plan = executor.createPlan(action, scope)
+
+        testMDPermutation(createSnapshot(action, connectionSupplier, scope), connectionSupplier, scope)
+                .addParameters(parameters)
+                .addOperations(plan: plan)
+                .run({
+            plan.execute(scope)
+
+            assert executor.checkStatus(action, scope).applied
+
+            assertClosure(plan)
+        })
+
+        return true;
+    }
+
+    protected List<ConnectionSupplier> getConnectionSuppliers() {
+        JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers
+    }
+
+    protected List createAllPermutations(Class type, Map<String, List<Object>> defaultValues) {
+        JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(type, defaultValues)
+    }
+
+    protected List<ObjectName> getObjectNames(Class<? extends  AbstractTestStructureSupplier> supplierType, ObjectNameStrategy strategy, Scope scope) {
+        return scope.getSingleton(supplierType).getObjectNames(strategy, scope)
     }
 
     def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
@@ -45,22 +90,24 @@ abstract class AbstractActionTest extends Specification {
             throw SetupResult.OK;
         }
 
-        if (snapshot == null) {
-            for (ObjectName name : supplier.getAllContainers()) {
-                new DropAllCommand(new ObjectReference(Schema.class, name)).execute(scope);
-            }
-        } else {
+        for (ObjectName name : supplier.getAllContainers()) {
+            new DropAllCommand(new Schema(name)).execute(scope);
+        }
+
+        if (snapshot != null) {
             for (Schema schema : snapshot.get(Schema.class)) {
-                new DropAllCommand(schema.getObjectReference()).execute(scope);
+                new DropAllCommand(schema).execute(scope);
             }
 
             def control = new DiffOutputControl()
             def executor = new ActionExecutor()
 
-            for (def obj : snapshot.get(Table.class)) {
-                for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
-                    LoggerFactory.getLogger(this.getClass()).debug("Executing: " + executor.createPlan(action, scope).describe())
-                    executor.execute(action, scope)
+            for (def type : [Table, UniqueConstraint, Index]) {
+                for (def obj : snapshot.get(type)) {
+                    for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
+                        LoggerFactory.getLogger(this.getClass()).debug("Executing: " + executor.createPlan(action, scope).describe())
+                        executor.execute(action, scope)
+                    }
                 }
             }
         }

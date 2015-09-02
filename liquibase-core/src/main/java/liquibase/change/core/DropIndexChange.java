@@ -57,11 +57,12 @@ public class DropIndexChange extends AbstractChange {
 
     @Override
     public ActionStatus checkStatus(Database database) {
-        try {
-            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), database), "Index exists");
-        } catch (Exception e) {
-            return new ActionStatus().unknown(e);
-        }
+//        try {
+//            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), database), "Index exists");
+//        } catch (Exception e) {
+//            return new ActionStatus().unknown(e);
+//        }
+        return null;
     }
 
     @Override

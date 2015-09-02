@@ -1,26 +1,25 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.Scope;
+import liquibase.action.Action;
+import liquibase.action.core.AddUniqueConstraintsAction;
 import liquibase.change.Change;
-import liquibase.change.core.AddUniqueConstraintChange;
-import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.diff.output.changelog.ChangeGeneratorChain;
-import liquibase.diff.output.changelog.ChangeGeneratorFactory;
-import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
+import liquibase.diff.output.changelog.MissingObjectActionGenerator;
+import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class MissingUniqueConstraintChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingUniqueConstraintActionGenerator implements MissingObjectActionGenerator {
     @Override
-    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+    public int getPriority(Class<? extends DatabaseObject> objectType, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
         if (UniqueConstraint.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
         }
-        return PRIORITY_NONE;
+        return PRIORITY_NOT_APPLICABLE;
     }
 
     @Override
@@ -37,16 +36,11 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
     }
 
     @Override
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        List<Change> returnList = new ArrayList<Change>();
+    public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
+        List<Action> returnList = new ArrayList<>();
+        returnList.add(new AddUniqueConstraintsAction((UniqueConstraint) missingObject));
 
-        UniqueConstraint uc = (UniqueConstraint) missingObject;
-//
-//        if (uc.getTable() == null) {
-//            return null;
-//        }
-//
-//        AddUniqueConstraintChange change = new AddUniqueConstraintChange();
+        return returnList;
 //        change.setTableName(uc.getTable().getSimpleName());
 //        if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
 //            change.setTablespace(uc.getBackingIndex().getTablespace());
@@ -97,9 +91,6 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
 //        }
 
 //        returnList.add(change);
-
-        return returnList.toArray(new Change[returnList.size()]);
-
 
     }
 }

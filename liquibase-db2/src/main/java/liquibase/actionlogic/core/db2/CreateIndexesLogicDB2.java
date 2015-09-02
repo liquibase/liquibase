@@ -1,14 +1,15 @@
 package liquibase.actionlogic.core.db2;
 
 import liquibase.Scope;
-import liquibase.action.core.CreateIndexAction;
-import liquibase.actionlogic.core.CreateIndexLogic;
+import liquibase.action.core.CreateIndexesAction;
+import liquibase.actionlogic.core.CreateIndexesLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
+import liquibase.structure.core.Index;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 
-public class CreateIndexLogicDB2 extends CreateIndexLogic {
+public class CreateIndexesLogicDB2 extends CreateIndexesLogic {
 
     @Override
     protected Class<? extends Database> getRequiredDatabase() {
@@ -16,15 +17,15 @@ public class CreateIndexLogicDB2 extends CreateIndexLogic {
     }
 
     @Override
-    protected StringClauses generateSql(CreateIndexAction action, Scope scope) {
-        StringClauses clauses = super.generateSql(action, scope);
+    protected StringClauses generateSql(Index index, CreateIndexesAction action, Scope scope) {
+        StringClauses clauses = super.generateSql(index, action, scope);
 
-        String tablespace = action.tablespace;
+        String tablespace = index.tablespace;
         if (tablespace != null) {
             clauses.replace(tablespace, "IN " + tablespace);
         }
 
-        if (ObjectUtil.defaultIfEmpty(action.clustered, false)){
+        if (ObjectUtil.defaultIfEmpty(index.clustered, false)){
             clauses.append("CLUSTER");
         }
 

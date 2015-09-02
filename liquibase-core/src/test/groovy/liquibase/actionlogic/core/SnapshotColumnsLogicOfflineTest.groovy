@@ -45,7 +45,7 @@ class SnapshotColumnsLogicOfflineTest extends Specification {
         ])
         database.setConnection(new OfflineConnection("offline:mock", snapshot, new JUnitResourceAccessor()))
 
-        def result = new SnapshotColumnsLogicOffline().execute(new SnapshotDatabaseObjectsAction(Column, relatedTo.getObjectReference()), scope)
+        def result = new SnapshotColumnsLogicOffline().execute(new SnapshotDatabaseObjectsAction(Column, relatedTo), scope)
 
         then:
         that result.asList(Column)*.toString(), containsInAnyOrder(expected)

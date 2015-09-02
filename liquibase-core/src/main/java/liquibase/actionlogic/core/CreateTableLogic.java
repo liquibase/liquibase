@@ -267,7 +267,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
                 BigInteger incrementBy = autoIncrementInformation.incrementBy;
                 ActionLogic addAutoIncrementLogic = scope.getSingleton(ActionLogicFactory.class).getActionLogic(new AddAutoIncrementAction(), scope);
 
-                StringClauses autoIncrementClause = ((AddAutoIncrementLogic) addAutoIncrementLogic).generateAutoIncrementClause(startWith, incrementBy);
+                StringClauses autoIncrementClause = ((AddAutoIncrementLogic) addAutoIncrementLogic).generateAutoIncrementClause(new Column.AutoIncrementInformation(startWith, incrementBy));
 
                 columnClause.append(ColumnClauses.autoIncrement, autoIncrementClause);
 //                if (!"".equals(autoIncrementClause)) {
@@ -284,7 +284,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             }
         }
 
-        boolean nullable = false; //ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false) || ObjectUtil.defaultIfEmpty(column.nullable, false);
+        boolean nullable = ObjectUtil.defaultIfEmpty(column.nullable, true); //ObjectUtil.defaultIfEmpty(column.isPrimaryKey, false) || ObjectUtil.defaultIfEmpty(column.nullable, false);
 
         if (nullable) {
             if (database.requiresDefiningColumnsAsNull()) {

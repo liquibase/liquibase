@@ -24,17 +24,18 @@ public class IndexComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        List<String> hashes = new ArrayList<String>();
-        if (databaseObject.getName() != null) {
-            hashes.add(databaseObject.getSimpleName().toLowerCase());
-        }
-
-        Table table = ((Index) databaseObject).getTable();
-        if (table != null) {
-            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
-        }
-
-        return hashes.toArray(new String[hashes.size()]);
+//        List<String> hashes = new ArrayList<String>();
+//        if (databaseObject.getName() != null) {
+//            hashes.add(databaseObject.getSimpleName().toLowerCase());
+//        }
+//
+//        Table table = ((Index) databaseObject).getTable();
+//        if (table != null) {
+//            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
+//        }
+//
+//        return hashes.toArray(new String[hashes.size()]);
+        return null;
     }
 
 
@@ -47,53 +48,54 @@ public class IndexComparator implements DatabaseObjectComparator {
         Index thisIndex = (Index) databaseObject1;
         Index otherIndex = (Index) databaseObject2;
 
-        int thisIndexSize = thisIndex.getColumns().size();
-        int otherIndexSize = otherIndex.getColumns().size();
+//        int thisIndexSize = thisIndex.getColumns().size();
+//        int otherIndexSize = otherIndex.getColumns().size();
+//
+//        if (thisIndex.getTable() != null && otherIndex.getTable() != null) {
+//            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
+//                return false;
+//            }
+//            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+//                return false;
+//            }
+//
+//            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+//                return true;
+//            } else {
+//                if (thisIndexSize == 0 || otherIndexSize == 0) {
+//                    return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
+//                }
+//
+//
+//                if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+//                    return false;
+//                }
+//
+//
+//                for (int i = 0; i < otherIndexSize; i++) {
+//                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getColumns().get(i), otherIndex.getColumns().get(i), accordingTo)) {
+//                        return false;
+//                    }
+//                }
+//                return true;
+//            }
+//        } else {
+//            if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+//                return false;
+//            }
+//
+//            if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+//                return false;
+//            }
+//
+//            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
+//                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo);
+//            } else {
+//                return true;
+//            }
+//        }
 
-        if (thisIndex.getTable() != null && otherIndex.getTable() != null) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
-                return false;
-            }
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
-                return false;
-            }
-
-            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
-                return true;
-            } else {
-                if (thisIndexSize == 0 || otherIndexSize == 0) {
-                    return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
-                }
-
-
-                if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
-                    return false;
-                }
-
-
-                for (int i = 0; i < otherIndexSize; i++) {
-                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getColumns().get(i), otherIndex.getColumns().get(i), accordingTo)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        } else {
-            if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
-                return false;
-            }
-
-            if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
-                return false;
-            }
-
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
-                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo);
-            } else {
-                return true;
-            }
-        }
-
+        return false;
     }
 
 

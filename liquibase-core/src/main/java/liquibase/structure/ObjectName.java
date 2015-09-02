@@ -69,6 +69,13 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
 
     @Override
     public int compareTo(ObjectName o) {
+        if (this.name == null) {
+            if (o.name == null) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
         return this.name.compareTo(o.name);
     }
 

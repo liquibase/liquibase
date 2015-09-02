@@ -18,14 +18,14 @@ import liquibase.structure.ObjectReference;
 public class SnapshotDatabaseObjectsAction extends AbstractAction implements QueryAction {
 
     public Class<? extends DatabaseObject> typeToSnapshot;
-    public ObjectReference relatedTo;
+    public DatabaseObject relatedTo;
 
-    public SnapshotDatabaseObjectsAction(ObjectReference objectToSnapshot) {
-        this.typeToSnapshot = objectToSnapshot.objectType;
+    public SnapshotDatabaseObjectsAction(DatabaseObject objectToSnapshot) {
+        this.typeToSnapshot = objectToSnapshot.getClass();
         relatedTo = objectToSnapshot;
     }
 
-    public SnapshotDatabaseObjectsAction(Class<? extends DatabaseObject> typeToLookup, ObjectReference relatedTo) {
+    public SnapshotDatabaseObjectsAction(Class<? extends DatabaseObject> typeToLookup, DatabaseObject relatedTo) {
         this.typeToSnapshot = typeToLookup;
         this.relatedTo = relatedTo;
     }

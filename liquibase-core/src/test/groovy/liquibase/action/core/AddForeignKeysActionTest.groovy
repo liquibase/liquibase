@@ -1,20 +1,15 @@
 package liquibase.action.core
 
 import liquibase.JUnitScope
-import liquibase.actionlogic.ActionExecutor
+import liquibase.Scope
+import liquibase.action.Action
+import liquibase.action.TestObjectFactory
+import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
-import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.NoOpTransformer
-import liquibase.structure.ObjectName
-import liquibase.structure.TestColumnSupplier
-import liquibase.structure.TestForeignKeySupplier
-import liquibase.structure.TestTableSupplier
-import liquibase.structure.core.Column
-import liquibase.structure.core.ForeignKey
-import liquibase.structure.core.PrimaryKey
-import liquibase.structure.core.Table
+import liquibase.snapshot.Snapshot
+import liquibase.structure.*
+import liquibase.structure.core.*
 import liquibase.util.CollectionUtil
-import org.junit.Assume
 import spock.lang.Unroll
 
 class AddForeignKeysActionTest extends AbstractActionTest {
@@ -27,55 +22,129 @@ class AddForeignKeysActionTest extends AbstractActionTest {
         def pkTable = new Table(new ObjectName(tableName.container, tableName.name + "_2"))
         def fkTable = new Table(tableName)
 
-        def foreignKey = new ForeignKey(fkName, [new ObjectName(fkTable.name, columnName.name)], [new ObjectName(pkTable.name, columnName.name+"_2")])
+        def foreignKey = new ForeignKey(fkName, [new ObjectName(fkTable.name, columnName.name)], [new ObjectName(pkTable.name, columnName.name + "_2")])
 
         action.foreignKeys = [foreignKey]
 
-
-        def errors = scope.getSingleton(ActionExecutor).validate(action, scope)
-        Assume.assumeFalse(errors.toString(), errors.hasErrors())
-
         then:
-        def plan = scope.getSingleton(ActionExecutor).createPlan(action, scope)
-
-        testMDPermutation(conn, scope)
-                .addParameters([
-                fkName_asTable: fkName.toString(),
-                tableName_asTable: tableName.toString(),
+        runStandardTest([
+                fkName_asTable    : fkName.toString(),
+                tableName_asTable : tableName.toString(),
                 columnName_asTable: columnName.toString()
-        ])
-                .addOperations(plan: plan)
-                .run({
-
-            def createFKTableAction = new CreateTableAction(fkTable)
-            createFKTableAction.addColumn(new ObjectName(fkTable.name, "id"), "int")
-            createFKTableAction.addColumn(new ObjectName(fkTable.name, columnName.name), "int")
-            scope.getSingleton(ActionExecutor.class).execute(createFKTableAction, scope)
-
-            def createPKTableAction = new CreateTableAction(pkTable)
-            createPKTableAction.addColumn(new ObjectName(pkTable.name, "id"), "int")
-            createPKTableAction.addColumn(new ObjectName(pkTable.name, columnName.name+"_2"), "int")
-            createPKTableAction.primaryKey = new PrimaryKey(new ObjectName(pkTable.name, null), createPKTableAction.columns[1].simpleName)
-            scope.getSingleton(ActionExecutor.class).execute(createPKTableAction, scope)
-
-
-            plan.execute(scope)
-
-            assert scope.getSingleton(ActionExecutor).checkStatus(action, scope).applied
-        })
+        ], action, conn, scope)
 
         where:
         [conn, scope, columnName, tableName, fkName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, JUnitScope.TestObjectNameStrategy.COMPLEX_NAMES)
+            def scope = JUnitScope.getInstance(it)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    new TestColumnSupplier().getObjectNames(scope),
-                    new TestTableSupplier().getObjectNames(scope),
-                    new TestForeignKeySupplier().getObjectNames(scope),
+                    getObjectNames(TestColumnSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope),
+                    getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope),
+                    getObjectNames(TestForeignKeySupplier, ObjectNameStrategy.COMPLEX_NAMES, scope),
             ])
         }
 
     }
 
+    @Unroll("#featureName: add #fkName on #tableName.#columnName.name to #conn")
+    def "Can apply multiple columns with standard settings but complex names"() {
+        when:
+        def action = new AddForeignKeysAction()
+
+        def pkTable = new Table(new ObjectName(tableName.container, tableName.name + "_2"))
+        def fkTable = new Table(tableName)
+
+        def foreignKey = new ForeignKey(fkName, [new ObjectName(fkTable.name, columnName.name), new ObjectName(fkTable.name, columnName.name + "_2")], [new ObjectName(pkTable.name, columnName.name + "_3"), new ObjectName(pkTable.name, columnName.name + "_4")])
+
+        action.foreignKeys = [foreignKey]
+
+
+        then:
+        runStandardTest([
+                fkName_asTable    : fkName.toString(),
+                tableName_asTable : tableName.toString(),
+                columnName_asTable: columnName.toString()
+        ], action, conn, scope)
+
+        where:
+        [conn, scope, columnName, tableName, fkName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
+            return CollectionUtil.permutations([
+                    [it],
+                    [scope],
+                    getObjectNames(TestColumnSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope),
+                    getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope),
+                    getObjectNames(TestForeignKeySupplier, ObjectNameStrategy.COMPLEX_NAMES, scope),
+            ])
+        }
+
+    }
+
+    @Unroll("#featureName: #foreignKeyDefinition on #conn")
+    def "Valid parameter foreignKey permutations work"() {
+        when:
+        def baseTableName = getObjectNames(TestTableSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0]
+        def refTableName = getObjectNames(TestTableSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[1]
+
+        def baseColumnName = new ObjectName(baseTableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name)
+        def refColumnName = new ObjectName(refTableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name)
+
+        ((ForeignKey) foreignKeyDefinition).columnChecks = [new ForeignKey.ForeignKeyColumnCheck(baseColumnName, refColumnName)]
+        AddForeignKeysAction action = new AddForeignKeysAction(foreignKeyDefinition)
+
+        then:
+        runStandardTest([
+                columnChecks_asTable     : foreignKeyDefinition.columnChecks,
+                deferrable_asTable       : foreignKeyDefinition.deferrable,
+                initiallyDeferred_asTable: foreignKeyDefinition.initiallyDeferred,
+                updateRule_asTable       : foreignKeyDefinition.updateRule,
+                deleteRule_asTable       : foreignKeyDefinition.deleteRule,
+                backingIndex_asTable     : foreignKeyDefinition.backingIndex,
+        ], action, conn, scope)
+
+        where:
+        [conn, scope, foreignKeyDefinition] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it)
+            return CollectionUtil.permutations([
+                    [it],
+                    [scope],
+                    JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(ForeignKey, [
+                            columnChecks: null,
+                            deferrable: [null, true, false],
+                            initiallyDeferred: [null, true, false],
+                            updateRule: [null, ForeignKeyConstraintType.importedKeyCascade, ForeignKeyConstraintType.importedKeyNoAction, ForeignKeyConstraintType.importedKeyRestrict, ForeignKeyConstraintType.importedKeySetDefault, ForeignKeyConstraintType.importedKeySetNull],
+                            deleteRule: [null, ForeignKeyConstraintType.importedKeyCascade, ForeignKeyConstraintType.importedKeyNoAction, ForeignKeyConstraintType.importedKeyRestrict, ForeignKeyConstraintType.importedKeySetDefault, ForeignKeyConstraintType.importedKeySetNull],
+                    ]),
+            ])
+        }
+
+    }
+
+    @Override
+    protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
+        Snapshot snapshot = new Snapshot(scope)
+        def seenTables = new HashSet()
+        for (def fk : ((AddForeignKeysAction) action).foreignKeys) {
+            for (def check : fk.columnChecks) {
+                def baseTableName = check.baseColumn.container
+                def refTableName = check.referencedColumn.container
+                if (!seenTables.contains(baseTableName)) {
+                    snapshot.add(new Table(baseTableName))
+                }
+                if (!seenTables.contains(refTableName)) {
+                    snapshot.add(new Table(refTableName))
+                }
+
+                snapshot.add(new Column(check.baseColumn, new DataType(DataType.StandardType.INTEGER)))
+                snapshot.add(new Column(check.referencedColumn, new DataType(DataType.StandardType.INTEGER)))
+
+                def index = new Index(getObjectNames(TestIndexSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope).get(0))
+                index.columns.add(new Index.IndexedColumn(check.referencedColumn)) //index, not PK to support nulls
+                snapshot.add(index)
+            }
+        }
+
+        return snapshot
+    }
 }

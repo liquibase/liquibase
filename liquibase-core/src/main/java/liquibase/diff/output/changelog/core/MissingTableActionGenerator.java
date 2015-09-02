@@ -55,7 +55,7 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
 
             Scope referenceOfflineDatabaseScope = scope.child(Scope.Attr.database, DatabaseFactory.getInstance().fromSnapshot(referenceSnapshot));
 
-            PrimaryKey primaryKey  = LiquibaseUtil.snapshotObject(PrimaryKey.class, missingTable.getObjectReference(), referenceOfflineDatabaseScope);
+            PrimaryKey primaryKey  = LiquibaseUtil.snapshotObject(PrimaryKey.class, missingTable, referenceOfflineDatabaseScope);
 
 //        if (control.diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema().toCatalogAndSchema(), missingTable.getName())) {
 //            continue;
@@ -66,7 +66,7 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
             action.table.remarks = missingTable.remarks;
             action.primaryKey = primaryKey;
 
-            for (Column column : LiquibaseUtil.snapshotAll(Column.class, missingTable.getObjectReference(), referenceOfflineDatabaseScope)) {
+            for (Column column : LiquibaseUtil.snapshotAll(Column.class, missingTable, referenceOfflineDatabaseScope)) {
                 action.columns.add(column);
     //            columnDefinition.columnName = column.getName();
     //

@@ -46,72 +46,74 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) changedObject;
 
-        if (index.getTable() != null) {
-//            if (index.getTable().primaryKey != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().primaryKey.getBackingIndex(), changedObject, comparisonDatabase)) {
-//                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().primaryKey, differences, control, referenceDatabase, comparisonDatabase);
-//            }
-
-//            Set<UniqueConstraint> uniqueConstraints = index.getTable().uniqueConstraints;
-//            if (uniqueConstraints != null) {
-//                for (UniqueConstraint constraint : uniqueConstraints) {
-//                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, comparisonDatabase)) {
-//                        return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
-//                    }
+//        if (index.getTable() != null) {
+////            if (index.getTable().primaryKey != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable().primaryKey.getBackingIndex(), changedObject, comparisonDatabase)) {
+////                return ChangeGeneratorFactory.getInstance().fixChanged(index.getTable().primaryKey, differences, control, referenceDatabase, comparisonDatabase);
+////            }
 //
-//                }
-//            }
-        }
-
-        DropIndexChange dropIndexChange = createDropIndexChange();
-        dropIndexChange.setTableName(index.getTable().getSimpleName());
-        dropIndexChange.setIndexName(index.getSimpleName());
-        
-        CreateIndexChange addIndexChange = createCreateIndexChange();
-        addIndexChange.setTableName(index.getTable().getSimpleName());
-        List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
-//        for (Column col : index.getColumns()) {
-//            columns.add(new AddColumnConfig(col));
+////            Set<UniqueConstraint> uniqueConstraints = index.getTable().uniqueConstraints;
+////            if (uniqueConstraints != null) {
+////                for (UniqueConstraint constraint : uniqueConstraints) {
+////                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, comparisonDatabase)) {
+////                        return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
+////                    }
+////
+////                }
+////            }
 //        }
-        addIndexChange.setColumns(columns);
-        addIndexChange.setIndexName(index.getSimpleName());
 
-
-        if (control.getIncludeCatalog()) {
-            dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
-            addIndexChange.setCatalogName(index.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            dropIndexChange.setSchemaName(index.getSchema().getSimpleName());
-            addIndexChange.setSchemaName(index.getSchema().getSimpleName());
-        }
-
-        Difference columnsDifference = differences.getDifference("columns");
-        
-        if (columnsDifference != null) {
-            List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
-            List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
-
-            StringUtils.StringUtilsFormatter<Column> formatter = new StringUtils.StringUtilsFormatter<Column>() {
-                @Override
-                public String toString(Column obj) {
-                    return obj.toString(false);
-                }
-            };
-
-            control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
-            if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
-                control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
-            }
-    
-//            if (index.isUnique() != null && index.isUnique()) {
-//                control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
-//                if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
-//                    control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
+//        DropIndexChange dropIndexChange = createDropIndexChange();
+//        dropIndexChange.setTableName(index.getTable().getSimpleName());
+//        dropIndexChange.setIndexName(index.getSimpleName());
+//
+//        CreateIndexChange addIndexChange = createCreateIndexChange();
+//        addIndexChange.setTableName(index.getTable().getSimpleName());
+//        List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
+////        for (Column col : index.getColumns()) {
+////            columns.add(new AddColumnConfig(col));
+////        }
+//        addIndexChange.setColumns(columns);
+//        addIndexChange.setIndexName(index.getSimpleName());
+//
+//
+//        if (control.getIncludeCatalog()) {
+//            dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
+//            addIndexChange.setCatalogName(index.getSchema().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            dropIndexChange.setSchemaName(index.getSchema().getSimpleName());
+//            addIndexChange.setSchemaName(index.getSchema().getSimpleName());
+//        }
+//
+//        Difference columnsDifference = differences.getDifference("columns");
+//
+//        if (columnsDifference != null) {
+//            List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
+//            List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
+//
+//            StringUtils.StringUtilsFormatter<Column> formatter = new StringUtils.StringUtilsFormatter<Column>() {
+//                @Override
+//                public String toString(Column obj) {
+//                    return obj.toString(false);
 //                }
-//            }
-        }
+//            };
+//
+////            control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
+////            if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
+////                control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
+////            }
+//
+////            if (index.isUnique() != null && index.isUnique()) {
+////                control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
+////                if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
+////                    control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
+////                }
+////            }
+//        }
 
-        return new Change[] { dropIndexChange, addIndexChange };
+//        return new Change[] { dropIndexChange, addIndexChange };
+
+        return null;
     }
 
     protected DropIndexChange createDropIndexChange() {
