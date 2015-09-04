@@ -1,25 +1,16 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutorService;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.InsertGenerator;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertSetStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement> {
 
@@ -39,43 +30,44 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
     }
 
     @Override
-    public Sql[] generateSql(InsertSetStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	public Sql[] generateSql(InsertSetStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-    	if(statement.peek() == null) {
-    		return new UnparsedSql[0];
-    	}
-        StringBuffer sql = new StringBuffer();
-        
-        generateHeader(sql,statement,database);
-        generateValues(sql,statement,database);
+		if (statement.peek() == null) {
+			return new UnparsedSql[0];
+		}
+		StringBuffer sql = new StringBuffer();
+		generateHeader(sql, statement, database);
 
-        return new Sql[] {
-                new UnparsedSql(sql.toString(), getAffectedTable(statement))
-        };
-    }
+		ArrayList<Sql> result = new ArrayList<Sql>();
+		int index = 0;
+		for (InsertStatement sttmnt : statement.getStatements()) {
+			index++;
+			myGenerator.generateValues(sql, sttmnt, database);
+			sql.append(",");
+			if (index > statement.getBatchThreshold()) {
+				result.add(completeStatement(statement, sql));
+
+				index = 0;
+				sql = new StringBuffer();
+				generateHeader(sql, statement, database);
+			}
+		}
+		result.add(completeStatement(statement, sql));
+
+		return result.toArray(new UnparsedSql[result.size()]);
+	}
+    
+	private Sql completeStatement(InsertSetStatement statement, StringBuffer sql) {
+		sql.deleteCharAt(sql.lastIndexOf(","));
+		sql.append(";\n");
+		return new UnparsedSql(sql.toString(), getAffectedTable(statement));
+	}
     
     public void generateHeader(StringBuffer sql,InsertSetStatement statement, Database database) {
         InsertStatement insert=statement.peek();
         myGenerator.generateHeader(sql,insert,database);
     }
     
-    public void generateValues(StringBuffer sql,InsertSetStatement statements, Database database) {
-        int index = 0;
-        for( InsertStatement statement : statements.getStatements()) {
-          index++;
-          if(index>statements.getBatchThreshold()) {
-            sql.deleteCharAt(sql.lastIndexOf(","));
-            sql.append(";\n");            
-            generateHeader(sql,statements,database);
-            index=0;
-          }
-          myGenerator.generateValues(sql,statement,database);
-          sql.append(",");
-        }
-        sql.deleteCharAt(sql.lastIndexOf(","));
-        sql.append(";");
-    }
-
     protected Relation getAffectedTable(InsertSetStatement statement) {
         return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
