@@ -1,19 +1,23 @@
 package liquibase.changelog;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Test;
+
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
-import static org.junit.Assert.*;
-
 import liquibase.test.JUnitResourceAccessor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.List;
 
 public class ChangeLogParserFactoryTest {
     @After

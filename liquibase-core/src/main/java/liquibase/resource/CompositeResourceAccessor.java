@@ -1,12 +1,15 @@
 package liquibase.resource;
 
-import liquibase.util.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
+
+import liquibase.util.StringUtils;
 
 /**
  * A FileOpener that will search in a List of other FileOpeners until it finds

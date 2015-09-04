@@ -1,5 +1,12 @@
 package liquibase.database.core;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.CatalogAndSchema;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
@@ -8,19 +15,21 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
-import liquibase.structure.core.*;
+import liquibase.statement.core.CopyRowsStatement;
+import liquibase.statement.core.CreateIndexStatement;
+import liquibase.statement.core.DropTableStatement;
+import liquibase.statement.core.ReindexStatement;
+import liquibase.statement.core.RenameTableStatement;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
-
-import java.math.BigInteger;
-import java.util.*;
 
 public class SQLiteDatabase extends AbstractJdbcDatabase {
 

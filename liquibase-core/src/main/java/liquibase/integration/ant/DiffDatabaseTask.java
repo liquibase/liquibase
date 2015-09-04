@@ -1,22 +1,22 @@
 package liquibase.integration.ant;
 
+import java.io.PrintStream;
+
+import org.apache.tools.ant.BuildException;
+
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.report.DiffToReport;
+import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.diff.DiffResult;
-import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
-import org.apache.tools.ant.BuildException;
-
-import java.io.PrintStream;
 
 public class DiffDatabaseTask extends BaseLiquibaseTask {
 

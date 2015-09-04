@@ -1,12 +1,11 @@
 package liquibase.structure.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import javax.swing.text.TableView;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PrimaryKey extends AbstractDatabaseObject {
 

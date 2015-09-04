@@ -1,14 +1,12 @@
 package liquibase.datatype.core;
 
+import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
-import liquibase.database.Database;
 
 @DataTypeInfo(name="date", aliases = {"java.sql.Types.DATE", "java.sql.Date"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateType extends LiquibaseDataType {

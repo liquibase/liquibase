@@ -10,28 +10,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.After;
+
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Table;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
+import liquibase.structure.core.Table;
 import liquibase.test.DatabaseTestContext;
-import liquibase.exception.DatabaseException;
-
-import org.junit.After;
+import liquibase.test.TestContext;
 
 public abstract class AbstractExecuteTest {
 

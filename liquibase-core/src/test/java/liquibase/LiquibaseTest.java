@@ -1,5 +1,28 @@
 package liquibase;
 
+import static liquibase.test.Assert.assertListsEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
@@ -12,7 +35,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -27,23 +49,6 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.Assert;
 import liquibase.test.MockResourceAccessor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
-import static liquibase.test.Assert.assertListsEqual;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class LiquibaseTest {
     private MockResourceAccessor mockResourceAccessor;

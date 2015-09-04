@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.structure.core.Schema;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;

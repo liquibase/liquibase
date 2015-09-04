@@ -1,11 +1,12 @@
 package liquibase.dbtest.mssql;
 
 import java.util.Date;
+
+import org.junit.Test;
+
 import liquibase.Liquibase;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.MigrationFailedException;
 import liquibase.exception.ValidationFailedException;
-import org.junit.Test;
 
 /**
  *

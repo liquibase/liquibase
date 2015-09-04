@@ -1,17 +1,16 @@
 package liquibase.dbdoc;
 
-import liquibase.change.Change;
-import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import liquibase.change.Change;
+import liquibase.database.Database;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class TableWriter extends HTMLWriter {
 

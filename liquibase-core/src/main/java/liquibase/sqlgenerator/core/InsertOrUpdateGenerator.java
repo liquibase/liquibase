@@ -1,19 +1,18 @@
 package liquibase.sqlgenerator.core;
 
 import java.util.Arrays;
+import java.util.HashSet;
+
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
-
-import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
 

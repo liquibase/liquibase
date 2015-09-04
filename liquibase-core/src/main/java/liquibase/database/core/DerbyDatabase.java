@@ -1,26 +1,25 @@
 package liquibase.database.core;
 
-import java.sql.*;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Enumeration;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SqlStatement;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-
-import java.sql.Driver;
-import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 

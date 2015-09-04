@@ -1,20 +1,19 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
      @Override

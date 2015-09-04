@@ -1,13 +1,18 @@
 package liquibase.database;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.util.StringUtils;
-
-import java.util.*;
 
 public class DatabaseFactory {
     private static DatabaseFactory instance;

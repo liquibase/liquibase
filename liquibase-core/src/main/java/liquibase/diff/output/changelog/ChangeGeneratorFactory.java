@@ -1,17 +1,20 @@
 package liquibase.diff.output.changelog;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.SnapshotGenerator;
-import liquibase.snapshot.SnapshotGeneratorChain;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
-
-import java.util.*;
 
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;

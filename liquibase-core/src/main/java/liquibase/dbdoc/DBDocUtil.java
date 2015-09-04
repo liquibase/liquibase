@@ -1,7 +1,5 @@
 package liquibase.dbdoc;
 
-import java.net.URLEncoder;
-
 public class DBDocUtil {
 
 

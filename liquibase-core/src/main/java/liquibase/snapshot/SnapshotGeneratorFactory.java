@@ -1,5 +1,12 @@
 package liquibase.snapshot;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -7,14 +14,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.*;
 
 public class SnapshotGeneratorFactory {
 

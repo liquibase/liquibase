@@ -1,8 +1,6 @@
 package liquibase.dbtest.hsqldb;
 
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.MigrationFailedException;
-import org.junit.Test;
 
 public class HsqlIntegrationTest extends AbstractIntegrationTest {
 

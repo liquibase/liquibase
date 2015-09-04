@@ -1,19 +1,20 @@
 package liquibase.servicelocator;
 
-import java.io.File;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
-import java.net.URL;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import liquibase.database.Database;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.test.TestContext;
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
 
 public class ServiceLocatorTest {
     private ServiceLocator serviceLocator;

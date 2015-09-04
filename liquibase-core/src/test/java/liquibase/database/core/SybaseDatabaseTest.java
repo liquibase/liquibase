@@ -1,20 +1,22 @@
 package liquibase.database.core;
 
-import static java.util.Arrays.*;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static java.util.Arrays.asList;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
-
-import org.junit.Test;
 
 public class SybaseDatabaseTest {
 

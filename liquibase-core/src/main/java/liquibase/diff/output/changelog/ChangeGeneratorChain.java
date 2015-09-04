@@ -1,15 +1,13 @@
 package liquibase.diff.output.changelog;
 
+import java.util.Iterator;
+import java.util.SortedSet;
+
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-
-import java.util.Iterator;
-import java.util.SortedSet;
-import java.util.UUID;
 
 public class ChangeGeneratorChain {
     private Iterator<ChangeGenerator> changeGenerators;

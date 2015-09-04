@@ -1,17 +1,17 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.core.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import liquibase.statement.core.DeleteStatement;
+import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.InsertStatement;
 
 public class InitializeDatabaseChangeLogLockTableGenerator extends AbstractSqlGenerator<InitializeDatabaseChangeLogLockTableStatement> {
 

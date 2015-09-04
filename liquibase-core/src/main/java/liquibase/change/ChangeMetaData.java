@@ -1,11 +1,15 @@
 package liquibase.change;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.structure.DatabaseObject;
-
-import java.util.*;
 
 /**
  * Static metadata about a {@code link Change}.

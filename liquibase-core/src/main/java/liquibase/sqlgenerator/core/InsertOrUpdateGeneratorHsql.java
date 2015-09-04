@@ -1,8 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;

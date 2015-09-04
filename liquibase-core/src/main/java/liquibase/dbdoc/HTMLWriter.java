@@ -1,5 +1,12 @@
 package liquibase.dbdoc;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
+
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -7,14 +14,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
 
 public abstract class HTMLWriter {
     protected File outputDir;

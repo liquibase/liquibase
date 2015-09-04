@@ -11,7 +11,6 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.lockservice.LockServiceImpl;
 
 public class DatabaseTestTemplate {
     public void testOnAvailableDatabases(DatabaseTest test) throws Exception {

@@ -1,14 +1,12 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;

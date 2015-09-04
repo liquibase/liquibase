@@ -1,16 +1,11 @@
 package liquibase.ext;
 
-import static org.junit.Assert.fail;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.test.TestContext;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.ServiceLocator;
 
 public class ExtServiceLocatorTest {
     private ServiceLocator serviceLocator;

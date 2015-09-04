@@ -1,22 +1,30 @@
 package liquibase.change.custom;
 
-import junit.framework.Assert;
-import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import org.junit.Test;
-
-import java.net.URL;
-import java.net.URLClassLoader;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+
+import java.net.URL;
+import java.net.URLClassLoader;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import liquibase.database.Database;
+import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.ResourceAccessor;
+import liquibase.statement.SqlStatement;
 
 public class CustomChangeWrapperTest {
 

@@ -1,19 +1,28 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.DatabaseMetaData;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-
-import java.sql.DatabaseMetaData;
-import java.util.*;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {

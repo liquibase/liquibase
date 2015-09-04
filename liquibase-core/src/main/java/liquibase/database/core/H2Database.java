@@ -1,20 +1,19 @@
 package liquibase.database.core;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import liquibase.CatalogAndSchema;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.structure.DatabaseObject;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Arrays;
-import java.util.List;
 
 public class H2Database extends AbstractJdbcDatabase {
 

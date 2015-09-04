@@ -1,23 +1,22 @@
 package liquibase.dbtest.mysql;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
+import org.junit.Test;
+
 import liquibase.CatalogAndSchema;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.*;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-import org.junit.Test;
-
-import java.util.Calendar;
-import java.util.Date;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 
 public class MySQLIntegrationTest extends AbstractIntegrationTest {
 

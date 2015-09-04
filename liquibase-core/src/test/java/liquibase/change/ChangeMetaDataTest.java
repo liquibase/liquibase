@@ -1,23 +1,23 @@
 package liquibase.change;
 
+import static junit.framework.Assert.assertEquals;
+import static liquibase.test.Assert.assertSetsEqual;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import java.util.HashMap;
+import java.util.HashSet;
+
+import org.junit.Test;
+
 import liquibase.database.core.H2Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.HashSet;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertSame;
-import static liquibase.test.Assert.assertSetsEqual;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 public class ChangeMetaDataTest {
 

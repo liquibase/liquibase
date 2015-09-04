@@ -6,7 +6,6 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
 import liquibase.structure.core.Sequence;

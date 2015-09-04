@@ -1,13 +1,5 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.DatabaseConnection;
-import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DateParseException;
-import liquibase.util.ISODateFormat;
-
 import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -15,6 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DateParseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.util.ISODateFormat;
 
 public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String START_CONCAT = "CONCAT(";

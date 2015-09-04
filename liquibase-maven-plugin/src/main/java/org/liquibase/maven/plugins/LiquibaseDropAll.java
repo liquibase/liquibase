@@ -1,12 +1,11 @@
 package org.liquibase.maven.plugins;
 
-import liquibase.CatalogAndSchema;
-import liquibase.Liquibase;
-import liquibase.structure.core.Schema;
-import liquibase.exception.LiquibaseException;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import liquibase.CatalogAndSchema;
+import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 
 /**
  * Drops all database objects owned by the user. Note that functions, procedures and packages are not dropped.

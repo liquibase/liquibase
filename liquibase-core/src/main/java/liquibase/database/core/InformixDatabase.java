@@ -19,7 +19,6 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -37,9 +36,7 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class InformixDatabase extends AbstractJdbcDatabase {

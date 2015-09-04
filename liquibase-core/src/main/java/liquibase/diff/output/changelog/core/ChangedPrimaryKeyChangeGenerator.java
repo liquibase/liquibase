@@ -1,5 +1,7 @@
 package liquibase.diff.output.changelog.core;
 
+import java.util.Collection;
+
 import liquibase.change.Change;
 import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.DropPrimaryKeyChange;
@@ -11,11 +13,8 @@ import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
-
-import java.util.Collection;
 
 public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
     @Override

@@ -1,21 +1,22 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
-
-import java.math.BigInteger;
-import java.sql.Types;
-import java.util.*;
 
 /**
  * Encapsulates PostgreSQL database support.

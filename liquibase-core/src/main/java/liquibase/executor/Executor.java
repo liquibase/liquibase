@@ -1,13 +1,12 @@
 package liquibase.executor;
 
+import java.util.List;
+import java.util.Map;
+
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
-
-import java.util.List;
-import java.util.Map;
 
 public interface Executor {
 

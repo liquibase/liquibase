@@ -1,10 +1,11 @@
 package liquibase.statementexecute;
 
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.statement.core.MarkChangeSetRanStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.DB2Database;
@@ -20,13 +21,10 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.changelog.ChangeSet;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.util.LiquibaseUtil;
-
-import java.util.List;
-import java.util.Arrays;
-
-import org.junit.Test;
 
 public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
     @Override

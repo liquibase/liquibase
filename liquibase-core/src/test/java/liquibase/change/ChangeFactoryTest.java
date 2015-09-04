@@ -1,28 +1,23 @@
 package liquibase.change;
 
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import liquibase.change.ChangeMetaData;
+import java.util.TreeSet;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class ChangeFactoryTest {
 

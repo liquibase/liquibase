@@ -1,19 +1,18 @@
 package org.liquibase.maven.plugins;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import org.apache.maven.plugin.MojoExecutionException;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
-
-import org.apache.maven.plugin.MojoExecutionException;
 
 /**
  * Generates the SQL that is required to rollback the database to the specified

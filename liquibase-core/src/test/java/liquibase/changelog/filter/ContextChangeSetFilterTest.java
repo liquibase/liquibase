@@ -1,16 +1,15 @@
 package liquibase.changelog.filter;
 
-import liquibase.Contexts;
-import liquibase.changelog.ChangeSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
-
-import liquibase.database.Database;
-import liquibase.sql.visitor.AbstractSqlVisitor;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import liquibase.Contexts;
+import liquibase.changelog.ChangeSet;
+import liquibase.database.Database;
+import liquibase.sql.visitor.AbstractSqlVisitor;
 
 public class ContextChangeSetFilterTest {
 

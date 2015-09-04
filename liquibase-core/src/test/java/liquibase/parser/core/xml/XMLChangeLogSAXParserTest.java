@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.junit.Test;
+
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
@@ -19,14 +21,11 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-
-import org.junit.Test;
 
 public class XMLChangeLogSAXParserTest {
 

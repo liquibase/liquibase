@@ -1,5 +1,15 @@
 package liquibase.diff.output.changelog.core;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
@@ -10,27 +20,16 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Data;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
 import liquibase.util.csv.CSVWriter;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 public class MissingDataChangeGenerator implements MissingObjectChangeGenerator {
 

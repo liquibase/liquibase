@@ -1,17 +1,23 @@
 package liquibase.snapshot;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
-import liquibase.structure.core.*;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
-
-import java.lang.reflect.Field;
-import java.util.*;
+import liquibase.structure.core.Schema;
 
 public abstract class DatabaseSnapshot {
 

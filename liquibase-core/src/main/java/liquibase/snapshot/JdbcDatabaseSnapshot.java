@@ -1,19 +1,34 @@
 package liquibase.snapshot;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DB2iDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
-
-import java.sql.*;
-import java.util.*;
-
-import liquibase.logging.LogFactory;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;

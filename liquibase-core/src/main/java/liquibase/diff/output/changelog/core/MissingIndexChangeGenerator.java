@@ -2,7 +2,6 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;

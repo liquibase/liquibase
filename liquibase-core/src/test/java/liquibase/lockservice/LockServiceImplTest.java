@@ -1,23 +1,36 @@
 package liquibase.lockservice;
 
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import liquibase.database.Database;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import static org.easymock.classextension.EasyMock.*;
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-
-import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.util.*;
 
 @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
 public class LockServiceImplTest {

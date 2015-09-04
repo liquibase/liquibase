@@ -1,13 +1,15 @@
 package liquibase.change;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Set;
+
+import org.junit.Test;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
-import org.junit.Test;
-
-import java.util.Set;
 
 public class ConstraintsConfigTest {
 

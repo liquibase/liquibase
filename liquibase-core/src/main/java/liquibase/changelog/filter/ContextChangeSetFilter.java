@@ -1,11 +1,11 @@
 package liquibase.changelog.filter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.Contexts;
 import liquibase.changelog.ChangeSet;
-import liquibase.util.StringUtils;
 import liquibase.sql.visitor.SqlVisitor;
-
-import java.util.*;
 
 public class ContextChangeSetFilter implements ChangeSetFilter {
     private Contexts contexts;

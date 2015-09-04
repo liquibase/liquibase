@@ -1,14 +1,12 @@
 package liquibase.structure;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.StringUtils;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 

@@ -1,16 +1,16 @@
 package liquibase.serializer.core.json;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
+
+import org.junit.Test;
+
 import liquibase.change.AddColumnConfig;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import org.junit.Test;
-
-import java.util.Date;
-
-import static org.junit.Assert.assertEquals;
 
 public class JsonChangeLogSerializerTest {
 

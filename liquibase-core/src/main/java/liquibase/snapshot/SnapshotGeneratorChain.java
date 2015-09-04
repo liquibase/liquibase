@@ -1,13 +1,11 @@
 package liquibase.snapshot;
 
-import liquibase.exception.DatabaseException;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
-
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.UUID;
+
+import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
 
 public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;

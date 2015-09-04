@@ -1,11 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;

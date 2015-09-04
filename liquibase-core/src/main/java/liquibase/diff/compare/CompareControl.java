@@ -1,19 +1,14 @@
 package liquibase.diff.compare;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
-import liquibase.diff.ObjectDifferences;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.DatabaseObjectFactory;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import liquibase.CatalogAndSchema;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DatabaseObjectFactory;
 
 public class CompareControl {
 

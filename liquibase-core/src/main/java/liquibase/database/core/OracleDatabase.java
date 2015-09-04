@@ -1,5 +1,12 @@
 package liquibase.database.core;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -9,16 +16,8 @@ import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.

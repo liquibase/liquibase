@@ -1,15 +1,14 @@
 package liquibase.database.core;
 
 
-import liquibase.CatalogAndSchema;
+import java.util.HashSet;
+import java.util.Set;
+
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.View;
-
-import java.util.HashSet;
-import java.util.Set;
 
 
 public class MaxDBDatabase extends AbstractJdbcDatabase {

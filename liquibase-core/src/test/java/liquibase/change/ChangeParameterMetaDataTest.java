@@ -1,16 +1,25 @@
 package liquibase.change;
 
-import liquibase.change.core.*;
-import liquibase.database.DatabaseFactory;
+import static liquibase.test.Assert.assertSetsEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.AddNotNullConstraintChange;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.DropAllForeignKeyConstraintsChange;
+import liquibase.change.core.DropPrimaryKeyChange;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
-import org.junit.Test;
-
-import static liquibase.test.Assert.assertSetsEqual;
-import static org.junit.Assert.*;
 
 public class ChangeParameterMetaDataTest {
 

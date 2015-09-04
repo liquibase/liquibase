@@ -1,6 +1,27 @@
 package liquibase.diff.output.changelog;
 
-import liquibase.CatalogAndSchema;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -16,12 +37,7 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
-import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.util.*;
 
 public class DiffToChangeLog {
 

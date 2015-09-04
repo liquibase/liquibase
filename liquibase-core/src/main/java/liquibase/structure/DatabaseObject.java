@@ -1,11 +1,9 @@
 package liquibase.structure;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
-import liquibase.structure.core.Schema;
-
 import java.util.Set;
 import java.util.UUID;
+
+import liquibase.structure.core.Schema;
 
 public interface DatabaseObject extends Comparable{
 

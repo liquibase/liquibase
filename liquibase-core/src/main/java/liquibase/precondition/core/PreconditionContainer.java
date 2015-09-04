@@ -1,20 +1,18 @@
 package liquibase.precondition.core;
 
-import liquibase.util.StringUtils;
-import liquibase.util.StreamUtil;
-import liquibase.database.Database;
-import liquibase.changelog.DatabaseChangeLog;
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.changelog.ChangeSet;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationFailedException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 public class PreconditionContainer extends AndPrecondition {
 

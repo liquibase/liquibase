@@ -1,23 +1,21 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import liquibase.structure.core.Index;
 
 /**
  * SQLite does not support this ALTER TABLE operation until now.

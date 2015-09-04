@@ -1,18 +1,16 @@
 package liquibase.exception;
 
-import liquibase.change.CheckSum;
+import java.io.PrintStream;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.logging.LogFactory;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.util.StreamUtil;
-
-import java.io.PrintStream;
-import java.util.List;
-import java.util.Set;
 
 public class ValidationFailedException extends MigrationFailedException {
 

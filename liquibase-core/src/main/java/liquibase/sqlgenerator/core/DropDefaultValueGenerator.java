@@ -1,17 +1,22 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MaxDBDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropDefaultValueStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {

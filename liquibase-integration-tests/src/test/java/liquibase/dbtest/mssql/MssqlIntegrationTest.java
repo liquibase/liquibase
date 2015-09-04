@@ -1,31 +1,24 @@
 package liquibase.dbtest.mssql;
 
-import liquibase.CatalogAndSchema;
-import liquibase.Liquibase;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.DatabaseDataType;
-import liquibase.diff.DiffResult;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.output.DiffOutputControl;
-import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.EmptyDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.DataType;
-import liquibase.structure.core.Table;
-import org.junit.Test;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Set;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+
+import java.util.Calendar;
+import java.util.Date;
+
+import org.junit.Test;
+
+import liquibase.CatalogAndSchema;
+import liquibase.Liquibase;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.DatabaseFunction;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 

@@ -1,30 +1,42 @@
 package liquibase.changelog.visitor;
 
-import liquibase.CatalogAndSchema;
-import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.database.Database;
-import liquibase.dbdoc.*;
-import liquibase.diff.compare.CompareControl;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.util.StreamUtil;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.dbdoc.AuthorListWriter;
+import liquibase.dbdoc.AuthorWriter;
+import liquibase.dbdoc.ChangeLogListWriter;
+import liquibase.dbdoc.ChangeLogWriter;
+import liquibase.dbdoc.ColumnWriter;
+import liquibase.dbdoc.HTMLWriter;
+import liquibase.dbdoc.PendingChangesWriter;
+import liquibase.dbdoc.PendingSQLWriter;
+import liquibase.dbdoc.RecentChangesWriter;
+import liquibase.dbdoc.TableListWriter;
+import liquibase.dbdoc.TableWriter;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
+import liquibase.util.StreamUtil;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 

@@ -1,9 +1,9 @@
 package liquibase.integration.ant;
 
+import org.apache.tools.ant.BuildException;
+
 import liquibase.Liquibase;
 import liquibase.util.StringUtils;
-import org.apache.tools.ant.AntClassLoader;
-import org.apache.tools.ant.BuildException;
 
 public class DBDocTask extends BaseLiquibaseTask {
 

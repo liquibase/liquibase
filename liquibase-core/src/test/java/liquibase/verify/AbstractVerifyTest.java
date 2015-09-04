@@ -1,16 +1,20 @@
 package liquibase.verify;
 
-import liquibase.util.StringUtils;
+import static org.junit.Assert.assertEquals;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.regex.Pattern;
+
 import org.junit.ComparisonFailure;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.regex.Pattern;
-
-import static org.junit.Assert.assertEquals;
+import liquibase.util.StringUtils;
 
 public class AbstractVerifyTest {
 

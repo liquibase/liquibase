@@ -1,19 +1,12 @@
 package liquibase.snapshot;
 
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
+
+import liquibase.database.Database;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DatabaseObjectFactory;
 
 public class SnapshotControl {
 
