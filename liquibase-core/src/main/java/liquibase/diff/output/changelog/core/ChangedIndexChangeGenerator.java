@@ -73,7 +73,7 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         }
         addIndexChange.setColumns(columns);
         addIndexChange.setIndexName(index.getName());
-
+        addIndexChange.setUnique(index.isUnique());
 
         if (control.getIncludeCatalog()) {
             dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
