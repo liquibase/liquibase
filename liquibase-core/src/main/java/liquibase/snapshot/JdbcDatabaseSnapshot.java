@@ -77,27 +77,36 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     List<String> tables = new ArrayList<String>();
                     String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    if (tableName == null) {
-                        for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
-                            tables.add(row.getString("TABLE_NAME"));
+
+                    if (database instanceof DB2Database) {
+                        String sql = getDB2Sql(jdbcSchemaName);
+                        if (tableName != null) {
+                            sql = sql.replace(" ORDER BY ", " AND fk_col.tabname='" + tableName + "' ORDER BY ");
                         }
+                        return executeAndExtract(sql, database);
                     } else {
-                        tables.add(tableName);
-                    }
-
-                    for (String foundTable : tables) {
-                        if (database instanceof OracleDatabase) {
-                            throw new RuntimeException("Should have bulk selected");
+                        if (tableName == null) {
+                            for (CachedRow row : getTables(jdbcCatalogName, jdbcSchemaName, null)) {
+                                tables.add(row.getString("TABLE_NAME"));
+                            }
                         } else {
-                            returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+                            tables.add(tableName);
                         }
-                    }
 
-                    return returnList;
+                        for (String foundTable : tables) {
+                            if (database instanceof OracleDatabase) {
+                                throw new RuntimeException("Should have bulk selected");
+                            } else {
+                                returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+                            }
+                        }
+
+                        return returnList;
+                    }
                 }
 
                 @Override
-				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     if (database instanceof OracleDatabase) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
@@ -130,19 +139,55 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "ON fc.owner = f.owner " +
                                 "AND fc.constraint_name = f.constraint_name " +
                                 "AND fc.position = pc.position " +
-                                "WHERE p.owner = '" +jdbcSchemaName+"' "+
+                                "WHERE p.owner = '" + jdbcSchemaName + "' " +
                                 "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R'" +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
+                        return executeAndExtract(sql, database);
+                    } else if (database instanceof DB2Database) {
+                        CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                        String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                        String sql = getDB2Sql(jdbcSchemaName);
                         return executeAndExtract(sql, database);
                     } else {
                         throw new RuntimeException("Cannot bulk select");
                     }
                 }
 
+                protected String getDB2Sql(String jdbcSchemaName) {
+                    return "SELECT  " +
+                            "  pk_col.tabschema AS pktable_cat,  " +
+                            "  null as pktable_schem,  " +
+                            "  pk_col.tabname as pktable_name,  " +
+                            "  pk_col.colname as pkcolumn_name, " +
+                            "  fk_col.tabschema as fktable_cat,  " +
+                            "  null as fktable_schem,  " +
+                            "  fk_col.tabname as fktable_name,  " +
+                            "  fk_col.colname as fkcolumn_name, " +
+                            "  fk_col.colseq as key_seq,  " +
+                            "  decode (ref.updaterule, 'A', 3, 'R', 1, 1) as update_rule,  " +
+                            "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                            "  ref.constname as fk_name,  " +
+                            "  ref.refkeyname as pk_name,  " +
+                            "  7 as deferrability  " +
+                            "FROM " +
+                            "syscat.references ref " +
+                            "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
+                            "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
+                            "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
+                            "and pk_col.colseq=fk_col.colseq " +
+                            "ORDER BY fk_col.colseq";
+                }
+
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
+                    if (database instanceof DB2Database) {
+                        return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
+                    } else {
+                        return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
+                    }
                 }
             });
         }
@@ -311,13 +356,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "CHAR_USED, V80_FMT_IMAGE, DATA_UPGRADED, HISTOGRAM, VIRTUAL_COLUMN\n" +
                             "FROM ALL_TAB_COLS c " +
                             "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
-                            "WHERE OWNER='"+((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"' AND hidden_column='NO'";
+                            "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
                     if (!bulk) {
                         if (tableName != null) {
-                            sql += " AND TABLE_NAME='"+database.escapeObjectName(tableName, Table.class)+"'";
+                            sql += " AND TABLE_NAME='" + database.escapeObjectName(tableName, Table.class) + "'";
                         }
                         if (columnName != null) {
-                            sql += " AND COLUMN_NAME='"+database.escapeObjectName(columnName, Column.class)+"'";
+                            sql += " AND COLUMN_NAME='" + database.escapeObjectName(columnName, Column.class) + "'";
                         }
                     }
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
@@ -368,11 +413,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
-                    
+
                     String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.TABLE_NAME as TABLE_NAME, a.TEMPORARY as TEMPORARY, a.DURATION as DURATION, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
-                        "from ALL_TABLES a " +
-                        "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
-                        "WHERE a.OWNER='" + ownerName + "'";
+                            "from ALL_TABLES a " +
+                            "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
+                            "WHERE a.OWNER='" + ownerName + "'";
                     if (tableName != null) {
                         sql += " AND a.TABLE_NAME='" + tableName + "'";
                     }
@@ -381,7 +426,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
         }
-		
+
         public List<CachedRow> getViews(final String catalogName, final String schemaName, final String view) throws SQLException, DatabaseException {
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
@@ -393,13 +438,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-				public ResultSetCache.RowData wantedKeyParameters() {
+                public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, view);
                 }
 
 
                 @Override
-				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (database instanceof OracleDatabase) {
@@ -413,7 +458,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     if (database instanceof OracleDatabase) {
@@ -427,15 +472,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
-                    
+
                     String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
-                        "from ALL_VIEWS a " +
-                        "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
-                        "WHERE a.OWNER='" + ownerName + "'";
+                            "from ALL_VIEWS a " +
+                            "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
+                            "WHERE a.OWNER='" + ownerName + "'";
                     if (viewName != null) {
                         sql += " AND a.VIEW_NAME='" + viewName + "'";
                     }
-                    sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner='"+ownerName+"')";
+                    sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner='" + ownerName + "')";
 
                     return executeAndExtract(sql, database);
                 }
@@ -484,7 +529,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                         try {
-                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM all_cons_columns c, all_constraints k WHERE k.constraint_type = 'P' AND k.owner='"+catalogAndSchema.getCatalogName()+"' AND k.constraint_name = c.constraint_name  AND k.table_name = c.table_name  AND k.owner = c.owner  ORDER BY column_name", database);
+                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM all_cons_columns c, all_constraints k WHERE k.constraint_type = 'P' AND k.owner='" + catalogAndSchema.getCatalogName() + "' AND k.constraint_name = c.constraint_name  AND k.table_name = c.table_name  AND k.owner = c.owner  ORDER BY column_name", database);
                         } catch (DatabaseException e) {
                             throw new SQLException(e);
                         }
