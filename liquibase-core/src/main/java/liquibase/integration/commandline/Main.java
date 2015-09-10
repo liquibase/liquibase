@@ -777,7 +777,7 @@ public class Main {
                                 File jar = extract(earZip, entry);
                                 URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
                                 urls.add(newUrl);
-                                logger.info("adding '"+newUrl+"' to classpath");
+                                logger.debug("Adding '"+newUrl+"' to classpath");
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
                                 File warFile = extract(earZip, entry);
@@ -787,7 +787,7 @@ public class Main {
 
                     } else {
                         URL newUrl = new File(classpathEntry).toURI().toURL();
-                        logger.info("adding '"+newUrl+"' to classpath");
+                        logger.debug("Adding '"+newUrl+"' to classpath");
                         urls.add(newUrl);
                     }
                 } catch (Exception e) {
