@@ -38,6 +38,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private String executable;
     private List<String> os;
     private List<String> args = new ArrayList<String>();
+    protected List<String> finalCommandArray;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -104,6 +105,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             nonExecutedMode = true;
         }
 
+        this.finalCommandArray = createFinalCommandArray(database);
+
         if (shouldRun && !nonExecutedMode) {
 
 
@@ -113,10 +116,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 public Sql[] generate(Database database) {
 
                     try {
-                        executeCommand(database);
+                      executeCommand(database);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new UnexpectedLiquibaseException("Error executing command: " + e, e);
+                      throw new UnexpectedLiquibaseException("Error executing command: " + e.getLocalizedMessage(), e);
                     }
 
                     return null;
@@ -125,23 +127,34 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
 
         if (nonExecutedMode) {
-            return new SqlStatement[]{
-                    new CommentStatement(getCommandString())
-            };
+            try {
+                return new SqlStatement[]{
+                        new CommentStatement(getCommandString())
+                };
+            } finally {
+                nonExecutedCleanup();
+            }
         }
 
         return new SqlStatement[0];
     }
 
-    protected void executeCommand(Database database) throws Exception {
+    protected void nonExecutedCleanup() {
+
+    }
+
+    protected List<String> createFinalCommandArray(Database database) {
         List<String> commandArray = new ArrayList<String>();
         commandArray.add(getExecutable());
         commandArray.addAll(getArgs());
+        return commandArray;
+    }
 
+    protected void executeCommand(Database database) throws Exception {
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
         ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
 
-        ProcessBuilder pb = createProcessBuilder(commandArray, database);
+        ProcessBuilder pb = createProcessBuilder(database);
         Process p = pb.start();
         int returnCode = 0;
         try {
@@ -169,8 +182,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
     }
 
-    protected ProcessBuilder createProcessBuilder(List<String> commandArray, Database database) {
-        ProcessBuilder pb = new ProcessBuilder(commandArray);
+    protected ProcessBuilder createProcessBuilder(Database database) {
+        ProcessBuilder pb = new ProcessBuilder(finalCommandArray);
         pb.redirectErrorStream(true);
         return pb;
     }
@@ -180,7 +193,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return "Shell command '" + getCommandString() + "' executed";
     }
 
-    private String getCommandString() {
+    protected String getCommandString() {
         return getExecutable() + " " + StringUtils.join(args, " ");
     }
 
@@ -250,5 +263,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
         }
 
+    }
+    
+    @Override
+    public String toString() {
+      return "external process '" + getExecutable() + "' " + getArgs(); 
     }
 }

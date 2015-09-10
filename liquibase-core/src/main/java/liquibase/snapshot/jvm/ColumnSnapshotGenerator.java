@@ -321,6 +321,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     columnSize = columnSize / 2; //Stored as double length chars
                 }
             }
+            if (columnTypeName.equalsIgnoreCase("TIMESTAMP") && decimalDigits == null) { //actually a date
+                columnTypeName = "DATE";
+                dataType = Types.DATE;
+            }
         }
 
 

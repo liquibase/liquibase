@@ -12,13 +12,7 @@ public class Difference implements Comparable {
 
     public Difference(String message, String field, Object referenceValue, Object comparedValue) {
         if (message == null) {
-            if (referenceValue instanceof String) {
-                referenceValue = "'"+referenceValue+"'";
-            }
-            if (comparedValue instanceof String) {
-                comparedValue = "'"+comparedValue+"'";
-            }
-            message = field+" changed from "+referenceValue+" to "+comparedValue;
+            message = field+" changed from '"+referenceValue+"' to '"+comparedValue+"'";
         }
         this.message = message;
         this.field = field;
