@@ -254,6 +254,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         } catch (ParseException e) {
                         }
                     }
+                    String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
+                    Integer orderExecuted = (tmpOrderExecuted == null ? null : new Integer(tmpOrderExecuted));
                     String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                     String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
@@ -261,6 +263,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
                     try {
                         RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels);
+                        ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
                         LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);

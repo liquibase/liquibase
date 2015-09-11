@@ -166,7 +166,18 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             columnConfig.setDefaultValueComputed(function);
         } else {
-            columnConfig.setDefaultValue(defaultValue.toString());
+            String defaultValueString = null;
+            try {
+                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), database).objectToSql(defaultValue, database);
+            } catch (NullPointerException e) {
+                throw e;
+            }
+            if (defaultValueString != null) {
+                defaultValueString = defaultValueString.replaceFirst("'",
+                        "").replaceAll("'$", "");
+            }
+
+            columnConfig.setDefaultValue(defaultValueString);
         }
     }
 
