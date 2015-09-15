@@ -608,10 +608,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and TABLE_NAME='" + tableName + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
-                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG from all_constraints uc, all_indexes ui "
-                                + "where uc.constraint_type='U' and uc.index_name = ui.index_name "
+                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
+                                "from all_constraints uc join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner "
+                                + "where uc.constraint_type='U' "
                                 + "and uc.owner = '" + jdbcSchemaName + "' "
-                                + "and ui.table_owner = '" + jdbcSchemaName + "' ";
+                                + "AND ui.table_name NOT LIKE 'BIN$%' ";
+
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + tableName + "'";
                         }
