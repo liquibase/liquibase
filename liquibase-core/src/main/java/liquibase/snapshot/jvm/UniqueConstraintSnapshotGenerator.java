@@ -134,11 +134,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "and TC.CONSTRAINT_NAME='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
                         + "order by TC.CONSTRAINT_NAME";
             } else if (database instanceof OracleDatabase) {
-                sql = "select ucc.owner as constraint_container, ucc.column_name " +
+                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name " +
                         "from all_cons_columns ucc " +
                         "where " +
                         (bulkQuery ? "" : "ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ") +
                         "ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                        "and ucc.table_name not like 'BIN$%' "+
                         "order by ucc.position";
             } else if (database instanceof DB2Database) {
                 if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
@@ -229,7 +230,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             if (bulkQuery) {
                 this.columnCache = new HashMap<String, List<Map<String, ?>>>();
                 for (Map<String, ?> row : rows) {
-                    String key = row.get("constraint_container") + "_" + row.get("constraint_name");
+                    String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
                     List<Map<String, ?>> constraintRows = this.columnCache.get(key);
                     if (constraintRows == null) {
                         constraintRows = new ArrayList<Map<String, ?>>();
@@ -243,7 +244,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 return rows;
             }
         } else {
-            String lookupKey = schema.toString() + "_" + name;
+            String lookupKey = schema.getName() + "_" + example.getName();
             List<Map<String, ?>> rows = this.columnCache.get(lookupKey);
             if (rows == null) {
                 rows = new ArrayList<Map<String, ?>>();
