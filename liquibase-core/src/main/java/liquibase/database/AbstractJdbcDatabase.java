@@ -482,6 +482,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected boolean isDateTime(final String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
     }
+    
+    protected boolean isTimestamp(final String isoDate) {
+        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
+    }
 
     protected boolean isTimeOnly(final String isoDate) {
         return isoDate.length() == "hh:mm:ss".length();
