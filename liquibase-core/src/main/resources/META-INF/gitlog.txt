@@ -1,3 +1,13 @@
+477ce51 When checking if the index needs to be made, use the actual schema and handle generateChangeLog correcty
+b0533d7 Do not create a backing primary key if it already exists
+f6540b8 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+0c25f4c CORE-2518 DB2: snapshot sees DATE types as TIMESTAMP
+0632100 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+8b3b9d0 add info-level logging of classpath changes
+3040668 CORE-2517 Foreign key snapshot improvements for DB2
+0cb125c CORE-2513 DiffChangeLog fixing changed indexes misses "unique" attribute
+8f7e56d CORE-2512 Both defautValueComputed and defaultValue included in addColumn diffChangeLog outputs if value is a computed value
+e8f191d CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
 2721e26 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 3edb4d7 CORE-2493 ExecuteShellCommand improvements
 a1c67cb DVONE-2669 Set the orderExecuted field on the RanChangeSet object

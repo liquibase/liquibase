@@ -758,6 +758,7 @@ public class Main {
                 classpath = this.classpath.split(":");
             }
 
+            Logger logger = LogFactory.getInstance().getLog();
             for (String classpathEntry : classpath) {
                 File classPathFile = new File(classpathEntry);
                 if (!classPathFile.exists()) {
@@ -774,7 +775,9 @@ public class Main {
                             JarEntry entry = entries.nextElement();
                             if (entry.getName().toLowerCase().endsWith(".jar")) {
                                 File jar = extract(earZip, entry);
-                                urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                                urls.add(newUrl);
+                                logger.debug("Adding '"+newUrl+"' to classpath");
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
                                 File warFile = extract(earZip, entry);
@@ -783,7 +786,9 @@ public class Main {
                         }
 
                     } else {
-                        urls.add(new File(classpathEntry).toURL());
+                        URL newUrl = new File(classpathEntry).toURI().toURL();
+                        logger.debug("Adding '"+newUrl+"' to classpath");
+                        urls.add(newUrl);
                     }
                 } catch (Exception e) {
                     throw new CommandLineParsingException(e);
@@ -812,7 +817,9 @@ public class Main {
     }
 
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
-        URL url = new URL("jar:" + classPathFile.toURL() + "!/WEB-INF/classes/");
+        Logger logger = LogFactory.getInstance().getLog();
+        URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
+        logger.info("adding '"+url+"' to classpath");
         urls.add(url);
         JarFile warZip = new JarFile(classPathFile);
         Enumeration<? extends JarEntry> entries = warZip.entries();
@@ -821,7 +828,9 @@ public class Main {
             if (entry.getName().startsWith("WEB-INF/lib")
                     && entry.getName().toLowerCase().endsWith(".jar")) {
                 File jar = extract(warZip, entry);
-                urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                logger.info("adding '"+newUrl+"' to classpath");
+                urls.add(newUrl);
                 jar.deleteOnExit();
             }
         }
