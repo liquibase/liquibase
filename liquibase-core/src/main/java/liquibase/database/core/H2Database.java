@@ -1,18 +1,19 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
+import liquibase.util.TodayUtil;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class H2Database extends AbstractJdbcDatabase {
@@ -107,7 +108,10 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(' ') > 0) {
+            Date dt;
+            if ((dt = TodayUtil.doToday(dateAsString)) != null) {
+                return dt;
+            } else if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
             } else {
                 if (dateAsString.indexOf(':') > 0) {

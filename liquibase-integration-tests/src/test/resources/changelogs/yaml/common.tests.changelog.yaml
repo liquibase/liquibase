@@ -204,6 +204,9 @@ databaseChangeLog:
                   name: datetimeB
                   type: datetime
               - column:
+                  name: datetimeC
+                  type: datetime
+              - column:
                   name: computedDate
                   type: datetime
 
@@ -241,6 +244,11 @@ databaseChangeLog:
             tableName: defaultValueTest
             columnName: datetimeB
             defaultValueDate: "2007-08-09 10:11:12"
+            columnDataType: datetime
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: datetimeC
+            defaultValueDate: "Today"
             columnDataType: datetime
         - addDefaultValue:
             tableName: defaultValueTest
