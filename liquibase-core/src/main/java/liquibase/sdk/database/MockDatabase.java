@@ -1,15 +1,5 @@
 package liquibase.sdk.database;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.Change;
@@ -33,6 +23,16 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 public class MockDatabase implements Database, InternalDatabase {
 
@@ -772,4 +772,10 @@ public class MockDatabase implements Database, InternalDatabase {
     public String unescapeDataTypeString(String dataTypeString) {
         return dataTypeString;
     }
+
+    @Override
+    public String getSequenceSql(String sequenceName) {
+        return sequenceName;
+    }
+
 }

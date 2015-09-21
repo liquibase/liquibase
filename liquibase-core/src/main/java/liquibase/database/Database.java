@@ -340,5 +340,16 @@ public interface Database extends PrioritizedService {
     String unescapeDataTypeName(String dataTypeName);
 
     String unescapeDataTypeString(String dataTypeString);
+
+    /**
+     * Formats the specified sequenceName into the db specific function / value to actually
+     * get the next sequential value.
+     * @param sequenceName Name of Sequence to use when generating next sequential number.
+     * @return DB Specific function / operation to get the next SEQ number, or 'NULL' if the
+     * database doesn't support explicit Sequence setting.
+     * @throws RuntimeException if database supports sequences, but doesn't have a sequence Next Value Function defined.
+     */
+    public String getSequenceSql(String sequenceName);
+
 }
 

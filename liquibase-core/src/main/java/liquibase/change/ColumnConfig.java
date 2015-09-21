@@ -1,17 +1,12 @@
 package liquibase.change;
 
-import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.ExactColumnValue;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.Column;
@@ -22,6 +17,14 @@ import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+
+import java.math.BigInteger;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * The standard configuration used by Change classes to represent a column.
@@ -56,6 +59,13 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private BigInteger incrementBy;
     private String remarks;
     private Boolean descending;
+
+    // For Liquibase internal use.  Need to exclude from Serializable Fields (i.e. exclude from
+    // checksum calculation)
+    // If you add more internal use only type fields (i.e. not parsed from the 'Columns' specification),
+    // then update the 'getSerializableFields()' to make sure they are removed from the whole set of
+    // fields.
+    private ExactColumnValue exactColumnValue;
 
     /**
      * Create a ColumnConfig object based on a {@link Column} snapshot.
@@ -455,7 +465,21 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.encoding = encoding;
         return this;
     }
-    
+
+    /**
+     * Returns exact column value, if set.  This would come from processing of other
+     * column data - it isn't set direct from the &lt;column&gt; element or attributes.
+     * @return exact column value (to be used in SQL), or null if not set.
+     */
+    public ExactColumnValue getExactColumnValue() {
+        return exactColumnValue;
+    }
+
+    public ColumnConfig setExactColumnValue(ExactColumnValue exactColumnValue) {
+        this.exactColumnValue = exactColumnValue;
+        return this;
+    }
+
     /**
      * Return the value from whatever setValue* function was called. Will return null if none were set.
      */
@@ -470,6 +494,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getValueDate();
         } else if (getValueComputed() != null) {
             return getValueComputed();
+        } else if (getExactColumnValue() != null) {
+            return getExactColumnValue();
         } else if (getValueClobFile() != null) {
             return getValueClobFile();
         } else if (getValueBlobFile() != null) {
@@ -763,6 +789,13 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> serializableFields = ReflectionSerializer.getInstance().getFields(this);
+        serializableFields.remove("exactColumnValue"); // Calculated field - exclude from check sum handling and serialization.
+        return serializableFields;
     }
 
     @Override
