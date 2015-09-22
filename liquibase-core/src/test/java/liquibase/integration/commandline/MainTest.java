@@ -37,6 +37,8 @@ public class MainTest {
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "--promptForNonLocalDatabase=true",
+                "--changeExecListenerClass=MockChangeExecListener",
+                "--changeExecListenerPropertiesFile=PROPS",
                 "update",
         };
 
@@ -52,6 +54,8 @@ public class MainTest {
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
         assertEquals("update", cli.command);
+        assertEquals("MockChangeExecListener", cli.changeExecListenerClass);
+        assertEquals("PROPS", cli.changeExecListenerPropertiesFile);
     }
 
     @Test
