@@ -19,6 +19,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private int columnQueryCount = 1;
     private HashMap<String, List<Map<String, ?>>> columnCache;
+    private String currentCachedSchema;
 
     public UniqueConstraintSnapshotGenerator() {
         super(UniqueConstraint.class, new Class[]{Table.class});
@@ -99,6 +100,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
         boolean bulkQuery;
         String sql;
+
+        String currentSchema = example.getSchema().toCatalogAndSchema().customize(database).toString();
+        if (this.currentCachedSchema == null || !this.currentCachedSchema.equals(currentSchema)) {  //switching to another schema
+            this.columnCache = null;
+            this.currentCachedSchema = currentSchema;
+
+        }
+
         if (this.columnCache == null) {
             bulkQuery = (database instanceof OracleDatabase) && columnQueryCount > 3;
             columnQueryCount++;
