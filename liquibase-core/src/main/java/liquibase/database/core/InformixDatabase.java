@@ -14,6 +14,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -38,7 +39,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 		systemTablesAndViews.add("systabauth");
 		systemTablesAndViews.add("syscolauth");
 		systemTablesAndViews.add("sysviews");
-		systemTablesAndViews.add("sysusers");
+		systemTablesAndViews.add("syØsusers");
 		systemTablesAndViews.add("sysdepend");
 		systemTablesAndViews.add("syssynonyms");
 		systemTablesAndViews.add("syssyntable");
@@ -226,8 +227,26 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName;
     }
+
     @Override
     protected String getConnectionSchemaName() {
+        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+            return null;
+        }
+        try {
+            String schemaName = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select username from sysmaster:informix.syssessions where sid = dbinfo('sessionid')"), String.class);
+            if (schemaName != null) {
+                return schemaName.trim();
+            }
+        } catch (Exception e) {
+            LogFactory.getInstance().getLog().info("Error getting connection schema", e);
+        }
         return null;
     }
+
+    @Override
+    public boolean supportsCatalogInObjectName(final Class<? extends DatabaseObject> type) {
+        return true;
+    }
+
 }
