@@ -39,7 +39,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 		systemTablesAndViews.add("systabauth");
 		systemTablesAndViews.add("syscolauth");
 		systemTablesAndViews.add("sysviews");
-		systemTablesAndViews.add("syØsusers");
+		systemTablesAndViews.add("sysusers");
 		systemTablesAndViews.add("sysdepend");
 		systemTablesAndViews.add("syssynonyms");
 		systemTablesAndViews.add("syssyntable");
