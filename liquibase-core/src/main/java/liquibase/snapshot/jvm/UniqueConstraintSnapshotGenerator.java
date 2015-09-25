@@ -17,10 +17,6 @@ import java.util.*;
 
 public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
-    private int columnQueryCount = 1;
-    private HashMap<String, List<Map<String, ?>>> columnCache;
-    private String currentCachedSchema;
-
     public UniqueConstraintSnapshotGenerator() {
         super(UniqueConstraint.class, new Class[]{Table.class});
     }
@@ -39,7 +35,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
 
-        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
+        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
 
         if (metadata.size() == 0) {
             return null;
@@ -93,7 +89,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
@@ -101,16 +97,18 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         boolean bulkQuery;
         String sql;
 
-        String currentSchema = example.getSchema().toCatalogAndSchema().customize(database).toString();
-        if (this.currentCachedSchema == null || !this.currentCachedSchema.equals(currentSchema)) {  //switching to another schema
-            this.columnCache = null;
-            this.currentCachedSchema = currentSchema;
+        String cacheKey = "uniqueConstraints-"+example.getClass().getSimpleName()+"-"+example.getSchema().toCatalogAndSchema().customize(database).toString();
+        String queryCountKey = "uniqueConstraints-"+example.getClass().getSimpleName()+"-queryCount";
 
+        Map<String, List<Map<String, ?>>> columnCache = (Map<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
+        Integer columnQueryCount = (Integer) snapshot.getScratchData(queryCountKey);
+        if (columnQueryCount == null) {
+            columnQueryCount = 0;
         }
 
-        if (this.columnCache == null) {
+        if (columnCache == null) {
             bulkQuery = (database instanceof OracleDatabase) && columnQueryCount > 3;
-            columnQueryCount++;
+            snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
 
             if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
                 sql = "select const.CONSTRAINT_NAME, COLUMN_NAME "
@@ -295,24 +293,25 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
             if (bulkQuery) {
-                this.columnCache = new HashMap<String, List<Map<String, ?>>>();
+                columnCache = new HashMap<String, List<Map<String, ?>>>();
+                snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
                     String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
-                    List<Map<String, ?>> constraintRows = this.columnCache.get(key);
+                    List<Map<String, ?>> constraintRows = columnCache.get(key);
                     if (constraintRows == null) {
                         constraintRows = new ArrayList<Map<String, ?>>();
-                        this.columnCache.put(key, constraintRows);
+                        columnCache.put(key, constraintRows);
                     }
                     constraintRows.add(row);
                 }
 
-                return listColumns(example, database);
+                return listColumns(example, database, snapshot);
             } else {
                 return rows;
             }
         } else {
             String lookupKey = schema.getName() + "_" + example.getName();
-            List<Map<String, ?>> rows = this.columnCache.get(lookupKey);
+            List<Map<String, ?>> rows = columnCache.get(lookupKey);
             if (rows == null) {
                 rows = new ArrayList<Map<String, ?>>();
             }
