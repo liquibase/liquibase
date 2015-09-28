@@ -1,3 +1,12 @@
+79e463c CORE-2528 Oracle: improve unique constraint snapshot query performance
+8c8418d CORE-2545 MSSQL: createProcedure fails if replaceIfExists=true and body uses "create proc" rather than "create procedure"
+8bcf816 CORE-2528 Oracle: improve unique constraint snapshot query performance
+f3d09a0 Cherry-picked improved mssql unique constraint SQL from master
+209ba6d Removed unused columns from Oracle all columns snapshot query
+3fcbe35 CORE-2528 Oracle: improve unique constraint snapshot query performance
+ad22a99 CORE-2528 Oracle: improve unique constraint snapshot query performance
+025f7bd CORE-2528 Oracle: improve unique constraint snapshot query performance
+b2626d9 CORE-2524 MSSQL: need to escape default value constraint names
 477ce51 When checking if the index needs to be made, use the actual schema and handle generateChangeLog correcty
 b0533d7 Do not create a backing primary key if it already exists
 f6540b8 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb

@@ -49,7 +49,11 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
              }
             sql.add(new UnparsedSql("if object_id('"+ fullyQualifiedName +"', 'p') is null exec ('create procedure "+fullyQualifiedName+" as select 1 a')"));
 
+            String oldProcedureText = procedureText;
             procedureText = procedureText.replaceFirst("(?i)create\\s+procedure", "ALTER PROCEDURE");
+            if (oldProcedureText.equals(procedureText)) {
+                procedureText = procedureText.replaceFirst("(?i)create\\s+proc ", "ALTER PROCEDURE");
+            }
         }
 
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
