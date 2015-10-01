@@ -209,6 +209,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             val.append(normalLiteral);
             val.append(", 'HH24:MI:SS')");
             return val.toString();
+        } else if (isTimestamp(isoDate)) {
+            StringBuffer val = new StringBuffer(26);
+            val.append("to_timestamp(");
+            val.append(normalLiteral);
+            val.append(", 'YYYY-MM-DD HH24:MI:SS.FF')");
+            return val.toString();
         } else if (isDateTime(isoDate)) {
             normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf('.')) + "'";
 
