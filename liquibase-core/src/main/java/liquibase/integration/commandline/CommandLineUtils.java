@@ -21,13 +21,12 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
-import javax.annotation.Resource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 /**
- * Common Utilitiy methods used in the CommandLine application and the Maven plugin.
- * These methods were orignally moved from {@link Main} so they could be shared.
+ * Common Utility methods used in the CommandLine application and the Maven plugin.
+ * These methods were originally moved from {@link Main} so they could be shared.
  *
  * @author Peter Murray
  */
@@ -88,7 +87,7 @@ public class CommandLineUtils {
         }
     }
 
-    protected static void initializeDatabase(String username, String defaultCatalogName, String defaultSchemaName, Database database) throws DatabaseException {
+    public static void initializeDatabase(String username, String defaultCatalogName, String defaultSchemaName, Database database) throws DatabaseException {
         if ((defaultCatalogName != null || defaultSchemaName != null) && !(database.getConnection() instanceof OfflineConnection)) {
             if (database instanceof OracleDatabase) {
                 String schema = defaultCatalogName;
