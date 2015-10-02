@@ -473,7 +473,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
 
-                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
+                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS, TEXT as OBJECT_BODY " +
                             "from ALL_VIEWS a " +
                             "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
                             "WHERE a.OWNER='" + ownerName + "'";

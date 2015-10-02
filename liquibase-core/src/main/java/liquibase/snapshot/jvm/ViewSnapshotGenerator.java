@@ -14,6 +14,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
@@ -49,6 +50,9 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
+        if (((View) example).getDefinition() != null) {
+            return example;
+        }
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
 
@@ -67,7 +71,6 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 View view = new View().setName(cleanNameFromDatabase(rawViewName, database));
                 view.setRemarks(remarks);
-
                 CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
                 view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
@@ -122,7 +125,13 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null);
                 for (CachedRow row : viewsMetadataRs) {
-                    schema.addDatabaseObject(new View().setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    View view = new View();
+                    view.setName(row.getString("TABLE_NAME"));
+                    view.setSchema(schema);
+                    view.setRemarks(row.getString("REMARKS"));
+                    view.setDefinition(row.getString("OBJECT_BODY"));
+
+                    schema.addDatabaseObject(view);
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
