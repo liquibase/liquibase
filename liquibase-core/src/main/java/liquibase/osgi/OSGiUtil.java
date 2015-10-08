@@ -4,19 +4,24 @@ import org.osgi.framework.BundleReference;
 
 public final class OSGiUtil {
 
+    private static Boolean loadedAsBundle;
+
     public static boolean isLiquibaseLoadedAsOSGiBundle() {
-        ClassLoader classLoader = OSGiUtil.class.getClassLoader();
-        try {
-            classLoader.loadClass("org.osgi.framework.BundleReference");
-        } catch (ClassNotFoundException e) {
-            return false;
+        if (loadedAsBundle == null) {
+            ClassLoader classLoader = OSGiUtil.class.getClassLoader();
+            try {
+                classLoader.loadClass("org.osgi.framework.BundleReference");
+            } catch (ClassNotFoundException e) {
+                return false;
+            }
+
+            if (classLoader instanceof BundleReference) {
+                loadedAsBundle = true;
+            } else {
+                loadedAsBundle =false;
+            }
         }
-        
-        if (classLoader instanceof BundleReference) {
-            return true;
-        } else {
-            return false;
-        }
+        return loadedAsBundle;
     }
 
     private OSGiUtil() {
