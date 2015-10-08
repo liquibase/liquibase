@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -28,6 +29,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.changelog.visitor.ChangeExecListener;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -65,6 +67,8 @@ public class Main {
     protected String labels;
     protected String driverPropertiesFile;
     protected String propertyProviderClass = null;
+    protected String changeExecListenerClass;
+    protected String changeExecListenerPropertiesFile;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected Boolean strict = Boolean.TRUE;
@@ -591,6 +595,10 @@ public class Main {
         stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
         stream.println("                                            to be set on the JDBC connection");
         stream.println("                                            to be created");
+        stream.println(" --changeExecListenerClass=<ChangeExecListener.ClassName>     Custom Change Exec");
+        stream.println("                                            listener implementation to use");
+        stream.println(" --changeExecListenerPropertiesFile=</path/to/file.properties> Properties for");
+        stream.println("                                            Custom Change Exec listener");
         stream.println(" --liquibaseCatalogName=<name>              The name of the catalog with the");
         stream.println("                                            liquibase tables");
         stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
@@ -1026,6 +1034,11 @@ public class Main {
 
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
+            		liquibase.getDatabase(), liquibase.getResourceAccessor(), 
+            		changeExecListenerClass, changeExecListenerPropertiesFile);
+            liquibase.setChangeExecListener(listener);
+            
             liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
