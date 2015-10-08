@@ -5,6 +5,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
+import liquibase.osgi.OSGiPackageScanClassResolver;
+import liquibase.osgi.OSGiResourceAccessor;
+import liquibase.osgi.OSGiUtil;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -20,6 +23,9 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.Manifest;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
 public class ServiceLocator {
 
     private static ServiceLocator instance;
@@ -30,7 +36,13 @@ public class ServiceLocator {
             instance = (ServiceLocator) scanner.newInstance();
         } catch (Exception e) {
             try {
-                instance = new ServiceLocator();
+                if (OSGiUtil.isLiquibaseLoadedAsOSGiBundle()) {
+                    Bundle liquibaseBundle = FrameworkUtil.getBundle(ServiceLocator.class);
+                    instance = new ServiceLocator(new OSGiPackageScanClassResolver(liquibaseBundle), 
+                            new OSGiResourceAccessor(liquibaseBundle));
+                } else {
+                    instance = new ServiceLocator();
+                }
             } catch (Throwable e1) {
                 LogFactory.getInstance().getLog().severe("Cannot build ServiceLocator", e1);
             }
