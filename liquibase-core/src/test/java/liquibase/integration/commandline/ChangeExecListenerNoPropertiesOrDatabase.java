@@ -1,8 +1,8 @@
 package liquibase.integration.commandline;
 
-import liquibase.changelog.visitor.ChangeExecListenerAdaptor;
+import liquibase.changelog.visitor.AbstractChangeExecListener;
 
-public class ChangeExecListenerNoPropertiesOrDatabase extends ChangeExecListenerAdaptor {
+public class ChangeExecListenerNoPropertiesOrDatabase extends AbstractChangeExecListener {
 	public ChangeExecListenerNoPropertiesOrDatabase() {
 	}
 }

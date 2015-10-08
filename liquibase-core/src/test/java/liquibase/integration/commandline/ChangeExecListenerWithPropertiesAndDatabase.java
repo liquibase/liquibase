@@ -2,10 +2,10 @@ package liquibase.integration.commandline;
 
 import java.util.Properties;
 
-import liquibase.changelog.visitor.ChangeExecListenerAdaptor;
+import liquibase.changelog.visitor.AbstractChangeExecListener;
 import liquibase.database.Database;
 
-public class ChangeExecListenerWithPropertiesAndDatabase extends ChangeExecListenerAdaptor {
+public class ChangeExecListenerWithPropertiesAndDatabase extends AbstractChangeExecListener {
 	private final Database database;
 	private final Properties properties;
 	

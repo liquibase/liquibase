@@ -15,7 +15,7 @@ import liquibase.precondition.core.PreconditionContainer.FailOption;
  * Default implementation of the ChangeExecListener so that sub classes can just override the methods
  * they are interested in.
  */
-public class ChangeExecListenerAdaptor implements ChangeExecListener {
+public abstract class AbstractChangeExecListener implements ChangeExecListener {
 	@Override
 	public void willRun(ChangeSet changeSet,
 			DatabaseChangeLog databaseChangeLog, Database database,
