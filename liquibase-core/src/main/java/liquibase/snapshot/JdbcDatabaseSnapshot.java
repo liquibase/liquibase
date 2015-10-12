@@ -159,11 +159,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected String getDB2Sql(String jdbcSchemaName) {
                     return "SELECT  " +
                             "  pk_col.tabschema AS pktable_cat,  " +
-                            "  null as pktable_schem,  " +
                             "  pk_col.tabname as pktable_name,  " +
                             "  pk_col.colname as pkcolumn_name, " +
                             "  fk_col.tabschema as fktable_cat,  " +
-                            "  null as fktable_schem,  " +
                             "  fk_col.tabname as fktable_name,  " +
                             "  fk_col.colname as fkcolumn_name, " +
                             "  fk_col.colseq as key_seq,  " +
@@ -473,7 +471,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
 
-                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
+                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS, TEXT as OBJECT_BODY " +
                             "from ALL_VIEWS a " +
                             "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
                             "WHERE a.OWNER='" + ownerName + "'";
