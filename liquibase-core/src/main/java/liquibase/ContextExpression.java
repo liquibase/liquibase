@@ -162,4 +162,19 @@ public class ContextExpression {
     public boolean isEmpty() {
         return this.contexts == null || this.contexts.size() == 0;
     }
+
+    public static boolean matchesAll(Collection<ContextExpression> expressions, Contexts contexts) {
+        if (expressions == null || expressions.isEmpty()) {
+            return true;
+        }
+        if (contexts == null || contexts.isEmpty()) {
+            return true;
+        }
+        for (ContextExpression expression : expressions) {
+            if (!expression.matches(contexts)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
