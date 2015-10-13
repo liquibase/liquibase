@@ -23,7 +23,7 @@ public class AlterSequenceChange extends AbstractChange {
     private BigInteger minValue;
     private Boolean ordered;
     private BigInteger cacheSize;
-    private Boolean willCycle;
+    private Boolean cycle;
 
     @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog", since = "3.0")
     public String getCatalogName() {
@@ -97,12 +97,12 @@ public class AlterSequenceChange extends AbstractChange {
         this.cacheSize = cacheSize;
     }
 
-    public Boolean getWillCycle() {
-        return willCycle;
+    public Boolean getCycle() {
+        return cycle;
     }
 
-    public void setWillCycle(Boolean willCycle) {
-        this.willCycle = willCycle;
+    public void setCycle(Boolean cycle) {
+        this.cycle = cycle;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class AlterSequenceChange extends AbstractChange {
                 .setMaxValue(getMaxValue())
                 .setMinValue(getMinValue())
                 .setCacheSize(getCacheSize())
-                .setWillCycle(getWillCycle())
+                .setCycle(getCycle())
                 .setOrdered(isOrdered())
         };
     }
