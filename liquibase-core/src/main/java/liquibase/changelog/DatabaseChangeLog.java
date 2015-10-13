@@ -150,7 +150,38 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void addChangeSet(ChangeSet changeSet) {
-        this.changeSets.add(changeSet);
+        if (changeSet.getRunOrder() == null) {
+            ListIterator<ChangeSet> it = this.changeSets.listIterator(this.changeSets.size());
+            boolean added = false;
+            while (it.hasPrevious() && !added) {
+                if (!"last".equals(it.previous().getRunOrder())) {
+                    it.next();
+                    it.add(changeSet);
+                    added = true;
+                }
+            }
+            if (!added) {
+                it.add(changeSet);
+            }
+
+        } else if (changeSet.getRunOrder().equals("first")) {
+            ListIterator<ChangeSet> it = this.changeSets.listIterator();
+            boolean added = false;
+            while (it.hasNext() && !added) {
+                if (!"first".equals(it.next().getRunOrder())) {
+                    it.previous();
+                    it.add(changeSet);
+                    added = true;
+                }
+            }
+            if (!added) {
+                this.changeSets.add(changeSet);
+            }
+        } else if (changeSet.getRunOrder().equals("last")) {
+            this.changeSets.add(changeSet);
+        } else {
+            throw new UnexpectedLiquibaseException("Unknown runOrder: "+changeSet.getRunOrder());
+        }
     }
 
     @Override
@@ -363,7 +394,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
-            this.changeSets.add(changeSet);
+            addChangeSet(changeSet);
         }
 
         return true;

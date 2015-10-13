@@ -257,6 +257,7 @@
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
         <xsd:attribute name="created" type="xsd:string"/>
+		<xsd:attribute name="runOrder" type="xsd:string"/>
 	</xsd:attributeGroup>
 
 	<!-- Attributes for constraints -->
