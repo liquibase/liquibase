@@ -603,7 +603,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "where CONSTRAINT_TYPE = 'Unique' "
                                 + "and CONSTRAINT_SCHEMA='" + jdbcSchemaName + "'";
                         if (tableName != null) {
-                            sql += " and TABLE_NAME='" + tableName + "'";
+                            sql += " and TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
                         sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
