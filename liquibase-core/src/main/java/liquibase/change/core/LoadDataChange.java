@@ -1,6 +1,13 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeStatus;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.CheckSum;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -15,7 +22,6 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.InsertSetStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
@@ -24,7 +30,9 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -193,7 +201,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
             InsertSetStatement statements = this.createStatementSet(getCatalogName(), getSchemaName(), getTableName());
             String[] line;
-            int lineNumber = 0;
+            int lineNumber = 1; // Start at '1' to take into account the header (already processed)
 
             boolean isCommentingEnabled = StringUtils.isNotEmpty(commentLineStartsWith);
             while ((line = reader.readNext()) != null) {
@@ -202,12 +210,17 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         || (isCommentingEnabled && isLineCommented(line))) {
                     continue; //nothing on this line
                 }
+                
+                // Ensure eaech line has the same number of columns defined as does the header.
+                // (Failure could indicate unquoted strings with commas, for example).
+                if (line.length != headers.length)
+                {
+                    throw new UnexpectedLiquibaseException("CSV file " + getFile() + " Line " + lineNumber + " has " + line.length + " values defined, Header has " + headers.length + ". Numbers MUST be equal (check for unquoted string with embedded commas)");
+                }
+
                 InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
-                    if( i >= line.length ) {
-                      throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i-1) + " columns, the header has " + headers.length);
-                    }
 
                     Object value = line[i];
 
