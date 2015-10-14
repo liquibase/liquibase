@@ -246,7 +246,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaNameCallStatement() {
-        return "select current_schema";
+        return "select current_schema()";
     }
 
     private boolean catalogExists(String catalogName) throws DatabaseException {
