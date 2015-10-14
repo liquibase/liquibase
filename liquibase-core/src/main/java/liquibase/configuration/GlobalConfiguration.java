@@ -17,6 +17,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String CHANGELOGLOCK_POLL_RATE = "changeLogLockPollRate";
     public static final String CONVERT_DATA_TYPES = "convertDataTypes";
     public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
+    public static final String LEGACY_CHECKSUM_COMPARE = "legacyCheckSumCompare";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -66,6 +67,11 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
         getContainer().addProperty(GENERATE_CHANGESET_CREATED_VALUES, Boolean.class)
                 .setDescription("Should Liquibase include a 'created' attribute in diff/generateChangeLog changeSets with the current datetime")
+                .setDefaultValue(false);
+        
+        getContainer().addProperty(LEGACY_CHECKSUM_COMPARE, Boolean.class)
+                .setDescription("Whether liquibase should use the legacy validCheckSums comparison "
+                        + "behavior (compare to current) or the default (compare to stored).")
                 .setDefaultValue(false);
     }
 
@@ -188,4 +194,20 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().setValue(OUTPUT_ENCODING, name);
         return this;
     }
+
+    /**
+     * Whether Liquibase should use the legacy validCheckSum comparison behavior (compare to current)
+     * or the default (compare to stored).
+     * 
+     * @see <a href="https://liquibase.jira.com/browse/CORE-1167">CORE-1167</a>
+     */
+    public boolean getLegacyChecksumCompare() {
+        return getContainer().getValue(LEGACY_CHECKSUM_COMPARE, Boolean.class);
+    }
+
+    public GlobalConfiguration setLegacyChecksumCompare(boolean value) {
+        getContainer().setValue(LEGACY_CHECKSUM_COMPARE, value);
+        return this;
+    }
+
 }
