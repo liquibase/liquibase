@@ -2,6 +2,8 @@ package liquibase.changelog
 
 import liquibase.change.CheckSum
 import liquibase.change.core.*
+import liquibase.configuration.GlobalConfiguration
+import liquibase.configuration.LiquibaseConfiguration
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
@@ -19,6 +21,14 @@ public class ChangeSetTest extends Specification {
 
     @Shared
             resourceSupplier = new ResourceSupplier()
+
+    def setup() {
+        LiquibaseConfiguration.getInstance().reset()
+    }
+
+    def cleanup() {
+        LiquibaseConfiguration.getInstance().reset()
+    }
 
     def getDescriptions() {
         when:
@@ -97,6 +107,21 @@ public class ChangeSetTest extends Specification {
 
     def isCheckSumValid_differentButValidCheckSum() {
         when:
+        CheckSum checkSum = CheckSum.parse("2:asdf");
+
+        ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
+        changeSet.addValidCheckSum("2:asdf");
+
+        then:
+        assert changeSet.isCheckSumValid(checkSum)
+    }
+
+    def isCheckSumValid_differentButValidCheckSumLegacy() {
+        when:
+        LiquibaseConfiguration.getInstance()
+                .getConfiguration(GlobalConfiguration.class)
+                .setLegacyChecksumCompare(true);
+
         CheckSum checkSum = CheckSum.parse("2:asdf");
 
         ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);

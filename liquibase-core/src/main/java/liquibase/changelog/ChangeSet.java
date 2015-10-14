@@ -9,6 +9,8 @@ import liquibase.change.DbmsTargetedChange;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
@@ -832,6 +834,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 return true;
             }
         }
+
         CheckSum currentMd5Sum = generateCheckSum();
         if (currentMd5Sum == null) {
             return true;
@@ -843,8 +846,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             return true;
         }
 
+        // Old checksum behavior compares each validCheckSum to the new computed value
+        // New (default) behavior compares each to the stored value
+        boolean legacyChecksumBehavior = LiquibaseConfiguration.getInstance()
+                .getConfiguration(GlobalConfiguration.class)
+                .getLegacyChecksumCompare();
+        CheckSum actual = legacyChecksumBehavior ? currentMd5Sum : storedCheckSum;
+
         for (CheckSum validCheckSum : validCheckSums) {
-            if (currentMd5Sum.equals(validCheckSum)) {
+            if (actual.equals(validCheckSum)) {
                 return true;
             }
         }
