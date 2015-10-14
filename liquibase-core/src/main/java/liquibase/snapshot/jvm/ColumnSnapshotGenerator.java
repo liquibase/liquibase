@@ -115,12 +115,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
+        Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
 
         Column column = new Column();
         column.setName(rawColumnName);
         column.setRelation(table);
         column.setRemarks(remarks);
+        column.setOrder(position);
 
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");
