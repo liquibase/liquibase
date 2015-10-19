@@ -31,6 +31,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private DatabaseObjectCollection referencedObjects;
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
+    private Map<String, Object> snapshotScratchPad = new HashMap<String, Object>();
+
     private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -463,5 +465,17 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     @Override
     public ParsedNode serialize() {
         throw new RuntimeException("TODO");
+    }
+
+    /**
+     * Used to get and store misc data that should be scoped to the snapshot. Helpful for caching snapshot results.
+     * @deprecated Will be removed with 4.0
+     */
+    public Object getScratchData(String key) {
+        return snapshotScratchPad.get(key);
+    }
+
+    public Object setScratchData(String key, Object data) {
+        return snapshotScratchPad.put(key, data);
     }
 }

@@ -156,11 +156,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected String getDB2Sql(String jdbcSchemaName) {
                     return "SELECT  " +
                             "  pk_col.tabschema AS pktable_cat,  " +
-                            "  null as pktable_schem,  " +
                             "  pk_col.tabname as pktable_name,  " +
                             "  pk_col.colname as pkcolumn_name, " +
                             "  fk_col.tabschema as fktable_cat,  " +
-                            "  null as fktable_schem,  " +
                             "  fk_col.tabname as fktable_name,  " +
                             "  fk_col.colname as fkcolumn_name, " +
                             "  fk_col.colseq as key_seq,  " +
@@ -361,11 +359,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
                             "DECODE (c.data_type, 'CHAR', 1, 'VARCHAR2', 12, 'NUMBER', 3, 'LONG', -1, 'DATE', " + (getMapDateToTimestamp?"93":"91") + ", 'RAW', -3, 'LONG RAW', -4, 'BLOB', 2004, 'CLOB', 2005, 'BFILE', -13, 'FLOAT', 6, 'TIMESTAMP(6)', 93, 'TIMESTAMP(6) WITH TIME ZONE', -101, 'TIMESTAMP(6) WITH LOCAL TIME ZONE', -102, 'INTERVAL YEAR(2) TO MONTH', -103, 'INTERVAL DAY(2) TO SECOND(6)', -104, 'BINARY_FLOAT', 100, 'BINARY_DOUBLE', 101, 'XMLTYPE', 2009, 1111) AS data_type, " +
                             "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
-                            "DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID, DEFAULT_LENGTH, " +
-                            "DATA_DEFAULT, NUM_DISTINCT, LOW_VALUE, HIGH_VALUE, DENSITY, NUM_NULLS, " +
-                            "NUM_BUCKETS, LAST_ANALYZED, SAMPLE_SIZE, CHARACTER_SET_NAME, " +
-                            "CHAR_COL_DECL_LENGTH, GLOBAL_STATS, USER_STATS, AVG_COL_LEN, CHAR_LENGTH, " +
-                            "CHAR_USED, V80_FMT_IMAGE, DATA_UPGRADED, VIRTUAL_COLUMN\n" +
+                            "DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID as ORDINAL_POSITION, DEFAULT_LENGTH, " +
+                            "DATA_DEFAULT, " +
+                            "NUM_BUCKETS, CHARACTER_SET_NAME, " +
+                            "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
+                            "CHAR_USED, VIRTUAL_COLUMN " +
                             "FROM ALL_TAB_COLS c " +
                             "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
                             "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
@@ -485,7 +483,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
                     String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
 
-                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
+                    String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS, TEXT as OBJECT_BODY " +
                             "from ALL_VIEWS a " +
                             "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
                             "WHERE a.OWNER='" + ownerName + "'";
@@ -699,10 +697,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
-                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG from all_constraints uc, all_indexes ui "
-                                + "where uc.constraint_type='U' and uc.index_name = ui.index_name "
+                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
+                                "from all_constraints uc join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner "
+                                + "where uc.constraint_type='U' "
                                 + "and uc.owner = '" + jdbcSchemaName + "' "
-                                + "and ui.table_owner = '" + jdbcSchemaName + "' ";
+                                + "AND ui.table_name NOT LIKE 'BIN$%' ";
+
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + tableName + "'";
                         }

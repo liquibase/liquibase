@@ -1,5 +1,6 @@
 package liquibase.structure;
 
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
@@ -20,6 +21,12 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
 
         }
 
+        if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
+            int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
+            if (i != 0) {
+                return i;
+            }
+        }
 
         String name1 = StringUtils.trimToEmpty(o1.getName());
         String name2 = StringUtils.trimToEmpty(o2.getName());

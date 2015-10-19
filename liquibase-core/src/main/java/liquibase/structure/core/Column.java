@@ -296,6 +296,15 @@ public class Column extends AbstractDatabaseObject {
                 .setDescending(descending);
     }
 
+    public Integer getOrder() {
+        return getAttribute("order", Integer.class);
+    }
+
+    public Column setOrder(Integer order) {
+        setAttribute("order", order);
+        return this;
+    }
+
     public static Column[] arrayFromNames(String columnNames) {
         if (columnNames == null) {
             return null;

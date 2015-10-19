@@ -14,10 +14,7 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -105,7 +102,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
-                    buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
+                    buffer.append(" CONSTRAINT ").append(database.escapeObjectName(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column), ForeignKey.class));
                 }
                 if (database instanceof OracleDatabase && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
                     buffer.append(" ");

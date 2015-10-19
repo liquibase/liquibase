@@ -78,7 +78,17 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                                     "AND [p].[name] = 'MS_Description'";
                 }
 
-                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
+            if (column != null && database instanceof MSSQLDatabase) {
+                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
+                        " CAST(value as varchar(max)) as REMARKS\n" +
+                        " FROM\n" +
+                        " sys.extended_properties\n" +
+                        "  WHERE\n" +
+                        " name='MS_Description' " +
+                        " AND major_id = OBJECT_ID('" + column.getRelation().getName() + "')\n" +
+                        " AND\n" +
+                        " minor_id = COLUMNPROPERTY(major_id, '" + column.getName() + "', 'ColumnId')"), String.class);
+
                 if (remarks != null && remarks.size() > 0) {
                     column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
                 }
@@ -128,12 +138,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
+        Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
 
         Column column = new Column();
         column.setName(StringUtils.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
+        column.setOrder(position);
 
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");

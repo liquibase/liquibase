@@ -64,7 +64,7 @@ public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenera
 
         if (differences.isDifferent("willCycle")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setWillCycle(sequence.getWillCycle());
+            change.setCycle(sequence.getWillCycle());
             changes.add(change);
         }
 

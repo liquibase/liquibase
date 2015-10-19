@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
@@ -79,9 +80,10 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
             if (backingIndex != null && backingIndex.getName() != null) {
                 try {
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
-                        backingIndex.getTable().setSchema(null); //set table schema to null so it is found in the correct schema
+                        CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
+                        backingIndex.getTable().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
                     }
-                    if (!SnapshotGeneratorFactory.getInstance().has(backingIndex, comparisonDatabase)) {
+                    if (referenceDatabase.equals(comparisonDatabase) || !SnapshotGeneratorFactory.getInstance().has(backingIndex, comparisonDatabase)) {
                         returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
                     }
                 } catch (Exception e) {

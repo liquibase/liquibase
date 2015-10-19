@@ -177,6 +177,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     private String created;
 
+    /**
+     * Allow changeSet to be ran "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
+     */
+    private String runOrder;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -897,6 +902,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public void setCreated(String created) {
         this.created = created;
+    }
+
+    public String getRunOrder() {
+        return runOrder;
+    }
+
+    public void setRunOrder(String runOrder) {
+        if (runOrder != null) {
+            runOrder = runOrder.toLowerCase();
+            if (!runOrder.equals("first") && !runOrder.equals("last")) {
+                throw new UnexpectedLiquibaseException("runOrder must be 'first' or 'last'");
+            }
+        }
+        this.runOrder = runOrder;
     }
 
     @Override
