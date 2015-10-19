@@ -138,9 +138,22 @@ public class CommandLineUtils {
                 }
                 ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
             } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + username + " WITH DEFAULT_SCHEMA=[" + defaultSchemaName + "]"));
-            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + defaultSchemaName));
+boolean sql2005OrLater = true;
+                    try {
+                        sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
+                    } catch (DatabaseException e) {
+                        // Assume SQL Server 2005 or later
+                    }
+                    if (sql2005OrLater) {
+                        ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
+                                "IF USER_NAME() <> N'dbo'\r\n" +
+                                "BEGIN\r\n" +
+                                "	DECLARE @sql [nvarchar](MAX)\r\n" +
+                                "	SELECT @sql = N'ALTER USER ' + QUOTENAME(USER_NAME()) + N' WITH DEFAULT_SCHEMA = " + database.escapeStringForDatabase(database.escapeObjectName(username, DatabaseObject.class)) + "'\r\n" +
+                                "	EXEC sp_executesql @sql\r\n" +
+                                "END"));
+                    }            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof DB2Database) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
