@@ -261,6 +261,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
         this.created = node.getChildValue(null, "created", String.class);
+        this.runOrder = node.getChildValue(null, "runOrder", String.class);
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
