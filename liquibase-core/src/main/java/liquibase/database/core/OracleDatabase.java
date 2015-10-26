@@ -10,6 +10,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -364,6 +366,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if (databaseFunction != null && databaseFunction.toString().equalsIgnoreCase("current_timestamp")) {
             return databaseFunction.toString();
         }
+        if(databaseFunction instanceof SequenceNextValueFunction
+                || databaseFunction instanceof SequenceCurrentValueFunction){
+            String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+            // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
+            return quotedSeq.replaceFirst("\"([^\\.\"]*)\\.([^\\.\"]*)\"","\"$1\".\"$2\"");
+
+        }
+
         return super.generateDatabaseFunctionValue(databaseFunction);
     }
 }

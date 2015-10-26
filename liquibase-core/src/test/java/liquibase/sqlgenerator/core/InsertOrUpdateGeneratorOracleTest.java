@@ -3,10 +3,15 @@ package liquibase.sqlgenerator.core;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+
+import liquibase.change.ColumnConfig;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
+import liquibase.statement.core.InsertStatement;
 import org.junit.Test;
 
 
@@ -90,5 +95,21 @@ END;*/
         assertEquals("UPDATE mycatalog.mytable SET col2 = 'value2' WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
         lineToCheck++;
         assertEquals( "Wrong number of lines", 1, sqlLines.length);
+    }
+
+    @Test
+    public void testInsertSequenceValWithSchema(){
+        OracleDatabase database = new OracleDatabase();
+        InsertGenerator generator = new InsertGenerator();
+        InsertStatement statement = new InsertStatement("mycatalog", "myschema","mytable");
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setValueSequenceNext(new SequenceNextValueFunction("myschema.my_seq"));
+        columnConfig.setName("col3");
+        statement.addColumn(columnConfig);
+
+        Sql[] sql = generator.generateSql( statement, database,  null);
+
+        String theSql = sql[0].toSql();
+        assertEquals("INSERT INTO mycatalog.mytable (col3) VALUES (\"myschema\".\"my_seq\".nextval)",theSql);
     }
 }
