@@ -56,7 +56,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                         " sys.extended_properties\n" +
                         "  WHERE\n" +
                         " name='MS_Description' " +
-                        " AND major_id = OBJECT_ID('" + schemaName+"."+table.getName() + "')\n" +
+                        " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "')\n" +
                         " AND\n" +
                         " minor_id = 0"), String.class);
 

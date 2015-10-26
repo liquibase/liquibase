@@ -1,3 +1,11 @@
+840be42 CORE-2563 DiffChangeLog that adds columns does not preserve column order
+4177583 CORE-2560 Add new runOrder="first|last" attribute to control when a changeSet is ran
+4079754 CORE-2563 DiffChangeLog that adds columns does not preserve column order
+f8a1095 CORE-2562 MSSQL: Snapshot errors if table names have single quote marks in them
+86743f8 CORE-2561 Add "cycle" attribute to alterSequence
+2ab1080 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+fdc4f15 CORE-2560 Add new runOrder="first|last" attribute to control when a changeSet is ran
+c554bd7 document extracted method
 6e42653 DB2 9.7 failing on "null as xyz" columns with error:
 a1ac8cb CORE-2553 DB2: add ability to disable automatic reorg statements
 d2b609e Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb

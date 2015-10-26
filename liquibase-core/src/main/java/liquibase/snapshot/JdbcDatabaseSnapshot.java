@@ -347,7 +347,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
                             // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
                             "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
-                            "DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID, DEFAULT_LENGTH, " +
+                            "DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID as ORDINAL_POSITION, DEFAULT_LENGTH, " +
                             "DATA_DEFAULT, " +
                             "NUM_BUCKETS, CHARACTER_SET_NAME, " +
                             "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
@@ -603,7 +603,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 + "where CONSTRAINT_TYPE = 'Unique' "
                                 + "and CONSTRAINT_SCHEMA='" + jdbcSchemaName + "'";
                         if (tableName != null) {
-                            sql += " and TABLE_NAME='" + tableName + "'";
+                            sql += " and TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
                         sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +

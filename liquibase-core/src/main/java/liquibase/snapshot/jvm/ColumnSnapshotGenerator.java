@@ -62,7 +62,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         " sys.extended_properties\n" +
                         "  WHERE\n" +
                         " name='MS_Description' " +
-                        " AND major_id = OBJECT_ID('" + column.getRelation().getName() + "')\n" +
+                        " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeObjectName(column.getRelation().getName(), Table.class)) + "')\n" +
                         " AND\n" +
                         " minor_id = COLUMNPROPERTY(major_id, '" + column.getName() + "', 'ColumnId')"), String.class);
 
@@ -115,12 +115,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
+        Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
 
         Column column = new Column();
         column.setName(rawColumnName);
         column.setRelation(table);
         column.setRemarks(remarks);
+        column.setOrder(position);
 
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");

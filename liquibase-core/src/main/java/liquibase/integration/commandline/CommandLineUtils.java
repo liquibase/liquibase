@@ -87,6 +87,16 @@ public class CommandLineUtils {
         }
     }
 
+    /**
+     * Executes RawSqlStatements particular to each database engine to set the default schema for the given Database
+     *  
+     * @param username            The username used for the connection. Used with MSSQL databases
+     * @param defaultCatalogName  Catalog name and schema name are similar concepts. Used if defaultCatalogName is null. 
+     * @param defaultSchemaName   Catalog name and schema name are similar concepts. Catalog is used with Oracle, DB2 and MySQL, and takes
+     *                             precedence over the schema name.
+     * @param database            Which Database object is affected by the initialization.
+     * @throws DatabaseException
+     */
     public static void initializeDatabase(String username, String defaultCatalogName, String defaultSchemaName, Database database) throws DatabaseException {
         if ((defaultCatalogName != null || defaultSchemaName != null) && !(database.getConnection() instanceof OfflineConnection)) {
             if (database instanceof OracleDatabase) {
