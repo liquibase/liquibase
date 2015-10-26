@@ -304,6 +304,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
+            String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
+            Comparator<?> resourceComparator = null;
+            if (resourceComparatorDef != null) {
+                try {
+                	resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
+                } catch (Exception e) {
+            		//take default comparator
+                	LogFactory.getInstance().getLog().info("no resourceComparator defined - taking default implementation");
+                	resourceComparator=getStandardChangeLogComparator();
+                }
+            }
+
             includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
                     node.getChildValue(null, "errorIfMissingOrEmpty", true),
                     getStandardChangeLogComparator(), resourceAccessor);
