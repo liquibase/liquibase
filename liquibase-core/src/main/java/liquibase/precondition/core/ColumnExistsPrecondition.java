@@ -135,7 +135,9 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 
 			try {
 				String sql = format("select t.%s from %s.%s t where 0=1",
-						columnName, schemaName, tableName);
+						database.escapeColumnNameList(columnName),
+						database.escapeObjectName(schemaName, Schema.class),
+						database.escapeObjectName(tableName, Table.class));
 				statement.executeQuery(sql).close();
 
 				// column exists
