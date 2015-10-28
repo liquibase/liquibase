@@ -1226,7 +1226,15 @@ public abstract class AbstractJdbcDatabase implements Database {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement);
-            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            try {
+                ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            } catch (DatabaseException e) {
+                if (statement.continueOnError()) {
+                    LogFactory.getLogger().severe("Error executing statement '"+statement.toString()+"', but continuing", e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
