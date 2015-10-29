@@ -196,6 +196,13 @@ public class StandardLockService implements LockService {
 
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
+                if (rowsUpdated == -1) {
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might be MSSQL with NOCOUNT enabled)");
+                    database.rollback();
+                    executor.update(new RawSqlStatement("set nocount off"));
+                    rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
+                    executor.update(new RawSqlStatement("set nocount on"));
+                }
                 if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
                 }
@@ -232,6 +239,13 @@ public class StandardLockService implements LockService {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
+                if (updatedRows == -1) {
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might be MSSQL with NOCOUNT enabled.)");
+                    database.rollback();
+                    executor.update(new RawSqlStatement("set nocount off"));
+                    updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
+                    executor.update(new RawSqlStatement("set nocount on"));
+                }
                 if (updatedRows != 1) {
                     throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
                 }
