@@ -4,6 +4,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -13,6 +14,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Table;
@@ -196,12 +199,14 @@ public class StandardLockService implements LockService {
 
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
-                if (rowsUpdated == -1) {
-                    LogFactory.getLogger().debug("Database did not return a proper row count (Might be MSSQL with NOCOUNT enabled)");
+                if (rowsUpdated == -1 && database instanceof MSSQLDatabase) {
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might have NOCOUNT enabled)");
                     database.rollback();
-                    executor.update(new RawSqlStatement("set nocount off"));
-                    rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
-                    executor.update(new RawSqlStatement("set nocount on"));
+                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(new LockDatabaseChangeLogStatement(), database);
+                    if (sql.length != 1) {
+                        throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
+                    }
+                    rowsUpdated = executor.update(new RawSqlStatement("EXEC sp_executesql N'SET NOCOUNT OFF "+sql[0].toSql().replace("'", "''")+"'"));
                 }
                 if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
@@ -239,12 +244,14 @@ public class StandardLockService implements LockService {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
-                if (updatedRows == -1) {
-                    LogFactory.getLogger().debug("Database did not return a proper row count (Might be MSSQL with NOCOUNT enabled.)");
+                if (updatedRows == -1 && database instanceof MSSQLDatabase) {
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might have NOCOUNT enabled.)");
                     database.rollback();
-                    executor.update(new RawSqlStatement("set nocount off"));
-                    updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
-                    executor.update(new RawSqlStatement("set nocount on"));
+                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(new UnlockDatabaseChangeLogStatement(), database);
+                    if (sql.length != 1) {
+                        throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
+                    }
+                    updatedRows = executor.update(new RawSqlStatement("EXEC sp_executesql N'SET NOCOUNT OFF "+sql[0].toSql().replace("'", "''")+"'"));
                 }
                 if (updatedRows != 1) {
                     throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
