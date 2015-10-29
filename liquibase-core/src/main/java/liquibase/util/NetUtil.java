@@ -23,20 +23,23 @@ public class NetUtil {
             return InetAddress.getLocalHost();
         }
 
-        InetAddress lch = null;
+        InetAddress loopback = null;
         Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
-
         while (e.hasMoreElements()) {
             NetworkInterface i = e.nextElement();
-
-            Enumeration<InetAddress> ie = i.getInetAddresses();
-            if (!ie.hasMoreElements()) {
-                break;
+            if (i.isUp() && !i.isPointToPoint()) {
+                Enumeration<InetAddress> ie = i.getInetAddresses();
+                while (ie.hasMoreElements()) {
+                    InetAddress lch = ie.nextElement();
+                    if (lch.isLoopbackAddress()) {
+                        loopback = lch;
+                    } else if (!lch.isLinkLocalAddress()) {
+                        return lch;
+                    }
+                }
             }
-            lch = ie.nextElement();
-            if (!lch.isLoopbackAddress()) break;
         }
-        return lch == null ? null : lch;
+        return loopback;
     }
 
     /**
