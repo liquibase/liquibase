@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -125,7 +126,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
 		} else if(col.getValueDate() != null) {
         log.debug("value is date = "+col.getValueDate());
-		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
+            if (col.getValueDate() instanceof Timestamp) {
+                stmt.setTimestamp(i, (Timestamp) col.getValueDate());
+            } else {
+                stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
+            }
 		} else if (col.getValueBlobFile() != null) {
         log.debug("value is blob = "+col.getValueBlobFile());
 			try {
