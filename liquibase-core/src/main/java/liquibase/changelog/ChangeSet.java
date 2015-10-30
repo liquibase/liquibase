@@ -834,7 +834,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public boolean isCheckSumValid(CheckSum storedCheckSum) {
         // no need to generate the checksum if any has been set as the valid checksum
         for (CheckSum validCheckSum : validCheckSums) {
-            if (validCheckSum.toString().equalsIgnoreCase("1:any")) {
+            if (validCheckSum.toString().equalsIgnoreCase("1:any") || validCheckSum.toString().equalsIgnoreCase("1:all") || validCheckSum.toString().equalsIgnoreCase("1:*")) {
                 return true;
             }
         }
@@ -850,7 +850,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         for (CheckSum validCheckSum : validCheckSums) {
-            if (currentMd5Sum.equals(validCheckSum)) {
+            if (currentMd5Sum.equals(validCheckSum) || storedCheckSum.equals(validCheckSum)) {
                 return true;
             }
         }
