@@ -1,31 +1,27 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.change.AddColumnConfig;
+import liquibase.Scope;
+import liquibase.action.Action;
+import liquibase.action.core.AddPrimaryKeysAction;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
-import liquibase.change.core.AddPrimaryKeyChange;
-import liquibase.change.core.CreateIndexChange;
-import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.diff.output.changelog.ChangeGeneratorChain;
-import liquibase.diff.output.changelog.ChangeGeneratorFactory;
-import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
+import liquibase.diff.output.changelog.MissingObjectActionGenerator;
+import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingPrimaryKeyActionGenerator implements MissingObjectActionGenerator {
+
 
     @Override
-    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+    public int getPriority(Class<? extends DatabaseObject> objectType, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
         if (PrimaryKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
         }
-        return PRIORITY_NONE;
-
+        return PRIORITY_NOT_APPLICABLE;
     }
 
     @Override
@@ -45,12 +41,18 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
     }
 
     @Override
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        List<Change> returnList = new ArrayList<Change>();
-
+    public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
         PrimaryKey pk = (PrimaryKey) missingObject;
 
-        AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+        ArrayList<AddPrimaryKeysAction> actions = new ArrayList<>();
+        actions.add(new AddPrimaryKeysAction(pk));
+
+        return actions;
+//        List<Change> returnList = new ArrayList<Change>();
+
+//        PrimaryKey pk = (PrimaryKey) missingObject;
+//
+//        AddPrimaryKeyChange change = new AddPrimaryKeyChange();
 //        change.setTableName(pk.getTable().getSimpleName());
 //        if (control.getIncludeCatalog()) {
 //            change.setCatalogName(pk.getTable().getSchema().getCatalogName());
@@ -87,9 +89,9 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 //        }
 
 //        control.setAlreadyHandledMissing(pk.getBackingIndex());
-        returnList.add(change);
-
-        return returnList.toArray(new Change[returnList.size()]);
+//        returnList.add(change);
+//
+//        return returnList.toArray(new Change[returnList.size()]);
 
     }
 }

@@ -6,7 +6,7 @@ import liquibase.database.OfflineConnection
 import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.Snapshot
 import liquibase.structure.ObjectName
-import liquibase.structure.ObjectReference
+
 import liquibase.structure.core.Column
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
@@ -52,13 +52,13 @@ class SnapshotTablesLogicOfflineTest extends Specification {
 
         where:
         relatedTo                                                                | expected
-        new ObjectReference(Schema, "cat1", "schema-a")                           | ["cat1.schema-a.table-a-1", "cat1.schema-a.table2"] as String[]
-        new ObjectReference(Schema, "cat1", "schema-b")                           | ["cat1.schema-b.table-b-1", "cat1.schema-b.table2"] as String[]
+        new ObjectName(Schema, "cat1", "schema-a")                           | ["cat1.schema-a.table-a-1", "cat1.schema-a.table2"] as String[]
+        new ObjectName(Schema, "cat1", "schema-b")                           | ["cat1.schema-b.table-b-1", "cat1.schema-b.table2"] as String[]
 
-        new ObjectReference(Table, "cat1", "schema-a", "table-a-1")               | ["cat1.schema-a.table-a-1"] as String[]
-        new ObjectReference(Table, "cat1", "schema-a", "table2")                  | ["cat1.schema-a.table2"] as String[]
-        new ObjectReference(Table, "cat1", "schema-b", "table-b-1")               | ["cat1.schema-b.table-b-1"] as String[]
-        new ObjectReference(Table, "cat1", "schema-b", "table2")                  | ["cat1.schema-b.table2"] as String[]
+        new ObjectName(Table, "cat1", "schema-a", "table-a-1")               | ["cat1.schema-a.table-a-1"] as String[]
+        new ObjectName(Table, "cat1", "schema-a", "table2")                  | ["cat1.schema-a.table2"] as String[]
+        new ObjectName(Table, "cat1", "schema-b", "table-b-1")               | ["cat1.schema-b.table-b-1"] as String[]
+        new ObjectName(Table, "cat1", "schema-b", "table2")                  | ["cat1.schema-b.table2"] as String[]
     }
 
 }

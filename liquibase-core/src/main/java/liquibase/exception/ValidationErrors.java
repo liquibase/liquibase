@@ -2,9 +2,6 @@ package liquibase.exception;
 
 import liquibase.ExtensibleObject;
 import liquibase.action.Action;
-import liquibase.action.core.AddPrimaryKeyAction;
-import liquibase.action.core.SetNullableAction;
-import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
 import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;

@@ -7,7 +7,6 @@ import liquibase.actionlogic.ActionLogic;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.CollectionUtil;
 

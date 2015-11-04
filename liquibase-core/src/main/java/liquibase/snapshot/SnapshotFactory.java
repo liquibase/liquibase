@@ -6,7 +6,6 @@ import liquibase.actionlogic.ActionExecutor;
 import liquibase.actionlogic.QueryResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectReference;
 
 public class SnapshotFactory {
 

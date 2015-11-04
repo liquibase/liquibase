@@ -10,7 +10,6 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.ActionPerformException;
 import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.CollectionUtil;

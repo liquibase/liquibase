@@ -178,7 +178,7 @@ public class StringUtils {
 
     public static String join(ExtensibleObject extensibleObject, String delimiter, StringUtilsFormatter formatter) {
         List<String> list = new ArrayList<String>();
-        for (String attribute : extensibleObject.getAttributeNames()) {
+        for (String attribute : new TreeSet<>(extensibleObject.getAttributeNames())) {
             list.add(attribute+"="+formatter.toString(extensibleObject.get(attribute, Object.class)));
         }
         return join(list, delimiter);

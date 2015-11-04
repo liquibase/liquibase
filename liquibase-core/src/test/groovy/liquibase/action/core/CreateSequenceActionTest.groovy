@@ -11,9 +11,9 @@ class CreateSequenceActionTest extends Specification {
         object.describe() == expected
 
         where:
-        object                                                                                                                                          | expected
-        new CreateSequenceAction()                                                                                                                      | "createSequence()"
-        new CreateSequenceAction().set("sequenceName", "test_seq")                                                     | "createSequence(sequenceName=test_seq)"
+        object                                                                        | expected
+        new CreateSequenceAction()                                                    | "createSequence()"
+        new CreateSequenceAction().set("sequenceName", "test_seq")                    | "createSequence(sequenceName=test_seq)"
         new CreateSequenceAction().set("sequenceName", "test_seq").set("cycle", true) | "createSequence(cycle=true, sequenceName=test_seq)"
     }
 }

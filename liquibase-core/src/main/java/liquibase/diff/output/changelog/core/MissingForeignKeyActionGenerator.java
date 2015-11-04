@@ -1,23 +1,33 @@
 package liquibase.diff.output.changelog.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
+import liquibase.action.Action;
+import liquibase.action.core.AddForeignKeysAction;
 import liquibase.change.Change;
 import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
+import liquibase.diff.output.changelog.MissingObjectActionGenerator;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
+import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
-public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGenerator {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MissingForeignKeyActionGenerator implements MissingObjectActionGenerator {
+
+
     @Override
-    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+    public int getPriority(Class<? extends DatabaseObject> objectType, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
         if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
         }
-        return PRIORITY_NONE;
+        return PRIORITY_NOT_APPLICABLE;
     }
 
     @Override
@@ -37,16 +47,21 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
     }
 
     @Override
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+    public List<? extends Action> fixMissing(DatabaseObject missingObject, DiffOutputControl control, Snapshot referenceSnapshot, Snapshot targetSnapshot, Scope scope) {
         ForeignKey fk = (ForeignKey) missingObject;
 
-        AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
-        change.setConstraintName(fk.getSimpleName());
+        ArrayList<AddForeignKeysAction> actions = new ArrayList<>();
+        actions.add(new AddForeignKeysAction(fk));
 
-        String defaultSchemaName = referenceDatabase.getDefaultSchemaName();
-        String defaultCatalogName = referenceDatabase.getDefaultCatalogName();
+        return actions;
 
-        boolean includedCatalog = false;
+//        AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
+//        change.setConstraintName(fk.getSimpleName());
+//
+//        String defaultSchemaName = referenceSnapshot.getScope().getDatabase().getDefaultSchemaName();
+//        String defaultCatalogName = referenceSnapshot.getScope().getDatabase().getDefaultCatalogName();
+//
+//        boolean includedCatalog = false;
 //        change.setReferencedTableName(fk.getPrimaryKeyTable().getSimpleName());
 //        if (referenceDatabase.supportsCatalogs() && (control.getIncludeCatalog() || (defaultCatalogName != null && !defaultCatalogName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getCatalogName())))) {
 //            change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
@@ -93,6 +108,6 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
 //            control.setAlreadyHandledMissing(backingIndex);
 //        }
 
-        return new Change[] { change };
+//        return new Change[] { change };
     }
 }

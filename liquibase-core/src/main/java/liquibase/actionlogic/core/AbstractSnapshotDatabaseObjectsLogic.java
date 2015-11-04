@@ -3,6 +3,7 @@ package liquibase.actionlogic.core;
 import liquibase.Scope;
 import liquibase.action.AbstractAction;
 import liquibase.action.Action;
+import liquibase.action.ActionStatus;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.*;
 import liquibase.exception.ActionPerformException;

@@ -3,10 +3,7 @@ package liquibase.structure;
 import liquibase.AbstractExtensibleObject;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class ObjectName extends AbstractExtensibleObject implements Comparable<ObjectName> {
 
@@ -27,9 +24,16 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return new ObjectName(split);
     }
 
-    public ObjectName(ObjectName container, String name) {
-        this.name = name;
+    public ObjectName(ObjectName container, String... names) {
         this.container = container;
+        if (names != null && names.length > 0) {
+            if (names.length == 1) {
+                this.name = names[0];
+            } else {
+                this.container = new ObjectName(container, Arrays.copyOfRange(names, 0, names.length - 1));
+                this.name = names[names.length-1];
+            }
+        }
     }
 
     /**
@@ -83,9 +87,6 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return this.name.equalsIgnoreCase(name.name);
     }
 
-    public boolean equals(ObjectReference objectReference) {
-        return this.equals(objectReference.objectName);
-    }
 
     /**
      * Same logic as {@link #equals(ObjectName, boolean)} with true for ignoreLengthDifferences

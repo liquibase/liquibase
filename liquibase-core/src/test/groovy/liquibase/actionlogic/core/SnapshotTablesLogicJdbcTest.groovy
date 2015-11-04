@@ -4,10 +4,9 @@ import liquibase.JUnitScope
 import liquibase.action.core.QueryJdbcMetaDataAction
 import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
-import liquibase.exception.ActionPerformException
 import liquibase.sdk.database.MockDatabase
 import liquibase.structure.ObjectName
-import liquibase.structure.ObjectReference
+
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
 import liquibase.structure.core.Schema
@@ -28,7 +27,7 @@ class SnapshotTablesLogicJdbcTest extends Specification {
                 TABLE_CAT  : tableCat,
                 TABLE_SCHEM: tableSchema,
                 TABLE_NAME : tableName,
-        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectReference(Table)), scope)
+        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectName(Table)), scope)
 
         then:
         object instanceof Table
@@ -52,7 +51,7 @@ class SnapshotTablesLogicJdbcTest extends Specification {
         db.setMaxSnapshotContainerDepth(maxDepth)
         def scope = JUnitScope.getInstance(db)
 
-        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(relatedType, name))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectName(relatedType, name))
 
         QueryJdbcMetaDataAction queryAction = new SnapshotTablesLogicJdbc().createSnapshotAction(action, scope)
 

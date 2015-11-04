@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.AddLookupTableAction;
-import liquibase.action.core.AddPrimaryKeyAction;
+import liquibase.action.core.AddPrimaryKeysAction;
 import liquibase.action.core.SetNullableAction;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
@@ -40,9 +40,7 @@ public class AddLookupTableLogic extends AbstractActionLogic<AddLookupTableActio
 
         actions.add(new SetNullableAction(newColumnName, newColumnDataType, false));
 
-        AddPrimaryKeyAction addPkAction = new AddPrimaryKeyAction();
-        addPkAction.primaryKey = new PrimaryKey(new ObjectName(newTableName, null));
-        addPkAction.primaryKey.columns = Arrays.asList(new PrimaryKey.PrimaryKeyColumnName(newColumnName.name));
+        AddPrimaryKeysAction addPkAction = new AddPrimaryKeysAction(new PrimaryKey(new ObjectName(newTableName, null), newColumnName.name));
 
         actions.add(addPkAction);
 

@@ -18,9 +18,15 @@ public class Index extends AbstractDatabaseObject {
     public Index() {
     }
 
-    public Index(ObjectName indexName) {
+    public Index(ObjectName indexName, String... columns) {
         super(indexName);
+//        if (columns != null && columns.length > 0) {
+//            for (String column : columns) {
+//                this.columns.add(new IndexedColumn())
+//            }
+//        }
     }
+
 
     public DatabaseObject[] getContainingObjects() {
         return null;

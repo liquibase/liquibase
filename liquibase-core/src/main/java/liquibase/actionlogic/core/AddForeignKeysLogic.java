@@ -74,14 +74,13 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
                     result.assertApplied(false, "Foreign Key '" + actionFK.name + "' not found");
                 } else {
                     result.assertCorrect(actionFK, snapshotFK);
-                }
-
-                if (actionFK.columnChecks.size() == snapshotFK.columnChecks.size()) {
-                    for (int i=0; i <  actionFK.columnChecks.size(); i++) {
-                        result.assertCorrect(actionFK.columnChecks.get(i), snapshotFK.columnChecks.get(i));
+                    if (actionFK.columnChecks.size() == snapshotFK.columnChecks.size()) {
+                        for (int i=0; i <  actionFK.columnChecks.size(); i++) {
+                            result.assertCorrect(actionFK.columnChecks.get(i), snapshotFK.columnChecks.get(i));
+                        }
+                    } else {
+                        result.assertCorrect(false, "columnCheck sizes are different");
                     }
-                } else {
-                    result.assertCorrect(false, "columnCheck sizes are different");
                 }
             }
             return result;

@@ -3,8 +3,6 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectReference;
-import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;

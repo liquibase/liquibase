@@ -3,7 +3,6 @@ package liquibase.action.core;
 import liquibase.action.AbstractAction;
 import liquibase.action.QueryAction;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectReference;
 
 /**
  * Action describing objects to snapshot.

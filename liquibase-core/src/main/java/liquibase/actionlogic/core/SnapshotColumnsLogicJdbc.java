@@ -11,7 +11,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;

@@ -4,12 +4,10 @@ import liquibase.JUnitScope
 import liquibase.action.core.QueryJdbcMetaDataAction
 import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
-import liquibase.exception.ActionPerformException
 import liquibase.sdk.database.MockDatabase
 import liquibase.statement.DatabaseFunction
-import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.ObjectName
-import liquibase.structure.ObjectReference
+
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import liquibase.structure.core.Table
@@ -34,7 +32,7 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
                 COLUMN_NAME: "columnName",
                 NULLABLE   : DatabaseMetaData.columnNoNulls,
                 DATA_TYPE  : Types.INTEGER,
-        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectReference(Table.class)), scope)
+        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectName(Table.class)), scope)
 
         then:
         object instanceof Column

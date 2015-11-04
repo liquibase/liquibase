@@ -13,12 +13,15 @@ class ObjectNameTest extends Specification {
         objectName.toString() == expected
 
         where:
-        objectName                    | expected
-        new ObjectName()              | "#UNSET"
-        new ObjectName(null)          | "#UNSET"
-        new ObjectName("a")           | "a"
-        new ObjectName("a", "b")      | "a.b"
-        new ObjectName("a", "b", "c") | "a.b.c"
+        objectName                                         | expected
+        new ObjectName()                                   | "#UNSET"
+        new ObjectName(null)                               | "#UNSET"
+        new ObjectName("a")                                | "a"
+        new ObjectName("a", "b")                           | "a.b"
+        new ObjectName("a", "b", "c")                      | "a.b.c"
+        new ObjectName(new ObjectName("a", "b"))           | "a.b.#UNSET"
+        new ObjectName(new ObjectName("a", "b"), "c")      | "a.b.c"
+        new ObjectName(new ObjectName("a", "b"), "c", "d") | "a.b.c.d"
     }
 
     @Unroll("#featureName: #expected")

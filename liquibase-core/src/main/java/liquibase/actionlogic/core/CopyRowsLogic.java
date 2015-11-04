@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core;
 
-import javafx.scene.control.Tab;
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.CopyRowsAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -12,7 +10,6 @@ import liquibase.actionlogic.NoOpResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;

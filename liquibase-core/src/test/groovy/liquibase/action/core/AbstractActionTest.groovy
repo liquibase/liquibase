@@ -3,6 +3,7 @@ package liquibase.action.core
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.Action
+import liquibase.action.QueryAction
 import liquibase.action.TestObjectFactory
 import liquibase.actionlogic.ActionExecutor
 import liquibase.command.DropAllCommand
@@ -16,9 +17,11 @@ import liquibase.servicelocator.AbstractServiceFactory
 import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
 import liquibase.structure.AbstractTestStructureSupplier
+import liquibase.structure.DatabaseObject
 import liquibase.structure.ObjectName
 import liquibase.structure.ObjectNameStrategy
-import liquibase.structure.ObjectReference
+
+import liquibase.structure.core.ForeignKey
 import liquibase.structure.core.Index
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
@@ -51,11 +54,13 @@ abstract class AbstractActionTest extends Specification {
                 .addParameters(parameters)
                 .addOperations(plan: plan)
                 .run({
-            plan.execute(scope)
+            def results = plan.execute(scope)
 
-            assert executor.checkStatus(action, scope).applied
+            if (!(action instanceof QueryAction)) {
+                assert executor.checkStatus(action, scope).applied
+            }
 
-            assertClosure(plan)
+            assertClosure(plan, results)
         })
 
         return true;
@@ -71,6 +76,14 @@ abstract class AbstractActionTest extends Specification {
 
     protected List<ObjectName> getObjectNames(Class<? extends  AbstractTestStructureSupplier> supplierType, ObjectNameStrategy strategy, Scope scope) {
         return scope.getSingleton(supplierType).getObjectNames(strategy, scope)
+    }
+
+    protected String correctObjectName(String name, Class<? extends DatabaseObject> type, Database database) {
+        if (database.canStoreObjectName("lowercase", false, type)) {
+            return name.toLowerCase();
+        } else {
+            return name.toUpperCase();
+        }
     }
 
     def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
@@ -102,10 +115,10 @@ abstract class AbstractActionTest extends Specification {
             def control = new DiffOutputControl()
             def executor = new ActionExecutor()
 
-            for (def type : [Table, UniqueConstraint, Index]) {
+            for (def type : [Table, UniqueConstraint, Index, ForeignKey]) {
                 for (def obj : snapshot.get(type)) {
                     for (def action : scope.getSingleton(ActionGeneratorFactory).fixMissing(obj, control, snapshot, new Snapshot(scope), scope)) {
-                        LoggerFactory.getLogger(this.getClass()).debug("Executing: " + executor.createPlan(action, scope).describe())
+                        LoggerFactory.getLogger(this.getClass()).debug("Setup action: " + executor.createPlan(action, scope).describe())
                         executor.execute(action, scope)
                     }
                 }

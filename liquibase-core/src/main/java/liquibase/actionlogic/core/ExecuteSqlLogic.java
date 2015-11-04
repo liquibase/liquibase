@@ -49,8 +49,7 @@ public class ExecuteSqlLogic extends AbstractSqlLogic<ExecuteSqlAction>  {
             Statement stmt = jdbcConnection.createStatement();
             stmt.execute(action.sql.toString());
         } catch (SQLException e) {
-            LoggerFactory.getLogger(getClass()).warn("Error executing SQL: "+action.sql.toString(), e);
-            throw new ActionPerformException(e);
+            throw new ActionPerformException("Error executing SQL: "+action.sql.toString(), e);
         }
         return new ExecuteResult();
 

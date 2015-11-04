@@ -95,11 +95,11 @@ public class MySQLConnectionSupplier extends ConnectionSupplier {
 
     @Override
     public String getPrimarySchema() {
-        return super.getPrimarySchema().toLowerCase();
+        return "lbcat".toLowerCase();
     }
 
     @Override
     public String getAlternateSchema() {
-        return super.getAlternateSchema().toLowerCase();
+        return "lbcat2".toLowerCase();
     }
 }

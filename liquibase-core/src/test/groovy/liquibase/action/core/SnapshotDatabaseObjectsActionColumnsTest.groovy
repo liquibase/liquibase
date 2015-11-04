@@ -188,7 +188,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
             if (autoIncrement) {
                 if (((AddAutoIncrementActionTest.TestDetails) new AddAutoIncrementActionTest().getTestDetails(scope)).createPrimaryKeyBeforeAutoIncrement()) {
-                    executor.execute(new AddPrimaryKeyAction(new PrimaryKey(new ObjectName(column.name.container, null), column.getSimpleName())), scope)
+                    executor.execute(new AddPrimaryKeysAction(new PrimaryKey(new ObjectName(column.name.container, null), column.getSimpleName())), scope)
                 }
                 executor.execute(new AddAutoIncrementAction(column.name, column.type), scope)
             }

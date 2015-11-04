@@ -5,7 +5,6 @@ import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.ActionExecutor;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectReference;
 
 import java.io.IOException;
 import java.io.InputStream;

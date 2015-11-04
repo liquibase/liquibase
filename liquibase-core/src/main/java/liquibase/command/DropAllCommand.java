@@ -5,7 +5,6 @@ import liquibase.action.core.DropForeignKeyAction;
 import liquibase.action.core.DropTablesAction;
 import liquibase.actionlogic.ActionExecutor;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectReference;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 

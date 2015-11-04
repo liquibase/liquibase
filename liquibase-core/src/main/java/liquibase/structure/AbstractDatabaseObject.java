@@ -56,11 +56,6 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
         return (T) this;
     }
 
-    public ObjectReference getObjectReference() {
-        return new ObjectReference(getClass(), getName());
-    }
-
-
     @Override
     public String getSnapshotId() {
         return snapshotId;

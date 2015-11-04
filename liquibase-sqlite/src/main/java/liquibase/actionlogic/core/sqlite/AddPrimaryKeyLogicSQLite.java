@@ -1,8 +1,7 @@
 package liquibase.actionlogic.core.sqlite;
 
-import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.AddPrimaryKeyAction;
+import liquibase.action.core.AddPrimaryKeysAction;
 import liquibase.actionlogic.UnsupportedActionLogic;
 import liquibase.database.Database;
 import liquibase.database.core.sqlite.SQLiteDatabase;
@@ -10,7 +9,7 @@ import liquibase.database.core.sqlite.SQLiteDatabase;
 public class AddPrimaryKeyLogicSQLite extends UnsupportedActionLogic {
     @Override
     protected Class<? extends Action> getSupportedAction() {
-        return AddPrimaryKeyAction.class;
+        return AddPrimaryKeysAction.class;
     }
 
     @Override

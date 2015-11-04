@@ -10,7 +10,6 @@ import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectName;
-import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.Validate;
 
