@@ -272,11 +272,11 @@ public class WatchCommand extends AbstractCommand {
                     throw new UnexpectedLiquibaseException("Can only display one schema");
                 }
                 Schema schema = schemas.iterator().next();
-                if (database.getMaxSnapshotContainerDepth() > 1) {
-                    buffer.append("<strong>Catalog & Schema:</strong> ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("<br>\n");
-                } else {
-                    buffer.append("<strong>Catalog:</strong> ").append(schema.getCatalogName()).append("<br>\n");
-                }
+//                if (database.getMaxSnapshotContainerDepth() > 1) {
+//                    buffer.append("<strong>Catalog & Schema:</strong> ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("<br>\n");
+//                } else {
+//                    buffer.append("<strong>Catalog:</strong> ").append(schema.getCatalogName()).append("<br>\n");
+//                }
 
                 buffer.append("</div>\n");
                 buffer.append("</div>\n");
@@ -290,11 +290,11 @@ public class WatchCommand extends AbstractCommand {
 
                 catalogBuffer.append("<ul class='nav nav-tabs' id='tabs'>\n");
                 catalogBuffer.append("<li><a href='#databasechangelog-tab' data-toggle='tab'>DatabaseChangeLog</a></li>\n");
-                for (Class type : includedTypes) {
-                    if (schema.getDatabaseObjects(type).size() > 0) {
-                        catalogBuffer.append("<li><a href='#").append(type.getSimpleName()).append("-tab' data-toggle='tab'>").append(type.getSimpleName()).append("(s)</a></li>\n");
-                    }
-                }
+//                for (Class type : includedTypes) {
+//                    if (schema.getDatabaseObjects(type).size() > 0) {
+//                        catalogBuffer.append("<li><a href='#").append(type.getSimpleName()).append("-tab' data-toggle='tab'>").append(type.getSimpleName()).append("(s)</a></li>\n");
+//                    }
+//                }
                 catalogBuffer.append("</ul>\n");
 
                 catalogBuffer.append("<div class='tab-content' style='margin-bottom:20px;'>\n");
@@ -305,27 +305,27 @@ public class WatchCommand extends AbstractCommand {
                 catalogBuffer.append(context.get("changeLog"));
                 catalogBuffer.append("</div>");
 
-                for (Class type : includedTypes) {
-                    List<? extends DatabaseObject> databaseObjects = sort(schema.getDatabaseObjects(type));
-                    if (databaseObjects.size() > 0) {
-                        catalogBuffer.append("<div class='tab-pane' style='border: 1px #ddd solid; border-top:none' id='").append(type.getSimpleName()).append("-tab'>\n");
-
-                        catalogBuffer.append("<div style='padding:10px; font-color:black'><ol>\n");
-
-                        StringBuilder typeBuffer = new StringBuilder();
-                        for (DatabaseObject databaseObject : databaseObjects) {
-                            String id = databaseObject.getClass().getName() + "-" + databaseObject.getName();
-                            id = cleanHtmlId(id);
-                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#" + id + "'>").append(StringUtils.escapeHtml(databaseObject.getSimpleName())).append("</a></li>\n");
-                            detailsBuilder.append(wrapDetails(id, type.getSimpleName()+" "+databaseObject.getName(), writeDatabaseObject(databaseObject, new HashSet<String>(), databaseObject.getSimpleName()))).append("\n");
-                        }
-
-                        catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
-
-                        catalogBuffer.append("</ol></div>\n");
-                        catalogBuffer.append("</div>\n");
-                    }
-                }
+//                for (Class type : includedTypes) {
+//                    List<? extends DatabaseObject> databaseObjects = sort(schema.getDatabaseObjects(type));
+//                    if (databaseObjects.size() > 0) {
+//                        catalogBuffer.append("<div class='tab-pane' style='border: 1px #ddd solid; border-top:none' id='").append(type.getSimpleName()).append("-tab'>\n");
+//
+//                        catalogBuffer.append("<div style='padding:10px; font-color:black'><ol>\n");
+//
+//                        StringBuilder typeBuffer = new StringBuilder();
+//                        for (DatabaseObject databaseObject : databaseObjects) {
+//                            String id = databaseObject.getClass().getName() + "-" + databaseObject.getName();
+//                            id = cleanHtmlId(id);
+//                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#" + id + "'>").append(StringUtils.escapeHtml(databaseObject.getSimpleName())).append("</a></li>\n");
+//                            detailsBuilder.append(wrapDetails(id, type.getSimpleName()+" "+databaseObject.getName(), writeDatabaseObject(databaseObject, new HashSet<String>(), databaseObject.getSimpleName()))).append("\n");
+//                        }
+//
+//                        catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
+//
+//                        catalogBuffer.append("</ol></div>\n");
+//                        catalogBuffer.append("</div>\n");
+//                    }
+//                }
                 catalogBuffer.append("</div>\n");
                 buffer.append(StringUtils.indent(catalogBuffer.toString(), 4));
 

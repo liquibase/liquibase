@@ -1,15 +1,15 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.util.List;
 
 public class CopyRowsAction extends AbstractAction {
 
-    public ObjectName sourceTableName;
+    public ObjectReference sourceTableName;
 
-    public ObjectName targetTableName;
+    public ObjectReference targetTableName;
 
     public List<String> sourceColumns;
     public List<String> targetColumns;

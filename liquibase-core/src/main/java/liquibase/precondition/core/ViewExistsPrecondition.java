@@ -4,13 +4,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Schema;
 import liquibase.exception.*;
-import liquibase.precondition.Precondition;
-import liquibase.structure.core.View;
 
 public class ViewExistsPrecondition extends AbstractPrecondition {
     private String catalogName;

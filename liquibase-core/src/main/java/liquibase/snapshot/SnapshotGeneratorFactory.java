@@ -3,23 +3,17 @@ package liquibase.snapshot;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.parser.SnapshotParser;
-import liquibase.parser.SnapshotParserFactory;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class SnapshotGeneratorFactory {
@@ -96,7 +90,7 @@ public class SnapshotGeneratorFactory {
         //workaround for common check for databasechangelog/lock table to not snapshot the whole database like we have to in order to handle case issues
         if (example instanceof Table && (example.getName().equals(database.getDatabaseChangeLogTableName()) || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
-                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), example.getSimpleName()), Table.class)));
+                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), ((Table) example).name), Table.class)));
                 return true;
             } catch (DatabaseException e) {
 //                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection
@@ -110,17 +104,17 @@ public class SnapshotGeneratorFactory {
             return true;
         }
         CatalogAndSchema catalogAndSchema;
-        if (example.getSchema() == null) {
-            catalogAndSchema = database.getDefaultSchema();
-        } else {
-            catalogAndSchema = example.getSchema().toCatalogAndSchema();
-        }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, false, example.getClass()));
-        for (DatabaseObject obj : snapshot.get(example.getClass())) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
-                return true;
-            }
-        }
+//        if (example.getContainer() == null) {
+//            catalogAndSchema = database.getDefaultSchema();
+//        } else {
+//            catalogAndSchema = example.getContainer().toCatalogAndSchema();
+//        }
+//        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, false, example.getClass()));
+//        for (DatabaseObject obj : snapshot.get(example.getClass())) {
+//            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
+//                return true;
+//            }
+//        }
         return false;
     }
 
@@ -133,10 +127,10 @@ public class SnapshotGeneratorFactory {
             return null;
         }
         Schema[] schemas = new Schema[examples.length];
-        for (int i = 0; i< schemas.length; i++) {
-            examples[i] = examples[i].customize(database);
-            schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
-        }
+//        for (int i = 0; i< schemas.length; i++) {
+//            examples[i] = examples[i].customize(database);
+//            schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
+//        }
         return createSnapshot(schemas, database, snapshotControl);
     }
 
@@ -166,7 +160,7 @@ public class SnapshotGeneratorFactory {
 
     public Table getDatabaseChangeLogTable(SnapshotControl snapshotControl, Database database) throws DatabaseException {
         try {
-            Table liquibaseTable = (Table) new Table(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+            Table liquibaseTable = (Table) new Table(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
             return createSnapshot(liquibaseTable, database, snapshotControl);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -175,7 +169,7 @@ public class SnapshotGeneratorFactory {
 
     public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
         try {
-            Table example = (Table) new Table(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            Table example = (Table) new Table(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             return createSnapshot(example, database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -184,7 +178,7 @@ public class SnapshotGeneratorFactory {
 
     public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
         try {
-            return has(new Table(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())), database);
+            return has(new Table(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -192,7 +186,7 @@ public class SnapshotGeneratorFactory {
 
     public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
         try {
-            return has(new Table(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())), database);
+            return has(new Table(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }

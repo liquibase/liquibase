@@ -4,26 +4,18 @@ import liquibase.ExtensibleObject;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.core.Schema;
 
-import java.util.Set;
-
 public interface DatabaseObject extends Comparable, LiquibaseSerializable, ExtensibleObject {
 
-    public String getSnapshotId();
-
-    public void setSnapshotId(String id);
-
-    DatabaseObject[] getContainingObjects();
+    String getSnapshotId();
 
     String getObjectTypeName();
 
-    ObjectName getName();
+    String getName();
 
-    String getSimpleName();
-
-    <T> T setName(ObjectName name);
-
-    Schema getSchema();
+    ObjectReference getContainer();
 
     boolean snapshotByDefault();
+
+    ObjectReference toReference();
 }
 

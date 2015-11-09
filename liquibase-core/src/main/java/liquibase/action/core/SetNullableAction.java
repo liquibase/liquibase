@@ -1,18 +1,18 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class SetNullableAction extends AbstractAction {
 
-    public ObjectName columnName;
+    public ObjectReference columnName;
     public String columnDataType;
     public Boolean nullable;
 
     public SetNullableAction() {
     }
 
-    public SetNullableAction(ObjectName columnName, String columnDataType, boolean nullable) {
+    public SetNullableAction(ObjectReference columnName, String columnDataType, boolean nullable) {
         this.columnName = columnName;
         this.columnDataType = columnDataType;
         this.nullable = nullable;

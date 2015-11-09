@@ -1,9 +1,6 @@
 package liquibase.action;
 
 import liquibase.AbstractExtensibleObject;
-import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.structure.ObjectName;
 import liquibase.util.StringUtils;
 
 /**

@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Table;
 
 /**
@@ -72,8 +73,8 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Table && example.getSimpleName().startsWith("RDB$")) {
+    public boolean isSystemObject(ObjectReference example) {
+        if (example.instanceOf(Table.class) && example.name.startsWith("RDB$")) {
             return true;
         }
         return super.isSystemObject(example);    //To change body of overridden methods use File | Settings | File Templates.

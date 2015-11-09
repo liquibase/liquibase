@@ -1,11 +1,7 @@
 package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.structure.ObjectReference;
 
 /**
  * A container of columns. Usually a table or view.
@@ -14,31 +10,18 @@ public abstract class Relation extends AbstractDatabaseObject {
 
     public String remarks;
 
-    protected Relation() {
+    public Relation() {
     }
 
-    protected Relation(ObjectName name) {
+    public Relation(String name) {
         super(name);
     }
 
-    @Override
-    public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[]{
-                getSchema()
-        };
-
+    public Relation(ObjectReference nameAndContainer) {
+        super(nameAndContainer);
     }
 
-    /**
-     * @return Returns the schema.
-     */
-    @Override
-    public Schema getSchema() {
-        return null;
+    public Relation(ObjectReference container, String name) {
+        super(container, name);
     }
-
-    public int compareTo(Object o) {
-        return this.getName().compareTo(((Relation) o).getName());
-    }
-
 }

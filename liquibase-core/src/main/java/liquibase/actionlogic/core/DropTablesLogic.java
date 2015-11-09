@@ -10,7 +10,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
@@ -46,14 +46,14 @@ public class DropTablesLogic extends AbstractActionLogic<DropTablesAction> {
     public ActionResult execute(DropTablesAction action, Scope scope) throws ActionPerformException {
         List<Action> actions = new ArrayList<>();
 
-        for (ObjectName tableName: action.tableNames) {
+        for (ObjectReference tableName: action.tableNames) {
             actions.add(new ExecuteSqlAction(generateSql(tableName, action, scope)));
         }
 
         return new DelegateResult(actions);
     }
 
-    protected StringClauses generateSql(ObjectName tableName, DropTablesAction action, Scope scope) {
+    protected StringClauses generateSql(ObjectReference tableName, DropTablesAction action, Scope scope) {
         Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses()
                 .append("DROP TABLE")

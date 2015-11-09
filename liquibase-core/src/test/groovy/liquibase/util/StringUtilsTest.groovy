@@ -1,7 +1,7 @@
 package liquibase.util
 
 import liquibase.action.core.AddAutoIncrementAction
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -117,7 +117,7 @@ class StringUtilsTest extends Specification {
         when:
         def emptyObject = new AddAutoIncrementAction()
         def populatedObject = new AddAutoIncrementAction()
-        populatedObject.columnName = new ObjectName("a", "b", "columnName")
+        populatedObject.columnName = new ObjectReference("a", "b", "columnName")
         populatedObject.incrementBy = new BigInteger(12)
 
         then:

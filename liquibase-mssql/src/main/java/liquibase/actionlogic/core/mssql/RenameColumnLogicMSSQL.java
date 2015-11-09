@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.RenameColumnAction;
 import liquibase.actionlogic.ActionResult;
@@ -10,11 +9,8 @@ import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-
-import java.util.List;
 
 public class RenameColumnLogicMSSQL extends RenameColumnLogic {
     @Override

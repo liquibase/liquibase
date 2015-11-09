@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core.sqlite;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.ReindexAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -11,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.core.sqlite.SQLiteDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
 public class ReindexLogicSQLite extends AbstractActionLogic<ReindexAction> {

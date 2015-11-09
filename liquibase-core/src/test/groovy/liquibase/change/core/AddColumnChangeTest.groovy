@@ -223,12 +223,12 @@ public class AddColumnChangeTest extends StandardChangeTest {
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {
         for (columnDef in ((AddColumnChange) change).getColumns()) {
-            def column = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, columnDef.name)
+            def column = new Column(Table.class, table.container.catalogName, table.container.name, table.name, columnDef.name)
             table.getColumns().add(column)
             snapshotFactory.addObjects(column)
 
             if (columnDef.constraints != null && columnDef.constraints.isPrimaryKey()) {
-                def pk = new PrimaryKey(null, table.schema.catalogName, table.schema.name, table.name, new Column(column.name))
+                def pk = new PrimaryKey(null, table.container.catalogName, table.container.name, table.name, new Column(column.name))
                 snapshotFactory.addObjects(pk)
                 table.setPrimaryKey(pk)
             }

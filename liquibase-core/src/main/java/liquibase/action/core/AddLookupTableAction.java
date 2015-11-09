@@ -1,12 +1,12 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class AddLookupTableAction extends AbstractAction {
-    public ObjectName existingColumnName;
+    public ObjectReference existingColumnName;
 
-    public ObjectName newColumnName;
+    public ObjectReference newColumnName;
     public String newColumnDataType;
     public String constraintName;
 }

@@ -1,29 +1,19 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.Liquibase;
 import liquibase.Scope;
 import liquibase.action.Action;
 import liquibase.action.core.CreateTableAction;
-import liquibase.action.core.SnapshotDatabaseObjectsAction;
-import liquibase.actionlogic.ActionExecutor;
-import liquibase.actionlogic.QueryResult;
-import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.LiquibaseDataType;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.MissingObjectActionGenerator;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.Snapshot;
-import liquibase.snapshot.SnapshotFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +45,7 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
 
             Scope referenceOfflineDatabaseScope = scope.child(Scope.Attr.database, DatabaseFactory.getInstance().fromSnapshot(referenceSnapshot));
 
-            PrimaryKey primaryKey  = LiquibaseUtil.snapshotObject(PrimaryKey.class, missingTable, referenceOfflineDatabaseScope);
+            PrimaryKey primaryKey  = LiquibaseUtil.snapshotObject(PrimaryKey.class, missingTable.toReference(), referenceOfflineDatabaseScope);
 
 //        if (control.diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema().toCatalogAndSchema(), missingTable.getName())) {
 //            continue;
@@ -66,7 +56,7 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
             action.table.remarks = missingTable.remarks;
             action.primaryKey = primaryKey;
 
-            for (Column column : LiquibaseUtil.snapshotAll(Column.class, missingTable, referenceOfflineDatabaseScope)) {
+            for (Column column : LiquibaseUtil.snapshotAll(Column.class, missingTable.toReference(), referenceOfflineDatabaseScope)) {
                 action.columns.add(column);
     //            columnDefinition.columnName = column.getName();
     //

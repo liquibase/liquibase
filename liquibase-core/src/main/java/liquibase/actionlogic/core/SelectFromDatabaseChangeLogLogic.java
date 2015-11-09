@@ -8,7 +8,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic<SelectFromDatabaseChangeLogAction> {
 
@@ -22,7 +22,7 @@ public class SelectFromDatabaseChangeLogLogic extends AbstractActionLogic<Select
         final Database database = scope.getDatabase();
 
         SelectDataAction selectDataAction = new SelectDataAction(
-                new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()),
+                new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()),
                 action.selectColumns
         );
         selectDataAction.where = action.where;

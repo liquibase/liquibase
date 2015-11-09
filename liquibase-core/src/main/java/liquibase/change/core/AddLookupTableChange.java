@@ -5,9 +5,8 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -172,16 +171,16 @@ public class AddLookupTableChange extends AbstractChange {
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
         try {
-            Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
-            Column newColumnExample = new Column(new ObjectName(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName()));
+//            Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
+//            Column newColumnExample = new Column(new ObjectReference(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName()));
 
 //            ForeignKey foreignKeyExample = new ForeignKey(getConstraintName(), getExistingTableCatalogName(), getExistingTableSchemaName(), getExistingTableName());
 //            foreignKeyExample.setPrimaryKeyTable(newTableExample);
 //            foreignKeyExample.setForeignKeyColumns(Column.listFromNames(getExistingColumnName()));
 //            foreignKeyExample.setPrimaryKeyColumns(Column.listFromNames(getNewColumnName()));
 
-            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
-            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
+//            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
+//            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
 //            result.assertApplied(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
 
             return result;

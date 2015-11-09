@@ -27,8 +27,8 @@ public class DataSnapshotGenerator extends JdbcSnapshotGenerator {
             Table table = (Table) foundObject;
             try {
 
-                Data exampleData = new Data().setTable(table);
-                table.set("data", exampleData);
+//                Data exampleData = new Data().setTable(table);
+//                table.set("data", exampleData);
             } catch (Exception e) {
                 throw new DatabaseException(e);
             }

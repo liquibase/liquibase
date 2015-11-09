@@ -9,7 +9,7 @@ import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.View;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
@@ -26,7 +26,7 @@ public class CreateViewLogicInformix extends CreateViewLogic {
         ActionResult result = super.execute(action, scope);
         if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {
             Database database = scope.getDatabase();
-            ObjectName viewName = action.viewName;
+            ObjectReference viewName = action.viewName;
 
             return new DelegateResult(
                     new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeObjectName(viewName, View.class)),

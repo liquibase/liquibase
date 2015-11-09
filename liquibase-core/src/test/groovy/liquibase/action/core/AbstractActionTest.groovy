@@ -18,7 +18,7 @@ import liquibase.servicelocator.Service
 import liquibase.snapshot.Snapshot
 import liquibase.structure.AbstractTestStructureSupplier
 import liquibase.structure.DatabaseObject
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.ObjectNameStrategy
 
 import liquibase.structure.core.ForeignKey
@@ -74,7 +74,7 @@ abstract class AbstractActionTest extends Specification {
         JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(type, defaultValues)
     }
 
-    protected List<ObjectName> getObjectNames(Class<? extends  AbstractTestStructureSupplier> supplierType, ObjectNameStrategy strategy, Scope scope) {
+    protected List<ObjectReference> getObjectNames(Class<? extends  AbstractTestStructureSupplier> supplierType, ObjectNameStrategy strategy, Scope scope) {
         return scope.getSingleton(supplierType).getObjectNames(strategy, scope)
     }
 
@@ -103,7 +103,7 @@ abstract class AbstractActionTest extends Specification {
             throw SetupResult.OK;
         }
 
-        for (ObjectName name : supplier.getAllContainers()) {
+        for (ObjectReference name : supplier.getAllContainers()) {
             new DropAllCommand(new Schema(name)).execute(scope);
         }
 

@@ -1,16 +1,13 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
@@ -69,15 +66,15 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             Table table = (Table) foundObject;
             Database database = snapshot.getDatabase();
             Schema schema;
-            schema = table.getSchema();
+//            schema = table.getContainer();
 
 
             Set<String> seenFks = new HashSet<String>();
             List<CachedRow> importedKeyMetadataResultSet;
             try {
-                importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getForeignKeys(((AbstractJdbcDatabase) database)
-                        .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
-                        database.correctObjectName(table.getSimpleName(), Table.class), null);
+//                importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getForeignKeys(((AbstractJdbcDatabase) database)
+//                        .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+//                        database.correctObjectName(table.getSimpleName(), Table.class), null);
 
 //                for (CachedRow row : importedKeyMetadataResultSet) {
 //                    ForeignKey fk = new ForeignKey(new ObjectName(row.getString("FK_NAME"))).setForeignKeyTable(table);

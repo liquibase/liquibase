@@ -24,10 +24,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         Column column = (Column) databaseObject;
 
-        if (column.getRelationName() == null) {
-            return new String[] {(column.getSimpleName()).toLowerCase()};
+        if (column.container.name == null) {
+            return new String[] {(column.name).toLowerCase()};
         } else {
-            return new String[] {(column.getRelationName() + ":" + column.getName()).toLowerCase()};
+            return new String[] {(column.name + ":" + column.getName()).toLowerCase()};
         }
     }
 
@@ -45,7 +45,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.name.container, otherColumn.name.container, accordingTo)) {
+        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.container, otherColumn.container, accordingTo)) {
             return false;
         }
 

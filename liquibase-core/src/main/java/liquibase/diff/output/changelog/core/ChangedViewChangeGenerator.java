@@ -8,10 +8,8 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.util.StringUtils;
 
 public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -39,17 +37,17 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
         View view = (View) changedObject;
 
         CreateViewChange change = new CreateViewChange();
-        change.setViewName(view.getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(view.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(view.getSchema().getSimpleName());
-        }
-        String selectQuery = view.getDefinition();
-        boolean fullDefinitionOverridden = false;
-        if (selectQuery == null) {
-            selectQuery = "COULD NOT DETERMINE VIEW QUERY";
+//        change.setViewName(view.getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(view.getContainer().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(view.getContainer().getSimpleName());
+//        }
+//        String selectQuery = view.getDefinition();
+//        boolean fullDefinitionOverridden = false;
+//        if (selectQuery == null) {
+//            selectQuery = "COULD NOT DETERMINE VIEW QUERY";
 //todo: action refactoring        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
 //            String viewName;
 //            if (change.getCatalogName() == null && change.getSchemaName() == null) {
@@ -71,11 +69,11 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
 //            change.setFullDefinition(true);
 //            fullDefinitionOverridden = true;
 
-        }
-        change.setSelectQuery(selectQuery);
-        if (!fullDefinitionOverridden) {
-            change.setFullDefinition(view.getContainsFullDefinition());
-        }
+//        }
+//        change.setSelectQuery(selectQuery);
+//        if (!fullDefinitionOverridden) {
+//            change.setFullDefinition(view.getContainsFullDefinition());
+//        }
 
         return new Change[] { change };
     }

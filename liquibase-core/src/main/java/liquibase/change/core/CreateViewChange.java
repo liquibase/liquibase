@@ -125,17 +125,17 @@ public class CreateViewChange extends AbstractChange {
     @Override
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
-        try {
-            View example = new View(getCatalogName(), getSchemaName(), getViewName());
-
-            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            result.assertApplied(snapshot != null, "View does not exist");
-
+//        try {
+//            View example = new View(getCatalogName(), getSchemaName(), getViewName());
+//
+//            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+//            result.assertApplied(snapshot != null, "View does not exist");
+//
             return result;
-
-        } catch (Exception e) {
-            return result.unknown(e);
-        }
+//
+//        } catch (Exception e) {
+//            return result.unknown(e);
+//        }
     }
 
 	private boolean supportsReplaceIfExistsOption(Database database) {

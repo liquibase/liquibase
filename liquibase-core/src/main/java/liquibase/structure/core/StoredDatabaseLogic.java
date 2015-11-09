@@ -1,50 +1,25 @@
 package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends AbstractDatabaseObject {
+
+    public Boolean valid;
+    public String body;
 
     public StoredDatabaseLogic() {
     }
 
-    public StoredDatabaseLogic(ObjectName name) {
+    public StoredDatabaseLogic(String name) {
         super(name);
     }
 
-    @Override
-    public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[]{
-                getSchema()
-        };
+    public StoredDatabaseLogic(ObjectReference nameAndContainer) {
+        super(nameAndContainer);
     }
 
-    @Override
-    public Schema getSchema() {
-        return get("schema", Schema.class);
-    }
-
-    public T setSchema(Schema schema) {
-        set("schema", schema);
-        return (T) this;
-    }
-
-    public Boolean isValid() {
-        return get("valid", Boolean.class);
-    }
-
-    public T setValid(Boolean valid) {
-        set("valid", valid);
-        return (T) this;
-    }
-
-    public String getBody() {
-        return get("body", String.class);
-    }
-
-    public T setBody(String body) {
-        set("body", body);
-        return (T) this;
+    public StoredDatabaseLogic(ObjectReference container, String name) {
+        super(container, name);
     }
 }

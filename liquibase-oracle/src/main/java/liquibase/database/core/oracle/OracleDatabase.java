@@ -12,6 +12,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
@@ -224,7 +225,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean isSystemObject(DatabaseObject example) {
+    public boolean isSystemObject(ObjectReference example) {
         if (example == null) {
             return false;
         }
@@ -233,18 +234,18 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return false;
         }
 
-        String name = example.getSimpleName();
-        if (example instanceof Schema) {
+        String name = example.name;
+        if (example.instanceOf(Schema.class)) {
             if ("SYSTEM".equals(name) || "SYS".equals(name) || "CTXSYS".equals(name) || "XDB".equals(name)) {
                 return true;
             }
-            if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
+            if ("SYSTEM".equals(example.container.name) || "SYS".equals(example.container.name) || "CTXSYS".equals(example.container.name) || "XDB".equals(example.container.name)) {
                 return true;
             }
-        } else if (isSystemObject(example.getSchema())) {
+        } else if (isSystemObject(example.container)) {
             return true;
         }
-        if (example instanceof Catalog) {
+        if (example.instanceOf(Catalog.class)) {
             if (("SYSTEM".equals(name) || "SYS".equals(name) || "CTXSYS".equals(name) || "XDB".equals(name))) {
                 return true;
             }
@@ -255,9 +256,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (name.startsWith("DR$")) { //oracle index tables
                 return true;
-            } else if (example.getSimpleName().startsWith("SYS_IOT_OVER")) { //oracle system table
+            } else if (example.name.startsWith("SYS_IOT_OVER")) { //oracle system table
                 return true;
-            } else if ((example.getSimpleName().startsWith("MDRT_") || example.getSimpleName().startsWith("MDRS_")) && example.getSimpleName().endsWith("$")) {
+            } else if ((example.name.startsWith("MDRT_") || example.name.startsWith("MDRS_")) && example.name.endsWith("$")) {
                 // CORE-1768 - Oracle creates these for spatial indices and will remove them when the index is removed.
                 return true;
             } else if (name.startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.

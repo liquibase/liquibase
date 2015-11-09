@@ -10,7 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
@@ -207,12 +207,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean isSystemObject(DatabaseObject example) {
-        if (example.getSchema() != null && example.getSchema().getName() != null) {
-            if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+    public boolean isSystemObject(ObjectReference example) {
+        if (example.container != null && example.container.name != null) {
+            if (example.instanceOf(Table.class) && (example.container.name.equals("sys") || example.container.name.equals("sybfi"))) {
                 return true;
             }
-            if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            if (example.instanceOf(View.class) && (example.container.name.equals("sys") || example.container.name.equals("sybfi"))) {
                 return true;
             }
         }
@@ -288,11 +288,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
         if (objectType.isAssignableFrom(Index.class)) {
-            return escapeObjectName(objectName.name, objectType);
+            return escapeObjectName(objectReference.name, objectType);
         }
-        return super.escapeObjectName(objectName, objectType);
+        return super.escapeObjectName(objectReference, objectType);
     }
 
     @Override

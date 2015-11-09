@@ -3,7 +3,7 @@ package liquibase.snapshot
 import liquibase.Scope
 import liquibase.snapshot.transformer.SnapshotTransformer
 import liquibase.structure.DatabaseObject
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.TestStructureSupplierFactory
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
@@ -36,21 +36,21 @@ public class TestSnapshotFactory {
             }
         }
 
-        Set<ObjectName> schemas = new HashSet<>();
+        Set<ObjectReference> schemas = new HashSet<>();
         for (Table table : snapshot.get(Table)) {
             schemas.add(table.name.container);
         }
 
 
-        Set<ObjectName> catalogs = new HashSet<>();
-        for (ObjectName schema : schemas) {
+        Set<ObjectReference> catalogs = new HashSet<>();
+        for (ObjectReference schema : schemas) {
             snapshot.add(new Schema(schema))
             if (schema.container != null) {
                 catalogs.add(schema.container);
             }
         }
 
-        for (ObjectName catalog : catalogs) {
+        for (ObjectReference catalog : catalogs) {
             snapshot.add(new Catalog(catalog))
         }
 

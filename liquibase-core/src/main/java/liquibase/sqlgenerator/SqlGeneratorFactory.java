@@ -249,20 +249,7 @@ public class SqlGeneratorFactory {
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
-        Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-
-        SqlGeneratorChain sqlGeneratorChain = createGeneratorChain(statement, database);
-        if (sqlGeneratorChain != null) {
-            //noinspection unchecked
-            Sql[] sqls = sqlGeneratorChain.generateSql(statement, database);
-            if (sqls != null) {
-                for (Sql sql : sqls) {
-                    affectedObjects.addAll(sql.getAffectedDatabaseObjects());
-                }
-            }
-        }
-
-        return affectedObjects;
+        return null;
 
     }
 

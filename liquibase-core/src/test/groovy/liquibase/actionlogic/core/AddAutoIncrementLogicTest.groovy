@@ -5,7 +5,7 @@ import liquibase.action.core.AddAutoIncrementAction
 import liquibase.actionlogic.ActionExecutor
 import liquibase.snapshot.MockSnapshotFactory
 import liquibase.snapshot.SnapshotFactory
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import spock.lang.Specification
@@ -16,7 +16,7 @@ class AddAutoIncrementLogicTest extends Specification {
     @Unroll
     def "checkStatus"() {
         when:
-        def columnName = new ObjectName("testTable", "testColumn")
+        def columnName = new ObjectReference("testTable", "testColumn")
         def column = new Column(columnName)
         if (columnStartsWith != null && columnIncrementBy != null) {
             column.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartsWith, columnIncrementBy)
@@ -48,7 +48,7 @@ class AddAutoIncrementLogicTest extends Specification {
         def scope = JUnitScope.instance.overrideSingleton(SnapshotFactory, new MockSnapshotFactory())
 
         def action = new AddAutoIncrementAction()
-        action.columnName = new ObjectName("testTable", "testColumn")
+        action.columnName = new ObjectReference("testTable", "testColumn")
 
         then:
         scope.getSingleton(ActionExecutor).checkStatus(action, scope).toString() == "Unknown: Column 'testTable.testColumn' does not exist"

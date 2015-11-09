@@ -9,7 +9,7 @@ import liquibase.actionlogic.core.CreateViewLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.View;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
@@ -25,7 +25,7 @@ public class CreateViewLogicMSSQL extends CreateViewLogic {
         ActionResult result = super.execute(action, scope);
         if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {
             Database database = scope.getDatabase();
-            ObjectName viewName = action.viewName;
+            ObjectReference viewName = action.viewName;
 
             //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
             return new DelegateResult(new ExecuteSqlAction(

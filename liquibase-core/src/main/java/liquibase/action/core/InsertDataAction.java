@@ -1,21 +1,21 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.CollectionUtil;
 
 import java.util.List;
 
 public class InsertDataAction extends AbstractAction {
 
-    public ObjectName tableName;
+    public ObjectReference tableName;
     public List<String> columnNames;
     public List<Object> columnValues;
 
     public InsertDataAction() {
     }
 
-    public InsertDataAction(ObjectName tableName) {
+    public InsertDataAction(ObjectReference tableName) {
         this.tableName = tableName;
     }
 

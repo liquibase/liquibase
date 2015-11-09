@@ -1,9 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class RenameTableAction extends AbstractAction {
-    public ObjectName oldTableName;
-    public ObjectName newTableName;
+    public ObjectReference oldTableName;
+    public ObjectReference newTableName;
 }

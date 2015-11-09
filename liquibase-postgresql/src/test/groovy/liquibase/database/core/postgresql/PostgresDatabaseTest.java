@@ -2,8 +2,7 @@ package liquibase.database.core.postgresql;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import liquibase.database.core.postgresql.PostgresDatabase;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Table;
 import org.junit.Assert;
 import static org.junit.Assert.*;
@@ -73,7 +72,7 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("\"schemaName\".\"tableName\"", database.escapeObjectName(new ObjectName("catalogName", "schemaName", "tableName"), Table.class));
+        assertEquals("\"schemaName\".\"tableName\"", database.escapeObjectName(new ObjectReference("catalogName", "schemaName", "tableName"), Table.class));
     }
 
 }

@@ -19,10 +19,10 @@ class AddForeignKeysActionTest extends AbstractActionTest {
         when:
         def action = new AddForeignKeysAction()
 
-        def pkTable = new Table(new ObjectName(tableName.container, tableName.name + "_2"))
+        def pkTable = new Table(new ObjectReference(tableName.container, tableName.name + "_2"))
         def fkTable = new Table(tableName)
 
-        def foreignKey = new ForeignKey(fkName, [new ObjectName(fkTable.name, columnName.name)], [new ObjectName(pkTable.name, columnName.name + "_2")])
+        def foreignKey = new ForeignKey(fkName, [new ObjectReference(fkTable.name, columnName.name)], [new ObjectReference(pkTable.name, columnName.name + "_2")])
 
         action.foreignKeys = [foreignKey]
 
@@ -52,10 +52,10 @@ class AddForeignKeysActionTest extends AbstractActionTest {
         when:
         def action = new AddForeignKeysAction()
 
-        def pkTable = new Table(new ObjectName(tableName.container, tableName.name + "_2"))
+        def pkTable = new Table(new ObjectReference(tableName.container, tableName.name + "_2"))
         def fkTable = new Table(tableName)
 
-        def foreignKey = new ForeignKey(fkName, [new ObjectName(fkTable.name, columnName.name), new ObjectName(fkTable.name, columnName.name + "_2")], [new ObjectName(pkTable.name, columnName.name + "_3"), new ObjectName(pkTable.name, columnName.name + "_4")])
+        def foreignKey = new ForeignKey(fkName, [new ObjectReference(fkTable.name, columnName.name), new ObjectReference(fkTable.name, columnName.name + "_2")], [new ObjectReference(pkTable.name, columnName.name + "_3"), new ObjectReference(pkTable.name, columnName.name + "_4")])
 
         action.foreignKeys = [foreignKey]
 
@@ -87,8 +87,8 @@ class AddForeignKeysActionTest extends AbstractActionTest {
         def baseTableName = getObjectNames(TestTableSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0]
         def refTableName = getObjectNames(TestTableSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[1]
 
-        def baseColumnName = new ObjectName(baseTableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name)
-        def refColumnName = new ObjectName(refTableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name)
+        def baseColumnName = new ObjectReference(baseTableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name)
+        def refColumnName = new ObjectReference(refTableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name)
 
         ((ForeignKey) foreignKeyDefinition).columnChecks = [new ForeignKey.ForeignKeyColumnCheck(baseColumnName, refColumnName)]
         AddForeignKeysAction action = new AddForeignKeysAction(foreignKeyDefinition)

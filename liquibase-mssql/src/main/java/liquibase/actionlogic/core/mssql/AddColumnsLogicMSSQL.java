@@ -23,7 +23,7 @@ public class AddColumnsLogicMSSQL extends AddColumnsLogic {
             return null;
         } else {
             return "CONSTRAINT "
-                    + database.generateDefaultConstraintName(column.name)
+                    + database.generateDefaultConstraintName(column.toReference())
                     + clause;
         }
 

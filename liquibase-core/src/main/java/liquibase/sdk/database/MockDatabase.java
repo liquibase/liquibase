@@ -27,7 +27,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
@@ -73,7 +73,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     public boolean equals(final DatabaseObject otherObject, final Database accordingTo) {
-        return otherObject.getSimpleName().equalsIgnoreCase(this.getName());
+        return otherObject.getName().equalsIgnoreCase(this.getName());
     }
 
     @Override
@@ -328,12 +328,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
 
     @Override
-    public boolean isSystemObject(final DatabaseObject example) {
+    public boolean isSystemObject(final ObjectReference example) {
         return false;
     }
 
     @Override
-    public boolean isLiquibaseObject(final DatabaseObject object) {
+    public boolean isLiquibaseObject(final ObjectReference object) {
         return false;
     }
 
@@ -447,8 +447,8 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
-        return StringUtils.join(objectName.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
+    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
+        return StringUtils.join(objectReference.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
     }
 
     @Override
@@ -598,11 +598,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     public String getJdbcCatalogName(final Schema schema) {
-        return schema.getCatalogName();
+        return schema.container.name;
     }
 
     public String getJdbcSchemaName(final Schema schema) {
-        return schema.getSimpleName();
+        return schema.name;
     }
 
     @Override

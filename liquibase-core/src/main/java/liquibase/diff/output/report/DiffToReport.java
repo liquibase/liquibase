@@ -1,9 +1,7 @@
 package liquibase.diff.output.report;
 
-import liquibase.CatalogAndSchema;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
-import liquibase.diff.compare.CompareControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
@@ -76,24 +74,24 @@ public class DiffToReport {
     }
 
     protected void printSetComparison(String title, Set<? extends DatabaseObject> objects, PrintStream out) {
-        out.print(title + ": ");
-        Schema lastSchema = null;
-        if (objects.size() == 0) {
-            out.println("NONE");
-        } else {
-            out.println();
-            for (DatabaseObject object : objects) {
-                if (getIncludeSchema() && object.getSchema() != null && (lastSchema == null || !lastSchema.equals(object.getSchema()))) {
-                    lastSchema = object.getSchema();
-                    String schemaName = object.getSchema().getSimpleName();
-                    if (schemaName == null) {
-                        schemaName = object.getSchema().getCatalogName();
-                    }
-                    out.println("  SCHEMA: "+schemaName);
-                }
-                out.println("     " + object);
-            }
-        }
+//        out.print(title + ": ");
+//        Schema lastSchema = null;
+//        if (objects.size() == 0) {
+//            out.println("NONE");
+//        } else {
+//            out.println();
+//            for (DatabaseObject object : objects) {
+//                if (getIncludeSchema() && object.getContainer() != null && (lastSchema == null || !lastSchema.equals(object.getContainer()))) {
+//                    lastSchema = object.getContainer();
+//                    String schemaName = object.getContainer().getSimpleName();
+//                    if (schemaName == null) {
+//                        schemaName = object.getContainer().getCatalogName();
+//                    }
+//                    out.println("  SCHEMA: "+schemaName);
+//                }
+//                out.println("     " + object);
+//            }
+//        }
     }
 
 //    private void printColumnComparison(SortedSet<Column> changedColumns,

@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core.db2;
 
-import javafx.scene.control.Tab;
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.ReorganizeTableAction;
 import liquibase.actionlogic.*;
@@ -11,7 +9,6 @@ import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Table;
 
 public class ReorganizeTableLogicDB2 extends AbstractActionLogic<ReorganizeTableAction> implements ActionLogic.InteractsExternally<ReorganizeTableAction> {

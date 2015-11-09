@@ -14,11 +14,7 @@ public class SingleLineComment implements Sql {
 		this.sql = sql;
 		this.lineCommentToken = lineCommentToken;
 	}
-	
-	@Override
-    public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
-		return new HashSet<DatabaseObject>();
-	}
+
 
 	@Override
     public String getEndDelimiter() {

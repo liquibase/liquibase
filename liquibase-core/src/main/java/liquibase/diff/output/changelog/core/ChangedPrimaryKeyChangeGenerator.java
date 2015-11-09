@@ -8,15 +8,12 @@ import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
-import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
@@ -51,7 +48,7 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange();
 //        addPkChange.setTableName(pk.getTable().getSimpleName());
 //        addPkChange.setColumnNames(pk.getColumnNames());
-        addPkChange.setConstraintName(pk.getSimpleName());
+        addPkChange.setConstraintName(pk.name);
 
 //        if (comparisonDatabase instanceof OracleDatabase) {
 //            Index backingIndex = pk.getBackingIndex();
@@ -75,14 +72,14 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
 //        }
         returnList.add(addPkChange);
 
-        if (control.getIncludeCatalog()) {
-            dropPkChange.setCatalogName(pk.getSchema().getCatalogName());
-            addPkChange.setCatalogName(pk.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            dropPkChange.setSchemaName(pk.getSchema().getSimpleName());
-            addPkChange.setSchemaName(pk.getSchema().getSimpleName());
-        }
+//        if (control.getIncludeCatalog()) {
+//            dropPkChange.setCatalogName(pk.getContainer().getCatalogName());
+//            addPkChange.setCatalogName(pk.getContainer().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            dropPkChange.setSchemaName(pk.getContainer().getSimpleName());
+//            addPkChange.setSchemaName(pk.getContainer().getSimpleName());
+//        }
 
         Difference columnDifferences = differences.getDifference("columns");
         List<Column> referenceColumns;

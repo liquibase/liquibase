@@ -1,56 +1,59 @@
 package liquibase.structure;
 
 import liquibase.AbstractExtensibleObject;
+import liquibase.structure.core.Catalog;
 import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class ObjectName extends AbstractExtensibleObject implements Comparable<ObjectName> {
+public class ObjectReference extends AbstractExtensibleObject implements Comparable<ObjectReference> {
 
+    public Class<? extends DatabaseObject> type;
     public String name;
-    public ObjectName container;
+    public ObjectReference container;
     public boolean virtual;
 
     /**
      * Construct an ObjectName from the given string. If the string contains dots, it will be split into containers on the dots.
      * If null is passed, return an empty ObjectName
      */
-    public static ObjectName parse(String string) {
+    public static ObjectReference parse(String string) {
         if (string == null) {
-            return new ObjectName(null);
+            return new ObjectReference(null);
         }
 
-        String[] split = string.split("\\.");
-        return new ObjectName(split);
+//        String[] split = string.split("\\.");
+//        return new ObjectReference(split);
+
+        return null;
     }
 
-    public ObjectName(ObjectName container, String... names) {
-        this.container = container;
-        if (names != null && names.length > 0) {
-            if (names.length == 1) {
-                this.name = names[0];
-            } else {
-                this.container = new ObjectName(container, Arrays.copyOfRange(names, 0, names.length - 1));
-                this.name = names[names.length-1];
-            }
-        }
+    public ObjectReference() {
     }
 
-    /**
-     * Construct a new ObjectName, from a passed list of container names.
-     * Name list goes from most general to most specific: new ObjectName("catalogName", "schemaName", "tablenName")
-     */
-    public ObjectName(String... names) {
+    public ObjectReference(Class<? extends DatabaseObject> type, ObjectReference container, String... names) {
+        this.type = type;
         if (names == null || names.length == 0) {
-            this.name = null;
-        } else {
-            ObjectName container = null;
-            for (int i = 0; i < names.length - 1; i++) {
-                container = new ObjectName(container, names[i]);
-            }
-            this.name = names[names.length - 1];
+            this.container = container.container;
+            this.name = container.name;
+        } else if (names.length == 1) {
             this.container = container;
+            this.name = names[0];
+        } else {
+            for (String name : names) {
+                container = new ObjectReference(container, name);
+            }
+            this.container = container.container;
+            this.name = container.name;
         }
+    }
+
+    public ObjectReference(ObjectReference container, String... names) {
+        this(null, container, names);
+    }
+
+    public ObjectReference(String... names) {
+        this(null, null, names);
     }
 
     public String toShortString() {
@@ -72,7 +75,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     }
 
     @Override
-    public int compareTo(ObjectName o) {
+    public int compareTo(ObjectReference o) {
         if (this.name == null) {
             if (o.name == null) {
                 return 0;
@@ -83,24 +86,24 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         return this.name.compareTo(o.name);
     }
 
-    public boolean equalsIgnoreCase(ObjectName name) {
+    public boolean equalsIgnoreCase(ObjectReference name) {
         return this.name.equalsIgnoreCase(name.name);
     }
 
 
     /**
-     * Same logic as {@link #equals(ObjectName, boolean)} with true for ignoreLengthDifferences
+     * Same logic as {@link #equals(ObjectReference, boolean)} with true for ignoreLengthDifferences
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ObjectName) {
-            return equals(((ObjectName) obj), true);
+        if (obj instanceof ObjectReference) {
+            return equals(((ObjectReference) obj), true);
         } else {
             return false;
         }
     }
 
-    public boolean equals(ObjectName obj, boolean ignoreLengthDifferences) {
+    public boolean equals(ObjectReference obj, boolean ignoreLengthDifferences) {
         if (ignoreLengthDifferences) {
             List<String> thisNames = this.asList();
             List<String> otherNames = obj.asList();
@@ -109,7 +112,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
             thisNames = thisNames.subList(thisNames.size() - precision, thisNames.size());
             otherNames = otherNames.subList(otherNames.size() - precision, otherNames.size());
 
-            for (int i=0; i<thisNames.size(); i++) {
+            for (int i = 0; i < thisNames.size(); i++) {
                 String thisName = thisNames.get(i);
                 String otherName = otherNames.get(i);
 
@@ -142,7 +145,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
             return list;
         }
         if (length < list.size()) {
-            return Collections.unmodifiableList(list.subList(list.size()-length, list.size()));
+            return Collections.unmodifiableList(list.subList(list.size() - length, list.size()));
         }
 
         List<String> newList = new ArrayList<>(list);
@@ -158,7 +161,7 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         }
 
         List<String> returnList = new ArrayList<>();
-        ObjectName name = this;
+        ObjectReference name = this;
         while (name != null) {
             returnList.add(0, name.name);
             name = name.container;
@@ -181,7 +184,6 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     }
 
 
-
     /**
      * Return the number of parent containers in this ObjectName.
      * Top-level containers with a null name are not counted in the depth, but null-named containers between named containers are counted.
@@ -198,13 +200,13 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     /**
      * Returns true if the names are equivalent, not counting null-value positions in either name
      */
-    public boolean matches(ObjectName objectName) {
-        if (objectName == null) {
+    public boolean matches(ObjectReference objectReference) {
+        if (objectReference == null) {
             return true;
         }
 
         List<String> thisList = this.asList();
-        List<String> otherList = objectName.asList();
+        List<String> otherList = objectReference.asList();
 
         if (otherList.size() == 0) {
             return true;
@@ -213,9 +215,9 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
         int length = Math.max(thisList.size(), otherList.size());
 
         thisList = this.asList(length);
-        otherList = objectName.asList(length);
+        otherList = objectReference.asList(length);
 
-        for (int i=0; i<length; i++) {
+        for (int i = 0; i < length; i++) {
             String thisName = thisList.get(i);
             String otherName = otherList.get(i);
             if (thisName != null && otherName != null) {
@@ -230,10 +232,16 @@ public class ObjectName extends AbstractExtensibleObject implements Comparable<O
     /**
      * Returns an objectName that is truncated to the given max length
      */
-    public ObjectName truncate(int maxLength) {
+    public ObjectReference truncate(int maxLength) {
         List<String> names = this.asList();
         int length = Math.min(maxLength, names.size());
 
-        return new ObjectName(names.subList(names.size()-length, names.size()).toArray(new String[length]));
+//        return new ObjectReference(names.subList(names.size() - length, names.size()).toArray(new String[length]));
+
+        return null;
+    }
+
+    public boolean instanceOf(Class<? extends DatabaseObject> type) {
+        return type.isAssignableFrom(this.type);
     }
 }

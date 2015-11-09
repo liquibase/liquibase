@@ -18,7 +18,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.example.ExampleCustomDatabase;
@@ -202,13 +202,13 @@ public abstract class AbstractExecuteTest {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
+                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
+                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
             } catch (SQLException e) {
                 ;
             }

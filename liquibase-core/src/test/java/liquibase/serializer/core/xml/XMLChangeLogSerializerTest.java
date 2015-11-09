@@ -6,7 +6,7 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -82,7 +82,7 @@ public class XMLChangeLogSerializerTest {
         change.setDefaultValueNumeric("42");
         change.setDefaultValueBoolean(true);
         change.setDefaultValueDate("2007-01-02");
-        change.setDefaultValueSequenceNext(new SequenceNextValueFunction(new ObjectName("sampleSeq")));
+        change.setDefaultValueSequenceNext(new SequenceNextValueFunction(new ObjectReference("sampleSeq")));
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addDefaultValue", node.getTagName());

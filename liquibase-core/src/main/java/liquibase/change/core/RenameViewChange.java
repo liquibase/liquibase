@@ -72,23 +72,23 @@ public class RenameViewChange extends AbstractChange {
 
     @Override
     public ActionStatus checkStatus(Database database) {
-        try {
+//        try {
             ActionStatus actionStatus = new ActionStatus();
-            View newView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
-            View oldView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
-
-            if (newView == null && oldView == null) {
-                return actionStatus.unknown("Neither view exists");
-            }
-            if (newView != null && oldView != null) {
-                return actionStatus.unknown("Both views exist");
-            }
-            actionStatus.assertApplied(newView != null, "New view does not exist");
-
+//            View newView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
+//            View oldView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
+//
+//            if (newView == null && oldView == null) {
+//                return actionStatus.unknown("Neither view exists");
+//            }
+//            if (newView != null && oldView != null) {
+//                return actionStatus.unknown("Both views exist");
+//            }
+//            actionStatus.assertApplied(newView != null, "New view does not exist");
+//
             return actionStatus;
-        } catch (Exception e) {
-            return new ActionStatus().unknown(e);
-        }
+//        } catch (Exception e) {
+//            return new ActionStatus().unknown(e);
+//        }
 
     }
 

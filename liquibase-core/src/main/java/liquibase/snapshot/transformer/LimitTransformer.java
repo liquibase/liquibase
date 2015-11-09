@@ -2,7 +2,7 @@ package liquibase.snapshot.transformer;
 
 import liquibase.Scope;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import java.util.Map;
 public class LimitTransformer<T extends DatabaseObject> extends AbstractSnapshotTransformer<T> {
 
     private int limit;
-    private Map<Class, Map<ObjectName, Integer>> seenByTypeThenContainer = new HashMap<>();
+    private Map<Class, Map<ObjectReference, Integer>> seenByTypeThenContainer = new HashMap<>();
 
     @SafeVarargs
     public LimitTransformer(int limit, Class<T>... types) {
@@ -20,24 +20,25 @@ public class LimitTransformer<T extends DatabaseObject> extends AbstractSnapshot
 
     @Override
     public T transformObject(T object, Scope scope) {
-        Map<ObjectName, Integer> seenByContainer = this.seenByTypeThenContainer.get(object.getClass());
+        Map<ObjectReference, Integer> seenByContainer = this.seenByTypeThenContainer.get(object.getClass());
         if (seenByContainer == null) {
             seenByContainer = new HashMap<>();
             seenByTypeThenContainer.put(object.getClass(), seenByContainer);
         }
 
-        Integer seen = seenByContainer.get(object.getName().container);
-        if (seen == null) {
-            seen = 1;
-        } else {
-            seen = seen + 1;
-        }
-
-        if (seen > limit) {
-            return null;
-        } else {
-            seenByContainer.put(object.getName().container, seen);
-            return object;
-        }
+//        Integer seen = seenByContainer.get(object.getName().container);
+//        if (seen == null) {
+//            seen = 1;
+//        } else {
+//            seen = seen + 1;
+//        }
+//
+//        if (seen > limit) {
+//            return null;
+//        } else {
+//            seenByContainer.put(object.getName().container, seen);
+//            return object;
+//        }
+        return null;
     }
 }

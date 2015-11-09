@@ -40,7 +40,7 @@ class CatalogAndSchemaTest extends Specification {
         schema.equals(comparisionSchema, databaseThatDoesNotSupportCatalogs) == true
 
         where:
-        schema | comparisionSchema | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
+        getContainer | comparisionSchema | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
         new CatalogAndSchema(null, null)        | new CatalogAndSchema(null, null)        | null   | null      | true  | true
         new CatalogAndSchema("Cat1", null)      | new CatalogAndSchema("Cat1", null)      | null   | null      | true  | true
         new CatalogAndSchema("Cat1", "Schema1") | new CatalogAndSchema("Cat1", "Schema1") | null   | null      | true  | true
@@ -80,7 +80,7 @@ class CatalogAndSchemaTest extends Specification {
         "${correctedNotSupportsCatalogs.catalogName}.${correctedNotSupportsCatalogs.schemaName}" == "null.null"
 
         where:
-        schema                                  | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
+        getContainer                                  | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
 //        new CatalogAndSchema(null, null)        | null               | null              | "null.null"             | "null.null"
 //        new CatalogAndSchema(null, null)        | "MyCat"            | null              | "null.null"             | "null.null"
 //        new CatalogAndSchema(null, null)        | null               | "MySchema"        | "null.null"             | "null.null"
@@ -117,7 +117,7 @@ class CatalogAndSchemaTest extends Specification {
         "${correctedNotSupportsCatalogs.catalogName}.${correctedNotSupportsCatalogs.schemaName}" == "null.null"
 
         where:
-        schema | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
+        getContainer | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
         new CatalogAndSchema(null, null)        | null    | null       | "null.null"    | "null.null"
         new CatalogAndSchema(null, null)        | "MyCat" | null       | "mycaT.null"    | "mycaT.null"
         new CatalogAndSchema(null, null)        | null    | "MySchema" | "null.myschemA"    | "null.null"
@@ -137,7 +137,7 @@ class CatalogAndSchemaTest extends Specification {
         schema.toString() == expected
 
         where:
-        schema | expected
+        getContainer | expected
         new CatalogAndSchema(null, null)        | "DEFAULT.DEFAULT"
         new CatalogAndSchema("Cat1", null)      | "Cat1.DEFAULT"
         new CatalogAndSchema(null, "Schema1")   | "DEFAULT.Schema1"

@@ -1,6 +1,6 @@
 package liquibase.structure.core
 
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -33,7 +33,7 @@ class ColumnTest extends Specification {
         new Column("id")                                                                                        | "id"
         new Column("id").setRelation(new Table("test"))                                                         | "test.id"
         new Column("ID").setRelation(new Table("TEST"))                                                         | "TEST.ID"
-        new Column("addr").setRelation(new Table(new ObjectName("cat", "schema", "test")))                      | "cat.schema.test.addr"
-        new Column("max(id)").setRelation(new Table(new ObjectName("cat", "schema", "test"))).setComputed(true) | "max(id)"
+        new Column("addr").setRelation(new Table(new ObjectReference("cat", "schema", "test")))                      | "cat.schema.test.addr"
+        new Column("max(id)").setRelation(new Table(new ObjectReference("cat", "schema", "test"))).setComputed(true) | "max(id)"
     }
 }

@@ -6,7 +6,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropSequenceStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Sequence;
 
 /**
@@ -54,7 +54,7 @@ public class DropSequenceChange extends AbstractChange {
     @Override
     public ActionStatus checkStatus(Database database) {
         try {
-            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new Sequence(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName())), database), "Sequence exists");
+            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new Sequence(new ObjectReference(getCatalogName(), getSchemaName(), getSequenceName())), database), "Sequence exists");
         } catch (Exception e) {
             return new ActionStatus().unknown(e);
         }

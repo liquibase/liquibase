@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -12,12 +11,10 @@ import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.DataType;
+import liquibase.structure.ObjectReference;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -144,9 +141,9 @@ public interface Database extends PrioritizedService {
 
     boolean doesTagExist(String tag) throws DatabaseException;
 
-    boolean isSystemObject(DatabaseObject example);
+    boolean isSystemObject(ObjectReference example);
 
-    boolean isLiquibaseObject(DatabaseObject object);
+    boolean isLiquibaseObject(ObjectReference object);
 
     String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException;
 
@@ -160,7 +157,7 @@ public interface Database extends PrioritizedService {
 
     String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
 
-    String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType);
+    String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType);
 
     boolean supportsTablespaces();
 

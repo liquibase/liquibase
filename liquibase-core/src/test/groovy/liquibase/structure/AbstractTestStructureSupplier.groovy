@@ -61,16 +61,16 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         return returnList
     }
 
-    public List<ObjectName> getObjectNames(Scope scope) {
+    public List<ObjectReference> getObjectNames(Scope scope) {
         return getObjectNames(scope.get(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.SIMPLE_NAMES), scope)
     }
 
-    List<ObjectName> getObjectNames(ObjectNameStrategy nameStrategy, Scope scope) {
-        List<ObjectName> returnList = new ArrayList<>();
+    List<ObjectReference> getObjectNames(ObjectNameStrategy nameStrategy, Scope scope) {
+        List<ObjectReference> returnList = new ArrayList<>();
 
         def containers = ObjectUtil.defaultIfEmpty(getObjectContainers(scope), [null])
 
-        for (ObjectName container : containers) {
+        for (ObjectReference container : containers) {
             def objectNames;
             if (nameStrategy == ObjectNameStrategy.COMPLEX_NAMES) {
                 objectNames = getComplexObjectNames(scope)
@@ -79,10 +79,10 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
             }
 
             for (String simpleName : objectNames) {
-                returnList.add(new ObjectName(container, simpleName));
+                returnList.add(new ObjectReference(container, simpleName));
             }
             if (container != null) {
-                returnList.add(new ObjectName(container, "only_in_" + container.name));
+                returnList.add(new ObjectReference(container, "only_in_" + container.name));
             }
         }
 
@@ -98,7 +98,7 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
         return returnList;
     }
 
-    protected List<ObjectName> getObjectContainers(Scope scope) {
+    protected List<ObjectReference> getObjectContainers(Scope scope) {
         return scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()
     }
 

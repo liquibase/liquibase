@@ -1,15 +1,15 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class ReorganizeTableAction extends AbstractAction {
-    public ObjectName tableName;
+    public ObjectReference tableName;
 
     public ReorganizeTableAction() {
     }
 
-    public ReorganizeTableAction(ObjectName tableName) {
+    public ReorganizeTableAction(ObjectReference tableName) {
         this.tableName = tableName;
     }
 

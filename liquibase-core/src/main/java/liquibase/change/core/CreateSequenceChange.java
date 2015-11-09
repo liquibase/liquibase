@@ -6,7 +6,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
@@ -135,26 +135,26 @@ public class CreateSequenceChange extends AbstractChange {
     public ActionStatus checkStatus(Database database) {
         ActionStatus result = new ActionStatus();
         try {
-            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName())), database);
+            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(new ObjectReference(getCatalogName(), getSchemaName()), getSequenceName()), database);
             result.assertApplied(sequence != null, "Sequence " + getSequenceName() + " does not exist");
             if (sequence != null) {
                 if (getIncrementBy() != null) {
-                    result.assertCorrect(getIncrementBy().equals(sequence.getIncrementBy()), "Increment by has a different value");
+                    result.assertCorrect(getIncrementBy().equals(sequence.incrementBy), "Increment by has a different value");
                 }
                 if (getMinValue() != null) {
-                    result.assertCorrect(getMinValue().equals(sequence.getMinValue()), "Min Value is different");
+                    result.assertCorrect(getMinValue().equals(sequence.minValue), "Min Value is different");
                 }
                 if (getMaxValue() != null) {
-                    result.assertCorrect(getMaxValue().equals(sequence.getMaxValue()), "Max Value is different");
+                    result.assertCorrect(getMaxValue().equals(sequence.maxValue), "Max Value is different");
                 }
                 if (isOrdered() != null) {
-                    result.assertCorrect(isOrdered().equals(sequence.getOrdered()), "Max Value is different");
+                    result.assertCorrect(isOrdered().equals(sequence.ordered), "Ordered is different");
                 }
                 if (getCycle() != null) {
-                    result.assertCorrect(getCycle().equals(sequence.getWillCycle()), "Will Cycle is different");
+                    result.assertCorrect(getCycle().equals(sequence.willCycle), "Will Cycle is different");
                 }
                 if (getCacheSize() != null) {
-                    result.assertCorrect(getCacheSize().equals(sequence.getCacheSize()), "Cache size is different");
+                    result.assertCorrect(getCacheSize().equals(sequence.cacheSize), "Cache size is different");
                 }
             }
         } catch (Exception e) {

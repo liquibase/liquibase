@@ -12,7 +12,7 @@ import liquibase.snapshot.TestSnapshotFactory
 import liquibase.snapshot.transformer.LimitTransformer
 import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.structure.ObjectNameStrategy
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
@@ -119,7 +119,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         })
 
         where:
-        [conn, scope, snapshot, schema] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, scope, snapshot, getContainer] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
             def scope = JUnitScope.getInstance(it)
@@ -188,7 +188,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
             if (autoIncrement) {
                 if (((AddAutoIncrementActionTest.TestDetails) new AddAutoIncrementActionTest().getTestDetails(scope)).createPrimaryKeyBeforeAutoIncrement()) {
-                    executor.execute(new AddPrimaryKeysAction(new PrimaryKey(new ObjectName(column.name.container, null), column.getSimpleName())), scope)
+                    executor.execute(new AddPrimaryKeysAction(new PrimaryKey(new ObjectReference(column.name.container, null), column.getSimpleName())), scope)
                 }
                 executor.execute(new AddAutoIncrementAction(column.name, column.type), scope)
             }
@@ -259,7 +259,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
             //since data types change to what the database thinks, test by adding a new column with the snapshot's datatype and check that those are consistant
             def addColumnAction = new AddColumnsAction()
             def columnToAdd = snapshotColumn.clone() as Column
-            columnToAdd.name = new ObjectName(snapshotColumn.name.container, snapshotColumn.simpleName + "_added")
+            columnToAdd.name = new ObjectReference(snapshotColumn.name.container, snapshotColumn.name + "_added")
             addColumnAction.columns = [columnToAdd]
 
             executor.execute(addColumnAction, scope)

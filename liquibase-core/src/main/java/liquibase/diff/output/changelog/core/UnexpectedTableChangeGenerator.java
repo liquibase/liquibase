@@ -33,26 +33,26 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
         Table unexpectedTable = (Table) unexpectedObject;
 
         DropTableChange change = new DropTableChange();
-        change.setTableName(unexpectedTable.getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(unexpectedTable.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(unexpectedTable.getSchema().getSimpleName());
-        }
-
-//        for (Column column : unexpectedTable.getColumns()) {
-//            control.setAlreadyHandledUnexpected(column);
-//        };
-//        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
-
-//        for (Index index : unexpectedTable.indexes) {
-//            control.setAlreadyHandledUnexpected(index);
+//        change.setTableName(unexpectedTable.getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(unexpectedTable.getContainer().getCatalogName());
 //        }
-//        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
-//        if (unexpectedTable.primaryKey != null) {
-//            control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey.getBackingIndex());
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(unexpectedTable.getContainer().getSimpleName());
 //        }
+//
+////        for (Column column : unexpectedTable.getColumns()) {
+////            control.setAlreadyHandledUnexpected(column);
+////        };
+////        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
+//
+////        for (Index index : unexpectedTable.indexes) {
+////            control.setAlreadyHandledUnexpected(index);
+////        }
+////        control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey);
+////        if (unexpectedTable.primaryKey != null) {
+////            control.setAlreadyHandledUnexpected(unexpectedTable.primaryKey.getBackingIndex());
+////        }
 
         return new Change[] { change };
 

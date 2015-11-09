@@ -6,7 +6,7 @@ import liquibase.database.Database;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class AddColumnConfigSupplier {
         columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("datetime").setDefaultValueComputed(new DatabaseFunction("NOW()")));
         columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("datetime").setDefaultValueDate(new Date(737138163)));
         columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("datetime").setDefaultValueDate("2013-02-13T13:44:03"));
-        columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("datetime").setDefaultValueSequenceNext(new SequenceNextValueFunction(new ObjectName("seq_test"))));
+        columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("datetime").setDefaultValueSequenceNext(new SequenceNextValueFunction(new ObjectReference("seq_test"))));
 
         columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("int").setConstraints(new ConstraintsConfig().setPrimaryKey(true)));
         columnConfigs.add((AddColumnConfig) new AddColumnConfig().setName("test_col").setType("int").setConstraints(new ConstraintsConfig().setPrimaryKey(true)).setDefaultValueNumeric(-1));

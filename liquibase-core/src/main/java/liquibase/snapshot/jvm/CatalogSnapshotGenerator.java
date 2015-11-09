@@ -26,37 +26,38 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!(example instanceof Catalog)) {
-            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
-        }
-        Database database = snapshot.getDatabase();
-        Catalog match = null;
-        String catalogName = example.getSimpleName();
-        if (catalogName == null && database.getMaxSnapshotContainerDepth() > 1) {
-            catalogName = database.getDefaultCatalogName();
-        }
-        example = new Catalog(catalogName);
-
-        try {
-            for (String potentialCatalogName : getDatabaseCatalogNames(database)) {
-                Catalog catalog = new Catalog(potentialCatalogName);
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(catalog, example, database)) {
-                    if (match == null) {
-                        match = catalog;
-                    } else {
-                        throw new InvalidExampleException("Found multiple catalogs matching " + example.getName());
-                    }
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-
-        if (match != null && isDefaultCatalog(match, database)) {
-            match.isDefault = true;
-        }
-        return match;
+//        if (!(example instanceof Catalog)) {
+//            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
+//        }
+//        Database database = snapshot.getDatabase();
+//        Catalog match = null;
+//        String catalogName = example.getSimpleName();
+//        if (catalogName == null && database.getMaxSnapshotContainerDepth() > 1) {
+//            catalogName = database.getDefaultCatalogName();
+//        }
+//        example = new Catalog(catalogName);
+//
+//        try {
+//            for (String potentialCatalogName : getDatabaseCatalogNames(database)) {
+//                Catalog catalog = new Catalog(potentialCatalogName);
+//                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(catalog, example, database)) {
+//                    if (match == null) {
+//                        match = catalog;
+//                    } else {
+//                        throw new InvalidExampleException("Found multiple catalogs matching " + example.getName());
+//                    }
+//                }
+//            }
+//
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        }
+//
+//        if (match != null && isDefaultCatalog(match, database)) {
+//            match.isDefault = true;
+//        }
+//        return match;
+        return null;
     }
 
     protected boolean isDefaultCatalog(Catalog match, Database database) {

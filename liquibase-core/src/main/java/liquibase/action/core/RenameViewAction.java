@@ -1,9 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class RenameViewAction extends AbstractAction {
-    public ObjectName oldViewName;
-    public ObjectName newViewName;
+    public ObjectReference oldViewName;
+    public ObjectReference newViewName;
 }

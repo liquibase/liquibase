@@ -5,7 +5,7 @@ import liquibase.Scope
 import liquibase.action.Action
 import liquibase.database.ConnectionSupplier
 import liquibase.snapshot.Snapshot
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.TestColumnSupplier
 import liquibase.structure.TestTableSupplier
@@ -22,7 +22,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
     def "Can apply standard settings to complex names"() {
         when:
         def action = new AddAutoIncrementAction()
-        action.columnName = new ObjectName(tableName, columnName.name)
+        action.columnName = new ObjectReference(tableName, columnName.name)
         action.columnDataType = new DataType(DataType.StandardType.INTEGER);
 
         then:
@@ -48,7 +48,7 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
         when:
         def tableName = getObjectNames(TestTableSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0]
         def columnName = getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0]
-        columnName = new ObjectName(tableName, columnName.name)
+        columnName = new ObjectReference(tableName, columnName.name)
 
         def action = new AddAutoIncrementAction(columnName, new DataType(DataType.StandardType.INTEGER), autoIncrementInformation)
 
@@ -83,14 +83,14 @@ class AddAutoIncrementActionTest extends AbstractActionTest {
     }
 
     protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
-        ObjectName columnName = ((AddAutoIncrementAction) action).columnName
+        ObjectReference columnName = ((AddAutoIncrementAction) action).columnName
         Snapshot snapshot = new Snapshot(scope)
         snapshot.add(new Table(columnName.container))
-        snapshot.add(new Column(new ObjectName(columnName.container, "id"), "int"))
+        snapshot.add(new Column(new ObjectReference(columnName.container, "id"), "int"))
         snapshot.add(new Column(columnName, "int"))
 
         if (((TestDetails) getTestDetails(scope)).createPrimaryKeyBeforeAutoIncrement()) {
-            snapshot.add(new PrimaryKey(new ObjectName(columnName.container, null), columnName.name))
+            snapshot.add(new PrimaryKey(new ObjectReference(columnName.container, null), columnName.name))
         }
 
         return snapshot

@@ -81,7 +81,7 @@ public class AddPrimaryKeysLogic extends AbstractActionLogic<AddPrimaryKeysActio
 //            sql.append(database.escapeConstraintName(constraintName));
 //        }
 //
-        clauses.append(Clauses.constraintName, database.escapeObjectName(pk.getSimpleName(), PrimaryKey.class));
+        clauses.append(Clauses.constraintName, database.escapeObjectName(pk.getName(), PrimaryKey.class));
         clauses.append("PRIMARY KEY");
         clauses.append(Clauses.columnNames, new StringClauses("(", ", ", ")").append(pk.columns, Column.class, scope));
 

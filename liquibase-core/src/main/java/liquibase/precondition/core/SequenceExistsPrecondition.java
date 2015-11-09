@@ -5,12 +5,10 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 import liquibase.exception.*;
-import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshot;
 
 public class SequenceExistsPrecondition extends AbstractPrecondition {
@@ -54,15 +52,15 @@ public class SequenceExistsPrecondition extends AbstractPrecondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot snapshot;
-        Schema schema = new Schema(getCatalogName(), getSchemaName());
-        try {
-            if (!SnapshotGeneratorFactory.getInstance().has(new Sequence(new ObjectName(getSequenceName())).setSchema(schema), database)) {
-                throw new PreconditionFailedException("Sequence "+database.escapeObjectName(new ObjectName(getCatalogName(), getSchemaName(), getSequenceName()), Sequence.class)+" does not exist", changeLog, this);
-            }
-        } catch (LiquibaseException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
-        }
+//        DatabaseSnapshot snapshot;
+//        Schema schema = new Schema(getCatalogName(), getSchemaName());
+//        try {
+//            if (!SnapshotGeneratorFactory.getInstance().has(new Sequence(new ObjectReference(getSequenceName())).setSchema(schema), database)) {
+//                throw new PreconditionFailedException("Sequence "+database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getSequenceName()), Sequence.class)+" does not exist", changeLog, this);
+//            }
+//        } catch (LiquibaseException e) {
+//            throw new PreconditionErrorException(e, changeLog, this);
+//        }
     }
 
     @Override

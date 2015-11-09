@@ -10,7 +10,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.UniqueConstraint;
@@ -39,11 +39,11 @@ public class AddUniqueConstraintsLogic extends AbstractActionLogic<AddUniqueCons
         ValidationErrors validationErrors = super.validate(action, scope);
         for (UniqueConstraint uq : action.uniqueConstraints) {
             validationErrors.checkForRequiredField("columns", uq);
-            ObjectName tableName = uq.name.container;
+            ObjectReference tableName = uq.getTableName();
             if (tableName == null) {
                 validationErrors.addError("No table specified for unique constraint "+uq.name);
             }
-            for (ObjectName columnName : uq.columns) {
+            for (ObjectReference columnName : uq.columns) {
                 if (columnName.container == null) {
                     validationErrors.addError("Column "+columnName.name+" must have a table");
                     if (!tableName.equals(columnName.container)) {
@@ -76,7 +76,7 @@ public class AddUniqueConstraintsLogic extends AbstractActionLogic<AddUniqueCons
     }
 
     protected StringClauses generateSql(UniqueConstraint uniqueConstraint, AddUniqueConstraintsAction action, Scope scope) {
-        String constraintName = uniqueConstraint.name.name;
+        String constraintName = uniqueConstraint.name;
         Database database = scope.getDatabase();
 
         StringClauses clauses = new StringClauses();

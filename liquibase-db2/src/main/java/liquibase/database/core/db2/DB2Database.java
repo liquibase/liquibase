@@ -8,7 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
@@ -214,11 +214,11 @@ public class DB2Database extends AbstractJdbcDatabase {
 
 
     @Override
-    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
         if (objectType.isAssignableFrom(Index.class)) {
-            return super.escapeObjectName(objectName.name, objectType);
+            return super.escapeObjectName(objectReference.name, objectType);
         } else {
-            return super.escapeObjectName(objectName, objectType);
+            return super.escapeObjectName(objectReference, objectType);
         }
     }
 

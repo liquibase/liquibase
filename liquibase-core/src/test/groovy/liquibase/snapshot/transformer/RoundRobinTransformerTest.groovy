@@ -4,7 +4,7 @@ import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.snapshot.Snapshot
 import liquibase.structure.DatabaseObject
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import spock.lang.Specification
@@ -15,18 +15,18 @@ class RoundRobinTransformerTest extends Specification {
 
     def setup() {
         snapshot = new Snapshot(JUnitScope.instance)
-                .add(new Table(new ObjectName("table1")))
-                .add(new Table(new ObjectName("table2")))
-                .add(new Table(new ObjectName("table3")))
-                .add(new Column(new ObjectName("table1", "col1")))
-                .add(new Column(new ObjectName("table1", "col2")))
-                .add(new Column(new ObjectName("table1", "col3")))
-                .add(new Column(new ObjectName("table2", "col1")))
-                .add(new Column(new ObjectName("table2", "col2")))
-                .add(new Column(new ObjectName("table2", "col3")))
-                .add(new Column(new ObjectName("table3", "col1")))
-                .add(new Column(new ObjectName("table3", "col2")))
-                .add(new Column(new ObjectName("table3", "col3")))
+                .add(new Table(new ObjectReference("table1")))
+                .add(new Table(new ObjectReference("table2")))
+                .add(new Table(new ObjectReference("table3")))
+                .add(new Column(new ObjectReference("table1", "col1")))
+                .add(new Column(new ObjectReference("table1", "col2")))
+                .add(new Column(new ObjectReference("table1", "col3")))
+                .add(new Column(new ObjectReference("table2", "col1")))
+                .add(new Column(new ObjectReference("table2", "col2")))
+                .add(new Column(new ObjectReference("table2", "col3")))
+                .add(new Column(new ObjectReference("table3", "col1")))
+                .add(new Column(new ObjectReference("table3", "col2")))
+                .add(new Column(new ObjectReference("table3", "col3")))
     }
 
     def "will transform specific type with two transformers"() {

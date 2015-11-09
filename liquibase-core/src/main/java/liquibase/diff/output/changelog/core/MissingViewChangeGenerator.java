@@ -36,17 +36,17 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
         View view = (View) missingObject;
 
         CreateViewChange change = new CreateViewChange();
-        change.setViewName(view.getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(view.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(view.getSchema().getSimpleName());
-        }
-        String selectQuery = view.getDefinition();
-        boolean fullDefinitionOverridden = false;
-        if (selectQuery == null) {
-            selectQuery = "COULD NOT DETERMINE VIEW QUERY";
+//        change.setViewName(view.getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(view.getContainer().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(view.getContainer().getSimpleName());
+//        }
+//        String selectQuery = view.getDefinition();
+//        boolean fullDefinitionOverridden = false;
+//        if (selectQuery == null) {
+//            selectQuery = "COULD NOT DETERMINE VIEW QUERY";
 //todo: action refactoring        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
 //            String viewName;
 //            if (change.getCatalogName() == null && change.getSchemaName() == null) {
@@ -68,11 +68,11 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
 //            change.setFullDefinition(true);
 //            fullDefinitionOverridden = true;
 //
-        }
-        change.setSelectQuery(selectQuery);
-        if (!fullDefinitionOverridden) {
-            change.setFullDefinition(view.getContainsFullDefinition());
-        }
+//        }
+//        change.setSelectQuery(selectQuery);
+//        if (!fullDefinitionOverridden) {
+//            change.setFullDefinition(view.getContainsFullDefinition());
+//        }
 
         return new Change[] { change };
 

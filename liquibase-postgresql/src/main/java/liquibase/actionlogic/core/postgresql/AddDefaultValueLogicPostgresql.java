@@ -10,7 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
@@ -36,7 +36,7 @@ public class AddDefaultValueLogicPostgresql extends AddDefaultValueLogic {
         // this will allow a drop table cascade to remove the sequence as well.
         if (defaultValue instanceof SequenceNextValueFunction) {
             result = new DelegateResult(result, new RedefineSequenceAction(
-                    new ObjectName(action.columnName.container.container, ((SequenceNextValueFunction) defaultValue).getValue()),
+                    new ObjectReference(action.columnName.container.container, ((SequenceNextValueFunction) defaultValue).getValue()),
                     new StringClauses()
                             .append("OWNED BY")
                             .append(database.escapeObjectName(action.columnName.container, Table.class)

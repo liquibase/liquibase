@@ -4,7 +4,7 @@ import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.util.*;
 
@@ -145,8 +145,8 @@ public class StringClauses {
         for (Object obj : objects) {
             if (obj instanceof DatabaseObject) {
                 this.append(database.escapeObjectName(((DatabaseObject) obj).getName(), type));
-            } else if (obj instanceof ObjectName) {
-                this.append(database.escapeObjectName(((ObjectName) obj), type));
+            } else if (obj instanceof ObjectReference) {
+                this.append(database.escapeObjectName(((ObjectReference) obj), type));
             } else if (obj instanceof StringClauses) {
                 this.append(obj.toString(), ((StringClauses) obj));
             } else {

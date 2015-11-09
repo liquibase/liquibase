@@ -2,7 +2,7 @@ package liquibase
 
 import liquibase.action.core.AddAutoIncrementAction
 import liquibase.action.core.DropTablesAction
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import spock.lang.Specification
@@ -48,7 +48,7 @@ class AbstractExtensibleObjectTest extends Specification {
         fieldObject.set("value2", 2)
         fieldObject.set("startWith", 12)
         fieldObject.incrementBy = new BigInteger(32)
-        fieldObject.columnName = new ObjectName("x", "y")
+        fieldObject.columnName = new ObjectReference("x", "y")
 
         then:
         that nonFieldObject.getAttributeNames(), containsInAnyOrder(["value1", "value2", "value3"] as String[])
@@ -115,26 +115,26 @@ class AbstractExtensibleObjectTest extends Specification {
         def obj = new Table();
         obj.set("value1", "One")
         obj.set("value2", 2)
-        obj.columns = [new Column(new ObjectName("a")), new Column(new ObjectName("b"))]
-        obj.name = new ObjectName("testTable")
+        obj.columns = [new Column(new ObjectReference("a")), new Column(new ObjectReference("b"))]
+        obj.name = new ObjectReference("testTable")
 
         then:
         obj.get("value2", String) == "2"
         obj.columns*.toString() == ["a", "b"]
         obj.get("columns", List)*.toString() == ["a", "b"]
         obj.name.toString() == "testTable"
-        obj.get("name", ObjectName).toString() == "testTable"
+        obj.get("name", ObjectReference).toString() == "testTable"
 
         when:
-        obj.set("columns", [new Column(new ObjectName("x")), new Column(new ObjectName("y"))])
-        obj.set("name", new ObjectName("newTableName"))
+        obj.set("columns", [new Column(new ObjectReference("x")), new Column(new ObjectReference("y"))])
+        obj.set("name", new ObjectReference("newTableName"))
 
         then:
         obj.get("value2", String) == "2"
         obj.columns*.toString() == ["x", "y"]
         obj.get("columns", List)*.toString() == ["x", "y"]
         obj.name.toString() == "newTableName"
-        obj.get("name", ObjectName).toString() == "newTableName"
+        obj.get("name", ObjectReference).toString() == "newTableName"
 
     }
 

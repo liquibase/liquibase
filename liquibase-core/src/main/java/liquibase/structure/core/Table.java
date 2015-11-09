@@ -1,11 +1,6 @@
 package liquibase.structure.core;
 
-import liquibase.structure.ObjectName;
-import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import liquibase.structure.ObjectReference;
 
 public class Table extends Relation {
 
@@ -14,11 +9,15 @@ public class Table extends Relation {
     public Table() {
     }
 
-    public Table(ObjectName name) {
+    public Table(String name) {
         super(name);
     }
 
-    public Table(String catalogName, String schemaName, String tableName) {
-        this(new ObjectName(catalogName, schemaName, tableName));
+    public Table(ObjectReference nameAndContainer) {
+        super(nameAndContainer);
+    }
+
+    public Table(ObjectReference container, String name) {
+        super(container, name);
     }
 }

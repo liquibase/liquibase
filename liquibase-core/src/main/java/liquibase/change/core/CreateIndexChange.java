@@ -3,12 +3,8 @@ package liquibase.change.core;
 import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.Collection;

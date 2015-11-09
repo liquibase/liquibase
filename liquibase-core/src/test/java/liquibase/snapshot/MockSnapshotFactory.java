@@ -3,6 +3,7 @@ package liquibase.snapshot;
 import liquibase.Scope;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,14 +27,14 @@ public class MockSnapshotFactory extends SnapshotFactory {
     }
 
     @Override
-    public boolean has(DatabaseObject wanted, Scope scope) throws ActionPerformException, InvalidExampleException {
+    public boolean has(ObjectReference wanted, Scope scope) throws ActionPerformException, InvalidExampleException {
         return this.get(wanted, scope) != null;
     }
 
     @Override
-    public <T extends DatabaseObject> T get(DatabaseObject wanted, Scope scope) throws ActionPerformException, InvalidExampleException {
+    public <T extends DatabaseObject> T get(ObjectReference wanted, Scope scope) throws ActionPerformException, InvalidExampleException {
         for (DatabaseObject  object : objects) {
-            if (wanted.getName().equals(object.getName())) {
+            if (wanted.name.equals(object.getName())) {
                 return (T) object;
             }
         }

@@ -1,9 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class DropDefaultValueAction extends AbstractAction {
-    public ObjectName columnName;
+    public ObjectReference columnName;
     public String columnDataType;
 }

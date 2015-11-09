@@ -4,9 +4,8 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
@@ -97,7 +96,7 @@ public class DatabaseObjectComparatorFactory {
         instance = null;
     }
 
-    public boolean isSameObject(ObjectName object1, ObjectName object2, Database accordingTo) {
+    public boolean isSameObject(ObjectReference object1, ObjectReference object2, Database accordingTo) {
         return object1.equals(object2);
     }
 

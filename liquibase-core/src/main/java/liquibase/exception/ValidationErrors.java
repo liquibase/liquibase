@@ -3,7 +3,7 @@ package liquibase.exception;
 import liquibase.ExtensibleObject;
 import liquibase.action.Action;
 import liquibase.changelog.ChangeSet;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -203,15 +203,15 @@ public class ValidationErrors {
     }
 
     /**
-     * Adds the given errorMessage to the validationErrors if the {@link ObjectName} on the given field is set but doesn't have a container defined.
+     * Adds the given errorMessage to the validationErrors if the {@link ObjectReference} on the given field is set but doesn't have a container defined.
      * If the given field is not set, no error message is set.
      */
     public ValidationErrors checkForRequiredContainer(String errorMessage, String field, Action action) {
-        ObjectName objectName = action.get(field, ObjectName.class);
-        if (objectName != null) {
-            if (objectName.container == null) {
+        ObjectReference objectReference = action.get(field, ObjectReference.class);
+        if (objectReference != null) {
+            if (objectReference.container == null) {
                 addError(errorMessage);
-            } else if (objectName.container.name == null) {
+            } else if (objectReference.container.name == null) {
                 addError(errorMessage);
             }
         }

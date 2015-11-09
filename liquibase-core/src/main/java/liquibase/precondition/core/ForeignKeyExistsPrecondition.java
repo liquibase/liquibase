@@ -5,14 +5,10 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.ForeignKey;
 import liquibase.exception.*;
-import liquibase.precondition.Precondition;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.util.StringUtils;
 
 public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -71,7 +67,7 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             ForeignKey example = new ForeignKey();
-            example.setName(new ObjectName(getForeignKeyName()));
+//            example.setName(new ObjectReference(getForeignKeyName()));
 //            example.setForeignKeyTable(new Table());
 //            if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
 //                example.getForeignKeyTable().setName(new ObjectName(getForeignKeyTableName()));
@@ -79,7 +75,7 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
 //            example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
-                    throw new PreconditionFailedException("Foreign Key "+database.escapeObjectName(new ObjectName(catalogName, schemaName, foreignKeyName), Index.class)+" does not exist", changeLog, this);
+                    throw new PreconditionFailedException("Foreign Key "+database.escapeObjectName(new ObjectReference(catalogName, schemaName, foreignKeyName), Index.class)+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;

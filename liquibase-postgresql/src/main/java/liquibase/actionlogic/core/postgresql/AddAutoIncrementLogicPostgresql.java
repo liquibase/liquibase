@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.core.AddAutoIncrementAction;
 import liquibase.action.core.AddDefaultValueAction;
 import liquibase.action.core.CreateSequenceAction;
@@ -13,7 +12,7 @@ import liquibase.database.Database;
 import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.DataType;
 
 public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic<AddAutoIncrementAction> {
@@ -30,10 +29,10 @@ public class AddAutoIncrementLogicPostgresql extends AbstractActionLogic<AddAuto
 
     @Override
     public ActionResult execute(AddAutoIncrementAction action, Scope scope) throws ActionPerformException {
-        ObjectName columnName = action.columnName;
-        ObjectName tableName = columnName.container;
+        ObjectReference columnName = action.columnName;
+        ObjectReference tableName = columnName.container;
 
-        ObjectName sequenceName = new ObjectName(tableName.container, (tableName.name + "_" + columnName.name + "_seq").toLowerCase());
+        ObjectReference sequenceName = new ObjectReference(tableName.container, (tableName.name + "_" + columnName.name + "_seq").toLowerCase());
 
         DataType columnDataType = action.columnDataType;
 

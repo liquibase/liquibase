@@ -7,7 +7,6 @@ import liquibase.action.core.AddLookupTableAction;
 import liquibase.actionlogic.core.AddLookupTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 

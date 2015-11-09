@@ -8,7 +8,6 @@ import liquibase.action.core.AddLookupTableAction;
 import liquibase.actionlogic.core.AddLookupTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 

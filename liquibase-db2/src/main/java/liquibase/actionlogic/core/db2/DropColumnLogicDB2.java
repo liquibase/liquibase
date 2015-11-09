@@ -1,8 +1,6 @@
 package liquibase.actionlogic.core.db2;
 
 import liquibase.Scope;
-import liquibase.action.Action;
-import liquibase.action.core.DeleteDataAction;
 import liquibase.action.core.DropColumnsAction;
 import liquibase.action.core.ReorganizeTableAction;
 import liquibase.actionlogic.ActionResult;
@@ -11,7 +9,6 @@ import liquibase.actionlogic.core.DropColumnsLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
 
 public class DropColumnLogicDB2 extends DropColumnsLogic {
     @Override

@@ -13,7 +13,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
@@ -49,64 +49,65 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        Database database = snapshot.getDatabase();
-        Schema schema = example.getSchema();
-
-        List<CachedRow> viewsMetadataRs = null;
-        try {
-            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getSimpleName());
-            if (viewsMetadataRs.size() > 0) {
-                CachedRow row = viewsMetadataRs.get(0);
-                String rawViewName = row.getString("TABLE_NAME");
-                String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
-                String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
-                String remarks = row.getString("REMARKS");
-                if (remarks != null) {
-                    remarks = remarks.replace("''", "'"); //come back escaped sometimes
-                }
-
-                View view = new View().setName(new ObjectName(cleanNameFromDatabase(rawViewName, database)));
-                view.remarks = remarks;
-
-                CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
-//                view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
-
-                try {
-                    String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getSimpleName());
-
-                    if (definition.startsWith("FULL_DEFINITION: ")) {
-                        definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
-                        view.setContainsFullDefinition(true);
-                    }
-
-                    // remove strange zero-termination seen on some Oracle view definitions
-                    int length = definition.length();
-                    if (definition.charAt(length-1) == 0) {
-                      definition = definition.substring(0, length-1);
-                    }
-
-//todo: action refactoring                    if (database instanceof InformixDatabase) {
-//                        // Cleanup
-//                        definition = definition.trim();
-//                        definition = definition.replaceAll("\\s*,\\s*", ", ");
-//                        definition = definition.replaceAll("\\s*;", "");
+//        Database database = snapshot.getDatabase();
+//        Schema schema = example.getContainer();
 //
-//                        // Strip the schema definition because it can optionally be included in the tag attribute
-//                        definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+//        List<CachedRow> viewsMetadataRs = null;
+//        try {
+//            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getSimpleName());
+//            if (viewsMetadataRs.size() > 0) {
+//                CachedRow row = viewsMetadataRs.get(0);
+//                String rawViewName = row.getString("TABLE_NAME");
+//                String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
+//                String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
+//                String remarks = row.getString("REMARKS");
+//                if (remarks != null) {
+//                    remarks = remarks.replace("''", "'"); //come back escaped sometimes
+//                }
+//
+//                View view = new View().setName(new ObjectReference(cleanNameFromDatabase(rawViewName, database)));
+//                view.remarks = remarks;
+//
+//                CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
+////                view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
+//
+//                try {
+//                    String definition = database.getViewDefinition(schemaFromJdbcInfo, view.getSimpleName());
+//
+//                    if (definition.startsWith("FULL_DEFINITION: ")) {
+//                        definition = definition.replaceFirst("^FULL_DEFINITION: ", "");
+//                        view.setContainsFullDefinition(true);
 //                    }
-
-                    view.setDefinition(definition);
-                } catch (DatabaseException e) {
-                    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getSimpleName(), rawViewName), e);
-                }
-
-                return view;
-            } else {
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
+//
+//                    // remove strange zero-termination seen on some Oracle view definitions
+//                    int length = definition.length();
+//                    if (definition.charAt(length-1) == 0) {
+//                      definition = definition.substring(0, length-1);
+//                    }
+//
+////todo: action refactoring                    if (database instanceof InformixDatabase) {
+////                        // Cleanup
+////                        definition = definition.trim();
+////                        definition = definition.replaceAll("\\s*,\\s*", ", ");
+////                        definition = definition.replaceAll("\\s*;", "");
+////
+////                        // Strip the schema definition because it can optionally be included in the tag attribute
+////                        definition = definition.replaceAll("(?i)\""+view.getSchema().getName()+"\"\\.", "");
+////                    }
+//
+//                    view.setDefinition(definition);
+//                } catch (DatabaseException e) {
+//                    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getContainer().getCatalogName(), view.getContainer().getSimpleName(), rawViewName), e);
+//                }
+//
+//                return view;
+//            } else {
+//                return null;
+//            }
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        }
+        return null;
     }
 
     @Override

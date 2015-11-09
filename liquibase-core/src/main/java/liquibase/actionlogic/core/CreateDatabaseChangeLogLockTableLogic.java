@@ -8,10 +8,9 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
-import liquibase.structure.core.OldDataType;
 import liquibase.structure.core.Table;
 
 public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic<CreateDatabaseChangeLogLockTableAction> {
@@ -27,21 +26,21 @@ public class CreateDatabaseChangeLogLockTableLogic extends AbstractActionLogic<C
         String charTypeName = getCharTypeName(database);
         String dateTimeTypeString = getDateTimeTypeString(database);
 
-        ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
+        ObjectReference tableName = new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
 
-        Column idColumn = new Column(new ObjectName(tableName, "ID"));
+        Column idColumn = new Column(new ObjectReference(tableName, "ID"));
         idColumn.type = new DataType("int");
         idColumn.nullable = false;
 
-        Column lockedColumn = new Column(new ObjectName(tableName, "LOCKED"));
+        Column lockedColumn = new Column(new ObjectReference(tableName, "LOCKED"));
         lockedColumn.type = new DataType("BOOLEAN");
         lockedColumn.nullable = false;
 
         CreateTableAction createTableAction = new CreateTableAction(new Table(tableName))
                 .addColumn(idColumn)
                 .addColumn(lockedColumn)
-                .addColumn(new Column(new ObjectName(tableName, "LOCKGRANTED"), dateTimeTypeString))
-                .addColumn(new Column(new ObjectName(tableName, "LOCKEDBY"), charTypeName + "(255)"));
+                .addColumn(new Column(new ObjectReference(tableName, "LOCKGRANTED"), dateTimeTypeString))
+                .addColumn(new Column(new ObjectReference(tableName, "LOCKEDBY"), charTypeName + "(255)"));
         createTableAction.table.tablespace = database.getLiquibaseTablespaceName();
 
         return new DelegateResult(createTableAction);

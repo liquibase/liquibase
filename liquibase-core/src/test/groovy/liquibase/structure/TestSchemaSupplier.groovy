@@ -16,7 +16,7 @@ public class TestSchemaSupplier extends DefaultTestStructureSupplier {
     @Override
     List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         def returnList = []
-        for (ObjectName schemaName : scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()) {
+        for (ObjectReference schemaName : scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()) {
             returnList.add(new Schema(schemaName))
         }
 

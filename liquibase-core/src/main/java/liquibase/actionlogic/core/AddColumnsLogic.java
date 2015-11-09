@@ -10,7 +10,7 @@ import liquibase.exception.ActionPerformException;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotFactory;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.CollectionUtil;
@@ -88,23 +88,23 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
     @Override
     public ActionStatus checkStatus(AddColumnsAction action, Scope scope) {
         ActionStatus result = new ActionStatus();
-        ObjectName tableName = action.columns.get(0).name.container;
+        ObjectReference tableName = action.columns.get(0).container;
 
         try {
             PrimaryKey snapshotPK = null;
 
             if (action.primaryKey != null) {
-                snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, new Table(tableName)), scope).asObject(PrimaryKey.class);
+                snapshotPK = scope.getSingleton(ActionExecutor.class).query(new SnapshotDatabaseObjectsAction(PrimaryKey.class, tableName), scope).asObject(PrimaryKey.class);
             }
 
             for (Column actionColumn : action.columns) {
-                Column snapshotColumn = LiquibaseUtil.snapshotObject(Column.class, actionColumn, scope);
+                Column snapshotColumn = LiquibaseUtil.snapshotObject(Column.class, actionColumn.toReference(), scope);
                 if (snapshotColumn == null) {
                     result.assertApplied(false, "Column '"+actionColumn.name+"' not found");
                 } else {
-                    Table table = scope.getSingleton(SnapshotFactory.class).get(new Table(snapshotColumn.name.container), scope);
+                    Table table = scope.getSingleton(SnapshotFactory.class).get(snapshotColumn.container, scope);
                     if (table == null) {
-                        result.unknown("Cannot find table " + snapshotColumn.name.container);
+                        result.unknown("Cannot find table " + snapshotColumn.container);
                     } else {
                         List<String> excludeFields = new ArrayList<>(Arrays.asList("type", "autoIncrementInformation", "nullable"));
 
@@ -131,8 +131,8 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
                 } else {
                     for (Column actionColumn : action.columns) {
                         boolean pkHasColumn = false;
-                        for (ObjectName pkColumn : snapshotPK.columns) {
-                            if (pkColumn.name.equals(actionColumn.getSimpleName())) {
+                        for (PrimaryKey.PrimaryKeyColumn pkColumn : snapshotPK.columns) {
+                            if (pkColumn.name.equals(actionColumn.getName())) {
                                 pkHasColumn = true;
                                 break;
                             }
@@ -144,7 +144,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
             }
 
             for (ForeignKey actionFK : action.foreignKeys) {
-                ForeignKey snapshotFK = scope.getSingleton(SnapshotFactory.class).get(actionFK, scope);
+                ForeignKey snapshotFK = scope.getSingleton(SnapshotFactory.class).get(actionFK.toReference(), scope);
                 if (snapshotFK == null) {
                     result.assertApplied(false, "Foreign Key not created on '"+tableName+"'");
                 } else {
@@ -179,7 +179,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
     protected Action[] execute(Column column, AddColumnsAction action, Scope scope) {
         List<Action> returnActions = new ArrayList<>();
         returnActions.add(new AlterTableAction(
-                column.name.container,
+                column.container,
                 getColumnClause(column, action, scope)
         ));
 
@@ -191,7 +191,7 @@ public class AddColumnsLogic extends AbstractActionLogic<AddColumnsAction> {
         StringClauses clauses = new StringClauses(" ");
         Database database = scope.getDatabase();
 
-        ObjectName columnName = column.name;
+        ObjectReference columnName = column.toReference();
         DataType columnType = column.type;
         boolean primaryKey = action.primaryKey != null && action.primaryKey.containsColumn(column);
         boolean nullable = ObjectUtil.defaultIfEmpty(column.nullable, false); // primaryKey || ObjectUtil.defaultIfEmpty(column.nullable, false);

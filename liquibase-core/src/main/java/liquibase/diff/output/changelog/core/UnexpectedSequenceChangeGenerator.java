@@ -34,13 +34,13 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
         Sequence sequence = (Sequence) unexpectedObject;
 
         DropSequenceChange change = new DropSequenceChange();
-        change.setSequenceName(sequence.getSimpleName());
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(sequence.getSchema().getCatalogName());
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(sequence.getSchema().getSimpleName());
-        }
+//        change.setSequenceName(sequence.getSimpleName());
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(sequence.getContainer().getCatalogName());
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(sequence.getContainer().getSimpleName());
+//        }
 
         return new Change[] { change };
 

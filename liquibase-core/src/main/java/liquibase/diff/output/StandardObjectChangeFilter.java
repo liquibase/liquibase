@@ -101,7 +101,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 matches = false;
             }
             if (matches == null) {
-                matches = nameMatcher.matcher(object.getSimpleName()).matches();
+                matches = nameMatcher.matcher(object.getName()).matches();
             }
 
             if (!matches) {
@@ -117,9 +117,9 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 if (object instanceof PrimaryKey) {
                     return matches(new Table(((PrimaryKey) object).getTableName()));
                 }
-                if (object instanceof Data) {
-                    return matches(((Data) object).getTable());
-                }
+//                if (object instanceof Data) {
+//                    return matches(((Data) object).getTable());
+//                }
             }
             return matches;
         }

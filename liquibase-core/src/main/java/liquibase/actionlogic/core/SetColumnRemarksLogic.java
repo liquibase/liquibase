@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.SetColumnRemarksAction;
 import liquibase.actionlogic.AbstractActionLogic;
@@ -10,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 

@@ -9,7 +9,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
 
 import java.sql.SQLException;
@@ -66,41 +65,41 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             return;
         }
 
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
-            Database database = snapshot.getDatabase();
-            Schema schema;
-            schema = table.getSchema();
-
-            List<CachedRow> metadata = null;
-            try {
-                metadata = listConstraints(table, snapshot, schema);
-            } catch (SQLException e) {
-                throw new DatabaseException(e);
-            }
-
-            Set<String> seenConstraints = new HashSet<String>();
-
-//            for (CachedRow constraint : metadata) {
-//                UniqueConstraint uq = new UniqueConstraint(new ObjectName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database))).setTable(table);
-//                if (constraint.containsColumn("INDEX_NAME")) {
-//                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
-//                }
-////                if (seenConstraints.add(uq.getSimpleName())) {
-////                    table.uniqueConstraints.add(uq);
-////                }
+//        if (foundObject instanceof Table) {
+//            Table table = (Table) foundObject;
+//            Database database = snapshot.getDatabase();
+//            Schema schema;
+//            schema = table.getContainer();
+//
+//            List<CachedRow> metadata = null;
+//            try {
+//                metadata = listConstraints(table, snapshot, schema);
+//            } catch (SQLException e) {
+//                throw new DatabaseException(e);
 //            }
-        }
+//
+//            Set<String> seenConstraints = new HashSet<String>();
+//
+////            for (CachedRow constraint : metadata) {
+////                UniqueConstraint uq = new UniqueConstraint(new ObjectName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database))).setTable(table);
+////                if (constraint.containsColumn("INDEX_NAME")) {
+////                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getSimpleName()));
+////                }
+//////                if (seenConstraints.add(uq.getSimpleName())) {
+//////                    table.uniqueConstraints.add(uq);
+//////                }
+////            }
+//        }
     }
 
-    protected List<CachedRow> listConstraints(Table table, DatabaseSnapshot snapshot, Schema schema) throws DatabaseException, SQLException {
-        return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getSimpleName(), table.getSimpleName());
-    }
+//    protected List<CachedRow> listConstraints(Table table, DatabaseSnapshot snapshot, Schema schema) throws DatabaseException, SQLException {
+//        return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getSimpleName(), table.getSimpleName());
+//    }
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
 //        Table table = example.getTable();
 //        Schema schema = table.getSchema();
-        String name = example.getSimpleName();
+//        String name = example.getSimpleName();
 
         String sql = null;
 //        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {

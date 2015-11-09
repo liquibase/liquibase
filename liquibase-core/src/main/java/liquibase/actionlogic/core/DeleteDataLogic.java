@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.core.DeleteStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -53,6 +53,6 @@ public class DeleteDataLogic extends AbstractSqlBuilderLogic<DeleteDataAction> {
     }
 
     protected Relation getAffectedTable(DeleteStatement statement) {
-        return new Table(new ObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
+        return new Table(new ObjectReference(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
     }
 }

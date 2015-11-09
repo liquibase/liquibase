@@ -9,7 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
@@ -24,25 +24,26 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
-        String objectName = example.getSimpleName();
-        Schema schema = example.getSchema();
+//        String objectName = example.getSimpleName();
+//        Schema schema = example.getContainer();
 
-        List<CachedRow> rs = null;
-        try {
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
-            rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), objectName);
-
-            Table table;
-            if (rs.size() > 0) {
-                table = readTable(rs.get(0), database);
-            } else {
-                return null;
-            }
-
-            return table;
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
+//        List<CachedRow> rs = null;
+//        try {
+//            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+//            rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), objectName);
+//
+//            Table table;
+//            if (rs.size() > 0) {
+//                table = readTable(rs.get(0), database);
+//            } else {
+//                return null;
+//            }
+//
+//            return table;
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        }
+        return null;
     }
 
     @Override
@@ -74,32 +75,33 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
-        String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
-        String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
-        if (remarks != null) {
-            remarks = remarks.replace("''", "'"); //come back escaped sometimes
-        }
-
-        Table table = new Table().setName(new ObjectName(cleanNameFromDatabase(rawTableName, database)));
-        table.remarks = remarks;
-
-        CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
-//        table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
-
-        if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
-            table.set("temporary", "GLOBAL");
-
-            String duration = tableMetadataResultSet.getString("DURATION");
-            if (duration != null && duration.equals("SYS$TRANSACTION")) {
-                table.set("duration", "ON COMMIT DELETE ROWS");
-            } else if (duration != null && duration.equals("SYS$SESSION")) {
-                table.set("duration", "ON COMMIT PRESERVE ROWS");
-            }
-        }
-
-        return table;
+//        String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
+//        String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
+//        String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
+//        String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+//        if (remarks != null) {
+//            remarks = remarks.replace("''", "'"); //come back escaped sometimes
+//        }
+//
+//        Table table = new Table().setName(new ObjectReference(cleanNameFromDatabase(rawTableName, database)));
+//        table.remarks = remarks;
+//
+//        CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
+////        table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
+//
+//        if ("Y".equals(tableMetadataResultSet.getString("TEMPORARY"))) {
+//            table.set("temporary", "GLOBAL");
+//
+//            String duration = tableMetadataResultSet.getString("DURATION");
+//            if (duration != null && duration.equals("SYS$TRANSACTION")) {
+//                table.set("duration", "ON COMMIT DELETE ROWS");
+//            } else if (duration != null && duration.equals("SYS$SESSION")) {
+//                table.set("duration", "ON COMMIT PRESERVE ROWS");
+//            }
+//        }
+//
+//        return table;
+        return null;
     }
 
     //code from SqlLiteSnapshotGenerator

@@ -10,7 +10,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.util.NetUtil;
 import liquibase.util.StringClauses;
@@ -45,7 +45,7 @@ public class LockDatabaseChangeLogLogic extends AbstractActionLogic<LockDatabase
         String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
 
-        UpdateDataAction updateDataAction = new UpdateDataAction(new ObjectName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogLockTableName()))
+        UpdateDataAction updateDataAction = new UpdateDataAction(new ObjectReference(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogLockTableName()))
                 .addNewColumnValue("LOCKED", true)
                 .addNewColumnValue("LOCKGRANTED", new Timestamp(new Date().getTime()))
                 .addNewColumnValue("LOCKEDBY", hostname + hostDescription + " (" + hostaddress + ")");

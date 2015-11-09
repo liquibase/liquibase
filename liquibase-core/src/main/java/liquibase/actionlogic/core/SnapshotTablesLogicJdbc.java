@@ -7,7 +7,7 @@ import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -38,23 +38,23 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
     @Override
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
 
-        DatabaseObject relatedTo = action.relatedTo;
-        ObjectName objectName;
-        if (relatedTo instanceof Catalog) {
+        ObjectReference relatedTo = action.relatedTo;
+        ObjectReference objectReference;
+        if (relatedTo.instanceOf(Catalog.class)) {
             if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
             }
-            objectName = new ObjectName(relatedTo.getSimpleName(), null, null);
-        } else if (relatedTo instanceof Schema) {
-            objectName = new ObjectName(new ObjectName(relatedTo.getName().container, relatedTo.getSimpleName()), null);
-        } else if (relatedTo instanceof Table) {
-            objectName = relatedTo.getName();
+            objectReference = new ObjectReference(relatedTo.name, null, null);
+        } else if (relatedTo.instanceOf(Schema.class)) {
+            objectReference = new ObjectReference(new ObjectReference(relatedTo.container, relatedTo.name), null);
+        } else if (relatedTo.instanceOf(Table.class)) {
+            objectReference = relatedTo;
         } else {
             throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
         }
 
-        objectName = objectName.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 1);
-        List<String> nameParts = objectName.asList(3);
+        objectReference = objectReference.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 1);
+        List<String> nameParts = objectReference.asList(3);
 
         if (scope.getDatabase().getMaxSnapshotContainerDepth() >= 2) {
             return new QueryJdbcMetaDataAction("getTables", nameParts.get(0), nameParts.get(1), nameParts.get(2), new String[]{"TABLE"});
@@ -73,21 +73,21 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
-        ObjectName container;
+        ObjectReference container;
         int maxContainerDepth = scope.getDatabase().getMaxReferenceContainerDepth();
         if (maxContainerDepth == 0) {
             container = null;
         } else if (maxContainerDepth == 1) {
             if (rawCatalogName != null && rawSchemaName == null) {
-                container = new ObjectName(rawCatalogName);
+                container = new ObjectReference(rawCatalogName);
             } else {
-                container = new ObjectName(rawSchemaName);
+                container = new ObjectReference(rawSchemaName);
             }
         } else {
-            container = new ObjectName(rawCatalogName, rawSchemaName);
+            container = new ObjectReference(rawCatalogName, rawSchemaName);
         }
 
-        Table table = new Table().setName(new ObjectName(container, rawTableName));
+        Table table = new Table(new ObjectReference(container, rawTableName));
         table.remarks = remarks;
 
         if ("Y".equals(row.get("TEMPORARY", String.class))) {

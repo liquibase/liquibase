@@ -7,7 +7,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.util.CollectionUtil;
 import org.slf4j.LoggerFactory;
@@ -243,33 +243,33 @@ public abstract class ConnectionSupplier implements Cloneable {
         return db;
     }
 
-    public List<ObjectName> getReferenceObjectNames(Class<? extends DatabaseObject> type) {
+    public List<ObjectReference> getReferenceObjectNames(Class<? extends DatabaseObject> type) {
         return getReferenceObjectNames(type, false, false);
     }
 
-    public List<ObjectName> getReferenceObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
+    public List<ObjectReference> getReferenceObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
         if (Column.class.isAssignableFrom(type)) {
             return getObjectNames(type, 0, includePartials, includeNulls);
         }
         return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
     }
 
-    public List<ObjectName> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
+    public List<ObjectReference> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
         if (Column.class.isAssignableFrom(type)) {
             return getObjectNames(type, 0, includePartials, includeNulls);
         }
         return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
     }
 
-    public List<ObjectName> getObjectNames(Class<? extends DatabaseObject> type, int maxDepth, boolean includePartials, boolean includeNulls) {
-        List<ObjectName> returnList = new ArrayList<>();
+    public List<ObjectReference> getObjectNames(Class<? extends DatabaseObject> type, int maxDepth, boolean includePartials, boolean includeNulls) {
+        List<ObjectReference> returnList = new ArrayList<>();
 
         for (String simpleName : getSimpleObjectNames(type)) {
             if (maxDepth == 0) {
-                returnList.add(new ObjectName(simpleName));
+                returnList.add(new ObjectReference(simpleName));
             } else {
-                for (ObjectName container : getContainers(maxDepth, includePartials, includeNulls)) {
-                    returnList.add(new ObjectName(container, simpleName));
+                for (ObjectReference container : getContainers(maxDepth, includePartials, includeNulls)) {
+                    returnList.add(new ObjectReference(container, simpleName));
                 }
             }
         }
@@ -278,30 +278,30 @@ public abstract class ConnectionSupplier implements Cloneable {
         return returnList;
     }
 
-    public List<ObjectName> getAllContainers() {
+    public List<ObjectReference> getAllContainers() {
         int depth = getDatabase().getMaxReferenceContainerDepth();
 
         if (depth == 0) {
             return Arrays.asList();
         } else if (depth== 1) {
-            return Arrays.asList(new ObjectName(getPrimarySchema()), new ObjectName(getAlternateSchema()));
+            return Arrays.asList(new ObjectReference(getPrimarySchema()), new ObjectReference(getAlternateSchema()));
         } else {
-            return Arrays.asList(new ObjectName(getPrimaryCatalog(), getPrimarySchema()),
-                    new ObjectName(getPrimaryCatalog(), getAlternateSchema()),
-                    new ObjectName(getAlternateCatalog(), getPrimarySchema()),
-                    new ObjectName(getAlternateCatalog(), getAlternateSchema()));
+            return Arrays.asList(new ObjectReference(getPrimaryCatalog(), getPrimarySchema()),
+                    new ObjectReference(getPrimaryCatalog(), getAlternateSchema()),
+                    new ObjectReference(getAlternateCatalog(), getPrimarySchema()),
+                    new ObjectReference(getAlternateCatalog(), getAlternateSchema()));
         }
     }
 
 
-    protected List<ObjectName> getContainers(int maxDepth, boolean includePartials, boolean includeNulls) {
-        LinkedHashSet<ObjectName> returnList = new LinkedHashSet<>();
-        for (ObjectName container : getAllContainers()) {
-            List<ObjectName> expandedList = new ArrayList<>();
+    protected List<ObjectReference> getContainers(int maxDepth, boolean includePartials, boolean includeNulls) {
+        LinkedHashSet<ObjectReference> returnList = new LinkedHashSet<>();
+        for (ObjectReference container : getAllContainers()) {
+            List<ObjectReference> expandedList = new ArrayList<>();
 
             List<String> name = container.asList();
             name = name.subList(name.size() - maxDepth, name.size());
-            ObjectName shortened = new ObjectName(name.toArray(new String[name.size()]));
+            ObjectReference shortened = new ObjectReference(name.toArray(new String[name.size()]));
             expandedList.add(shortened);
 
             if (includePartials) {
@@ -318,13 +318,13 @@ public abstract class ConnectionSupplier implements Cloneable {
         return new ArrayList<>(returnList);
     }
 
-    protected List<ObjectName> createPartials(List<ObjectName> originalList) {
-        List<ObjectName> returnList = new ArrayList<>();
+    protected List<ObjectReference> createPartials(List<ObjectReference> originalList) {
+        List<ObjectReference> returnList = new ArrayList<>();
 
-        for (ObjectName name : originalList) {
+        for (ObjectReference name : originalList) {
             List<String> nameList = name.asList();
             for (int i = nameList.size() - 1; i > 0; i--) {
-                ObjectName shortened = new ObjectName(nameList.subList(i, nameList.size()).toArray(new String[nameList.size() - i]));
+                ObjectReference shortened = new ObjectReference(nameList.subList(i, nameList.size()).toArray(new String[nameList.size() - i]));
                 returnList.add(shortened);
 
 //                if (shortened.asList().size() < maxDepth) {
@@ -346,10 +346,10 @@ public abstract class ConnectionSupplier implements Cloneable {
         return returnList;
     }
 
-    protected List<ObjectName> createNulls(List<ObjectName> originalList) {
-        List<ObjectName> returnList = new ArrayList<>();
+    protected List<ObjectReference> createNulls(List<ObjectReference> originalList) {
+        List<ObjectReference> returnList = new ArrayList<>();
 
-        for (ObjectName name : originalList) {
+        for (ObjectReference name : originalList) {
             List<String> nameList = name.asList();
             Set<Integer> indexes = new HashSet<>();
             for (int i=0; i<nameList.size(); i++) {
@@ -362,7 +362,7 @@ public abstract class ConnectionSupplier implements Cloneable {
                     modifiedNameList.set(val, null);
                 }
 
-                returnList.add(new ObjectName(modifiedNameList.toArray(new String[modifiedNameList.size()])));
+                returnList.add(new ObjectReference(modifiedNameList.toArray(new String[modifiedNameList.size()])));
             }
         }
 

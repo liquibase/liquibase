@@ -1,17 +1,9 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
-
-import java.sql.DatabaseMetaData;
-import java.util.*;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {

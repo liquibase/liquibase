@@ -6,7 +6,7 @@ import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.ActionLogic;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
@@ -36,27 +36,27 @@ public class SnapshotColumnsLogicOffline extends AbstractSnapshotDatabaseObjects
     }
 
     protected CollectionUtil.CollectionFilter<? extends DatabaseObject> getDatabaseObjectFilter(SnapshotDatabaseObjectsAction action, Scope scope) {
-        final DatabaseObject relatedTo = action.relatedTo;
+        final ObjectReference relatedTo = action.relatedTo;
 
         return new CollectionUtil.CollectionFilter<Column>() {
             @Override
             public boolean include(Column column) {
-                if (relatedTo instanceof Column) {
-                    return column.getName().equals(relatedTo.getName());
-                } else if (relatedTo instanceof Relation) {
-                    ObjectName tableName = column.getName().container;
-                    return tableName != null && tableName.equals((relatedTo).getName());
-                } else if (relatedTo instanceof Schema) {
-                    ObjectName tableName = column.getName().container;
-                    return tableName != null && tableName.container != null && tableName.container.equals((relatedTo.getName()));
-                } else if (relatedTo instanceof Catalog) {
-                    ObjectName tableName = column.getName().container;
+                if (relatedTo.instanceOf(Column.class)) {
+                    return column.getName().equals(relatedTo.name);
+                } else if (relatedTo.instanceOf(Relation.class)) {
+                    ObjectReference tableName = column.container;
+                    return tableName != null && tableName.equals((relatedTo).name);
+                } else if (relatedTo.instanceOf(Schema.class)) {
+                    ObjectReference tableName = column.container;
+                    return tableName != null && tableName.container != null && tableName.container.equals((relatedTo.name));
+                } else if (relatedTo.instanceOf(Catalog.class)) {
+                    ObjectReference tableName = column.container;
                     if (tableName == null || tableName.container == null) {
                         return false;
                     }
-                    ObjectName schemaName = tableName.container;
+                    ObjectReference schemaName = tableName.container;
 
-                    return schemaName.container != null && schemaName.container.equals((relatedTo.getName()));
+                    return schemaName.container != null && schemaName.container.equals((relatedTo.name));
                 } else {
                     throw new UnexpectedLiquibaseException("Unexpected relatedTo type: "+relatedTo.getClass().getName());
                 }

@@ -1,6 +1,6 @@
 package liquibase.statement;
 
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 /**
  * Represents a function for getting the next value from a sequence
@@ -11,7 +11,7 @@ public class SequenceNextValueFunction extends DatabaseFunction {
         super("UNSET");
     }
 
-    public SequenceNextValueFunction(ObjectName sequenceName) {
+    public SequenceNextValueFunction(ObjectReference sequenceName) {
         super(sequenceName.toString());
     }
 }

@@ -9,7 +9,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class SelectFromDatabaseChangeLogLockLogic extends AbstractActionLogic<SelectFromDatabaseChangeLogLockAction> {
 
@@ -30,7 +30,7 @@ public class SelectFromDatabaseChangeLogLockLogic extends AbstractActionLogic<Se
 
         return new DelegateResult(
                 (SelectDataAction) new SelectDataAction(
-                        new ObjectName(database.getLiquibaseCatalogName(),
+                        new ObjectReference(database.getLiquibaseCatalogName(),
                                 database.getLiquibaseSchemaName(),
                                 database.getDatabaseChangeLogTableName()),
                         action.selectColumns)

@@ -9,7 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 
 import java.sql.SQLException;
@@ -23,82 +23,83 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        Database database = snapshot.getDatabase();
-        Schema schema = example.getSchema();
-        String searchTableName = null;
-//        if (((PrimaryKey) example).getTable() != null) {
-//            searchTableName = ((PrimaryKey) example).getTable().getSimpleName();
-//            searchTableName = database.correctObjectName(searchTableName, Table.class);
+//        Database database = snapshot.getDatabase();
+//        Schema schema = example.getContainer();
+//        String searchTableName = null;
+////        if (((PrimaryKey) example).getTable() != null) {
+////            searchTableName = ((PrimaryKey) example).getTable().getSimpleName();
+////            searchTableName = database.correctObjectName(searchTableName, Table.class);
+////        }
+//
+//        List<CachedRow> rs = null;
+//        try {
+//            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+//            rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), searchTableName);
+//            PrimaryKey returnKey = null;
+//            for (CachedRow row : rs) {
+//                if (example.getName() != null && !example.getSimpleName().equalsIgnoreCase(row.getString("PK_NAME"))) {
+//                    continue;
+//                }
+//                String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
+//                short position = row.getShort("KEY_SEQ");
+//
+//                if (returnKey == null) {
+//                    returnKey = new PrimaryKey();
+//                    CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
+////                    returnKey.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
+//                    returnKey.setName(new ObjectReference(row.getString("PK_NAME")));
+//                }
+//
+////todo: move for action logic                if (database instanceof SQLiteDatabase) { //SQLite is zero based position?
+////                    position = (short) (position + 1);
+////                }
+//
+//                String ascOrDesc = row.getString("ASC_OR_DESC");
+//                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+//                Column column = new Column(new ObjectReference(((PrimaryKey) example).name, columnName));
+////                column.descending = descending;
+////                returnKey.addColumn(position - 1, column);
+//            }
+//
+//            if (returnKey != null) {
+////                Index exampleIndex = new Index().setTable(returnKey.getTable());
+////                exampleIndex.setColumns(returnKey.getColumns());
+////todo: move for action logic                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
+////                    exampleIndex.setName(returnKey.getName());
+////                }
+////                returnKey.setBackingIndex(exampleIndex);
+//            }
+//
+//            return returnKey;
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
 //        }
-
-        List<CachedRow> rs = null;
-        try {
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
-            rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), searchTableName);
-            PrimaryKey returnKey = null;
-            for (CachedRow row : rs) {
-                if (example.getName() != null && !example.getSimpleName().equalsIgnoreCase(row.getString("PK_NAME"))) {
-                    continue;
-                }
-                String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
-                short position = row.getShort("KEY_SEQ");
-
-                if (returnKey == null) {
-                    returnKey = new PrimaryKey();
-                    CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"));
-//                    returnKey.setTable((Table) new Table(new ObjectName(row.getString("TABLE_NAME"))).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
-                    returnKey.setName(new ObjectName(row.getString("PK_NAME")));
-                }
-
-//todo: move for action logic                if (database instanceof SQLiteDatabase) { //SQLite is zero based position?
-//                    position = (short) (position + 1);
-//                }
-
-                String ascOrDesc = row.getString("ASC_OR_DESC");
-                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                Column column = new Column(new ObjectName(((PrimaryKey) example).name, columnName));
-//                column.descending = descending;
-//                returnKey.addColumn(position - 1, column);
-            }
-
-            if (returnKey != null) {
-//                Index exampleIndex = new Index().setTable(returnKey.getTable());
-//                exampleIndex.setColumns(returnKey.getColumns());
-//todo: move for action logic                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
-//                    exampleIndex.setName(returnKey.getName());
-//                }
-//                returnKey.setBackingIndex(exampleIndex);
-            }
-
-            return returnKey;
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
+        return null;
     }
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)) {
-            return;
-        }
-
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
-            Database database = snapshot.getDatabase();
-            Schema schema = table.getSchema();
-
-            List<CachedRow> rs = null;
-            try {
-                JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
-                rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getSimpleName());
-                if (rs.size() > 0) {
-//                    table.primaryKey = new PrimaryKey(new ObjectName(rs.get(0).getString("PK_NAME"))).setTable(table);
-                }
-            } catch (SQLException e) {
-                throw new DatabaseException(e);
-            }
-
-        }
+//        if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)) {
+//            return;
+//        }
+//
+//        if (foundObject instanceof Table) {
+//            Table table = (Table) foundObject;
+//            Database database = snapshot.getDatabase();
+//            Schema schema = table.getContainer();
+//
+//            List<CachedRow> rs = null;
+//            try {
+//                JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+//                rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getSimpleName());
+//                if (rs.size() > 0) {
+////                    table.primaryKey = new PrimaryKey(new ObjectName(rs.get(0).getString("PK_NAME"))).setTable(table);
+//                }
+//            } catch (SQLException e) {
+//                throw new DatabaseException(e);
+//            }
+//
+//        }
     }
 
     //FROM SQLIteDatabaseSnapshotGenerator

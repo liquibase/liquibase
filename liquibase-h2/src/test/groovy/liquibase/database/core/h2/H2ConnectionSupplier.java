@@ -6,11 +6,6 @@ import liquibase.actionlogic.ActionExecutor;
 import liquibase.database.ConnectionSupplier;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.structure.ObjectName;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class H2ConnectionSupplier extends ConnectionSupplier {
 

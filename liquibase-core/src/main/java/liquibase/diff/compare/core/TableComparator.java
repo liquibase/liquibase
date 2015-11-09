@@ -36,7 +36,7 @@ public class TableComparator  implements DatabaseObjectComparator {
             return false;
         }
 
-        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getContainer(), databaseObject2.getContainer(), accordingTo)) {
             return false;
         }
 

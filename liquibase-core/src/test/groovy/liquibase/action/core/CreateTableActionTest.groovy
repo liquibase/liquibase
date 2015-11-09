@@ -4,7 +4,7 @@ import liquibase.JUnitScope
 import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.SnapshotFactory
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
@@ -22,7 +22,7 @@ class CreateTableActionTest extends Specification {
 
     def "parametrized constructor"() {
         expect:
-        new CreateTableAction(new Table(new ObjectName("cat", "schem", "tab"))).describe() == "createTable(tableName=cat.schem.tab)"
+        new CreateTableAction(new Table(new ObjectReference("cat", "schem", "tab"))).describe() == "createTable(tableName=cat.schem.tab)"
     }
 
     @Unroll("#featureName #tableName with #columnName")
@@ -40,7 +40,7 @@ class CreateTableActionTest extends Specification {
             throw SetupResult.OK
         })
                 .cleanup({
-            new ActionExecutor().execute(new DropTablesAction(tableName as ObjectName), scope)
+            new ActionExecutor().execute(new DropTablesAction(tableName as ObjectReference), scope)
         })
                 .run({
             plan.execute(scope)

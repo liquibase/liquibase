@@ -9,7 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -243,35 +243,35 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean isSystemObject(DatabaseObject example) {
-        if (example.getSchema() == null || example.getSchema().getName() == null) {
+    public boolean isSystemObject(ObjectReference example) {
+        if (example.container == null || example.container.name == null) {
             return super.isSystemObject(example);
         }
 
-        if (example instanceof Table && example.getSchema().getName().equals("sys")) {
+        if (example.instanceOf(Table.class) && example.container.name.equals("sys")) {
             return true;
         }
-        if (example instanceof View && example.getSchema().getName().equals("sys")) {
+        if (example.instanceOf(View.class) && example.container.name.equals("sys")) {
             return true;
         }
         return super.isSystemObject(example);
     }
 
-    public String generateDefaultConstraintName(ObjectName columnName) {
+    public String generateDefaultConstraintName(ObjectReference columnName) {
         return "DF_" + columnName.container.name + "_" + columnName.name;
     }
 
     @Override
-    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
         if (objectType.isAssignableFrom(Index.class)) {
             // MSSQL server does not support the schema name for the index -
-            return super.escapeObjectName(objectName.name, objectType);
+            return super.escapeObjectName(objectReference.name, objectType);
         } else if (objectType.isAssignableFrom(View.class)) {
             // SQLServer does not support specifying the database name as a prefix to the object name
-            return super.escapeObjectName(objectName.truncate(2), objectType);
+            return super.escapeObjectName(objectReference.truncate(2), objectType);
         }
 
-        return super.escapeObjectName(objectName, objectType);
+        return super.escapeObjectName(objectReference, objectType);
     }
 
     @Override

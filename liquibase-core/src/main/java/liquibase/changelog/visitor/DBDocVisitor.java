@@ -137,12 +137,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         SortedSet<Table> tables = new TreeSet<Table>(snapshot.get(Table.class));
         Iterator<Table> tableIterator = tables.iterator();
-        while (tableIterator.hasNext()) {
-            if (database.isLiquibaseObject(tableIterator.next())) {
-                tableIterator.remove();
-            }
-
-        }
+//        while (tableIterator.hasNext()) {
+//            if (database.isLiquibaseObject(tableIterator.next())) {
+//                tableIterator.remove();
+//            }
+//
+//        }
 
         new TableListWriter(rootOutputDir).writeHTML(tables);
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
@@ -151,19 +151,19 @@ public class DBDocVisitor implements ChangeSetVisitor {
             authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
         }
 
-        for (Table table : tables) {
-            if (database.isLiquibaseObject(table)) {
-                continue;
-            }
-            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
-        }
+//        for (Table table : tables) {
+//            if (database.isLiquibaseObject(table)) {
+//                continue;
+//            }
+//            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+//        }
 
-        for (Column column : snapshot.get(Column.class)) {
-            if (database.isLiquibaseObject(new Table(column.getName().container))) {
-                continue;
-            }
-            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
-        }
+//        for (Column column : snapshot.get(Column.class)) {
+//            if (database.isLiquibaseObject(new Table(column.getName().container))) {
+//                continue;
+//            }
+//            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
+//        }
 
         for (ChangeLogInfo changeLog : changeLogs) {
             changeLogWriter.writeChangeLog(changeLog.logicalPath, changeLog.physicalPath);

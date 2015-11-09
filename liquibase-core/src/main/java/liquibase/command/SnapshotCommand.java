@@ -3,6 +3,7 @@ package liquibase.command;
 import liquibase.Scope;
 import liquibase.snapshot.Snapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
@@ -14,12 +15,12 @@ import java.util.Set;
 
 public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
-    public Set<DatabaseObject> relatedObjects = new HashSet<>();
+    public Set<ObjectReference> relatedObjects = new HashSet<>();
 
     public SnapshotCommand() {
     }
 
-    public SnapshotCommand(DatabaseObject... relatedObjects) {
+    public SnapshotCommand(ObjectReference... relatedObjects) {
         if (relatedObjects != null) {
             this.relatedObjects.addAll(Arrays.asList(relatedObjects));
         }
@@ -37,7 +38,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
 
         Snapshot snapshot = new Snapshot(scope);
 
-        for (DatabaseObject related : relatedObjects) {
+        for (ObjectReference related : relatedObjects) {
             for (Class type : types) {
                 snapshot.addAll(LiquibaseUtil.snapshotAll(type, related, scope));
             }

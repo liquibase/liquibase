@@ -1,25 +1,18 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.change.core.DropUniqueConstraintChange;
 import liquibase.database.Database;
-import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
-import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectChangeGenerator {
@@ -49,22 +42,22 @@ public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectCha
 
         DropUniqueConstraintChange dropUniqueConstraintChange = createDropUniqueConstraintChange();
 //        dropUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
-        dropUniqueConstraintChange.setConstraintName(uniqueConstraint.getSimpleName());
+        dropUniqueConstraintChange.setConstraintName(uniqueConstraint.name);
 
         AddUniqueConstraintChange addUniqueConstraintChange = createAddUniqueConstraintChange();
-        addUniqueConstraintChange.setConstraintName(uniqueConstraint.getSimpleName());
+        addUniqueConstraintChange.setConstraintName(uniqueConstraint.name);
 //        addUniqueConstraintChange.setTableName(uniqueConstraint.getTable().getSimpleName());
 //        addUniqueConstraintChange.setColumnNames(uniqueConstraint.getColumnNames());
 
         returnList.add(dropUniqueConstraintChange);
 
         if (control.getIncludeCatalog()) {
-            dropUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
-            addUniqueConstraintChange.setCatalogName(uniqueConstraint.getSchema().getCatalogName());
+            dropUniqueConstraintChange.setCatalogName(uniqueConstraint.getContainer().container.name);
+            addUniqueConstraintChange.setCatalogName(uniqueConstraint.getContainer().container.name);
         }
         if (control.getIncludeSchema()) {
-            dropUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getSimpleName());
-            addUniqueConstraintChange.setSchemaName(uniqueConstraint.getSchema().getSimpleName());
+            dropUniqueConstraintChange.setSchemaName(uniqueConstraint.getContainer().name);
+            addUniqueConstraintChange.setSchemaName(uniqueConstraint.getContainer().name);
         }
 
 //        Index backingIndex = uniqueConstraint.getBackingIndex();

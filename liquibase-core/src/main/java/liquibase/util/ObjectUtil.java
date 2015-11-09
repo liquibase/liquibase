@@ -5,7 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -67,7 +67,7 @@ public class ObjectUtil {
         } else if (parameterType.equals(DatabaseFunction.class)) {
             finalValue = new DatabaseFunction(propertyValue);
         } else if (parameterType.equals(SequenceNextValueFunction.class)) {
-            finalValue = new SequenceNextValueFunction(new ObjectName(propertyValue));
+            finalValue = new SequenceNextValueFunction(new ObjectReference(propertyValue));
         } else if (parameterType.equals(SequenceCurrentValueFunction.class)) {
             finalValue = new SequenceCurrentValueFunction(propertyValue);
         } else if (Enum.class.isAssignableFrom(parameterType)) {
@@ -232,11 +232,11 @@ public class ObjectUtil {
                 return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
             } else if (targetClass.isAssignableFrom(String.class)) {
                 return (T) object.toString();
-            } else if (targetClass.isAssignableFrom(ObjectName.class)) {
+            } else if (targetClass.isAssignableFrom(ObjectReference.class)) {
                 if (object instanceof String) {
-                    return (T) new ObjectName((String) object);
+                    return (T) new ObjectReference((String) object);
                 } else {
-                    throw new UnexpectedLiquibaseException("Cannot convert "+ object.getClass()+" to "+ObjectName.class.getName());
+                    throw new UnexpectedLiquibaseException("Cannot convert "+ object.getClass()+" to "+ObjectReference.class.getName());
                 }
             } else if (targetClass.isAssignableFrom(List.class)) {
                 if (object instanceof List) {

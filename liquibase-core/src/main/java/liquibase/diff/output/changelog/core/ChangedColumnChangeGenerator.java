@@ -4,7 +4,6 @@ import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.LiquibaseDataType;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
@@ -64,9 +63,9 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         Difference remarksDiff = differences.getDifference("remarks");
         if (remarksDiff != null) {
             SetColumnRemarksChange change = new SetColumnRemarksChange();
-            if (control.getIncludeCatalog()) {
-                change.setCatalogName(column.getSchema().getCatalogName());
-            }
+//            if (control.getIncludeCatalog()) {
+//                change.setCatalogName(column.getContainer().getCatalogName());
+//            }
 //            if (control.getIncludeSchema()) {
 //                change.setSchemaName(column.getSchema().getName());
 //            }
@@ -81,72 +80,72 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
     }
 
     protected void handleNullableDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
-        Difference nullableDifference = differences.getDifference("nullable");
-        if (nullableDifference != null && nullableDifference.getReferenceValue() != null) {
-            boolean nullable = (Boolean) nullableDifference.getReferenceValue();
-            if (nullable) {
-                DropNotNullConstraintChange change = new DropNotNullConstraintChange();
-                if (control.getIncludeCatalog()) {
-                    change.setCatalogName(column.getCatalogName());
-                }
-                if (control.getIncludeSchema()) {
-                    change.setSchemaName(column.getSchemaName());
-                }
-                change.setTableName(column.getRelationName());
-                change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(column.type.toString());
-                changes.add(change);
-            } else {
-                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-                if (control.getIncludeCatalog()) {
-                    change.setCatalogName(column.getCatalogName());
-                }
-                if (control.getIncludeSchema()) {
-                    change.setSchemaName(column.getSchemaName());
-                }
-                change.setTableName(column.getRelationName());
-                change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(column.type.toString());
-                changes.add(change);
-            }
-        }
+//        Difference nullableDifference = differences.getDifference("nullable");
+//        if (nullableDifference != null && nullableDifference.getReferenceValue() != null) {
+//            boolean nullable = (Boolean) nullableDifference.getReferenceValue();
+//            if (nullable) {
+//                DropNotNullConstraintChange change = new DropNotNullConstraintChange();
+//                if (control.getIncludeCatalog()) {
+//                    change.setCatalogName(column.getCatalogName());
+//                }
+//                if (control.getIncludeSchema()) {
+//                    change.setSchemaName(column.getSchemaName());
+//                }
+//                change.setTableName(column.getRelationName());
+//                change.setColumnName(column.getSimpleName());
+//                change.setColumnDataType(column.type.toString());
+//                changes.add(change);
+//            } else {
+//                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
+//                if (control.getIncludeCatalog()) {
+//                    change.setCatalogName(column.getCatalogName());
+//                }
+//                if (control.getIncludeSchema()) {
+//                    change.setSchemaName(column.getSchemaName());
+//                }
+//                change.setTableName(column.getRelationName());
+//                change.setColumnName(column.getSimpleName());
+//                change.setColumnDataType(column.type.toString());
+//                changes.add(change);
+//            }
+//        }
     }
 
     protected void handleAutoIncrementDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
-        Difference difference = differences.getDifference("autoIncrementInformation");
-        if (difference != null) {
-            if (difference.getReferenceValue() == null) {
-                LoggerFactory.getLogger(getClass()).info("ChangedColumnChangeGenerator cannot fix dropped auto increment values");
-                //todo: Support dropping auto increments
-            } else {
-                AddAutoIncrementChange change = new AddAutoIncrementChange();
-                if (control.getIncludeCatalog()) {
-                    change.setCatalogName(column.getCatalogName());
-                }
-                if (control.getIncludeSchema()) {
-                    change.setSchemaName(column.getSchemaName());
-                }
-                change.setTableName(column.getRelationName());
-                change.setColumnName(column.getSimpleName());
-                change.setColumnDataType(column.type.toString());
-                changes.add(change);
-            }
-        }
+//        Difference difference = differences.getDifference("autoIncrementInformation");
+//        if (difference != null) {
+//            if (difference.getReferenceValue() == null) {
+//                LoggerFactory.getLogger(getClass()).info("ChangedColumnChangeGenerator cannot fix dropped auto increment values");
+//                //todo: Support dropping auto increments
+//            } else {
+//                AddAutoIncrementChange change = new AddAutoIncrementChange();
+//                if (control.getIncludeCatalog()) {
+//                    change.setCatalogName(column.getCatalogName());
+//                }
+//                if (control.getIncludeSchema()) {
+//                    change.setSchemaName(column.getSchemaName());
+//                }
+//                change.setTableName(column.getRelationName());
+//                change.setColumnName(column.getSimpleName());
+//                change.setColumnDataType(column.type.toString());
+//                changes.add(change);
+//            }
+//        }
     }
 
     protected void handleTypeDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
-        Difference typeDifference = differences.getDifference("type");
-        if (typeDifference != null) {
-            String catalogName = null;
-            String schemaName = null;
-            if (control.getIncludeCatalog()) {
-                catalogName = column.getCatalogName();
-            }
-            if (control.getIncludeSchema()) {
-                schemaName = column.getSchemaName();
-            }
-
-            String tableName = column.getRelationName();
+//        Difference typeDifference = differences.getDifference("type");
+//        if (typeDifference != null) {
+//            String catalogName = null;
+//            String schemaName = null;
+//            if (control.getIncludeCatalog()) {
+//                catalogName = column.getCatalogName();
+//            }
+//            if (control.getIncludeSchema()) {
+//                schemaName = column.getSchemaName();
+//            }
+//
+//            String tableName = column.getRelationName();
 
 //            if (comparisonDatabase instanceof OracleDatabase && (((DataType) typeDifference.getReferenceValue()).getTypeName().equalsIgnoreCase("clob") || ((DataType) typeDifference.getComparedValue()).getTypeName().equalsIgnoreCase("clob"))) {
 //                String tempColName = "TEMP_CLOB_CONVERT";
@@ -183,67 +182,67 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
 //                changes.add(renameColumnChange);
 //
 //            } else {
-                ModifyDataTypeChange change = new ModifyDataTypeChange();
-                change.setCatalogName(catalogName);
-                change.setSchemaName(schemaName);
-                change.setTableName(tableName);
-                change.setColumnName(column.getSimpleName());
-                OldDataType referenceType = (OldDataType) typeDifference.getReferenceValue();
-                change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
-
-                changes.add(change);
+//                ModifyDataTypeChange change = new ModifyDataTypeChange();
+//                change.setCatalogName(catalogName);
+//                change.setSchemaName(schemaName);
+//                change.setTableName(tableName);
+//                change.setColumnName(column.getSimpleName());
+//                OldDataType referenceType = (OldDataType) typeDifference.getReferenceValue();
+//                change.setNewDataType(DataTypeFactory.getInstance().from(referenceType, comparisonDatabase).toString());
+//
+//                changes.add(change);
 //            }
-        }
+//        }
     }
 
     protected void handleDefaultValueDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
-        Difference difference = differences.getDifference("defaultValue");
-
-        if (difference != null) {
-            Object value = difference.getReferenceValue();
-
-//            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.type, comparisonDatabase);
-            if (value == null) {
-                DropDefaultValueChange change = new DropDefaultValueChange();
-                if (control.getIncludeCatalog()) {
-                    change.setCatalogName(column.getCatalogName());
-                }
-                if (control.getIncludeSchema()) {
-                    change.setSchemaName(column.getSchemaName());
-                }
-                change.setTableName(column.getRelationName());
-                change.setColumnName(column.getSimpleName());
-//                change.setColumnDataType(columnDataType.toString());
-
-                changes.add(change);
-
-            } else {
-                AddDefaultValueChange change = new AddDefaultValueChange();
-                if (control.getIncludeCatalog()) {
-                    change.setCatalogName(column.getCatalogName());
-                }
-                if (control.getIncludeSchema()) {
-                    change.setSchemaName(column.getSchemaName());
-                }
-                change.setTableName(column.getRelationName());
-                change.setColumnName(column.getSimpleName());
-//                change.setColumnDataType(columnDataType.toString());
-
-                if (value instanceof Boolean) {
-                    change.setDefaultValueBoolean((Boolean) value);
-                } else if (value instanceof Date) {
-                    change.setDefaultValueDate(new ISODateFormat().format(((Date) value)));
-                } else if (value instanceof Number) {
-                    change.setDefaultValueNumeric(value.toString());
-                } else if (value instanceof DatabaseFunction) {
-                    change.setDefaultValueComputed(((DatabaseFunction) value));
-                } else {
-                    change.setDefaultValue(value.toString());
-                }
-
-
-                changes.add(change);
-            }
+//        Difference difference = differences.getDifference("defaultValue");
+//
+//        if (difference != null) {
+//            Object value = difference.getReferenceValue();
+//
+////            LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.type, comparisonDatabase);
+//            if (value == null) {
+//                DropDefaultValueChange change = new DropDefaultValueChange();
+//                if (control.getIncludeCatalog()) {
+//                    change.setCatalogName(column.getCatalogName());
+//                }
+//                if (control.getIncludeSchema()) {
+//                    change.setSchemaName(column.getSchemaName());
+//                }
+//                change.setTableName(column.getRelationName());
+//                change.setColumnName(column.getSimpleName());
+////                change.setColumnDataType(columnDataType.toString());
+//
+//                changes.add(change);
+//
+//            } else {
+//                AddDefaultValueChange change = new AddDefaultValueChange();
+//                if (control.getIncludeCatalog()) {
+//                    change.setCatalogName(column.getCatalogName());
+//                }
+//                if (control.getIncludeSchema()) {
+//                    change.setSchemaName(column.getSchemaName());
+//                }
+//                change.setTableName(column.getRelationName());
+//                change.setColumnName(column.getSimpleName());
+////                change.setColumnDataType(columnDataType.toString());
+//
+//                if (value instanceof Boolean) {
+//                    change.setDefaultValueBoolean((Boolean) value);
+//                } else if (value instanceof Date) {
+//                    change.setDefaultValueDate(new ISODateFormat().format(((Date) value)));
+//                } else if (value instanceof Number) {
+//                    change.setDefaultValueNumeric(value.toString());
+//                } else if (value instanceof DatabaseFunction) {
+//                    change.setDefaultValueComputed(((DatabaseFunction) value));
+//                } else {
+//                    change.setDefaultValue(value.toString());
+//                }
+//
+//
+//                changes.add(change);
+//            }
         }
-    }
+//    }
 }

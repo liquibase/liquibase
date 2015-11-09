@@ -9,7 +9,7 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.CollectionUtil;
 import liquibase.util.ObjectUtil;
@@ -95,9 +95,9 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
         if (action.primaryKey != null) {
             StringClauses primaryKey = new StringClauses(" ");
             if (database.supportsPrimaryKeyNames()) {
-                String pkName = action.primaryKey.getSimpleName();
+                String pkName = action.primaryKey.getName();
                 if (pkName == null) {
-                    pkName = database.generatePrimaryKeyName(action.table.getSimpleName());
+                    pkName = database.generatePrimaryKeyName(action.table.getName());
                 }
                 if (pkName != null) {
                     primaryKey.append("CONSTRAINT");
@@ -106,7 +106,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
             }
             primaryKey.append("PRIMARY KEY");
             StringClauses columnClauses = new StringClauses("(", ", ", ")");
-            for (ObjectName col : action.primaryKey.columns) {
+            for (PrimaryKey.PrimaryKeyColumn col : action.primaryKey.columns) {
                 columnClauses.append(database.escapeObjectName(col.name, Column.class));
             }
             primaryKey.append("columns", columnClauses);
@@ -161,7 +161,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
     protected StringClauses generateUniqueConstraintSql(UniqueConstraint uniqueConstraint, CreateTableAction action, Scope scope) {
         Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses();
-        String constraintName = uniqueConstraint.getSimpleName();
+        String constraintName = uniqueConstraint.getName();
 
         if (constraintName != null) {
             clauses.append(UniqueConstraintClauses.constraintName, "CONSTRAINT " + database.escapeObjectName(constraintName, Index.class));
@@ -177,11 +177,6 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
     protected StringClauses generateForeignKeySql(ForeignKey foreignKey, CreateTableAction action, Scope scope) {
         StringClauses clauses = new StringClauses();
         final Database database = scope.getDatabase();
-
-        ObjectName name = foreignKey.name;
-        if (name != null) {
-            clauses.append(ForeignKeyClauses.constraintName, "CONSTRAINT " + database.escapeObjectName(name, ForeignKey.class));
-        }
 
         String referencesString = StringUtils.join(foreignKey.columnChecks, ", ", new StringUtils.StringUtilsFormatter<ForeignKey.ForeignKeyColumnCheck>() {
             @Override
@@ -221,7 +216,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
     protected StringClauses generateColumnSql(Column column, CreateTableAction action, Scope scope, List<Action> additionalActions) {
         Database database = scope.getDatabase();
 
-        String columnName = column.getSimpleName();
+        String columnName = column.getName();
         StringClauses columnClause = new StringClauses().append(database.escapeObjectName(columnName, Column.class));
         columnClause.append(column.type.toString());
 

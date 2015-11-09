@@ -10,7 +10,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.StringClauses;
 
 public class RemoveChangeSetRanStatusLogic extends AbstractActionLogic<RemoveChangeSetRunStatusAction> {
@@ -31,7 +31,7 @@ public class RemoveChangeSetRanStatusLogic extends AbstractActionLogic<RemoveCha
         Database database = scope.getDatabase();
         ChangeSet changeSet = action.changeSet;
 
-        DeleteDataAction deleteDataAction = new DeleteDataAction(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
+        DeleteDataAction deleteDataAction = new DeleteDataAction(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
         deleteDataAction.where = new StringClauses().append("ID=? AND AUTHOR=? AND FILENAME=?");
         return new DelegateResult(deleteDataAction);

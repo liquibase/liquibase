@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -74,16 +75,16 @@ public class RenameTableChange extends AbstractChange {
     public ActionStatus checkStatus(Database database) {
         try {
             ActionStatus actionStatus = new ActionStatus();
-            Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
-            Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
+//            Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new ObjectReference(Table.class, new ObjectReference(getCatalogName(), getSchemaName()), getNewTableName()), database);
+//            Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new ObjectReference(Table.class, new ObjectReference(getCatalogName(), getSchemaName(), getOldTableName()), database);
 
-            if (newTable == null && oldTable == null) {
-                return actionStatus.unknown("Neither table exists");
-            }
-            if (newTable != null && oldTable != null) {
-                return actionStatus.unknown("Both tables exist");
-            }
-            actionStatus.assertApplied(newTable != null, "New table does not exist");
+//            if (newTable == null && oldTable == null) {
+//                return actionStatus.unknown("Neither table exists");
+//            }
+//            if (newTable != null && oldTable != null) {
+//                return actionStatus.unknown("Both tables exist");
+//            }
+//            actionStatus.assertApplied(newTable != null, "New table does not exist");
 
             return actionStatus;
         } catch (Exception e) {

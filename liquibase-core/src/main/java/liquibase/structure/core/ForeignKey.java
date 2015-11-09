@@ -2,8 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 
@@ -17,32 +16,29 @@ public class ForeignKey extends AbstractDatabaseObject {
     public Boolean initiallyDeferred;
     public ForeignKeyConstraintType updateRule;
     public ForeignKeyConstraintType deleteRule;
-    public ObjectName backingIndex;
+    public ObjectReference backingIndex;
 
     public ForeignKey() {
     }
 
-    public ForeignKey(ObjectName name) {
+    public ForeignKey(String name) {
         super(name);
     }
 
-    public ForeignKey(ObjectName name, List<ObjectName> foreignKeyColumns, List<ObjectName> primaryKeyColumns) {
+    public ForeignKey(ObjectReference nameAndContainer) {
+        super(nameAndContainer);
+    }
+
+    public ForeignKey(ObjectReference container, String name) {
+        super(container, name);
+    }
+
+    public ForeignKey(String name, List<ObjectReference> foreignKeyColumns, List<ObjectReference> primaryKeyColumns) {
         this(name);
         for (int i=0; i<CollectionUtil.createIfNull(foreignKeyColumns).size(); i++) {
             this.columnChecks.add(new ForeignKeyColumnCheck(foreignKeyColumns.get(i), primaryKeyColumns.get(i), i));
         }
     }
-
-    @Override
-    public DatabaseObject[] getContainingObjects() {
-        return null;
-    }
-
-    @Override
-    public Schema getSchema() {
-        return null;
-    }
-
 
     @Override
     public String toString() {
@@ -82,19 +78,19 @@ public class ForeignKey extends AbstractDatabaseObject {
     }
 
     public static class ForeignKeyColumnCheck extends AbstractExtensibleObject {
-        public ObjectName baseColumn;
-        public ObjectName referencedColumn;
+        public ObjectReference baseColumn;
+        public ObjectReference referencedColumn;
 
         public Integer position;
 
         public ForeignKeyColumnCheck() {
         }
 
-        public ForeignKeyColumnCheck(ObjectName baseColumn, ObjectName referencedColumn) {
+        public ForeignKeyColumnCheck(ObjectReference baseColumn, ObjectReference referencedColumn) {
             this(baseColumn, referencedColumn, null);
         }
 
-        public ForeignKeyColumnCheck(ObjectName baseColumn, ObjectName referencedColumn, Integer position) {
+        public ForeignKeyColumnCheck(ObjectReference baseColumn, ObjectReference referencedColumn, Integer position) {
             this.baseColumn = baseColumn;
             this.referencedColumn = referencedColumn;
             this.position = position;
@@ -107,5 +103,9 @@ public class ForeignKey extends AbstractDatabaseObject {
         public String toString(ForeignKeyColumnCheck obj) {
             return obj.baseColumn + "->" +obj.referencedColumn;
         }
+    }
+
+    public static class ForeignKeyReference extends ObjectReference {
+        public ObjectReference table;
     }
 }

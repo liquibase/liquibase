@@ -9,10 +9,11 @@ import liquibase.actionlogic.ObjectBasedQueryResult;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.Validate;
 
+import javax.management.ObjectName;
 import java.sql.DatabaseMetaData;
 import java.util.*;
 
@@ -35,26 +36,26 @@ public class SnapshotForeignKeysLogicJdbc extends AbstractSnapshotDatabaseObject
 
     @Override
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
-        DatabaseObject relatedTo = action.relatedTo;
-        ObjectName fkName = null;
-        ObjectName tableName = null;
-        if (relatedTo instanceof Catalog) {
+        ObjectReference relatedTo = action.relatedTo;
+        ObjectReference fkName = null;
+        ObjectReference tableName = null;
+        if (relatedTo.instanceOf(Catalog.class)) {
             if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
             }
-            fkName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
-        } else if (relatedTo instanceof Schema) {
-            fkName = new ObjectName(new ObjectName(new ObjectName(relatedTo.getName().container, relatedTo.getSimpleName()), null), null);
-        } else if (relatedTo instanceof Table) {
-            tableName = relatedTo.getName();
-        } else if (relatedTo instanceof ForeignKey) {
-            fkName = relatedTo.getName();
+            fkName = new ObjectReference(relatedTo.name, null, null, null);
+        } else if (relatedTo.instanceOf(Schema.class)) {
+            fkName = new ObjectReference(new ObjectReference(new ObjectReference(relatedTo.container, relatedTo.name), null), null);
+        } else if (relatedTo.instanceOf(Table.class)) {
+            tableName = relatedTo;
+        } else if (relatedTo.instanceOf(ForeignKey.class)) {
+            fkName = relatedTo;
         } else {
             throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
         }
 
         if (tableName == null) {
-            tableName = new ObjectName(fkName.container, null);
+            tableName = new ObjectReference(fkName.container, null);
         }
 
         tableName = tableName.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 2);
@@ -84,27 +85,27 @@ public class SnapshotForeignKeysLogicJdbc extends AbstractSnapshotDatabaseObject
         String fkName = row.get("FK_NAME", String.class);
         Short deferrability = row.get("DEFERRABILITY", Short.class);
 
-        ObjectName objectName;
+        ObjectReference objectReference;
         if (fkTableCat != null && fkTableSchema == null) {
-            objectName = new ObjectName(fkTableCat, fkName);
+            objectReference = new ObjectReference(fkTableCat, fkName);
         } else {
-            objectName = new ObjectName(fkTableCat, fkTableSchema, fkName);
+            objectReference = new ObjectReference(fkTableCat, fkTableSchema, fkName);
         }
-        ObjectName fkTableObjectName;
+        ObjectReference fkTableObjectReference;
         if (fkTableCat != null && fkTableSchema == null) {
-            fkTableObjectName = new ObjectName(fkTableCat, fkTableName);
+            fkTableObjectReference = new ObjectReference(fkTableCat, fkTableName);
         } else {
-            fkTableObjectName = new ObjectName(fkTableCat, fkTableSchema, fkTableName);
+            fkTableObjectReference = new ObjectReference(fkTableCat, fkTableSchema, fkTableName);
         }
-        ObjectName pkTableObjectName;
+        ObjectReference pkTableObjectReference;
         if (pkTableCat != null && pkTableSchema == null) {
-            pkTableObjectName = new ObjectName(pkTableCat, pkTableName);
+            pkTableObjectReference = new ObjectReference(pkTableCat, pkTableName);
         } else {
-            pkTableObjectName = new ObjectName(pkTableCat, pkTableSchema, pkTableName);
+            pkTableObjectReference = new ObjectReference(pkTableCat, pkTableSchema, pkTableName);
         }
 
-        ForeignKey fk = new ForeignKey(objectName);
-        fk.columnChecks.add(new ForeignKey.ForeignKeyColumnCheck(new ObjectName(fkTableObjectName, fkColumnName), new ObjectName(pkTableObjectName, pkColumnName), position));
+        ForeignKey fk = new ForeignKey(objectReference);
+        fk.columnChecks.add(new ForeignKey.ForeignKeyColumnCheck(new ObjectReference(fkTableObjectReference, fkColumnName), new ObjectReference(pkTableObjectReference, pkColumnName), position));
 
         if (updateRule != null) {
             switch (updateRule) {
@@ -171,11 +172,11 @@ public class SnapshotForeignKeysLogicJdbc extends AbstractSnapshotDatabaseObject
             @Override
             public ActionResult rewrite(ActionResult result) throws ActionPerformException {
                 List<ForeignKey> rawResults = ((ObjectBasedQueryResult) super.rewrite(result)).asList(ForeignKey.class);
-                Map<ObjectName, ForeignKey> combinedResults = new HashMap<>();
+                Map<ObjectReference, ForeignKey> combinedResults = new HashMap<>();
                 for (ForeignKey foreignKey : rawResults) {
                     ForeignKey existingPk = combinedResults.get(foreignKey.name);
                     if (existingPk == null) {
-                        combinedResults.put(foreignKey.name, foreignKey);
+                        combinedResults.put(foreignKey.toReference(), foreignKey);
                     } else {
                         existingPk.columnChecks.addAll(foreignKey.columnChecks);
                     }

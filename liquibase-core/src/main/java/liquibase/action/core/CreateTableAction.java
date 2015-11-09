@@ -1,11 +1,10 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.CollectionUtil;
 
-import java.math.BigInteger;
 import java.util.*;
 
 public class CreateTableAction extends AbstractAction {
@@ -25,12 +24,12 @@ public class CreateTableAction extends AbstractAction {
         this.table = table;
     }
 
-    public CreateTableAction addColumn(ObjectName columnName, String type) {
+    public CreateTableAction addColumn(ObjectReference columnName, String type) {
         return addColumn(new Column(columnName, type));
     }
 
     public CreateTableAction addColumn(String columnName, String type) {
-        return addColumn(new Column(new ObjectName(table.name, columnName), type));
+        return addColumn(new Column(new ObjectReference(table.name, columnName), type));
     }
 
     public CreateTableAction addColumn(Column column) {

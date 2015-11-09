@@ -8,7 +8,6 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
-import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
@@ -38,9 +37,9 @@ public class ChangedTableChangeGenerator implements ChangedObjectChangeGenerator
         Difference changedRemarks = differences.getDifference("remarks");
         if (changedRemarks != null) {
             SetTableRemarksChange change = new SetTableRemarksChange();
-            if (control.getIncludeCatalog()) {
-                change.setCatalogName(table.getSchema().getCatalogName());
-            }
+//            if (control.getIncludeCatalog()) {
+//                change.setCatalogName(table.getContainer().getCatalogName());
+//            }
 //            if (control.getIncludeSchema()) {
 //                change.setSchemaName(table.getSchema().getName());
 //            }

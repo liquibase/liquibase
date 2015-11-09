@@ -30,7 +30,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
@@ -919,18 +919,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isSystemObject(final DatabaseObject example) {
+    public boolean isSystemObject(final ObjectReference example) {
         if (example == null) {
             return false;
         }
-        if (example.getSchema() != null && example.getSchema().getSimpleName() != null && example.getSchema().getSimpleName().equalsIgnoreCase("information_schema")) {
+        if (example.container != null && example.container.name != null && example.container.name.equalsIgnoreCase("information_schema")) {
             return true;
         }
-        if (example instanceof Table && getSystemTables().contains(example.getName())) {
+        if (example.instanceOf(Table.class) && getSystemTables().contains(example.name)) {
             return true;
         }
 
-        if (example instanceof View && getSystemViews().contains(example.getName())) {
+        if (example.instanceOf(View.class) && getSystemViews().contains(example.name)) {
             return true;
         }
 
@@ -948,9 +948,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isLiquibaseObject(final DatabaseObject object) {
-        if (object instanceof Table) {
-            Schema liquibaseSchema = new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName());
+    public boolean isLiquibaseObject(final ObjectReference object) {
+        if (Table.class.isAssignableFrom(object.type)) {
+            Schema liquibaseSchema = new Schema(new ObjectReference(getLiquibaseCatalogName()), getLiquibaseSchemaName());
 //            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table(new ObjectName(getDatabaseChangeLogTableName())).setSchema(liquibaseSchema), this)) {
 //                return true;
 //            }
@@ -958,11 +958,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 //                return true;
 //            }
             return false;
-        } else if (object instanceof Column) {
-            return isLiquibaseObject(new Table(object.getName().container));
-        } else if (object instanceof Index) {
-            return isLiquibaseObject(new Table(((Index) object).columns.get(0).name.container));
-        } else if (object instanceof PrimaryKey) {
+        } else if (Column.class.isAssignableFrom(object.type)) {
+            return isLiquibaseObject(object.container);
+        } else if (Index.class.isAssignableFrom(object.type)) {
+            return isLiquibaseObject(((Index.IndexReference) object).table);
+        } else if (PrimaryKey.class.isAssignableFrom(object.type)) {
 //            return isLiquibaseObject(((PrimaryKey) object).getTable());
         }
         return false;
@@ -1011,11 +1011,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
         if (objectType.isAssignableFrom(Column.class) || objectType.isAssignableFrom(PrimaryKey.class)  || objectType.isAssignableFrom(UniqueConstraint.class)) {
-            return escapeObjectName(objectName.name, objectType);
+            return escapeObjectName(objectReference.name, objectType);
         }
-        return StringUtils.join(objectName.truncate(getMaxReferenceContainerDepth() + 1).asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
+        return StringUtils.join(objectReference.truncate(getMaxReferenceContainerDepth() + 1).asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
@@ -1325,19 +1325,21 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public final String getJdbcCatalogName(final Schema schema) {
-        if (schema == null) {
-            return getJdbcCatalogName(getDefaultSchema());
-        } else {
-            return getJdbcCatalogName(new CatalogAndSchema(schema.getCatalogName(), schema.getSimpleName()));
-        }
+//        if (schema == null) {
+//            return getJdbcCatalogName(getDefaultSchema());
+//        } else {
+//            return getJdbcCatalogName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+//        }
+        return null;
     }
 
     public final String getJdbcSchemaName(final Schema schema) {
-        if (schema == null) {
-            return getJdbcSchemaName(getDefaultSchema());
-        } else {
-            return getJdbcSchemaName(new CatalogAndSchema(schema.getCatalogName(), schema.getSimpleName()));
-        }
+//        if (schema == null) {
+//            return getJdbcSchemaName(getDefaultSchema());
+//        } else {
+//            return getJdbcSchemaName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+//        }
+        return null;
     }
 
     @Override

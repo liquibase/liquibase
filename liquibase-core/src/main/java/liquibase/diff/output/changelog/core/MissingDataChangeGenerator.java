@@ -10,7 +10,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
@@ -47,86 +47,87 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            Data data = (Data) missingObject;
+//        Statement stmt = null;
+//        ResultSet rs = null;
+//        try {
+//            Data data = (Data) missingObject;
+//
+//            Table table = data.getTable();
+//            if (referenceDatabase.isLiquibaseObject(table)) {
+//                return null;
+//            }
+//
+//            String sql = "SELECT * FROM " + referenceDatabase.escapeObjectName(new ObjectReference(table.getContainer().getCatalogName(), table.getContainer().getSimpleName(), table.getSimpleName()), Table.class);
+//
+//            stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+//            stmt.setFetchSize(1000);
+//            rs = stmt.executeQuery(sql);
+//
+//            List<String> columnNames = new ArrayList<String>();
+//            for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
+//                columnNames.add(rs.getMetaData().getColumnName(i+1));
+//            }
+//
+//            List<Change> changes = new ArrayList<Change>();
+//            while (rs.next()) {
+//                InsertDataChange change = new InsertDataChange();
+//                if (outputControl.getIncludeCatalog()) {
+//                    change.setCatalogName(table.getContainer().getCatalogName());
+//                }
+//                if (outputControl.getIncludeSchema()) {
+//                    change.setSchemaName(table.getContainer().getSimpleName());
+//                }
+//                change.setTableName(table.getSimpleName());
+//
+//                // loop over all columns for this row
+//                for (int i = 0; i < columnNames.size(); i++) {
+//                    ColumnConfig column = new ColumnConfig();
+//                    column.setName(columnNames.get(i));
+//
+//                    Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+//                    if (value == null) {
+//                        column.setValue(null);
+//                    } else if (value instanceof Number) {
+//                        column.setValueNumeric((Number) value);
+//                    } else if (value instanceof Boolean) {
+//                        column.setValueBoolean((Boolean) value);
+//                    } else if (value instanceof Date) {
+//                        column.setValueDate((Date) value);
+//                    } else { // string
+////todo: action refactoring                        if (referenceDatabase instanceof InformixDatabase) {
+////                            if (value instanceof byte[]) {
+////                                byte[] bytes = (byte[]) value;
+////                                value = new String(bytes);
+////                            }
+////                        }
+//
+//                        column.setValue(value.toString().replace("\\", "\\\\"));
+//                    }
+//
+//                    change.addColumn(column);
+//
+//                }
+//
+//                // for each row, add a new change
+//                // (there will be one group per table)
+//                changes.add(change);
+//            }
 
-            Table table = data.getTable();
-            if (referenceDatabase.isLiquibaseObject(table)) {
-                return null;
-            }
-
-            String sql = "SELECT * FROM " + referenceDatabase.escapeObjectName(new ObjectName(table.getSchema().getCatalogName(), table.getSchema().getSimpleName(), table.getSimpleName()), Table.class);
-
-            stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(1000);
-            rs = stmt.executeQuery(sql);
-
-            List<String> columnNames = new ArrayList<String>();
-            for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
-                columnNames.add(rs.getMetaData().getColumnName(i+1));
-            }
-
-            List<Change> changes = new ArrayList<Change>();
-            while (rs.next()) {
-                InsertDataChange change = new InsertDataChange();
-                if (outputControl.getIncludeCatalog()) {
-                    change.setCatalogName(table.getSchema().getCatalogName());
-                }
-                if (outputControl.getIncludeSchema()) {
-                    change.setSchemaName(table.getSchema().getSimpleName());
-                }
-                change.setTableName(table.getSimpleName());
-
-                // loop over all columns for this row
-                for (int i = 0; i < columnNames.size(); i++) {
-                    ColumnConfig column = new ColumnConfig();
-                    column.setName(columnNames.get(i));
-
-                    Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-                    if (value == null) {
-                        column.setValue(null);
-                    } else if (value instanceof Number) {
-                        column.setValueNumeric((Number) value);
-                    } else if (value instanceof Boolean) {
-                        column.setValueBoolean((Boolean) value);
-                    } else if (value instanceof Date) {
-                        column.setValueDate((Date) value);
-                    } else { // string
-//todo: action refactoring                        if (referenceDatabase instanceof InformixDatabase) {
-//                            if (value instanceof byte[]) {
-//                                byte[] bytes = (byte[]) value;
-//                                value = new String(bytes);
-//                            }
-//                        }
-
-                        column.setValue(value.toString().replace("\\", "\\\\"));
-                    }
-
-                    change.addColumn(column);
-
-                }
-
-                // for each row, add a new change
-                // (there will be one group per table)
-                changes.add(change);
-            }
-
-            return changes.toArray(new Change[changes.size()]);
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) { }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ignore) { }
-            }
-        }
+//            return changes.toArray(new Change[changes.size()]);
+//        } catch (Exception e) {
+//            throw new UnexpectedLiquibaseException(e);
+//        } finally {
+//            if (rs != null) {
+//                try {
+//                    rs.close();
+//                } catch (SQLException ignore) { }
+//            }
+//            if (stmt != null) {
+//                try {
+//                    stmt.close();
+//                } catch (SQLException ignore) { }
+//            }
+//        }
+        return null;
     }
 }

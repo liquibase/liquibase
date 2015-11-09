@@ -1,13 +1,21 @@
 package liquibase.structure.core;
 
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class StoredProcedure extends StoredDatabaseLogic<StoredProcedure> {
 
     public StoredProcedure() {
     }
 
-    public StoredProcedure(ObjectName name) {
+    public StoredProcedure(String name) {
         super(name);
+    }
+
+    public StoredProcedure(ObjectReference nameAndContainer) {
+        super(nameAndContainer);
+    }
+
+    public StoredProcedure(ObjectReference container, String name) {
+        super(container, name);
     }
 }

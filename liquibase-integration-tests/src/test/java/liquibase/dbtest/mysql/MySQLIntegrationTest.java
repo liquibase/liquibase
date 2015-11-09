@@ -2,19 +2,13 @@ package liquibase.dbtest.mysql;
 
 import liquibase.CatalogAndSchema;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 import org.junit.Test;
-
-import java.util.Calendar;
-import java.util.Date;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -65,7 +59,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
                 ")"));
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, getDatabase(), new SnapshotControl(getDatabase()));
-        Column createdColumn = snapshot.get(new Column(new ObjectName("ad", "created")));
+        Column createdColumn = snapshot.get(new Column(new ObjectReference("ad", "created")));
 
         Object defaultValue = createdColumn.defaultValue;
         assertNotNull(defaultValue);

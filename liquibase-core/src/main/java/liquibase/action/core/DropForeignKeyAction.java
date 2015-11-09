@@ -1,17 +1,17 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class DropForeignKeyAction extends AbstractAction {
 
-    public ObjectName baseTableName;
-    public ObjectName constraintName;
+    public ObjectReference baseTableName;
+    public ObjectReference constraintName;
 
     public DropForeignKeyAction() {
     }
 
-    public DropForeignKeyAction(ObjectName constraintName, ObjectName baseTableName) {
+    public DropForeignKeyAction(ObjectReference constraintName, ObjectReference baseTableName) {
         this.constraintName = constraintName;
         this.baseTableName = baseTableName;
     }

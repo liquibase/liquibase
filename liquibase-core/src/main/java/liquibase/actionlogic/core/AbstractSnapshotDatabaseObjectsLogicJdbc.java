@@ -11,7 +11,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -62,11 +62,11 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicJdbc<T extends Snapsho
      * Default implementation trims object name to null.
      */
     protected void correctObject(DatabaseObject object) {
-        ObjectName name = object.getName();
-        while (name != null) {
-            name.name = StringUtils.trimToNull(name.name);
-            name = name.container;
-        }
+//        ObjectReference name = object.getName();
+//        while (name != null) {
+//            name.name = StringUtils.trimToNull(name.name);
+//            name = name.container;
+//        }
     }
 
     /**

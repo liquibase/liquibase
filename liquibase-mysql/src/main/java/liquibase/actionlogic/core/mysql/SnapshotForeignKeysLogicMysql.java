@@ -2,7 +2,6 @@ package liquibase.actionlogic.core.mysql;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.ExecuteSqlAction;
 import liquibase.action.QuerySqlAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.RowBasedQueryResult;
@@ -11,7 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Schema;
@@ -50,20 +49,20 @@ public class SnapshotForeignKeysLogicMysql extends SnapshotForeignKeysLogicJdbc 
                 "AND KEY_COL.CONSTRAINT_NAME=CON.CONSTRAINT_NAME "+
                 "AND KEY_COL.TABLE_NAME=CON.TABLE_NAME "+
                 "WHERE KEY_COL.REFERENCED_COLUMN_NAME IS NOT NULL");
-        if (action.relatedTo instanceof ForeignKey) {
-            if (action.relatedTo.getName()== null) {
-                ObjectName baseTable = ((ForeignKey) action.relatedTo).columnChecks.get(0).baseColumn.container;
+        if (action.relatedTo.instanceOf(ForeignKey.class)) {
+            if (action.relatedTo.name== null) {
+                ObjectReference baseTable = ((ForeignKey.ForeignKeyReference) action.relatedTo).table;
                 query.append("AND KEY_COL.TABLE_NAME='" + baseTable.name + "'")
                         .append("AND KEY_COL.TABLE_SCHEMA='" + baseTable.container.name + "'");
             } else {
-                query.append("AND KEY_COL.CONSTRAINT_NAME='" + action.relatedTo.getSimpleName() + "'")
-                        .append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.getName().container + "'");
+                query.append("AND KEY_COL.CONSTRAINT_NAME='" + action.relatedTo.name + "'")
+                        .append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.container + "'");
             }
-        } else if (action.relatedTo instanceof Table) {
-            query.append("AND KEY_COL.TABLE_NAME_NAME='" + action.relatedTo.getSimpleName() + "'")
-                    .append("AND KEY_COL.TABLE_SCHEMA='" + action.relatedTo.getName().container + "'");
-        } else if (action.relatedTo instanceof Schema) {
-            query.append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.getSimpleName() + "'");
+        } else if (action.relatedTo.instanceOf(Table.class)) {
+            query.append("AND KEY_COL.TABLE_NAME_NAME='" + action.relatedTo.name + "'")
+                    .append("AND KEY_COL.TABLE_SCHEMA='" + action.relatedTo.container + "'");
+        } else if (action.relatedTo.instanceOf(Schema.class)) {
+            query.append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.name + "'");
         } else {
             throw new ActionPerformException("Unexpected relatedTo type: " + action.relatedTo.getClass().getName());
         }

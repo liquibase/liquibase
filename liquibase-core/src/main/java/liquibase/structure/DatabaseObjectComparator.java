@@ -9,8 +9,8 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
 
     @Override
     public int compare(DatabaseObject o1, DatabaseObject o2) {
-        Schema schema1 = o1.getSchema();
-        Schema schema2 = o2.getSchema();
+        ObjectReference schema1 = o1.getContainer();
+        ObjectReference schema2 = o2.getContainer();
 
         if (schema1 != null && schema2 != null) {
             int i = schema1.toString().compareTo(schema2.toString());
@@ -21,8 +21,8 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
         }
 
 
-        String name1 = StringUtils.trimToEmpty(o1.getSimpleName());
-        String name2 = StringUtils.trimToEmpty(o2.getSimpleName());
+        String name1 = StringUtils.trimToEmpty(o1.getName());
+        String name2 = StringUtils.trimToEmpty(o2.getName());
 
         int i = name1.compareTo(name2);
         if (i == 0) {

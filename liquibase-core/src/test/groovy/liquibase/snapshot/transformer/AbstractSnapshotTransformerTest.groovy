@@ -3,7 +3,7 @@ package liquibase.snapshot.transformer
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.snapshot.Snapshot
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.core.Column
 import liquibase.structure.core.OldDataType
 import liquibase.structure.core.Table
@@ -23,10 +23,10 @@ class AbstractSnapshotTransformerTest extends Specification {
         }
 
         def snapshot = new Snapshot(JUnitScope.instance)
-                .add(new Table(new ObjectName("table1")))
-                .add(new Table(new ObjectName("table2")))
-                .add(new Column(Table, new ObjectName("table1"), "col1"))
-                .add(new Column(Table, new ObjectName("table1"), "col2"))
+                .add(new Table(new ObjectReference("table1")))
+                .add(new Table(new ObjectReference("table2")))
+                .add(new Column(Table, new ObjectReference("table1"), "col1"))
+                .add(new Column(Table, new ObjectReference("table1"), "col2"))
 
         then:
         snapshot.transform(transformer, JUnitScope.instance).get(Column)*.type*.toString() == ["int", "int"]

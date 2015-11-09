@@ -12,8 +12,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,8 +19,8 @@ import java.util.regex.Pattern;
 public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject implements DatabaseObject {
 
     private String snapshotId;
-
-    public ObjectName name;
+    public ObjectReference container;
+    public String name;
 
     @Override
     public String getObjectTypeName() {
@@ -32,41 +30,42 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
     public AbstractDatabaseObject() {
     }
 
-    public AbstractDatabaseObject(ObjectName name) {
-        setName(name);
+    public AbstractDatabaseObject(String name) {
+        this.name = name;
     }
 
-    public String getSimpleName() {
-        ObjectName name = getName();
-        if (name == null) {
-            return null;
-        } else {
-            return name.name;
-        }
+    public AbstractDatabaseObject(ObjectReference nameAndContainer) {
+        this.name = nameAndContainer.name;
+        this.container = nameAndContainer.container;
     }
 
-    public ObjectName getName() {
+    public AbstractDatabaseObject(ObjectReference container, String name) {
+        this.name = name;
+    }
+
+
+
+    /**
+     * Returns the name. Marked final so subclasses don't change business logic and make it not match get("name")
+     */
+    public final String getName() {
         return name;
     }
 
+    /**
+     * Returns the schema. Marked final so subclasses don't change business logic and make it not match get("schema")
+     */
     @Override
-    public <T> T setName(ObjectName name) {
-        this.name = name;
-
-        return (T) this;
+    public final ObjectReference getContainer() {
+        return container;
     }
 
+    /**
+     * Returns the snapshotId. Marked final so subclasses don't change business logic and make it not match get("snapshotId")
+     */
     @Override
-    public String getSnapshotId() {
+    public final String getSnapshotId() {
         return snapshotId;
-    }
-
-    @Override
-    public void setSnapshotId(String snapshotId) {
-        if (this.snapshotId != null) {
-            throw new UnexpectedLiquibaseException("snapshotId already set");
-        }
-        this.snapshotId = snapshotId;
     }
 
     @Override
@@ -94,6 +93,18 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
         return getSerializedObjectNamespace();
     }
 
+
+    /**
+     * Convenience method for subclasses to use in the standard toString(). Returns name, prefixed with container if it exists
+     */
+    protected String toString(ObjectReference container, String name) {
+        String string = name;
+        if (container != null) {
+            string = container.toString()+"."+name;
+        }
+        return string;
+    }
+
     @Override
     public Set<String> getSerializableFields() {
         TreeSet<String> fields = new TreeSet<String>(getAttributeNames());
@@ -111,14 +122,14 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
         }
             Object value = get(field, Object.class);
             if (value instanceof Schema) {
-                Schema clone = new Schema(((Schema) value).getName());
-                clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
+                Schema clone = new Schema(((ObjectReference) value).name);
+                clone.set("snapshotId", (((DatabaseObject) value).getSnapshotId()));
                 return clone;
             } else if (value instanceof DatabaseObject) {
                 try {
                     DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
-                    clone.setName(((DatabaseObject) value).getName());
-                    clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
+                    clone.set("name", ((DatabaseObject) value).getName());
+                    clone.set("snapshotId", ((DatabaseObject) value).getSnapshotId());
                     return clone;
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException(e);
@@ -185,11 +196,11 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     @Override
     public String toString() {
-        ObjectName name = getName();
+        String name = getName();
         if (name == null) {
             return "unnamed";
         }
-        return name.toString();
+        return name;
     }
 
     @Override
@@ -201,5 +212,10 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
     public boolean equals(Object obj) {
         return obj instanceof DatabaseObject
                 && StringUtils.trimToEmpty(getName().toString()).equals(((DatabaseObject) obj).getName().toString());
+    }
+
+    @Override
+    public ObjectReference toReference() {
+        return new ObjectReference(getClass(), container, name);
     }
 }

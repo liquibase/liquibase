@@ -21,7 +21,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        String name = databaseObject.getSimpleName();
+        String name = databaseObject.getName();
         if (name == null) {
             name = "null";
         }
@@ -100,8 +100,8 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     //Static so it can be used in other comparators if needed
     public static boolean nameMatches(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo) {
-        String object1Name = accordingTo.correctObjectName(databaseObject1.getSimpleName(), databaseObject1.getClass());
-        String object2Name = accordingTo.correctObjectName(databaseObject2.getSimpleName(), databaseObject2.getClass());
+        String object1Name = accordingTo.correctObjectName(databaseObject1.getName(), databaseObject1.getClass());
+        String object2Name = accordingTo.correctObjectName(databaseObject2.getName(), databaseObject2.getClass());
 
         if (object1Name == null && object2Name == null) {
             return true;

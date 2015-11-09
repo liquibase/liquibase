@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
@@ -123,7 +123,7 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.addColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + database.escapeObjectName(new ObjectName(getCatalogName(), getSchemaName(), getTableName()), Table.class) +
+        String updateStatement = "UPDATE " + database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getTableName()), Table.class) +
                 " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
                 + " = " + database.getConcatSql(database.escapeObjectName(getColumn1Name(), Column.class)
                 , "'" + getJoinString() + "'", database.escapeObjectName(getColumn2Name(), Column.class));

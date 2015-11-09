@@ -2,16 +2,14 @@ package liquibase.actionlogic.core;
 
 import liquibase.Scope;
 import liquibase.action.Action;
-import liquibase.action.core.QueryJdbcMetaDataAction;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.ObjectBasedQueryResult;
 import liquibase.actionlogic.RowBasedQueryResult;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
-import liquibase.util.Validate;
 
 import java.util.*;
 
@@ -34,31 +32,32 @@ public class SnapshotPrimaryKeysLogicJdbc extends AbstractSnapshotDatabaseObject
 
     @Override
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
-        DatabaseObject relatedTo = action.relatedTo;
-        ObjectName objectName;
-        if (relatedTo instanceof Catalog) {
-            if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
-                throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
-            }
-            objectName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
-        } else if (relatedTo instanceof Schema) {
-            objectName = new ObjectName(new ObjectName(new ObjectName(relatedTo.getName().container, relatedTo.getSimpleName()), null), null);
-        } else if (relatedTo instanceof Table) {
-            objectName = new ObjectName(relatedTo.getName(), null);
-        } else if (relatedTo instanceof PrimaryKey) {
-            objectName = relatedTo.getName();
-        } else {
-            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
-        }
+//        DatabaseObject relatedTo = action.relatedTo;
+//        ObjectReference objectReference;
+//        if (relatedTo instanceof Catalog) {
+//            if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
+//                throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
+//            }
+//            objectReference = new ObjectReference(relatedTo.getName(), null, null, null);
+//        } else if (relatedTo instanceof Schema) {
+//            objectReference = new ObjectReference(new ObjectReference(new ObjectReference(relatedTo.getName().container, relatedTo.getName()), null), null);
+//        } else if (relatedTo instanceof Table) {
+//            objectReference = new ObjectReference(relatedTo.getName(), null);
+//        } else if (relatedTo instanceof PrimaryKey) {
+//            objectReference = relatedTo.getName();
+//        } else {
+//            throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
+//        }
 
-        objectName = objectName.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 2);
-        List<String> nameParts = objectName.asList(4);
+//        objectReference = objectReference.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 2);
+//        List<String> nameParts = objectReference.asList(4);
 
-        if (scope.getDatabase().getMaxSnapshotContainerDepth() >= 3) {
-            return new QueryJdbcMetaDataAction("getPrimaryKeys", nameParts.get(0), nameParts.get(1), nameParts.get(2));
-        } else { //usually calls the top level "catalogs"
-            return new QueryJdbcMetaDataAction("getPrimaryKeys", nameParts.get(1), null, nameParts.get(2));
-        }
+//        if (scope.getDatabase().getMaxSnapshotContainerDepth() >= 3) {
+//            return new QueryJdbcMetaDataAction("getPrimaryKeys", nameParts.get(0), nameParts.get(1), nameParts.get(2));
+//        } else { //usually calls the top level "catalogs"
+//            return new QueryJdbcMetaDataAction("getPrimaryKeys", nameParts.get(1), null, nameParts.get(2));
+//        }
+        return null;
     }
 
     @Override
@@ -73,18 +72,18 @@ public class SnapshotPrimaryKeysLogicJdbc extends AbstractSnapshotDatabaseObject
         String tableSchema = row.get("TABLE_SCHEM", String.class);
         String tableName = row.get("TABLE_NAME", String.class);
 
-        ObjectName objectName;
+        ObjectReference objectReference;
         if (tableCat != null && tableSchema == null) {
-            objectName = new ObjectName(tableCat, tableName, pkName);
+            objectReference = new ObjectReference(tableCat, tableName, pkName);
         } else {
-            objectName = new ObjectName(tableCat, tableSchema, tableName, pkName);
+            objectReference = new ObjectReference(tableCat, tableSchema, tableName, pkName);
         }
 
-        PrimaryKey pk = new PrimaryKey(objectName);
-        PrimaryKey.PrimaryKeyColumnName pkColumn = new PrimaryKey.PrimaryKeyColumnName(objectName.container, columnName);
-        pkColumn.descending = descending;
-        pkColumn.position = position;
-        pk.columns.add(pkColumn);
+        PrimaryKey pk = new PrimaryKey(objectReference);
+//        PrimaryKey.PrimaryKeyColumn pkColumn = new PrimaryKey.PrimaryKeyColumn(objectReference.container, columnName);
+//        pkColumn.descending = descending;
+//        pkColumn.position = position;
+//        pk.columns.add(pkColumn);
 
         return pk;
 
@@ -106,25 +105,26 @@ public class SnapshotPrimaryKeysLogicJdbc extends AbstractSnapshotDatabaseObject
             @Override
             public ActionResult rewrite(ActionResult result) throws ActionPerformException {
                 List<PrimaryKey> rawResults = ((ObjectBasedQueryResult) super.rewrite(result)).asList(PrimaryKey.class);
-                Map<ObjectName, PrimaryKey> combinedResults = new HashMap<>();
+                Map<ObjectReference, PrimaryKey> combinedResults = new HashMap<>();
                 for (PrimaryKey primaryKey : rawResults) {
                     PrimaryKey existingPk = combinedResults.get(primaryKey.name);
-                    if (existingPk == null) {
-                        combinedResults.put(primaryKey.name, primaryKey);
-                    } else {
-                        existingPk.columns.addAll(primaryKey.columns);
-                    }
+//                    if (existingPk == null) {
+//                        combinedResults.put(primaryKey.name, primaryKey);
+//                    } else {
+//                        existingPk.columns.addAll(primaryKey.columns);
+//                    }
                 }
 
                 for (PrimaryKey primaryKey : combinedResults.values()) {
-                    Collections.sort(primaryKey.columns, new Comparator<PrimaryKey.PrimaryKeyColumnName>() {
+                    Collections.sort(primaryKey.columns, new Comparator<PrimaryKey.PrimaryKeyColumn>() {
                         @Override
-                        public int compare(PrimaryKey.PrimaryKeyColumnName o1, PrimaryKey.PrimaryKeyColumnName o2) {
-                            if (o1.position == null || o2.position == null) {
-                                return o1.name.compareTo(o2.name);
-                            } else {
-                                return o1.position.compareTo(o2.position);
-                            }
+                        public int compare(PrimaryKey.PrimaryKeyColumn o1, PrimaryKey.PrimaryKeyColumn o2) {
+//                            if (o1.position == null || o2.position == null) {
+//                                return o1.name.compareTo(o2.name);
+//                            } else {
+//                                return o1.position.compareTo(o2.position);
+//                            }
+                            return 0;
                         }
                     });
                 }

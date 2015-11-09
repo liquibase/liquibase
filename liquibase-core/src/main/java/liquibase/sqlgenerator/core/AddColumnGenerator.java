@@ -4,21 +4,16 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Schema;
+import liquibase.structure.ObjectReference;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.database.core.*;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 
@@ -126,7 +121,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected String generateSingleColumBaseSQL(AddColumnStatement statement, Database database) {
-        return "ALTER TABLE " + database.escapeObjectName(new ObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), Table.class);
+        return "ALTER TABLE " + database.escapeObjectName(new ObjectReference(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), Table.class);
     }
 
     protected String generateSingleColumnSQL(AddColumnStatement statement, Database database) {

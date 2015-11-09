@@ -6,7 +6,7 @@ import liquibase.action.core.SnapshotDatabaseObjectsAction
 import liquibase.actionlogic.RowBasedQueryResult
 import liquibase.sdk.database.MockDatabase
 import liquibase.statement.DatabaseFunction
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
@@ -32,7 +32,7 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
                 COLUMN_NAME: "columnName",
                 NULLABLE   : DatabaseMetaData.columnNoNulls,
                 DATA_TYPE  : Types.INTEGER,
-        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectName(Table.class)), scope)
+        ]), new SnapshotDatabaseObjectsAction(Column, new ObjectReference(Table.class)), scope)
 
         then:
         object instanceof Column
@@ -73,7 +73,7 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
     def "readDefaultValue handles various rows correctly"() {
         when:
         def data = [COLUMN_DEF: columnDef]
-        def column = new Column(new ObjectName("testTable", "col_name"))
+        def column = new Column(new ObjectReference("testTable", "col_name"))
         column.type = dataType
 
         then:
@@ -107,11 +107,11 @@ class SnapshotColumnsLogicJdbcTest extends Specification {
 
         where:
         name                                         | maxDepth | arguments
-        new ObjectName("cat", "schem", "tab", "col") | 2        | ["cat", "schem", "tab", "col"]
-        new ObjectName("schem", "tab", "col")        | 2        | [null, "schem", "tab", "col"]
-        new ObjectName("schem", "tab", "col")        | 1        | ["schem", null, "tab", "col"]
-        new ObjectName("tab", "col")                 | 2        | [null, null, "tab", "col"]
-        new ObjectName("tab", "col")                 | 1        | [null, null, "tab", "col"]
-        new ObjectName("tab", "col")                 | 0        | [null, null, "tab", "col"]
+        new ObjectReference("cat", "schem", "tab", "col") | 2        | ["cat", "schem", "tab", "col"]
+        new ObjectReference("schem", "tab", "col")        | 2        | [null, "schem", "tab", "col"]
+        new ObjectReference("schem", "tab", "col")        | 1        | ["schem", null, "tab", "col"]
+        new ObjectReference("tab", "col")                 | 2        | [null, null, "tab", "col"]
+        new ObjectReference("tab", "col")                 | 1        | [null, null, "tab", "col"]
+        new ObjectReference("tab", "col")                 | 0        | [null, null, "tab", "col"]
     }
 }

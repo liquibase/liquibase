@@ -3,15 +3,10 @@ package liquibase.action.core
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.Action
-import liquibase.actionlogic.ActionExecutor
 import liquibase.database.ConnectionSupplier
-import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.Snapshot
-import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.LimitTransformer
-import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.structure.ObjectNameStrategy
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.TestColumnSupplier
 import liquibase.structure.TestTableSupplier
 import liquibase.structure.core.Column
@@ -28,7 +23,7 @@ class AddColumnsActionTest extends AbstractActionTest {
     @Unroll("#featureName: add #tableName #columnName on #conn")
     def "Can apply single column with standard settings but complex names"() {
         when:
-        columnName = new ObjectName(tableName, columnName.name)
+        columnName = new ObjectReference(tableName, columnName.name)
 
         def action = new AddColumnsAction(new Column(columnName, new DataType(DataType.StandardType.INTEGER)))
 
@@ -54,7 +49,7 @@ class AddColumnsActionTest extends AbstractActionTest {
     def "Can apply multiple columns with standard settings but complex names"() {
         when:
         def action = new AddColumnsAction()
-        action.columns = [new Column(new ObjectName(tableName, columnNames[0]), new DataType(DataType.StandardType.INTEGER)), new Column(new ObjectName(tableName, columnNames[1]), new DataType(DataType.StandardType.INTEGER))]
+        action.columns = [new Column(new ObjectReference(tableName, columnNames[0]), new DataType(DataType.StandardType.INTEGER)), new Column(new ObjectReference(tableName, columnNames[1]), new DataType(DataType.StandardType.INTEGER))]
 
         then:
         runStandardTest([
@@ -80,7 +75,7 @@ class AddColumnsActionTest extends AbstractActionTest {
         def tableName = getObjectNames(TestTableSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0]
 
         def action = new AddColumnsAction()
-        column.name = new ObjectName(tableName, scope.getDatabase().canStoreObjectName("column_name", false, Column) ? "column_name" : "COLUMN_NAME")
+        column.name = new ObjectReference(tableName, scope.getDatabase().canStoreObjectName("column_name", false, Column) ? "column_name" : "COLUMN_NAME")
 
         if (column.type != null && column.defaultValue == "WITH_DEFAULT_VALUE") {
             if (column.type.standardType == DataType.StandardType.INTEGER) {
@@ -93,9 +88,9 @@ class AddColumnsActionTest extends AbstractActionTest {
         }
 
         if (primaryKey == "Unnamed PK") {
-            primaryKey = new PrimaryKey(new ObjectName(tableName, null), column.simpleName)
+            primaryKey = new PrimaryKey(new ObjectReference(tableName, null), column.simpleName)
         } else if (primaryKey == "Named PK") {
-            primaryKey = new PrimaryKey(new ObjectName(tableName, scope.getDatabase().canStoreObjectName("test_pk", false, PrimaryKey) ? "test_pk" : "TEST_PK"), column.simpleName)
+            primaryKey = new PrimaryKey(new ObjectReference(tableName, scope.getDatabase().canStoreObjectName("test_pk", false, PrimaryKey) ? "test_pk" : "TEST_PK"), column.simpleName)
         }
 
 //        columnDef.addAfterColumn;
@@ -139,7 +134,7 @@ class AddColumnsActionTest extends AbstractActionTest {
                             autoIncrementInformation: [null, new Column.AutoIncrementInformation(), new Column.AutoIncrementInformation(2, 3)]
                     ]),
                     [null, "Unnamed PK", "Named PK"],
-                    [[], [new ForeignKey(null, [new ObjectName("this_col")], [new ObjectName("other_table", "other_col")])]]
+                    [[], [new ForeignKey(null, [new ObjectReference("this_col")], [new ObjectReference("other_table", "other_col")])]]
 
             ])
         }
@@ -156,7 +151,7 @@ class AddColumnsActionTest extends AbstractActionTest {
             if (!seenTables.contains(tableName)) {
                 snapshot.add(new Table(tableName))
             }
-            snapshot.add(new Column(new ObjectName(tableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name+"_existing"), new DataType(DataType.StandardType.INTEGER)))
+            snapshot.add(new Column(new ObjectReference(tableName, getObjectNames(TestColumnSupplier, ObjectNameStrategy.SIMPLE_NAMES, scope)[0].name+"_existing"), new DataType(DataType.StandardType.INTEGER)))
             type = column.type
         }
 
@@ -167,7 +162,7 @@ class AddColumnsActionTest extends AbstractActionTest {
                     snapshot.add(new Table(refTableName))
                 }
                 snapshot.add(new Column(check.referencedColumn, type))
-                snapshot.add(new PrimaryKey(new ObjectName(check.referencedColumn.container.name, null), check.referencedColumn.name))
+                snapshot.add(new PrimaryKey(new ObjectReference(check.referencedColumn.container.name, null), check.referencedColumn.name))
             }
         }
         return snapshot;

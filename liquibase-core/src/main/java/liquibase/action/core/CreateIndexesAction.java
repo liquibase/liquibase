@@ -1,8 +1,6 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.change.AddColumnConfig;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.math.BigInteger;
 
@@ -10,7 +10,7 @@ import java.math.BigInteger;
  */
 public class CreateSequenceAction extends AbstractAction {
 
-        public ObjectName sequenceName;
+        public ObjectReference sequenceName;
         public BigInteger startValue;
         public BigInteger incrementBy;
         public BigInteger maxValue;
@@ -22,7 +22,7 @@ public class CreateSequenceAction extends AbstractAction {
     public CreateSequenceAction() {
     }
 
-    public CreateSequenceAction(ObjectName sequenceName) {
+    public CreateSequenceAction(ObjectReference sequenceName) {
         this.sequenceName = sequenceName;
     }
 

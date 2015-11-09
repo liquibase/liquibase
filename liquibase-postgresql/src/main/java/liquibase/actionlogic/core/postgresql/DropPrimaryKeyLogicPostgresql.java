@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core.postgresql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropPrimaryKeyAction;
 import liquibase.actionlogic.ActionResult;
@@ -11,7 +10,6 @@ import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.actionlogic.core.DropPrimaryKeyLogic;
-import liquibase.structure.ObjectName;
 
 public class DropPrimaryKeyLogicPostgresql extends DropPrimaryKeyLogic {
     @Override

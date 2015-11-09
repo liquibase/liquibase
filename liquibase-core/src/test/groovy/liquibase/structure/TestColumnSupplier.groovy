@@ -18,7 +18,7 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
         def returnList = []
         for (Table table : snapshot.get(Table)) {
             for (Column baseColumn : super.getTestObjects(type, snapshot, scope)) {
-                Column column = new Column(new ObjectName(table.name, baseColumn.name.name));
+                Column column = new Column(new ObjectReference(table.name, baseColumn.name.name));
                 column.type = new DataType("int")
                 returnList.add(column)
             }
@@ -33,8 +33,8 @@ class TestColumnSupplier extends DefaultTestStructureSupplier{
     }
 
     @Override
-    protected List<ObjectName> getObjectContainers(Scope scope) {
-        return [new ObjectName()];
+    protected List<ObjectReference> getObjectContainers(Scope scope) {
+        return [new ObjectReference()];
     }
 
 }

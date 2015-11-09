@@ -5,14 +5,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Schema;
+import liquibase.structure.ObjectReference;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.precondition.Precondition;
 import liquibase.structure.core.Table;
 
 public class TableExistsPrecondition extends AbstractPrecondition {
@@ -57,8 +54,8 @@ public class TableExistsPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
             String correctedTableName = database.correctObjectName(getTableName(), Table.class);
-            if (!SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectName(getCatalogName(), getSchemaName(), correctedTableName)), database)) {
-                throw new PreconditionFailedException("Table "+database.escapeObjectName(new ObjectName(getCatalogName(), getSchemaName(), getTableName()), Table.class)+" does not exist", changeLog, this);
+            if (!SnapshotGeneratorFactory.getInstance().has(new Table(new ObjectReference(getCatalogName(), getSchemaName(), correctedTableName)), database)) {
+                throw new PreconditionFailedException("Table "+database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getTableName()), Table.class)+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;

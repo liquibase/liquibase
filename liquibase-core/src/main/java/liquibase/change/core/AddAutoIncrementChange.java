@@ -1,13 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.action.ActionStatus;
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Column;
 
 import java.math.BigInteger;
 

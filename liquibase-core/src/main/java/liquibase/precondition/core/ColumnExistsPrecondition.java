@@ -11,11 +11,9 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.exception.*;
-import liquibase.precondition.Precondition;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -84,19 +82,19 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 	}
 
     private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        Column example = new Column();
-        example.setName(new ObjectName(database.correctObjectName(getColumnName(), Column.class)));
-        if (StringUtils.trimToNull(getTableName()) != null) {
-            example.name.container = new ObjectName(getCatalogName(), getSchemaName(), database.correctObjectName(getTableName(), Table.class));
-        }
-
-        try {
-            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
-                throw new PreconditionFailedException("Column '" + new ObjectName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
-            }
-        } catch (LiquibaseException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
-        }
+//        Column example = new Column();
+//        example.setName(new ObjectReference(database.correctObjectName(getColumnName(), Column.class)));
+//        if (StringUtils.trimToNull(getTableName()) != null) {
+//            example.name.container = new ObjectReference(getCatalogName(), getSchemaName(), database.correctObjectName(getTableName(), Table.class));
+//        }
+//
+//        try {
+//            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
+//                throw new PreconditionFailedException("Column '" + new ObjectReference(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
+//            }
+//        } catch (LiquibaseException e) {
+//            throw new PreconditionErrorException(e, changeLog, this);
+//        }
     }
 
 	private boolean canCheckFast(Database database) {

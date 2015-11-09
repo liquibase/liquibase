@@ -11,7 +11,7 @@ import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.ObjectUtil;
 
@@ -39,7 +39,7 @@ public class CreateProcedureLogicMSSQL extends CreateProcedureLogic {
     public ActionResult execute(CreateProcedureAction action, Scope scope) throws ActionPerformException {
         Database database = scope.getDatabase();
         String procedureText = action.procedureText.toString();
-        ObjectName procedureName = action.procedureName;
+        ObjectReference procedureName = action.procedureName;
 
         List<Action> actions = new ArrayList<>();
         if (ObjectUtil.defaultIfEmpty(action.replaceIfExists, false)) {

@@ -1,8 +1,8 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class TableRowCountAction extends AbstractAction {
-    public ObjectName tableName;
+    public ObjectReference tableName;
 }

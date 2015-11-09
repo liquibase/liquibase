@@ -5,7 +5,7 @@ import liquibase.action.core.DropTablesAction;
 import liquibase.actionlogic.core.DropTablesLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.StringClauses;
 
 public class DropTablesLogicOracle extends DropTablesLogic {
@@ -15,7 +15,7 @@ public class DropTablesLogicOracle extends DropTablesLogic {
     }
 
     @Override
-    protected StringClauses generateSql(ObjectName table, DropTablesAction action, Scope scope) {
+    protected StringClauses generateSql(ObjectReference table, DropTablesAction action, Scope scope) {
         return super.generateSql(table, action, scope)
                 .replace("CASCADE", "CASCADE CONSTRAINTS");
     }

@@ -14,7 +14,7 @@ import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.util.StringUtils;
 
@@ -191,7 +191,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         ActionStatus result = new ActionStatus();
         try {
             for (AddColumnConfig column : getColumns()) {
-                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), column.getName())), database);
+                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(new ObjectReference(getCatalogName(), getSchemaName(), getTableName(), column.getName())), database);
                 result.assertApplied(snapshot != null, "Column " + column.getName() + " does not exist");
 
 //                if (snapshot != null) {

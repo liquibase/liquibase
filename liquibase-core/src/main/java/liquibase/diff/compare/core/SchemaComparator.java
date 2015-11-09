@@ -27,12 +27,12 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Schema && databaseObject2 instanceof Schema)) {
-            return false;
-        }
-
-        CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
-        CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
+//        if (!(databaseObject1 instanceof Schema && databaseObject2 instanceof Schema)) {
+//            return false;
+//        }
+//
+//        CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
+//        CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
 
 //        if (accordingTo.supportsCatalogs()) {
 //            if (thisSchema.getCatalogName() == null) {

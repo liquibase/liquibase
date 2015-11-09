@@ -56,7 +56,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             Set<Catalog> catalogs = new HashSet<Catalog>();
             for (DatabaseObject object : examples) {
                 if (object instanceof Schema) {
-                    catalogs.add(((Schema) object).getCatalog());
+                    catalogs.add(new Catalog(((Schema) object).container.name));
                 }
             }
 
@@ -163,14 +163,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return null;
         }
 
-        if (database.isSystemObject(example)) {
+        if (database.isSystemObject(example.toReference())) {
             return null;
         }
 
-        if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
-            CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
-            example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
-        }
+//        if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
+//            CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
+//            example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
+//        }
 
         if (!snapshotControl.shouldInclude(example.getClass())) {
             return example;
@@ -260,7 +260,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue);
                 if (savedFieldValue == null) {
                     savedFieldValue = (DatabaseObject) fieldValue;
-                    savedFieldValue.setSnapshotId(SnapshotIdService.getInstance().generateId());
+                    savedFieldValue.set("snapshotId", SnapshotIdService.getInstance().generateId());
                     includeNestedObjects(savedFieldValue);
 
                     referencedObjects.add(savedFieldValue);
@@ -343,7 +343,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         for (DatabaseObject obj : originalExamples) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(fieldValue.getSchema(), obj, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(fieldValue.getContainer(), obj.toReference(), database)) {
                 return false;
             }
         }

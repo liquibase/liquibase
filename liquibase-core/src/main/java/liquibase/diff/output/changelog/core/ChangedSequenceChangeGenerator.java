@@ -40,31 +40,31 @@ public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenera
 
         if (differences.isDifferent("incrementBy")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setIncrementBy(sequence.getIncrementBy());
+            change.setIncrementBy(sequence.incrementBy);
             changes.add(change);
         }
 
         if (differences.isDifferent("maxValue")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setMaxValue(sequence.getMaxValue());
+            change.setMaxValue(sequence.maxValue);
             changes.add(change);
         }
 
         if (differences.isDifferent("ordered")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setOrdered(sequence.getOrdered());
+            change.setOrdered(sequence.ordered);
             changes.add(change);
         }
 
         if (differences.isDifferent("cacheSize")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setCacheSize(sequence.getCacheSize());
+            change.setCacheSize(sequence.cacheSize);
             changes.add(change);
         }
 
         if (differences.isDifferent("willCycle")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setWillCycle(sequence.getWillCycle());
+            change.setWillCycle(sequence.willCycle);
             changes.add(change);
         }
 
@@ -78,12 +78,12 @@ public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenera
     protected AlterSequenceChange createAlterSequenceChange(Sequence sequence, DiffOutputControl control) {
         AlterSequenceChange change = new AlterSequenceChange();
         if (control.getIncludeCatalog()) {
-            change.setCatalogName(sequence.getSchema().getCatalogName());
+            change.setCatalogName(sequence.getContainer().container.name);
         }
         if (control.getIncludeSchema()) {
-            change.setSchemaName(sequence.getSchema().getSimpleName());
+            change.setSchemaName(sequence.getContainer().name);
         }
-        change.setSequenceName(sequence.getSimpleName());
+        change.setSequenceName(sequence.name);
         return change;
     }
 }

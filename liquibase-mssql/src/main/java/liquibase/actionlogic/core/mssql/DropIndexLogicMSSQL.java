@@ -1,7 +1,6 @@
 package liquibase.actionlogic.core.mssql;
 
 import liquibase.Scope;
-import liquibase.action.Action;
 import liquibase.action.ExecuteSqlAction;
 import liquibase.action.core.DropIndexAction;
 import liquibase.actionlogic.ActionResult;
@@ -11,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 

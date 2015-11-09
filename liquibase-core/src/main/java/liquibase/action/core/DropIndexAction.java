@@ -1,12 +1,12 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class DropIndexAction extends AbstractAction {
 
-    public ObjectName indexName;
-    public ObjectName tableName;
-    public ObjectName associatedWith;
+    public ObjectReference indexName;
+    public ObjectReference tableName;
+    public ObjectReference associatedWith;
 
 }

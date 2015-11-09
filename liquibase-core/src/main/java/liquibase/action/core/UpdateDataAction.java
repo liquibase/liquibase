@@ -1,8 +1,7 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.actionlogic.UpdateResult;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 
@@ -11,7 +10,7 @@ import java.util.List;
 
 public class UpdateDataAction extends AbstractAction {
 
-    public ObjectName tableName;
+    public ObjectReference tableName;
     public List<String> columnNames;
     public List<Object> newColumnValues;
     public StringClauses whereClause;
@@ -21,7 +20,7 @@ public class UpdateDataAction extends AbstractAction {
     public UpdateDataAction() {
     }
 
-    public UpdateDataAction(ObjectName tableName) {
+    public UpdateDataAction(ObjectReference tableName) {
         this.tableName = tableName;
     }
 

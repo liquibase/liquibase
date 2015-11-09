@@ -56,11 +56,11 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             });
 
             for (Schema schema : schemas) {
-                if (database.getMaxSnapshotContainerDepth() > 1) {
-                    buffer.append("\nCatalog & Schema: ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("\n");
-                } else {
-                    buffer.append("\nCatalog: ").append(schema.getCatalogName()).append("\n");
-                }
+//                if (database.getMaxSnapshotContainerDepth() > 1) {
+//                    buffer.append("\nCatalog & Schema: ").append(schema.getCatalogName()).append(" / ").append(schema.getName()).append("\n");
+//                } else {
+//                    buffer.append("\nCatalog: ").append(schema.getCatalogName()).append("\n");
+//                }
 
                 StringBuilder catalogBuffer = new StringBuilder();
                 for (Class type : includedTypes) {
@@ -75,14 +75,14 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                             continue;
                         }
 
-                        Schema objectSchema = next.getSchema();
-                        if (objectSchema == null) {
-                            if (!(next instanceof CatalogLevelObject) || !((CatalogLevelObject) next).getCatalog().equals(schema.getCatalog())) {
-                                iterator.remove();
-                            }
-                        } else if (!objectSchema.equals(schema)) {
-                            iterator.remove();
-                        }
+//                        Schema objectSchema = next.getContainer();
+//                        if (objectSchema == null) {
+//                            if (!(next instanceof CatalogLevelObject) || !((CatalogLevelObject) next).getCatalog().equals(schema.getCatalog())) {
+//                                iterator.remove();
+//                            }
+//                        } else if (!objectSchema.equals(schema)) {
+//                            iterator.remove();
+//                        }
                     }
                     outputObjects(objects, type, catalogBuffer);
                 }
@@ -151,21 +151,21 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     value = null;
                 } else {
                     if (((Collection) value).iterator().next() instanceof DatabaseObject) {
-                        value = StringUtils.join(new TreeSet<DatabaseObject>((Collection<DatabaseObject>) value), "\n", new StringUtils.StringUtilsFormatter() {
-                            @Override
-                            public String toString(Object obj) {
-                                if (obj instanceof DatabaseObject) {
-                                    if (shouldExpandNestedObject(obj, databaseObject)) {
-                                        return ((DatabaseObject) obj).getName()+"\n"+StringUtils.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
-                                    } else {
-                                        return ((DatabaseObject) obj).getSimpleName();
-                                    }
-                                } else {
-                                    return obj.toString();
-                                }
-                            }
-                        });
-                        value = "\n"+StringUtils.indent((String) value, INDENT_LENGTH);
+//                        value = StringUtils.join(new TreeSet<DatabaseObject>((Collection<DatabaseObject>) value), "\n", new StringUtils.StringUtilsFormatter() {
+//                            @Override
+//                            public String toString(Object obj) {
+//                                if (obj instanceof DatabaseObject) {
+//                                    if (shouldExpandNestedObject(obj, databaseObject)) {
+//                                        return ((DatabaseObject) obj).getName()+"\n"+StringUtils.indent(serialize(((DatabaseObject) obj), databaseObject), INDENT_LENGTH);
+//                                    } else {
+//                                        return ((DatabaseObject) obj).getSimpleName();
+//                                    }
+//                                } else {
+//                                    return obj.toString();
+//                                }
+//                            }
+//                        });
+//                        value = "\n"+StringUtils.indent((String) value, INDENT_LENGTH);
                     } else {
                         value = databaseObject.getSerializableFieldValue(attribute);
                     }

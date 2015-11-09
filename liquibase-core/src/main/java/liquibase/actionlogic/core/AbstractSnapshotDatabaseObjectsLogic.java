@@ -1,19 +1,9 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.AbstractAction;
-import liquibase.action.Action;
-import liquibase.action.ActionStatus;
 import liquibase.action.core.SnapshotDatabaseObjectsAction;
 import liquibase.actionlogic.*;
-import liquibase.exception.ActionPerformException;
-import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
-import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Convenience abstract base class for {@link liquibase.action.core.SnapshotDatabaseObjectsAction} related logic.

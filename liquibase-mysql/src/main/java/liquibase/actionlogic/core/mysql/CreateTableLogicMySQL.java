@@ -10,7 +10,7 @@ import liquibase.actionlogic.core.CreateTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
@@ -31,7 +31,7 @@ public class CreateTableLogicMySQL extends CreateTableLogic {
             String columnRemarks = column.remarks;
             if (columnRemarks != null) {
                 SetColumnRemarksAction remarksAction = new SetColumnRemarksAction();
-                remarksAction.columnName = new ObjectName(action.table.name, column.getSimpleName());
+                remarksAction.columnName = new ObjectReference(action.table.name, column.name);
                 remarksAction.remarks = columnRemarks;
                 return new DelegateResult(result, remarksAction);
             }

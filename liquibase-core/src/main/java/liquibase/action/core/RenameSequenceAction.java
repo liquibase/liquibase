@@ -1,9 +1,9 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 public class RenameSequenceAction extends AbstractAction {
-        public ObjectName oldSequenceName;
-        public ObjectName newSequenceName;
+        public ObjectReference oldSequenceName;
+        public ObjectReference newSequenceName;
 }

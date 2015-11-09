@@ -7,9 +7,8 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
-import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +26,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        if (((Column) example).name.virtual) {
+        if (((Column) example).virtual) {
             return example;
         }
 
         List<CachedRow> columnMetadataRs = null;
-        try {
+//        try {
 
             Column column = null;
 
@@ -42,15 +41,15 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 
                 return column;
             } else {
-                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
-                List<String> fullName = column.getName().asList(4);
-
-                columnMetadataRs = databaseMetaData.getColumns(fullName.get(3), fullName.get(2), fullName.get(1), fullName.get(0));
-
-                if (columnMetadataRs.size() > 0) {
-                    CachedRow data = columnMetadataRs.get(0);
-                    column = readColumn(data, column.getName().container, database);
-//                }
+//                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+//                List<String> fullName = column.getName().asList(4);
+//
+//                columnMetadataRs = databaseMetaData.getColumns(fullName.get(3), fullName.get(2), fullName.get(1), fullName.get(0));
+//
+//                if (columnMetadataRs.size() > 0) {
+//                    CachedRow data = columnMetadataRs.get(0);
+//                    column = readColumn(data, column.getName().container, database);
+////                }
 //            }
 //            if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
 //                String sql;
@@ -81,14 +80,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 //                    column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
 //                }
 //            }
-                    return column;
-                } else {
-                    return null;
-                }
+//                    return column;
+//                } else {
+//                    return null;
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new DatabaseException(e);
+//        }
             }
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        }
+        return null;
     }
 
     @Override
@@ -97,31 +98,31 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return;
         }
         if (foundObject instanceof Relation) {
-            Database database = snapshot.getDatabase();
-            Relation relation = (Relation) foundObject;
-            List<CachedRow> allColumnsMetadataRs = null;
-            try {
-
-                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
-
-                Schema schema;
-
-                schema = relation.getSchema();
-                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), null);
-
-                for (CachedRow row : allColumnsMetadataRs) {
-                    Column column = readColumn(row, foundObject.getName(), database);
-                    column.set(LIQUIBASE_COMPLETE, true);
-//                    relation.getColumns().add(column);
-                }
-            } catch (Exception e) {
-                throw new DatabaseException(e);
-            }
+//            Database database = snapshot.getDatabase();
+//            Relation relation = (Relation) foundObject;
+//            List<CachedRow> allColumnsMetadataRs = null;
+//            try {
+//
+//                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+//
+//                Schema schema;
+//
+//                schema = relation.getContainer();
+//                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getSimpleName(), null);
+//
+//                for (CachedRow row : allColumnsMetadataRs) {
+//                    Column column = readColumn(row, foundObject.getName(), database);
+//                    column.set(LIQUIBASE_COMPLETE, true);
+////                    relation.getColumns().add(column);
+//                }
+//            } catch (Exception e) {
+//                throw new DatabaseException(e);
+//            }
         }
 
     }
 
-    protected Column readColumn(CachedRow columnMetadataResultSet, ObjectName container, Database database) throws SQLException, DatabaseException {
+    protected Column readColumn(CachedRow columnMetadataResultSet, ObjectReference container, Database database) throws SQLException, DatabaseException {
         String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
         String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
@@ -132,7 +133,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
 
-        Column column = new Column(new ObjectName(container, StringUtils.trimToNull(rawColumnName)));
+        Column column = new Column(new ObjectReference(container, StringUtils.trimToNull(rawColumnName)));
         column.remarks = remarks;
 
 //todo: action refactoring        if (database instanceof OracleDatabase) {
@@ -182,7 +183,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
                 } else {
-                    selectStatement = "select " + database.escapeObjectName(rawColumnName, Column.class) + " from " + database.escapeObjectName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName), Table.class) + " where 0=1";
+                    selectStatement = "select " + database.escapeObjectName(rawColumnName, Column.class) + " from " + database.escapeObjectName(new ObjectReference(rawCatalogName, rawSchemaName, rawTableName), Table.class) + " where 0=1";
                 }
                 LoggerFactory.getLogger(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                 Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();

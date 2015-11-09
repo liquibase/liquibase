@@ -3,24 +3,17 @@ package liquibase.action.core
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.Action
-import liquibase.actionlogic.ActionExecutor
 import liquibase.actionlogic.ObjectBasedQueryResult
-import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.Snapshot
-import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.LimitTransformer
-import liquibase.snapshot.transformer.NoOpTransformer
-import liquibase.structure.ObjectName
+import liquibase.structure.ObjectReference
 import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.TestColumnSupplier
 import liquibase.structure.TestForeignKeySupplier
 import liquibase.structure.TestTableSupplier
 import liquibase.structure.core.*
 import liquibase.util.CollectionUtil
-import liquibase.util.LiquibaseUtil
-import org.junit.Assume
 import spock.lang.Unroll
 
 class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
@@ -29,8 +22,8 @@ class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
     def "can find fully qualified complex foreign key names"() {
         expect:
         def fk = new ForeignKey(fkName,
-                [new ObjectName(fkName.container, correctObjectName("base_table", Table, scope.database), correctObjectName("base_col", Column, scope.database))],
-                [new ObjectName(fkName.container, correctObjectName("ref_table", Table, scope.database), correctObjectName("ref_col", Column, scope.database))])
+                [new ObjectReference(fkName.container, correctObjectName("base_table", Table, scope.database), correctObjectName("base_col", Column, scope.database))],
+                [new ObjectReference(fkName.container, correctObjectName("ref_table", Table, scope.database), correctObjectName("ref_col", Column, scope.database))])
 
         def action = new SnapshotDatabaseObjectsAction(fk)
 
@@ -121,7 +114,7 @@ class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
     @Override
     protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
         Snapshot snapshot = new Snapshot(scope)
-        def seenTables = new HashSet<ObjectName>()
+        def seenTables = new HashSet<ObjectReference>()
         if (((SnapshotDatabaseObjectsAction) action).relatedTo instanceof ForeignKey) {
             ForeignKey fk = ((SnapshotDatabaseObjectsAction) action).relatedTo
             for (def check : fk.columnChecks) {
@@ -135,21 +128,21 @@ class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
                 }
                 snapshot.add(new Column(check.referencedColumn, "int"))
                 snapshot.add(new Column(check.baseColumn, "int"))
-                snapshot.add(new PrimaryKey(new ObjectName(check.referencedColumn.container), check.referencedColumn.name))
+                snapshot.add(new PrimaryKey(new ObjectReference(check.referencedColumn.container), check.referencedColumn.name))
             }
             snapshot.add(fk)
 
             //add other FKs to ensure only the desired one(s) are fetched
             def table1Name = (seenTables as List)[0]
             for (def i = 0; i < 5; i++) {
-                def baseCol = new Column(new ObjectName(table1Name, "base_col$i"), "int")
-                def refCol = new Column(new ObjectName(table1Name.container, "ref_table$i", "ref_col$i"), "int")
+                def baseCol = new Column(new ObjectReference(table1Name, "base_col$i"), "int")
+                def refCol = new Column(new ObjectReference(table1Name.container, "ref_table$i", "ref_col$i"), "int")
 
                 snapshot.add(new Table(refCol.name.container))
                 snapshot.add(baseCol)
                 snapshot.add(refCol)
-                snapshot.add(new ForeignKey(new ObjectName(table1Name.container, correctObjectName("fk_$i", ForeignKey, scope.getDatabase())), [baseCol.name], [refCol.name]))
-                snapshot.add(new PrimaryKey(new ObjectName(refCol.name.container, null), refCol.name.name))
+                snapshot.add(new ForeignKey(new ObjectReference(table1Name.container, correctObjectName("fk_$i", ForeignKey, scope.getDatabase())), [baseCol.name], [refCol.name]))
+                snapshot.add(new PrimaryKey(new ObjectReference(refCol.name.container, null), refCol.name.name))
             }
         } else if (((SnapshotDatabaseObjectsAction) action).relatedTo instanceof Table) {
             Table table = ((SnapshotDatabaseObjectsAction) action).relatedTo
@@ -166,13 +159,13 @@ class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
 
             for (def i = 0; i < numItems; i++) {
                 snapshot.add(new Table(tableNames[i]))
-                snapshot.add(new Column(new ObjectName(table.name, columnNames[i].name), "int"))
-                snapshot.add(new Column(new ObjectName(tableNames[i], columnNames[i].name), "int"))
-                snapshot.add(new PrimaryKey(new ObjectName(tableNames[i], null), columnNames[i].name))
-                snapshot.add(new ForeignKey(new ObjectName(table.name.container, fkNames[i].name), [new ObjectName(table.name, columnNames[i].name)], [new ObjectName(tableNames[i], columnNames[i].name)]))
+                snapshot.add(new Column(new ObjectReference(table.name, columnNames[i].name), "int"))
+                snapshot.add(new Column(new ObjectReference(tableNames[i], columnNames[i].name), "int"))
+                snapshot.add(new PrimaryKey(new ObjectReference(tableNames[i], null), columnNames[i].name))
+                snapshot.add(new ForeignKey(new ObjectReference(table.name.container, fkNames[i].name), [new ObjectReference(table.name, columnNames[i].name)], [new ObjectReference(tableNames[i], columnNames[i].name)]))
 
                 //and another FK on the other table that shouldn't match
-                snapshot.add(new ForeignKey(new ObjectName(table.name.container, correctObjectName(fkNames[i].name + "_other", ForeignKey, scope.getDatabase())), [new ObjectName(tableNames[i], columnNames[i].name)], [new ObjectName(tableNames[i], columnNames[i].name)]))
+                snapshot.add(new ForeignKey(new ObjectReference(table.name.container, correctObjectName(fkNames[i].name + "_other", ForeignKey, scope.getDatabase())), [new ObjectReference(tableNames[i], columnNames[i].name)], [new ObjectReference(tableNames[i], columnNames[i].name)]))
             }
         } else if (((SnapshotDatabaseObjectsAction) action).relatedTo instanceof Schema) {
             def tableNames = getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope)
@@ -183,9 +176,9 @@ class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
 
             for (def i = 0; i < numItems; i++) {
                 snapshot.add(new Table(tableNames[i]))
-                snapshot.add(new Column(new ObjectName(tableNames[i], columnNames[i].name), "int"))
-                snapshot.add(new Index(new ObjectName(tableNames[i], null), columnNames[i].name))
-                snapshot.add(new ForeignKey(new ObjectName(tableNames[i].container, fkNames[i].name), [new ObjectName(tableNames[i], columnNames[i].name)], [new ObjectName(tableNames[i], columnNames[i].name)]))
+                snapshot.add(new Column(new ObjectReference(tableNames[i], columnNames[i].name), "int"))
+                snapshot.add(new Index(new ObjectReference(tableNames[i], null), columnNames[i].name))
+                snapshot.add(new ForeignKey(new ObjectReference(tableNames[i].container, fkNames[i].name), [new ObjectReference(tableNames[i], columnNames[i].name)], [new ObjectReference(tableNames[i], columnNames[i].name)]))
             }
         } else {
             throw new RuntimeException("Unexpected relatedTo type: "+((SnapshotDatabaseObjectsAction) action).relatedTo.class.name)

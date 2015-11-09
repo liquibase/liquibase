@@ -11,7 +11,7 @@ import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
@@ -28,19 +28,19 @@ public class AddLookupTableLogic extends AbstractActionLogic<AddLookupTableActio
 
     @Override
     public ActionResult execute(AddLookupTableAction action, Scope scope) throws ActionPerformException {
-        ObjectName newColumnName = action.newColumnName;
-        ObjectName newTableName = newColumnName.container;
+        ObjectReference newColumnName = action.newColumnName;
+        ObjectReference newTableName = newColumnName.container;
 
         String newColumnDataType = action.newColumnDataType;
 
-        ObjectName existingColumnName = action.existingColumnName;
-        ObjectName existingTableName = existingColumnName.container;
+        ObjectReference existingColumnName = action.existingColumnName;
+        ObjectReference existingTableName = existingColumnName.container;
 
         List<Action> actions = new ArrayList<>(Arrays.asList(generateCreateAndLoadActions(action, scope)));
 
         actions.add(new SetNullableAction(newColumnName, newColumnDataType, false));
 
-        AddPrimaryKeysAction addPkAction = new AddPrimaryKeysAction(new PrimaryKey(new ObjectName(newTableName, null), newColumnName.name));
+        AddPrimaryKeysAction addPkAction = new AddPrimaryKeysAction(new PrimaryKey(new ObjectReference(newTableName, null), newColumnName.name));
 
         actions.add(addPkAction);
 

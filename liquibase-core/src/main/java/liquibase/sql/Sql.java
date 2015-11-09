@@ -9,6 +9,4 @@ public interface Sql {
 
     String getEndDelimiter();
 
-    Collection<? extends DatabaseObject> getAffectedDatabaseObjects();
-
 }

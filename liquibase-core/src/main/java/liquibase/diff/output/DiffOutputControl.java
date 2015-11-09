@@ -105,7 +105,7 @@ public class DiffOutputControl {
     }
 
     public DiffOutputControl addIncludedSchema(Schema schema) {
-        this.includeSchemas.add(schema.toCatalogAndSchema());
+//        this.includeSchemas.add(schema.toCatalogAndSchema());
         return this;
     }
 
@@ -115,22 +115,22 @@ public class DiffOutputControl {
     }
 
     public boolean shouldOutput(DatabaseObject object, Database accordingTo) {
-        if (includeSchemas.size() > 0) {
-            Schema schema = object.getSchema();
-            if (schema == null) {
-                return true;
-            }
-            CatalogAndSchema objectCatalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
-            for (CatalogAndSchema catalogAndSchema : includeSchemas) {
-                catalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
-                if (objectCatalogAndSchema.equals(catalogAndSchema, accordingTo)) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
+//        if (includeSchemas.size() > 0) {
+//            Schema schema = new Schema(object.getContainer());
+//            if (schema == null) {
+//                return true;
+//            }
+//            CatalogAndSchema objectCatalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
+//            for (CatalogAndSchema catalogAndSchema : includeSchemas) {
+//                catalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
+//                if (objectCatalogAndSchema.equals(catalogAndSchema, accordingTo)) {
+//                    return true;
+//                }
+//            }
+//            return false;
+//        } else {
             return true;
-        }
+//        }
     }
 
     public ObjectChangeFilter getObjectChangeFilter() {

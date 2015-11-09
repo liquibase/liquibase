@@ -54,11 +54,12 @@ public class DropViewChange extends AbstractChange {
 
     @Override
     public ActionStatus checkStatus(Database database) {
-        try {
-            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new View(getCatalogName(), getSchemaName(), getViewName()), database), "View exists");
-        } catch (Exception e) {
-            return new ActionStatus().unknown(e);
-        }
+//        try {
+//            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new View(getCatalogName(), getSchemaName(), getViewName()), database), "View exists");
+//        } catch (Exception e) {
+//            return new ActionStatus().unknown(e);
+//        }
+        return null;
     }
 
 

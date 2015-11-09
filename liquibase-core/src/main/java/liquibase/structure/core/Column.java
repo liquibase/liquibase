@@ -9,7 +9,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -19,35 +19,45 @@ import java.util.Set;
 
 public class Column extends AbstractDatabaseObject {
 
+    public ObjectReference table;
     public DataType type;
     public AutoIncrementInformation autoIncrementInformation;
     public Boolean nullable;
     public Object defaultValue;
     public String remarks;
+    public Boolean virtual;
 
     public Column() {
     }
 
-    public Column(ObjectName name) {
+    public Column(String name) {
         super(name);
     }
 
-    public Column(ObjectName name, DataType type, Boolean nullable) {
-        this(name);
+    public Column(ObjectReference nameAndContainer) {
+        super(nameAndContainer);
+    }
+
+    public Column(ObjectReference container, String name) {
+        super(container, name);
+    }
+
+    public Column(ObjectReference table, String columnName, DataType type, Boolean nullable) {
+        this(columnName);
         this.type = type;
         this.nullable = nullable;
     }
 
-    public Column(ObjectName name, String type) {
-        this(name, DataType.parse(type));
+    public Column(ObjectReference table, String columnName, String type) {
+        this(table, columnName, DataType.parse(type));
     }
 
-    public Column(ObjectName name, DataType type) {
-        this(name, type, null);
+    public Column(ObjectReference table, String columnName, DataType type) {
+        this(table, columnName, type, null);
     }
 
     public Column(ColumnConfig columnConfig) {
-        super(new ObjectName(columnConfig.getName()));
+        super(columnConfig.getName());
         this.type = new DataType(columnConfig.getType());
 
         if (columnConfig.getDefaultValue() != null) {
@@ -66,23 +76,9 @@ public class Column extends AbstractDatabaseObject {
         this.remarks = columnConfig.getRemarks();
     }
 
-    @Override
-    public DatabaseObject[] getContainingObjects() {
-        return null; // new DatabaseObject[]{ relation };
-    }
-
-//    @Override
-    public Schema getSchema() {
-//        if (relation == null) {
-            return null;
-//        }
-//        return relation.getSchema();
-    }
-
-    public Column setName(String name, boolean computed) {
-        ObjectName objectName = new ObjectName(name);
-        setName(objectName);
-        objectName.virtual = computed;
+    public Column setName(String name, boolean virtual) {
+        this.name = name;
+        this.virtual = virtual;
 
         return this;
     }
@@ -95,7 +91,7 @@ public class Column extends AbstractDatabaseObject {
         if (includeRelation) {
             return toString();
         } else {
-            return getName().toShortString();
+            return name;
         }
     }
 
@@ -104,47 +100,13 @@ public class Column extends AbstractDatabaseObject {
         if (name == null) {
             return "Unnamed Column";
         }
-        return getName().toString();
+        return getName();
     }
 
 
     @Override
     public int compareTo(Object other) {
         return this.getName().compareTo(((Column) other).getName());
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Column)) {
-            return false;
-        }
-        return this.toString().equals(o.toString());
-    }
-
-    @Override
-    public int hashCode() {
-        return toString().hashCode();
-    }
-
-    public static Column[] arrayFromNames(String columnNames) {
-        if (columnNames == null) {
-            return null;
-        }
-
-        List<String> columnNameList = StringUtils.splitAndTrim(columnNames, ",");
-        Column[] returnArray = new Column[columnNameList.size()];
-        for (int i = 0; i < columnNameList.size(); i++) {
-            returnArray[i] = new Column(new ObjectName(columnNameList.get(i)));
-        }
-        return returnArray;
-    }
-
-    public static List<Column> listFromNames(String columnNames) {
-        if (columnNames == null) {
-            return null;
-        }
-        return Arrays.asList(arrayFromNames(columnNames));
     }
 
     @Override
@@ -166,16 +128,30 @@ public class Column extends AbstractDatabaseObject {
 
     }
 
-    public String getRelationName() {
-        return name.asList(2).get(1);
-    }
+    /**
+     * For a column reference, "container" is the table.
+     */
+    public static class ColumnReference extends ObjectReference {
 
-    public String getSchemaName() {
-        return name.asList(3).get(2);
-    }
+        public ColumnReference() {
+        }
 
-    public String getCatalogName() {
-        return name.asList(4).get(3);
+        public ColumnReference(Class<? extends DatabaseObject> type, ObjectReference container, String... names) {
+            super(type, container, names);
+        }
+
+        public ColumnReference(ObjectReference container, String... names) {
+            super(container, names);
+        }
+
+        public ColumnReference(String... names) {
+            super(names);
+        }
+
+        public ObjectReference getRelation() {
+            return container;
+        }
+
     }
 
     public static class AutoIncrementInformation extends AbstractExtensibleObject implements LiquibaseSerializable {

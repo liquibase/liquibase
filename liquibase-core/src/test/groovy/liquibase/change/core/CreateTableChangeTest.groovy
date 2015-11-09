@@ -167,9 +167,9 @@ public class CreateTableChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def table = new Table(null, null, "test_table")
-        def column1 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_1").setType(new OldDataType("int")).setRelation(table)
-        def column2 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_2").setType(new OldDataType("boolean")).setRelation(table)
-        def column3 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_3").setType(new OldDataType("varchar(10)")).setRelation(table)
+        def column1 = new Column(Table.class, table.container.catalogName, table.container.name, table.name, "column_1").setType(new OldDataType("int")).setRelation(table)
+        def column2 = new Column(Table.class, table.container.catalogName, table.container.name, table.name, "column_2").setType(new OldDataType("boolean")).setRelation(table)
+        def column3 = new Column(Table.class, table.container.catalogName, table.container.name, table.name, "column_3").setType(new OldDataType("varchar(10)")).setRelation(table)
 
         def change = new CreateTableChange()
         change.tableName = table.name
@@ -208,7 +208,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).status == ActionStatus.Status.incorrect
 
         when: "table has primary key as expected"
-        def pk = new PrimaryKey("pk_test", table.schema.catalogName, table.schema.name, table.name, new Column(column1.name))
+        def pk = new PrimaryKey("pk_test", table.container.catalogName, table.container.name, table.name, new Column(column1.name))
         table.setPrimaryKey(pk)
         snapshotFactory.addObjects(pk)
         then:

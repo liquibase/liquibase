@@ -1,7 +1,7 @@
 package liquibase.action.core;
 
 import liquibase.action.AbstractAction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.UniqueConstraint;
 
 import java.util.ArrayList;
@@ -14,10 +14,6 @@ public class AddUniqueConstraintsAction extends AbstractAction {
 
     public AddUniqueConstraintsAction() {
 
-    }
-
-    public AddUniqueConstraintsAction(ObjectName name, String... columnNames) {
-        this(new UniqueConstraint(name, columnNames));
     }
 
     public AddUniqueConstraintsAction(UniqueConstraint... uniqueConstraints) {

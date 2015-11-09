@@ -8,7 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -119,11 +119,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
 
     @Override
-    public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Table) {
-            if (example.getSchema() != null) {
-                if ("pg_catalog".equals(example.getSchema().getName())
-                        || "pg_toast".equals(example.getSchema().getName())) {
+    public boolean isSystemObject(ObjectReference example) {
+        if (example.instanceOf(Table.class)) {
+            if (example.container != null) {
+                if ("pg_catalog".equals(example.container.name)
+                        || "pg_toast".equals(example.container.name)) {
                     return true;
                 }
             }
@@ -161,11 +161,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectName objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
         if (Index.class.isAssignableFrom(objectType)) {
-            return this.escapeObjectName(objectName.name, Index.class);
+            return this.escapeObjectName(objectReference.name, Index.class);
         } else {
-            return super.escapeObjectName(objectName, objectType);
+            return super.escapeObjectName(objectReference, objectType);
         }
     }
 

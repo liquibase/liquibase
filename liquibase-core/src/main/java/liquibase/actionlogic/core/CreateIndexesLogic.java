@@ -10,7 +10,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
@@ -73,8 +73,8 @@ public class CreateIndexesLogic extends AbstractActionLogic<CreateIndexesAction>
 
     protected StringClauses generateSql(Index index, CreateIndexesAction action, Scope scope) {
         final Database database = scope.getDatabase();
-        ObjectName indexName = index.name;
-        ObjectName tableName = index.columns.get(0).name.container;
+        ObjectReference indexName = index.toReference();
+        ObjectReference tableName = index.columns.get(0).container;
         String tablespace = index.tablespace;
 
 
@@ -100,11 +100,11 @@ public class CreateIndexesLogic extends AbstractActionLogic<CreateIndexesAction>
                 Boolean computed = column.computed;
                 String name;
                 if (computed == null) {
-                    name = database.escapeObjectName(column.getSimpleName(), Column.class);
+                    name = database.escapeObjectName(column.name, Column.class);
                 } else if (computed) {
-                    name = column.getSimpleName();
+                    name = column.name;
                 } else {
-                    name = database.escapeObjectName(column.getSimpleName(), Column.class);
+                    name = database.escapeObjectName(column.name, Column.class);
                 }
 
                 if (ObjectUtil.defaultIfEmpty(column.descending, false)) {

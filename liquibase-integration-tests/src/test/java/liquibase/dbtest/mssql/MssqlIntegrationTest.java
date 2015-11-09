@@ -78,7 +78,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
         for (Table table : snapshot.get(Table.class)) {
-            if (getDatabase().isLiquibaseObject(table)) {
+            if (getDatabase().isLiquibaseObject(table.toReference())) {
                 continue;
             }
 //            for (Column column : table.getColumns()) {

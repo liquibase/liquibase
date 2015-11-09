@@ -9,7 +9,7 @@ import liquibase.snapshot.SnapshotIdService;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 
@@ -25,70 +25,70 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getDatabase().supportsSequences()) {
-            return;
-        }
-        if (foundObject instanceof Schema) {
-            Schema schema = (Schema) foundObject;
-            Database database = snapshot.getDatabase();
-            if (!database.supportsSequences()) {
-                updateListeners("Sequences not supported for " + database.toString() + " ...");
-            }
-
-            //noinspection unchecked
-            List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
-
-            if (sequences != null) {
-                for (Map<String, ?> sequence : sequences) {
-                    schema.addDatabaseObject(new Sequence(new ObjectName(cleanNameFromDatabase((String) sequence.get("SEQUENCE_NAME"), database))).setSchema(schema));
-                }
-            }
-        }
+//        if (!snapshot.getDatabase().supportsSequences()) {
+//            return;
+//        }
+//        if (foundObject instanceof Schema) {
+//            Schema schema = (Schema) foundObject;
+//            Database database = snapshot.getDatabase();
+//            if (!database.supportsSequences()) {
+//                updateListeners("Sequences not supported for " + database.toString() + " ...");
+//            }
+//
+//            //noinspection unchecked
+//            List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
+//
+//            if (sequences != null) {
+//                for (Map<String, ?> sequence : sequences) {
+//                    schema.addDatabaseObject(new Sequence(new ObjectReference(cleanNameFromDatabase((String) sequence.get("SEQUENCE_NAME"), database))).setSchema(schema));
+//                }
+//            }
+//        }
     }
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (example.getSnapshotId() != null) {
-            return example;
-        }
-        if (example.get("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
-            example.setSnapshotId(SnapshotIdService.getInstance().generateId());
-            example.set("liquibase-complete", null);
-            return example;
-        }
-
-        Database database = snapshot.getDatabase();
-        if (!database.supportsSequences()) {
-            return null;
-        }
-
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
-        for (Map<String, ?> sequenceRow : sequences) {
-            String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
-            if ((database.isCaseSensitive(example.getClass()) && name.equals(example.getName()) || (!database.isCaseSensitive(example.getClass()) && name.equalsIgnoreCase(example.getSimpleName())))) {
-                return mapToSequence(sequenceRow, example.getSchema(), database);
-            }
-        }
-
+//        if (example.getSnapshotId() != null) {
+//            return example;
+//        }
+//        if (example.get("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
+//            example.setSnapshotId(SnapshotIdService.getInstance().generateId());
+//            example.set("liquibase-complete", null);
+//            return example;
+//        }
+//
+//        Database database = snapshot.getDatabase();
+//        if (!database.supportsSequences()) {
+//            return null;
+//        }
+//
+//        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getContainer(), database)));
+//        for (Map<String, ?> sequenceRow : sequences) {
+//            String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
+//            if ((database.isCaseSensitive(example.getClass()) && name.equals(example.getName()) || (!database.isCaseSensitive(example.getClass()) && name.equalsIgnoreCase(example.getSimpleName())))) {
+//                return mapToSequence(sequenceRow, example.getContainer(), database);
+//            }
+//        }
+//
         return null;
     }
 
-    private Sequence mapToSequence(Map<String, ?> sequenceRow, Schema schema, Database database) {
-        String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
-        Sequence seq = new Sequence();
-        seq.setName(new ObjectName(name));
-        seq.setSchema(schema);
-        seq.setStartValue(toBigInteger(sequenceRow.get("START_VALUE"), database));
-        seq.setMinValue(toBigInteger(sequenceRow.get("MIN_VALUE"), database));
-        seq.setMaxValue(toBigInteger(sequenceRow.get("MAX_VALUE"), database));
-        seq.setCacheSize(toBigInteger(sequenceRow.get("CACHE_SIZE"), database));
-        seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
-        seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
-        seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
-        seq.set("liquibase-complete", true);
-
-        return seq;
-    }
+//    private Sequence mapToSequence(Map<String, ?> sequenceRow, Schema schema, Database database) {
+//        String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
+//        Sequence seq = new Sequence();
+//        seq.setName(new ObjectReference(name));
+//        seq.setSchema(schema);
+//        seq.setStartValue(toBigInteger(sequenceRow.get("START_VALUE"), database));
+//        seq.setMinValue(toBigInteger(sequenceRow.get("MIN_VALUE"), database));
+//        seq.setMaxValue(toBigInteger(sequenceRow.get("MAX_VALUE"), database));
+//        seq.setCacheSize(toBigInteger(sequenceRow.get("CACHE_SIZE"), database));
+//        seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
+//        seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
+//        seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
+//        seq.set("liquibase-complete", true);
+//
+//        return seq;
+//    }
 
     protected Boolean toBoolean(Object value, Database database) {
         if (value == null) {

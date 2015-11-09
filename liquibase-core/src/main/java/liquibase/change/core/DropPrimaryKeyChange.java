@@ -6,7 +6,7 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.PrimaryKey;
 
 /**
@@ -71,7 +71,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     @Override
     public ActionStatus checkStatus(Database database) {
         try {
-            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new PrimaryKey(new ObjectName(getCatalogName(), getSchemaName(), getTableName(), getConstraintName())), database), "Primary key exists");
+            return new ActionStatus().assertApplied(!SnapshotGeneratorFactory.getInstance().has(new PrimaryKey(new ObjectReference(getCatalogName(), getSchemaName(), getTableName(), getConstraintName())), database), "Primary key exists");
         } catch (Exception e) {
             return new ActionStatus().unknown(e);
         }

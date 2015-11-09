@@ -12,10 +12,8 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.ObjectUtil;
@@ -52,7 +50,7 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
 
             validationErrors.checkForRequiredField("columnChecks", fk);
 
-            if (fk.name != null && fk.name.container != null && !supportsSeparateConstraintSchema() && !fk.name.container.equals(fk.columnChecks.get(0).baseColumn.container.container)) {
+            if (fk.name != null && fk.container != null && !supportsSeparateConstraintSchema() && !fk.container.equals(fk.columnChecks.get(0).baseColumn.container.container)) {
                 validationErrors.addUnsupportedError("Specifying a different foreign key schema", database.getShortName());
             }
         }
@@ -69,7 +67,7 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
         ActionStatus result = new ActionStatus();
         try {
             for (ForeignKey actionFK : action.foreignKeys) {
-                ForeignKey snapshotFK = LiquibaseUtil.snapshotObject(ForeignKey.class, actionFK, scope);
+                ForeignKey snapshotFK = LiquibaseUtil.snapshotObject(ForeignKey.class, actionFK.toReference(), scope);
                 if (snapshotFK == null) {
                     result.assertApplied(false, "Foreign Key '" + actionFK.name + "' not found");
                 } else {
@@ -112,7 +110,7 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
     protected StringClauses generateSql(ForeignKey foreignKey, AddForeignKeysAction action, Scope scope) {
         final Database database = scope.getDatabase();
 
-        String constrantName = supportsSeparateConstraintSchema() ? database.escapeObjectName(foreignKey.name, ForeignKey.class) : database.escapeObjectName(foreignKey.getSimpleName(), ForeignKey.class);
+        String constrantName = supportsSeparateConstraintSchema() ? database.escapeObjectName(foreignKey.name, ForeignKey.class) : database.escapeObjectName(foreignKey.getName(), ForeignKey.class);
 
         StringClauses clauses = new StringClauses()
                 .append("ADD CONSTRAINT")

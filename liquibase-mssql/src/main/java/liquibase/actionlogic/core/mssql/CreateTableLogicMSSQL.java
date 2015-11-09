@@ -37,17 +37,17 @@ public class CreateTableLogicMSSQL extends CreateTableLogic {
 
         String defaultValue = clauses.get(ColumnClauses.defaultValue);
         if (defaultValue != null) {
-            clauses.replace(ColumnClauses.defaultValue, defaultValue.replaceFirst("DEFAULT", "CONSTRAINT " + database.generateDefaultConstraintName(column.name)));
+            clauses.replace(ColumnClauses.defaultValue, defaultValue.replaceFirst("DEFAULT", "CONSTRAINT " + database.generateDefaultConstraintName(column.toReference())));
         }
 
         String remarks = column.remarks;
 
         if (remarks != null) {
-            String schemaName = action.table.name.container.name;
+            String schemaName = action.table.container.name;
             if (schemaName == null) {
                 schemaName = database.getDefaultSchemaName();
             }
-            additionalActions.add(new ExecuteSqlAction("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+remarks+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+action.table.getSimpleName()+", @level2type = N'Column', @level2name = "+column));
+            additionalActions.add(new ExecuteSqlAction("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+remarks+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+action.table.name+", @level2type = N'Column', @level2name = "+column));
         }
 
         return clauses;

@@ -1,12 +1,10 @@
 package liquibase.snapshot;
 
 import liquibase.Scope;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.transformer.SnapshotTransformer;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.CollectionUtil;
-import liquibase.util.ObjectUtil;
 
 import java.util.*;
 
@@ -33,7 +31,7 @@ public class Snapshot {
         }
 
         if (object.getSnapshotId() == null) {
-            object.setSnapshotId(snapshotIdService.generateId());
+            object.set("napshotId", snapshotIdService.generateId());
         }
         typeObjects.add(object);
 
@@ -47,7 +45,7 @@ public class Snapshot {
         return this;
     }
 
-    public <T extends DatabaseObject> T get(Class<T> type, ObjectName name) {
+    public <T extends DatabaseObject> T get(Class<T> type, ObjectReference name) {
         Set<T> objects = get(type);
         for (T obj : objects) {
             if (obj.getName().equals(name)) {
@@ -61,13 +59,13 @@ public class Snapshot {
         return (Set<T>) Collections.unmodifiableSet(CollectionUtil.createIfNull(objects.get(type)));
     }
 
-    public <T extends DatabaseObject> Set<T> getAll(Class<T> type, final ObjectName objectName) {
+    public <T extends DatabaseObject> Set<T> getAll(Class<T> type, final ObjectReference objectReference) {
         return CollectionUtil.select(CollectionUtil.createIfNull(objects.get(type)),
                 new CollectionUtil.CollectionFilter() {
                     @Override
                     public boolean include(Object obj) {
-                        ObjectName name = ((DatabaseObject) obj).getName();
-                        return name.matches(objectName);
+                        ObjectReference name = ((DatabaseObject) obj).toReference();
+                        return name.matches(objectReference);
                     }
                 });
 

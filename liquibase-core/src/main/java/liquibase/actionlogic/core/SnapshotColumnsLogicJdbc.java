@@ -10,7 +10,7 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.*;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -42,26 +42,26 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 
     @Override
     /**
-     * Creates an ObjectName with null values for "unknown" portions and calls {@link #createColumnSnapshotAction(ObjectName)}.
+     * Creates an ObjectName with null values for "unknown" portions and calls {@link #createColumnSnapshotAction(ObjectReference)}.
      */
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
-        DatabaseObject relatedTo = action.relatedTo;
+        ObjectReference relatedTo = action.relatedTo;
 
-        ObjectName columnName;
+        ObjectReference columnName;
 
         Database database = scope.getDatabase();
 
-        if (relatedTo instanceof Catalog) {
+        if (relatedTo.instanceOf(Catalog.class)) {
             if (database.getMaxSnapshotContainerDepth() < 2) {
                 throw new ActionPerformException("Cannot snapshot catalogs on " + database.getShortName());
             }
-            columnName = new ObjectName(relatedTo.getSimpleName(), null, null, null);
-        } else if (relatedTo instanceof Schema) {
-            columnName = new ObjectName(relatedTo.getSimpleName(), null, null);
-        } else if (relatedTo instanceof Relation) {
-            columnName = new ObjectName(relatedTo.getName(), null);
-        } else if (relatedTo instanceof Column) {
-            columnName = relatedTo.getName();
+            columnName = new ObjectReference(relatedTo.name, null, null, null);
+        } else if (relatedTo.instanceOf(Schema.class)) {
+            columnName = new ObjectReference(relatedTo.name, null, null);
+        } else if (relatedTo.instanceOf(Relation.class)) {
+            columnName = new ObjectReference(relatedTo.name, null);
+        } else if (relatedTo.instanceOf(Column.class)) {
+            columnName = new ObjectReference(relatedTo.name);
         } else {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }
@@ -69,7 +69,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
         return createColumnSnapshotAction(columnName, scope);
     }
 
-    protected Action createColumnSnapshotAction(ObjectName columnName, Scope scope) {
+    protected Action createColumnSnapshotAction(ObjectReference columnName, Scope scope) {
         List<String> nameParts = columnName.asList(4);
 
         if (nameParts.get(0) != null || scope.getDatabase().getMaxSnapshotContainerDepth() > 1) {
@@ -96,9 +96,11 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 
         Column column = new Column();
         if (rawSchemaName == null) {
-            column.setName(new ObjectName(rawCatalogName, rawTableName, rawColumnName));
+            column.container = new ObjectReference(rawCatalogName, rawTableName);
+            column.name = rawColumnName;
         } else {
-            column.setName(new ObjectName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName));
+            column.container = new ObjectReference(rawCatalogName, rawSchemaName, rawTableName);
+            column.name = rawColumnName;
 
         }
 

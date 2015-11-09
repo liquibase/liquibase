@@ -33,7 +33,7 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        if (snapshot.getDatabase().isSystemObject(example)) {
+        if (snapshot.getDatabase().isSystemObject(example.toReference())) {
             return null;
         }
 
@@ -49,7 +49,7 @@ public class SnapshotGeneratorChain {
 
         T obj = next.snapshot(example, snapshot, this);
         if (obj != null && obj.getSnapshotId() == null) {
-            obj.setSnapshotId(snapshotIdService.generateId());
+            obj.set("snapshotId", snapshotIdService.generateId());
         }
         return obj;
     }

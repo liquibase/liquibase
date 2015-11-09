@@ -5,8 +5,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.ObjectName;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -82,7 +80,7 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
-            Schema schema = new Schema(getCatalogName(), getSchemaName());
+//            Schema schema = new Schema(getCatalogName(), getSchemaName());
             Index example = new Index();
             String tableName = StringUtils.trimToNull(getTableName());
 //            if (tableName != null) {

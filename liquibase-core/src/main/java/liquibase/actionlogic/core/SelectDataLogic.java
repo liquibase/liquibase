@@ -9,11 +9,10 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
 
@@ -47,8 +46,8 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
                         .append(StringUtils.join(CollectionUtil.createIfNull(action.selectColumns), ", ", new StringUtils.StringUtilsFormatter<Column>() {
                     @Override
                     public String toString(Column column) {
-                        String columnName = column.getSimpleName();
-                        if (column.name.virtual) {
+                        String columnName = column.getName();
+                        if (column.virtual) {
                             return columnName;
                         } else {
                             return database.escapeObjectName(columnName, Column.class);
@@ -56,7 +55,7 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
                     }
                 }))
                    .append("FROM")
-                        .append(database.escapeObjectName(new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
+                        .append(database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
 
         StringClauses whereClause = action.where;
         if (whereClause != null) {

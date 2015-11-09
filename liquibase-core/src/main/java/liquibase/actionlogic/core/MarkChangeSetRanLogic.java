@@ -19,7 +19,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.DatabaseFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -61,7 +61,7 @@ public class MarkChangeSetRanLogic extends AbstractActionLogic<MarkChangeSetRanA
                 }
             }
 
-            ObjectName tableName = new ObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+            ObjectReference tableName = new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 
             if (execType.ranBefore) {
                 runAction = new UpdateDataAction(tableName)

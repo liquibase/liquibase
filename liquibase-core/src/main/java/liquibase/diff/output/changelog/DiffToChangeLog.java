@@ -143,7 +143,7 @@ public class DiffToChangeLog {
                 if (object == null) {
                     continue;
                 }
-                if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
+                if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object.toReference()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object.toReference())) {
                     Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy, created);
                 }
@@ -154,7 +154,7 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type, comparator)) {
-                if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
+                if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object.toReference()) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object.toReference())) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy, created);
                 }
@@ -165,7 +165,7 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
-                if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
+                if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey().toReference()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey().toReference())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy, created);
                 }

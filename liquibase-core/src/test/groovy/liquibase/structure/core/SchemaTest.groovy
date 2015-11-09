@@ -28,7 +28,7 @@ class SchemaTest extends Specification {
         schema.toCatalogAndSchema().toString() == expected
 
         where:
-        schema                                                                      | expected
+        getContainer                                                                      | expected
         new Schema()                                                                | "DEFAULT.DEFAULT"
         new Schema("cat", "schem")                                                  | "cat.schem"
         new Schema(new Catalog("cat"), "myschem")                                   | "cat.myschem"

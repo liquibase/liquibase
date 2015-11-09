@@ -47,14 +47,14 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
 //        }
 
         DropColumnChange change = new DropColumnChange();
-        change.setTableName(column.name.container.name);
-        if (control.getIncludeCatalog()) {
-            change.setCatalogName(column.name.container.container.container.name);
-        }
-        if (control.getIncludeSchema()) {
-            change.setSchemaName(column.name.container.container.name);
-        }
-        change.setColumnName(column.getSimpleName());
+//        change.setTableName(column.name.container.name);
+//        if (control.getIncludeCatalog()) {
+//            change.setCatalogName(column.name.container.container.container.name);
+//        }
+//        if (control.getIncludeSchema()) {
+//            change.setSchemaName(column.name.container.container.name);
+//        }
+//        change.setColumnName(column.getSimpleName());
 
         return new Change[] { change };
 

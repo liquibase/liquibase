@@ -1,29 +1,19 @@
 package liquibase.actionlogic.core;
 
 import liquibase.Scope;
-import liquibase.action.AbstractAction;
 import liquibase.action.Action;
-import liquibase.action.ExecuteSqlAction;
 import liquibase.action.UpdateSqlAction;
 import liquibase.action.core.*;
 import liquibase.actionlogic.AbstractActionLogic;
 import liquibase.actionlogic.ActionResult;
 import liquibase.actionlogic.DelegateResult;
-import liquibase.change.AddColumnConfig;
-import liquibase.change.ColumnConfig;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.DropColumnChange;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,14 +29,14 @@ public class MergeColumnsLogic extends AbstractActionLogic<MergeColumnsAction> {
         Database database = scope.getDatabase();
         List<Action> actions = new ArrayList<>();
 
-        ObjectName tableName = action.tableName;
+        ObjectReference tableName = action.tableName;
         String finalColumnName = action.finalColumnName;
         String finalColumnType = action.finalColumnType;
         String column1Name = action.column1Name;
         String column2Name = action.column2Name;
 
         AddColumnsAction addColumnsAction = new AddColumnsAction();
-        addColumnsAction.columns = Collections.singletonList(new Column(new ObjectName(action.tableName, finalColumnName), finalColumnType));
+        addColumnsAction.columns = Collections.singletonList(new Column(new ObjectReference(action.tableName, finalColumnName), finalColumnType));
         actions.add(addColumnsAction);
 
         actions.add(new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName, Table.class) +

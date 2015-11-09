@@ -17,7 +17,7 @@ public class TestCatalogSupplier extends DefaultTestStructureSupplier {
     List<? extends DatabaseObject> getTestObjects(Class type, Snapshot snapshot, Scope scope) {
         def returnList = []
         def seenNames = [] as Set
-        for (ObjectName schemaName : scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()) {
+        for (ObjectReference schemaName : scope.get(JUnitScope.Attr.connectionSupplier, ConnectionSupplier).getAllContainers()) {
             if (schemaName.container != null && !seenNames.contains(schemaName.container.name)) {
                 returnList.add(new Catalog(schemaName.container.name))
             }

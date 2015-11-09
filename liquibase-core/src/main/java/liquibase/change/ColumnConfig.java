@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -16,12 +15,8 @@ import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -65,8 +60,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * It will attempt to set as much as possible based on the information in the snapshot.
      */
     public ColumnConfig(Column columnSnapshot) {
-        setName(columnSnapshot.getSimpleName());
-        setComputed(columnSnapshot.name.virtual);
+        setName(columnSnapshot.getName());
+        setComputed(columnSnapshot.virtual);
 //        setDescending(columnSnapshot.descending != null && columnSnapshot.descending ? Boolean.TRUE : null);
         if (columnSnapshot.type != null) {
             setType(columnSnapshot.type.toString());
@@ -912,7 +907,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
         String valueSequenceNextString = parsedNode.getChildValue(null, "valueSequenceNext", String.class);
         if (valueSequenceNextString != null) {
-            valueSequenceNext = new SequenceNextValueFunction(new ObjectName(valueSequenceNextString));
+            valueSequenceNext = new SequenceNextValueFunction(new ObjectReference(valueSequenceNextString));
         }
         String valueSequenceCurrentString = parsedNode.getChildValue(null, "valueSequenceCurrent", String.class);
         if (valueSequenceCurrentString != null) {
@@ -936,7 +931,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         }
         String defaultValueSequenceNextString = parsedNode.getChildValue(null, "defaultValueSequenceNext", String.class);
         if (defaultValueSequenceNextString != null) {
-            defaultValueSequenceNext = new SequenceNextValueFunction(new ObjectName(defaultValueSequenceNextString));
+            defaultValueSequenceNext = new SequenceNextValueFunction(new ObjectReference(defaultValueSequenceNextString));
         }
 
         loadConstraints(parsedNode.getChild(null, "constraints"));

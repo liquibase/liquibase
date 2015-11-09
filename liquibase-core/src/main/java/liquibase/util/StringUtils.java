@@ -4,7 +4,7 @@ import liquibase.ExtensibleObject;
 import liquibase.database.Database;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.ObjectName;
+import liquibase.structure.ObjectReference;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -350,7 +350,7 @@ public class StringUtils {
         }
     }
 
-    public static class ObjectNameFormatter implements StringUtilsFormatter<ObjectName> {
+    public static class ObjectNameFormatter implements StringUtilsFormatter<ObjectReference> {
 
         private Database database;
         private Class<? extends DatabaseObject> objectType;
@@ -365,12 +365,12 @@ public class StringUtils {
         }
 
         @Override
-        public String toString(ObjectName obj) {
+        public String toString(ObjectReference obj) {
             return database.escapeObjectName(obj, objectType);
         }
     }
 
-    public static class ObjectSimpleNameFormatter implements StringUtilsFormatter<ObjectName> {
+    public static class ObjectSimpleNameFormatter implements StringUtilsFormatter<ObjectReference> {
 
         private Database database;
         private Class<? extends DatabaseObject> objectType;
@@ -385,7 +385,7 @@ public class StringUtils {
         }
 
         @Override
-        public String toString(ObjectName obj) {
+        public String toString(ObjectReference obj) {
             return database.escapeObjectName(obj.name, objectType);
         }
     }

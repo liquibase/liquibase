@@ -38,7 +38,7 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
         ForeignKey fk = (ForeignKey) unexpectedObject;
 
         DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
-        change.setConstraintName(fk.getSimpleName());
+//        change.setConstraintName(fk.getSimpleName());
 //        change.setBaseTableName(fk.getForeignKeyTable().getSimpleName());
 //        if (control.getIncludeCatalog()) {
 //            change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
