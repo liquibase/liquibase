@@ -76,6 +76,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
 
         Document doc = documentBuilder.newDocument();
+        doc.setXmlVersion("1.1");
         Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, "databaseChangeLog");
 
         changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE);
