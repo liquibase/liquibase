@@ -162,7 +162,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void addChangeSet(ChangeSet changeSet) {
-        if (getChangeSets().contains(changeSet)) {
+        if (this.changeSets.contains(changeSet)) {
           return;
         }
 
