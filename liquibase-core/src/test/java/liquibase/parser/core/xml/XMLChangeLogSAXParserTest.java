@@ -14,7 +14,7 @@ import liquibase.test.JUnitResourceAccessor;
 public class XMLChangeLogSAXParserTest {
 
     @Test
-    public void ignoreDuplicateChangeSet() throws ChangeLogParseException, Exception {
+    public void testIgnoreDuplicateChangeSets() throws ChangeLogParseException, Exception {
         XMLChangeLogSAXParser xmlParser = new XMLChangeLogSAXParser();
         DatabaseChangeLog changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml", 
             new ChangeLogParameters(), new JUnitResourceAccessor());
