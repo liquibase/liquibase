@@ -18,6 +18,7 @@ import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
@@ -105,13 +106,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean liquibaseColumnNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
                 Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
+                liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!this.getDatabase().getConnection().getDatabaseProductName().equals("SQLite")) {
                 Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize != 35;
+                checksumNotRightSize = columnSize != null && columnSize < 35;
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
 
@@ -154,13 +155,26 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
 
-            if (!hasContexts) {
+            if (hasContexts) {
+                Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
+                if (columnSize != null && columnSize < Integer.valueOf(getContextsSize())) {
+                    executor.comment("Modifying size of databasechangelog.contexts column");
+                    statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", "VARCHAR("+getContextsSize()+")"));
+                }
+            } else {
                 executor.comment("Adding missing databasechangelog.contexts column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", "VARCHAR("+getContextsSize()+")", null));
             }
-            if (!hasLabels) {
+
+            if (hasLabels) {
+                Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
+                if (columnSize != null && columnSize < Integer.valueOf(getLabelsSize())) {
+                    executor.comment("Modifying size of databasechangelog.labels column");
+                    statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", "VARCHAR("+getContextsSize()+")"));
+                }
+            } else {
                 executor.comment("Adding missing databasechangelog.labels column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", "VARCHAR("+getLabelsSize()+")", null));
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
@@ -195,6 +209,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
         }
         serviceInitialized = true;
+    }
+
+    protected String getLabelsSize() {
+        return "255";
+    }
+
+    protected String getContextsSize() {
+        return "255";
     }
 
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
