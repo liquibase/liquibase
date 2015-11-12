@@ -264,13 +264,13 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     public List<ObjectReference> getAllContainers() {
         if (getDatabase().supports(Catalog.class)) {
-            return Arrays.asList(new ObjectReference(getPrimaryCatalog(), getPrimarySchema()),
-                    new ObjectReference(getPrimaryCatalog(), getAlternateSchema()),
-                    new ObjectReference(getAlternateCatalog(), getPrimarySchema()),
-                    new ObjectReference(getAlternateCatalog(), getAlternateSchema()));
+            return Arrays.asList(new ObjectReference(Schema.class, new ObjectReference(Catalog.class, getPrimaryCatalog()), getPrimarySchema()),
+                    new ObjectReference(Schema.class, new ObjectReference(Catalog.class, getPrimaryCatalog()), getAlternateSchema()),
+                    new ObjectReference(Schema.class, new ObjectReference(Catalog.class, getAlternateCatalog()), getPrimarySchema()),
+                    new ObjectReference(Schema.class, new ObjectReference(Catalog.class, getAlternateCatalog()), getAlternateSchema()));
 
         } else if (getDatabase().supports(Schema.class)) {
-            return Arrays.asList(new ObjectReference(getPrimarySchema()), new ObjectReference(getAlternateSchema()));
+            return Arrays.asList(new ObjectReference(Schema.class, getPrimarySchema()), new ObjectReference(Schema.class, getAlternateSchema()));
         } else {
             return Arrays.asList();
         }

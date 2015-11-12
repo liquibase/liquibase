@@ -4,10 +4,19 @@
 
 - **connection:** mysql[config:caseInsensitive]
 
-| Permutation | Verified | schemaName | OPERATIONS
-| :---------- | :------- | :--------- | :------
-| 020de5      | true     | LBSCHEMA   | **plan**: getTables(LBSCHEMA, null, null, [TABLE])
-| 6d6ef2      | true     | LBSCHEMA2  | **plan**: getTables(LBSCHEMA2, null, null, [TABLE])
+| Permutation | Verified | schemaName      | OPERATIONS
+| :---------- | :------- | :-------------- | :------
+| 3cd221      | true     | lbcat (SCHEMA)  | **plan**: getTables(lbcat, null, null, [TABLE])
+| 3193e6      | true     | lbcat2 (SCHEMA) | **plan**: getTables(lbcat2, null, null, [TABLE])
+
+# Test: "can snapshot all tables in schema using a null table name reference" #
+
+- **connection:** mysql[config:caseInsensitive]
+
+| Permutation | Verified | schemaName      | OPERATIONS
+| :---------- | :------- | :-------------- | :------
+| 3cd221      | true     | lbcat (SCHEMA)  | **plan**: getTables(null, null, lbcat, [TABLE])
+| 3193e6      | true     | lbcat2 (SCHEMA) | **plan**: getTables(null, null, lbcat2, [TABLE])
 
 # Test: "can snapshot all tables in schema with a null table name" #
 

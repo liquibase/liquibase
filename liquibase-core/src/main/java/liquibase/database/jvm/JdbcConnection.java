@@ -426,13 +426,18 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     @Override
+    public String toString() {
+        return getConnectionUserName()+"@"+getURL();
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        return obj instanceof JdbcConnection && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
+        return obj != null  && obj instanceof JdbcConnection && this.toString().equals(obj.toString());
 
     }
 
     @Override
     public int hashCode() {
-        return this.getUnderlyingConnection().hashCode();
+        return toString().hashCode();
     }
 }

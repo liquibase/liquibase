@@ -80,12 +80,12 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
             container = null;
         } else if (!scope.getDatabase().supports(Catalog.class)) {
             if (rawCatalogName != null && rawSchemaName == null) {
-                container = new ObjectReference(rawCatalogName);
+                container = new ObjectReference(Schema.class, rawCatalogName);
             } else {
-                container = new ObjectReference(rawSchemaName);
+                container = new ObjectReference(Schema.class, rawSchemaName);
             }
         } else {
-            container = new ObjectReference(rawCatalogName, rawSchemaName);
+            container = new ObjectReference(Schema.class, new ObjectReference(Catalog.class, rawCatalogName), rawSchemaName);
         }
 
         Table table = new Table(new ObjectReference(container, rawTableName));

@@ -140,7 +140,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
-        LoggerFactory.getLogger(getClass()).debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
+        if (this.connection != null && this.connection.equals(conn)) {
+            return;
+        }
+        LoggerFactory.getLogger(getClass()).debug("Connected to " + conn.toString());
         this.connection = conn;
         try {
             boolean autoCommit = conn.getAutoCommit();

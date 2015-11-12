@@ -48,174 +48,77 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         }
     }
 
-    @Unroll("#featureName: #schemaName on #conn")
+    @Unroll("#featureName: #schemaRef on #conn")
     def "can snapshot all tables in schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Schema, schemaName))
+        def action = new SnapshotDatabaseObjectsAction(Table, schemaRef)
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters(schemaName_asTable: schemaName)
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
-
-            def expected = snapshot.get(Table).grep({
-                it.name.container.toString() == schemaName.toString()
+        runStandardTest([schemaName_asTable: schemaRef], action, conn, scope, { plan, result ->
+            def expected = result.asList(Table).grep({
+                it.container == schemaRef
             })
             assertThat result.asList(Table), containsInAnyOrder(expected.toArray())
         })
 
         where:
-        [scope, conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [scope, conn, schemaRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [scope],
                     [it],
-                    [snapshot],
-                    snapshot.get(Schema)*.getName()
+                    it.allContainers
             ])
         }
     }
 
-    @Unroll("#featureName: #schemaName on #conn")
-    def "can snapshot all tables in schema with a null table name"() {
+    @Unroll("#featureName: #schemaRef on #conn")
+    def "can snapshot all tables in schema using a null table name reference"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Table, new ObjectReference(schemaName, null)))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Table, new ObjectReference(Table, schemaRef, null)))
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters(schemaName_asTable: schemaName)
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
-
-            def expected = snapshot.get(Table).grep({
-                it.getName().container.toString() == schemaName.toString()
-            }).toArray()
-            assertThat result.asList(Table), containsInAnyOrder(expected)
+        runStandardTest([schemaName_asTable: schemaRef], action, conn, scope, { plan, result ->
+            def expected = result.asList(Table).grep({
+                it.container == schemaRef
+            })
+            assertThat result.asList(Table), containsInAnyOrder(expected.toArray())
         })
 
         where:
-        [scope, conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
+        [scope, conn, schemaRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it)
+
             return CollectionUtil.permutations([
                     [scope],
                     [it],
-                    [snapshot],
-                    snapshot.get(Schema)*.name
+                    it.allContainers
             ])
         }
     }
 
-    @Unroll("#featureName: #catalogName on #conn")
+    @Unroll("#featureName: #catalogRef on #conn")
     def "can snapshot all tables in catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Table, new ObjectReference(new ObjectReference(catalogName, null), null)))
+        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Table, new ObjectReference(new ObjectReference(catalogRef, null), null)))
 
-        def plan = new ActionExecutor().createPlan(action, scope)
+        runStandardTest([catalogName_asTable: catalogRef], action, conn, scope, {
+            plan, result ->
+                def expected = result.asList(Table).grep({
+                    it.container.container == catalogRef
+                })
 
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters(catalogName_asTable: catalogName)
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
-                it.getName().asList()[2] == catalogName
-            }).toArray())
+                assertThat result.asList(Table), containsInAnyOrder(expected.toArray())
         })
 
         where:
-        [conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxReferenceContainerDepth() >= 2);
+        [conn, snapshot, catalogRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            Assume.assumeTrue("Database does not support catalogs", it.database.supports(Catalog))
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
-
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [scope],
                     [it],
-                    [snapshot],
-                    snapshot.get(Table)*.getName()*.container*.container*.getName().unique()
-            ])
-        }
-    }
-
-    @Unroll("#featureName: #schemaName on #conn")
-    def "can snapshot tables related to a schema"() {
-        expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Schema, schemaName))
-
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters(schemaName_asTable: schemaName)
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
-            def expected = snapshot.get(Table).grep({
-                it.getName().container.toString() == schemaName.toString()
-            }).toArray()
-            assertThat result.asList(Table), containsInAnyOrder(expected)
-        })
-
-        where:
-        [scope, conn, snapshot, schemaName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
-
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
-            return CollectionUtil.permutations([
-                    [scope],
-                    [it],
-                    [snapshot],
-                    snapshot.get(Schema)*.getName()
-            ])
-        }
-    }
-
-    @Unroll("#featureName: #catalogName on #conn")
-    def "can snapshot tables related to a catalog"() {
-        expect:
-        def action = new SnapshotDatabaseObjectsAction(Table, new ObjectReference(Catalog, catalogName))
-
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters(catalogName_asTable: catalogName)
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
-            assertThat result.asList(Table), containsInAnyOrder(snapshot.get(Table).grep({
-                it.getName().container.container == catalogName
-            }).toArray())
-        })
-
-        where:
-        [scope, conn, snapshot, catalogName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxSnapshotContainerDepth() > 1);
-
-            def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
-
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
-            return CollectionUtil.permutations([
-                    [scope],
-                    [it],
-                    [snapshot],
-                    snapshot.get(Table)*.getName()*.container*.container.unique()
+                    it.allContainers*.container.grep({ it != null }).unique()
             ])
         }
     }
