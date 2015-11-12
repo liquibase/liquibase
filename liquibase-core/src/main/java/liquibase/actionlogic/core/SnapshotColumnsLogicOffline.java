@@ -45,7 +45,7 @@ public class SnapshotColumnsLogicOffline extends AbstractSnapshotDatabaseObjects
                     return column.getName().equals(relatedTo.name);
                 } else if (relatedTo.instanceOf(Relation.class)) {
                     ObjectReference tableName = column.container;
-                    return tableName != null && tableName.equals((relatedTo).name);
+                    return tableName != null && tableName.equals(relatedTo);
                 } else if (relatedTo.instanceOf(Schema.class)) {
                     ObjectReference tableName = column.container;
                     return tableName != null && tableName.container != null && tableName.container.equals((relatedTo.name));

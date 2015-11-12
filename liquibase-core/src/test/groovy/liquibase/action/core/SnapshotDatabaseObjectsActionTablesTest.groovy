@@ -12,8 +12,9 @@ import liquibase.snapshot.TestSnapshotFactory
 import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectReference
-
+import liquibase.structure.TestTableSupplier
 import liquibase.structure.core.Catalog
+import liquibase.structure.core.Column
 import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
@@ -30,28 +31,19 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         expect:
         def action = new SnapshotDatabaseObjectsAction(Table, tableRef)
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope).addParameters([tableName_asTable: tableRef])
-                .addOperations(plan: plan)
-                .run({
-            def result = plan.execute(scope) as QueryResult
-
+        runStandardTest([tableName_asTable: tableRef], action, conn, scope, { plan, result ->
             assert result.asList(Table).size() == 1
             assert result.asObject(Object) instanceof Table
-            assert result.asObject(Table).getName() == tableRef.objectName
+            assert result.asObject(Table).getName() == tableRef.name
         })
 
         where:
-        [scope, conn, snapshot, tableRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
-
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
+        [scope, conn, tableRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it)
             return CollectionUtil.permutations([
                     [scope],
                     [it],
-                    [snapshot],
-                    snapshot.get(Table)
+                    getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope)
             ])
         }
     }
@@ -230,6 +222,11 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
     @Override
     protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
-        return null
+        Snapshot snapshot = new Snapshot(scope)
+        for (ObjectReference tableName : getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope)) {
+            snapshot.add(new Table(tableName))
+            snapshot.add(new Column(tableName, correctObjectName("id", Column, scope.getDatabase()), "int"))
+        }
+        return snapshot
     }
 }

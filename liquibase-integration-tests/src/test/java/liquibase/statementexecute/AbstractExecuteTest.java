@@ -202,13 +202,13 @@ public abstract class AbstractExecuteTest {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
+                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
+                connectionStatement.executeUpdate("drop table " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
             } catch (SQLException e) {
                 ;
             }

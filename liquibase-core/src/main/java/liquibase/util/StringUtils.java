@@ -366,7 +366,7 @@ public class StringUtils {
 
         @Override
         public String toString(ObjectReference obj) {
-            return database.escapeObjectName(obj, objectType);
+            return database.escapeObjectName(obj);
         }
     }
 

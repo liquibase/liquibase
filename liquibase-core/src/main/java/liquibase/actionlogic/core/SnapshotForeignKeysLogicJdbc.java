@@ -40,12 +40,9 @@ public class SnapshotForeignKeysLogicJdbc extends AbstractSnapshotDatabaseObject
         ObjectReference fkName = null;
         ObjectReference tableName = null;
         if (relatedTo.instanceOf(Catalog.class)) {
-            if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
-                throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
-            }
             fkName = new ObjectReference(relatedTo.name, null, null, null);
         } else if (relatedTo.instanceOf(Schema.class)) {
-            fkName = new ObjectReference(new ObjectReference(new ObjectReference(relatedTo.container, relatedTo.name), null), null);
+            fkName = new ObjectReference(relatedTo.container, relatedTo.name, null, null);
         } else if (relatedTo.instanceOf(Table.class)) {
             tableName = relatedTo;
         } else if (relatedTo.instanceOf(ForeignKey.class)) {
@@ -58,10 +55,9 @@ public class SnapshotForeignKeysLogicJdbc extends AbstractSnapshotDatabaseObject
             tableName = new ObjectReference(fkName.container, null);
         }
 
-        tableName = tableName.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 2);
-        List<String> nameParts = tableName.asList(3);
+        List<String> nameParts = fkName.truncate(3).asList(3);
 
-        if (scope.getDatabase().getMaxSnapshotContainerDepth() >= 2) {
+        if (scope.getDatabase().supports(Catalog.class)) {
             return new QueryJdbcMetaDataAction("getImportedKeys", nameParts.get(0), nameParts.get(1), nameParts.get(2));
         } else { //usually calls the top level "catalogs"
             return new QueryJdbcMetaDataAction("getImportedKeys", nameParts.get(1), null, nameParts.get(2));

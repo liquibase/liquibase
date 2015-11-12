@@ -8,8 +8,6 @@ import liquibase.action.core.AddLookupTableAction;
 import liquibase.actionlogic.core.AddLookupTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.db2.DB2Database;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class AddLookupTableLogicDB2 extends AddLookupTableLogic {
     @Override
@@ -22,22 +20,22 @@ public class AddLookupTableLogicDB2 extends AddLookupTableLogic {
         Database database = scope.getDatabase();
         return new Action[]{
                 new ExecuteSqlAction("CREATE TABLE "
-                        + database.escapeObjectName(action.newColumnName.container, Table.class)
+                        + database.escapeObjectName(action.newColumnName.container)
                         + " AS (SELECT "
-                        + database.escapeObjectName(action.existingColumnName, Column.class)
+                        + database.escapeObjectName(action.existingColumnName)
                         + " AS "
-                        + database.escapeObjectName(action.newColumnName, Column.class)
+                        + database.escapeObjectName(action.newColumnName)
                         + " FROM "
-                        + database.escapeObjectName(action.existingColumnName.container, Table.class)
+                        + database.escapeObjectName(action.existingColumnName.container)
                         + ") WITH NO DATA"),
                 new UpdateSqlAction("INSERT INTO "
-                        + database.escapeObjectName(action.newColumnName.container, Table.class)
+                        + database.escapeObjectName(action.newColumnName.container)
                         + " SELECT DISTINCT "
-                        + database.escapeObjectName(action.existingColumnName, Column.class)
+                        + database.escapeObjectName(action.existingColumnName)
                         + " FROM "
-                        + database.escapeObjectName(action.existingColumnName, Table.class)
+                        + database.escapeObjectName(action.existingColumnName)
                         + " WHERE "
-                        + database.escapeObjectName(action.existingColumnName, Column.class)
+                        + database.escapeObjectName(action.existingColumnName)
                         + " IS NOT NULL"),
         };
     }

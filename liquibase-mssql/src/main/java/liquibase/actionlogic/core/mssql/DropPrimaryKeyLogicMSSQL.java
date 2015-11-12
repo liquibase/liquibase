@@ -10,7 +10,6 @@ import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.actionlogic.core.DropPrimaryKeyLogic;
-import liquibase.structure.core.Table;
 
 public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
     @Override
@@ -44,7 +43,7 @@ public class DropPrimaryKeyLogicMSSQL extends DropPrimaryKeyLogic {
                 " where o.name = '"+action.tableName.name+"'" +
                 " and s.name='"+action.tableName.container.name+"'" +
                 "\n" +
-                "set @sql='alter table "+database.escapeObjectName(action.tableName, Table.class)+" drop constraint ' + @pkname" +
+                "set @sql='alter table "+database.escapeObjectName(action.tableName)+" drop constraint ' + @pkname" +
                 "\n" +
                 "exec(@sql)" +
                 "\n"));

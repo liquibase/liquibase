@@ -12,7 +12,6 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 
@@ -58,7 +57,7 @@ public class UpdateDataLogic extends AbstractSqlBuilderLogic<UpdateDataAction> {
 
         StringClauses clauses = new StringClauses()
                 .append("UPDATE")
-                .append(database.escapeObjectName(action.tableName, Table.class))
+                .append(database.escapeObjectName(action.tableName))
                 .append("SET");
         for (int i = 0; i < columnNames.size(); i++) {
             clauses.append(

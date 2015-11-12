@@ -52,8 +52,7 @@ public class MissingTableActionGenerator implements MissingObjectActionGenerator
 //        }
 
             CreateTableAction action = createCreateTableChange();
-            action.table = new Table(missingTable.getName());
-            action.table.remarks = missingTable.remarks;
+            action.table = (Table) missingTable.clone();
             action.primaryKey = primaryKey;
 
             for (Column column : LiquibaseUtil.snapshotAll(Column.class, missingTable.toReference(), referenceOfflineDatabaseScope)) {

@@ -52,9 +52,6 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
         Database database = scope.getDatabase();
 
         if (relatedTo.instanceOf(Catalog.class)) {
-            if (database.getMaxSnapshotContainerDepth() < 2) {
-                throw new ActionPerformException("Cannot snapshot catalogs on " + database.getShortName());
-            }
             columnName = new ObjectReference(relatedTo.name, null, null, null);
         } else if (relatedTo.instanceOf(Schema.class)) {
             columnName = new ObjectReference(relatedTo.name, null, null);
@@ -72,7 +69,7 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
     protected Action createColumnSnapshotAction(ObjectReference columnName, Scope scope) {
         List<String> nameParts = columnName.asList(4);
 
-        if (nameParts.get(0) != null || scope.getDatabase().getMaxSnapshotContainerDepth() > 1) {
+        if (nameParts.get(0) != null || scope.getDatabase().supports(Catalog.class)) {
             return new QueryJdbcMetaDataAction("getColumns", nameParts.get(0), nameParts.get(1), nameParts.get(2), nameParts.get(3));
         } else {
             return new QueryJdbcMetaDataAction("getColumns", nameParts.get(1), null, nameParts.get(2), nameParts.get(3));

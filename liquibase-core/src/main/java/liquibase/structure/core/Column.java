@@ -43,7 +43,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Column(ObjectReference table, String columnName, DataType type, Boolean nullable) {
-        this(columnName);
+        this(table, columnName);
         this.type = type;
         this.nullable = nullable;
     }
@@ -94,15 +94,6 @@ public class Column extends AbstractDatabaseObject {
             return name;
         }
     }
-
-    @Override
-    public String toString() {
-        if (name == null) {
-            return "Unnamed Column";
-        }
-        return getName();
-    }
-
 
     @Override
     public int compareTo(Object other) {

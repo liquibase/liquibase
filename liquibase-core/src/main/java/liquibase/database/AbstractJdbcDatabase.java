@@ -339,7 +339,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
         defaultSchemaSet = schemaName != null;
-        if (getMaxReferenceContainerDepth() == 0) {
+        if (!supports(Schema.class)) {
             defaultCatalogSet = schemaName != null;
         }
     }
@@ -371,6 +371,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean supportsAutoIncrement() {
+        return true;
+    }
+
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> type) {
         return true;
     }
 
@@ -1011,11 +1016,24 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference) {
+        Class<? extends DatabaseObject> objectType = objectReference.type;
+        if (objectType == null) {
+            objectType = DatabaseObject.class;
+        }
+
         if (objectType.isAssignableFrom(Column.class) || objectType.isAssignableFrom(PrimaryKey.class)  || objectType.isAssignableFrom(UniqueConstraint.class)) {
             return escapeObjectName(objectReference.name, objectType);
         }
-        return StringUtils.join(objectReference.truncate(getMaxReferenceContainerDepth() + 1).asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
+
+        int length = 1;
+        if (supports(Schema.class)) {
+            length++;
+        }
+        if (supports(Catalog.class)) {
+            length++;
+        }
+        return StringUtils.join(objectReference.truncate(length).asList(), ".", new StringUtils.ObjectStringNameFormatter(objectType, this));
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
@@ -1413,7 +1431,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isDefaultSchema(final String catalog, final String schema) {
-        if (getMaxReferenceContainerDepth() == 0) {
+        if (!supports(Schema.class)) {
             return true;
         }
 
@@ -1425,7 +1443,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isDefaultCatalog(final String catalog) {
-        if (getMaxReferenceContainerDepth() < 2) {
+        if (!supports(Catalog.class)) {
             return true;
         }
 
@@ -1482,13 +1500,4 @@ public abstract class AbstractJdbcDatabase implements Database {
         return value.startsWith("\"SYSIBM\"") || value.startsWith("to_date(") || value.equalsIgnoreCase(getCurrentDateTimeFunction());
     }
 
-    @Override
-    public int getMaxReferenceContainerDepth() {
-        return 1;
-    }
-
-    @Override
-    public int getMaxSnapshotContainerDepth() {
-        return 2;
-    }
 }

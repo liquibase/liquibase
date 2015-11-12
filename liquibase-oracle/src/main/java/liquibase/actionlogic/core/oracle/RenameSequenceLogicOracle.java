@@ -5,7 +5,6 @@ import liquibase.action.core.RenameSequenceAction;
 import liquibase.actionlogic.core.RenameSequenceLogic;
 import liquibase.database.Database;
 import liquibase.database.core.oracle.OracleDatabase;
-import liquibase.structure.core.Sequence;
 import liquibase.util.StringClauses;
 
 public class RenameSequenceLogicOracle extends RenameSequenceLogic {
@@ -20,8 +19,8 @@ public class RenameSequenceLogicOracle extends RenameSequenceLogic {
 
         return new StringClauses()
                 .append("RENAME")
-                .append(database.escapeObjectName(action.oldSequenceName, Sequence.class))
+                .append(database.escapeObjectName(action.oldSequenceName))
                 .append("TO")
-                .append(database.escapeObjectName(action.newSequenceName, Sequence.class));
+                .append(database.escapeObjectName(action.newSequenceName));
     }
 }

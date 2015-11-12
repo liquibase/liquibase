@@ -52,6 +52,6 @@ public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("schemaName.tableName", database.escapeObjectName(new ObjectReference("catalogName", "schemaName", "tableName"), Table.class));
+        assertEquals("schemaName.tableName", database.escapeObjectName(new ObjectReference("catalogName", "schemaName", "tableName")));
     }    
 }

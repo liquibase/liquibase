@@ -1,6 +1,5 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -183,7 +182,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
                 } else {
-                    selectStatement = "select " + database.escapeObjectName(rawColumnName, Column.class) + " from " + database.escapeObjectName(new ObjectReference(rawCatalogName, rawSchemaName, rawTableName), Table.class) + " where 0=1";
+                    selectStatement = "select " + database.escapeObjectName(rawColumnName, Column.class) + " from " + database.escapeObjectName(new ObjectReference(rawCatalogName, rawSchemaName, rawTableName)) + " where 0=1";
                 }
                 LoggerFactory.getLogger(getClass()).debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                 Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();

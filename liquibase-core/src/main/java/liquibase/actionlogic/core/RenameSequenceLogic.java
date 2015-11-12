@@ -5,7 +5,6 @@ import liquibase.action.core.RenameSequenceAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Sequence;
 import liquibase.util.StringClauses;
 
 public class RenameSequenceLogic extends AbstractSqlBuilderLogic<RenameSequenceAction> {
@@ -32,8 +31,8 @@ public class RenameSequenceLogic extends AbstractSqlBuilderLogic<RenameSequenceA
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("ALTER SEQUENCE")
-                .append(database.escapeObjectName(action.oldSequenceName, Sequence.class))
+                .append(database.escapeObjectName(action.oldSequenceName))
                 .append("RENAME TO")
-                .append(database.escapeObjectName(action.newSequenceName, Sequence.class));
+                .append(database.escapeObjectName(action.newSequenceName));
     }
 }

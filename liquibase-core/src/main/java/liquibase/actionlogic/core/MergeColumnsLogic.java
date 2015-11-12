@@ -11,7 +11,6 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +38,7 @@ public class MergeColumnsLogic extends AbstractActionLogic<MergeColumnsAction> {
         addColumnsAction.columns = Collections.singletonList(new Column(new ObjectReference(action.tableName, finalColumnName), finalColumnType));
         actions.add(addColumnsAction);
 
-        actions.add(new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName, Table.class) +
+        actions.add(new UpdateSqlAction("UPDATE " + database.escapeObjectName(tableName) +
                 " SET " + database.escapeObjectName(finalColumnName, Column.class)
                 + " = " + database.getConcatSql(database.escapeObjectName(column1Name, Column.class)
                 , "'" + action.joinString + "'", database.escapeObjectName(column2Name, Column.class))));

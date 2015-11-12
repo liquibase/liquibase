@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.View;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 
@@ -55,7 +54,7 @@ public class CreateViewLogic extends AbstractSqlBuilderLogic<CreateViewAction> {
             clauses.append(Clauses.createStatement, "CREATE VIEW");
         }
 
-        clauses.append(database.escapeObjectName(action.viewName, View.class));
+        clauses.append(database.escapeObjectName(action.viewName));
         clauses.append("AS");
         clauses.append(Clauses.selectQuery, action.selectQuery);
 

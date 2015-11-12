@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 public class AlterColumnLogic extends AbstractActionLogic<AlterColumnAction> {
@@ -43,7 +42,7 @@ public class AlterColumnLogic extends AbstractActionLogic<AlterColumnAction> {
         Database database = scope.getDatabase();
         return new StringClauses(" ")
                 .append("ALTER TABLE")
-                .append(Clauses.tableName, database.escapeObjectName(action.columnName.container, Table.class))
+                .append(Clauses.tableName, database.escapeObjectName(action.columnName.container))
                 .append("ALTER COLUMN")
                 .append(Clauses.columnName, database.escapeObjectName(action.columnName.name, Column.class))
                 .append(Clauses.newDefinition, action.newDefinition.toString().trim());

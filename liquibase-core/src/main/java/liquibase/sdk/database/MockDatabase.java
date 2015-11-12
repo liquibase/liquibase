@@ -364,6 +364,11 @@ public class MockDatabase implements Database, InternalDatabase {
         return null;
     }
 
+    @Override
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        return true;
+    }
+
     public boolean supportsCatalogInObjectName() {
         return true;
     }
@@ -447,8 +452,8 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
-        return StringUtils.join(objectReference.asList(), ".", new StringUtils.ObjectNameFormatter(objectType, this));
+    public String escapeObjectName(ObjectReference objectReference) {
+        return StringUtils.join(objectReference.asList(), ".", new StringUtils.ObjectNameFormatter(objectReference.type, this));
     }
 
     @Override
@@ -697,21 +702,10 @@ public class MockDatabase implements Database, InternalDatabase {
         return false;
     }
 
-    @Override
-    public int getMaxReferenceContainerDepth() {
-        return maxReferenceContainerDepth;
-    }
-
     public MockDatabase setMaxReferenceContainerDepth(int maxReferenceContainerDepth) {
         this.maxReferenceContainerDepth = maxReferenceContainerDepth;
         return this;
     }
-
-    @Override
-    public int getMaxSnapshotContainerDepth() {
-        return maxSnapshotContainerDepth;
-    }
-
     public MockDatabase setMaxSnapshotContainerDepth(int maxContainerDepth) {
         this.maxSnapshotContainerDepth = maxContainerDepth;
         return this;

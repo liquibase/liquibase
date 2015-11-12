@@ -39,27 +39,29 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
     protected Action createSnapshotAction(SnapshotDatabaseObjectsAction action, Scope scope) throws ActionPerformException {
 
         ObjectReference relatedTo = action.relatedTo;
-        ObjectReference objectReference;
+        String catalogName = null;
+        String schemaName = null;
+        String tableName = null;
+
         if (relatedTo.instanceOf(Catalog.class)) {
-            if (scope.getDatabase().getMaxSnapshotContainerDepth() < 2) {
-                throw new ActionPerformException("Cannot snapshot catalogs on " + scope.getDatabase().getShortName());
-            }
-            objectReference = new ObjectReference(relatedTo.name, null, null);
+            catalogName = relatedTo.name;
         } else if (relatedTo.instanceOf(Schema.class)) {
-            objectReference = new ObjectReference(new ObjectReference(relatedTo.container, relatedTo.name), null);
+            schemaName = relatedTo.name;
+            List<String> nameParts = relatedTo.asList(2);
+            catalogName = nameParts.get(0);
         } else if (relatedTo.instanceOf(Table.class)) {
-            objectReference = relatedTo;
+            List<String> names = relatedTo.asList(3);
+            catalogName = names.get(0);
+            schemaName = names.get(1);
+            tableName = names.get(2);
         } else {
             throw Validate.failure("Unexpected relatedTo type: " + relatedTo.getClass().getName());
         }
 
-        objectReference = objectReference.truncate(scope.getDatabase().getMaxSnapshotContainerDepth() + 1);
-        List<String> nameParts = objectReference.asList(3);
-
-        if (scope.getDatabase().getMaxSnapshotContainerDepth() >= 2) {
-            return new QueryJdbcMetaDataAction("getTables", nameParts.get(0), nameParts.get(1), nameParts.get(2), new String[]{"TABLE"});
-        } else { //usually calls the top level "catalogs"
-            return new QueryJdbcMetaDataAction("getTables", nameParts.get(1), null, nameParts.get(2), new String[]{"TABLE"});
+        if (scope.getDatabase().supports(Catalog.class)) {
+            return new QueryJdbcMetaDataAction("getTables", catalogName, schemaName, tableName, new String[]{"TABLE"});
+        } else { //usually calls schemas "catalogs"
+            return new QueryJdbcMetaDataAction("getTables", schemaName, null, tableName, new String[]{"TABLE"});
         }
     }
 
@@ -74,10 +76,9 @@ public class SnapshotTablesLogicJdbc extends AbstractSnapshotDatabaseObjectsLogi
         }
 
         ObjectReference container;
-        int maxContainerDepth = scope.getDatabase().getMaxReferenceContainerDepth();
-        if (maxContainerDepth == 0) {
+        if (!scope.getDatabase().supports(Schema.class)) {
             container = null;
-        } else if (maxContainerDepth == 1) {
+        } else if (!scope.getDatabase().supports(Catalog.class)) {
             if (rawCatalogName != null && rawSchemaName == null) {
                 container = new ObjectReference(rawCatalogName);
             } else {

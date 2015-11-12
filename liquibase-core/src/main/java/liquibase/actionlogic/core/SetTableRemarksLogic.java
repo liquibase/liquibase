@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 public class SetTableRemarksLogic extends AbstractSqlBuilderLogic<SetTableRemarksAction> {
@@ -38,7 +37,7 @@ public class SetTableRemarksLogic extends AbstractSqlBuilderLogic<SetTableRemark
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("COMMENT ON TABLE")
-                .append(database.escapeObjectName(action.tableName, Table.class))
+                .append(database.escapeObjectName(action.tableName))
                 .append("IS")
                 .append(database.escapeStringForDatabase(action.remarks));
     }

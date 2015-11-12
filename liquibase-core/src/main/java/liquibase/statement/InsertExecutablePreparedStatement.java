@@ -9,7 +9,6 @@ import liquibase.database.Database;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 /**
  * Handles INSERT Execution
@@ -24,7 +23,7 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	protected String generateSql(List<ColumnConfig> cols) {
 		StringBuilder sql = new StringBuilder("INSERT INTO ");
 	    StringBuilder params = new StringBuilder("VALUES(");
-	    sql.append(database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getTableName()), Table.class));
+	    sql.append(database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getTableName())));
 	    sql.append("(");
 	    for(ColumnConfig column : getColumns()) {
 	        if(database.supportsAutoIncrement()

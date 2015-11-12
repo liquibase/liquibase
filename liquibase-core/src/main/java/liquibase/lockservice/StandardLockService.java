@@ -13,7 +13,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Table;
 import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
@@ -85,7 +84,7 @@ public class StandardLockService implements LockService {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             database.commit();
-            LoggerFactory.getLogger(getClass()).debug("Created database lock table with name: " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class));
+            LoggerFactory.getLogger(getClass()).debug("Created database lock table with name: " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
             hasDatabaseChangeLogLockTable = true;
@@ -115,7 +114,7 @@ public class StandardLockService implements LockService {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
 
             try {
-                isDatabaseChangeLogLockTableInitialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()), Table.class))) > 0;
+                isDatabaseChangeLogLockTableInitialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())))) > 0;
             } catch (LiquibaseException e) {
                 if (executor.updatesDatabase()) {
                     throw new UnexpectedLiquibaseException(e);

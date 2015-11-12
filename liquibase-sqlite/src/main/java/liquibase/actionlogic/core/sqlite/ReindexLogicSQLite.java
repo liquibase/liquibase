@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.core.sqlite.SQLiteDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Table;
 
 public class ReindexLogicSQLite extends AbstractActionLogic<ReindexAction> {
 
@@ -36,6 +35,6 @@ public class ReindexLogicSQLite extends AbstractActionLogic<ReindexAction> {
 
         return new DelegateResult(new ExecuteSqlAction(
                 "REINDEX "
-                        + database.escapeObjectName(action.tableName, Table.class)));
+                        + database.escapeObjectName(action.tableName)));
     }
 }

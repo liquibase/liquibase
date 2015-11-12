@@ -12,7 +12,6 @@ import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.StoredProcedure;
 import liquibase.util.ObjectUtil;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class CreateProcedureLogicMSSQL extends CreateProcedureLogic {
             actions.add(new ExecuteSqlAction("IF object_id('dbo."
                     +procedureName
                     +"', 'p') IS NULL EXEC ('CREATE PROCEDURE "
-                    +database.escapeObjectName(procedureName, StoredProcedure.class)
+                    +database.escapeObjectName(procedureName)
                     +" AS SELECT 1 A')"));
 
             procedureText = procedureText.replaceFirst("(?i)create\\s+procedure", "ALTER PROCEDURE");

@@ -12,6 +12,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.ObjectReference;
+import liquibase.structure.core.Catalog;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -157,7 +158,7 @@ public interface Database extends PrioritizedService {
 
     String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
 
-    String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType);
+    String escapeObjectName(ObjectReference objectReference);
 
     boolean supportsTablespaces();
 
@@ -311,8 +312,6 @@ public interface Database extends PrioritizedService {
 
     boolean looksLikeFunctionCall(String value);
 
-    int getMaxReferenceContainerDepth();
-
-    int getMaxSnapshotContainerDepth();
+    boolean supports(Class<? extends DatabaseObject> type);
 }
 

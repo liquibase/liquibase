@@ -53,13 +53,8 @@ public class DB2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public int getMaxReferenceContainerDepth() {
-        return 1;
-    }
-
-    @Override
-    public int getMaxSnapshotContainerDepth() {
-        return 1;
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        return !type.isAssignableFrom(Catalog.class) && super.supports(type);
     }
 
     @Override
@@ -214,11 +209,16 @@ public class DB2Database extends AbstractJdbcDatabase {
 
 
     @Override
-    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference) {
+        Class<? extends DatabaseObject> objectType = objectReference.type;
+        if (objectType == null) {
+            objectType = DatabaseObject.class;
+        }
+
         if (objectType.isAssignableFrom(Index.class)) {
             return super.escapeObjectName(objectReference.name, objectType);
         } else {
-            return super.escapeObjectName(objectReference, objectType);
+            return super.escapeObjectName(objectReference);
         }
     }
 

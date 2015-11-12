@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.core.sybase.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.core.Column;
 import liquibase.util.StringClauses;
 
 public class AddDefaultValueLogicSybase extends AddDefaultValueLogic {
@@ -29,7 +28,7 @@ public class AddDefaultValueLogicSybase extends AddDefaultValueLogic {
                 action.columnName.container,
                 new StringClauses()
                         .append("REPLACE")
-                        .append(database.escapeObjectName(action.columnName, Column.class))
+                        .append(database.escapeObjectName(action.columnName))
                         .append("DEFAULT")
                         .append(DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
         ));

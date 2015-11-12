@@ -12,6 +12,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
+import java.io.DataOutput;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
     }
 
     public AbstractDatabaseObject(ObjectReference container, String name) {
+        this.container = container;
         this.name = name;
     }
 
@@ -75,7 +77,10 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     @Override
     public int compareTo(Object o) {
-        return this.getName().compareTo(((AbstractDatabaseObject) o).getName());
+        if (o == null || !(o instanceof DatabaseObject)) {
+            return 1;
+        }
+        return this.toReference().compareTo(((DatabaseObject) o).toReference());
     }
 
     @Override
@@ -196,22 +201,18 @@ public abstract class AbstractDatabaseObject  extends AbstractExtensibleObject i
 
     @Override
     public String toString() {
-        String name = getName();
-        if (name == null) {
-            return "unnamed";
-        }
-        return name;
+        return toReference().toString();
     }
 
     @Override
     public int hashCode() {
-        return StringUtils.trimToEmpty(getName().toString()).hashCode();
+        return toReference().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         return obj instanceof DatabaseObject
-                && StringUtils.trimToEmpty(getName().toString()).equals(((DatabaseObject) obj).getName().toString());
+                && this.toReference().equals(((DatabaseObject) obj).toReference());
     }
 
     @Override

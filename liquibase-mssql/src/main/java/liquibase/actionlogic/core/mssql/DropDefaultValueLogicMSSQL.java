@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
-import liquibase.structure.core.Table;
 
 public class DropDefaultValueLogicMSSQL extends DropDefaultValueLogic {
     @Override
@@ -21,7 +20,7 @@ public class DropDefaultValueLogicMSSQL extends DropDefaultValueLogic {
     @Override
     public ActionResult execute(DropDefaultValueAction action, Scope scope) throws ActionPerformException {
         Database database = scope.getDatabase();
-        String escapedTableName = database.escapeObjectName(action.columnName.container, Table.class);
+        String escapedTableName = database.escapeObjectName(action.columnName.container);
 
         boolean sql2005OrLater = true;
         try {

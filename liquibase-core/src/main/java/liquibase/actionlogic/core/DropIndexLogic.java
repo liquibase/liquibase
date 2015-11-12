@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Index;
 
 public class DropIndexLogic extends AbstractActionLogic<DropIndexAction> {
 
@@ -28,7 +27,7 @@ public class DropIndexLogic extends AbstractActionLogic<DropIndexAction> {
     @Override
     public ActionResult execute(DropIndexAction action, Scope scope) throws ActionPerformException {
         Database database = scope.getDatabase();
-        return new DelegateResult(new ExecuteSqlAction("DROP INDEX " + database.escapeObjectName(action.indexName, Index.class)));
+        return new DelegateResult(new ExecuteSqlAction("DROP INDEX " + database.escapeObjectName(action.indexName)));
     }
 
 }

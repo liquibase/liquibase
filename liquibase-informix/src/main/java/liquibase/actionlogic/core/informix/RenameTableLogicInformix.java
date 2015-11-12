@@ -23,7 +23,7 @@ public class RenameTableLogicInformix extends RenameTableLogic {
         Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "RENAME TABLE "
-                        + database.escapeObjectName(action.oldTableName, Table.class)
+                        + database.escapeObjectName(action.oldTableName)
                         + " TO "
                         + database.escapeObjectName(action.newTableName.name, Table.class)
         ));

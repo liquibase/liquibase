@@ -14,7 +14,6 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 
@@ -46,7 +45,7 @@ public class DropColumnsLogic extends AbstractActionLogic<DropColumnsAction> {
         Database database = scope.getDatabase();
 
         return new StringClauses()
-                .append("ALTER TABLE " + database.escapeObjectName(action.tableName, Table.class))
+                .append("ALTER TABLE " + database.escapeObjectName(action.tableName))
                         .append("DROP COLUMN")
                         .append(database.escapeObjectName(column, Column.class));
     }

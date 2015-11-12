@@ -64,7 +64,7 @@ public class CreateTableLogic extends AbstractSqlBuilderLogic<CreateTableAction>
 
         StringClauses createTable = new StringClauses(" ");
         createTable.append("CREATE TABLE");
-        createTable.append(Clauses.tableName, database.escapeObjectName(action.table.name, Table.class));
+        createTable.append(Clauses.tableName, database.escapeObjectName(action.table.toReference()));
 
         List<Column> columns = CollectionUtil.createIfNull(action.columns);
 //        for (Column column : columns) {

@@ -161,11 +161,16 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference) {
+        Class<? extends DatabaseObject> objectType = objectReference.type;
+        if (objectType == null) {
+            objectType = DatabaseObject.class;
+        }
+
         if (Index.class.isAssignableFrom(objectType)) {
             return this.escapeObjectName(objectReference.name, Index.class);
         } else {
-            return super.escapeObjectName(objectReference, objectType);
+            return super.escapeObjectName(objectReference);
         }
     }
 

@@ -310,7 +310,7 @@ public class TemplateActionLogic extends AbstractActionLogic {
         if (args.length == 2) {
             return database.escapeObjectName(args[0], objectType);
         } else {
-            return database.escapeObjectName(new ObjectReference(args[0], args[1], args[2]), objectType);
+            return database.escapeObjectName(new ObjectReference(args[0], args[1], args[2]));
         }
     }
 

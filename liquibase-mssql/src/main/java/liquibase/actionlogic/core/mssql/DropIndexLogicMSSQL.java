@@ -11,7 +11,6 @@ import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
 
 public class DropIndexLogicMSSQL extends DropIndexLogic {
 
@@ -32,7 +31,7 @@ public class DropIndexLogicMSSQL extends DropIndexLogic {
 
         return new DelegateResult(new ExecuteSqlAction(
                 "DROP INDEX "
-                        + database.escapeObjectName(action.tableName, Table.class)
+                        + database.escapeObjectName(action.tableName)
                         + "."
                         + database.escapeObjectName(action.indexName.name, Index.class)));
 

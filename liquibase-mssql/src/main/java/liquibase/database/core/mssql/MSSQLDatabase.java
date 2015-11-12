@@ -262,16 +262,21 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference) {
+        Class<? extends DatabaseObject> objectType = objectReference.type;
+        if (objectType == null) {
+            objectType = DatabaseObject.class;
+        }
+
         if (objectType.isAssignableFrom(Index.class)) {
             // MSSQL server does not support the schema name for the index -
             return super.escapeObjectName(objectReference.name, objectType);
         } else if (objectType.isAssignableFrom(View.class)) {
             // SQLServer does not support specifying the database name as a prefix to the object name
-            return super.escapeObjectName(objectReference.truncate(2), objectType);
+            return super.escapeObjectName(objectReference.truncate(2));
         }
 
-        return super.escapeObjectName(objectReference, objectType);
+        return super.escapeObjectName(objectReference);
     }
 
     @Override
@@ -503,8 +508,4 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return Index.class.isAssignableFrom(objectType);
     }
 
-    @Override
-    public int getMaxReferenceContainerDepth() {
-        return 2;
-    }
 }

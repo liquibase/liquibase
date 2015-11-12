@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Sequence;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 
@@ -58,7 +57,7 @@ public class CreateSequenceLogic extends AbstractSqlBuilderLogic<CreateSequenceA
         StringClauses clauses = new StringClauses();
 
         clauses.append("CREATE SEQUENCE");
-        clauses.append(database.escapeObjectName(action.sequenceName, Sequence.class));
+        clauses.append(database.escapeObjectName(action.sequenceName));
 
         clauses.append(Clauses.startWith, startValue == null?null:"START WITH " + startValue);
         clauses.append(Clauses.incrementBy, incrementBy == null?null:"INCREMENT BY " + incrementBy);

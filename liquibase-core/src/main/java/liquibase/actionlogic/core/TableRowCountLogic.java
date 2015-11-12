@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Table;
 
 public class TableRowCountLogic extends AbstractActionLogic<TableRowCountAction> {
 
@@ -28,6 +27,6 @@ public class TableRowCountLogic extends AbstractActionLogic<TableRowCountAction>
     public ActionResult execute(TableRowCountAction action, Scope scope) throws ActionPerformException {
         Database database = scope.getDatabase();
         return new DelegateResult(new QuerySqlAction("SELECT COUNT(*) FROM "
-                + database.escapeObjectName(action.tableName, Table.class)));
+                + database.escapeObjectName(action.tableName)));
     }
 }

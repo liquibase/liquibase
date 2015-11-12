@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.View;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 
@@ -29,7 +28,7 @@ public class CreateViewLogicInformix extends CreateViewLogic {
             ObjectReference viewName = action.viewName;
 
             return new DelegateResult(
-                    new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeObjectName(viewName, View.class)),
+                    new ExecuteSqlAction("DROP VIEW IF EXISTS "+database.escapeObjectName(viewName)),
                     ((DelegateResult) result).getActions().get(0));
         }
 

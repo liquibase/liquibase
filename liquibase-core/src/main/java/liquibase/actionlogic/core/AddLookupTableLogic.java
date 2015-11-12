@@ -12,9 +12,7 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,15 +57,15 @@ public class AddLookupTableLogic extends AbstractActionLogic<AddLookupTableActio
         return new Action[]{
                 new ExecuteSqlAction(
                         "CREATE TABLE "
-                                + database.escapeObjectName(action.newColumnName.container, Table.class)
+                                + database.escapeObjectName(action.newColumnName.container)
                                 + " AS SELECT DISTINCT "
-                                + database.escapeObjectName(action.existingColumnName, Column.class)
+                                + database.escapeObjectName(action.existingColumnName)
                                 + " AS "
-                                + database.escapeObjectName(action.newColumnName, Column.class)
+                                + database.escapeObjectName(action.newColumnName)
                                 + " FROM "
-                                + database.escapeObjectName(action.existingColumnName.container, Table.class)
+                                + database.escapeObjectName(action.existingColumnName.container)
                                 + " WHERE "
-                                + database.escapeObjectName(action.existingColumnName, Column.class)
+                                + database.escapeObjectName(action.existingColumnName)
                                 + " IS NOT NULL")
         };
     }

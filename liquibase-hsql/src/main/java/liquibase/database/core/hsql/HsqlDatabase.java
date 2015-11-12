@@ -6,6 +6,8 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -97,27 +99,25 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+
     @Override
-    public int getMaxSnapshotContainerDepth() {
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        boolean supportsCatalogs = false;
         try {
-            if (getDatabaseMajorVersion() < 2) {
-                return 1;
-            } else {
-                return 2;
-            }
+            supportsCatalogs = getDatabaseMajorVersion() > 1;
         } catch (DatabaseException e) {
-            return 2;
+            supportsCatalogs = true;
+        }
+        if (supportsCatalogs) {
+            return super.supports(type);
+        } else {
+            return !type.isAssignableFrom(Catalog.class) && super.supports(type);
         }
     }
 
     @Override
-    public int getMaxReferenceContainerDepth() {
-        return getMaxSnapshotContainerDepth();
-    }
-
-    @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (getMaxSnapshotContainerDepth() > 2) {
+        if (this.supports(Catalog.class)) {
             return "PUBLIC";
         } else {
             return null;

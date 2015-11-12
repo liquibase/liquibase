@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Table;
 
 public class ClearDatabaseChangeLogHistoryLogic extends AbstractActionLogic<ClearDatabaseChangeLogHistoryAction> {
 
@@ -27,6 +26,6 @@ public class ClearDatabaseChangeLogHistoryLogic extends AbstractActionLogic<Clea
             container = new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
         }
 
-        return new DelegateResult(new UpdateSqlAction("DELETE FROM " + database.escapeObjectName(new ObjectReference(container, database.getDatabaseChangeLogTableName()), Table.class)));
+        return new DelegateResult(new UpdateSqlAction("DELETE FROM " + database.escapeObjectName(new ObjectReference(container, database.getDatabaseChangeLogTableName()))));
     }
 }

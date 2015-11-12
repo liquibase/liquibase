@@ -24,13 +24,13 @@ public abstract class AbstractSnapshotDatabaseObjectsLogic<T extends SnapshotDat
             return priority;
         }
 
-        if (action.relatedTo == null || action.typeToSnapshot == null) {
+        if (action.relatedTo == null || action.relatedTo.type == null || action.typeToSnapshot == null ) {
             return PRIORITY_NOT_APPLICABLE;
         }
 
         if (action.typeToSnapshot.isAssignableFrom(getTypeToSnapshot())) {
             for (Class clazz : getSupportedRelatedTypes()) {
-                if (clazz.isAssignableFrom(action.relatedTo.getClass())) {
+                if (clazz.isAssignableFrom(action.relatedTo.type)) {
                     return priority;
                 }
             }

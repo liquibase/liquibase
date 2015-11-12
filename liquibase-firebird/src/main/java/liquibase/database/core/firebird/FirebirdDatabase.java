@@ -5,6 +5,8 @@ import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.ObjectReference;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 /**
@@ -85,16 +87,11 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    @Override
-    public int getMaxReferenceContainerDepth() {
-        return 0;
-    }
 
     @Override
-    public int getMaxSnapshotContainerDepth() {
-        return 0;
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        return !type.isAssignableFrom(Catalog.class) && !type.isAssignableFrom(Schema.class) && super.supports(type);
     }
-
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {

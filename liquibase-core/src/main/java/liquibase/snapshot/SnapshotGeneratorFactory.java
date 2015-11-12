@@ -3,7 +3,6 @@ package liquibase.snapshot;
 import liquibase.CatalogAndSchema;
 import liquibase.Scope;
 import liquibase.database.Database;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -90,7 +89,7 @@ public class SnapshotGeneratorFactory {
         //workaround for common check for databasechangelog/lock table to not snapshot the whole database like we have to in order to handle case issues
         if (example instanceof Table && (example.getName().equals(database.getDatabaseChangeLogTableName()) || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
-                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), ((Table) example).name), Table.class)));
+                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), ((Table) example).name))));
                 return true;
             } catch (DatabaseException e) {
 //                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection

@@ -9,7 +9,6 @@ import liquibase.database.core.db2.DB2Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Table;
 
 public class ReorganizeTableLogicDB2 extends AbstractActionLogic<ReorganizeTableAction> implements ActionLogic.InteractsExternally<ReorganizeTableAction> {
 
@@ -46,7 +45,7 @@ public class ReorganizeTableLogicDB2 extends AbstractActionLogic<ReorganizeTable
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new DelegateResult(new ExecuteSqlAction(
                         "CALL SYSPROC.ADMIN_CMD ('REORG TABLE "
-                                + database.escapeObjectName(action.tableName, Table.class)
+                                + database.escapeObjectName(action.tableName)
                                 + "')"));
             } else {
                 return new NoOpResult();

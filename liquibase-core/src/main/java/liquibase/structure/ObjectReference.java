@@ -52,6 +52,10 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
         this(null, container, names);
     }
 
+    public ObjectReference(Class<? extends DatabaseObject> type, String... names) {
+        this(type, null, names);
+    }
+
     public ObjectReference(String... names) {
         this(null, null, names);
     }
@@ -62,28 +66,34 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
 
     @Override
     public String toString() {
+        String returnString;
         List<String> list = asList();
         if (list.size() == 0) {
-            return "#UNSET";
+            returnString = "UNNAMED";
+        } else {
+            returnString = StringUtils.join(list, ".", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return StringUtils.defaultIfEmpty(obj, "UNNAMED");
+                }
+            });
         }
-        return StringUtils.join(list, ".", new StringUtils.StringUtilsFormatter<String>() {
-            @Override
-            public String toString(String obj) {
-                return StringUtils.defaultIfEmpty(obj, "#UNSET");
-            }
-        });
+
+        if (type == null) {
+            returnString += " (NO TYPE)";
+        } else {
+            returnString += " (" + type.getSimpleName().toUpperCase() + ")";
+        }
+
+        return returnString;
     }
 
     @Override
     public int compareTo(ObjectReference o) {
-        if (this.name == null) {
-            if (o.name == null) {
-                return 0;
-            } else {
-                return -1;
-            }
+        if (o == null) {
+            return 1;
         }
-        return this.name.compareTo(o.name);
+        return this.toString().compareTo(o.toString());
     }
 
     public boolean equalsIgnoreCase(ObjectReference name) {
@@ -91,16 +101,9 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
     }
 
 
-    /**
-     * Same logic as {@link #equals(ObjectReference, boolean)} with true for ignoreLengthDifferences
-     */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ObjectReference) {
-            return equals(((ObjectReference) obj), true);
-        } else {
-            return false;
-        }
+        return obj != null && (obj instanceof ObjectReference) && obj.toString().equals(this.toString());
     }
 
     public boolean equals(ObjectReference obj, boolean ignoreLengthDifferences) {
@@ -236,9 +239,7 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
         List<String> names = this.asList();
         int length = Math.min(maxLength, names.size());
 
-//        return new ObjectReference(names.subList(names.size() - length, names.size()).toArray(new String[length]));
-
-        return null;
+        return new ObjectReference(type, names.subList(names.size() - length, names.size()).toArray(new String[length]));
     }
 
     public boolean instanceOf(Class<? extends DatabaseObject> type) {

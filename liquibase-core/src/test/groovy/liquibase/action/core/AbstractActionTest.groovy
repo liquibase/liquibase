@@ -104,12 +104,12 @@ abstract class AbstractActionTest extends Specification {
         }
 
         for (ObjectReference name : supplier.getAllContainers()) {
-            new DropAllCommand(new Schema(name)).execute(scope);
+            new DropAllCommand(new ObjectReference(Schema, name)).execute(scope);
         }
 
         if (snapshot != null) {
             for (Schema schema : snapshot.get(Schema.class)) {
-                new DropAllCommand(schema).execute(scope);
+                new DropAllCommand(schema.toReference()).execute(scope);
             }
 
             def control = new DiffOutputControl()

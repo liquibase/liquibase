@@ -7,7 +7,6 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Table;
 
 public class InsertOrUpdateLogicOracle extends InsertOrUpdateLogic {
 
@@ -24,7 +23,7 @@ public class InsertOrUpdateLogicOracle extends InsertOrUpdateLogic {
         recordCheckSql.append("DECLARE\n");
         recordCheckSql.append("\tv_reccount NUMBER := 0;\n");
         recordCheckSql.append("BEGIN\n");
-        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeObjectName(new ObjectReference(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()), Table.class) + " WHERE ");
+        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeObjectName(new ObjectReference(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName())) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(";\n");

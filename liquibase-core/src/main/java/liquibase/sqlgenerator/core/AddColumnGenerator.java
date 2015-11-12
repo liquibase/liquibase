@@ -6,7 +6,6 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.ObjectReference;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
@@ -121,7 +120,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected String generateSingleColumBaseSQL(AddColumnStatement statement, Database database) {
-        return "ALTER TABLE " + database.escapeObjectName(new ObjectReference(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), Table.class);
+        return "ALTER TABLE " + database.escapeObjectName(new ObjectReference(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
     }
 
     protected String generateSingleColumnSQL(AddColumnStatement statement, Database database) {

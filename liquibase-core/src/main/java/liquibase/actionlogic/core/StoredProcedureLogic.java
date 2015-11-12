@@ -4,7 +4,6 @@ import liquibase.Scope;
 import liquibase.action.core.StoredProcedureAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.StoredProcedure;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -26,7 +25,7 @@ public class StoredProcedureLogic extends AbstractSqlBuilderLogic<StoredProcedur
     protected StringClauses generateSql(StoredProcedureAction action, Scope scope) {
         return new StringClauses()
                 .append("EXEC")
-                .append(scope.getDatabase().escapeObjectName(action.procedureName, StoredProcedure.class))
+                .append(scope.getDatabase().escapeObjectName(action.procedureName))
                 .append("(" + StringUtils.join(CollectionUtil.createIfNull(action.parameterNames), ", ") + ")");
 
     }

@@ -8,7 +8,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.ForeignKey;
 import liquibase.exception.*;
-import liquibase.structure.core.Index;
 
 public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
@@ -75,7 +74,7 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
 //            example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
-                    throw new PreconditionFailedException("Foreign Key "+database.escapeObjectName(new ObjectReference(catalogName, schemaName, foreignKeyName), Index.class)+" does not exist", changeLog, this);
+                    throw new PreconditionFailedException("Foreign Key "+database.escapeObjectName(new ObjectReference(catalogName, schemaName, foreignKeyName))+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;

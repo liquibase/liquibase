@@ -11,7 +11,6 @@ import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -55,7 +54,7 @@ public class SelectDataLogic extends AbstractSqlBuilderLogic<SelectDataAction> {
                     }
                 }))
                    .append("FROM")
-                        .append(database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class));
+                        .append(database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
 
         StringClauses whereClause = action.where;
         if (whereClause != null) {

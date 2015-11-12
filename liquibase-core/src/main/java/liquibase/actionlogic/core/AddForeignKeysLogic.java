@@ -14,7 +14,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Table;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
@@ -123,7 +122,7 @@ public class AddForeignKeysLogic extends AbstractActionLogic<AddForeignKeysActio
                     }
                 }) + ")")
                 .append("REFERENCES")
-                .append(Clauses.referencedTableName, database.escapeObjectName(foreignKey.columnChecks.get(0).referencedColumn.container, Table.class))
+                .append(Clauses.referencedTableName, database.escapeObjectName(foreignKey.columnChecks.get(0).referencedColumn.container))
                 .append(Clauses.referencedColumnNames, "(" + StringUtils.join(foreignKey.columnChecks, ", ", new StringUtils.StringUtilsFormatter<ForeignKey.ForeignKeyColumnCheck>() {
                     @Override
                     public String toString(ForeignKey.ForeignKeyColumnCheck obj) {

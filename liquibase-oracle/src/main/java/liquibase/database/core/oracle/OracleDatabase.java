@@ -142,14 +142,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-    @Override
-    public int getMaxReferenceContainerDepth() {
-        return 1;
-    }
 
     @Override
-    public int getMaxSnapshotContainerDepth() {
-        return 1;
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        return !type.isAssignableFrom(Catalog.class) && !type.isAssignableFrom(Schema.class) && super.supports(type);
     }
 
     @Override

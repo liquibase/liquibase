@@ -11,7 +11,6 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.List;
@@ -48,13 +47,13 @@ public class CopyRowsLogic extends AbstractActionLogic<CopyRowsAction> {
         }
 
         String sql = "INSERT INTO "
-                + database.escapeObjectName(action.targetTableName, Table.class)
+                + database.escapeObjectName(action.targetTableName)
                 + " ("
                 + StringUtils.join(sourceColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
                 + ")  SELECT "
                 + StringUtils.join(targetColumns, ", ", new StringUtils.ObjectNameFormatter(Column.class, database))
                 + " FROM "
-                + database.escapeObjectName(action.sourceTableName, Table.class);
+                + database.escapeObjectName(action.sourceTableName);
 
         return new DelegateResult(new ExecuteSqlAction(sql));
     }

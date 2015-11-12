@@ -20,7 +20,7 @@ public class RenameSequenceLogicMSSQL extends RenameSequenceLogic {
 
         return new StringClauses()
                 .append("SP_RENAME ")
-                .append(database.escapeObjectName(action.oldSequenceName, Sequence.class))
+                .append(database.escapeObjectName(action.oldSequenceName))
                 .append(", ")
                 .append(database.escapeObjectName(action.newSequenceName.name, Sequence.class));
     }

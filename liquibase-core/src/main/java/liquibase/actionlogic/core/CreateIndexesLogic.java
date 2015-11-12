@@ -13,7 +13,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -87,12 +86,12 @@ public class CreateIndexesLogic extends AbstractActionLogic<CreateIndexesAction>
         clauses.append("INDEX ");
 
         if (indexName != null) {
-            clauses.append(Clauses.indexName, database.escapeObjectName(indexName, Index.class));
+            clauses.append(Clauses.indexName, database.escapeObjectName(indexName));
         }
 
         clauses.append("ON");
 
-        clauses.append(Clauses.tableName, database.escapeObjectName(tableName, Table.class));
+        clauses.append(Clauses.tableName, database.escapeObjectName(tableName));
 
         clauses.append(Clauses.columns, "(" + StringUtils.join(index.columns, ", ", new StringUtils.StringUtilsFormatter<Index.IndexedColumn>() {
             @Override

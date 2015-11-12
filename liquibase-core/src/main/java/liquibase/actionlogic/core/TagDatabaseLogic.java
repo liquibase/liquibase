@@ -10,7 +10,6 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 public class TagDatabaseLogic extends AbstractActionLogic<TagDatabaseAction> {
@@ -38,6 +37,6 @@ public class TagDatabaseLogic extends AbstractActionLogic<TagDatabaseAction> {
 
     protected StringClauses generateWhereClause(TagDatabaseAction action, Scope scope) {
         Database database = scope.getDatabase();
-        return new StringClauses().append("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class) + ")");
+        return new StringClauses().append("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())) + ")");
     }
 }

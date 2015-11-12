@@ -62,11 +62,16 @@ public abstract class AbstractSnapshotDatabaseObjectsLogicJdbc<T extends Snapsho
      * Default implementation trims object name to null.
      */
     protected void correctObject(DatabaseObject object) {
-//        ObjectReference name = object.getName();
-//        while (name != null) {
-//            name.name = StringUtils.trimToNull(name.name);
-//            name = name.container;
-//        }
+        String name = object.getName();
+        if (name != null) {
+            object.set("name", StringUtils.trimToNull(name));
+        }
+
+        ObjectReference container = object.getContainer();
+        while (container != null) {
+            container.name = StringUtils.trimToNull(container.name);
+            container = container.container;
+        }
     }
 
     /**

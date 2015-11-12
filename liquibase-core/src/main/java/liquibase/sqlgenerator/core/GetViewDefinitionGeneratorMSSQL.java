@@ -7,7 +7,6 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.View;
 
 public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator {
     @Override
@@ -29,7 +28,7 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
         } catch (Exception ignored) {
             // Assume 2005 or later
         }
-        String viewNameEscaped = database.escapeObjectName(new ObjectReference(schema.getCatalogName(), schema.getSchemaName(), statement.getViewName()), View.class);
+        String viewNameEscaped = database.escapeObjectName(new ObjectReference(schema.getCatalogName(), schema.getSchemaName(), statement.getViewName()));
         String sql;
         if (sql2005OrLater) {
             sql = "SELECT OBJECT_DEFINITION(OBJECT_ID(N'" + database.escapeStringForDatabase(viewNameEscaped) + "')) AS [ObjectDefinition]";

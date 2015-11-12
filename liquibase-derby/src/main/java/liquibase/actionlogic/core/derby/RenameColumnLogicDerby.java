@@ -6,7 +6,6 @@ import liquibase.actionlogic.core.RenameColumnLogic;
 import liquibase.database.Database;
 import liquibase.database.core.derby.DerbyDatabase;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 public class RenameColumnLogicDerby extends RenameColumnLogic {
@@ -20,7 +19,7 @@ public class RenameColumnLogicDerby extends RenameColumnLogic {
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("RENAME COLUMN")
-                .append(database.escapeObjectName(action.tableName, Table.class)
+                .append(database.escapeObjectName(action.tableName)
                         + "."
                         + database.escapeObjectName(action.oldColumnName, Column.class))
                 .append("TO")

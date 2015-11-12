@@ -38,15 +38,17 @@ public class TestSnapshotFactory {
 
         Set<ObjectReference> schemas = new HashSet<>();
         for (Table table : snapshot.get(Table)) {
-            schemas.add(table.name.container);
+            schemas.add(table.container);
         }
 
 
         Set<ObjectReference> catalogs = new HashSet<>();
         for (ObjectReference schema : schemas) {
-            snapshot.add(new Schema(schema))
-            if (schema.container != null) {
-                catalogs.add(schema.container);
+            if (schema != null) {
+                snapshot.add(new Schema(schema))
+                if (schema.container != null) {
+                    catalogs.add(schema.container);
+                }
             }
         }
 

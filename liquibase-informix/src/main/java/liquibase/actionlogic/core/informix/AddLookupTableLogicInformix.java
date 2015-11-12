@@ -7,8 +7,6 @@ import liquibase.action.core.AddLookupTableAction;
 import liquibase.actionlogic.core.AddLookupTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.informix.InformixDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class AddLookupTableLogicInformix extends AddLookupTableLogic {
     @Override
@@ -21,20 +19,20 @@ public class AddLookupTableLogicInformix extends AddLookupTableLogic {
         Database database = scope.getDatabase();
         return new Action[]{
                 new ExecuteSqlAction("CREATE TABLE "
-                        + database.escapeObjectName(action.newColumnName.container, Table.class)
+                        + database.escapeObjectName(action.newColumnName.container)
                         + " ( "
-                        + database.escapeObjectName(action.newColumnName, Column.class)
+                        + database.escapeObjectName(action.newColumnName)
                         + " "
                         + action.newColumnDataType
                         + " )"),
                 new ExecuteSqlAction("INSERT INTO "
-                        + database.escapeObjectName(action.newColumnName.container, Table.class)
+                        + database.escapeObjectName(action.newColumnName.container)
                         + " ( "
                         + action.newColumnName
                         + " ) SELECT DISTINCT "
                         + action.existingColumnName
                         + " FROM "
-                        + database.escapeObjectName(action.existingColumnName.container, Table.class)
+                        + database.escapeObjectName(action.existingColumnName.container)
                         + " WHERE "
                         + action.existingColumnName.name
                         + " IS NOT NULL"),

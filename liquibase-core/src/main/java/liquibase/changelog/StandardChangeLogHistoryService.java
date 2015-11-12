@@ -186,7 +186,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
                     statementsToExecute.add(new RawSqlStatement(
-                            "UPDATE " + getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()), Table.class) + " " +
+                            "UPDATE " + getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName())) + " " +
                             "SET " +  getDatabase().escapeObjectName("MD5SUM", Column.class) + " = NULL"));
                 }
             }
@@ -196,13 +196,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()), Table.class) + " table for your getDatabase().\n\n" +
+                throw new DatabaseException("Cannot create " + getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName())) + " table for your getDatabase().\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LoggerFactory.getLogger(getClass()).info("Creating database history table with name: " + getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()), Table.class));
+            LoggerFactory.getLogger(getClass()).info("Creating database history table with name: " + getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName())));
         }
 
         for (SqlStatement sql : statementsToExecute) {
@@ -227,7 +227,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
-            String databaseChangeLogTableName = getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()), Table.class);
+            String databaseChangeLogTableName = getDatabase().escapeObjectName(new ObjectReference(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
             if (hasDatabaseChangeLogTable()) {
                 LoggerFactory.getLogger(getClass()).info("Reading from " + databaseChangeLogTableName);

@@ -10,6 +10,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +54,8 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public int getMaxReferenceContainerDepth() {
-        return 0;
-    }
-
-    @Override
-    public int getMaxSnapshotContainerDepth() {
-        return 0;
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        return !type.isAssignableFrom(Catalog.class) && !type.isAssignableFrom(Schema.class) && super.supports(type);
     }
 
     @Override

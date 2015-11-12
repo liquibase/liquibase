@@ -9,7 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 public class RenameTableLogic extends AbstractSqlBuilderLogic<RenameTableAction> {
@@ -40,6 +39,6 @@ public class RenameTableLogic extends AbstractSqlBuilderLogic<RenameTableAction>
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("RENAME TO")
-                .append(database.escapeObjectName(action.newTableName, Table.class));
+                .append(database.escapeObjectName(action.newTableName));
     }
 }

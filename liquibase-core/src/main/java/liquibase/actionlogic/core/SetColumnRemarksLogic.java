@@ -9,8 +9,6 @@ import liquibase.actionlogic.DelegateResult;
 import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class SetColumnRemarksLogic extends AbstractActionLogic<SetColumnRemarksAction> {
 
@@ -31,9 +29,9 @@ public class SetColumnRemarksLogic extends AbstractActionLogic<SetColumnRemarksA
         Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "COMMENT ON COLUMN "
-                        + database.escapeObjectName(action.columnName.container, Table.class)
+                        + database.escapeObjectName(action.columnName.container)
                         + "."
-                        + database.escapeObjectName(action.columnName, Column.class)
+                        + database.escapeObjectName(action.columnName)
                         + " IS '"
                         + database.escapeStringForDatabase(action.remarks)
                         + "'"

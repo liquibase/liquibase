@@ -79,10 +79,10 @@ abstract class AbstractTestStructureSupplier<T extends DatabaseObject> implement
             }
 
             for (String simpleName : objectNames) {
-                returnList.add(new ObjectReference(container, simpleName));
+                returnList.add(new ObjectReference(getTypeCreates(), container, simpleName));
             }
             if (container != null) {
-                returnList.add(new ObjectReference(container, "only_in_" + container.name));
+                returnList.add(new ObjectReference(getTypeCreates(), container, "only_in_" + container.name));
             }
         }
 

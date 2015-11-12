@@ -27,7 +27,7 @@ public class RenameViewLogic extends AbstractSqlBuilderLogic<RenameViewAction> {
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("RENAME")
-                .append(database.escapeObjectName(action.oldViewName, View.class))
+                .append(database.escapeObjectName(action.oldViewName))
                 .append("TO")
                 .append(database.escapeObjectName(action.newViewName.name, View.class));
     }

@@ -9,7 +9,6 @@ import liquibase.actionlogic.core.RenameTableLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mssql.MSSQLDatabase;
 import liquibase.exception.ActionPerformException;
-import liquibase.structure.core.Table;
 
 public class RenameTableLogicMSSQL extends RenameTableLogic {
     @Override
@@ -22,7 +21,7 @@ public class RenameTableLogicMSSQL extends RenameTableLogic {
         Database database = scope.getDatabase();
         return new DelegateResult(new ExecuteSqlAction(
                 "exec sp_rename '"
-                        + database.escapeObjectName(action.oldTableName, Table.class)
+                        + database.escapeObjectName(action.oldTableName)
                         + "', '"
                         + action.newTableName
                         + "'"));

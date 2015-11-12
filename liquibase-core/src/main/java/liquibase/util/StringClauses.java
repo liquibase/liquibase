@@ -146,7 +146,7 @@ public class StringClauses {
             if (obj instanceof DatabaseObject) {
                 this.append(database.escapeObjectName(((DatabaseObject) obj).getName(), type));
             } else if (obj instanceof ObjectReference) {
-                this.append(database.escapeObjectName(((ObjectReference) obj), type));
+                this.append(database.escapeObjectName(((ObjectReference) obj)));
             } else if (obj instanceof StringClauses) {
                 this.append(obj.toString(), ((StringClauses) obj));
             } else {

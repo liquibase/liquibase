@@ -11,8 +11,6 @@ import liquibase.database.core.postgresql.PostgresDatabase;
 import liquibase.exception.ActionPerformException;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 /**
@@ -39,9 +37,9 @@ public class AddDefaultValueLogicPostgresql extends AddDefaultValueLogic {
                     new ObjectReference(action.columnName.container.container, ((SequenceNextValueFunction) defaultValue).getValue()),
                     new StringClauses()
                             .append("OWNED BY")
-                            .append(database.escapeObjectName(action.columnName.container, Table.class)
+                            .append(database.escapeObjectName(action.columnName.container)
                                     + "."
-                                    + database.escapeObjectName(action.columnName, Column.class))));
+                                    + database.escapeObjectName(action.columnName))));
         }
 
         return result;

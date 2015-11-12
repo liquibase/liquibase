@@ -11,7 +11,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
@@ -27,7 +26,7 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 	@Override
 	protected String generateSql(List<ColumnConfig> cols) {
 
-		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getTableName()), Table.class));
+		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeObjectName(new ObjectReference(getCatalogName(), getSchemaName(), getTableName())));
 
 		StringBuilder params = new StringBuilder(" SET ");
 	    for(ColumnConfig column : getColumns()) {

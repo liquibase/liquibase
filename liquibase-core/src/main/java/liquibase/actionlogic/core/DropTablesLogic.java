@@ -11,7 +11,6 @@ import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 import liquibase.exception.ValidationErrors;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Table;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringClauses;
 
@@ -57,7 +56,7 @@ public class DropTablesLogic extends AbstractActionLogic<DropTablesAction> {
         Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses()
                 .append("DROP TABLE")
-                .append(database.escapeObjectName(tableName, Table.class));
+                .append(database.escapeObjectName(tableName));
 
         if (ObjectUtil.defaultIfEmpty(action.cascadeConstraints, false)) {
             clauses.append("CASCADE");

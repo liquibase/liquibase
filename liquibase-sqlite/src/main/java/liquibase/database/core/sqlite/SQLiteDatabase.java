@@ -1,7 +1,6 @@
 package liquibase.database.core.sqlite;
 
 import liquibase.CatalogAndSchema;
-import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractJdbcDatabase;
@@ -9,11 +8,9 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 
@@ -90,16 +87,11 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    @Override
-    public int getMaxReferenceContainerDepth() {
-        return 0;
-    }
 
     @Override
-    public int getMaxSnapshotContainerDepth() {
-        return 0;
+    public boolean supports(Class<? extends DatabaseObject> type) {
+        return !type.isAssignableFrom(Catalog.class) && !type.isAssignableFrom(Schema.class) && !type.isAssignableFrom(Schema.class) && super.supports(type);
     }
-
     public String getTrigger(String table, String column) {
         return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" +
                 " UPDATE " + table + " SET " + column + " = DATETIME('NOW')" +

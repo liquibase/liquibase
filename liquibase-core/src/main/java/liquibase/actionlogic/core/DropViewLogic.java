@@ -5,7 +5,6 @@ import liquibase.action.core.DropViewAction;
 import liquibase.actionlogic.AbstractSqlBuilderLogic;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.View;
 import liquibase.util.StringClauses;
 
 public class DropViewLogic extends AbstractSqlBuilderLogic<DropViewAction> {
@@ -26,7 +25,7 @@ public class DropViewLogic extends AbstractSqlBuilderLogic<DropViewAction> {
         Database database = scope.getDatabase();
         return new StringClauses()
                 .append("DROP VIEW")
-                .append(database.escapeObjectName(action.viewName, View.class
+                .append(database.escapeObjectName(action.viewName
                 ));
     }
 }

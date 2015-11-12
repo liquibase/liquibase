@@ -6,7 +6,6 @@ import liquibase.actionlogic.core.TagDatabaseLogic;
 import liquibase.database.Database;
 import liquibase.database.core.mysql.MySQLDatabase;
 import liquibase.structure.ObjectReference;
-import liquibase.structure.core.Table;
 import liquibase.util.StringClauses;
 
 public class TagDatabaseLogicMysql extends TagDatabaseLogic {
@@ -19,6 +18,6 @@ public class TagDatabaseLogicMysql extends TagDatabaseLogic {
     @Override
     protected StringClauses generateWhereClause(TagDatabaseAction action, Scope scope) {
         Database database = scope.getDatabase();
-        return new StringClauses().append("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()), Table.class) + ") AS X)");
+        return new StringClauses().append("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())) + ") AS X)");
     }
 }

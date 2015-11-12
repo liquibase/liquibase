@@ -288,11 +288,16 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(ObjectReference objectReference, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(ObjectReference objectReference) {
+        Class<? extends DatabaseObject> objectType = objectReference.type;
+        if (objectType == null) {
+            objectType = DatabaseObject.class;
+        }
+
         if (objectType.isAssignableFrom(Index.class)) {
             return escapeObjectName(objectReference.name, objectType);
         }
-        return super.escapeObjectName(objectReference, objectType);
+        return super.escapeObjectName(objectReference);
     }
 
     @Override

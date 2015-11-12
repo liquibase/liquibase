@@ -8,7 +8,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringClauses;
 import liquibase.util.StringUtils;
@@ -42,7 +41,7 @@ public class InsertDataLogic extends AbstractSqlBuilderLogic<InsertDataAction> {
         final Database database = scope.getDatabase();
         return new StringClauses()
                 .append("INSERT INTO")
-                .append(database.escapeObjectName(action.tableName, Table.class))
+                .append(database.escapeObjectName(action.tableName))
                 .append("("+ StringUtils.join(CollectionUtil.createIfNull(action.columnNames), ", ", new StringUtils.ObjectNameFormatter(Column.class, database))+")")
                 .append("VALUES")
         .append("("+StringUtils.join(CollectionUtil.createIfNull(action.columnNames), ", ", new StringUtils.StringUtilsFormatter() {

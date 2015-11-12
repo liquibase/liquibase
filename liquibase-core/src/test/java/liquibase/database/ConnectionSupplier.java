@@ -8,7 +8,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectReference;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.util.CollectionUtil;
 import org.slf4j.LoggerFactory;
 import testmd.logic.SetupResult;
@@ -243,24 +245,6 @@ public abstract class ConnectionSupplier implements Cloneable {
         return db;
     }
 
-    public List<ObjectReference> getReferenceObjectNames(Class<? extends DatabaseObject> type) {
-        return getReferenceObjectNames(type, false, false);
-    }
-
-    public List<ObjectReference> getReferenceObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
-        if (Column.class.isAssignableFrom(type)) {
-            return getObjectNames(type, 0, includePartials, includeNulls);
-        }
-        return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
-    }
-
-    public List<ObjectReference> getSnapshotObjectNames(Class<? extends DatabaseObject> type, boolean includePartials, boolean includeNulls) {
-        if (Column.class.isAssignableFrom(type)) {
-            return getObjectNames(type, 0, includePartials, includeNulls);
-        }
-        return getObjectNames(type, getDatabase().getMaxReferenceContainerDepth(), includePartials, includeNulls);
-    }
-
     public List<ObjectReference> getObjectNames(Class<? extends DatabaseObject> type, int maxDepth, boolean includePartials, boolean includeNulls) {
         List<ObjectReference> returnList = new ArrayList<>();
 
@@ -279,17 +263,16 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public List<ObjectReference> getAllContainers() {
-        int depth = getDatabase().getMaxReferenceContainerDepth();
-
-        if (depth == 0) {
-            return Arrays.asList();
-        } else if (depth== 1) {
-            return Arrays.asList(new ObjectReference(getPrimarySchema()), new ObjectReference(getAlternateSchema()));
-        } else {
+        if (getDatabase().supports(Catalog.class)) {
             return Arrays.asList(new ObjectReference(getPrimaryCatalog(), getPrimarySchema()),
                     new ObjectReference(getPrimaryCatalog(), getAlternateSchema()),
                     new ObjectReference(getAlternateCatalog(), getPrimarySchema()),
                     new ObjectReference(getAlternateCatalog(), getAlternateSchema()));
+
+        } else if (getDatabase().supports(Schema.class)) {
+            return Arrays.asList(new ObjectReference(getPrimarySchema()), new ObjectReference(getAlternateSchema()));
+        } else {
+            return Arrays.asList();
         }
     }
 

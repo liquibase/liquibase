@@ -33,7 +33,7 @@ public class DeleteDataLogic extends AbstractSqlBuilderLogic<DeleteDataAction> {
         Database database = scope.getDatabase();
         StringClauses clauses = new StringClauses();
         clauses.append("DELETE FROM");
-        clauses.append(database.escapeObjectName(action.tableName, Table.class));
+        clauses.append(database.escapeObjectName(action.tableName));
 
         StringClauses whereClause = action.where;
         if (whereClause != null) {
