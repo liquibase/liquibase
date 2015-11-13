@@ -18,15 +18,6 @@
 | 3cd221      | true     | lbcat (SCHEMA)  | **plan**: getTables(null, null, lbcat, [TABLE])
 | 3193e6      | true     | lbcat2 (SCHEMA) | **plan**: getTables(null, null, lbcat2, [TABLE])
 
-# Test: "can snapshot all tables in schema with a null table name" #
-
-- **connection:** mysql[config:caseInsensitive]
-
-| Permutation | Verified | schemaName | OPERATIONS
-| :---------- | :------- | :--------- | :------
-| 020de5      | true     | LBSCHEMA   | **plan**: getTables(LBSCHEMA, null, null, [TABLE])
-| 6d6ef2      | true     | LBSCHEMA2  | **plan**: getTables(LBSCHEMA2, null, null, [TABLE])
-
 # Test: "can snapshot fully qualified table" #
 
 - **connection:** mysql[config:caseInsensitive]
@@ -44,11 +35,4 @@
 | 3cb8b0      | true     | lbcat2.lowertable (TABLE)                 | **plan**: getTables(lbcat2, null, lowertable, [TABLE])
 | a1779f      | true     | lbcat2.only_in_lbcat2 (TABLE)             | **plan**: getTables(lbcat2, null, only_in_lbcat2, [TABLE])
 
-# Test: "can snapshot tables related to a schema" #
-
-- **connection:** mysql[config:caseInsensitive]
-
-| Permutation | Verified | schemaName | OPERATIONS
-| :---------- | :------- | :--------- | :------
-| 020de5      | true     | LBSCHEMA   | **plan**: getTables(LBSCHEMA, null, null, [TABLE])
-| 6d6ef2      | true     | LBSCHEMA2  | **plan**: getTables(LBSCHEMA2, null, null, [TABLE])
+# Test Version: "240208" #
