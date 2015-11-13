@@ -32,6 +32,7 @@ import org.spockframework.runtime.SpecificationContext
 import spock.lang.Specification
 import testmd.Permutation
 import testmd.TestMD
+import testmd.logic.Setup
 import testmd.logic.SetupResult
 
 abstract class AbstractActionTest extends Specification {
@@ -42,7 +43,7 @@ abstract class AbstractActionTest extends Specification {
 
     protected abstract Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope)
 
-    def runStandardTest(Map parameters, Action action, ConnectionSupplier connectionSupplier, Scope scope, Closure assertClosure = {}) {
+    def runStandardTest(Map parameters, Snapshot snapshot = null, Action action, ConnectionSupplier connectionSupplier, Scope scope, Closure assertClosure = {}, Closure setupClosure = {}) {
         def executor = scope.getSingleton(ActionExecutor)
 
         def errors = executor.validate(action, scope)
@@ -50,7 +51,12 @@ abstract class AbstractActionTest extends Specification {
 
         def plan = executor.createPlan(action, scope)
 
-        testMDPermutation(createSnapshot(action, connectionSupplier, scope), connectionSupplier, scope)
+
+        if (snapshot != null) {
+            snapshot = createSnapshot(action, connectionSupplier, scope)
+        }
+
+        testMDPermutation(snapshot, setupClosure, connectionSupplier, scope)
                 .addParameters(parameters)
                 .addOperations(plan: plan)
                 .run({
@@ -74,7 +80,7 @@ abstract class AbstractActionTest extends Specification {
         JUnitScope.instance.getSingleton(TestObjectFactory).createAllPermutations(type, defaultValues)
     }
 
-    protected List<ObjectReference> getObjectNames(Class<? extends  AbstractTestStructureSupplier> supplierType, ObjectNameStrategy strategy, Scope scope) {
+    protected List<ObjectReference> getObjectNames(Class<? extends AbstractTestStructureSupplier> supplierType, ObjectNameStrategy strategy, Scope scope) {
         return scope.getSingleton(supplierType).getObjectNames(strategy, scope)
     }
 
@@ -86,10 +92,10 @@ abstract class AbstractActionTest extends Specification {
         }
     }
 
-    def testMDPermutation(Snapshot snapshot, ConnectionSupplier conn, Scope scope) {
+    def testMDPermutation(Snapshot snapshot, Closure setupClosure = {}, ConnectionSupplier conn, Scope scope) {
         def database = scope.database
 
-        def permutation = new ActionTestPermutation(this.specificationContext, this, snapshot, conn, scope, [:])
+        def permutation = new ActionTestPermutation(this.specificationContext, this, snapshot, setupClosure, conn, scope, [:])
 
         permutation.addParameter("connection", conn.toString())
 
@@ -97,7 +103,7 @@ abstract class AbstractActionTest extends Specification {
                 .withPermutation(permutation)
     }
 
-    def setupDatabase(Snapshot snapshot, ConnectionSupplier supplier, Scope scope) {
+    def setupDatabase(Snapshot snapshot, Closure setupClosure, ConnectionSupplier supplier, Scope scope) {
         Database database = scope.database
         if (database instanceof UnsupportedDatabase) {
             throw SetupResult.OK;
@@ -125,6 +131,8 @@ abstract class AbstractActionTest extends Specification {
             }
         }
 
+        setupClosure()
+
         throw SetupResult.OK
     }
 
@@ -141,14 +149,16 @@ abstract class AbstractActionTest extends Specification {
         ConnectionSupplier conn
         AbstractActionTest test
         Snapshot snapshot
+        Closure setupClosure
 
-        ActionTestPermutation(SpecificationContext specificationContext, AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
-            super(specificationContext.currentIteration.parent.spec.getPackage()+"."+specificationContext.currentIteration.parent.spec.name, specificationContext.currentIteration.parent.name, parameters)
+        ActionTestPermutation(SpecificationContext specificationContext, AbstractActionTest test, Snapshot snapshot, Closure setupClosure, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
+            super(specificationContext.currentIteration.parent.spec.getPackage() + "." + specificationContext.currentIteration.parent.spec.name, specificationContext.currentIteration.parent.name, parameters)
             this.scope = scope
             this.database = scope.database
             this.conn = connectionSupplier
             this.snapshot = snapshot
             this.test = test;
+            this.setupClosure = setupClosure
 
             this.setup({ throw SetupResult.OK })
             this.cleanup({
@@ -176,7 +186,7 @@ abstract class AbstractActionTest extends Specification {
                 }
 
                 conn.connect(scope)
-                test.setupDatabase(snapshot, conn, scope)
+                test.setupDatabase(snapshot, setupClosure, conn, scope)
                 setup.run();
             })
         }

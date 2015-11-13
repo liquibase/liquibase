@@ -49,16 +49,14 @@ public class SnapshotColumnsLogicJdbc extends AbstractSnapshotDatabaseObjectsLog
 
         ObjectReference columnName;
 
-        Database database = scope.getDatabase();
-
         if (relatedTo.instanceOf(Catalog.class)) {
             columnName = new ObjectReference(relatedTo.name, null, null, null);
         } else if (relatedTo.instanceOf(Schema.class)) {
-            columnName = new ObjectReference(relatedTo.name, null, null);
+            columnName = new ObjectReference(relatedTo.container, relatedTo.name, null, null);
         } else if (relatedTo.instanceOf(Relation.class)) {
-            columnName = new ObjectReference(relatedTo.name, null);
+            columnName = new ObjectReference(relatedTo.container, relatedTo.name, null);
         } else if (relatedTo.instanceOf(Column.class)) {
-            columnName = new ObjectReference(relatedTo.name);
+            columnName = relatedTo;
         } else {
             throw Validate.failure("Unexpected type: " + relatedTo.getClass().getName());
         }

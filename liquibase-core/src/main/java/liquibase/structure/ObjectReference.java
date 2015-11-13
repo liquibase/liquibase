@@ -61,11 +61,6 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
     }
 
     public String toShortString() {
-        return StringUtils.defaultIfEmpty(name, "#UNSET");
-    }
-
-    @Override
-    public String toString() {
         String returnString;
         List<String> list = asList();
         if (list.size() == 0) {
@@ -78,14 +73,16 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
                 }
             });
         }
-
-        if (type == null) {
-            returnString += " (NO TYPE)";
-        } else {
-            returnString += " (" + type.getSimpleName().toUpperCase() + ")";
-        }
-
         return returnString;
+    }
+
+    @Override
+    public String toString() {
+        if (type == null) {
+            return toShortString() + " (NO TYPE)";
+        } else {
+            return toShortString() + " (" + type.getSimpleName().toUpperCase() + ")";
+        }
     }
 
     @Override
@@ -93,7 +90,7 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
         if (o == null) {
             return 1;
         }
-        return this.toString().compareTo(o.toString());
+        return this.toShortString().compareTo(o.toShortString());
     }
 
     public boolean equalsIgnoreCase(ObjectReference name) {
@@ -103,7 +100,7 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && (obj instanceof ObjectReference) && obj.toString().equals(this.toString());
+        return obj != null && (obj instanceof ObjectReference) && ((ObjectReference) obj).toShortString().equals(this.toShortString());
     }
 
     public boolean equals(ObjectReference obj, boolean ignoreLengthDifferences) {
@@ -135,7 +132,7 @@ public class ObjectReference extends AbstractExtensibleObject implements Compara
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        return toShortString().hashCode();
     }
 
 

@@ -10,14 +10,14 @@ import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.Snapshot
 import liquibase.snapshot.TestSnapshotFactory
 import liquibase.snapshot.transformer.LimitTransformer
-import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectReference
+import liquibase.structure.TestColumnSupplier
+import liquibase.structure.TestTableSupplier
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
 import liquibase.structure.core.DataType
 import liquibase.structure.core.PrimaryKey
-import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
 import liquibase.util.LiquibaseUtil
@@ -26,202 +26,149 @@ import spock.lang.Unroll
 
 class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
-    @Unroll("#featureName: #column on #conn")
+    @Unroll("#featureName: #columnRef on #conn")
     def "can find fully qualified complex column names"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(column)
+        def action = new SnapshotDatabaseObjectsAction(Column, columnRef)
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters([columnName_asTable: column.getName()])
-                .addOperations(plan: plan)
-                .run({
-            QueryResult result = plan.execute(scope)
-
-            assert result.asList(Column).size() == 1
-            assert result.asObject(Object) instanceof Column
-            assert result.asObject(Column).getName().container != null
-            assert result.asObject(Column).getName() == column.getName()
+        runStandardTest([columnName_asTable: columnRef.toString()], action, conn, scope, {
+            plan, result ->
+                assert result.asList(Column).size() == 1
+                assert result.asObject(Object) instanceof Column
+                assert result.asObject(Column).toReference() == columnRef
         })
 
         where:
-        [conn, scope, snapshot, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
+        [conn, scope, columnRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            def scope = JUnitScope.getInstance(it)
 
-            def scope = JUnitScope.getInstance(it).child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
-
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    [snapshot],
-                    new ArrayList(snapshot.get(Column)),
+                    getColumnNamesWithTables(scope)
             ])
         }
     }
 
-    @Unroll("#featureName: #table on #conn")
+    @Unroll("#featureName: #tableRef on #conn")
     def "can find all columns in a fully qualified complex table name"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, table)
+        def action = new SnapshotDatabaseObjectsAction(Column, tableRef)
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters([tableName_asTable: table.getName()])
-                .addOperations(plan: plan)
-                .run({
-            QueryResult result = plan.execute(scope)
-
-            assert result.asList(Column).size() > 0
-            result.asList(Object).each {
-                assert it instanceof Column;
-                assert it.getName().container.equals(table.getName(), true)
-            }
+        runStandardTest([tableName_asTable: tableRef], action, conn, scope, {
+            plan, result ->
+                assert result.asList(Column).size() > 0
+                result.asList(Object).each {
+                    assert it instanceof Column;
+                    assert it.container == tableRef
+                }
         })
 
         where:
-        [conn, scope, snapshot, table] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
-
+        [conn, scope, tableRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    [snapshot],
-                    new ArrayList(snapshot.get(Table)),
+                    getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope)
             ])
         }
     }
 
-    @Unroll("#featureName: #schema on #conn")
+    @Unroll("#featureName: #schemaRef on #conn")
     def "can find all columns in a schema"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, schema)
+        def action = new SnapshotDatabaseObjectsAction(Column, schemaRef)
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters([schemaName_asTable: schema.getName()])
-                .addOperations(plan: plan)
-                .run({
-            QueryResult result = plan.execute(scope)
-
-            assert result.asList(Column).size() > 0
-            result.asList(Object).each {
-                assert it instanceof Column;
-                assert it.getName().container.container.equals(schema.getName(), true)
-            }
+        runStandardTest([schemaName_asTable: schemaRef], action, conn, scope, {
+            plan, result ->
+                assert result.asList(Column).size() > 0
+                result.asList(Object).each {
+                    assert it instanceof Column;
+                    assert it.container.container == schemaRef
+                }
         })
 
         where:
-        [conn, scope, snapshot, getContainer] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
-
+        [conn, scope, schemaRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = JUnitScope.instance.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    [snapshot],
-                    new ArrayList(snapshot.get(Schema)),
+                    it.allContainers
             ])
         }
     }
 
-    @Unroll("#featureName: #catalog on #conn")
+    @Unroll("#featureName: #catalogRef on #conn")
     def "can find all columns in a catalog"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(Column, catalog)
+        def action = new SnapshotDatabaseObjectsAction(Column, catalogRef)
 
-        def plan = new ActionExecutor().createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters([catalogName_asTable: catalog.getName()])
-                .addOperations(plan: plan)
-                .run({
-            QueryResult result = plan.execute(scope)
-
-            assert result.asList(Column).size() > 0
-            result.asList(Object).each {
-                assert it instanceof Column;
-                assert it.name.container.container.container.name.equals(catalog.getSimpleName())
-            }
+        runStandardTest([catalogName_asTable: catalogRef], action, conn, scope, {
+            plan, result ->
+                assert result.asList(Column).size() > 0
+                result.asList(Object).each {
+                    assert it instanceof Column;
+                    assert it.name.container.container.container.name.equals(catalogRef.getSimpleName())
+                }
         })
 
         where:
-        [conn, scope, snapshot, catalog] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
-            Assume.assumeTrue("Database does not support catalogs", it.database.getMaxReferenceContainerDepth() >= 2);
+        [conn, scope, catalogRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+            Assume.assumeTrue("Database does not support catalogs", it.database.supports(Catalog));
 
             def scope = JUnitScope.getInstance(it)
-                    .child(JUnitScope.Attr.objectNameStrategy, ObjectNameStrategy.COMPLEX_NAMES)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(NoOpTransformer.instance, scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    [snapshot],
-                    new ArrayList(snapshot.get(Catalog)),
+                    it.allContainers*.container.unique(),
             ])
         }
     }
 
-    @Unroll("#featureName: #column (autoIncrement: #autoIncrement) on #conn")
+    @Unroll("#featureName: #columnRef (autoIncrement: #autoIncrement) on #conn")
     def "autoIncrement information set correctly"() {
         expect:
-        def action = new SnapshotDatabaseObjectsAction(column)
-        def executor = scope.getSingleton(ActionExecutor.class)
-        def plan = executor.createPlan(action, scope)
+        def action = new SnapshotDatabaseObjectsAction(columnRef)
 
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters([columnName_asTable: column.getName()])
-                .addParameters([autoIncrement_asTable: autoIncrement])
-                .addOperations(plan: plan)
-                .run({
-
+        runStandardTest([columnName_asTable: columnRef, autoIncrement_asTable: autoIncrement], action, conn, scope, {
+            plan, result ->
+                assert result.asList(Column).size() > 0
+                result.asList(Object).each {
+                    assert it instanceof Column;
+                    assert it.toReference() == columnRef
+                    if (autoIncrement) {
+                        assert it.autoIncrement
+                        //no jdbc interface to get auto increment start/incrementBy info
+                    } else {
+                        assert !it.autoIncrement
+                    }
+                }
+        }, {
+            def executor = scope.getSingleton(ActionExecutor)
             if (autoIncrement) {
                 if (((AddAutoIncrementActionTest.TestDetails) new AddAutoIncrementActionTest().getTestDetails(scope)).createPrimaryKeyBeforeAutoIncrement()) {
-                    executor.execute(new AddPrimaryKeysAction(new PrimaryKey(new ObjectReference(column.name.container, null), column.getSimpleName())), scope)
+                    executor.execute(new AddPrimaryKeysAction(new PrimaryKey(null, columnRef.container, columnRef.name)), scope)
                 }
-                executor.execute(new AddAutoIncrementAction(column.name, column.type), scope)
-            }
-
-
-            QueryResult result = plan.execute(scope)
-
-            assert result.asList(Column).size() > 0
-            result.asList(Object).each {
-                assert it instanceof Column;
-                assert it.name.equals(column.name, true)
-                if (autoIncrement) {
-                    assert it.autoIncrement
-                    //no jdbc interface to get auto increment start/incrementBy info
-                } else {
-                    assert !it.autoIncrement
-                }
+                executor.execute(new AddAutoIncrementAction(columnRef, DataType.parse("int"), new Column.AutoIncrementInformation()), scope)
             }
         })
 
         where:
-        [conn, scope, snapshot, autoIncrement, column] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, scope, autoIncrement, columnRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
 
             def scope = JUnitScope.getInstance(it)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(new LimitTransformer(1), scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    [snapshot],
                     [true, false],
-                    new ArrayList(snapshot.get(Column)),
+                    getColumnNamesWithTables(scope),
             ])
         }
     }
@@ -229,25 +176,25 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     @Unroll("#featureName: #typeString on #conn")
     def "dataType comes through correctly"() {
         when:
-        column.type = DataType.parse(typeString)
-        def executor = scope.getSingleton(ActionExecutor.class) as ActionExecutor
+        def schema = conn.allContainers[0]
+        def tableName = correctObjectName("testtable", Table, scope.database)
+        def columnName = correctObjectName("testcol", Column, scope.database)
+        def type = DataType.parse(typeString)
+
+        def snapshot = new Snapshot(scope)
+
+        def column = new Column(new ObjectReference(schema, tableName), columnName, type)
+        snapshot.add(column)
+        snapshot.add(new Table(new ObjectReference(schema, tableName)))
 
         then:
-        def action = new SnapshotDatabaseObjectsAction(column)
+        def action = new SnapshotDatabaseObjectsAction(column.toReference())
 
-
-        def plan = executor.createPlan(action, scope)
-
-        testMDPermutation(snapshot, conn, scope)
-                .addParameters([columnName_asTable: column.getName()])
-                .addParameters([type_asTable: ((Column) column).type])
-                .addOperations(plan: plan)
-                .run({
-            QueryResult result = plan.execute(scope)
-
+        runStandardTest([columnName_asTable: column.getName(), type_asTable: ((Column) column).type], snapshot, action, conn, scope, {
+            plan, result ->
             assert result.asList(Column).size() == 1
             def snapshotColumn = result.asObject(Column)
-            assert snapshotColumn.name.matches(column.name)
+            assert snapshotColumn.name == columnName
 
             //do some minor checks based on things that are always consistent
             if (typeString == "int") {
@@ -256,13 +203,13 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
                 assert snapshotColumn.type.toString().toLowerCase().startsWith("varchar") && snapshotColumn.type.toString().contains("(10")
             }
 
-            //since data types change to what the database thinks, test by adding a new column with the snapshot's datatype and check that those are consistant
+            //since data types change to what the database thinks, test by adding a new columnRef with the snapshot's datatype and check that those are consistant
             def addColumnAction = new AddColumnsAction()
             def columnToAdd = snapshotColumn.clone() as Column
-            columnToAdd.name = new ObjectReference(snapshotColumn.name.container, snapshotColumn.name + "_added")
+            columnToAdd.name = new ObjectReference(snapshotColumn.container, snapshotColumn.name + "_added")
             addColumnAction.columns = [columnToAdd]
 
-            executor.execute(addColumnAction, scope)
+            scope.getSingleton(ActionExecutor).execute(addColumnAction, scope)
 
             def newColumnSnapshot = LiquibaseUtil.snapshotObject(Column, columnToAdd, scope)
 
@@ -271,15 +218,12 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
         })
 
         where:
-        [conn, scope, snapshot, column, typeString] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, scope, typeString] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
 
-            def snapshot = scope.getSingleton(TestSnapshotFactory).createSnapshot(new LimitTransformer(1), scope)
             return CollectionUtil.permutations([
                     [it],
                     [scope],
-                    [snapshot],
-                    [snapshot.get(Column).iterator().next()],
                     getDataTypesToTest()
             ])
         }
@@ -291,6 +235,25 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
     @Override
     protected Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope) {
-        return null
+        Snapshot snapshot = new Snapshot(scope)
+        for (ObjectReference tableName : getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope)) {
+            snapshot.add(new Table(tableName))
+            for (ObjectReference columnName : getObjectNames(TestColumnSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope)) {
+                snapshot.add(new Column(tableName, columnName.name, "int"))
+            }
+        }
+
+        return snapshot
     }
+
+    List<ObjectReference> getColumnNamesWithTables(Scope scope) {
+        getObjectNames(TestColumnSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope).collectMany {
+            def colRef = it
+            return getObjectNames(TestTableSupplier, ObjectNameStrategy.COMPLEX_NAMES, scope).collect {
+                return new ObjectReference(Column, it, colRef.name)
+            }
+        }
+    }
+
+
 }
