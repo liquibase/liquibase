@@ -143,7 +143,7 @@ abstract class AbstractActionTest extends Specification {
         Snapshot snapshot
 
         ActionTestPermutation(SpecificationContext specificationContext, AbstractActionTest test, Snapshot snapshot, ConnectionSupplier connectionSupplier, Scope scope, Map<String, Object> parameters) {
-            super(specificationContext.currentIteration.parent.name, parameters)
+            super(specificationContext.currentIteration.parent.spec.getPackage()+"."+specificationContext.currentIteration.parent.spec.name, specificationContext.currentIteration.parent.name, parameters)
             this.scope = scope
             this.database = scope.database
             this.conn = connectionSupplier

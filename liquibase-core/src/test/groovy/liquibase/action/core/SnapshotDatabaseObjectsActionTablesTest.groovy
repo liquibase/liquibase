@@ -111,13 +111,13 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
         })
 
         where:
-        [conn, snapshot, catalogRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, scope, catalogRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             Assume.assumeTrue("Database does not support catalogs", it.database.supports(Catalog))
             def scope = JUnitScope.getInstance(it)
 
             return CollectionUtil.permutations([
-                    [scope],
                     [it],
+                    [scope],
                     it.allContainers*.container.grep({ it != null }).unique()
             ])
         }
