@@ -18,28 +18,23 @@ import spock.lang.Unroll
 
 class SnapshotDatabaseObjectsActionForeignKeysTest extends AbstractActionTest {
 
-    @Unroll("#featureName: #fkName on #conn")
+    @Unroll("#featureName: #fkRef on #conn")
     def "can find fully qualified complex foreign key names"() {
         expect:
-        def fk = new ForeignKey(fkName,
-                [new ObjectReference(fkName.container, correctObjectName("base_table", Table, scope.database), correctObjectName("base_col", Column, scope.database))],
-                [new ObjectReference(fkName.container, correctObjectName("ref_table", Table, scope.database), correctObjectName("ref_col", Column, scope.database))])
-
-        def action = new SnapshotDatabaseObjectsAction(fk)
+        def action = new SnapshotDatabaseObjectsAction(fkRef)
 
         runStandardTest([
-                fkName_asTable: fkName
+                fkName_asTable: fkRef
         ], action, conn, scope, { plan, results ->
             assert results instanceof ObjectBasedQueryResult
             assert results.size() == 1;
 
             def foundFk = results.asObject(ForeignKey)
-            assert foundFk.name == fkName
-
+            assert foundFk.name == fkRef
         })
 
         where:
-        [conn, scope, fkName] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
+        [conn, scope, fkRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
             def scope = JUnitScope.getInstance(it)
 
             return CollectionUtil.permutations([
