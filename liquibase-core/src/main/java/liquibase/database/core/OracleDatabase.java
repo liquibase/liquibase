@@ -270,6 +270,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
                 return true;
+            } else if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
+                return true;
             }
         }
 
