@@ -38,6 +38,7 @@ public class NumberType extends LiquibaseDataType {
                 || database instanceof HsqlDatabase
                 || database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
+                || database instanceof InformixDatabase
                 || database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase) {
             return new DatabaseDataType("numeric", getParameters());
