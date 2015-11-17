@@ -101,13 +101,21 @@ public class DateTimeType extends LiquibaseDataType {
                 if (params.length == 0 || !allowFractional) {
                     return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
                 } else {
-                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITH TIME ZONE");
+                    Object param = params[0];
+                    if (params.length == 2) {
+                        param = params[1];
+                    }
+                    return new DatabaseDataType("TIMESTAMP(" + param + ") WITH TIME ZONE");
                 }
             } else {
                 if (params.length == 0 || !allowFractional) {
                     return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
                 } else {
-                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITHOUT TIME ZONE");
+                    Object param = params[0];
+                    if (params.length == 2) {
+                        param = params[1];
+                    }
+                    return new DatabaseDataType("TIMESTAMP(" + param + ") WITHOUT TIME ZONE");
                 }
             }
         }
