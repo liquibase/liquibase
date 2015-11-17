@@ -546,6 +546,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
+                        if (change.generateStatementsVolatile(database)) {
+                            executor.comment("WARNING The following SQL is possibly incorrect, invalid, and/or may change on each run:");
+                        }
+
+
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
                         if (listener != null) {
