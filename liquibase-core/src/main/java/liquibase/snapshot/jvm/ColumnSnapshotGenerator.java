@@ -18,10 +18,14 @@ import liquibase.util.StringUtils;
 
 import java.sql.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
+
+    private Pattern postgresValuePattern = Pattern.compile("'(.*)'::[\\w ]+");
 
     public ColumnSnapshotGenerator() {
         super(Column.class, new Class[]{Table.class, View.class});
@@ -367,6 +371,17 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
 
+        }
+
+        if (database instanceof PostgresDatabase) {
+            Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+            if (defaultValue != null && defaultValue instanceof String) {
+                Matcher matcher = postgresValuePattern.matcher((String) defaultValue);
+                if (matcher.matches()) {
+                    defaultValue = matcher.group(1);
+                }
+                columnMetadataResultSet.set("COLUMN_DEF", defaultValue);
+            }
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());
