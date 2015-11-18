@@ -226,6 +226,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
             this.valueNumeric = null;
         } else {
+          String saved = new String(valueNumeric);
             if (valueNumeric.startsWith("(")) {
                 valueNumeric = valueNumeric.replaceFirst("^\\(", "");
                 valueNumeric = valueNumeric.replaceFirst("\\)$", "");
@@ -234,7 +235,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             try {
                 this.valueNumeric = ValueNumeric.of(Locale.US, valueNumeric);
             } catch (ParseException e) {
-                this.valueComputed = new DatabaseFunction(valueNumeric);
+                this.valueComputed = new DatabaseFunction(saved);
             }
         }
 
