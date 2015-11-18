@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @LiquibaseService(skip = true)
-public class LoggingExecutor extends AbstractExecutor implements Executor {
+public class LoggingExecutor extends AbstractExecutor {
 
     private Writer output;
     private Executor delegatedReadExecutor;
@@ -34,22 +34,6 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     protected Writer getOutput() {
         return output;
-    }
-
-    @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
-        }
-
     }
 
     @Override
