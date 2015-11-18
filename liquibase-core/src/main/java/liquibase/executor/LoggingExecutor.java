@@ -103,7 +103,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
             if (sql instanceof ExecutablePreparedStatement) {
-                output.write("WARNING!: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode\n\n");
+                output.write("WARNING: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode\n\n");
             }
 
             for (String statement : applyVisitors(sql, sqlVisitors)) {
