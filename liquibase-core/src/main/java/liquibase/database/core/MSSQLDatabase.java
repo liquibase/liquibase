@@ -9,10 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -198,7 +195,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return escapeObjectName(null, schemaName, tableName, Table.class);
+        return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -293,6 +290,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
+    }
+
+    @Override
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return Relation.class.isAssignableFrom(type);
     }
 
     @Override
