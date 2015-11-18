@@ -83,10 +83,19 @@ public class StandardLockService implements LockService {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (!hasDatabaseChangeLogLockTable()) {
-            executor.comment("Create Database Lock Table");
-            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-            database.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            try {
+                executor.comment("Create Database Lock Table");
+                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                database.commit();
+                LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            } catch (DatabaseException e) {
+                if (e.getMessage() != null && e.getMessage().contains("exists")) {
+                    //hit a race condition where the table got created by another node.
+                    LogFactory.getLogger().debug("Database lock table already appears to exist, due to exception: " + e.getMessage()+". Continuing on");
+                }  else {
+                    throw e;
+                }
+            }
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
             hasDatabaseChangeLogLockTable = true;
