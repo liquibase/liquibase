@@ -76,7 +76,7 @@ public class ChangeFactory {
             registry.get(name).add(changeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
-        }
+		}
     }
 
     public ChangeMetaData getChangeMetaData(String change) {

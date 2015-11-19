@@ -40,7 +40,8 @@ public class MockDatabase implements Database, InternalDatabase {
     private boolean outputDefaultCatalog;
     private boolean supportsCatalogs = true;
     private boolean supportsSchemas = true;
-    private String defaultCatalogName;
+	private boolean supportsSequences = true;
+	private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
 
@@ -209,10 +210,14 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return true;
+		return supportsSequences;
     }
 
-    @Override
+	public void setSupportsSequences(boolean supportsSequences) {
+		this.supportsSequences = supportsSequences;
+	}
+
+	@Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
     }

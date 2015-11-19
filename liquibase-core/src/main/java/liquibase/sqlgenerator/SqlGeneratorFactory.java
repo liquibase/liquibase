@@ -92,7 +92,15 @@ public class SqlGeneratorFactory {
         } else {
             databaseName = database.getShortName();
         }
-        String key = statement.getClass().getName()+":"+ databaseName;
+
+        int version;
+        try {
+            version = database.getDatabaseMajorVersion();
+        } catch (Throwable e) {
+            version = 0;
+        }
+
+        String key = statement.getClass().getName()+":"+ databaseName+":"+ version;
 
         if (generatorsByKey.containsKey(key)) {
             return generatorsByKey.get(key);
