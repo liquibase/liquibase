@@ -16,5 +16,6 @@ public interface SqlStatement {
 
     boolean skipOnUnsupported();
 
+    boolean skipVisitors();
 
 }

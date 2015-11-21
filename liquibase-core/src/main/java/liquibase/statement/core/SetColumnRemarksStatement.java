@@ -37,4 +37,9 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
     public String getRemarks() {
         return remarks;
     }
+    
+	@Override
+	public boolean skipVisitors() {
+		return true;
+	}
 }

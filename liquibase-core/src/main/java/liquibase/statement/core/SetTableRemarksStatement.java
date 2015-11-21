@@ -32,4 +32,10 @@ public class SetTableRemarksStatement extends AbstractSqlStatement {
         return remarks;
     }
 
+	@Override
+	public boolean skipVisitors() {
+		return true;
+	}
+
+    
 }
