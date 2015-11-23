@@ -87,51 +87,53 @@ public class ServiceLocator {
 
         this.classResolver.setClassLoaders(new HashSet<ClassLoader>(Arrays.asList(new ClassLoader[] {resourceAccessor.toClassLoader()})));
 
-        packagesToScan = new ArrayList<String>();
-        String packagesToScanSystemProp = System.getProperty("liquibase.scan.packages");
-        if ((packagesToScanSystemProp != null) &&
-        	((packagesToScanSystemProp = StringUtils.trimToNull(packagesToScanSystemProp)) != null)) {
-        	for (String value : packagesToScanSystemProp.split(",")) {
-        		addPackageToScan(value);
-        	}
-        } else {
-	        Set<InputStream> manifests;
-	        try {
-	            manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
-                if (manifests != null) {
-                    for (InputStream is : manifests) {
-                        Manifest manifest = new Manifest(is);
-                        String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
-                        if (attributes != null) {
-                            for (Object value : attributes.split(",")) {
-                                addPackageToScan(value.toString());
-                            }
-                        }
-                        is.close();
-                    }
+        if (packagesToScan == null) {
+            packagesToScan = new ArrayList<String>();
+            String packagesToScanSystemProp = System.getProperty("liquibase.scan.packages");
+            if ((packagesToScanSystemProp != null) &&
+                ((packagesToScanSystemProp = StringUtils.trimToNull(packagesToScanSystemProp)) != null)) {
+                for (String value : packagesToScanSystemProp.split(",")) {
+                    addPackageToScan(value);
                 }
-	        } catch (IOException e) {
-	            throw new UnexpectedLiquibaseException(e);
-	        }
+            } else {
+                Set<InputStream> manifests;
+                try {
+                    manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
+                    if (manifests != null) {
+                        for (InputStream is : manifests) {
+                            Manifest manifest = new Manifest(is);
+                            String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
+                            if (attributes != null) {
+                                for (Object value : attributes.split(",")) {
+                                    addPackageToScan(value.toString());
+                                }
+                            }
+                            is.close();
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
 
-            if (packagesToScan.size() == 0) {
-                addPackageToScan("liquibase.change");
-                addPackageToScan("liquibase.changelog");
-                addPackageToScan("liquibase.database");
-                addPackageToScan("liquibase.parser");
-                addPackageToScan("liquibase.precondition");
-                addPackageToScan("liquibase.datatype");
-                addPackageToScan("liquibase.serializer");
-                addPackageToScan("liquibase.sqlgenerator");
-                addPackageToScan("liquibase.executor");
-                addPackageToScan("liquibase.snapshot");
-                addPackageToScan("liquibase.logging");
-                addPackageToScan("liquibase.diff");
-                addPackageToScan("liquibase.structure");
-                addPackageToScan("liquibase.structurecompare");
-                addPackageToScan("liquibase.lockservice");
-                addPackageToScan("liquibase.sdk.database");
-                addPackageToScan("liquibase.ext");
+                if (packagesToScan.size() == 0) {
+                    addPackageToScan("liquibase.change");
+                    addPackageToScan("liquibase.changelog");
+                    addPackageToScan("liquibase.database");
+                    addPackageToScan("liquibase.parser");
+                    addPackageToScan("liquibase.precondition");
+                    addPackageToScan("liquibase.datatype");
+                    addPackageToScan("liquibase.serializer");
+                    addPackageToScan("liquibase.sqlgenerator");
+                    addPackageToScan("liquibase.executor");
+                    addPackageToScan("liquibase.snapshot");
+                    addPackageToScan("liquibase.logging");
+                    addPackageToScan("liquibase.diff");
+                    addPackageToScan("liquibase.structure");
+                    addPackageToScan("liquibase.structurecompare");
+                    addPackageToScan("liquibase.lockservice");
+                    addPackageToScan("liquibase.sdk.database");
+                    addPackageToScan("liquibase.ext");
+                }
             }
         }
     }
