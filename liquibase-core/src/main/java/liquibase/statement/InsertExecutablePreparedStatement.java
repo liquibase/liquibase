@@ -18,6 +18,11 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	}
 
 	@Override
+	public boolean continueOnError() {
+		return false;
+	}
+
+	@Override
 	protected String generateSql(List<ColumnConfig> cols) {
 		StringBuilder sql = new StringBuilder("INSERT INTO ");
 	    StringBuilder params = new StringBuilder("VALUES(");
