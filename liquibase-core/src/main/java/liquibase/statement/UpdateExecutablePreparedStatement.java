@@ -22,7 +22,12 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 		super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);
 	}
 
-	@Override
+    @Override
+    public boolean continueOnError() {
+        return false;
+    }
+
+    @Override
 	protected String generateSql(List<ColumnConfig> cols) {
 
 		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));

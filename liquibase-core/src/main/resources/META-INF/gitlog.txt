@@ -1,3 +1,8 @@
+b4fc4bb DVONE-3393 explicitly set xml version to 1.0. In some environments it seemed to default to 1.1
+9a33021 Reverted CORE-2589 Output xml changelogs as xml version="1.1"
+28d9b33 Allow extensions to control label and context columns size
+4338052 CORE-2589 Output xml changelogs as xml version="1.1"
+96a2362 Support continueOnError flag on SqlStatement
 840be42 CORE-2563 DiffChangeLog that adds columns does not preserve column order
 4177583 CORE-2560 Add new runOrder="first|last" attribute to control when a changeSet is ran
 4079754 CORE-2563 DiffChangeLog that adds columns does not preserve column order
