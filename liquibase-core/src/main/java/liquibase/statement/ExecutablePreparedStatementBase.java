@@ -183,8 +183,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		
 		try {
 			if (in instanceof FileInputStream) {
-				in = createStream(in);
-				return new LOBContent<InputStream>(in, ((FileInputStream) in).getChannel().size());
+				InputStream bufferedInput = createStream(in);
+				return new LOBContent<InputStream>(bufferedInput, ((FileInputStream) in).getChannel().size());
 			}
 			
 			in = createStream(in);
