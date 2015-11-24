@@ -97,7 +97,7 @@ public class LiquibaseConfiguration {
     protected  <T extends ConfigurationContainer> T createConfiguration(Class<T> type) {
         try {
             T configuration = type.newInstance();
-            configuration.init(new SystemPropertyProvider());
+            configuration.init(configurationValueProviders);
             return configuration;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName(), e);

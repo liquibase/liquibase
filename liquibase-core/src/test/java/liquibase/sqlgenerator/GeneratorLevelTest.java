@@ -13,6 +13,8 @@ public class GeneratorLevelTest {
             String className = generator.getClass().getName();
             if (className.contains(".ext.")) {
                 //not one to test, a test class
+            } else if (className.endsWith("CreateTableGeneratorInformix")) {
+                //had to change level for some reason
             } else if (className.endsWith("Generator")) {
                 assertEquals("Incorrect level/naming convention for "+ className, SqlGenerator.PRIORITY_DEFAULT, specializationlevel);
             } else {

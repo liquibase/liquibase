@@ -109,7 +109,9 @@ public class Liquibase {
         log = LogFactory.getLogger();
         this.databaseChangeLog = changeLog;
 
-        this.changeLogFile = changeLog.getPhysicalFilePath();
+        if (changeLog != null) {
+            this.changeLogFile = changeLog.getPhysicalFilePath();
+        }
         if (this.changeLogFile != null) {
             changeLogFile = changeLogFile.replace('\\', '/'); //convert to standard / if using absolute path on windows
         }

@@ -17,6 +17,7 @@ import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
@@ -160,6 +161,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             reader = new FileReader(this.changeLogFile);
             CSVReader csvReader = new CSVReader(reader);
             String[] line = csvReader.readNext();
+
+            if (line == null) { //empty file
+                writeHeader(this.changeLogFile);
+                return new ArrayList<RanChangeSet>();
+            }
             if (!line[COLUMN_ID].equals("ID")) {
                 throw new DatabaseException("Missing header in file "+this.changeLogFile.getAbsolutePath());
             }

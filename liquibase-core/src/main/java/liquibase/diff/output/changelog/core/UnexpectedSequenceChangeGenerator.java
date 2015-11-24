@@ -21,12 +21,12 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
 
     @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
+        return new Class[] { Table.class};
     }
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] { Table.class};
+        return null;
     }
 
     @Override

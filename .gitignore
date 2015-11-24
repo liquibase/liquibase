@@ -19,3 +19,6 @@ derby.log
 .DS_Store
 /tmp
 /.metadata/
+
+atlassian-ide-plugin.xml
+_issues

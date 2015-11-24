@@ -37,6 +37,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     private List<RanChangeSet> ranChangeSetList;
     private boolean serviceInitialized = false;
     private Boolean hasDatabaseChangeLogTable = null;
+    private boolean databaseChecksumsCompatible = true;
     private Integer lastChangeSetSequenceValue;
 
     @Override
@@ -189,6 +190,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
+                    databaseChecksumsCompatible = false;
                     statementsToExecute.add(new RawSqlStatement(
                             "UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " " +
                             "SET " +  getDatabase().escapeObjectName("MD5SUM", Column.class) + " = NULL"));
@@ -240,7 +242,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String fileName = rs.get("FILENAME").toString();
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
+                    String md5sum = rs.get("MD5SUM") == null || !databaseChecksumsCompatible ? null : rs.get("MD5SUM").toString();
                     String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
                     String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
