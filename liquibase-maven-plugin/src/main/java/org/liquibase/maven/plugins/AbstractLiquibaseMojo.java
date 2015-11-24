@@ -238,9 +238,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
-     * @parameter expression="${liquibase.should.run}"
+     * @parameter expression="${liquibase.skip}"
      */
-    protected boolean liquibaseShouldRun = true;
+    protected boolean skip = false;
 
     /**
      * Array to put a expression variable to maven plugin.
@@ -320,7 +320,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
-        if (!liquibaseShouldRun) {
+        if (skip) {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
