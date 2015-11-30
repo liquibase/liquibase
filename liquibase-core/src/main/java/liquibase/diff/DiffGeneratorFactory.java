@@ -17,12 +17,12 @@ public class DiffGeneratorFactory {
 
     protected DiffGeneratorFactory() {
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(DiffGenerator.class);
-
-            //noinspection unchecked
-            for (Class<? extends DiffGenerator> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
-            }
+//            Class[] classes = ServiceLocator.getInstance().findClasses(DiffGenerator.class);
+//
+//            //noinspection unchecked
+//            for (Class<? extends DiffGenerator> clazz : classes) {
+//                register(clazz.getConstructor().newInstance());
+//            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);

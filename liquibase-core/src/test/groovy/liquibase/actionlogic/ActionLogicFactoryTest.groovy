@@ -5,62 +5,57 @@ import liquibase.Scope
 import liquibase.action.UpdateSqlAction
 import liquibase.action.core.CreateSequenceAction
 import liquibase.action.core.DropSequenceAction
+import liquibase.exception.ServiceNotFoundException
 import liquibase.sdk.database.MockDatabase
+import liquibase.servicelocator.ServiceLocator
 import liquibase.test.JUnitResourceAccessor
 import spock.lang.Specification
 
 class ActionLogicFactoryTest extends Specification {
 
-    ActionLogicFactory emptyLogicFactory
+    ServiceLocator emptyLogicFactory
     Scope testScope;
+    List<ActionLogic> emptyLogicFactoryServices;
 
     def setup() {
-        testScope = JUnitScope.instance
-
-        emptyLogicFactory = new ActionLogicFactory(testScope) {
-            @Override
-            protected Class<? extends ActionLogic>[] findAllServiceClasses(Scope scope) {
-                return new Class[0];
-            }
+        emptyLogicFactory = new ServiceLocator() {
 
             @Override
-            protected TemplateActionLogic[] getTemplateActionLogic(Scope scope) {
-                return new TemplateActionLogic[0];
+            def <T> Iterator<T> findAllServices(Class<T> requiredInterface) throws ServiceNotFoundException {
+                return emptyLogicFactoryServices.iterator()
             }
+
         }
+        emptyLogicFactoryServices = []
+        testScope = JUnitScope.instance.overrideSingleton(ServiceLocator, emptyLogicFactory)
+
     }
 
     def "getActionLogic when empty"() {
         expect:
-        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), JUnitScope.instance) == null
+        testScope.getSingleton(ActionLogicFactory).getActionLogic(new UpdateSqlAction("some sql"), JUnitScope.instance) == null
     }
 
     def "getActionLogic"() {
         when:
-        emptyLogicFactory.register(new MockActionLogic("create 1", 1, CreateSequenceAction))
-        emptyLogicFactory.register(new MockActionLogic("create 2", 2, CreateSequenceAction))
+        emptyLogicFactoryServices.add(new MockActionLogic("create 1", 1, CreateSequenceAction))
+        emptyLogicFactoryServices.add(new MockActionLogic("create 2", 2, CreateSequenceAction))
 
-        emptyLogicFactory.register(new MockActionLogic("drop 3", 3, DropSequenceAction))
-        emptyLogicFactory.register(new MockActionLogic("drop 2", 2, DropSequenceAction))
-        emptyLogicFactory.register(new MockActionLogic("drop 1", 1, DropSequenceAction))
+        emptyLogicFactoryServices.add(new MockActionLogic("drop 3", 3, DropSequenceAction))
+        emptyLogicFactoryServices.add(new MockActionLogic("drop 2", 2, DropSequenceAction))
+        emptyLogicFactoryServices.add(new MockActionLogic("drop 1", 1, DropSequenceAction))
 
-        def scope = JUnitScope.getInstance(new MockDatabase())
+        def scope = testScope.child(Scope.Attr.database, new MockDatabase())
 
         then:
-        emptyLogicFactory.getActionLogic(new CreateSequenceAction(), scope).toString() == "Mock action logic 'create 2'"
-        emptyLogicFactory.getActionLogic(new DropSequenceAction(), scope).toString() == "Mock action logic 'drop 3'"
-        emptyLogicFactory.getActionLogic(new UpdateSqlAction("some sql"), scope) == null
+        scope.getSingleton(ActionLogicFactory).getActionLogic(new CreateSequenceAction(), scope).toString() == "Mock action logic 'create 2'"
+        scope.getSingleton(ActionLogicFactory).getActionLogic(new DropSequenceAction(), scope).toString() == "Mock action logic 'drop 3'"
+        scope.getSingleton(ActionLogicFactory).getActionLogic(new UpdateSqlAction("some sql"), scope) == null
 
     }
 
     def "Automatically finds action classes"() {
         expect:
-        JUnitScope.instance.getSingleton(ActionLogicFactory).registry.size() > 0
+        JUnitScope.instance.getSingleton(ServiceLocator).findAllServices(ActionLogic.class).hasNext()
     }
-
-//    enable if/when we create .logic files
-//    def "Automatically registers TemplateActionLogic instances based on .logic files"() {
-//        expect:
-//        JUnitScope.instance.getSingleton(ActionLogicFactory).registry.findAll({it.getClass() == TemplateActionLogic}).size() > 0
-//    }
 }

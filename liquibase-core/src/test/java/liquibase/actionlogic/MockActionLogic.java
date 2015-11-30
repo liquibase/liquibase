@@ -3,6 +3,7 @@ package liquibase.actionlogic;
 import groovy.lang.Closure;
 import liquibase.Scope;
 import liquibase.action.Action;
+import liquibase.database.Database;
 import liquibase.exception.ActionPerformException;
 
 public class MockActionLogic extends AbstractActionLogic {
@@ -51,5 +52,10 @@ public class MockActionLogic extends AbstractActionLogic {
         } else {
             return priority;
         }
+    }
+
+    @Override
+    protected Class<? extends Database> getRequiredDatabase() {
+        return null;
     }
 }

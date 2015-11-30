@@ -323,7 +323,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
+//            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
 
         } catch (Exception e) {
             LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
@@ -898,7 +898,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         }
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
-                            ExecutorService.getInstance().getExecutor(this).execute(statement);
+//                            ExecutorService.getInstance().getExecutor(this).execute(statement);
                         }
 
                     }
@@ -1002,11 +1002,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
-        if (definition == null) {
-            return null;
-        }
-        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+//        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+//        if (definition == null) {
+//            return null;
+//        }
+//        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+        return null;
     }
 
     @Override
@@ -1166,7 +1167,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
             connection.close();
         }
-        ExecutorService.getInstance().clearExecutor(this);
+//        ExecutorService.getInstance().clearExecutor(this);
     }
 
     @Override
@@ -1232,7 +1233,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 continue;
             }
             LoggerFactory.getLogger(getClass()).debug("Executing Statement: " + statement);
-            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+//            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
         }
     }
 

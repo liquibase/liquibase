@@ -1,9 +1,9 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.ExecutablePreparedStatement;
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     private Writer output;
@@ -27,6 +26,11 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         this.output = output;
         this.delegatedReadExecutor = delegatedExecutor;
         setDatabase(database);
+    }
+
+    @Override
+    public int getPriority(Scope scope) {
+        return PRIORITY_NOT_APPLICABLE;
     }
 
     protected Writer getOutput() {

@@ -71,7 +71,7 @@ public class ChangeSetExecuteTest {
     @Test
     public void testExecuteForDatabaseThatSupportsDdlInTranWhenRunInTransactionIsTrue() throws Exception {
     	Database database = createMockDatabaseThatSupportsDdlInTran(); 
-    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
+//    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
     	checkOrder(database, true);
     	database.setAutoCommit(false); // before ChangeSet is run
     	checkOrder(database, false);
@@ -89,7 +89,7 @@ public class ChangeSetExecuteTest {
     @Test
     public void testExecuteForDatabaseThatSupportsDdlInTranWhenRunInTransactionIsFalse() throws Exception {
     	Database database = createMockDatabaseThatSupportsDdlInTran(); 
-    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
+//    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
     	checkOrder(database, true);
     	database.setAutoCommit(true); // before ChangeSet is run
     	checkOrder(database, false);
@@ -107,7 +107,7 @@ public class ChangeSetExecuteTest {
     @Test
     public void testExecuteForDatabaseThatDoesNotSupportDdlInTranWhenRunInTransactionIsTrue() throws Exception {
     	Database database = createMockDatabaseThatDoesNotSupportDdlInTran();
-    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
+//    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
     	trainToAcceptAnyNumberOfCommitsOrRollbacks(database);
     	// database.setAutoCommit(boolean) should not be called
     	replay(database);
@@ -121,7 +121,7 @@ public class ChangeSetExecuteTest {
     @Test
     public void testExecuteForDatabaseThatDoesNotSupportDdlInTranWhenRunInTransactionIsFalse() throws Exception {
     	Database database = createMockDatabaseThatDoesNotSupportDdlInTran(); 
-    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
+//    	ExecutorService.getInstance().setExecutor(database, createMockExecutor());
     	trainToAcceptAnyNumberOfCommitsOrRollbacks(database);
     	// database.setAutoCommit(boolean) should not be called
     	replay(database);

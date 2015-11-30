@@ -148,18 +148,18 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return !type.isAssignableFrom(Catalog.class) && !type.isAssignableFrom(Schema.class) && super.supports(type);
     }
 
-    @Override
-    protected String getConnectionCatalogName() throws DatabaseException {
-        if (getConnection() instanceof OfflineConnection) {
-            return getConnection().getCatalog();
-        }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
-        } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
-        }
-        return null;
-    }
+//    @Override
+//    protected String getConnectionCatalogName() throws DatabaseException {
+//        if (getConnection() instanceof OfflineConnection) {
+//            return getConnection().getCatalog();
+//        }
+//        try {
+//            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
+//        } catch (Exception e) {
+//            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
+//        }
+//        return null;
+//    }
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -343,20 +343,20 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-    public Set<String> getUserDefinedTypes() {
-        if (userDefinedTypes == null) {
-            userDefinedTypes = new HashSet<String>();
-            if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
-                try {
-                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
-                } catch (DatabaseException e) {
-                    //ignore error
-                }
-            }
-        }
-
-        return userDefinedTypes;
-    }
+//    public Set<String> getUserDefinedTypes() {
+//        if (userDefinedTypes == null) {
+//            userDefinedTypes = new HashSet<String>();
+//            if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
+//                try {
+//                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+//                } catch (DatabaseException e) {
+//                    //ignore error
+//                }
+//            }
+//        }
+//
+//        return userDefinedTypes;
+//    }
 
     @Override
     public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {

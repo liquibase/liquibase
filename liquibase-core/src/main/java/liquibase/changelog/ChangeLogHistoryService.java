@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -22,7 +23,7 @@ public interface ChangeLogHistoryService extends PrioritizedService {
     /**
      * Ensures the change log history container is correctly initialized for use. This method may be called multiple times so it should check state as needed.
      */
-    public void init() throws DatabaseException;
+    public void init(Scope scope) throws DatabaseException;
 
     /**
      * Upgrades any existing checksums with an out of date version

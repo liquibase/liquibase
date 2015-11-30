@@ -1,38 +1,14 @@
 package liquibase.servicelocator;
 
 import liquibase.Scope;
-import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.TreeSet;
 
 public abstract class AbstractServiceFactory<T extends Service> {
 
-    private List<T> registry = new ArrayList<>();
-
     protected AbstractServiceFactory(Scope scope) {
-        try {
-            for (Class clazz : findAllServiceClasses(scope)) {
-                register((T) clazz.getConstructor().newInstance());
-            }
-
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
-    protected Class<? extends T>[] findAllServiceClasses(Scope scope) {
-        return scope.getSingleton(ServiceLocator.class).findClasses(getServiceClass());
-    }
-
-    /**
-     * Registers a new ActionLogic instance for future consideration.
-     */
-    public void register(T service) {
-        this.registry.add(service);
-    }
-
-    public List<T> getRegistry() {
-        return Collections.unmodifiableList(registry);
     }
 
     protected abstract Class<T> getServiceClass();
@@ -54,7 +30,9 @@ public abstract class AbstractServiceFactory<T extends Service> {
             }
         });
 
-        for (T service : getRegistry()) {
+        Iterator<T> serviceIterator = scope.getSingleton(ServiceLocator.class).findAllServices(getServiceClass());
+        while (serviceIterator.hasNext()) {
+            T service = serviceIterator.next();
             if (getPriority(service, scope, args) >= 0) {
                 applicable.add(service);
             }

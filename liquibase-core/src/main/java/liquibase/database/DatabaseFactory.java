@@ -28,16 +28,16 @@ public class DatabaseFactory {
     private DatabaseFactory() {
         log = LoggerFactory.getLogger(DatabaseFactory.class);
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
-
-            //noinspection unchecked
-            for (Class<? extends Database> clazz : classes) {
-                try {
-                    register(clazz.getConstructor().newInstance());
-                } catch (Throwable e) {
-                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
-                }
-            }
+//            Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
+//
+//            //noinspection unchecked
+//            for (Class<? extends Database> clazz : classes) {
+//                try {
+//                    register(clazz.getConstructor().newInstance());
+//                } catch (Throwable e) {
+//                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
+//                }
+//            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);

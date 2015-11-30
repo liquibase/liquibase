@@ -194,11 +194,11 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         if (getConnection() == null || getConnection() instanceof OfflineConnection) {
             return null;
         }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
-        } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
-        }
+//        try {
+//            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
+//        } catch (Exception e) {
+//            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
+//        }
         return null;
     }
 

@@ -1,9 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.ContextExpression;
-import liquibase.Contexts;
-import liquibase.LabelExpression;
-import liquibase.Labels;
+import liquibase.*;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -84,12 +81,13 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return "varchar";
     }
 
-    public void init() throws DatabaseException {
+    public void init(Scope scope) throws DatabaseException {
         if (serviceInitialized) {
             return;
         }
+        this.scope = scope;
         Database database = getDatabase();
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = scope.getExecutor();
 
         Table changeLogTable = null;
         try {
@@ -180,7 +178,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 //                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName + "(255)", null));
 //            }
 
-            List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
+            List<Map<String, ?>> md5sumRS = executor.queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
             if (md5sumRS.size() > 0) {
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
@@ -231,7 +229,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
             if (hasDatabaseChangeLogTable()) {
                 LoggerFactory.getLogger(getClass()).info("Reading from " + databaseChangeLogTableName);
-                List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
+                List<Map<String, ?>> results = queryDatabaseChangeLogTable(scope);
                 for (Map rs : results) {
                     String fileName = rs.get("FILENAME").toString();
                     String author = rs.get("AUTHOR").toString();
@@ -270,14 +268,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return Collections.unmodifiableList(ranChangeSetList);
     }
 
-    public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
+    public List<Map<String, ?>> queryDatabaseChangeLogTable(Scope scope) throws DatabaseException {
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
-        return ExecutorService.getInstance().getExecutor(database).queryForList(select);
+        return scope.getExecutor().queryForList(select);
     }
 
     @Override
     protected void replaceChecksum(ChangeSet changeSet) throws DatabaseException {
-        ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
+        scope.getExecutor().execute(new UpdateChangeSetChecksumStatement(changeSet));
 
         getDatabase().commit();
         reset();
@@ -296,7 +294,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         Database database = getDatabase();
 
-        ExecutorService.getInstance().getExecutor(database).execute(new MarkChangeSetRanStatement(changeSet, execType));
+        scope.getExecutor().execute(new MarkChangeSetRanStatement(changeSet, execType));
         getDatabase().commit();
         if (this.ranChangeSetList != null) {
             this.ranChangeSetList.add(new RanChangeSet(changeSet, execType, null, null));
@@ -307,7 +305,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public void removeFromHistory(final ChangeSet changeSet) throws DatabaseException {
         Database database = getDatabase();
-        ExecutorService.getInstance().getExecutor(database).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+        scope.getExecutor().execute(new RemoveChangeSetRanStatusStatement(changeSet));
         getDatabase().commit();
 
         if (this.ranChangeSetList != null) {
@@ -321,7 +319,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             if (getDatabase().getConnection() == null) {
                 lastChangeSetSequenceValue = 0;
             } else {
-                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(getDatabase()).queryForInt(new GetNextChangeSetSequenceValueStatement());
+                lastChangeSetSequenceValue = scope.getExecutor().queryForInt(new GetNextChangeSetSequenceValueStatement());
             }
         }
 
@@ -334,9 +332,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public void tag(final String tagString) throws DatabaseException {
         Database database = getDatabase();
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = scope.getExecutor();
         try {
-            int totalRows = ExecutorService.getInstance().getExecutor(database).queryForInt(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true)));
+            int totalRows = scope.getExecutor().queryForInt(new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("COUNT(*)", true)));
             if (totalRows == 0) {
                 ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, getDatabase().getObjectQuotingStrategy(), null);
                 this.setExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
@@ -356,7 +354,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     @Override
     public boolean tagExists(final String tag) throws DatabaseException {
-        int count = ExecutorService.getInstance().getExecutor(getDatabase()).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), new ColumnConfig().setName("COUNT(*)", true)));
+        int count = scope.getExecutor().queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), new ColumnConfig().setName("COUNT(*)", true)));
         return count > 0;
     }
 
@@ -365,7 +363,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         Database database = getDatabase();
         UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
         updateStatement.addNewColumnValue("MD5SUM", null);
-        ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
+        scope.getExecutor().execute(updateStatement);
         database.commit();
     }
 

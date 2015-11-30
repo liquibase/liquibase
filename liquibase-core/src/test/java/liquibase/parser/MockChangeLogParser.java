@@ -4,9 +4,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.LiquibaseService;
 
-@LiquibaseService(skip = true)
 public class MockChangeLogParser implements ChangeLogParser {
 
     private String[] validExtensions;

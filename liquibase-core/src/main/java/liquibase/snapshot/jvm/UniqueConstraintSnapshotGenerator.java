@@ -399,7 +399,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 //                sql += "and constraint_name='" + constraintName + "'";
 //            }
 //        }
-        return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+//        return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+        return null;
     }
 
     //START CODE FROM PostgresDatabseSnapshotGenerator

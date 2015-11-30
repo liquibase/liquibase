@@ -1,0 +1,6 @@
+liquibase.actionlogic.core.AddAutoIncrementLogic
+liquibase.actionlogic.core.AddColumnsLogic
+liquibase.actionlogic.core.AddDefaultValueLogic
+
+liquibase.actionlogic.core.SnapshotTablesLogicJdbc
+liquibase.actionlogic.core.SnapshotTablesLogicOffline

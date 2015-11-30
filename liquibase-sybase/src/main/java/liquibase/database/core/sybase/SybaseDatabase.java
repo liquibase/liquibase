@@ -229,11 +229,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         if (getConnection() == null || getConnection() instanceof OfflineConnection) {
             return null;
         }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
-        } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
-        }
+//        try {
+//            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
+//        } catch (Exception e) {
+//            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
+//        }
         return null;
     }
 
@@ -245,16 +245,17 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        schema = schema.customize(this);
-        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
-        @SuppressWarnings("unchecked")
-        List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
-        StringBuilder definition = new StringBuilder();
-        for (String d : definitionRows) {
-        	definition.append(d);
-        }
-        return definition.toString();
+//        schema = schema.customize(this);
+//        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
+//        Executor executor = ExecutorService.getInstance().getExecutor(this);
+//        @SuppressWarnings("unchecked")
+//        List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
+//        StringBuilder definition = new StringBuilder();
+//        for (String d : definitionRows) {
+//        	definition.append(d);
+//        }
+//        return definition.toString();
+        return null;
 	}
 	
 	/** 

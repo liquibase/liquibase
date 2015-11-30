@@ -39,22 +39,22 @@ public class ServiceLocatorTest {
      }
 
 
-    @Test
-    public void getClasses() throws Exception {
-        Class[] classes = serviceLocator.findClasses(ChangeLogParser.class);
-        assertTrue(classes.length > 0);
-    }
+//    @Test
+//    public void getClasses() throws Exception {
+//        Class[] classes = serviceLocator.findClasses(ChangeLogParser.class);
+//        assertTrue(classes.length > 0);
+//    }
 
-    @Test
-    public void findClass() throws Exception {
-        Class[] classes = serviceLocator.findClasses(Database.class);
-        for (Class clazz : classes) {
-            assertFalse(clazz.getName()+" is abstract", Modifier.isAbstract(clazz.getModifiers()));                    
-            assertFalse(clazz.getName()+" is an interface", Modifier.isInterface(clazz.getModifiers()));
-            assertNotNull(clazz.getConstructors());
-        }
-        assertTrue(classes.length > 0);
-    }
+//    @Test
+//    public void findClass() throws Exception {
+//        Class[] classes = serviceLocator.findClasses(Database.class);
+//        for (Class clazz : classes) {
+//            assertFalse(clazz.getName()+" is abstract", Modifier.isAbstract(clazz.getModifiers()));
+//            assertFalse(clazz.getName()+" is an interface", Modifier.isInterface(clazz.getModifiers()));
+//            assertNotNull(clazz.getConstructors());
+//        }
+//        assertTrue(classes.length > 0);
+//    }
 
 //    @Test
 //    public void extractZipFile() throws MalformedURLException {

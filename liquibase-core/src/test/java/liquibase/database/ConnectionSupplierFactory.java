@@ -5,10 +5,7 @@ import liquibase.database.core.UnsupportedDatabaseSupplier;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public class ConnectionSupplierFactory {
 
@@ -20,30 +17,20 @@ public class ConnectionSupplierFactory {
 
     public List<ConnectionSupplier> getConnectionSuppliers() {
         if (this.connectionSuppliers == null) {
-            Class[] supplierClasses = ServiceLocator.getInstance().findClasses(ConnectionSupplier.class);
+            Iterator<ConnectionSupplier> supplierIterator = ServiceLocator.getInstance().findAllServices(ConnectionSupplier.class);
 
-            if (supplierClasses.length == 0) {
+            if (!supplierIterator.hasNext()) {
                 throw new UnexpectedLiquibaseException("Could not find ConnectionSupplier implementations");
             }
 
-            if (supplierClasses.length > 1) {
-                List<Class> classes = new ArrayList<>(Arrays.asList(supplierClasses));
-                ListIterator iterator = classes.listIterator();
-                while (iterator.hasNext()) {
-                    if (iterator.next().equals(UnsupportedDatabaseSupplier.class)) {
-                        iterator.remove();
-                    }
-                }
-                supplierClasses = classes.toArray(new Class[classes.size()]);
-            }
-
             this.connectionSuppliers = new ArrayList<>();
-            try {
-                for (Class clazz : supplierClasses) {
-                    this.connectionSuppliers.add((ConnectionSupplier) clazz.newInstance());
+
+            while (supplierIterator.hasNext()) {
+                ConnectionSupplier supplier = supplierIterator.next();
+                if (supplier.getClass().equals(UnsupportedDatabaseSupplier.class)) {
+                    continue;
                 }
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
+                this.connectionSuppliers.add(supplier);
             }
         }
 

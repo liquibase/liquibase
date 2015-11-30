@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
@@ -13,11 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractExecutor {
+
     protected Database database;
 
     public void setDatabase(Database database) {
         this.database = database;
     }
+
+    public abstract int getPriority(Scope scope);
 
     protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);

@@ -1,6 +1,7 @@
 package liquibase.dbtest.mysql;
 
 import liquibase.CatalogAndSchema;
+import liquibase.JUnitScope;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.*;
@@ -44,7 +45,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
             return;
         }
 
-        ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RawSqlStatement("CREATE TABLE ad (\n" +
+        JUnitScope.getInstance().getExecutor().execute(new RawSqlStatement("CREATE TABLE ad (\n" +
                 "ad_id int(10) unsigned NOT NULL AUTO_INCREMENT,\n" +
                 "advertiser_id int(10) unsigned NOT NULL,\n" +
                 "ad_type_id int(10) unsigned NOT NULL,\n" +

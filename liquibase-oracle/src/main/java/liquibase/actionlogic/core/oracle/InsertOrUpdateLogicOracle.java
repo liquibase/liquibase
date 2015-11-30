@@ -38,17 +38,17 @@ public class InsertOrUpdateLogicOracle extends InsertOrUpdateLogic {
                return "\tELSIF v_reccount = 1 THEN\n";
     }
 
-    @Override
-    protected String getPostUpdateStatements(Database database){
-        StringBuffer endStatements = new StringBuffer();
-        endStatements.append("END IF;\n");
-        endStatements.append("END;\n");
-
-        if (ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor) {
-            endStatements.append("/\n");
-        }
-
-        return endStatements.toString();
-
-    }
+//    @Override
+//    protected String getPostUpdateStatements(Database database){
+//        StringBuffer endStatements = new StringBuffer();
+//        endStatements.append("END IF;\n");
+//        endStatements.append("END;\n");
+//
+//        if (ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor) {
+//            endStatements.append("/\n");
+//        }
+//
+//        return endStatements.toString();
+//
+//    }
 }

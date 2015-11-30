@@ -24,11 +24,11 @@ public class SnapshotGeneratorFactory {
     protected SnapshotGeneratorFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SnapshotGenerator) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(SnapshotGenerator.class);
+//
+//            for (Class clazz : classes) {
+//                register((SnapshotGenerator) clazz.getConstructor().newInstance());
+//            }
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -88,15 +88,15 @@ public class SnapshotGeneratorFactory {
 
         //workaround for common check for databasechangelog/lock table to not snapshot the whole database like we have to in order to handle case issues
         if (example instanceof Table && (example.getName().equals(database.getDatabaseChangeLogTableName()) || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
-            try {
-                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), ((Table) example).name))));
+//            try {
+//                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), ((Table) example).name))));
                 return true;
-            } catch (DatabaseException e) {
-//                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection
-//                    database.rollback();
-//                }
-                return false;
-            }
+//            } catch (DatabaseException e) {
+////                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection
+////                    database.rollback();
+////                }
+//                return false;
+//            }
         }
 
         if (createSnapshot(example, database, new SnapshotControl(database, false, types.toArray(new Class[types.size()]))) != null) {

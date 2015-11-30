@@ -28,11 +28,11 @@ public class NamespaceDetailsFactory {
     private NamespaceDetailsFactory() {
         Class<? extends NamespaceDetails>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(NamespaceDetails.class);
-
-            for (Class<? extends NamespaceDetails> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(NamespaceDetails.class);
+//
+//            for (Class<? extends NamespaceDetails> clazz : classes) {
+//                register(clazz.getConstructor().newInstance());
+//            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

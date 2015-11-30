@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.JUnitScope;
 import liquibase.database.OfflineConnection;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @see http://liquibase.jira.com/browse/CORE-2334
+ * http://liquibase.jira.com/browse/CORE-2334
  */
 public class OfflineChangeLogHistoryServiceTest  {
     @Rule
@@ -47,7 +48,7 @@ public class OfflineChangeLogHistoryServiceTest  {
         OfflineChangeLogHistoryService service = createService(writer, "true");
         ChangeSet changeSet = createChangeSet();
         // When
-        service.init();
+        service.init(JUnitScope.getInstance());
         service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
         writer.close();
         // Assert
@@ -64,7 +65,7 @@ public class OfflineChangeLogHistoryServiceTest  {
         OfflineChangeLogHistoryService service = createService(writer, "data_only");
         ChangeSet changeSet = createChangeSet();
         // When
-        service.init();
+        service.init(JUnitScope.getInstance());
         service.setExecType(changeSet, ChangeSet.ExecType.EXECUTED);
         writer.close();
         // Assert
@@ -81,8 +82,8 @@ public class OfflineChangeLogHistoryServiceTest  {
         database.setConnection(connection);
         connection.attached(database);
         OfflineChangeLogHistoryService changeLogHistoryService = (OfflineChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), writer, database);
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+//        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), writer, database);
+//        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
         return changeLogHistoryService;
     }
 

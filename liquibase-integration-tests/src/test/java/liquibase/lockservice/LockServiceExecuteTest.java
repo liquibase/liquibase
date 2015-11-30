@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.JUnitScope;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.executor.*;
@@ -20,7 +21,7 @@ public class LockServiceExecuteTest {
 
     @Before
     public void setUp() throws DatabaseException, LockException {
-        ExecutorService.getInstance().reset();
+        JUnitScope.getInstance().getSingleton(ExecutorService.class).reset();
         LockServiceFactory.getInstance().resetAll();
 
         fixupLockTables();

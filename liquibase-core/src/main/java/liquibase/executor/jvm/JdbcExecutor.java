@@ -1,6 +1,8 @@
 package liquibase.executor.jvm;
 
+import liquibase.Scope;
 import liquibase.change.Change;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -32,6 +34,14 @@ import java.util.Map;
 public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     private Logger log = LoggerFactory.getLogger(JdbcExecutor.class);
+
+    @Override
+    public int getPriority(Scope scope) {
+        if (scope.getDatabase() != null && scope.getDatabase() instanceof AbstractJdbcDatabase) {
+            return PRIORITY_DEFAULT;
+        }
+        return PRIORITY_NOT_APPLICABLE;
+    }
 
     @Override
     public boolean updatesDatabase() {

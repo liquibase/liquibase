@@ -17,11 +17,11 @@ public class PreconditionFactory {
         preconditions = new HashMap<String, Class<? extends Precondition>>();
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(Precondition.class);
-
-            for (Class<? extends Precondition> clazz : classes) {
-                    register(clazz);
-            }
+//            classes = ServiceLocator.getInstance().findClasses(Precondition.class);
+//
+//            for (Class<? extends Precondition> clazz : classes) {
+//                    register(clazz);
+//            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

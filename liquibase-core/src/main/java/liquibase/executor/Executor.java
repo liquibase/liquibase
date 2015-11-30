@@ -1,8 +1,10 @@
 package liquibase.executor;
 
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.Service;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
@@ -10,9 +12,11 @@ import liquibase.statement.SqlStatement;
 import java.util.List;
 import java.util.Map;
 
-public interface Executor {
+public interface Executor extends Service{
 
     void setDatabase(Database database);
+
+    int getPriority(Scope scope);
 
     /** Read methods */
     <T>  T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException;

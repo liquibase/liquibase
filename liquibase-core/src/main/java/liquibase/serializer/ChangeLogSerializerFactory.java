@@ -26,11 +26,11 @@ public class ChangeLogSerializerFactory {
     private ChangeLogSerializerFactory() {
         Class<? extends ChangeLogSerializer>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
-
-            for (Class<? extends ChangeLogSerializer> clazz : classes) {
-                register((ChangeLogSerializer) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
+//
+//            for (Class<? extends ChangeLogSerializer> clazz : classes) {
+//                register((ChangeLogSerializer) clazz.getConstructor().newInstance());
+//            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

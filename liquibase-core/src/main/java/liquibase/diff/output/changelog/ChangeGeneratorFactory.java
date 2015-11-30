@@ -21,11 +21,11 @@ public class ChangeGeneratorFactory {
     private ChangeGeneratorFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeGenerator.class);
-
-            for (Class clazz : classes) {
-                register((ChangeGenerator) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(ChangeGenerator.class);
+//
+//            for (Class clazz : classes) {
+//                register((ChangeGenerator) clazz.getConstructor().newInstance());
+//            }
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

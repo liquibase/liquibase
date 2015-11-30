@@ -26,11 +26,11 @@ public class SnapshotSerializerFactory {
     private SnapshotSerializerFactory() {
         Class<? extends SnapshotSerializer>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotSerializer.class);
-
-            for (Class<? extends SnapshotSerializer> clazz : classes) {
-                register((SnapshotSerializer) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(SnapshotSerializer.class);
+//
+//            for (Class<? extends SnapshotSerializer> clazz : classes) {
+//                register((SnapshotSerializer) clazz.getConstructor().newInstance());
+//            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

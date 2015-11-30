@@ -35,9 +35,9 @@ public class PendingSQLWriter extends HTMLWriter {
     @Override
     protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
 
-        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
-        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
+//        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+//        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), fileWriter, database);
+//        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         try {
             if (changesToRun.size() == 0) {
@@ -64,7 +64,7 @@ public class PendingSQLWriter extends HTMLWriter {
             }
             fileWriter.append("</pre></code>");
         } finally {
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
+//            ExecutorService.getInstance().setExecutor(database, oldTemplate);
         }
     }
 

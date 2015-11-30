@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.ContextExpression;
 import liquibase.Labels;
+import liquibase.Scope;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.database.Database;
@@ -10,7 +11,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
@@ -26,7 +26,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-@LiquibaseService(skip = true)
 public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private final File changeLogFile;
@@ -92,7 +91,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     @Override
-    public void init() throws DatabaseException {
+    public void init(Scope scope) throws DatabaseException {
         if (!changeLogFile.exists()) {
             changeLogFile.getParentFile().mkdirs();
             try {
@@ -100,7 +99,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 writeHeader(changeLogFile);
 
                 if (isExecuteDdlAgainstDatabase()) {
-                    ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
+                    scope.getSingleton(ExecutorService.class).getExecutor(scope).execute(new CreateDatabaseChangeLogTableStatement());
                 }
 
 
@@ -142,7 +141,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     protected void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
+            scope.getSingleton(ExecutorService.class).getExecutor(scope).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
         replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
             @Override
@@ -315,7 +314,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public void setExecType(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
+            scope.getSingleton(ExecutorService.class).getExecutor(scope).execute(new MarkChangeSetRanStatement(changeSet, execType));
             getDatabase().commit();
         }
 
@@ -339,7 +338,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public void removeFromHistory(ChangeSet changeSet) throws DatabaseException {
         if (isExecuteDmlAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+            scope.getSingleton(ExecutorService.class).getExecutor(scope).execute(new RemoveChangeSetRanStatusStatement(changeSet));
             getDatabase().commit();
         }
 

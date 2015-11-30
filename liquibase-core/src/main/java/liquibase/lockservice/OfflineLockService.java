@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -21,7 +22,7 @@ public class OfflineLockService implements LockService {
     }
 
     @Override
-    public void init() throws DatabaseException {
+    public void init(Scope scope) throws DatabaseException {
 
     }
 

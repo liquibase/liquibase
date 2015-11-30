@@ -182,17 +182,17 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-    @Override
-    public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
-        return enabled;
-    }
+//    @Override
+//    public boolean disableForeignKeyChecks() throws DatabaseException {
+//        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+//        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+//        return enabled;
+//    }
 
-    @Override
-    public void enableForeignKeyChecks() throws DatabaseException {
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
-    }
+//    @Override
+//    public void enableForeignKeyChecks() throws DatabaseException {
+//        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+//    }
 
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {

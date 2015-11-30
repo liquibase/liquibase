@@ -13,8 +13,9 @@ import java.util.*;
 public class ChangeSupplierFactory {
 
     public Set<Class<? extends Change>> getExtensionClasses() {
-        Set<Class<? extends Change>> classes = new HashSet<Class<? extends Change>>(Arrays.asList(ServiceLocator.getInstance().findClasses(Change.class)));
-        return classes;
+//        Set<Class<? extends Change>> classes = new HashSet<Class<? extends Change>>(Arrays.asList(ServiceLocator.getInstance().findClasses(Change.class)));
+//        return classes;
+        return null;
     }
 
     public Set<Change> getExtensionChanges() {
@@ -40,7 +41,7 @@ public class ChangeSupplierFactory {
             Change[] changes = supplier.prepareDatabase(change);
             if (changes != null) {
                 for (Change prepareChange : changes) {
-                    ExecutorService.getInstance().getExecutor(database).execute(prepareChange);
+//                    ExecutorService.getInstance().getExecutor(database).execute(prepareChange);
                 }
             }
         } catch (Exception e) {
@@ -55,7 +56,7 @@ public class ChangeSupplierFactory {
             Change[] changes = supplier.revertDatabase(change);
             if (changes != null) {
                 for (Change revertChange : changes) {
-                    ExecutorService.getInstance().getExecutor(database).execute(revertChange);
+//                    ExecutorService.getInstance().getExecutor(database).execute(revertChange);
                 }
             }
         } catch (Exception e) {

@@ -63,7 +63,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
 
     @Override
     protected CommandResult run(Scope scope) throws Exception {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = scope.getExecutor();
         String sqlText;
         if (sqlFile == null) {
             sqlText = sql;

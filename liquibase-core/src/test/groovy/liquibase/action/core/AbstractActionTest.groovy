@@ -43,7 +43,11 @@ abstract class AbstractActionTest extends Specification {
 
     protected abstract Snapshot createSnapshot(Action action, ConnectionSupplier connectionSupplier, Scope scope)
 
-    def runStandardTest(Map parameters, Snapshot snapshot = null, Action action, ConnectionSupplier connectionSupplier, Scope scope, Closure assertClosure = {}, Closure setupClosure = {}) {
+    def runStandardTest(Map parameters, Action action, ConnectionSupplier connectionSupplier, Scope scope, Closure assertClosure = {}, Closure setupClosure = {}) {
+        return runStandardTest(parameters, null, action, connectionSupplier, scope, assertClosure, setupClosure)
+    }
+
+    def runStandardTest(Map parameters, Snapshot snapshot, Action action, ConnectionSupplier connectionSupplier, Scope scope, Closure assertClosure = {}, Closure setupClosure = {}) {
         def executor = scope.getSingleton(ActionExecutor)
 
         def errors = executor.validate(action, scope)

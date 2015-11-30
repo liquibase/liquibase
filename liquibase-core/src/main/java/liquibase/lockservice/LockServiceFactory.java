@@ -45,11 +45,11 @@ public class LockServiceFactory {
     private LockServiceFactory() {
 		Class<? extends LockService>[] classes;
 		try {
-			classes = ServiceLocator.getInstance().findClasses(LockService.class);
-
-			for (Class<? extends LockService> clazz : classes) {
-				register(clazz.getConstructor().newInstance());
-			}
+//			classes = ServiceLocator.getInstance().findClasses(LockService.class);
+//
+//			for (Class<? extends LockService> clazz : classes) {
+//				register(clazz.getConstructor().newInstance());
+//			}
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);

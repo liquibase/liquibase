@@ -1,5 +1,6 @@
 package liquibase.lockservice.ext;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.exception.DatabaseException;
@@ -17,7 +18,7 @@ public class MockLockService implements LockService {
     }
 
     @Override
-    public void init() throws DatabaseException {
+    public void init(Scope scope) throws DatabaseException {
 
     }
 

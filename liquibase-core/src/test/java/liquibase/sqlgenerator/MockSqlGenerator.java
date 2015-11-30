@@ -3,7 +3,6 @@ package liquibase.sqlgenerator;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SqlStatement;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@LiquibaseService(skip = true)
 public class MockSqlGenerator implements SqlGenerator {
     private int priority;
     private boolean supports;

@@ -23,12 +23,12 @@ public class DataTypeFactory {
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(LiquibaseDataType.class);
-
-            for (Class<? extends LiquibaseDataType> clazz : classes) {
-                //noinspection unchecked
-                register(clazz);
-            }
+//            classes = ServiceLocator.getInstance().findClasses(LiquibaseDataType.class);
+//
+//            for (Class<? extends LiquibaseDataType> clazz : classes) {
+//                //noinspection unchecked
+//                register(clazz);
+//            }
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
@@ -38,7 +39,7 @@ public interface LockService extends PrioritizedService {
      */
     void reset();
 
-    void init() throws DatabaseException;
+    void init(Scope scope) throws DatabaseException;
 
     void destroy() throws DatabaseException;
 }

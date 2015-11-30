@@ -34,18 +34,18 @@ public class DatabaseObjectFactory {
             Set<String> typesToInclude = new HashSet<String>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
             Set<String> typesNotFound = new HashSet<String>(typesToInclude);
 
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
-            for (Class<? extends DatabaseObject> clazz : classes) {
-                if (typesToInclude.contains(clazz.getSimpleName().toLowerCase())
-                        || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")
-                        || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"es") //like indexes
-                        ) {
-                    returnSet.add(clazz);
-                    typesNotFound.remove(clazz.getSimpleName().toLowerCase());
-                    typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"s");
-                    typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"es");
-                }
-            }
+//            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+//            for (Class<? extends DatabaseObject> clazz : classes) {
+//                if (typesToInclude.contains(clazz.getSimpleName().toLowerCase())
+//                        || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")
+//                        || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"es") //like indexes
+//                        ) {
+//                    returnSet.add(clazz);
+//                    typesNotFound.remove(clazz.getSimpleName().toLowerCase());
+//                    typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"s");
+//                    typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"es");
+//                }
+//            }
             if (typesNotFound.size() > 0) {
                 throw new UnexpectedLiquibaseException("Unknown snapshot type(s) "+StringUtils.join(typesNotFound, ", "));
             }
@@ -57,16 +57,16 @@ public class DatabaseObjectFactory {
         if (standardTypes == null) {
             Set<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
 
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
-            for (Class<? extends DatabaseObject> clazz : classes) {
-                try {
-                    if (clazz.newInstance().snapshotByDefault()) {
-                        set.add(clazz);
-                    }
-                } catch (Exception e) {
-                    LoggerFactory.getLogger(getClass()).info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
-                }
-            }
+//            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+//            for (Class<? extends DatabaseObject> clazz : classes) {
+//                try {
+//                    if (clazz.newInstance().snapshotByDefault()) {
+//                        set.add(clazz);
+//                    }
+//                } catch (Exception e) {
+//                    LoggerFactory.getLogger(getClass()).info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+//                }
+//            }
 
             standardTypes = set;
         }

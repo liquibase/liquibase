@@ -37,11 +37,11 @@ public class ChangeLogHistoryServiceFactory {
     private ChangeLogHistoryServiceFactory() {
         Class<? extends ChangeLogHistoryService>[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogHistoryService.class);
-
-            for (Class<? extends ChangeLogHistoryService> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(ChangeLogHistoryService.class);
+//
+//            for (Class<? extends ChangeLogHistoryService> clazz : classes) {
+//                register(clazz.getConstructor().newInstance());
+//            }
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.Scope;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -32,6 +33,7 @@ public class StandardLockService implements LockService {
 
     private Boolean hasDatabaseChangeLogLockTable = null;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
+    private Scope scope;
 
     public StandardLockService() {
     }
@@ -76,9 +78,10 @@ public class StandardLockService implements LockService {
     }
 
     @Override
-    public void init() throws DatabaseException {
+    public void init(Scope scope) throws DatabaseException {
+        this.scope = scope;
         boolean createdTable = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = scope.getExecutor();
 
         if (!hasDatabaseChangeLogLockTable()) {
             executor.comment("Create Database Lock Table");
@@ -111,7 +114,7 @@ public class StandardLockService implements LockService {
 
     public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
         if (!isDatabaseChangeLogLockTableInitialized) {
-            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            Executor executor = scope.getExecutor();
 
             try {
                 isDatabaseChangeLogLockTableInitialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(new ObjectReference(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())))) > 0;
@@ -180,13 +183,13 @@ public class StandardLockService implements LockService {
             return true;
         }
 
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = scope.getExecutor();
 
         try {
             database.rollback();
-            this.init();
+            this.init(scope);
 
-            Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
+            Boolean locked = (Boolean) scope.getExecutor().queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
 
             if (locked) {
                 return false;
@@ -224,7 +227,7 @@ public class StandardLockService implements LockService {
 
     @Override
     public void releaseLock() throws LockException {
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = scope.getExecutor();
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
@@ -260,7 +263,7 @@ public class StandardLockService implements LockService {
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(sqlStatement);
+            List<Map<String, ?>> rows = scope.getExecutor().queryForList(sqlStatement);
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;
@@ -281,7 +284,7 @@ public class StandardLockService implements LockService {
 
     @Override
     public void forceReleaseLock() throws LockException, DatabaseException {
-        this.init();
+        this.init(scope);
         releaseLock();
         /*try {
             releaseLock();

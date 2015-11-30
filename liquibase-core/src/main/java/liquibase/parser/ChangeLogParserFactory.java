@@ -45,11 +45,11 @@ public class ChangeLogParserFactory {
 
         parsers = new ArrayList<ChangeLogParser>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
+//            classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 
-            for (Class<? extends ChangeLogParser> clazz : classes) {
-                    register((ChangeLogParser) clazz.getConstructor().newInstance());
-            }
+//            for (Class<? extends ChangeLogParser> clazz : classes) {
+//                    register((ChangeLogParser) clazz.getConstructor().newInstance());
+//            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

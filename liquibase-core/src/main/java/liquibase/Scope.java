@@ -5,6 +5,8 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.SmartMap;
 import liquibase.util.Validate;
@@ -166,6 +168,10 @@ public class Scope {
 
     public Database getDatabase() {
         return get(Attr.database, Database.class);
+    }
+
+    public Executor getExecutor() {
+        return this.getSingleton(ExecutorService.class).getExecutor(this);
     }
 
     public ResourceAccessor getResourceAccessor() {

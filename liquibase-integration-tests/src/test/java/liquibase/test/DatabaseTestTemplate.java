@@ -1,5 +1,6 @@
 package liquibase.test;
 
+import liquibase.JUnitScope;
 import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
 import liquibase.executor.ExecutorService;
@@ -26,7 +27,7 @@ public class DatabaseTestTemplate {
 //            }
             JdbcExecutor writeExecutor = new JdbcExecutor();
             writeExecutor.setDatabase(database);
-            ExecutorService.getInstance().setExecutor(database, writeExecutor);
+            JUnitScope.getInstance().getSingleton(ExecutorService.class).setExecutor(database, writeExecutor);
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             lockService.reset();
             if (database.getConnection() != null) {

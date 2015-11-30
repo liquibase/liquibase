@@ -80,7 +80,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         // Make a new list
         List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = null;//scope.getExecutor();
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
 

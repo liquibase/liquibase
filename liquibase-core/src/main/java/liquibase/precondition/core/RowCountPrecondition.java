@@ -68,19 +68,19 @@ public class RowCountPrecondition extends AbstractPrecondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
+//        try {
+//            TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
+//
+//            int result = ExecutorService.getInstance().getExecutor(database).queryForInt(statement);
+//            if (result != expectedRows) {
+//                throw new PreconditionFailedException(getFailureMessage(result), changeLog, this);
+//            }
 
-            int result = ExecutorService.getInstance().getExecutor(database).queryForInt(statement);
-            if (result != expectedRows) {
-                throw new PreconditionFailedException(getFailureMessage(result), changeLog, this);
-            }
-
-        } catch (PreconditionFailedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new PreconditionErrorException(e, changeLog, this);
-        }
+//        } catch (PreconditionFailedException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            throw new PreconditionErrorException(e, changeLog, this);
+//        }
     }
 
     protected String getFailureMessage(int result) {

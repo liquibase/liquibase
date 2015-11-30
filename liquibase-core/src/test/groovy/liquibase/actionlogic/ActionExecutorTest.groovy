@@ -17,13 +17,8 @@ class ActionExecutorTest extends Specification {
     def setup() {
         scope = JUnitEmptyScope.getNewInstance(new MockDatabase()).child(["liquibase.actionlogic.ActionLogicFactory": new ActionLogicFactory(new Scope(new JUnitResourceAccessor(), new HashMap<String, Object>())) {
             @Override
-            protected Class<? extends ActionLogic>[] findAllServiceClasses(Scope scope) {
-                return new Class[0];
-            }
-
-            @Override
-            protected TemplateActionLogic[] getTemplateActionLogic(Scope scope) {
-                return new TemplateActionLogic[0];
+            protected ActionLogic getService(Scope scope, Object... args) {
+                return null;
             }
         }])
         scope.database.setConnection(new MockJdbcConnection())

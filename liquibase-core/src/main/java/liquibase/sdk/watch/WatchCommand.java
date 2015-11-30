@@ -143,7 +143,7 @@ public class WatchCommand extends AbstractCommand {
 
         public DynamicContentHandler(Database database) {
             this.database = database;
-            executor = ExecutorService.getInstance().getExecutor(database);
+            executor = null; //ExecutorService.getInstance().getExecutor(database);
         }
 
         @Override
@@ -207,7 +207,7 @@ public class WatchCommand extends AbstractCommand {
                 outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
 
                 SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED DESC", "ORDEREXECUTED DESC"); //going in opposite order for easier reading
-                List<Map> ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).queryForList(select);
+                List<Map> ranChangeSets = null; //(List) ExecutorService.getInstance().getExecutor(database).queryForList(select);
 
                 for (Map row : ranChangeSets) {
                     String id = cleanHtmlId(row.get("ID") + ":" + row.get("AUTHOR") + ":" + row.get("FILENAME"));

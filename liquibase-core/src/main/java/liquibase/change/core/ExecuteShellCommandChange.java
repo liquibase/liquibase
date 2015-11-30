@@ -100,10 +100,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     	// check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
-        if (executor instanceof LoggingExecutor) {
-            nonExecutedMode = true;
-        }
+//        Executor executor = ExecutorService.getInstance().getExecutor(database);
+//        if (executor instanceof LoggingExecutor) {
+//            nonExecutedMode = true;
+//        }
         
         if (shouldRun && !nonExecutedMode) {
 

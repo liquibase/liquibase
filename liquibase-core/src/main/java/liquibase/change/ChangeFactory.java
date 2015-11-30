@@ -25,12 +25,12 @@ public class ChangeFactory {
 
     private void init() {
         Class<? extends Change>[] classes;
-        classes = ServiceLocator.getInstance().findClasses(Change.class);
-
-        for (Class<? extends Change> clazz : classes) {
-            //noinspection unchecked
-            register(clazz);
-        }
+//        classes = ServiceLocator.getInstance().findClasses(Change.class);
+//
+//        for (Class<? extends Change> clazz : classes) {
+//            //noinspection unchecked
+//            register(clazz);
+//        }
     }
 
     /**

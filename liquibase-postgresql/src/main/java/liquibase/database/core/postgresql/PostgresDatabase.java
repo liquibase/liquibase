@@ -215,22 +215,22 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             DatabaseConnection con = getConnection();
 
             if (con != null) {
-                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
+//                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
 
-                if (searchPathResult != null) {
-                    String dirtySearchPaths[] = searchPathResult.split("\\,");
-                    searchPaths = new ArrayList<String>();
-                    for (String searchPath : dirtySearchPaths) {
-                        searchPath = searchPath.trim();
-
-                        // Ensure there is consistency ..
-                        if (searchPath.equals("\"$user\"")) {
-                            searchPath = "$user";
-                        }
-
-                        searchPaths.add(searchPath);
-                    }
-                }
+//                if (searchPathResult != null) {
+//                    String dirtySearchPaths[] = searchPathResult.split("\\,");
+//                    searchPaths = new ArrayList<String>();
+//                    for (String searchPath : dirtySearchPaths) {
+//                        searchPath = searchPath.trim();
+//
+//                        // Ensure there is consistency ..
+//                        if (searchPath.equals("\"$user\"")) {
+//                            searchPath = "$user";
+//                        }
+//
+//                        searchPaths.add(searchPath);
+//                    }
+//                }
 
             }
         } catch (Exception e) {
@@ -242,17 +242,17 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return searchPaths;
     }
 
-    @Override
-    protected String getConnectionSchemaName() {
-        try {
-            String currentSchema = ExecutorService.getInstance().getExecutor(this)
-                    .queryForObject(new RawCallStatement("select current_schema"), String.class);
-            return currentSchema;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get current schema", e);
-        }
-    }
+//    @Override
+//    protected String getConnectionSchemaName() {
+//        try {
+//            String currentSchema = ExecutorService.getInstance().getExecutor(this)
+//                    .queryForObject(new RawCallStatement("select current_schema"), String.class);
+//            return currentSchema;
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to get current schema", e);
+//        }
+//    }
 
     private boolean catalogExists(String catalogName) throws DatabaseException {
         return catalogName != null && runExistsQuery(
@@ -264,9 +264,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     private boolean runExistsQuery(String query) throws DatabaseException {
-        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
-
-        return count != null && count > 0;
+//        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
+//
+//        return count != null && count > 0;
+        return false;
     }
 
     @Override

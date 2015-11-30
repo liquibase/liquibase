@@ -59,6 +59,9 @@ public class JUnitScope extends Scope {
         return new JUnitScope(this, scopeValues);
     }
 
+    /**
+     * Create a child scope that uses the given singleton instead falling back to the root scope's singleton like usual.
+     */
     public <T> JUnitScope overrideSingleton(Class<T> type, T singleton) {
         JUnitScope childScope = (JUnitScope) child(new HashMap<String, Object>());
         childScope.singletons.put(type.getName(), singleton);

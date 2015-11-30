@@ -122,18 +122,18 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     @Override
     public void setConnection(final DatabaseConnection connection) {
         super.setConnection(connection);
-        if (!(connection instanceof OfflineConnection)) {
-            try {
-                /*
-                 * TODO Maybe there is a better place for this.
-                 * For each session this statement has to be executed,
-                 * to allow newlines in quoted strings
-                 */
-                ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
-            }
-        }
+//        if (!(connection instanceof OfflineConnection)) {
+//            try {
+//                /*
+//                 * TODO Maybe there is a better place for this.
+//                 * For each session this statement has to be executed,
+//                 * to allow newlines in quoted strings
+//                 */
+//                ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
+//            } catch (Exception e) {
+//                throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
+//            }
+//        }
     }
 
 	@Override
@@ -171,13 +171,13 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-		List<Map<String, ?>> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
+//		List<Map<String, ?>> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
-		for (Map rowMap : retList) {
-			String s = (String) rowMap.get("VIEWTEXT");
-			sb.append(s);
-		}
+//		for (Map rowMap : retList) {
+//			String s = (String) rowMap.get("VIEWTEXT");
+//			sb.append(s);
+//		}
 		return CREATE_VIEW_AS_PATTERN.matcher(sb.toString()).replaceFirst("");
 	}
 

@@ -91,10 +91,10 @@ public abstract class AbstractExecuteTest {
                 if (shouldTestDatabase(database, includeDatabases, excludeDatabases)) {
                     testedDatabases.add(database.getClass());
 
-                    if (database.getConnection() != null) {
-                        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
-                        LockServiceFactory.getInstance().getLockService(database).init();
-                    }
+//                    if (database.getConnection() != null) {
+//                        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
+//                        LockServiceFactory.getInstance().getLockService(database).init();
+//                    }
 
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database);
 
@@ -235,7 +235,7 @@ public abstract class AbstractExecuteTest {
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
                 for (SqlStatement statement : setupStatements) {
-                    ExecutorService.getInstance().getExecutor(database).execute(statement);
+//                    ExecutorService.getInstance().getExecutor(database).execute(statement);
                 }
             }
             connectionStatement.close();

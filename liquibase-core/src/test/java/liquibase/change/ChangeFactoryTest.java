@@ -4,7 +4,6 @@ import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.LiquibaseService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -161,7 +160,6 @@ public class ChangeFactoryTest {
 
     }
 
-    @LiquibaseService(skip = true)
     public static class Priority5Change extends CreateTableChange {
         @Override
         public ChangeMetaData createChangeMetaData() {
@@ -169,7 +167,6 @@ public class ChangeFactoryTest {
         }
     }
 
-    @LiquibaseService(skip = true)
     public static class Priority10Change extends CreateTableChange {
         @Override
         public ChangeMetaData createChangeMetaData() {
@@ -177,7 +174,6 @@ public class ChangeFactoryTest {
         }
     }
 
-    @LiquibaseService(skip = true)
     public static class AnotherPriority5Change extends CreateTableChange {
         @Override
         public ChangeMetaData createChangeMetaData() {
@@ -185,7 +181,6 @@ public class ChangeFactoryTest {
         }
     }
 
-    @LiquibaseService(skip = true)
     public static class ExceptionThrowingChange extends CreateTableChange {
         public ExceptionThrowingChange() {
             throw new RuntimeException("I throw exceptions");
@@ -197,7 +192,6 @@ public class ChangeFactoryTest {
         }
     }
 
-    @LiquibaseService(skip = true)
     public static class SometimesExceptionThrowingChange extends CreateTableChange {
         private static int timesCalled = 0;
         public SometimesExceptionThrowingChange() {

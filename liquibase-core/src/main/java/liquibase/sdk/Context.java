@@ -69,17 +69,17 @@ public class Context {
             propertyFiles.add(propertiesFile);
         }
 
-        try {
-            for (String packageName : ServiceLocator.getInstance().getPackages()) {
-                Enumeration<URL> dirs = this.getClass().getClassLoader().getResources(packageName.replace('.', '/'));
-                while (dirs.hasMoreElements()) {
-                    File dir = new File(dirs.nextElement().toURI());
-                    findClasses(packageName, dir);
-                }
-            }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseSdkException(e);
-        }
+//        try {
+//            for (String packageName : ServiceLocator.getInstance().getPackages()) {
+//                Enumeration<URL> dirs = this.getClass().getClassLoader().getResources(packageName.replace('.', '/'));
+//                while (dirs.hasMoreElements()) {
+//                    File dir = new File(dirs.nextElement().toURI());
+//                    findClasses(packageName, dir);
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new UnexpectedLiquibaseSdkException(e);
+//        }
 
         for (Class clazz : allClasses) {
             if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {

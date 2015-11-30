@@ -56,11 +56,11 @@ public class SnapshotForeignKeysLogicMysql extends SnapshotForeignKeysLogicJdbc 
                         .append("AND KEY_COL.TABLE_SCHEMA='" + baseTable.container.name + "'");
             } else {
                 query.append("AND KEY_COL.CONSTRAINT_NAME='" + action.relatedTo.name + "'")
-                        .append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.container + "'");
+                        .append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.container.name + "'");
             }
         } else if (action.relatedTo.instanceOf(Table.class)) {
             query.append("AND KEY_COL.TABLE_NAME_NAME='" + action.relatedTo.name + "'")
-                    .append("AND KEY_COL.TABLE_SCHEMA='" + action.relatedTo.container + "'");
+                    .append("AND KEY_COL.TABLE_SCHEMA='" + action.relatedTo.container.name + "'");
         } else if (action.relatedTo.instanceOf(Schema.class)) {
             query.append("AND KEY_COL.CONSTRAINT_SCHEMA='" + action.relatedTo.name + "'");
         } else {

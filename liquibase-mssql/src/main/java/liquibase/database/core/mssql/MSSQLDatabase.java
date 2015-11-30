@@ -172,18 +172,18 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
     }
 
-    @Override
-    protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
-        }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
-        } catch (Exception e) {
-            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
-        }
-        return null;
-    }
+//    @Override
+//    protected String getConnectionSchemaName() {
+//        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+//            return null;
+//        }
+//        try {
+//            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
+//        } catch (Exception e) {
+//            LoggerFactory.getLogger(getClass()).info("Error getting default schema", e);
+//        }
+//        return null;
+//    }
     
     @Override
     public String getConcatSql(String... values) {
@@ -304,34 +304,34 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    @Override
-    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-          schema = schema.customize(this);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
-        StringBuffer sb = new StringBuffer();
-        for (String defLine : defLines) {
-            sb.append(defLine);
-        }
-        String definition = sb.toString();
-
-        String finalDef =definition.replaceAll("\\r\\n", "\n").trim();
-
-        String selectOnly = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("");
-        if (selectOnly.equals(finalDef)) {
-            return "FULL_DEFINITION: " + finalDef;
-        }
-
-        selectOnly = selectOnly.trim();
-
-
-        /**handle views that end up as '(select XYZ FROM ABC);' */
-        if (selectOnly.startsWith("(") && (selectOnly.endsWith(")") || selectOnly.endsWith(");"))) {
-            selectOnly = selectOnly.replaceFirst("^\\(", "");
-            selectOnly = selectOnly.replaceFirst("\\);?$", "");
-        }
-
-        return selectOnly;
-    }
+//    @Override
+//    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+//          schema = schema.customize(this);
+//        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+//        StringBuffer sb = new StringBuffer();
+//        for (String defLine : defLines) {
+//            sb.append(defLine);
+//        }
+//        String definition = sb.toString();
+//
+//        String finalDef =definition.replaceAll("\\r\\n", "\n").trim();
+//
+//        String selectOnly = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("");
+//        if (selectOnly.equals(finalDef)) {
+//            return "FULL_DEFINITION: " + finalDef;
+//        }
+//
+//        selectOnly = selectOnly.trim();
+//
+//
+//        /**handle views that end up as '(select XYZ FROM ABC);' */
+//        if (selectOnly.startsWith("(") && (selectOnly.endsWith(")") || selectOnly.endsWith(");"))) {
+//            selectOnly = selectOnly.replaceFirst("^\\(", "");
+//            selectOnly = selectOnly.replaceFirst("\\);?$", "");
+//        }
+//
+//        return selectOnly;
+//    }
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
@@ -342,30 +342,30 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return schemaName;
     }
 
-    @Override
-    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
-
-        if (caseSensitive == null) {
-            try {
-                if (getConnection() instanceof JdbcConnection) {
-                    String catalog = getConnection().getCatalog();
-                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
-                    caseSensitive = collation != null && !collation.contains("_CI_");
-                } else if (getConnection() instanceof OfflineConnection) {
-                    caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
-                }
-            } catch (Exception e) {
-                LoggerFactory.getLogger(getClass()).warn("Cannot determine case sensitivity from MSSQL", e);
-            }
-        }
-
-        if (caseSensitive == null) {
-            return false;
-        } else {
-            return caseSensitive;
-        }
-    }
+//    @Override
+//    public boolean isCaseSensitive(Class<? extends DatabaseObject> type) {
+//
+//        if (caseSensitive == null) {
+//            try {
+//                if (getConnection() instanceof JdbcConnection) {
+//                    String catalog = getConnection().getCatalog();
+//                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
+//                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+//                    caseSensitive = collation != null && !collation.contains("_CI_");
+//                } else if (getConnection() instanceof OfflineConnection) {
+//                    caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
+//                }
+//            } catch (Exception e) {
+//                LoggerFactory.getLogger(getClass()).warn("Cannot determine case sensitivity from MSSQL", e);
+//            }
+//        }
+//
+//        if (caseSensitive == null) {
+//            return false;
+//        } else {
+//            return caseSensitive;
+//        }
+//    }
 
     @Override
     public int getDataTypeMaxParameters(String dataTypeName) {

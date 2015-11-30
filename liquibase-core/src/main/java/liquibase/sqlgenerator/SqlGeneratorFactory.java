@@ -34,11 +34,11 @@ public class SqlGeneratorFactory {
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
-
-            for (Class clazz : classes) {
-                register((SqlGenerator) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
+//
+//            for (Class clazz : classes) {
+//                register((SqlGenerator) clazz.getConstructor().newInstance());
+//            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);

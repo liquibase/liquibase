@@ -24,11 +24,11 @@ public class DatabaseObjectComparatorFactory {
     private DatabaseObjectComparatorFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(DatabaseObjectComparator.class);
-
-            for (Class clazz : classes) {
-                register((DatabaseObjectComparator) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(DatabaseObjectComparator.class);
+//
+//            for (Class clazz : classes) {
+//                register((DatabaseObjectComparator) clazz.getConstructor().newInstance());
+//            }
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);

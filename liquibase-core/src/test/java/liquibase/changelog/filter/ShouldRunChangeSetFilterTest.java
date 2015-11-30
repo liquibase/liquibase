@@ -94,7 +94,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         replay(database);
         replay(template);
-        ExecutorService.getInstance().setExecutor(database, template);
+//        ExecutorService.getInstance().setExecutor(database, template);
         return database;
     }
 }

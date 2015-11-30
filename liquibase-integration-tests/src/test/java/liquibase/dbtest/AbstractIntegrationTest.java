@@ -157,7 +157,7 @@ public abstract class AbstractIntegrationTest {
             if (shouldRollBack()) {
                 database.rollback();
             }
-            ExecutorService.getInstance().clearExecutor(database);
+//            ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
@@ -178,7 +178,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws LiquibaseException {
-        ExecutorService.getInstance().clearExecutor(database);
+//        ExecutorService.getInstance().clearExecutor(database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
@@ -561,17 +561,17 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         //run again to test changelog testing logic
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
-        try {
-            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogTableName(), false));
-        } catch (DatabaseException e) {
-            //ok
-        }
-        try {
-            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogLockTableName(), false));
-        } catch (DatabaseException e) {
-            //ok
-        }
+//        Executor executor = ExecutorService.getInstance().getExecutor(database);
+//        try {
+//            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogTableName(), false));
+//        } catch (DatabaseException e) {
+//            ok
+//        }
+//        try {
+//            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogLockTableName(), false));
+//        } catch (DatabaseException e) {
+//            ok
+//        }
         database.commit();
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
@@ -723,11 +723,11 @@ public abstract class AbstractIntegrationTest {
 //    }
 
     private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
-        try {
-            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false));
-        } catch (DatabaseException e) {
-            ; //ok
-        }
+//        try {
+//            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false));
+//        } catch (DatabaseException e) {
+//            ; //ok
+//        }
     }
 
     @Test

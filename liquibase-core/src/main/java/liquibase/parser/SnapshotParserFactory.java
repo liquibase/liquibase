@@ -48,11 +48,11 @@ public class SnapshotParserFactory {
 
         parsers = new ArrayList<SnapshotParser>();
         try {
-            classes = ServiceLocator.getInstance().findClasses(SnapshotParser.class);
-
-            for (Class<? extends SnapshotParser> clazz : classes) {
-                    register((SnapshotParser) clazz.getConstructor().newInstance());
-            }
+//            classes = ServiceLocator.getInstance().findClasses(SnapshotParser.class);
+//
+//            for (Class<? extends SnapshotParser> clazz : classes) {
+//                    register((SnapshotParser) clazz.getConstructor().newInstance());
+//            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
