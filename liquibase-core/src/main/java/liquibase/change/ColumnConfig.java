@@ -13,6 +13,8 @@ import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.io.IOUtils;
+
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -853,6 +855,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (parsedNode.getChildValue(null, "valueBlob", String.class) != null) {
         	try {
 				valueBlob = new SerialBlob(DatatypeConverter.parseHexBinary(parsedNode.getChildValue(null, "valueBlob", String.class)));
+				SerialBlob blob = getValueBlob();
 			} catch (SerialException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -11,6 +11,8 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.charset.Charset
+
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 
@@ -243,9 +245,8 @@ public class ColumnConfigTest extends Specification {
 		IOUtils.toByteArray(
 			new ColumnConfig().setValueBlob(
 				new SerialBlob(DatatypeConverter.parseHexBinary(
-					DatatypeConverter.printHexBinary("abcd".getBytes())))).getValueBlob().getBinaryStream()).toString() == "abcd"
-		//new ColumnConfig().setValueBlob(new SerialBlob(DatatypeConverter.parseHexBinary(DatatypeConverter.printHexBinary("abcd".getBytes())))).getValueObject() == "abcd"
-		new ColumnConfig().setValueClob(new SerialClob("xyz".toCharArray())).getValueObject() == "xyz";
+					DatatypeConverter.printHexBinary("abcd".getBytes())))).getValueBlob().getBinaryStream()).toString() == "abcd".getBytes().toString()
+		new ColumnConfig().setValueClob(new SerialClob("xyz".toCharArray())).getValueClob().getSubString(1,3) == "xyz";
         new ColumnConfig().setValue("A value").getValueObject() == "A value"
         new ColumnConfig().getValueObject() == null
 
@@ -420,7 +421,8 @@ public class ColumnConfigTest extends Specification {
 	def setValueBlob() {
 		expect:
 		new ColumnConfig().setValueBlob(null).getValueBlob() == null
-		//IOUtils.toString(new ColumnConfig().setValueBlob(new SerialBlob(DatatypeConverter.printHexBinary(byte[] {"xyz"}))).getValueBlob().getBinaryStream()) == "xyz"
+//		IOUtils.toString(new ColumnConfig().setValueBlob(new SerialBlob(DatatypeConverter.printHexBinary(new String("xyz").getBytes(Charset.forName("UTF-8"))))).getValueBlob().getBinaryStream()) == "xyz"
+		new ColumnConfig().setValueBlob(new SerialBlob("xyz".getBytes())).getValueBlob().getBytes(1, 3) == "xyz".getBytes()
 	}
 
     def getFieldSerializationType() {
@@ -452,9 +454,11 @@ public class ColumnConfigTest extends Specification {
             testValue = true
         } else if (field in ["valueClob"]) {
 			testValue = "xyz"
-        }  else if (field in ["hexBinary"]) {
-			testValue = "abcd"
-        }
+        }  else if (field in ["valueBlob"]) {
+			testValue = DatatypeConverter.printHexBinary("abc".getBytes())
+        } else {
+			testValue = "1234";
+		}
         node.addChild(null, field, testValue)
         try {
             column.load(node, resourceSupplier.simpleResourceAccessor)
@@ -463,9 +467,11 @@ public class ColumnConfigTest extends Specification {
         }
 
         then:
-        if (field in ["valueClob"]) {
-			assert 1//assert column.getSerializableFieldValue(field).toString() == testValue.toString()
-		} else {
+        if (field in ["valueBlob"]) {
+			assert DatatypeConverter.printHexBinary(IOUtils.toByteArray(((SerialBlob)column.getSerializableFieldValue(field)).getBinaryStream())) == testValue.toString()
+		} else if (field in ["valueClob"]) {
+			assert IOUtils.toString((((SerialClob)column.getSerializableFieldValue(field)).getCharacterStream())) == testValue.toString()
+		}  else {
 			assert column.getSerializableFieldValue(field).toString() == testValue.toString()
 		}
 
