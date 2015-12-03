@@ -1,23 +1,39 @@
 package liquibase.diff.output.changelog.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
+import org.apache.commons.io.IOUtils;
+
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.datatype.core.BlobType;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Data;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class MissingDataChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -91,6 +107,14 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                         column.setValueBoolean((Boolean) value);
                     } else if (value instanceof Date) {
                         column.setValueDate((Date) value);
+                    } else if (value instanceof Blob) {
+                    	byte[] blob = IOUtils.toByteArray(((Blob) value).getBinaryStream());
+                    	SerialBlob serialBlob = new SerialBlob(blob);
+                    	column.setValueBlob(serialBlob);
+                    } else if (value instanceof Clob) {
+                    	char[] clob = IOUtils.toCharArray(((Clob)value).getCharacterStream());
+                    	SerialClob serialClob = new SerialClob(clob);
+                    	column.setValueClob(serialClob);
                     } else { // string
                         if (referenceDatabase instanceof InformixDatabase) {
                             if (value instanceof byte[]) {

@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -145,7 +148,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 			}
 		} else if(col.getValueClobFile() != null) {
 			try {
-        log.debug("value is clob = "+col.getValueClobFile());
+				log.debug("value is clob = "+col.getValueClobFile());
 				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
 				if (lob.length <= Integer.MAX_VALUE) {
 					stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -155,7 +158,11 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 			} catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
 			}
-		} else {
+		} else if (col.getValueBlob() != null) {
+			stmt.setBinaryStream(i, col.getValueBlob().getBinaryStream());
+		} else if (col.getValueClob() != null) {
+			stmt.setCharacterStream(i, col.getValueClob().getCharacterStream());
+		}  else {
       // NULL values might intentionally be set into a change, we must also add them to the prepared statement
       log.debug("value is explicit null");
 			stmt.setNull(i, java.sql.Types.NULL);

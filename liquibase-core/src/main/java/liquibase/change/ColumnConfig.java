@@ -1,11 +1,17 @@
 package liquibase.change;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
+import javax.xml.bind.DatatypeConverter;
 
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -37,7 +43,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private Date valueDate;
     private Boolean valueBoolean;
     private String valueBlobFile;
+    private SerialBlob valueBlob;
     private String valueClobFile;
+    private SerialClob valueClob;
     private String encoding;
     private DatabaseFunction valueComputed;
     private SequenceNextValueFunction valueSequenceNext;
@@ -431,6 +439,19 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.valueBlobFile = valueBlobFile;
         return this;
     }
+    
+    /**
+     * Return the data to load into a BLOB.
+     * @see #setValue(byte[])
+     */
+    public SerialBlob getValueBlob() {
+        return valueBlob;
+    }
+
+    public ColumnConfig setValueBlob(SerialBlob valueBlob) {
+        this.valueBlob = valueBlob;
+        return this;
+    }
 
     /**
      * Return the file containing the data to load into a CLOB.
@@ -442,6 +463,19 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     public ColumnConfig setValueClobFile(String valueClobFile) {
         this.valueClobFile = valueClobFile;
+        return this;
+    }
+    
+    /**
+     * Return the data to load into a CLOB.
+     * @see #setValue(String)
+     */
+    public SerialClob getValueClob() {
+        return valueClob;
+    }
+
+    public ColumnConfig setValueClob(SerialClob valueClob) {
+        this.valueClob = valueClob;
         return this;
     }
 
@@ -475,6 +509,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             return getValueClobFile();
         } else if (getValueBlobFile() != null) {
             return getValueBlobFile();
+        } else if (getValueBlob() != null) {
+        	return getValueBlob();
+        }  else if (getValueClob() != null) {
+        	return getValueClob();
         } else if (getValueSequenceNext() != null) {
             return getValueSequenceNext();
         } else if (getValueSequenceCurrent() != null) {
@@ -801,6 +839,28 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         valueBoolean = parsedNode.getChildValue(null, "valueBoolean", Boolean.class);
         valueBlobFile = parsedNode.getChildValue(null, "valueBlobFile", String.class);
         valueClobFile = parsedNode.getChildValue(null, "valueClobFile", String.class);
+        if (parsedNode.getChildValue(null, "valueClob", String.class) != null) {
+        	try {
+				valueClob = new SerialClob(parsedNode.getChildValue(null, "valueClob", String.class).toCharArray());
+			} catch (SerialException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }        
+        if (parsedNode.getChildValue(null, "valueBlob", String.class) != null) {
+        	try {
+				valueBlob = new SerialBlob(DatatypeConverter.parseHexBinary(parsedNode.getChildValue(null, "valueBlob", String.class)));
+			} catch (SerialException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
         String valueComputedString = parsedNode.getChildValue(null, "valueComputed", String.class);
         if (valueComputedString != null) {
             valueComputed = new DatabaseFunction(valueComputedString);
