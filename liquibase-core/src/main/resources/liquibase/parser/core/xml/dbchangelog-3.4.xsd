@@ -267,40 +267,45 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="column">
-        <xsd:attribute name="name" type="xsd:string"/>
-        <xsd:attribute name="computed" type="booleanExp"/>
-        <xsd:attribute name="type" type="xsd:string"/>
-        <xsd:attribute name="value" type="xsd:string"/>
-        <xsd:attribute name="valueNumeric" type="xsd:string"/>
-        <xsd:attribute name="valueBoolean" type="xsd:string"/>
-        <xsd:attribute name="valueDate" type="xsd:string"/>
-        <xsd:attribute name="valueComputed" type="xsd:string"/>
-        <xsd:attribute name="valueSequenceCurrent" type="xsd:string"/>
-        <xsd:attribute name="valueSequenceNext" type="xsd:string"/>
-        <xsd:attribute name="valueBlobFile" type="xsd:string"/>
-        <xsd:attribute name="valueClobFile" type="xsd:string"/>
-        <xsd:attribute name="defaultValue" type="xsd:string"/>
-        <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
-        <xsd:attribute name="defaultValueDate" type="xsd:string"/>
-        <xsd:attribute name="defaultValueBoolean" type="booleanExp"/>
-        <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
-        <xsd:attribute name="defaultValueSequenceCurrent" type="xsd:string"/>
-        <xsd:attribute name="defaultValueSequenceNext" type="xsd:string"/>
-        <xsd:attribute name="autoIncrement" type="booleanExp"/>
-        <xsd:attribute name="startWith" type="xsd:long"/>
-        <xsd:attribute name="incrementBy" type="xsd:long"/>
-        <xsd:attribute name="remarks" type="xsd:string"/>
-        <xsd:attribute name="encoding" type="xsd:string">
-            <xsd:annotation>
-                <xsd:appinfo>
-                    <xsd:documentation>
-                        Used with valueClobFile to specify file encoding explicitly.
-                    </xsd:documentation>
-                </xsd:appinfo>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:attribute name="descending" type="booleanExp"/>
-        <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    	<xsd:attribute name="name" type="xsd:string" />
+    	<xsd:attribute name="computed" type="booleanExp" />
+    	<xsd:attribute name="type" type="xsd:string" />
+    	<xsd:attribute name="value" type="xsd:string" />
+    	<xsd:attribute name="valueNumeric" type="xsd:string" />
+    	<xsd:attribute name="valueBoolean" type="xsd:string" />
+    	<xsd:attribute name="valueDate" type="xsd:string" />
+    	<xsd:attribute name="valueComputed" type="xsd:string" />
+    	<xsd:attribute name="valueSequenceCurrent" type="xsd:string" />
+    	<xsd:attribute name="valueSequenceNext" type="xsd:string" />
+    	<xsd:attribute name="valueBlobFile" type="xsd:string" />
+    	<xsd:attribute name="valueBlob" type="xsd:hexBinary"></xsd:attribute>
+    	<xsd:attribute name="valueClobFile" type="xsd:string" />
+    	<xsd:attribute name="valueClob" type="xsd:string"></xsd:attribute>
+    	<xsd:attribute name="defaultValue" type="xsd:string" />
+    	<xsd:attribute name="defaultValueNumeric" type="xsd:string" />
+    	<xsd:attribute name="defaultValueDate" type="xsd:string" />
+    	<xsd:attribute name="defaultValueBoolean" type="booleanExp" />
+    	<xsd:attribute name="defaultValueComputed" type="xsd:string" />
+    	<xsd:attribute name="defaultValueSequenceCurrent"
+    		type="xsd:string" />
+    	<xsd:attribute name="defaultValueSequenceNext"
+    		type="xsd:string" />
+    	<xsd:attribute name="autoIncrement" type="booleanExp" />
+    	<xsd:attribute name="startWith" type="xsd:long" />
+    	<xsd:attribute name="incrementBy" type="xsd:long" />
+    	<xsd:attribute name="remarks" type="xsd:string" />
+    	<xsd:attribute name="encoding" type="xsd:string">
+    		<xsd:annotation>
+    			<xsd:appinfo>
+    				<xsd:documentation>
+    					Used with valueClobFile to specify file encoding
+    					explicitly.
+    				</xsd:documentation>
+    			</xsd:appinfo>
+    		</xsd:annotation>
+    	</xsd:attribute>
+    	<xsd:attribute name="descending" type="booleanExp" />
+    	<xsd:anyAttribute namespace="##other" processContents="lax" />
     </xsd:attributeGroup>
 
     <xsd:complexType name="columnType" mixed="true">
