@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -23,8 +22,10 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 import liquibase.change.*;
-import liquibase.change.DatabaseChangeProperty;
 import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.CustomSqlChange;
@@ -332,7 +333,11 @@ public class StringChangeLogSerializerTest extends Specification {
                 field.set(object, createMap());
             } else if (field.getType().equals(ChangeLogParameters.class)) {
                 // TODO: unclear what to do here ...
-            } else if (Collection.class.isAssignableFrom(field.getType())) {
+            } else if (field.getType().equals(SerialBlob.class)) {
+				//TODO: unclear what to do here ...
+			} else if (field.getType().equals(SerialClob.class)) {
+				//TODO: unclear what to do here ...
+			} else if (Collection.class.isAssignableFrom(field.getType())) {
                 Type genericType = field.getGenericType();
                 if (genericType instanceof ParameterizedType) {
                     int genericsLength = ((ParameterizedType) genericType).getActualTypeArguments().length;
@@ -369,7 +374,7 @@ public class StringChangeLogSerializerTest extends Specification {
                     fail("List not generic");
                 }
             } else {
-                fail("Unknown field type in " + clazz.getName() + ": " + field.getType().getName());
+               fail("Unknown field type in " + clazz.getName() + ": " + field.getType().getName());
             }
         }
 

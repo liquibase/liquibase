@@ -1,5 +1,11 @@
 package liquibase.change
 
+import java.text.ParseException
+
+import javax.sql.rowset.serial.SerialBlob
+import javax.sql.rowset.serial.SerialClob
+import javax.xml.bind.DatatypeConverter
+
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
@@ -7,20 +13,12 @@ import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.core.*
+
+import org.apache.commons.io.IOUtils
+
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.nio.charset.Charset
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-
-import java.text.ParseException
-
-import javax.xml.bind.DatatypeConverter;
-
-import org.apache.commons.io.IOUtils;
 
 public class ColumnConfigTest extends Specification {
 
@@ -441,7 +439,7 @@ public class ColumnConfigTest extends Specification {
         def node = new ParsedNode(null, "column")
         def column = new ColumnConfig()
 
-        def testValue = "GHans value for ${field}"
+        def testValue = "value for ${field}"
         if (field in ["defaultValueDate", "valueDate"]) {
             testValue = "2012-03-13 18:52:22.129"
         } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed"]) {
@@ -488,7 +486,7 @@ public class ColumnConfigTest extends Specification {
 
         def column = new ColumnConfig()
 
-        def testValue = "this is the value for ${field}"
+        def testValue = "value for ${field}"
         if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey"]) {
             testValue = "true"
         }

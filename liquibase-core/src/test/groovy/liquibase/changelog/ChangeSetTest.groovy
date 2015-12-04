@@ -128,7 +128,7 @@ public class ChangeSetTest extends Specification {
             } else if (param == "objectQuotingStrategy") {
                 testValue[param] = "QUOTE_ONLY_RESERVED_WORDS"
             } else {
-                testValue[param] = "ChangeSetTest value for ${param}"
+                testValue[param] = "value for ${param}"
             }
             node.addChild(null, param, testValue[param])
         }
