@@ -23,6 +23,6 @@ public class LiquibaseActivator implements BundleActivator {
 
     @Override
     public void stop(BundleContext bundleContext) throws Exception {
-        ServiceLocator.reset();
+//        ServiceLocator.reset();
     }
 }

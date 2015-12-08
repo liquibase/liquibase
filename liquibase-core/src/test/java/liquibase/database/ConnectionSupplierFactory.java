@@ -9,15 +9,17 @@ import java.util.*;
 
 public class ConnectionSupplierFactory {
 
+    private final Scope scope;
     private List<ConnectionSupplier> connectionSuppliers;
 
     protected ConnectionSupplierFactory(Scope scope) {
+        this.scope = scope;
 
     }
 
     public List<ConnectionSupplier> getConnectionSuppliers() {
         if (this.connectionSuppliers == null) {
-            Iterator<ConnectionSupplier> supplierIterator = ServiceLocator.getInstance().findAllServices(ConnectionSupplier.class);
+            Iterator<ConnectionSupplier> supplierIterator = scope.getSingleton(ServiceLocator.class).findAllServices(ConnectionSupplier.class);
 
             if (!supplierIterator.hasNext()) {
                 throw new UnexpectedLiquibaseException("Could not find ConnectionSupplier implementations");
@@ -26,11 +28,7 @@ public class ConnectionSupplierFactory {
             this.connectionSuppliers = new ArrayList<>();
 
             while (supplierIterator.hasNext()) {
-                ConnectionSupplier supplier = supplierIterator.next();
-                if (supplier.getClass().equals(UnsupportedDatabaseSupplier.class)) {
-                    continue;
-                }
-                this.connectionSuppliers.add(supplier);
+                this.connectionSuppliers.add(supplierIterator.next());
             }
         }
 

@@ -1,5 +1,6 @@
 package liquibase.database
 
+import liquibase.Scope
 import liquibase.database.core.UnsupportedDatabaseSupplier
 import liquibase.sdk.database.MockDatabase
 import liquibase.structure.core.Table
@@ -17,7 +18,7 @@ class ConnectionSupplierTest extends Specification {
         when:
         def supplier = new UnsupportedDatabaseSupplier() {
             @Override
-            Database getDatabase() {
+            Database getDatabase(Scope scope) {
                 return new MockDatabase().setMaxReferenceContainerDepth(1);
             }
         }
@@ -39,7 +40,7 @@ class ConnectionSupplierTest extends Specification {
         expect:
         def supplier = new UnsupportedDatabaseSupplier() {
             @Override
-            Database getDatabase() {
+            Database getDatabase(Scope scope) {
                 return new MockDatabase().setMaxReferenceContainerDepth(2);
             }
         }

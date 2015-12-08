@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.changelog.ChangeSet
+import liquibase.database.ConnectionSupplier
 import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.OfflineConnection
@@ -12,10 +13,7 @@ import liquibase.sdk.supplier.database.DatabaseSupplier
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sdk.verifytest.TestPermutation
 import liquibase.sdk.verifytest.VerifiedTest
-import liquibase.serializer.core.string.StringChangeLogSerializer
 import liquibase.sqlgenerator.SqlGeneratorFactory
-import org.junit.Rule
-import org.junit.rules.TestName
 import spock.lang.*
 
 class StandardChangeTest extends Specification {
@@ -97,7 +95,7 @@ class StandardChangeTest extends Specification {
 
 
         where:
-        [changeClass, database] << [changeSupplier.extensionClasses, databaseSupplier.allDatabases].combinations()
+        [changeClass, ConnectionSupplier.getDatabase] << [changeSupplier.extensionClasses, databaseSupplier.allDatabases].combinations()
     }
 
 //    @Unroll("Minimum required properties for <#change> is valid sql on #database.shortName")

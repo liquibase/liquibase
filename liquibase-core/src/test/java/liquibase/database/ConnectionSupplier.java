@@ -9,7 +9,6 @@ import liquibase.sdk.TemplateService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.ObjectReference;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.util.CollectionUtil;
 import org.slf4j.LoggerFactory;
@@ -222,8 +221,8 @@ public abstract class ConnectionSupplier implements Cloneable {
 
     }
 
-    public Database getDatabase() {
-        return DatabaseFactory.getInstance().getDatabase(getDatabaseShortName());
+    public Database getDatabase(Scope scope) {
+        return scope.getSingleton(DatabaseFactory.class).getDatabase(getDatabaseShortName());
     }
 
     public Scope connect(Scope scope) throws DatabaseException {

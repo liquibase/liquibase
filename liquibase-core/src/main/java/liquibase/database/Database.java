@@ -1,10 +1,12 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Scope;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
+import liquibase.servicelocator.Service;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
@@ -20,10 +22,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public interface Database extends PrioritizedService {
+public interface Database extends Service {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
+
+    int getPriority(Scope scope);
 
     /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.

@@ -2,18 +2,26 @@ package liquibase.servicelocator;
 
 import liquibase.Scope;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 
 public abstract class AbstractServiceFactory<T extends Service> {
 
+    private final Scope rootScope;
+
     protected AbstractServiceFactory(Scope scope) {
+        this.rootScope = scope;
     }
 
     protected abstract Class<T> getServiceClass();
 
     protected abstract int getPriority(T obj, Scope scope, Object... args);
+
+    protected Scope getRootScope() {
+        return rootScope;
+    };
 
     protected T getService(final Scope scope, final Object... args) {
         TreeSet<T> applicable = new TreeSet<>(new Comparator<T>() {
@@ -30,9 +38,7 @@ public abstract class AbstractServiceFactory<T extends Service> {
             }
         });
 
-        Iterator<T> serviceIterator = scope.getSingleton(ServiceLocator.class).findAllServices(getServiceClass());
-        while (serviceIterator.hasNext()) {
-            T service = serviceIterator.next();
+        for (T service : scope.getSingleton(ServiceLocator.class).findAllServices(getServiceClass())) {
             if (getPriority(service, scope, args) >= 0) {
                 applicable.add(service);
             }

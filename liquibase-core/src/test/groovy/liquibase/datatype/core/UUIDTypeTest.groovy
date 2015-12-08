@@ -1,8 +1,7 @@
 package liquibase.datatype.core
 
-import liquibase.database.core.*
+import liquibase.database.ConnectionSupplier
 import liquibase.sdk.database.MockDatabase
-import liquibase.statement.DatabaseFunction
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -16,7 +15,7 @@ class UUIDTypeTest extends Specification {
         type.objectToSql(object, database) == expectedSql
 
         where:
-        object                                                  | database            | expectedSql
+        object                                                  | ConnectionSupplier.getDatabase            | expectedSql
         null                                                    | new MockDatabase()  | null
         "NULL"                                                  | new MockDatabase()  | null
         "DFD8E505-0BB7-4D3E-B341-AD17190D8C9E"                  | new MockDatabase()  | "DFD8E505-0BB7-4D3E-B341-AD17190D8C9E"

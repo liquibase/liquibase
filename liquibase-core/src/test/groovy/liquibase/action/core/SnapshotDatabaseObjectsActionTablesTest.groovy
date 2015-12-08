@@ -3,19 +3,14 @@ package liquibase.action.core
 import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.Action
-import liquibase.actionlogic.ActionExecutor
-import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.Snapshot
-import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.NoOpTransformer
 import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectReference
 import liquibase.structure.TestTableSupplier
 import liquibase.structure.core.Catalog
 import liquibase.structure.core.Column
-import liquibase.structure.core.Schema
 import liquibase.structure.core.Table
 import liquibase.util.CollectionUtil
 import org.junit.Assume
@@ -112,7 +107,7 @@ class SnapshotDatabaseObjectsActionTablesTest extends AbstractActionTest {
 
         where:
         [conn, scope, catalogRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support catalogs", it.database.supports(Catalog))
+            Assume.assumeTrue("Database does not support catalogs", ConnectionSupplier.getDatabase.supports(Catalog))
             def scope = JUnitScope.getInstance(it)
 
             return CollectionUtil.permutations([

@@ -4,12 +4,9 @@ import liquibase.JUnitScope
 import liquibase.Scope
 import liquibase.action.Action
 import liquibase.actionlogic.ActionExecutor
-import liquibase.actionlogic.QueryResult
 import liquibase.database.ConnectionSupplier
 import liquibase.database.ConnectionSupplierFactory
 import liquibase.snapshot.Snapshot
-import liquibase.snapshot.TestSnapshotFactory
-import liquibase.snapshot.transformer.LimitTransformer
 import liquibase.structure.ObjectNameStrategy
 import liquibase.structure.ObjectReference
 import liquibase.structure.TestColumnSupplier
@@ -118,7 +115,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
         where:
         [conn, scope, catalogRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support catalogs", it.database.supports(Catalog));
+            Assume.assumeTrue("Database does not support catalogs", ConnectionSupplier.getDatabase.supports(Catalog));
 
             def scope = JUnitScope.getInstance(it)
 
@@ -160,7 +157,7 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
 
         where:
         [conn, scope, autoIncrement, columnRef] << JUnitScope.instance.getSingleton(ConnectionSupplierFactory).connectionSuppliers.collectMany {
-            Assume.assumeTrue("Database does not support autoIncrement", it.database.supportsAutoIncrement());
+            Assume.assumeTrue("Database does not support autoIncrement", ConnectionSupplier.getDatabase.supportsAutoIncrement());
 
             def scope = JUnitScope.getInstance(it)
 
@@ -177,8 +174,8 @@ class SnapshotDatabaseObjectsActionColumnsTest extends AbstractActionTest {
     def "dataType comes through correctly"() {
         when:
         def schema = conn.allContainers[0]
-        def tableName = correctObjectName("testtable", Table, scope.database)
-        def columnName = correctObjectName("testcol", Column, scope.database)
+        def tableName = correctObjectName("testtable", Table, ConnectionSupplier.getDatabase)
+        def columnName = correctObjectName("testcol", Column, ConnectionSupplier.getDatabase)
         def type = DataType.parse(typeString)
 
         def snapshot = new Snapshot(scope)

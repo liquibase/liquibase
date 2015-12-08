@@ -835,7 +835,6 @@ public class Main {
             });
         }
 
-        ServiceLocator.getInstance().setResourceAccessor(new ClassLoaderResourceAccessor(classLoader));
         Thread.currentThread().setContextClassLoader(classLoader);
     }
 

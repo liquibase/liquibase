@@ -1,7 +1,6 @@
 package liquibase.datatype
 
-import liquibase.database.DatabaseFactory
-import liquibase.database.core.*
+import liquibase.database.ConnectionSupplier
 import liquibase.datatype.core.*
 import liquibase.sdk.database.MockDatabase
 import spock.lang.Specification
@@ -22,7 +21,7 @@ public class DataTypeFactoryTest extends Specification {
         expectedAutoIncrement == autoIncrement
 
         where:
-        liquibaseString                                      | database              | databaseString                                       | expectedType  | expectedAutoIncrement
+        liquibaseString                                      | ConnectionSupplier.getDatabase              | databaseString                                       | expectedType  | expectedAutoIncrement
         "int"                                                | new MockDatabase()    | "INT"                                                | IntType       | false
         "varchar(255)"                                       | new MockDatabase()    | "VARCHAR(255)"                                       | VarcharType   | false
         "int{autoIncrement:true}"                            | new MockDatabase()    | "INT"                                                | IntType       | true
@@ -212,7 +211,7 @@ public class DataTypeFactoryTest extends Specification {
         liquibaseType.getClass() == expectedType
 
         where:
-        object                       | database           | expectedType | expectedSql
+        object                       | ConnectionSupplier.getDatabase           | expectedType | expectedSql
         Integer.valueOf("10000000")  | new MockDatabase() | IntType      | "10000000"
         Long.valueOf("10000000")     | new MockDatabase() | BigIntType   | "10000000"
         new BigInteger("10000000")   | new MockDatabase() | BigIntType   | "10000000"

@@ -1,11 +1,14 @@
 package liquibase.database;
 
+import liquibase.Scope;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.AbstractServiceFactory;
+import liquibase.servicelocator.Service;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.Snapshot;
 import liquibase.util.StringUtils;
@@ -19,57 +22,39 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
 
-public class DatabaseFactory {
-    private static DatabaseFactory instance;
-    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<String, SortedSet<Database>>();
-    private Map<String, SortedSet<Database>> internalDatabases = new HashMap<String, SortedSet<Database>>();
+public class DatabaseFactory extends AbstractServiceFactory<Database> {
     private Logger log;
 
-    private DatabaseFactory() {
+    protected DatabaseFactory(Scope scope) {
+        super(scope);
         log = LoggerFactory.getLogger(DatabaseFactory.class);
-        try {
-//            Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
-//
-//            //noinspection unchecked
-//            for (Class<? extends Database> clazz : classes) {
-//                try {
-//                    register(clazz.getConstructor().newInstance());
-//                } catch (Throwable e) {
-//                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
-//                }
-//            }
+    }
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    @Override
+    protected Class<Database> getServiceClass() {
+        return Database.class;
+    }
+
+    @Override
+    protected int getPriority(Database obj, Scope scope, Object... args) {
+        String databaseName = (String) args[0];
+
+        if (obj.getShortName().equals(databaseName)) {
+            return obj.getPriority(scope);
+        } else {
+            return Service.PRIORITY_NOT_APPLICABLE;
         }
-
-    }
-
-    public static DatabaseFactory getInstance() {
-        if (instance == null) {
-            instance = new DatabaseFactory();
-        }
-        return instance;
-    }
-
-    public static void reset() {
-        instance = new DatabaseFactory();
-    }
-
-    /**
-     * Set singleton instance. Primarily used in testing
-     */
-    public static void setInstance(DatabaseFactory databaseFactory) {
-        instance = databaseFactory;
     }
 
     /**
      * Returns instances of all implemented database types.
      */
     public List<Database> getImplementedDatabases() {
-        List<Database> returnList = new ArrayList<Database>();
-        for (SortedSet<Database> set : implementedDatabases.values()) {
-            returnList.add(set.iterator().next());
+        List<Database> returnList = new ArrayList<>();
+        for (Database db : getRootScope().getSingleton(ServiceLocator.class).findAllServices(Database.class)) {
+            if (!(db instanceof InternalDatabase)) {
+                returnList.add(db);
+            }
         }
         return returnList;
     }
@@ -78,31 +63,18 @@ public class DatabaseFactory {
      * Returns instances of all "internal" database types.
      */
     public List<Database> getInternalDatabases() {
-        List<Database> returnList = new ArrayList<Database>();
-        for (SortedSet<Database> set : internalDatabases.values()) {
-            returnList.add(set.iterator().next());
+        List<Database> returnList = new ArrayList<>();
+        for (Database db : getRootScope().getSingleton(ServiceLocator.class).findAllServices(Database.class)) {
+            if (db instanceof InternalDatabase) {
+                returnList.add(db);
+            }
         }
         return returnList;
     }
 
-    public void register(Database database) {
-        Map<String, SortedSet<Database>> map = null;
-        if (database instanceof InternalDatabase) {
-            map = internalDatabases;
-        } else {
-            map = implementedDatabases;
-
-        }
-
-        if (!map.containsKey(database.getShortName())) {
-            map.put(database.getShortName(), new TreeSet<Database>(new TreeSet<Database>(new DatabaseComparator())));
-        }
-        map.get(database.getShortName()).add(database);
-    }
-
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
 
-        SortedSet<Database> foundDatabases = new TreeSet<Database>(new DatabaseComparator());
+        List<Database> foundDatabases = new ArrayList<>();
 
         for (Database implementedDatabase : getImplementedDatabases()) {
             if (connection instanceof OfflineConnection) {
@@ -125,6 +97,13 @@ public class DatabaseFactory {
 
         Database returnDatabase;
         try {
+            Collections.sort(foundDatabases, new Comparator<Database>() {
+                @Override
+                public int compare(Database o1, Database o2) {
+                    return Integer.valueOf(o1.getPriority(getRootScope())).compareTo(o2.getPriority(getRootScope()));
+                }
+            });
+
             returnDatabase = foundDatabases.iterator().next().getClass().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -176,20 +155,19 @@ public class DatabaseFactory {
 
         driver = StringUtils.trimToNull(driver);
         if (driver == null) {
-            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
+            driver = this.findDefaultDriver(url);
         }
 
         try {
             Driver driverObject;
-            DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
-            if (databaseClass != null) {
-                databaseFactory.clearRegistry();
-                databaseFactory.register((Database) Class.forName(databaseClass, true, resourceAccessor.toClassLoader()).newInstance());
-            }
+//            if (databaseClass != null) {
+//                this.clearRegistry();
+//                this.register((Database) Class.forName(databaseClass, true, resourceAccessor.toClassLoader()).newInstance());
+//            }
 
             try {
                 if (driver == null) {
-                    driver = databaseFactory.findDefaultDriver(url);
+                    driver = this.findDefaultDriver(url);
                 }
 
                 if (driver == null) {
@@ -261,18 +239,8 @@ public class DatabaseFactory {
         return null;
     }
 
-    /**
-     * Removes all registered databases, even built in ones.  Useful for forcing a particular database implementation
-     */
-    public void clearRegistry() {
-        implementedDatabases.clear();
-    }
-
     public Database getDatabase(String shortName) {
-        if (!implementedDatabases.containsKey(shortName)) {
-            return null;
-        }
-        return implementedDatabases.get(shortName).iterator().next();
+        return getService(getRootScope(), shortName);
 
     }
 
@@ -295,10 +263,4 @@ public class DatabaseFactory {
         return returnDatabase;
     }
 
-    private static class DatabaseComparator implements Comparator<Database> {
-        @Override
-        public int compare(Database o1, Database o2) {
-            return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
-        }
-    }
 }

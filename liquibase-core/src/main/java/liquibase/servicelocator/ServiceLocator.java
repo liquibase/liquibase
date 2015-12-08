@@ -1,5 +1,6 @@
 package liquibase.servicelocator;
 
+import liquibase.Scope;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -16,35 +17,17 @@ import java.util.jar.Manifest;
 
 public class ServiceLocator {
 
-    private static ServiceLocator instance;
 
-    private ResourceAccessor resourceAccessor;
-
-    protected ServiceLocator() {
-        setResourceAccessor(new ClassLoaderResourceAccessor());
+    protected ServiceLocator(Scope scope) {
     }
 
-    protected ServiceLocator(ResourceAccessor accessor) {
-        setResourceAccessor(accessor);
+    public <T> Collection<T> findAllServices(Class<T> requiredInterface) throws ServiceNotFoundException {
+        Iterator<T> iterator = ServiceLoader.load(requiredInterface).iterator();
+        List<T> returnList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            returnList.add(iterator.next());
+        }
+        return Collections.unmodifiableCollection(returnList);
     }
 
-    public static ServiceLocator getInstance() {
-        return instance;
-    }
-
-    public static void setInstance(ServiceLocator newInstance) {
-        instance = newInstance;
-    }
-
-    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-        this.resourceAccessor = resourceAccessor;
-    }
-
-    public <T> Iterator<T> findAllServices(Class<T> requiredInterface) throws ServiceNotFoundException {
-        return ServiceLoader.load(requiredInterface).iterator();
-    }
-
-    public static void reset() {
-        instance = new ServiceLocator();
-    }
 }

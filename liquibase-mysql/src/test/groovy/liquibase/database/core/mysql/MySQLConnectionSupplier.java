@@ -1,6 +1,7 @@
 package liquibase.database.core.mysql;
 
 
+import liquibase.Scope;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.ConnectionSupplier;
 import liquibase.database.Database;
@@ -38,8 +39,8 @@ public class MySQLConnectionSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public Database getDatabase() {
-        Database database = super.getDatabase();
+    public Database getDatabase(Scope scope) {
+        Database database = super.getDatabase(scope);
         ((AbstractJdbcDatabase) database).setCaseSensitive(false);
         return database;
     }

@@ -1,8 +1,7 @@
 package liquibase.datatype.core
 
-import liquibase.database.core.*
+import liquibase.database.ConnectionSupplier
 import liquibase.sdk.database.MockDatabase
-import liquibase.statement.DatabaseFunction
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -16,7 +15,7 @@ class XMLTypeTest extends Specification {
         type.objectToSql(object, database) == expectedSql
 
         where:
-        object                                                  | database                | expectedSql
+        object                                                  | ConnectionSupplier.getDatabase                | expectedSql
         null                                                    | new MockDatabase()      | null
         "NULL"                                                  | new MockDatabase()      | null
         "<?xml version=\"1.0\"?><root/>"                        | new MockDatabase()      | "'<?xml version=\"1.0\"?><root/>'"

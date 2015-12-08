@@ -86,8 +86,6 @@ public abstract class AbstractIntegrationTest {
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
 
         this.url = url;
-
-        ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
     }
 
     private void openConnection(String url) throws Exception {
