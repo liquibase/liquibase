@@ -301,6 +301,18 @@ public class Main {
                       messages.add("unexpected command parameter: "+cmdParm);
                     }
                 }
+            } else if ("snapshot".equalsIgnoreCase(command)
+                    || "generateChangeLog".equalsIgnoreCase(command)) {
+                if (commandParams.size() > 0) {
+                    for (String cmdParm : commandParams) {
+                        if (!cmdParm.startsWith("--includeSchema")
+                                && !cmdParm.startsWith("--includeCatalog")
+                                && !cmdParm.startsWith("--includeTablespace")
+                                && !cmdParm.startsWith("--schemas")) {
+                            messages.add("unexpected command parameter: " + cmdParm);
+                        }
+                    }
+                }
             }
         }
 
