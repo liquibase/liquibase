@@ -238,6 +238,8 @@ public class Main {
                     i++;
                 }
             }
+
+            arg = arg.replace("\\,", ","); //sometimes commas come through escaped still
             fixedArgs.add(arg);
         }
 
