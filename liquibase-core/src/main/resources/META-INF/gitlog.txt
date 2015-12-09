@@ -1,3 +1,4 @@
+4e723c3 DVONE-3428 Use a LinkedHashSet in LabelExpression to keep the labels in the input order
 b4fc4bb DVONE-3393 explicitly set xml version to 1.0. In some environments it seemed to default to 1.1
 9a33021 Reverted CORE-2589 Output xml changelogs as xml version="1.1"
 28d9b33 Allow extensions to control label and context columns size
