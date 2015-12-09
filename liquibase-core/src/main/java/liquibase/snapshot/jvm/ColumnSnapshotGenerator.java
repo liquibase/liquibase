@@ -64,7 +64,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         " name='MS_Description' " +
                         " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeObjectName(column.getRelation().getName(), Table.class)) + "')\n" +
                         " AND\n" +
-                        " minor_id = COLUMNPROPERTY(major_id, '" + column.getName() + "', 'ColumnId')"), String.class);
+                        " minor_id = COLUMNPROPERTY(major_id, '" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId')"), String.class);
 
                 if (remarks != null && remarks.size() > 0) {
                     column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
