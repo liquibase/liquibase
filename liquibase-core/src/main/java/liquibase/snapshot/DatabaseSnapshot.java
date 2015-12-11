@@ -6,6 +6,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -201,6 +202,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 knownNull.put(example.getClass(), collection);
             }
             collection.add(example);
+
+            if (example instanceof Schema) {
+                LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
+            }
+            if (example instanceof Catalog) {
+                LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
+            }
 
         } else {
             allFound.add(object);
