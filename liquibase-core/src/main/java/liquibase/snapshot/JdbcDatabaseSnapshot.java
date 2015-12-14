@@ -135,7 +135,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "ON fc.owner = f.owner " +
                                 "AND fc.constraint_name = f.constraint_name " +
                                 "AND fc.position = pc.position " +
-                                "WHERE p.owner = '" + jdbcSchemaName + "' " +
+                                "WHERE f.owner = '" + jdbcSchemaName + "' " +
                                 "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R' " +
                                 "AND p.table_name NOT LIKE 'BIN$%' " +

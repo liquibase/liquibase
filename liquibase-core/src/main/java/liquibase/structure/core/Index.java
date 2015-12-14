@@ -162,7 +162,14 @@ public class Index extends AbstractDatabaseObject {
     @Override
     public int compareTo(Object other) {
         Index o = (Index) other;
-        int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
+        int returnValue = 0;
+
+        if (this.getTable() != null && o.getTable() != null) {
+            returnValue = this.getTable().compareTo(o.getTable());
+            if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
+                returnValue = this.getTable().getSchema().toString().compareTo(o.getTable().getSchema().toString());
+            }
+        }
 
         if (returnValue == 0) {
             String thisName = StringUtils.trimToEmpty(this.getName());
@@ -205,7 +212,15 @@ public class Index extends AbstractDatabaseObject {
             stringBuffer.append(" unique ");
         }
         if (getTable() != null && getColumns() != null) {
-            stringBuffer.append(" on ").append(getTable().getName());
+            String tableName = getTable().getName();
+            if (getTable().getSchema() != null) {
+                if (getTable().getSchema().getCatalogName() == null) {
+                    tableName = getTable().getSchema()+"."+tableName;
+                } else {
+                    tableName = getTable().getSchema().getCatalogName()+"."+getTable().getSchema().getName()+"."+tableName;
+                }
+            }
+            stringBuffer.append(" on ").append(tableName);
             if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
                 for (Column column : getColumns()) {

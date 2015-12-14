@@ -57,6 +57,11 @@ public class Sequence extends AbstractDatabaseObject {
 
         Sequence sequence = (Sequence) o;
 
+        if (this.getSchema() != null && sequence.getSchema() != null) {
+            return this.getSchema().toString().equalsIgnoreCase(sequence.getSchema().toString());
+        }
+
+
         return !(getName() != null ? !getName().equalsIgnoreCase(sequence.getName()) : sequence.getName() != null);
 
     }
