@@ -179,6 +179,11 @@ public class ForeignKey extends AbstractDatabaseObject{
 
         ForeignKey that = (ForeignKey) o;
 
+        if (this.getSchema() != null && that.getSchema() != null) {
+            return this.getSchema().toString().equalsIgnoreCase(that.getSchema().toString());
+        }
+
+
         if (getForeignKeyColumns() == null) {
             return this.getName().equalsIgnoreCase(that.getName());
         }
