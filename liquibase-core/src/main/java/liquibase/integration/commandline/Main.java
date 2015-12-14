@@ -242,6 +242,8 @@ public class Main {
                     i++;
                 }
             }
+
+            arg = arg.replace("\\,", ","); //sometimes commas come through escaped still
             fixedArgs.add(arg);
         }
 
@@ -308,6 +310,18 @@ public class Main {
                       && !cmdParm.startsWith("--includeObjects")
                       && !cmdParm.startsWith("--diffTypes")) {
                       messages.add("unexpected command parameter: "+cmdParm);
+                    }
+                }
+            } else if ("snapshot".equalsIgnoreCase(command)
+                    || "generateChangeLog".equalsIgnoreCase(command)) {
+                if (commandParams.size() > 0) {
+                    for (String cmdParm : commandParams) {
+                        if (!cmdParm.startsWith("--includeSchema")
+                                && !cmdParm.startsWith("--includeCatalog")
+                                && !cmdParm.startsWith("--includeTablespace")
+                                && !cmdParm.startsWith("--schemas")) {
+                            messages.add("unexpected command parameter: " + cmdParm);
+                        }
                     }
                 }
             }

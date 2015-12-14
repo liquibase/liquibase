@@ -2,7 +2,9 @@ package liquibase.datatype;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.core.BigIntType;
+import liquibase.datatype.core.CharType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -172,6 +174,9 @@ public class DataTypeFactory {
             for (String param : params) {
                 param = StringUtils.trimToNull(param);
                 if (param != null) {
+                    if (liquibaseDataType instanceof CharType && !(database instanceof OracleDatabase)) {
+                        param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle, not sure what else supports it
+                    }
                     liquibaseDataType.addParameter(param);
                 }
             }
