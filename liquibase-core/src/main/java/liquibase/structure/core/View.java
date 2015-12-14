@@ -32,6 +32,10 @@ public class View extends Relation {
 
         View that = (View) o;
 
+        if (this.getSchema() != null && that.getSchema() != null) {
+            return this.getSchema().toString().equalsIgnoreCase(that.getSchema().toString());
+        }
+
         return getName().equalsIgnoreCase(that.getName());
 
     }
