@@ -52,7 +52,9 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 				generateHeader(sql, statement, database);
 			}
 		}
-		result.add(completeStatement(statement, sql));
+		if (index > 0) {
+			result.add(completeStatement(statement, sql));
+		}
 
 		return result.toArray(new UnparsedSql[result.size()]);
 	}
