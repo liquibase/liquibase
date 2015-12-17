@@ -203,6 +203,12 @@
                 <scope>test</scope>
             </dependency>
 
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<scope>compile</scope>
+				<version>1.3.2</version>
+			</dependency>
 
         </dependencies>
     </dependencyManagement>
