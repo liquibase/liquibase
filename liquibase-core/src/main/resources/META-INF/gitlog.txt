@@ -1,3 +1,7 @@
+bd70e7a Correctly escape column names when fetching remarks
+f782fec Unescape commas that sometimes come through still escaped
+104c3a3 CORE-2612 Oracle: include BYTE in CHAR and VARCHAR types from snapshot/generateChangeLog
+f735662 Don't throw validation errors for --schemas flag on snapshot and generateChangeLog
 4e723c3 DVONE-3428 Use a LinkedHashSet in LabelExpression to keep the labels in the input order
 b4fc4bb DVONE-3393 explicitly set xml version to 1.0. In some environments it seemed to default to 1.1
 9a33021 Reverted CORE-2589 Output xml changelogs as xml version="1.1"
