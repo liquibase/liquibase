@@ -279,7 +279,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         }
                     }
                     String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
-                    Integer orderExecuted = (tmpOrderExecuted == null ? null : new Integer(tmpOrderExecuted));
+                    Integer orderExecuted = (tmpOrderExecuted == null ? null : Integer.valueOf(tmpOrderExecuted));
                     String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                     String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
