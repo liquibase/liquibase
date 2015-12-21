@@ -217,6 +217,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "JOIN ALL_INDEXES i on i.index_name = c.index_name " +
                                 "LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name) " +
                                 "WHERE c.TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' " +
+                                "AND c.table_name not in (select object_name from dba_recyclebin) "+
                                 "AND i.OWNER=c.TABLE_OWNER";
                         if (!bulkFetch && tableName != null) {
                             sql += " AND c.TABLE_NAME='" + tableName + "'";
@@ -343,7 +344,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS,\n" +
+                    String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS, " +
                             "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
                             // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
                             "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
@@ -517,7 +518,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             throw new SQLException(e);
                         }
                     } else {
-                        return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                        if (database instanceof OracleDatabase) {
+                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq, c.constraint_name AS pk_name " +
+                                    "FROM all_cons_columns c, all_constraints k " +
+                                    "WHERE k.constraint_type = 'P' " +
+                                    "AND k.table_name not in (select object_name from dba_recyclebin) " +
+                                    "AND k.table_name = '"+table+"' " +
+                                    "AND k.owner = '"+((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"' " +
+                                    "AND k.constraint_name = c.constraint_name " +
+                                    "AND k.table_name = c.table_name " +
+                                    "AND k.owner = c.owner " +
+                                    "ORDER BY column_name";
+                            try {
+                                return executeAndExtract(sql, database);
+                            } catch (DatabaseException e) {
+                                throw new SQLException(e);
+                            }
+                        } else {
+                            return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                        }
                     }
                 }
 
@@ -527,7 +546,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                         try {
-                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM all_cons_columns c, all_constraints k WHERE k.constraint_type = 'P' AND k.owner='" + catalogAndSchema.getCatalogName() + "' AND k.constraint_name = c.constraint_name  AND k.table_name = c.table_name  AND k.owner = c.owner  ORDER BY column_name", database);
+                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM " +
+                                    "all_cons_columns c, all_constraints k " +
+                                    "WHERE k.constraint_type = 'P' " +
+                                    "AND k.owner='" + catalogAndSchema.getCatalogName() + "' " +
+                                    "AND k.table_name not in (select object_name from dba_recyclebin) "+
+                                    "AND k.constraint_name = c.constraint_name " +
+                                    "AND k.table_name = c.table_name " +
+                                    "AND k.owner = c.owner " +
+                                    "ORDER BY column_name", database);
                         } catch (DatabaseException e) {
                             throw new SQLException(e);
                         }
@@ -610,7 +637,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "from all_constraints uc join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner "
                                 + "where uc.constraint_type='U' "
                                 + "and uc.owner = '" + jdbcSchemaName + "' "
-                                + "AND ui.table_name NOT LIKE 'BIN$%' ";
+                                + "AND ui.table_name not in (select object_name from dba_recyclebin) ";
 
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + tableName + "'";
