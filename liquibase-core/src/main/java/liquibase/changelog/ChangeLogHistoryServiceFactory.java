@@ -30,7 +30,7 @@ public class ChangeLogHistoryServiceFactory {
     }
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
@@ -93,7 +93,7 @@ public class ChangeLogHistoryServiceFactory {
             }
     }
 
-    public void resetAll() {
+    public synchronized void resetAll() {
         for (ChangeLogHistoryService changeLogHistoryService : registry) {
             changeLogHistoryService.reset();
         }

@@ -49,14 +49,14 @@ public class SqlGeneratorFactory {
     /**
      * Return singleton SqlGeneratorFactory
      */
-    public static SqlGeneratorFactory getInstance() {
+    public static synchronized SqlGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new SqlGeneratorFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SqlGeneratorFactory();
     }
 

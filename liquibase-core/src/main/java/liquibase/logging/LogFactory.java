@@ -14,11 +14,11 @@ public class LogFactory {
 
     private static LogFactory instance;
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new LogFactory();
     }
 
-    public static LogFactory getInstance() {
+    public static synchronized LogFactory getInstance() {
         if (instance == null) {
             instance = new LogFactory();
         }

@@ -15,7 +15,7 @@ public class DatabaseObjectFactory {
     private static DatabaseObjectFactory instance;
     private Set<Class<? extends DatabaseObject>> standardTypes;
 
-    public static DatabaseObjectFactory getInstance() {
+    public static synchronized DatabaseObjectFactory getInstance() {
         if (instance == null) {
             instance = new DatabaseObjectFactory();
         }

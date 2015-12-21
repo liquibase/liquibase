@@ -45,14 +45,14 @@ public class SnapshotGeneratorFactory {
     /**
      * Return singleton SnapshotGeneratorFactory
      */
-    public static SnapshotGeneratorFactory getInstance() {
+    public static synchronized SnapshotGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new SnapshotGeneratorFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotGeneratorFactory();
     }
 
@@ -193,7 +193,7 @@ public class SnapshotGeneratorFactory {
         }
     }
 
-    public static void resetAll() {
+    public static synchronized void resetAll() {
         instance = null;
     }
 

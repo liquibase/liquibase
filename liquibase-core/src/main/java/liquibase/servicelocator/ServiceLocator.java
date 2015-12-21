@@ -80,7 +80,7 @@ public class ServiceLocator {
         return instance;
     }
 
-    public static void setInstance(ServiceLocator newInstance) {
+    public static synchronized void setInstance(ServiceLocator newInstance) {
         instance = newInstance;
     }
 
@@ -247,7 +247,7 @@ public class ServiceLocator {
         return classes;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ServiceLocator();
     }
 

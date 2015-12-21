@@ -36,14 +36,14 @@ public class ChangeGeneratorFactory {
     /**
      * Return singleton ChangeGeneratorFactory
      */
-    public static ChangeGeneratorFactory getInstance() {
+    public static synchronized ChangeGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new ChangeGeneratorFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ChangeGeneratorFactory();
     }
 
