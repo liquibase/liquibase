@@ -11,11 +11,11 @@ public class SnapshotSerializerFactory {
 
     private Map<String, List<SnapshotSerializer>> serializers = new HashMap<String, List<SnapshotSerializer>>();
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotSerializerFactory();
     }
 
-    public static SnapshotSerializerFactory getInstance() {
+    public static synchronized SnapshotSerializerFactory getInstance() {
         if (instance == null) {
             instance = new SnapshotSerializerFactory();
         }

@@ -27,14 +27,14 @@ public class PreconditionFactory {
         }
     }
 
-    public static PreconditionFactory getInstance() {
+    public static synchronized PreconditionFactory getInstance() {
         if (instance == null) {
              instance = new PreconditionFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new PreconditionFactory();
     }
 

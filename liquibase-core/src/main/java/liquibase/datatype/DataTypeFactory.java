@@ -45,7 +45,7 @@ public class DataTypeFactory {
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new DataTypeFactory();
     }
 

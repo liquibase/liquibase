@@ -26,7 +26,7 @@ public class ConnectionConfigurationFactory {
 
     }
 
-    public static ConnectionConfigurationFactory getInstance() {
+    public static synchronized ConnectionConfigurationFactory getInstance() {
         if (instance == null) {
             instance = new ConnectionConfigurationFactory();
         }
@@ -41,7 +41,7 @@ public class ConnectionConfigurationFactory {
         return configurations;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ConnectionConfigurationFactory();
     }
 

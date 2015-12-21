@@ -38,7 +38,7 @@ public class LockServiceFactory {
     }
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
@@ -91,7 +91,7 @@ public class LockServiceFactory {
 
 	}
 
-	public void resetAll() {
+	public synchronized void resetAll() {
 		for (LockService lockService : registry) {
 			lockService.reset();
 		}
