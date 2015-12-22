@@ -3,6 +3,7 @@ package liquibase.snapshot;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.DatabaseObjectComparator;
@@ -12,6 +13,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.*;
@@ -20,6 +22,8 @@ import java.util.*;
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     private CachingDatabaseMetaData cachingDatabaseMetaData;
+
+    private Set<String> userDefinedTypes;
 
     public JdbcDatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         super(examples, database, snapshotControl);
@@ -270,6 +274,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
          * Return the columns for the given catalog, schema, table, and column.
          */
         public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
+
+            if (database instanceof MSSQLDatabase && userDefinedTypes == null) {
+                userDefinedTypes = new HashSet<String>();
+                DatabaseConnection databaseConnection = database.getConnection();
+                if (databaseConnection instanceof JdbcConnection) {
+                    Statement stmt = null;
+                    ResultSet resultSet = null;
+                    try {
+                        stmt = ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement();
+                        resultSet = stmt.executeQuery("select name from sys.types where is_user_defined=1");
+                        while (resultSet.next()) {
+                            userDefinedTypes.add(resultSet.getString("name").toLowerCase());
+                        }
+                    } finally {
+                        JdbcUtils.close(resultSet, stmt);
+                    }
+                }
+            }
+
             return getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -367,6 +390,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
                     return this.executeAndExtract(sql, database);
+                }
+
+                @Override
+                protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
+                    List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
+                    if (database instanceof MSSQLDatabase && userDefinedTypes.size() > 0) { //UDT types in MSSQL don't take parameters
+                        for (CachedRow row : rows) {
+                           String dataType = (String) row.get("TYPE_NAME");
+                            if (userDefinedTypes.contains(dataType.toLowerCase())) {
+                                row.set("COLUMN_SIZE", null);
+                                row.set("DECIMAL_DIGITS ", null);
+                            }
+                        }
+                    }
+                    return rows;
                 }
             });
         }
