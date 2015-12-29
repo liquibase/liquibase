@@ -2,9 +2,11 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import org.junit.Assert;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link PostgresDatabase}
@@ -59,7 +61,25 @@ public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
         assertEquals("\"tableName\"", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tbl", database.escapeTableName(null, null, "tbl"));
     }
+
+    @Test
+    public void escapeTableName_reservedWordOnly() {
+        Database database = getDatabase();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ONLY_RESERVED_WORDS);
+        assertEquals("\"user\"", database.escapeTableName(null, null, "user"));
+        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
+    }
+
+    @Test
+    public void escapeTableName_all() {
+        Database database = getDatabase();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        assertEquals("\"tbl\"", database.escapeTableName(null, null, "tbl"));
+        assertEquals("\"user\"", database.escapeTableName(null, null, "user"));
+    }
+
 
     @Test
      public void escapeTableName_reservedWord() {
