@@ -213,7 +213,7 @@ public class Index extends AbstractDatabaseObject {
         }
         if (getTable() != null && getColumns() != null) {
             String tableName = getTable().getName();
-            if (getTable().getSchema() != null) {
+            if (getTable().getSchema() != null && getTable().getSchema().getName() != null) {
                 tableName = getTable().getSchema().getName()+"."+tableName;
             }
             stringBuffer.append(" on ").append(tableName);

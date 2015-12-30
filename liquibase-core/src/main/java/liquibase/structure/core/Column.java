@@ -173,7 +173,7 @@ public class Column extends AbstractDatabaseObject {
             return getName();
         } else {
             String tableOrViewName = getRelation().getName();
-            if (getRelation().getSchema() != null) {
+            if (getRelation().getSchema() != null && getRelation().getSchema().getName() != null) {
                 tableOrViewName = getRelation().getSchema().getName()+"."+tableOrViewName;
             }
             return tableOrViewName + "." + getName();

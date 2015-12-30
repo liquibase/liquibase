@@ -63,7 +63,6 @@ class SchemaComparatorTest extends Specification {
         new Schema((String) null, null)                | null                                           | null          | true                    | true
         new Schema((String) null, null)                | null                                           | "MySchem"     | true                    | true
         new Schema("Cat1", null)                       | new Schema("Cat1", null)                       | null          | true                    | true
-        new Schema("Cat1", null)                       | new Schema("Cat2", null)                       | null          | false                   | false
         new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem1")                   | null          | true                    | true
         new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem2")                   | null          | false                   | true
         new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem1")                   | "MySchem"     | true                    | true
