@@ -12,6 +12,8 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 
 import java.util.Set;
 
@@ -77,6 +79,13 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
                     //                    continue;
                     //                }
+                    Schema referenceObjectSchema = referenceObject.getSchema();
+                    if (referenceObjectSchema != null && !referenceObjectSchema.toCatalogAndSchema().equals(schemaComparison.getReferenceSchema(), referenceSnapshot.getDatabase())) {
+                        continue;
+                    }
+                    if (referenceObject instanceof Catalog && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(referenceObject.getName())) {
+                        continue;
+                    }
                     T comparisonObject = comparisonSnapshot.get(referenceObject);
                     if (comparisonObject == null) {
                         diffResult.addMissingObject(referenceObject);
@@ -92,6 +101,14 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
                     //                    continue;
                     //                }
+                    Schema comparisonObjectSchema = comparisonObject.getSchema();
+                    if (comparisonObjectSchema != null && !comparisonObjectSchema.toCatalogAndSchema().equals(schemaComparison.getComparisonSchema(), comparisonSnapshot.getDatabase())) {
+                        continue;
+                    }
+                    if (comparisonObject instanceof Catalog && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(comparisonObject.getName())) {
+                        continue;
+                    }
+
                     if (referenceSnapshot.get(comparisonObject) == null) {
                         diffResult.addUnexpectedObject(comparisonObject);
                     }
