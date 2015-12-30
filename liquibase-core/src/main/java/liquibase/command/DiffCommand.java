@@ -176,7 +176,8 @@ public class DiffCommand extends AbstractCommand {
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
-                schemas[i++] = comparison.getReferenceSchema();
+                CatalogAndSchema schema = new CatalogAndSchema(referenceDatabase.getDefaultCatalogName(), comparison.getReferenceSchema().getSchemaName());
+                schemas[i++] = schema;
             }
         }
 

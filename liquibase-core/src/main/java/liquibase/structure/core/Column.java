@@ -174,7 +174,7 @@ public class Column extends AbstractDatabaseObject {
         } else {
             String tableOrViewName = getRelation().getName();
             if (getRelation().getSchema() != null) {
-                tableOrViewName = getRelation().getSchema().toString()+"."+tableOrViewName;
+                tableOrViewName = getRelation().getSchema().getName()+"."+tableOrViewName;
             }
             return tableOrViewName + "." + getName();
         }
@@ -194,7 +194,7 @@ public class Column extends AbstractDatabaseObject {
             } else {
                 returnValue = this.getRelation().compareTo(o.getRelation());
                 if (returnValue == 0 && this.getRelation().getSchema() != null && o.getRelation().getSchema() != null) {
-                    returnValue = this.getRelation().getSchema().toString().compareTo(o.getRelation().getSchema().toString());
+                    returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareTo(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
                 }
             }
 
