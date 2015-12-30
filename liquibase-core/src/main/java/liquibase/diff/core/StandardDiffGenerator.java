@@ -83,7 +83,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     if (referenceObjectSchema != null && !referenceObjectSchema.toCatalogAndSchema().equals(schemaComparison.getReferenceSchema(), referenceSnapshot.getDatabase())) {
                         continue;
                     }
-                    if (referenceObject instanceof Catalog && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(referenceObject.getName())) {
+                    if (referenceObject instanceof Catalog && schemaComparison.getReferenceSchema().getCatalogName() != null && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(referenceObject.getName())) {
                         continue;
                     }
                     T comparisonObject = comparisonSnapshot.get(referenceObject);
@@ -105,7 +105,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     if (comparisonObjectSchema != null && !comparisonObjectSchema.toCatalogAndSchema().equals(schemaComparison.getComparisonSchema(), comparisonSnapshot.getDatabase())) {
                         continue;
                     }
-                    if (comparisonObject instanceof Catalog && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(comparisonObject.getName())) {
+                    if (comparisonObject instanceof Catalog && schemaComparison.getReferenceSchema().getCatalogName() != null && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(comparisonObject.getName())) {
                         continue;
                     }
 
