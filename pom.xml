@@ -205,7 +205,7 @@
 
             <dependency>
             	<groupId>org.easymock</groupId>
-            	<artifactId>easyMock</artifactId>
+            	<artifactId>easymock</artifactId>
             	<version>2.5.2</version>
             	<scope>test</scope>
             </dependency>

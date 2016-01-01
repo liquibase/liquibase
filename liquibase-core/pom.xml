@@ -148,7 +148,7 @@
         </dependency>
         <dependency>
         	<groupId>org.easymock</groupId>
-        	<artifactId>easyMock</artifactId>
+        	<artifactId>easymock</artifactId>
         	<scope>test</scope>
         </dependency>
     </dependencies>
