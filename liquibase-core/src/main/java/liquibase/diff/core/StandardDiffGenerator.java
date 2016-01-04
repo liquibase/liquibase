@@ -80,11 +80,13 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                    continue;
                     //                }
                     Schema referenceObjectSchema = referenceObject.getSchema();
-                    if (referenceObjectSchema != null && !referenceObjectSchema.toCatalogAndSchema().equals(schemaComparison.getReferenceSchema(), referenceSnapshot.getDatabase())) {
-                        continue;
-                    }
-                    if (referenceObject instanceof Catalog && schemaComparison.getReferenceSchema().getCatalogName() != null && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(referenceObject.getName())) {
-                        continue;
+                    if (referenceObjectSchema != null && referenceObjectSchema.getName() != null) { //don't filter out null-named schemas. May actually be catalog-level objects that should be included
+                        if (!referenceObjectSchema.toCatalogAndSchema().equals(schemaComparison.getReferenceSchema(), referenceSnapshot.getDatabase())) {
+                            continue;
+                        }
+                        if (referenceObject instanceof Catalog && schemaComparison.getReferenceSchema().getCatalogName() != null && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(referenceObject.getName())) {
+                            continue;
+                        }
                     }
                     T comparisonObject = comparisonSnapshot.get(referenceObject);
                     if (comparisonObject == null) {
