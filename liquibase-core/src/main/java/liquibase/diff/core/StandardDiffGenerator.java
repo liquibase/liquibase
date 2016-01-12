@@ -81,10 +81,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                }
                     Schema referenceObjectSchema = referenceObject.getSchema();
                     if (referenceObjectSchema != null && referenceObjectSchema.getName() != null) { //don't filter out null-named schemas. May actually be catalog-level objects that should be included
-                        if (!referenceObjectSchema.toCatalogAndSchema().equals(schemaComparison.getReferenceSchema(), referenceSnapshot.getDatabase())) {
-                            continue;
-                        }
-                        if (referenceObject instanceof Catalog && schemaComparison.getReferenceSchema().getCatalogName() != null && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(referenceObject.getName())) {
+                        if (!referenceObjectSchema.getName().equalsIgnoreCase(schemaComparison.getReferenceSchema().getSchemaName())) {
                             continue;
                         }
                     }
@@ -104,10 +101,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                    continue;
                     //                }
                     Schema comparisonObjectSchema = comparisonObject.getSchema();
-                    if (comparisonObjectSchema != null && !comparisonObjectSchema.toCatalogAndSchema().equals(schemaComparison.getComparisonSchema(), comparisonSnapshot.getDatabase())) {
-                        continue;
-                    }
-                    if (comparisonObject instanceof Catalog && schemaComparison.getReferenceSchema().getCatalogName() != null && !schemaComparison.getReferenceSchema().getCatalogName().equalsIgnoreCase(comparisonObject.getName())) {
+                    if (comparisonObjectSchema != null && !comparisonObjectSchema.getName().equalsIgnoreCase(schemaComparison.getComparisonSchema().getSchemaName())) {
                         continue;
                     }
 
