@@ -78,6 +78,44 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         this(examples, database, new SnapshotControl(database));
     }
 
+    public DatabaseSnapshot clone(DatabaseObject[] examples) {
+        try {
+            DatabaseSnapshot returnSnapshot = new RestoredDatabaseSnapshot(this.database);
+
+            for (DatabaseObject example : examples) {
+                DatabaseObject existingObject = this.get(example);
+                if (existingObject == null) {
+                    continue;
+                }
+                if (example instanceof Schema) {
+                    for (Class<? extends DatabaseObject> type : this.snapshotControl.getTypesToInclude()) {
+                        for (DatabaseObject object : this.get(type)) {
+                            if (object.getSchema() == null) {
+                                if (object instanceof Catalog) {
+                                    if (object.equals(((Schema) example).getCatalog())) {
+                                        returnSnapshot.allFound.add(object);
+                                    }
+                                } else {
+                                    returnSnapshot.allFound.add(object);
+                                }
+                            } else {
+                                if (object.getSchema().equals(example)) {
+                                    returnSnapshot.allFound.add(object);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    returnSnapshot.allFound.add(existingObject);
+                }
+            }
+
+            return returnSnapshot;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     public SnapshotControl getSnapshotControl() {
         return snapshotControl;
     }
