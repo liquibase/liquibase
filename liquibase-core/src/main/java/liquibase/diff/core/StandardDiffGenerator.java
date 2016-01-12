@@ -14,6 +14,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.util.Set;
 
@@ -72,6 +73,9 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
 
+        Database comparisonDatabase = comparisonSnapshot.getDatabase();
+        Database referenceDatabase = referenceSnapshot.getDatabase();
+
         CompareControl.SchemaComparison[] schemaComparisons = diffResult.getCompareControl().getSchemaComparisons();
         if (schemaComparisons != null) {
             for (CompareControl.SchemaComparison schemaComparison : schemaComparisons) {
@@ -81,7 +85,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                }
                     Schema referenceObjectSchema = referenceObject.getSchema();
                     if (referenceObjectSchema != null && referenceObjectSchema.getName() != null) { //don't filter out null-named schemas. May actually be catalog-level objects that should be included
-                        if (!referenceObjectSchema.getName().equalsIgnoreCase(schemaComparison.getReferenceSchema().getSchemaName())) {
+                        if (!StringUtils.trimToEmpty(referenceObjectSchema.toCatalogAndSchema().standardize(referenceDatabase).getSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(schemaComparison.getReferenceSchema().standardize(referenceDatabase).getSchemaName()))) {
                             continue;
                         }
                     }
@@ -89,7 +93,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     if (comparisonObject == null) {
                         diffResult.addMissingObject(referenceObject);
                     } else {
-                        ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase(), diffResult.getCompareControl());
+                        ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonDatabase, diffResult.getCompareControl());
                         if (differences.hasDifferences()) {
                             diffResult.addChangedObject(referenceObject, differences);
                         }
@@ -101,7 +105,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                    continue;
                     //                }
                     Schema comparisonObjectSchema = comparisonObject.getSchema();
-                    if (comparisonObjectSchema != null && !comparisonObjectSchema.getName().equalsIgnoreCase(schemaComparison.getComparisonSchema().getSchemaName())) {
+                    if (comparisonObjectSchema != null && !StringUtils.trimToEmpty(comparisonObjectSchema.toCatalogAndSchema().standardize(comparisonDatabase).getSchemaName()).equalsIgnoreCase(schemaComparison.getComparisonSchema().standardize(comparisonDatabase).getSchemaName())) {
                         continue;
                     }
 
