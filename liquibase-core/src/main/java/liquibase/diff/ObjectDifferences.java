@@ -168,6 +168,9 @@ public class ObjectDifferences {
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
             if (referenceValue instanceof Collection) {
+                if (!(compareToValue instanceof Collection)) {
+                    return false;
+                }
                 if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
                     return false;
                 } else {

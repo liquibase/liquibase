@@ -26,6 +26,16 @@ public class UnknownType extends LiquibaseDataType {
         super(name, minParameters, maxParameters);
     }
 
+    private boolean autoIncrement;
+
+    public boolean isAutoIncrement() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
+    }
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         int dataTypeMaxParameters;

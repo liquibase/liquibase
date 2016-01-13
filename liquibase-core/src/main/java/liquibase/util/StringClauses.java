@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import org.apache.commons.collections.iterators.ArrayListIterator;
+
 import java.util.*;
 
 /**
@@ -404,6 +406,10 @@ public class StringClauses {
         return getSubclause(exitingKey.name());
     }
 
+    public ClauseIterator getClauseIterator() {
+        return new ClauseIterator(clauses);
+    }
+
     @Override
     public String toString() {
         if (clauses.size() == 0) {
@@ -491,6 +497,50 @@ public class StringClauses {
         @Override
         public String toString() {
             return value;
+        }
+    }
+
+    public static class ClauseIterator implements Iterator {
+
+        private ListIterator<String> keyIterator;
+        private final LinkedHashMap<String, Object> clauses;
+
+        public ClauseIterator(LinkedHashMap<String, Object> clauses) {
+            this.keyIterator = new ArrayList(clauses.keySet()).listIterator();
+            this.clauses = clauses;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return keyIterator.hasNext();
+        }
+
+        @Override
+        public Object next() {
+            return clauses.get(keyIterator.next());
+        }
+
+        public Object nextNonWhitespace() {
+            Object next;
+            while (hasNext()) {
+                next = clauses.get(keyIterator.next());
+                if (!(next instanceof Whitespace) && !(next instanceof Comment)) {
+                    return next;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+            keyIterator.remove();
+        }
+
+        public void replace(Object newClause) {
+            keyIterator.previous();
+            String keyToReplace = keyIterator.next();
+
+            clauses.put(keyToReplace, newClause);
         }
     }
 }
