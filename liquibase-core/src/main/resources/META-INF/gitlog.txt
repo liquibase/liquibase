@@ -1,3 +1,4 @@
+8b4be15 Prep for build 3.4.
 a2fab6d CORE-2615 Multi-schema improvements - handle comparing default schemas when they are the only ones compared
 e116948 CORE-2615 Multi-schema improvements - handle comparing default schemas when they are the only ones compared
 77362ce CORE-2615 Multi-schema improvements - Don't include catalog name in diff comparisons
