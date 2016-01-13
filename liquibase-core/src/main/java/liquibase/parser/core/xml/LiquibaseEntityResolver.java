@@ -1,20 +1,21 @@
 package liquibase.parser.core.xml;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.ext.EntityResolver2;
+
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.util.StreamUtil;
-import org.xml.sax.InputSource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.file.FilenameUtils;
-import org.xml.sax.SAXException;
-import org.xml.sax.ext.EntityResolver2;
 
 /**
  * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.
@@ -88,7 +89,12 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 return null;
             }
             try {
-                InputStream resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
+                InputStream resourceAsStream = null;
+                try {
+                    resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
+                }catch (IOException e){
+					log.debug("Could not load "+xsdFile+" with the standard resource accessor.");
+				}
 
                 if (resourceAsStream == null) {
                     log.debug("Could not load "+xsdFile+" with the standard resource accessor. Trying context classloader...");
