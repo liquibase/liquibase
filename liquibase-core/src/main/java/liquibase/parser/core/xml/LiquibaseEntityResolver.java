@@ -51,77 +51,37 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
    @Override
    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
        log.debug("Resolving XML entity name='" + name + "', publicId='" + publicId + "', baseURI='" + baseURI + "', systemId='" + systemId + "'");
+
+       if(systemId == null){
+           log.debug("Unable to resolve XML entity locally. Will load from network.");
+           return null;
+       }
+
        InputSource resolved=null;
-       if(systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
+       if(systemId.toLowerCase().endsWith(".xsd")) {
            if (systemId.startsWith("http://www.liquibase.org/xml/ns/migrator/")) {
                systemId = systemId.replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/");
            }
-            resolved=tryResolveLiquibaseSchema(systemId, publicId);
+            resolved = tryResolveLiquibaseSchema(systemId, publicId);
        }
 
-	   if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
-            resolved=tryResolveFromResourceAccessor(systemId);
+	   if(resolved==null && resourceAccessor!=null && basePath!=null) {
+            resolved =  tryResolveFromResourceAccessor(systemId);
        }
 
        if (resolved == null) {
-           log.debug("Unable to resolve XML entity locally. Will load from network.");
+            log.debug("Unable to resolve XML entity locally. Will load from network.");
        }
        return resolved;
     }
 
     private InputSource tryResolveLiquibaseSchema(String systemId, String publicId) {
-        if (systemId != null) {
-            NamespaceDetails namespaceDetails;
-            if (serializer != null) {
-                namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(serializer, systemId);
-            } else {
-                namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(parser, systemId);
-            }
-            if (namespaceDetails == null) {
-                log.debug("Found no namespace details class "+namespaceDetails.getClass().getName()+" for "+systemId);
-                return null;
-            }
-            log.debug("Found namespace details class "+namespaceDetails.getClass().getName()+" for "+systemId);
-            String xsdFile = namespaceDetails.getLocalPath(systemId);
-            log.debug("Local path for "+systemId+" is "+xsdFile);
-
-            if (xsdFile == null) {
-                return null;
-            }
-            try {
-                InputStream resourceAsStream = null;
-                try {
-                    resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
-                }catch (IOException e){
-					log.debug("Could not load "+xsdFile+" with the standard resource accessor.");
-				}
-
-                if (resourceAsStream == null) {
-                    log.debug("Could not load "+xsdFile+" with the standard resource accessor. Trying context classloader...");
-                    if (Thread.currentThread().getContextClassLoader() != null) {
-                        resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
-                    }
-                    if (resourceAsStream == null) {
-                        log.debug("Could not load "+xsdFile+" with the standard resource accessor. Trying class classloader...");
-                        resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(xsdFile);
-                    }
-                }
-                if (resourceAsStream == null) {
-                    log.debug("Could not find "+xsdFile+" locally");
-                    return null;
-                }
-
-                log.debug("Successfully loaded XSD from "+xsdFile);
-                InputSource source = new InputSource(resourceAsStream);
-                source.setPublicId(publicId);
-                source.setSystemId(systemId);
-                return source;
-            } catch (Exception ex) {
-                log.debug("Error loading XSD", ex);
-                return null; // We don't have the schema, try the network
-            }
+        LiquibaseSchemaResolver liquibaseSchemaResolver = new LiquibaseSchemaResolver(systemId, publicId, resourceAccessor);
+        if (serializer != null) {
+            return liquibaseSchemaResolver.resolve(serializer);
+        } else {
+            return liquibaseSchemaResolver.resolve(parser);
         }
-        return null;
     }
 
     private InputSource tryResolveFromResourceAccessor(String systemId) {

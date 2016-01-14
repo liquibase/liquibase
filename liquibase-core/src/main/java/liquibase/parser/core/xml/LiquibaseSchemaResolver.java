@@ -1,6 +1,5 @@
 package liquibase.parser.core.xml;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.xml.sax.InputSource;
@@ -12,19 +11,26 @@ import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializer;
-import liquibase.util.StreamUtil;
 
 class LiquibaseSchemaResolver {
 
 	private static final Logger LOGGER = new LogFactory().getLog("LiquibaseSchemaResolver");
 	private String systemId;
 	private String publicId;
-	private ResourceAccessor resourceAccessor;
+	private ResourceAccessorXsdStreamResolver resourceAccessorXsdStreamResolver;
+	private ContextClassLoaderXsdStreamResolver contextClassLoaderXsdStreamResolver;
+	private ClassLoaderXsdStreamResolver classLoaderXsdStreamResolver;
 
 	public LiquibaseSchemaResolver(String systemId, String publicId, ResourceAccessor resourceAccessor) {
 		this.systemId = systemId;
 		this.publicId = publicId;
-		this.resourceAccessor = resourceAccessor;
+
+		resourceAccessorXsdStreamResolver = new ResourceAccessorXsdStreamResolver(resourceAccessor);
+		contextClassLoaderXsdStreamResolver = new ContextClassLoaderXsdStreamResolver();
+		classLoaderXsdStreamResolver = new ClassLoaderXsdStreamResolver();
+
+		resourceAccessorXsdStreamResolver.setSuccessor(contextClassLoaderXsdStreamResolver);
+		contextClassLoaderXsdStreamResolver.setSuccessor(classLoaderXsdStreamResolver);
 	}
 
 	public InputSource resolve(LiquibaseSerializer serializer){
@@ -32,7 +38,7 @@ class LiquibaseSchemaResolver {
 			throw new RuntimeException("Serializer can not be null");
 		}
 		NamespaceDetails namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(serializer, systemId);
-		return resolve(namespaceDetails);
+		return getInputSourceFromXsd(namespaceDetails);
 	}
 
 	public InputSource resolve(LiquibaseParser parser){
@@ -40,10 +46,10 @@ class LiquibaseSchemaResolver {
 			throw new RuntimeException("Parser can not be null");
 		}
 		NamespaceDetails namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(parser, systemId);
-		return resolve(namespaceDetails);
+		return getInputSourceFromXsd(namespaceDetails);
 	}
 
-	private InputSource resolve(NamespaceDetails namespaceDetails){
+	private InputSource getInputSourceFromXsd(NamespaceDetails namespaceDetails){
 		if (systemId == null) {
 			return null;
 		}
@@ -57,14 +63,6 @@ class LiquibaseSchemaResolver {
 		}
 
 		try {
-
-			ResourceAccessorXsdStreamResolver resourceAccessorXsdStreamResolver = new ResourceAccessorXsdStreamResolver(resourceAccessor);
-			ContextClassLoaderXsdStreamResolver contextClassLoaderXsdStreamResolver = new ContextClassLoaderXsdStreamResolver();
-			ClassLoaderXsdStreamResolver classLoaderXsdStreamResolver = new ClassLoaderXsdStreamResolver();
-
-			resourceAccessorXsdStreamResolver.setSuccessor(contextClassLoaderXsdStreamResolver);
-			contextClassLoaderXsdStreamResolver.setSuccessor(classLoaderXsdStreamResolver);
-
 			InputStream resourceAsStream = resourceAccessorXsdStreamResolver.getResourceAsStream(xsdFile);
 
 			if (resourceAsStream == null) {
