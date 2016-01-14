@@ -43,7 +43,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
 
-        String procedureText = addSchemaToText(statement.getProcedureText(), statement.getSchemaName(), "PROCEDURE", database);
+        String procedureText = statement.getProcedureText();
+//        String procedureText = addSchemaToText(procedureText, statement.getSchemaName(), "PROCEDURE", database);
 
 
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
@@ -71,7 +72,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
 
 
-        surroundWithSchemaSets(sql, statement.getSchemaName(), database);
+//        surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
     }
 
