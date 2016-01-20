@@ -12,6 +12,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -46,7 +47,11 @@ public class BooleanType extends LiquibaseDataType {
             }
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
-        }
+        } else if (database instanceof PostgresDatabase) {
+            if (originalDefinition.toLowerCase().startsWith("bit")) {
+                return new DatabaseDataType("BIT", getParameters());
+            }
+	}
 
         return super.toDatabaseDataType(database);
     }
