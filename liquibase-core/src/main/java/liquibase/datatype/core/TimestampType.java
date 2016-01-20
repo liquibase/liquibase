@@ -5,6 +5,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -29,6 +30,9 @@ public class TimestampType extends DateTimeType {
 
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
+        if (database instanceof SybaseDatabase) {
+			return new DatabaseDataType(database.escapeDataTypeName("datetime"));
+		}
         return super.toDatabaseDataType(database);
     }
 }
