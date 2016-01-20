@@ -29,7 +29,7 @@ public class DiffGeneratorFactory {
         }
     }
 
-    public static DiffGeneratorFactory getInstance() {
+    public static synchronized DiffGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new DiffGeneratorFactory();
         }

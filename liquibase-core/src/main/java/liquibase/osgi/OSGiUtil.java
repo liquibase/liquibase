@@ -4,7 +4,7 @@ import org.osgi.framework.BundleReference;
 
 public final class OSGiUtil {
 
-    private static Boolean loadedAsBundle;
+    private static volatile Boolean loadedAsBundle;
 
     public static boolean isLiquibaseLoadedAsOSGiBundle() {
         if (loadedAsBundle == null) {
