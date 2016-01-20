@@ -75,7 +75,7 @@ public class ChangeFactory {
                     @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
-                            return -1 * new Integer(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
+                            return -1 * Integer.valueOf(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
                         } catch (Exception e) {
                             throw new UnexpectedLiquibaseException(e);
                         }

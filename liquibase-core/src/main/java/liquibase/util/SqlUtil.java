@@ -132,7 +132,7 @@ public class SqlUtil {
             if (scanner.hasNextBoolean()) {
                 return scanner.nextBoolean();
             } else {
-                return new Integer(stringVal);
+                return Integer.valueOf(stringVal);
             }
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
