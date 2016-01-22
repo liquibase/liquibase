@@ -13,6 +13,7 @@ import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.ObjectUtil;
@@ -128,8 +129,8 @@ public class OfflineConnection implements DatabaseConnection {
         return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql);
     }
 
-    public DatabaseSnapshot getSnapshot() {
-        return snapshot;
+    public DatabaseSnapshot getSnapshot(DatabaseObject[] examples) {
+        return this.snapshot.clone(examples);
     }
 
     @Override

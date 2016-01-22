@@ -6,6 +6,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -75,6 +76,44 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
         this(examples, database, new SnapshotControl(database));
+    }
+
+    public DatabaseSnapshot clone(DatabaseObject[] examples) {
+        try {
+            DatabaseSnapshot returnSnapshot = new RestoredDatabaseSnapshot(this.database);
+
+            for (DatabaseObject example : examples) {
+                DatabaseObject existingObject = this.get(example);
+                if (existingObject == null) {
+                    continue;
+                }
+                if (example instanceof Schema) {
+                    for (Class<? extends DatabaseObject> type : this.snapshotControl.getTypesToInclude()) {
+                        for (DatabaseObject object : this.get(type)) {
+                            if (object.getSchema() == null) {
+                                if (object instanceof Catalog) {
+                                    if (object.equals(((Schema) example).getCatalog())) {
+                                        returnSnapshot.allFound.add(object);
+                                    }
+                                } else {
+                                    returnSnapshot.allFound.add(object);
+                                }
+                            } else {
+                                if (object.getSchema().equals(example)) {
+                                    returnSnapshot.allFound.add(object);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    returnSnapshot.allFound.add(existingObject);
+                }
+            }
+
+            return returnSnapshot;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public SnapshotControl getSnapshotControl() {
@@ -201,6 +240,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 knownNull.put(example.getClass(), collection);
             }
             collection.add(example);
+
+            if (example instanceof Schema) {
+                LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
+            }
+            if (example instanceof Catalog) {
+                LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
+            }
 
         } else {
             allFound.add(object);

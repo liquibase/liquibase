@@ -35,6 +35,14 @@ class SqlParserTest extends Specification {
         "select 5 from test"                                                                               | ["select", "5", "from", "test"]
         "insert a1.b2.c3 from d4.e5"                                                                       | ["insert", "a1.b2.c3", "from", "d4.e5"]
         "select * from dual\ngo\ninsert into test\ngo"                                                     | ["select", "*", "from", "dual", "go", "insert", "into", "test", "go"]
+        "create procedure test.name as select * from dual go"                                              | ["create", "procedure", "test.name", "as", "select", "*", "from", "dual", "go"]
+        "create procedure \"test.name\" as select * from dual go"                                          | ["create", "procedure", "\"test.name\"", "as", "select", "*", "from", "dual", "go"]
+        "create procedure \"test\".\"name\" as select * from dual go"                                      | ["create", "procedure", "\"test\".\"name\"", "as", "select", "*", "from", "dual", "go"]
+        "create procedure [test].[name] as select * from dual go"                                          | ["create", "procedure", "[test].[name]", "as", "select", "*", "from", "dual", "go"]
+        "a test.[name] b"                                                                                  | ["a", "test.[name]", "b"]
+        "a [test].name b"                                                                                  | ["a", "[test].name", "b"]
+        "a [test].\"name\".[here].[four] b"                                                                | ["a", "[test].\"name\".[here].[four]", "b"]
+
     }
 
     @Unroll("#featureName `#input`")

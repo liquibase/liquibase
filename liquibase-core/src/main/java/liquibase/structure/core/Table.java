@@ -48,6 +48,10 @@ public class Table extends Relation {
 
         Table that = (Table) o;
 
+        if (this.getSchema() != null && that.getSchema() != null) {
+            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+        }
+
         return getName().equalsIgnoreCase(that.getName());
 
     }
