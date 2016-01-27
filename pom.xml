@@ -128,13 +128,6 @@
             </dependency>
 
             <dependency>
-                <groupId>org.easymock</groupId>
-                <artifactId>easymockclassextension</artifactId>
-                <version>2.5.2</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.ant</groupId>
                 <artifactId>ant</artifactId>
                 <version>1.7.1</version>
@@ -216,13 +209,6 @@
                 <scope>test</scope>
             </dependency>
 
-
-            <dependency>
-            	<groupId>org.easymock</groupId>
-            	<artifactId>easymock</artifactId>
-            	<version>2.5.2</version>
-            	<scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
