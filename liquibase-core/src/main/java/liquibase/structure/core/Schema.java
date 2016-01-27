@@ -97,7 +97,7 @@ public class Schema extends AbstractDatabaseObject {
             schemaName = "DEFAULT";
         }
 
-        if (catalogName == null) {
+        if (catalogName == null || catalogName.equals(schemaName)) {
             return schemaName;
         } else {
             return catalogName +"."+ schemaName;

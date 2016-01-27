@@ -11,6 +11,7 @@ import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -130,8 +131,8 @@ public class OfflineConnection implements DatabaseConnection {
         );
     }
 
-    public DatabaseSnapshot getSnapshot() {
-        return snapshot;
+    public DatabaseSnapshot getSnapshot(DatabaseObject[] examples) {
+        return this.snapshot.clone(examples);
     }
 
     @Override

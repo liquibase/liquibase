@@ -167,7 +167,7 @@ public class Index extends AbstractDatabaseObject {
         if (this.getTable() != null && o.getTable() != null) {
             returnValue = this.getTable().compareTo(o.getTable());
             if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
-                returnValue = this.getTable().getSchema().toString().compareTo(o.getTable().getSchema().toString());
+                returnValue = StringUtils.trimToEmpty(this.getTable().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getTable().getSchema().getName()));
             }
         }
 
@@ -213,12 +213,8 @@ public class Index extends AbstractDatabaseObject {
         }
         if (getTable() != null && getColumns() != null) {
             String tableName = getTable().getName();
-            if (getTable().getSchema() != null) {
-                if (getTable().getSchema().getCatalogName() == null) {
-                    tableName = getTable().getSchema()+"."+tableName;
-                } else {
-                    tableName = getTable().getSchema().getCatalogName()+"."+getTable().getSchema().getName()+"."+tableName;
-                }
+            if (getTable().getSchema() != null && getTable().getSchema().getName() != null) {
+                tableName = getTable().getSchema().getName()+"."+tableName;
             }
             stringBuffer.append(" on ").append(tableName);
             if (getColumns() != null && getColumns().size() > 0) {

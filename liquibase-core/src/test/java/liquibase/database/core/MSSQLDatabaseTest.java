@@ -1,7 +1,5 @@
 package liquibase.database.core;
 
-import static org.easymock.classextension.EasyMock.*;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

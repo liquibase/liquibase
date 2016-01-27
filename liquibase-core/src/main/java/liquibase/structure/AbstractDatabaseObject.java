@@ -50,7 +50,10 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public int compareTo(Object o) {
         AbstractDatabaseObject that = (AbstractDatabaseObject) o;
         if (this.getSchema() != null && that.getSchema() != null) {
-            return this.getSchema().toString().compareToIgnoreCase(that.getSchema().toString());
+            int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+            if (compare != 0) {
+                return compare;
+            }
         }
 
         return this.getName().compareTo(that.getName());

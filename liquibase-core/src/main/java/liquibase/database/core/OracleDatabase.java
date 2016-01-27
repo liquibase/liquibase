@@ -9,14 +9,11 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.*;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
+import liquibase.structure.core.*;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -256,7 +253,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             }
         } else if (example.getName() != null) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
-                return true;
+                if (example instanceof PrimaryKey || example instanceof Index || example instanceof liquibase.statement.UniqueConstraint) { //some objects don't get renamed back and so are already filtered in the metadata queries
+                    return false;
+                } else {
+                    return true;
+                }
             } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
                 return true;
             } else if (example.getName().startsWith("DR$")) { //oracle index tables

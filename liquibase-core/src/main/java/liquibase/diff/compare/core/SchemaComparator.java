@@ -8,6 +8,7 @@ import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.util.Set;
 
@@ -34,26 +35,13 @@ public class SchemaComparator implements DatabaseObjectComparator {
         CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
         CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
 
-        if (accordingTo.supportsCatalogs()) {
-            if (thisSchema.getCatalogName() == null) {
-                if (!(otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName()))) {
-                    return false;
-            }
-            } else {
-            if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
-                return false;
-                }
-            }
+        if (accordingTo.supportsSchemas()) {
+            return StringUtils.trimToEmpty(thisSchema.getSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(otherSchema.getSchemaName()));
+        } else if (accordingTo.supportsCatalogs()) {
+            return StringUtils.trimToEmpty(thisSchema.getCatalogName()).equalsIgnoreCase(StringUtils.trimToEmpty(otherSchema.getCatalogName()));
+        } else {
+            return true;
         }
-        if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
-            String thisSchemaName = thisSchema.getSchemaName();
-            String otherSchemaName = otherSchema.getSchemaName();
-            if (thisSchemaName == null) {
-                return otherSchemaName == null;
-            }
-            return thisSchemaName.equalsIgnoreCase(otherSchemaName);
-        }
-        return true;
     }
 
 

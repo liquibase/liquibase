@@ -76,7 +76,9 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey addPrimaryKeyColumn(Column primaryKeyColumn) {
         this.getAttribute("primaryKeyColumns", List.class).add(primaryKeyColumn);
-        primaryKeyColumn.setRelation(getPrimaryKeyTable());
+        if (primaryKeyColumn.getAttribute("relation", Object.class) == null) {
+            primaryKeyColumn.setRelation(getPrimaryKeyTable());
+        }
 
         return this;
     }
@@ -84,7 +86,9 @@ public class ForeignKey extends AbstractDatabaseObject{
     public ForeignKey setPrimaryKeyColumns(List<Column> primaryKeyColumns) {
         this.setAttribute("primaryKeyColumns", primaryKeyColumns);
         for (Column column : getPrimaryKeyColumns()) {
-            column.setRelation(getPrimaryKeyTable());
+            if (column.getAttribute("relation", Object.class) == null) {
+                column.setRelation(getPrimaryKeyTable());
+            }
         }
         return this;
     }
@@ -103,7 +107,9 @@ public class ForeignKey extends AbstractDatabaseObject{
     }
 
     public void addForeignKeyColumn(Column foreignKeyColumn) {
-        foreignKeyColumn.setRelation(getForeignKeyTable());
+        if (foreignKeyColumn.getAttribute("relation", Object.class) == null) {
+            foreignKeyColumn.setRelation(getForeignKeyTable());
+        }
         getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
     }
 
@@ -111,7 +117,9 @@ public class ForeignKey extends AbstractDatabaseObject{
         this.setAttribute("foreignKeyColumns", foreignKeyColumns);
 
         for (Column column : getForeignKeyColumns()) {
-            column.setRelation(getForeignKeyTable());
+            if (column.getAttribute("relation", Object.class) == null) {
+                column.setRelation(getForeignKeyTable());
+            }
         }
 
         return this;
@@ -186,7 +194,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         ForeignKey that = (ForeignKey) o;
 
         if (this.getSchema() != null && that.getSchema() != null) {
-            return this.getSchema().toString().equalsIgnoreCase(that.getSchema().toString());
+            return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
         }
 
 

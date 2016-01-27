@@ -222,7 +222,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         DataType type = readDataType(columnMetadataResultSet, column, database);
         column.setType(type);
 
-        column.setDefaultValue(readDefaultValue(columnMetadataResultSet, column, database));
+        Object defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
+        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().matches("\\w+")) {
+            defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());
+        }
+        column.setDefaultValue(defaultValue);
+
 
         return column;
     }
