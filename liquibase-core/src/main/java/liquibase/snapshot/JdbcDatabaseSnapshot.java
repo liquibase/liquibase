@@ -143,7 +143,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "ON fc.owner = f.owner " +
                                 "AND fc.constraint_name = f.constraint_name " +
                                 "AND fc.position = pc.position " +
-                                "WHERE p.owner = '" + jdbcSchemaName + "' " +
+                                "WHERE f.owner = '" + jdbcSchemaName + "' " +
                                 "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R'" +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
