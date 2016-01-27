@@ -45,7 +45,6 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         String procedureText = addSchemaToText(statement.getProcedureText(), statement.getSchemaName(), "PROCEDURE", database);
 
-
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
             String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
             String schemaName = statement.getSchemaName();
