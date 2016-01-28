@@ -44,6 +44,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private int COLUMN_LIQUIBASE = 10;
     private int COLUMN_CONTEXTS = 11;
     private int COLUMN_LABELS = 12;
+    private int DEPLOYMENT_ID = 13;
     private Integer lastChangeSetSequenceValue;
 
     public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeAgainstDatabase) {
@@ -159,6 +160,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     labels = new Labels(line[COLUMN_LABELS]);
                 }
 
+                String deploymentId = null;
+                if (line.length > DEPLOYMENT_ID) {
+                    deploymentId = line[DEPLOYMENT_ID];
+                }
+
                 returnList.add(new RanChangeSet(
                         line[COLUMN_FILENAME],
                         line[COLUMN_ID],
@@ -170,7 +176,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                         line[COLUMN_DESCRIPTION],
                         line[COLUMN_COMMENTS],
                         contexts,
-                        labels));
+                        labels,
+                        deploymentId));
             }
 
             return returnList;
@@ -265,6 +272,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[COLUMN_LIQUIBASE] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
             newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
             newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
+            newLine[DEPLOYMENT_ID] = getDeploymentId();
 
             csvWriter.writeNext(newLine);
 
