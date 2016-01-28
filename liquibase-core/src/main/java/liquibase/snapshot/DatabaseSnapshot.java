@@ -92,14 +92,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         for (DatabaseObject object : this.get(type)) {
                             if (object.getSchema() == null) {
                                 if (object instanceof Catalog) {
-                                    if (object.equals(((Schema) example).getCatalog())) {
+                                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, ((Schema) example).getCatalog(), database)) {
                                         returnSnapshot.allFound.add(object);
                                     }
                                 } else {
                                     returnSnapshot.allFound.add(object);
                                 }
                             } else {
-                                if (object.getSchema().equals(example)) {
+                                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object.getSchema(), example, database)) {
                                     returnSnapshot.allFound.add(object);
                                 }
                             }

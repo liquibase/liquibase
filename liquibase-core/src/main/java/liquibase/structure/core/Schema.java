@@ -69,7 +69,7 @@ public class Schema extends AbstractDatabaseObject {
         Schema schema = (Schema) o;
 
         if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
-        if (getName() != null ? !getName().equals(schema.getName()) : schema.getName() != null) return false;
+        if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
 
         return true;
     }
