@@ -36,24 +36,24 @@ public class SchemaComparator implements DatabaseObjectComparator {
             String schemaName1 = databaseObject1.getName();
             String schemaName2 = databaseObject2.getName();
 
-            if (schemaName1 == null) {
-                schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
+            if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+                return true;
             }
-            if (schemaName2 == null) {
-                schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
-            }
+
+            schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
+            schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
 
             return StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2));
         } else if (accordingTo.supportsCatalogs()) {
             String catalogName1 = ((Schema) databaseObject1).getCatalogName();
             String catalogName2 = ((Schema) databaseObject2).getCatalogName();
 
-            if (catalogName1 == null) {
-                catalogName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
+            if (StringUtils.trimToEmpty(catalogName1).equalsIgnoreCase(StringUtils.trimToEmpty(catalogName2))) {
+                return true;
             }
-            if (catalogName2 == null) {
-                catalogName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
-            }
+
+            catalogName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
+            catalogName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
 
             return StringUtils.trimToEmpty(catalogName1).equalsIgnoreCase(StringUtils.trimToEmpty(catalogName2));
         } else {
