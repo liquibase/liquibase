@@ -56,6 +56,8 @@ public interface ChangeLogHistoryService extends PrioritizedService {
 
     public String getDeploymentId();
 
+    public void resetDeploymentId();
+
     public void generateDeploymentId();
 
     }

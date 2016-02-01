@@ -98,6 +98,10 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         return this.deploymentId;
     }
 
+    public void resetDeploymentId() {
+        this.deploymentId = null;
+    }
+
     public void generateDeploymentId() {
         if (this.deploymentId == null) {
             String dateString = String.valueOf(new Date().getTime());
