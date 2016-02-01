@@ -4,7 +4,9 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.*;
@@ -12,9 +14,13 @@ import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.JdbcUtils;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +35,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     private Set<String> reservedWords = new HashSet<String>();
     private Set<String> userDefinedTypes = null;
+
+    private boolean canAccessDbaRecycleBin = false;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -325,5 +333,40 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return databaseFunction.toString();
         }
         return super.generateDatabaseFunctionValue(databaseFunction);
+    }
+
+    @Override
+    public ValidationErrors validate() {
+        ValidationErrors errors = super.validate();
+        DatabaseConnection connection = getConnection();
+        if (connection == null || connection instanceof OfflineConnection) {
+            errors.addError("Cannot validate offline database");
+        }
+
+        Statement statement = null;
+        try {
+            statement = ((JdbcConnection) connection).createStatement();
+            statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+            this.canAccessDbaRecycleBin = true;
+        } catch (Exception e) {
+            if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
+                errors.addWarning("Liquibase needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where constraints are deleted and restored. Since Oracle doesn't properly restore the original table names referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this issue.\n" +
+                        "\n" +
+                        "The user you used to connect to the database ("+getConnection().getConnectionUserName()+") needs to have \"select any dictionary\" permissions set before we can perform this operation. Please run the following SQL to set the appropriate permissions, and try running the command again.\n" +
+                        "\n" +
+                        "     grant select any dictionary to "+getConnection().getConnectionUserName()+";");
+            } else {
+                errors.addError(e.getMessage());
+            }
+        } finally {
+            JdbcUtils.close(null, statement);
+        }
+
+        return errors;
+
+    }
+
+    public boolean canAccessDbaRecycleBin() {
+        return canAccessDbaRecycleBin;
     }
 }

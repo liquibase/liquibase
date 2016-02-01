@@ -96,6 +96,15 @@ public class CommandLineUtils {
 
             //Todo: move to database object methods in 4.0
             initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
+
+            ValidationErrors errors = database.validate();
+            if (errors.hasErrors()) {
+                throw new DatabaseException("Database validation failed: "+errors.toString());
+            } else {
+                for (String warning : errors.getWarningMessages()) {
+                    LogFactory.getInstance().getLog().warning(warning);
+                }
+            }
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);
