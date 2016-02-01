@@ -340,7 +340,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         ValidationErrors errors = super.validate();
         DatabaseConnection connection = getConnection();
         if (connection == null || connection instanceof OfflineConnection) {
-            errors.addError("Cannot validate offline database");
+            LogFactory.getInstance().getLog().info("Cannot validate offline database");
+            return errors;
         }
 
         Statement statement = null;
