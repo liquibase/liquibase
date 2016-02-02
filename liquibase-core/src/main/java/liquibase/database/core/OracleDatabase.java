@@ -233,8 +233,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             }
         } else if (example.getName() != null) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
-                if (example instanceof PrimaryKey || example instanceof Index || example instanceof liquibase.statement.UniqueConstraint) { //some objects don't get renamed back and so are already filtered in the metadata queries
-                    return false;
+                if (this.canAccessDbaRecycleBin()) {
+                    if (example instanceof PrimaryKey || example instanceof Index || example instanceof liquibase.statement.UniqueConstraint) { //some objects don't get renamed back and so are already filtered in the metadata queries
+                        return false;
+                    } else {
+                        return true;
+                    }
                 } else {
                     return true;
                 }
