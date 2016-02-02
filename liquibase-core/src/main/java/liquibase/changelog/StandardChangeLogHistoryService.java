@@ -179,15 +179,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             if (!hasDeploymentIdColumn) {
-                generateDeploymentId();
                 executor.comment("Adding missing databasechangelog.deployment_id column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", "VARCHAR(10)", null));
                 if (database instanceof DB2Database) {
                     statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
                 }
-                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("DEPLOYMENT_ID", getDeploymentId()));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", "VARCHAR(10)", false));
-                resetDeploymentId();
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));

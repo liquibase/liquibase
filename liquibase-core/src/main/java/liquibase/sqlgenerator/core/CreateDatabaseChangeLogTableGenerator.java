@@ -43,7 +43,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)", database))
                 .addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription("VARCHAR("+getContextsSize()+")", database))
                 .addColumn("LABELS", DataTypeFactory.getInstance().fromDescription("VARCHAR("+getLabelsSize()+")", database))
-                .addColumn("DEPLOYMENT_ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)", database), new NotNullConstraint());
+                .addColumn("DEPLOYMENT_ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)", database));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }
