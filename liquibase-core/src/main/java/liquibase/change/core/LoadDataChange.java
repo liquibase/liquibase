@@ -20,10 +20,10 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+import liquibase.statement.ExactColumnValue;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertSetStatement;
-import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.BooleanParser;
 import liquibase.util.StreamUtil;
@@ -225,6 +225,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     Object value = line[i];
 
                     ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
+                    boolean doInsertColumn = true;
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 
@@ -247,6 +248,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
                                 liquibase.statement.DatabaseFunction function = new liquibase.statement.DatabaseFunction(value.toString());
                                 valueConfig.setValueComputed(function);
+                            } else if (columnConfig.getType().equalsIgnoreCase("SEQ")) {
+                                String seqValue = database.getSequenceSql(columnConfig.getValueSequenceNext().getValue());
+                                if ("NULL".equals(seqValue)) {
+                                    doInsertColumn = false; // Assume we have auto-increment on the column, and don't add to insert stmt.
+                                }
+                                else {
+                                    valueConfig.setExactColumnValue(new ExactColumnValue(seqValue));
+                                }
                             } else {
                                 throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
                             }
@@ -254,16 +263,17 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         }
                     }
 
-                    if (columnName == null) {
-                        columnName = headers[i];
+                    if (doInsertColumn) {
+                        if (columnName == null) {
+                            columnName = headers[i];
+                        }
+    
+                        if (columnName.contains("(") || columnName.contains(")") && database instanceof AbstractJdbcDatabase) {
+                            columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
+                        }
+
+                        insertStatement.addColumnValue(columnName, value);
                     }
-
-                    if (columnName.contains("(") || columnName.contains(")") && database instanceof AbstractJdbcDatabase) {
-                        columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
-                    }
-
-
-                    insertStatement.addColumnValue(columnName, value);
                 }
                 statements.addInsertStatement(insertStatement);
             }

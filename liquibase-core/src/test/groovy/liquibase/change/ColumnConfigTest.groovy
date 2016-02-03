@@ -5,6 +5,7 @@ import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.DatabaseFunction
+import liquibase.statement.ExactColumnValue
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.core.*
 import spock.lang.Shared
@@ -413,6 +414,19 @@ public class ColumnConfigTest extends Specification {
         new ColumnConfig().getSerializedObjectName() == "column"
     }
 
+    def getExactColumnValue() {
+        expect:
+        new ColumnConfig().setExactColumnValue(null).getExactColumnValue() == null
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("abc")).getExactColumnValue().getValue() == "abc"
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("abc")).getExactColumnValue().toString() == "abc"
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("")).getExactColumnValue().getValue() == "" // empty strings are saved
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("")).getExactColumnValue().toString() == "" // empty strings are saved
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("  not trimmed  ")).getExactColumnValue().getValue() == "  not trimmed  " //strings should not be trimmed
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("  not trimmed  ")).getExactColumnValue().toString() == "  not trimmed  " //strings should not be trimmed
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("null")).getExactColumnValue().getValue() == "null"
+        new ColumnConfig().setExactColumnValue(new ExactColumnValue("null")).getExactColumnValue().toString() == "null"
+    }
+
     @Unroll("#featureName: #field")
     def "load method sets properties"() {
         when:
@@ -430,6 +444,9 @@ public class ColumnConfigTest extends Specification {
             testValue = "347.22"
         } else if (field in ["descending"]) {
             testValue = true
+        } else if (field in ["exactColumnValue"]) {
+            // This value isn't loaded from the load method.  It is an internal use value only.
+            testValue = null;
         }
         node.addChild(null, field, testValue)
         try {

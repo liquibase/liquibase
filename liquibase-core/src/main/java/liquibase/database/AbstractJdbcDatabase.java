@@ -1531,6 +1531,21 @@ public abstract class AbstractJdbcDatabase implements Database {
         return dataTypeString;
     }
 
+    @Override
+    public String getSequenceSql(String sequenceName) {
+        if (StringUtils.isEmpty(sequenceName) || !supportsSequences()){
+            return "NULL";
+        }
+        if (sequenceNextValueFunction == null) {
+            throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
+                    getDefaultDatabaseProductName()));
+        }
+        if (!sequenceNextValueFunction.contains("'")) {
+            sequenceName = escapeObjectName(sequenceName, Sequence.class);
+        }
+        return String.format(sequenceNextValueFunction, sequenceName);
+    }
+
     public Object get(String key) {
         return attributes.get(key);
     }
