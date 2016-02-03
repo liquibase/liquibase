@@ -15,6 +15,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -233,7 +234,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             }
         } else if (example.getName() != null) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
-                if (this.canAccessDbaRecycleBin()) {
+                boolean filteredInOriginalQuery = this.canAccessDbaRecycleBin();
+                if (!filteredInOriginalQuery) {
+                    filteredInOriginalQuery = StringUtils.trimToEmpty(example.getSchema().getName()).equalsIgnoreCase(this.getConnection().getConnectionUserName());
+                }
+
+                if (filteredInOriginalQuery) {
                     if (example instanceof PrimaryKey || example instanceof Index || example instanceof liquibase.statement.UniqueConstraint) { //some objects don't get renamed back and so are already filtered in the metadata queries
                         return false;
                     } else {
