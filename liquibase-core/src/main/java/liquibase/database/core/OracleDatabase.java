@@ -361,11 +361,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             this.canAccessDbaRecycleBin = true;
         } catch (Exception e) {
             if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
-                errors.addWarning("Liquibase needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where constraints are deleted and restored. Since Oracle doesn't properly restore the original table names referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this issue.\n" +
-                        "\n" +
-                        "The user you used to connect to the database ("+getConnection().getConnectionUserName()+") needs to have \"SELECT ON SYS.DBA_RECYCLEBIN\" permissions set before we can perform this operation. Please run the following SQL to set the appropriate permissions, and try running the command again.\n" +
-                        "\n" +
-                        "     GRANT SELECT ON SYS.DBA_RECYCLEBIN TO "+getConnection().getConnectionUserName()+";");
+                errors.addWarning(getDbaRecycleBinWarning());
             } else {
                 errors.addError(e.getMessage());
             }
@@ -375,6 +371,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
         return errors;
 
+    }
+
+    public String getDbaRecycleBinWarning() {
+        return "Liquibase needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where constraints are deleted and restored. Since Oracle doesn't properly restore the original table names referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this issue.\n" +
+                "\n" +
+                "The user you used to connect to the database ("+getConnection().getConnectionUserName()+") needs to have \"SELECT ON SYS.DBA_RECYCLEBIN\" permissions set before we can perform this operation. Please run the following SQL to set the appropriate permissions, and try running the command again.\n" +
+                "\n" +
+                "     GRANT SELECT ON SYS.DBA_RECYCLEBIN TO "+getConnection().getConnectionUserName()+";";
     }
 
     public boolean canAccessDbaRecycleBin() {
