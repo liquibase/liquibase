@@ -37,7 +37,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Set<String> reservedWords = new HashSet<String>();
     private Set<String> userDefinedTypes = null;
 
-    private boolean canAccessDbaRecycleBin = false;
+    private Boolean canAccessDbaRecycleBin;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -354,19 +354,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return errors;
         }
 
-        Statement statement = null;
-        try {
-            statement = ((JdbcConnection) connection).createStatement();
-            statement.executeQuery("select 1 from dba_recyclebin where 0=1");
-            this.canAccessDbaRecycleBin = true;
-        } catch (Exception e) {
-            if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
-                errors.addWarning(getDbaRecycleBinWarning());
-            } else {
-                errors.addError(e.getMessage());
-            }
-        } finally {
-            JdbcUtils.close(null, statement);
+        if (!canAccessDbaRecycleBin()) {
+            errors.addWarning(getDbaRecycleBinWarning());
         }
 
         return errors;
@@ -382,6 +371,29 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     public boolean canAccessDbaRecycleBin() {
+        if (canAccessDbaRecycleBin == null) {
+            DatabaseConnection connection = getConnection();
+            if (connection == null || connection instanceof OfflineConnection) {
+                return false;
+            }
+
+            Statement statement = null;
+            try {
+                statement = ((JdbcConnection) connection).createStatement();
+                statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+                this.canAccessDbaRecycleBin = true;
+            } catch (Exception e) {
+                if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
+                    this.canAccessDbaRecycleBin = false;
+                } else {
+                    LogFactory.getInstance().getLog().warning("Cannot check dba_recyclebin access", e);
+                    this.canAccessDbaRecycleBin = false;
+                }
+            } finally {
+                JdbcUtils.close(null, statement);
+            }
+        }
+
         return canAccessDbaRecycleBin;
     }
 }
