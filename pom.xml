@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>3.4.2</version>
+    <version>3.4.3</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -215,8 +215,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.1</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.7</source>
+                        <target>1.7</target>
                         <optimize>true</optimize>
                         <debug>true</debug>
                         <encoding>${project.build.sourceEncoding}</encoding>
@@ -413,17 +413,17 @@
             </build>
         </profile>
 
-        <profile>
-            <id>rpm</id>
-            <activation>
-                <os>
-                    <family>linux</family>
-                </os>
-            </activation>
-            <modules>
-                <module>liquibase-rpm</module>
-            </modules>
-        </profile>
+<!--         <profile> -->
+<!--             <id>rpm</id> -->
+<!--             <activation> -->
+<!--                 <os> -->
+<!--                     <family>linux</family> -->
+<!--                 </os> -->
+<!--             </activation> -->
+<!--             <modules> -->
+<!--                 <module>liquibase-rpm</module> -->
+<!--             </modules> -->
+<!--         </profile> -->
 
         <profile>
             <id>doclint-java8-disable</id>

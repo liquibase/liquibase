@@ -10,13 +10,13 @@
     <parent>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-parent</artifactId>
-        <version>3.4.2</version>
+        <version>3.4.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <properties>
         <bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.4.2</project.version>
+        <project.version>3.4.3</project.version>
     </properties>
 
     <dependencies>
