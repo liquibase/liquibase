@@ -14,6 +14,7 @@ import java.util.Date;
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 
     private Database database;
+    private String deploymentId;
 
     public Database getDatabase() {
         return database;
@@ -92,6 +93,21 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
     }
 
     protected abstract void replaceChecksum(ChangeSet changeSet) throws DatabaseException;
+
+    public String getDeploymentId() {
+        return this.deploymentId;
+    }
+
+    public void resetDeploymentId() {
+        this.deploymentId = null;
+    }
+
+    public void generateDeploymentId() {
+        if (this.deploymentId == null) {
+            String dateString = String.valueOf(new Date().getTime());
+            this.deploymentId = dateString.substring(dateString.length() - 10);
+        }
+    }
 
 
 }
