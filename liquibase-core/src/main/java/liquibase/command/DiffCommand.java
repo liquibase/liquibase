@@ -153,7 +153,14 @@ public class DiffCommand extends AbstractCommand {
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
-                schemas[i++] = comparison.getComparisonSchema();
+                CatalogAndSchema schema;
+                if (targetDatabase.supportsSchemas()) {
+                    schema = new CatalogAndSchema(targetDatabase.getDefaultCatalogName(), comparison.getComparisonSchema().getSchemaName());
+                } else {
+                    schema = new CatalogAndSchema(comparison.getComparisonSchema().getSchemaName(), comparison.getComparisonSchema().getSchemaName());
+                }
+
+                schemas[i++] = schema;
             }
         }
         SnapshotControl snapshotControl = getTargetSnapshotControl();
@@ -176,7 +183,13 @@ public class DiffCommand extends AbstractCommand {
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
-                schemas[i++] = comparison.getReferenceSchema();
+                CatalogAndSchema schema;
+                if (referenceDatabase.supportsSchemas()) {
+                    schema = new CatalogAndSchema(referenceDatabase.getDefaultCatalogName(), comparison.getReferenceSchema().getSchemaName());
+                } else {
+                    schema = new CatalogAndSchema(comparison.getReferenceSchema().getSchemaName(), comparison.getReferenceSchema().getSchemaName());
+                }
+                schemas[i++] = schema;
             }
         }
 

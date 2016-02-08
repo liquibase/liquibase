@@ -8,6 +8,7 @@ import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.util.Set;
 
@@ -31,29 +32,33 @@ public class SchemaComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
-        CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
+        if (accordingTo.supportsSchemas()) {
+            String schemaName1 = databaseObject1.getName();
+            String schemaName2 = databaseObject2.getName();
 
-        if (accordingTo.supportsCatalogs()) {
-            if (thisSchema.getCatalogName() == null) {
-                if (!(otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName()))) {
-                    return false;
+            if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+                return true;
             }
-            } else {
-            if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
-                return false;
-                }
+
+            schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
+            schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
+
+            return StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2));
+        } else if (accordingTo.supportsCatalogs()) {
+            String catalogName1 = ((Schema) databaseObject1).getCatalogName();
+            String catalogName2 = ((Schema) databaseObject2).getCatalogName();
+
+            if (StringUtils.trimToEmpty(catalogName1).equalsIgnoreCase(StringUtils.trimToEmpty(catalogName2))) {
+                return true;
             }
+
+            catalogName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
+            catalogName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
+
+            return StringUtils.trimToEmpty(catalogName1).equalsIgnoreCase(StringUtils.trimToEmpty(catalogName2));
+        } else {
+            return true;
         }
-        if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
-            String thisSchemaName = thisSchema.getSchemaName();
-            String otherSchemaName = otherSchema.getSchemaName();
-            if (thisSchemaName == null) {
-                return otherSchemaName == null;
-            }
-            return thisSchemaName.equalsIgnoreCase(otherSchemaName);
-        }
-        return true;
     }
 
 

@@ -19,7 +19,7 @@
       liquibase-parent
     </artifactId>
     <version>
-      3.4.712
+      3.4.779
     </version>
     <relativePath>
       ../pom.xml
@@ -102,17 +102,6 @@
       </groupId>
       <artifactId>
         hamcrest-library
-      </artifactId>
-      <scope>
-        test
-      </scope>
-    </dependency>
-    <dependency>
-      <groupId>
-        org.easymock
-      </groupId>
-      <artifactId>
-        easymockclassextension
       </artifactId>
       <scope>
         test

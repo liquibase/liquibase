@@ -10,6 +10,7 @@ import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -29,8 +30,19 @@ public class DiffToReport {
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
+        Set<Schema> schemas = diffResult.getReferenceSnapshot().get(Schema.class);
+        if (schemas != null && schemas.size() > 0) {
+            out.println("Compared Schemas: " + StringUtils.join(schemas, ", ", new StringUtils.StringUtilsFormatter<Schema>() {
+                @Override
+                public String toString(Schema obj) {
+                    return obj.getName();
+                }
+            }, true));
+        }
+
         printComparison("Product Name", diffResult.getProductNameDiff(), out);
         printComparison("Product Version", diffResult.getProductVersionDiff(), out);
+
 
         TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<Class<? extends DatabaseObject>>(new Comparator<Class<? extends DatabaseObject>>() {
             @Override

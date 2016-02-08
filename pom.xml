@@ -9,7 +9,7 @@
     liquibase-parent
   </artifactId>
   <version>
-    3.4.712
+    3.4.779
   </version>
   <packaging>
     pom
@@ -192,20 +192,6 @@
         </artifactId>
         <version>
           1.9.5
-        </version>
-        <scope>
-          test
-        </scope>
-      </dependency>
-      <dependency>
-        <groupId>
-          org.easymock
-        </groupId>
-        <artifactId>
-          easymockclassextension
-        </artifactId>
-        <version>
-          2.5.2
         </version>
         <scope>
           test

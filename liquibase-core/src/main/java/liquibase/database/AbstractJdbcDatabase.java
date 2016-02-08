@@ -1497,4 +1497,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
         return this;
     }
+
+    @Override
+    public ValidationErrors validate() {
+        return new ValidationErrors();
+    }
 }

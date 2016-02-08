@@ -340,5 +340,7 @@ public interface Database extends PrioritizedService {
     String unescapeDataTypeName(String dataTypeName);
 
     String unescapeDataTypeString(String dataTypeString);
+
+    ValidationErrors validate();
 }
 

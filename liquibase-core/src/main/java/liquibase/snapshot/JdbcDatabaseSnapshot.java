@@ -3,6 +3,7 @@ package liquibase.snapshot;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.DatabaseObjectComparator;
@@ -12,6 +13,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.*;
@@ -19,7 +21,11 @@ import java.util.*;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
+    private boolean warnedAboutDbaRecycleBin=false;
+
     private CachingDatabaseMetaData cachingDatabaseMetaData;
+
+    private Set<String> userDefinedTypes;
 
     public JdbcDatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         super(examples, database, snapshotControl);
@@ -139,7 +145,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "ON fc.owner = f.owner " +
                                 "AND fc.constraint_name = f.constraint_name " +
                                 "AND fc.position = pc.position " +
-                                "WHERE p.owner = '" + jdbcSchemaName + "' " +
+                                "WHERE f.owner = '" + jdbcSchemaName + "' " +
                                 "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R'" +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
@@ -211,12 +217,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     if (database instanceof OracleDatabase) {
+                        warnAboutDbaRecycleBin();
+
                         //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                         String sql = "SELECT c.INDEX_NAME, 3 AS TYPE, c.TABLE_NAME, c.COLUMN_NAME, c.COLUMN_POSITION AS ORDINAL_POSITION, e.COLUMN_EXPRESSION AS FILTER_CONDITION, case I.UNIQUENESS when 'UNIQUE' then 0 else 1 end as NON_UNIQUE " +
                                 "FROM ALL_IND_COLUMNS c " +
                                 "JOIN ALL_INDEXES i on i.index_name = c.index_name " +
+                                "LEFT JOIN "+(((OracleDatabase) database).canAccessDbaRecycleBin()?"dba_recyclebin":"user_recyclebin")+" d ON d.object_name=c.table_name " +
                                 "LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name) " +
                                 "WHERE c.TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' " +
+                                "AND d.object_name IS NULL "+
                                 "AND i.OWNER=c.TABLE_OWNER";
                         if (!bulkFetch && tableName != null) {
                             sql += " AND c.TABLE_NAME='" + tableName + "'";
@@ -265,10 +275,36 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
+        protected void warnAboutDbaRecycleBin() {
+            if (!warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
+                LogFactory.getInstance().getLog().warning(((OracleDatabase) database).getDbaRecycleBinWarning());
+                warnedAboutDbaRecycleBin = true;
+            }
+        }
+
         /**
          * Return the columns for the given catalog, schema, table, and column.
          */
         public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
+
+            if (database instanceof MSSQLDatabase && userDefinedTypes == null) {
+                userDefinedTypes = new HashSet<String>();
+                DatabaseConnection databaseConnection = database.getConnection();
+                if (databaseConnection instanceof JdbcConnection) {
+                    Statement stmt = null;
+                    ResultSet resultSet = null;
+                    try {
+                        stmt = ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement();
+                        resultSet = stmt.executeQuery("select name from sys.types where is_user_defined=1");
+                        while (resultSet.next()) {
+                            userDefinedTypes.add(resultSet.getString("name").toLowerCase());
+                        }
+                    } finally {
+                        JdbcUtils.close(resultSet, stmt);
+                    }
+                }
+            }
+
             return getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
@@ -343,7 +379,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS,\n" +
+                    String sql = "select NULL AS TABLE_CAT, OWNER AS TABLE_SCHEM, 'NO' as IS_AUTOINCREMENT, cc.COMMENTS AS REMARKS, " +
                             "OWNER, TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_TYPE_MOD, DATA_TYPE_OWNER, " +
                             // note: oracle reports DATA_LENGTH=4*CHAR_LENGTH when using VARCHAR( <N> CHAR ), thus BYTEs
                             "DECODE( CHAR_USED, 'C',CHAR_LENGTH, DATA_LENGTH ) as DATA_LENGTH, " +
@@ -366,6 +402,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
                     return this.executeAndExtract(sql, database);
+                }
+
+                @Override
+                protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
+                    List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
+                    if (database instanceof MSSQLDatabase && userDefinedTypes.size() > 0) { //UDT types in MSSQL don't take parameters
+                        for (CachedRow row : rows) {
+                           String dataType = (String) row.get("TYPE_NAME");
+                            if (userDefinedTypes.contains(dataType.toLowerCase())) {
+                                row.set("COLUMN_SIZE", null);
+                                row.set("DECIMAL_DIGITS ", null);
+                            }
+                        }
+                    }
+                    return rows;
                 }
             });
         }
@@ -517,7 +568,28 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             throw new SQLException(e);
                         }
                     } else {
-                        return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                        if (database instanceof OracleDatabase) {
+                            warnAboutDbaRecycleBin();
+
+                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq, c.constraint_name AS pk_name " +
+                                    "FROM all_cons_columns c, all_constraints k " +
+                                    "LEFT JOIN "+(((OracleDatabase) database).canAccessDbaRecycleBin()?"dba_recyclebin":"user_recyclebin")+" d ON d.object_name=k.table_name "+
+                                    "WHERE k.constraint_type = 'P' " +
+                                    "AND d.object_name IS NULL "+
+                                    "AND k.table_name = '"+table+"' " +
+                                    "AND k.owner = '"+((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"' " +
+                                    "AND k.constraint_name = c.constraint_name " +
+                                    "AND k.table_name = c.table_name " +
+                                    "AND k.owner = c.owner " +
+                                    "ORDER BY column_name";
+                            try {
+                                return executeAndExtract(sql, database);
+                            } catch (DatabaseException e) {
+                                throw new SQLException(e);
+                            }
+                        } else {
+                            return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                        }
                     }
                 }
 
@@ -526,8 +598,19 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     if (database instanceof OracleDatabase) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
+                        warnAboutDbaRecycleBin();
                         try {
-                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM all_cons_columns c, all_constraints k WHERE k.constraint_type = 'P' AND k.owner='" + catalogAndSchema.getCatalogName() + "' AND k.constraint_name = c.constraint_name  AND k.table_name = c.table_name  AND k.owner = c.owner  ORDER BY column_name", database);
+                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM " +
+                                    "all_cons_columns c, " +
+                                    "all_constraints k " +
+                                    "LEFT JOIN "+(((OracleDatabase) database).canAccessDbaRecycleBin()?"dba_recyclebin":"user_recyclebin")+" d ON d.object_name=k.table_name "+
+                                    "WHERE k.constraint_type = 'P' " +
+                                    "AND d.object_name IS NULL " +
+                                    "AND k.owner='" + catalogAndSchema.getCatalogName() + "' " +
+                                    "AND k.constraint_name = c.constraint_name " +
+                                    "AND k.table_name = c.table_name " +
+                                    "AND k.owner = c.owner " +
+                                    "ORDER BY column_name", database);
                         } catch (DatabaseException e) {
                             throw new SQLException(e);
                         }
@@ -606,11 +689,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }
                     } else if (database instanceof OracleDatabase) {
+                        warnAboutDbaRecycleBin();
+
                         sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
-                                "from all_constraints uc join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner "
-                                + "where uc.constraint_type='U' "
-                                + "and uc.owner = '" + jdbcSchemaName + "' "
-                                + "AND ui.table_name NOT LIKE 'BIN$%' ";
+                                "from all_constraints uc " +
+                                "join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner " +
+                                "LEFT JOIN "+(((OracleDatabase) database).canAccessDbaRecycleBin()?"dba_recyclebin":"user_recyclebin")+" d ON d.object_name=ui.table_name "+
+                                "where uc.constraint_type='U' " +
+                                "and uc.owner = '" + jdbcSchemaName + "'" +
+                                "AND d.object_name IS NULL ";
 
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + tableName + "'";

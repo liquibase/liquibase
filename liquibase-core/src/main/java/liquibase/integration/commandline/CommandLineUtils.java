@@ -68,7 +68,22 @@ public class CommandLineUtils {
                                                 String liquibaseCatalogName,
                                                 String liquibaseSchemaName) throws DatabaseException {
         try {
+            liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
+            liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
+            defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
+            defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
+
+            if (!database.supportsSchemas()) {
+                if (defaultSchemaName != null && defaultCatalogName == null) {
+                    defaultCatalogName = defaultSchemaName;
+                }
+                if (liquibaseSchemaName != null && liquibaseCatalogName == null) {
+                    liquibaseCatalogName = liquibaseSchemaName;
+                }
+            }
+
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
 
@@ -76,11 +91,20 @@ public class CommandLineUtils {
             database.setDefaultSchemaName(defaultSchemaName);
             database.setOutputDefaultCatalog(outputDefaultCatalog);
             database.setOutputDefaultSchema(outputDefaultSchema);
-            database.setLiquibaseCatalogName(StringUtils.trimToNull(liquibaseCatalogName));
-            database.setLiquibaseSchemaName(StringUtils.trimToNull(liquibaseSchemaName));
+            database.setLiquibaseCatalogName(liquibaseCatalogName);
+            database.setLiquibaseSchemaName(liquibaseSchemaName);
 
             //Todo: move to database object methods in 4.0
             initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
+
+//            ValidationErrors errors = database.validate();
+//            if (errors.hasErrors()) {
+//                throw new DatabaseException("Database validation failed: "+errors.toString());
+//            } else {
+//                for (String warning : errors.getWarningMessages()) {
+//                    LogFactory.getInstance().getLog().warning(warning);
+//                }
+//            }
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);

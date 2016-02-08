@@ -1,3 +1,59 @@
+720762c CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+5bafd7b CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+34fdcbc CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+4c2b502 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+6eb0731 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+1d45454 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
+1071c99 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+78058d5 CORE-2615 Multi-schema improvements: better handling of default schema comparisions with offline snapshots that may have no default
+ef76309 CORE-2615 Multi-schema improvements: better handling of default schema comparisions with offline snapshots that may have no default
+83bbe2b Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+006a3e9 Merge branch 'multiSchemaImprovements' into ddb
+9a8e7cd Merge branch 'multiSchemaImprovements' into ddb
+bf9faf4 Removed easymock usage
+2889d5e CORE-2615 Multi-schema improvements
+c2ce48a CORE-2615 Multi-schema improvements - clear schemaName if default schema
+efadbc4 Commented out multi-schema improvement code cherry-picked in
+213c9d8 CORE-2640 Better handling of replaceIfExists in createProcedure (cherry picked from commit dd8f987)
+7461766 CORE-2626 Use schemaName in createProcedure (cherry picked from commit e398239)
+9ea33a5 Cherry pick liquibaseSchemaName -> liquibaseCatalogName logic from master
+1f72da8 Reverted pom and gitlog.txt files back
+0391f2e Merge branch 'multiSchemaImprovements' of https://github.com/Datical/liquibase into multiSchemaImprovements
+dd8f987 CORE-2640 Better handling of replaceIfExists in createProcedure
+703c015 Merge branch 'createProcedure_schemaName' into multiSchemaImprovements
+b6cfb54 Prep for build 3.4.735-SNAPSHOT
+8b4be15 Prep for build 3.4.
+a2fab6d CORE-2615 Multi-schema improvements - handle comparing default schemas when they are the only ones compared
+9425d7f CORE-2638 Diff not generating replaceIfExists=“true” attribute for View in changeset
+e116948 CORE-2615 Multi-schema improvements - handle comparing default schemas when they are the only ones compared
+77362ce CORE-2615 Multi-schema improvements - Don't include catalog name in diff comparisons
+90f94d4 CORE-2615 Multi-schema improvements - Better handling of comparing certain schemas from a snapshot that contains more
+8a822c8 CORE-2615 Multi-schema improvements - Don't filter out null-schema-name objects, may be catalog-level objects
+cbcf5f4 CORE-2615 Multi-schema improvements: Use --schemas as the catalog in non-schema-supporting databases
+713d1f0 CORE-2615 Multi-schema improvements: Don't include catalog in object comparisons, only the schema
+1c8a8fe CORE-2615 Multi-schema improvements: Don't include catalog in object comparisons, only the schema
+7ac3de3 CORE-2615 Multi-schema improvements - Don't include catalog and schema name in Schema.toString() since that usually means there is no schema support int he database - Don't compare objects that are not part of the compared schemas
+22867d0 CORE-2615 Multi-schema improvements - Don't include catalog and schema name in Schema.toString() since that usually means there is no schema support int he database - Don't compare objects that are not part of the compared schemas
+38cf523 Include schemas in diff report (cherry picked from commit d15c64e)
+d15c64e Include schemas in diff report
+c6df978 CORE-2625 Diff: should not be case sensitive in column default value functions
+6647434 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+77ab1f6 CORE-2625 Diff: should not be case sensitive in column default value functions
+e398239 CORE-2626 Use schemaName in createProcedure
+5021ae4 CORE-2624 MSSQL: don't include sizes for UDTs
+c14da87 Handle errors on snapshot load
+0f4aae3 CORE-2624 MSSQL: support identity UDT columns in update
+45d26b2 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+38da27a Column comments not coming through for alternate schemas
+f48b567 CORE-2615 Multi-schema snapshot bugfixes
+005f9b9 CORE-2615 Multi-schema snapshot bugfixes
+68a7cfb CORE-2615 Multi-schema snapshot bugfixes
+6f15d8c CORE-2615 Multi-schema snapshot bugfixes
+6b30d04 CORE-2615 Multi-schema snapshot bugfixes
+8136af3 CORE-2615 Multi-schema snapshot bugfixes
+6d90a41 Test fixes
+baaea0a CORE-2615 Multi-schema snapshot bugfixes
+ea4ce11 CORE-2615 Multi-schema snapshot bugfixes
 bd70e7a Correctly escape column names when fetching remarks
 f782fec Unescape commas that sometimes come through still escaped
 104c3a3 CORE-2612 Oracle: include BYTE in CHAR and VARCHAR types from snapshot/generateChangeLog
