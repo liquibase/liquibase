@@ -129,6 +129,14 @@ public class RanChangeSet {
         this.orderExecuted = orderExecuted;
     }
 
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
