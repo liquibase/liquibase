@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractJdbcDatabase implements Database {
 
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
+    private final static int FETCH_SIZE = 1000;
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -353,6 +354,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (!supportsSchemas()) {
             defaultCatalogSet = schemaName != null;
         }
+    }
+
+    @Override
+    public Integer getFetchSize() {
+        return FETCH_SIZE;
     }
 
     /**
