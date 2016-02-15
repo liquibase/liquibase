@@ -58,7 +58,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     column = readColumn(data, relation, database);
                 }
             }
-            if (column != null && database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+
+            // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
+            if (column != null && database instanceof MSSQLDatabase && ((!((MSSQLDatabase)database).isAzureDb() && database.getDatabaseMajorVersion() >= 8) || database.getDatabaseMajorVersion() >= 12)) {
                 String sql;
                 if (database.getDatabaseMajorVersion() >= 9) {
                     // SQL Server 2005 or later
