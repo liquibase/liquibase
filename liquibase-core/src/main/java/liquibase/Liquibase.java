@@ -205,6 +205,8 @@ public class Liquibase {
                 checkLiquibaseTables(true, changeLog, contexts, labelExpression);
             }
 
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
@@ -298,6 +300,8 @@ public class Liquibase {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -790,6 +794,8 @@ public class Liquibase {
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
             checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -845,6 +851,8 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             changeLog.validate(database, contexts, labelExpression);
 
@@ -922,6 +930,8 @@ public class Liquibase {
             if (checkLiquibaseTables) {
                 checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             }
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator;
@@ -1034,6 +1044,8 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
             getDatabase().tag(tagString);
         } finally {

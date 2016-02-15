@@ -32,13 +32,30 @@ public class SchemaComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
-        CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
-
         if (accordingTo.supportsSchemas()) {
-            return StringUtils.trimToEmpty(thisSchema.getSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(otherSchema.getSchemaName()));
+            String schemaName1 = databaseObject1.getName();
+            String schemaName2 = databaseObject2.getName();
+
+            if (StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2))) {
+                return true;
+            }
+
+            schemaName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
+            schemaName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getSchemaName();
+
+            return StringUtils.trimToEmpty(schemaName1).equalsIgnoreCase(StringUtils.trimToEmpty(schemaName2));
         } else if (accordingTo.supportsCatalogs()) {
-            return StringUtils.trimToEmpty(thisSchema.getCatalogName()).equalsIgnoreCase(StringUtils.trimToEmpty(otherSchema.getCatalogName()));
+            String catalogName1 = ((Schema) databaseObject1).getCatalogName();
+            String catalogName2 = ((Schema) databaseObject2).getCatalogName();
+
+            if (StringUtils.trimToEmpty(catalogName1).equalsIgnoreCase(StringUtils.trimToEmpty(catalogName2))) {
+                return true;
+            }
+
+            catalogName1 = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
+            catalogName2 = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo).getCatalogName();
+
+            return StringUtils.trimToEmpty(catalogName1).equalsIgnoreCase(StringUtils.trimToEmpty(catalogName2));
         } else {
             return true;
         }
