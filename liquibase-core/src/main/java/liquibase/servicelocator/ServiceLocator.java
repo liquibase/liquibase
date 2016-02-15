@@ -11,21 +11,29 @@ import liquibase.osgi.OSGiUtil;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.util.*;
-import java.util.jar.Manifest;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.jar.Manifest;
+
+/**
+ * Entry point to the Liquibase specific ServiceLocator framework.
+ *
+ * Services (concrete instances of interfaces) are located by scanning nominated
+ * packages on the classpath for implementations of the interface.
+ *
+ * This is a fragile and difficult approach, which needs careful handling
+ * and special cases for several environments (see e.g. special case handling
+ * for OSGI, WebSphere, EAS, JARs v.s. class dirs, etc.).
+ *
+ * TODO:https://liquibase.jira.com/browse/CORE-2594 future versions of Liquibase
+ * should use the Java builtin {@link ServiceLoader} framework instead, as it is
+ * much more robust and effective.
+ */
 public class ServiceLocator {
 
     private static ServiceLocator instance;
