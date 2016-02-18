@@ -108,17 +108,6 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     if (entry.getName().startsWith(path)) {
 
                         if (!recursive) {
-                            // I'm not sure exactly what the contract for this method is here, if
-                            // recursive is false.
-                            // There are a lot of edge cases where e.g. path = "" or path is an
-                            // absolute file path due to the ""relativeTo param where I'm not sure if
-                            // this does the right thing, or what the right thing even is.
-                            //
-                            // I can't see any callers who set recursive=false, maybe it's not used?
-                            //
-                            // Let's say that non-relative means that path="foo" and name="foo/a" but
-                            // not "foo/a/b":
-
                             String pathAsDir = path.endsWith("/")
                                     ? path
                                     : path + "/";

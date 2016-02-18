@@ -25,14 +25,6 @@ import java.util.jar.Manifest;
  *
  * Services (concrete instances of interfaces) are located by scanning nominated
  * packages on the classpath for implementations of the interface.
- *
- * This is a fragile and difficult approach, which needs careful handling
- * and special cases for several environments (see e.g. special case handling
- * for OSGI, WebSphere, EAS, JARs v.s. class dirs, etc.).
- *
- * TODO:https://liquibase.jira.com/browse/CORE-2594 future versions of Liquibase
- * should use the Java builtin {@link ServiceLoader} framework instead, as it is
- * much more robust and effective.
  */
 public class ServiceLocator {
 

@@ -397,9 +397,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      *
      * Any nested JAR files found inside this JAR will be assumed to also be
      * on the classpath and will be recursively examined for classes in `parentPackage`.
-     * (TODO:CORE-2594 Why? When is that needed? Some tests to demonstrate why that's
-     * needed might help guard against regressions here.)
-     *
+
      * @param parentPackage  the parent package under which classes must be in order to
      *                be considered
      * @param parentFileStream  the inputstream of the jar file to be examined for classes
@@ -431,16 +429,6 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 String name = entry.getName();
                 if (name != null) {
                     if (name.endsWith(".jar")) { //in a nested jar
-
-                        // TODO:CORE-2594 it is by no means certain that if there is a
-                        // JAR on the classpath that its contents are also on the classpath!
-                        // We assume here that they are, and add all classes found inside
-                        // 'name' to the 'classFiles' Set to be loaded below.
-                        // This will fail if the inner JAR is not in fact also on the classpath.
-                        //
-                        // All this is extremely fragile and ultimately misguided, as explained
-                        // on CORE-2594.
-
                         log.debug("Found nested jar " + name);
 
                         // To avoid needing to unzip 'parentFile' in its entirety, as that
