@@ -393,10 +393,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
                     if (!bulk) {
                         if (tableName != null) {
-                            sql += " AND TABLE_NAME='" + database.escapeObjectName(tableName, Table.class) + "'";
+                            sql += " AND TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
                         }
                         if (columnName != null) {
-                            sql += " AND COLUMN_NAME='" + database.escapeObjectName(columnName, Column.class) + "'";
+                            sql += " AND COLUMN_NAME='" + database.escapeStringForDatabase(columnName) + "'";
                         }
                     }
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
