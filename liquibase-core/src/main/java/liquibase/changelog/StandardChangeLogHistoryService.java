@@ -105,14 +105,20 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
             boolean liquibaseColumnNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                Column liquibaseColumn = changeLogTable.getColumn("LIQUIBASE");
+                if (liquibaseColumn != null) {
+                    Integer columnSize = liquibaseColumn.getType().getColumnSize();
+                    liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                }
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!this.getDatabase().getConnection().getDatabaseProductName().equals("SQLite")) {
-                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize < 35;
+                Column md5SumColumn = changeLogTable.getColumn("MD5SUM");
+                if (md5SumColumn != null) {
+                    Integer columnSize = md5SumColumn.getType().getColumnSize();
+                    checksumNotRightSize = columnSize != null && columnSize < 35;
+                }
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
