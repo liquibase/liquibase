@@ -1,12 +1,20 @@
+1c9e2f3 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+5fcf60d Don't quote object names or it causes problems in mode QUOTE_ALL. Use escapeStringForDatabase instead.
+459f2db Fix NPE in Standard Changelog History Service in certain cases
+2ec280f CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
+a6f5dda Merge branch 'CORE-2657_deploymentid' into ddb
 720762c CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 5bafd7b CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 34fdcbc CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 4c2b502 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 6eb0731 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+9a41d91 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
 1d45454 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
+a12b0d3 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
 1071c99 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 78058d5 CORE-2615 Multi-schema improvements: better handling of default schema comparisions with offline snapshots that may have no default
 ef76309 CORE-2615 Multi-schema improvements: better handling of default schema comparisions with offline snapshots that may have no default
+b16a5d9 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
 83bbe2b Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 006a3e9 Merge branch 'multiSchemaImprovements' into ddb
 9a8e7cd Merge branch 'multiSchemaImprovements' into ddb

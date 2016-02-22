@@ -7,6 +7,7 @@ import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -18,7 +19,6 @@ import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
@@ -105,16 +105,23 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             boolean hasLabels = changeLogTable.getColumn("LABELS") != null;
             boolean liquibaseColumnNotRightSize = false;
             if (!(this.getDatabase() instanceof SQLiteDatabase)) {
-                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                Column liquibaseColumn = changeLogTable.getColumn("LIQUIBASE");
+                if (liquibaseColumn != null) {
+                    Integer columnSize = liquibaseColumn.getType().getColumnSize();
+                    liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                }
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!this.getDatabase().getConnection().getDatabaseProductName().equals("SQLite")) {
-                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize < 35;
+                Column md5SumColumn = changeLogTable.getColumn("MD5SUM");
+                if (md5SumColumn != null) {
+                    Integer columnSize = md5SumColumn.getType().getColumnSize();
+                    checksumNotRightSize = columnSize != null && columnSize < 35;
+                }
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
+            boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
 
             if (!hasDescription) {
                 executor.comment("Adding missing databasechangelog.description column");
@@ -175,6 +182,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             } else {
                 executor.comment("Adding missing databasechangelog.labels column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", "VARCHAR("+getLabelsSize()+")", null));
+            }
+
+            if (!hasDeploymentIdColumn) {
+                executor.comment("Adding missing databasechangelog.deployment_id column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", "VARCHAR(10)", null));
+                if (database instanceof DB2Database) {
+                    statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
+                }
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
@@ -259,9 +274,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
                     Labels labels = new Labels((String) rs.get("LABELS"));
+                    String deploymentId = (String) rs.get("DEPLOYMENT_ID");
 
                     try {
-                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels);
+                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels, deploymentId);
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
@@ -277,7 +293,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
-        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE", "LABELS", "CONTEXTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement(new ColumnConfig().setName("*").setComputed(true)).setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
         return ExecutorService.getInstance().getExecutor(database).queryForList(select);
     }
 

@@ -7,7 +7,7 @@ import liquibase.change.CheckSum;
 import java.util.Date;
 
 /**
- * Encapsulates information about a previously-ran change set.  Used to build rollback statements. 
+ * Encapsulates information about a previously-ran change set.  Used to build rollback statements.
  */
 public class RanChangeSet {
     private final String changeLog;
@@ -22,6 +22,7 @@ public class RanChangeSet {
     private Integer orderExecuted;
     private ContextExpression contextExpression;
     private Labels labels;
+    private String deploymentId;
 
     public RanChangeSet(ChangeSet changeSet) {
         this(changeSet, null, null, null);
@@ -29,19 +30,20 @@ public class RanChangeSet {
 
     public RanChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType, ContextExpression contexts, Labels labels) {
         this(changeSet.getFilePath(),
-             changeSet.getId(),
-             changeSet.getAuthor(),
-             changeSet.generateCheckSum(),
-             new Date(),
-             null,
-             execType,
-            changeSet.getDescription(),
-            changeSet.getComments(),
+                changeSet.getId(),
+                changeSet.getAuthor(),
+                changeSet.generateCheckSum(),
+                new Date(),
+                null,
+                execType,
+                changeSet.getDescription(),
+                changeSet.getComments(),
                 contexts,
-                labels);
+                labels,
+                null);
     }
 
-    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels) {
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels, String deploymentId) {
         this.changeLog = changeLog;
         this.id = id;
         this.author = author;
@@ -57,6 +59,7 @@ public class RanChangeSet {
         this.comments = comments;
         this.contextExpression = contextExpression;
         this.labels = labels;
+        this.deploymentId = deploymentId;
     }
 
     public String getChangeLog() {
@@ -119,14 +122,22 @@ public class RanChangeSet {
     }
 
     public Integer getOrderExecuted() {
-		return orderExecuted;
-	}
+        return orderExecuted;
+    }
 
-	public void setOrderExecuted(Integer orderExecuted) {
-		this.orderExecuted = orderExecuted;
-	}
+    public void setOrderExecuted(Integer orderExecuted) {
+        this.orderExecuted = orderExecuted;
+    }
 
-	@Override
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
