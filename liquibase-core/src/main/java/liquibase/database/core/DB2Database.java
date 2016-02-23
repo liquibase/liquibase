@@ -218,6 +218,9 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        if (rawCatalogName != null && rawSchemaName == null) {
+            rawSchemaName = rawCatalogName;
+        }
         return new CatalogAndSchema(rawSchemaName, null).customize(this);
     }
 
