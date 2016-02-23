@@ -9,6 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -207,13 +208,6 @@ public class DB2Database extends AbstractJdbcDatabase {
             pkName = pkName.substring(0, 17);
         }
         return pkName;
-    }
-
-
-    @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // does not support the schema name for the index -
-        return super.escapeIndexName(null, null, indexName);
     }
 
     @Override
