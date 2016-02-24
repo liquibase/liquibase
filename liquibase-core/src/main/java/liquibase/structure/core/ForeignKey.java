@@ -27,7 +27,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
         }
         if (baseTableColumns != null && baseTableColumns.length > 0 && baseTableColumns[0] != null) {
-            setForeignKeyColumns(Arrays.asList(baseTableColumns));
+            setForeignKeyColumns(new ArrayList<Column>(Arrays.asList(baseTableColumns)));
         }
 
     }
@@ -106,11 +106,13 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("foreignKeyColumns", List.class);
     }
 
-    public void addForeignKeyColumn(Column foreignKeyColumn) {
+    public ForeignKey addForeignKeyColumn(Column foreignKeyColumn) {
         if (foreignKeyColumn.getAttribute("relation", Object.class) == null) {
             foreignKeyColumn.setRelation(getForeignKeyTable());
         }
         getAttribute("foreignKeyColumns", List.class).add(foreignKeyColumn);
+
+        return this;
     }
 
     public ForeignKey setForeignKeyColumns(List<Column> foreignKeyColumns) {
