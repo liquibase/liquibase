@@ -139,7 +139,13 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public String toString() {
-        return getName() + "(" + getForeignKeyTable() + "." + StringUtils.join(getForeignKeyColumns(), ", ", new StringUtils.ToStringFormatter()) + " -> " + getPrimaryKeyTable() + "." + StringUtils.join(getPrimaryKeyColumns(), ", ", new StringUtils.ToStringFormatter()) + ")";
+        StringUtils.StringUtilsFormatter<Column> columnFormatter = new StringUtils.StringUtilsFormatter<Column>() {
+            @Override
+            public String toString(Column obj) {
+                return obj.getName();
+            }
+        };
+        return getName() + "(" + getForeignKeyTable() + "[" + StringUtils.join(getForeignKeyColumns(), ", ", columnFormatter) + "] -> " + getPrimaryKeyTable() + "[" + StringUtils.join(getPrimaryKeyColumns(), ", ", columnFormatter) + "])";
     }
 
 
