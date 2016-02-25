@@ -52,6 +52,12 @@ public abstract class Relation extends AbstractDatabaseObject {
         return getAttribute("columns", List.class);
     }
 
+    public Relation addColumn(Column column) {
+        this.getColumns().add(column);
+
+        return this;
+    }
+
     /**
      * Returns the column object for the given columnName.  If the column does not exist in this table,
      * return null.
