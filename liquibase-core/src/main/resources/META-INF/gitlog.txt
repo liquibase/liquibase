@@ -1,3 +1,9 @@
+3af07b4 DB2 sees empty string default values as "NULL", especially in oracle-compatibility mode.
+837de9d Cleaned up View.toString() output
+4d17f52 Improve ForeignKey.toString() format for diff
+4090d77 Improve ForeignKey.toString() format for diff
+1aabaab CORE-2615 Multi-schema improvements: DB2 does support schemas on index names
+6bbccf8 CORE-2615 Multi-schema improvements: DB2 schemas come through as catalogs sometimes
 1c9e2f3 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 5fcf60d Don't quote object names or it causes problems in mode QUOTE_ALL. Use escapeStringForDatabase instead.
 459f2db Fix NPE in Standard Changelog History Service in certain cases
