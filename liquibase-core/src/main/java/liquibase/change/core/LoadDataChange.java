@@ -23,6 +23,7 @@ import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertSetStatement;
+import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.BooleanParser;
@@ -70,8 +71,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public boolean supports(Database database) {
         return true;
     }
-
-
 
     @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
@@ -199,7 +198,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
             }
 
-            InsertSetStatement statements = this.createStatementSet(getCatalogName(), getSchemaName(), getTableName());
+            List<SqlStatement> statements = new ArrayList<SqlStatement>();
+            
+            boolean anyPreparedStatements = false;
+           
             String[] line;
             int lineNumber = 1; // Start at '1' to take into account the header (already processed)
 
@@ -210,32 +212,34 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         || (isCommentingEnabled && isLineCommented(line))) {
                     continue; //nothing on this line
                 }
+                boolean needsPreparedStatement = false;
                 
-                // Ensure eaech line has the same number of columns defined as does the header.
-                // (Failure could indicate unquoted strings with commas, for example).
-                if (line.length != headers.length)
-                {
-                    throw new UnexpectedLiquibaseException("CSV file " + getFile() + " Line " + lineNumber + " has " + line.length + " values defined, Header has " + headers.length + ". Numbers MUST be equal (check for unquoted string with embedded commas)");
-                }
-
-                InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+                List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
                 for (int i=0; i<headers.length; i++) {
-                    String columnName = null;
-
-                    Object value = line[i];
-
+                    if( i >= line.length ) {
+                        throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i-1) + " columns, the header has " + headers.length);
+                    }
+                    
+                    Object value = line[i].trim();
+                    String columnName = headers[i].trim();
+                    
+                    boolean isNull = value.toString().equalsIgnoreCase("NULL");
+                    ColumnConfig valueConfig = new ColumnConfig();
+                    
                     ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
                     if (columnConfig != null) {
-                        columnName = columnConfig.getName();
-
                         if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
                         }
-
-                        if (value.toString().equalsIgnoreCase("NULL")) {
-                            value = "NULL";
-                        } else if (columnConfig.getType() != null) {
-                            ColumnConfig valueConfig = new ColumnConfig();
+                        
+                        // don't overwrite header name unless there is actually a value to override it with
+                        if (columnConfig.getName() != null) {
+                            columnName = columnConfig.getName();
+                        }
+                        
+                        valueConfig.setName(columnName);
+                        
+                        if (!isNull && columnConfig.getType() != null) {
                             if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
                                 valueConfig.setValueBoolean(BooleanParser.parseBoolean(value.toString().toLowerCase()));
                             } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
@@ -247,37 +251,73 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
                                 liquibase.statement.DatabaseFunction function = new liquibase.statement.DatabaseFunction(value.toString());
                                 valueConfig.setValueComputed(function);
+                            } else if (columnConfig.getType().equalsIgnoreCase("BLOB")) {
+                                valueConfig.setValueBlobFile(value.toString());
+                                needsPreparedStatement = true;
+                            } else if (columnConfig.getType().equalsIgnoreCase("CLOB")) {
+                                valueConfig.setValueClobFile(value.toString());
+                                needsPreparedStatement = true;
                             } else {
                                 throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
                             }
-                            value = valueConfig.getValueObject();
+                        }
+                    } else {
+                        if (columnName.contains("(") || columnName.contains(")") && database instanceof AbstractJdbcDatabase) {
+                            columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
+                        }
+                        
+                        valueConfig.setName(columnName);
+                        
+                        if (!isNull) {
+                            // value is always going to be a string unless overridden by ColumnConfig
+                            valueConfig.setValue((String) value);
                         }
                     }
-
-                    if (columnName == null) {
-                        columnName = headers[i];
-                    }
-
-                    if (columnName.contains("(") || columnName.contains(")") && database instanceof AbstractJdbcDatabase) {
-                        columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
-                    }
-
-
-                    insertStatement.addColumnValue(columnName, value);
+                    columns.add(valueConfig);
                 }
-                statements.addInsertStatement(insertStatement);
+                
+                if (needsPreparedStatement) {
+                    anyPreparedStatements = true;
+                    
+                    statements.add(new InsertExecutablePreparedStatement(database, getCatalogName(), getSchemaName(), getTableName(), columns, 
+                            getChangeSet(), getResourceAccessor()));
+                } else {
+                    InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+                    
+                    for (ColumnConfig column : columns) {
+                        String columnName = column.getName();
+                        Object value = column.getValueObject();
+                        
+                        if (value == null) {
+                            value = "NULL";
+                        }
+                        
+                        insertStatement.addColumnValue(columnName, value);
+                    }
+                    
+                    statements.add(insertStatement);
+                }
             }
 
-            if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
-                List<InsertStatement> innerStatements = statements.getStatements();
-                if (innerStatements != null && innerStatements.size() > 0 && innerStatements.get(0) instanceof InsertOrUpdateStatement) {
-                    //cannot do insert or update in a single statement
-                    return statements.getStatementsArray();
-                }
-                // we only return a single "statement" - it's capable of emitting multiple sub-statements, should the need arise, on generation.
-                return new SqlStatement[]{statements};
+            if (anyPreparedStatements) {
+                return statements.toArray(new SqlStatement[statements.size()]);
             } else {
-                return statements.getStatementsArray();
+                InsertSetStatement statementSet = this.createStatementSet(getCatalogName(), getSchemaName(), getTableName());
+                for (SqlStatement stmt : statements) {
+                    statementSet.addInsertStatement((InsertStatement) stmt);
+                }
+                
+                if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+                    List<InsertStatement> innerStatements = statementSet.getStatements();
+                    if (innerStatements != null && innerStatements.size() > 0 && innerStatements.get(0) instanceof InsertOrUpdateStatement) {
+                        //cannot do insert or update in a single statement
+                        return statementSet.getStatementsArray();
+                    }
+                    // we only return a single "statement" - it's capable of emitting multiple sub-statements, should the need arise, on generation.
+                    return new SqlStatement[]{statementSet};
+                } else {
+                    return statementSet.getStatementsArray();
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
