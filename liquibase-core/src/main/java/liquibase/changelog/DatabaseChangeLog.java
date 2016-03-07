@@ -162,6 +162,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void addChangeSet(ChangeSet changeSet) {
+        if (this.changeSets.contains(changeSet)) {
+          return;
+        }
+
         if (changeSet.getRunOrder() == null) {
             ListIterator<ChangeSet> it = this.changeSets.listIterator(this.changeSets.size());
             boolean added = false;
