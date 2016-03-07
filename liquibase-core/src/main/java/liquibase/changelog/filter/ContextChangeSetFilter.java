@@ -1,5 +1,6 @@
 package liquibase.changelog.filter;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.changelog.ChangeSet;
 import liquibase.sql.visitor.SqlVisitor;
@@ -31,11 +32,12 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
             return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass());
         }
 
-        if (changeSet.getContexts().isEmpty()) {
+        Collection<ContextExpression> inheritableContexts = changeSet.getInheritableContexts();
+        if (changeSet.getContexts().isEmpty() && inheritableContexts.isEmpty()) {
             return new ChangeSetFilterResult(true, "Change set runs under all contexts", this.getClass());
         }
 
-        if (changeSet.getContexts().matches(contexts)) {
+        if (changeSet.getContexts().matches(contexts) && ContextExpression.matchesAll(inheritableContexts, contexts)) {
             return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass());
         } else {
             return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass());
