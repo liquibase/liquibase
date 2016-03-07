@@ -25,7 +25,7 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
 
     @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return new Class[] {
+        return new Class[]{
                 Table.class
         };
     }
@@ -41,6 +41,7 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
 
         CreateViewChange change = new CreateViewChange();
         change.setViewName(view.getName());
+        change.setReplaceIfExists(true);
         if (control.getIncludeCatalog()) {
             change.setCatalogName(view.getSchema().getCatalogName());
         }
@@ -57,8 +58,8 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
                 viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
             } else {
                 viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
-        }
-            selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
+            }
+            selectQuery = "CREATE OR REPLACE FORCE VIEW " + viewName
                     + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
@@ -68,7 +69,7 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
                         return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
                     }
                 }
-            }) + ") AS "+selectQuery;
+            }) + ") AS " + selectQuery;
             change.setFullDefinition(true);
             fullDefinitionOverridden = true;
 
@@ -78,6 +79,6 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
             change.setFullDefinition(view.getContainsFullDefinition());
         }
 
-        return new Change[] { change };
+        return new Change[]{change};
     }
 }

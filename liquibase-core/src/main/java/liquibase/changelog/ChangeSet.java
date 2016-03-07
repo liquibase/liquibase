@@ -177,6 +177,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     private String created;
 
+    /**
+     * Allow changeSet to be ran "first" or "last". Multiple changeSets with the same runOrder will preserve their order relative to each other.
+     */
+    private String runOrder;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -256,6 +261,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
         this.created = node.getChildValue(null, "created", String.class);
+        this.runOrder = node.getChildValue(null, "runOrder", String.class);
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
@@ -550,6 +556,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                         if (listener != null) {
                             listener.willRun(change, this, changeLog, database);
                         }
+                        if (change.generateStatementsVolatile(database)) {
+                            executor.comment("WARNING The following SQL is possibly incorrect, invalid, and/or may change on each run:");
+                        }
+
+
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
                         if (listener != null) {
@@ -582,7 +593,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
-                log.severe("Change Set " + toString(false) + " failed.  Error: " + e.getMessage(), e);
+                // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
+                log.severe("Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {
@@ -828,7 +840,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public boolean isCheckSumValid(CheckSum storedCheckSum) {
         // no need to generate the checksum if any has been set as the valid checksum
         for (CheckSum validCheckSum : validCheckSums) {
-            if (validCheckSum.toString().equalsIgnoreCase("1:any")) {
+            if (validCheckSum.toString().equalsIgnoreCase("1:any") || validCheckSum.toString().equalsIgnoreCase("1:all") || validCheckSum.toString().equalsIgnoreCase("1:*")) {
                 return true;
             }
         }
@@ -844,7 +856,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         for (CheckSum validCheckSum : validCheckSums) {
-            if (currentMd5Sum.equals(validCheckSum)) {
+            if (currentMd5Sum.equals(validCheckSum) || storedCheckSum.equals(validCheckSum)) {
                 return true;
             }
         }
@@ -897,6 +909,20 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public void setCreated(String created) {
         this.created = created;
+    }
+
+    public String getRunOrder() {
+        return runOrder;
+    }
+
+    public void setRunOrder(String runOrder) {
+        if (runOrder != null) {
+            runOrder = runOrder.toLowerCase();
+            if (!runOrder.equals("first") && !runOrder.equals("last")) {
+                throw new UnexpectedLiquibaseException("runOrder must be 'first' or 'last'");
+            }
+        }
+        this.runOrder = runOrder;
     }
 
     @Override

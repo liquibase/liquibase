@@ -1,6 +1,5 @@
 package liquibase.datatype
 
-import liquibase.database.DatabaseFactory
 import liquibase.database.core.*
 import liquibase.datatype.core.*
 import liquibase.sdk.database.MockDatabase
@@ -191,6 +190,7 @@ public class DataTypeFactoryTest extends Specification {
         "MEDIUMINT UNSIGNED"                                 | new MySQLDatabase()   | "MEDIUMINT UNSIGNED"                                 | MediumIntType | false
         "BIGINT"                                             | new MySQLDatabase()   | "BIGINT"                                             | BigIntType    | false
         "BIGINT UNSIGNED"                                    | new MySQLDatabase()   | "BIGINT UNSIGNED"                                    | BigIntType    | false
+        "BINARY(16)"                                         | new MySQLDatabase()   | "BINARY(16)"                                         | BlobType      | false
         "tinyblob"                                           | new MySQLDatabase()   | "TINYBLOB"                                           | BlobType      | false
         "tinytext"                                           | new MySQLDatabase()   | "TINYTEXT"                                           | ClobType      | false
         "mediumblob"                                         | new MySQLDatabase()   | "MEDIUMBLOB"                                         | BlobType      | false
@@ -200,6 +200,7 @@ public class DataTypeFactoryTest extends Specification {
         "xml"                                                | new OracleDatabase()  | "XMLTYPE"                                            | XMLType       | false
         "xmltype"                                            | new OracleDatabase()  | "XMLTYPE"                                            | XMLType       | false
         "xml"                                                | new PostgresDatabase()| "XML"                                                | XMLType       | false
+        "BINARY(16)"                                         | new H2Database()      | "BINARY(16)"                                         | BlobType      | false
     }
 
     @Unroll("#featureName: #object for #database")

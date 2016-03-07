@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
@@ -14,10 +13,7 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
@@ -105,7 +101,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
-                    buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
+                    buffer.append(" CONSTRAINT ").append(database.escapeObjectName(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column), ForeignKey.class));
                 }
                 if (database instanceof OracleDatabase && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
                     buffer.append(" ");
@@ -153,16 +149,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 //buffer.append(" PRIMARY KEY");
             }
 
-            if(statement.getColumnRemarks(column) != null){
-                if (database instanceof MySQLDatabase) {
-                    buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
-                } else if (database instanceof MSSQLDatabase) {
-                    String schemaName = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).standardize(database).getSchemaName();
-                    if (schemaName == null) {
-                        schemaName = database.getDefaultSchemaName();
-                    }
-                    additionalSql.add(new UnparsedSql("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+statement.getColumnRemarks(column)+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+statement.getTableName()+", @level2type = N'Column', @level2name = "+column));
-                }
+            if(database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null){
+                buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
 
             }
 

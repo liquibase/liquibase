@@ -9,10 +9,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -112,6 +109,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         try {
+            if (isAzureDb()) {
+                return false;
+            }
             if (this.getDatabaseMajorVersion() >= 11) {
                 return true;
             }
@@ -198,7 +198,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return escapeObjectName(null, schemaName, tableName, Table.class);
+        return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -293,6 +293,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
+    }
+
+    @Override
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return Relation.class.isAssignableFrom(type);
     }
 
     @Override
@@ -497,5 +502,28 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
 
         return sendsStringParametersAsUnicode == null ? true : sendsStringParametersAsUnicode;
+    }
+
+    public boolean isAzureDb() {
+        return "Azure".equalsIgnoreCase(getEngineEdition());
+    }
+
+    public String getEngineEdition() {
+        try {
+            if (getConnection() instanceof JdbcConnection) {
+                String sql = "SELECT CASE ServerProperty('EngineEdition')\n" +
+                        "         WHEN 1 THEN 'Personal'\n" +
+                        "         WHEN 2 THEN 'Standard'\n" +
+                        "         WHEN 3 THEN 'Enterprise'\n" +
+                        "         WHEN 4 THEN 'Express'\n" +
+                        "         WHEN 5 THEN 'Azure'\n" +
+                        "         ELSE 'Unknown'\n" +
+                        "       END";
+                return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+            }
+        } catch (DatabaseException e) {
+            LogFactory.getLogger().warning("Could not determine engine edition", e);
+        }
+        return "Unknown";
     }
 }

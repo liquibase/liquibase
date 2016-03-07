@@ -37,7 +37,7 @@ public class DatabaseDataType {
      * @return Whether the type is serial
      */
     public boolean isAutoIncrement() {
-        return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial");
+        return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial") || type.equalsIgnoreCase("smallserial");
     }
 
     public String toSql() {

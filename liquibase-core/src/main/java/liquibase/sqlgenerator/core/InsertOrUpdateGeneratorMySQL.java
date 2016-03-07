@@ -7,6 +7,7 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.structure.core.Column;
 
 /**
  *
@@ -32,7 +33,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
         {
             if (!hashPkFields.contains(columnKey)) {
             	hasFields = true;
-            	updateClause.append(columnKey).append(" = ");
+            	updateClause.append(database.escapeObjectName(columnKey, Column.class)).append(" = ");
                 Object columnValue = insertOrUpdateStatement.getColumnValue(columnKey);
                 updateClause.append(DataTypeFactory.getInstance().fromObject(columnValue, database).objectToSql(columnValue, database));
             	updateClause.append(",");

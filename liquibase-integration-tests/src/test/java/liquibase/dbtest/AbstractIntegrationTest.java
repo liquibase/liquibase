@@ -5,43 +5,42 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.database.core.OracleDatabase;
-import liquibase.structure.core.*;
-import liquibase.test.DiffResultAssert;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.output.report.DiffToReport;
-import liquibase.snapshot.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.Executor;
-import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.DropTableStatement;
+import liquibase.structure.core.*;
 import liquibase.test.DatabaseTestContext;
+import liquibase.test.DiffResultAssert;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
-import liquibase.util.FileUtil;
 import liquibase.util.RegexMatcher;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -461,7 +460,7 @@ public abstract class AbstractIntegrationTest {
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = File.createTempFile("liquibase-test", ".xml");
-            FileUtil.deleteOnExit(tempFile);
+            deleteOnExit(tempFile);
             if (outputCsv) {
                 diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
             }
@@ -777,7 +776,7 @@ public abstract class AbstractIntegrationTest {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.generateDocumentation(outputDir.getAbsolutePath(), this.contexts);
 
-        FileUtil.deleteOnExit(outputDir);
+        deleteOnExit(outputDir);
     }
 
 
@@ -995,5 +994,21 @@ public abstract class AbstractIntegrationTest {
 
     protected Database getDatabase(){
         return database;
+    }
+
+    /**
+     * Schedule a file to be deleted when JVM exits.
+     * If file is directory delete it and all sub-directories.
+     */
+    private static void deleteOnExit(final File file) {
+        file.deleteOnExit();
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File child  : files) {
+                    deleteOnExit(child);
+                }
+            }
+        }
     }
 }

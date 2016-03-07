@@ -125,14 +125,14 @@ public class SqlUtil {
         } else if (typeId == Types.BINARY) {
             return new DatabaseFunction(stringVal.trim());
         } else if (typeId == Types.BIT) {
-            if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
-                stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
+            if (stringVal.startsWith("b'") || stringVal.startsWith("B'")) { //mysql returns boolean values as b'0' and b'1'
+                stringVal = stringVal.replaceFirst("b'", "").replaceFirst("B'", "").replaceFirst("'$", "");
             }
             stringVal = stringVal.trim();
             if (scanner.hasNextBoolean()) {
                 return scanner.nextBoolean();
             } else {
-                return new Integer(stringVal);
+                return Integer.valueOf(stringVal);
             }
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             if (strippedSingleQuotes) {

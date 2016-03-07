@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.structure.core.Sequence;
@@ -69,8 +68,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        if (statement.getWillCycle() != null && database instanceof OracleDatabase) {
-            if (statement.getWillCycle()) {
+        if (statement.getCycle() != null && database instanceof OracleDatabase) {
+            if (statement.getCycle()) {
                 buffer.append(" CYCLE ");
             } else {
                 buffer.append(" NOCYCLE ");

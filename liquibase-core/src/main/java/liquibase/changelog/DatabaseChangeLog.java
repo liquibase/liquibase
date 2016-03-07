@@ -30,14 +30,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Encapsulates the information stored in the change log XML file.
@@ -169,7 +162,38 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void addChangeSet(ChangeSet changeSet) {
-        this.changeSets.add(changeSet);
+        if (changeSet.getRunOrder() == null) {
+            ListIterator<ChangeSet> it = this.changeSets.listIterator(this.changeSets.size());
+            boolean added = false;
+            while (it.hasPrevious() && !added) {
+                if (!"last".equals(it.previous().getRunOrder())) {
+                    it.next();
+                    it.add(changeSet);
+                    added = true;
+                }
+            }
+            if (!added) {
+                it.add(changeSet);
+            }
+
+        } else if (changeSet.getRunOrder().equals("first")) {
+            ListIterator<ChangeSet> it = this.changeSets.listIterator();
+            boolean added = false;
+            while (it.hasNext() && !added) {
+                if (!"first".equals(it.next().getRunOrder())) {
+                    it.previous();
+                    it.add(changeSet);
+                    added = true;
+                }
+            }
+            if (!added) {
+                this.changeSets.add(changeSet);
+            }
+        } else if (changeSet.getRunOrder().equals("last")) {
+            this.changeSets.add(changeSet);
+        } else {
+            throw new UnexpectedLiquibaseException("Unknown runOrder: "+changeSet.getRunOrder());
+        }
     }
 
     @Override
@@ -277,6 +301,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
                 } catch (Exception e) {
                     throw new SetupException(e);
+                }
+            }
+
+            String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
+            Comparator<?> resourceComparator = null;
+            if (resourceComparatorDef != null) {
+                try {
+                	resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
+                } catch (Exception e) {
+            		//take default comparator
+                	LogFactory.getInstance().getLog().info("no resourceComparator defined - taking default implementation");
+                	resourceComparator=getStandardChangeLogComparator();
                 }
             }
 
@@ -419,7 +455,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
-            this.changeSets.add(changeSet);
+            addChangeSet(changeSet);
         }
 
         return true;
@@ -436,7 +472,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
-                return o1. compareTo(o2);
+            	//by ignoring WEB-INF/classes in path all changelog Files independent 
+            	//whehther they are in a WAR or in a JAR are order following the same rule
+            	return o1.replace("WEB-INF/classes/", "").compareTo(o2.replace("WEB-INF/classes/", ""));
             }
         };
     }

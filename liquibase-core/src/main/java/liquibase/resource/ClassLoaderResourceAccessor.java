@@ -3,12 +3,16 @@ package liquibase.resource;
 import liquibase.logging.LogFactory;
 import liquibase.util.FileUtil;
 import liquibase.util.StringUtils;
+import org.apache.commons.collections.EnumerationUtils;
+import org.apache.commons.collections.iterators.EnumerationIterator;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * An implementation of {@link liquibase.resource.ResourceAccessor} that wraps a class loader.
@@ -67,48 +71,70 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         while (fileUrls.hasMoreElements()) {
             URL fileUrl = fileUrls.nextElement();
-            if (!fileUrl.toExternalForm().startsWith("file:")) {
-                if (fileUrl.toExternalForm().startsWith("jar:file:")
-                        || fileUrl.toExternalForm().startsWith("wsjar:file:")
-                        || fileUrl.toExternalForm().startsWith("zip:")) {
 
-                    String file = fileUrl.getFile();
-                    String[] zipAndFile = file.split("!");
-                    String splitPath = zipAndFile[0];
-                    if (splitPath.matches("file:\\/[A-Za-z]:\\/.*")) {
-                        splitPath = splitPath.replaceFirst("file:\\/", "");
-                    } else {
-                        splitPath = splitPath.replaceFirst("file:", "");
-                    }
-                    splitPath = URLDecoder.decode(splitPath, "UTF-8");
-                    File zipfile = new File(splitPath);
+            if (fileUrl.toExternalForm().startsWith("jar:file:")
+                    || fileUrl.toExternalForm().startsWith("wsjar:file:")
+                    || fileUrl.toExternalForm().startsWith("zip:")) {
 
-
-                    File zipFileDir = FileUtil.unzip(zipfile);
-                    if (path.startsWith("classpath:")) {
-                        path = path.replaceFirst("classpath:", "");
-                    }
-                    if (path.startsWith("classpath*:")) {
-                        path = path.replaceFirst("classpath\\*:", "");
-                    }
-                    File dirInZip = new File(zipFileDir, zipAndFile[1]);
-                    if (!dirInZip.exists()) {
-                        dirInZip = new File(zipFileDir, path);
-                    }
-                    URI fileUri = dirInZip.toURI();
-                    fileUrl = fileUri.toURL();
+                String[] zipAndFile = fileUrl.getFile().split("!");
+                String zipFilePath = zipAndFile[0];
+                if (zipFilePath.matches("file:\\/[A-Za-z]:\\/.*")) {
+                    zipFilePath = zipFilePath.replaceFirst("file:\\/", "");
+                } else {
+                    zipFilePath = zipFilePath.replaceFirst("file:", "");
                 }
-            }
+                zipFilePath = URLDecoder.decode(zipFilePath, "UTF-8");
 
-            try {
-                File file = new File(fileUrl.toURI());
-                if (file.exists()) {
-                    getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
+                if (path.startsWith("classpath:")) {
+                    path = path.replaceFirst("classpath:", "");
                 }
-            } catch (URISyntaxException e) {
-                //not a local file
-            } catch (IllegalArgumentException e) {
-                //not a local file
+                if (path.startsWith("classpath*:")) {
+                    path = path.replaceFirst("classpath\\*:", "");
+                }
+
+                // TODO:When we update to Java 7+, we can can create a FileSystem from the JAR (zip)
+                // file, and then use NIO's directory walking and filtering mechanisms to search through it.
+                //
+                // As of 2016-02-03, Liquibase is Java 6+ (1.6)
+
+                // java.util.JarFile has a slightly nicer interface than ZipInputStream here and
+                // it works for zip files as well as JAR files
+                JarFile zipfile = new JarFile(zipFilePath, false);
+
+                Enumeration<JarEntry> entries = zipfile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+
+                    if (entry.getName().startsWith(path)) {
+
+                        if (!recursive) {
+                            String pathAsDir = path.endsWith("/")
+                                    ? path
+                                    : path + "/";
+                            if (!entry.getName().startsWith(pathAsDir)
+                             || entry.getName().substring(pathAsDir.length()).contains("/")) {
+                                continue;
+                            }
+                        }
+
+                        if (entry.isDirectory() && includeDirectories) {
+                            returnSet.add(entry.getName());
+                        } else if (includeFiles) {
+                            returnSet.add(entry.getName());
+                        }
+                    }
+                }
+            } else {
+                try {
+                    File file = new File(fileUrl.toURI());
+                    if (file.exists()) {
+                        getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
+                    }
+                } catch (URISyntaxException e) {
+                    //not a local file
+                } catch (IllegalArgumentException e) {
+                    //not a local file
+                }
             }
 
             Enumeration<URL> resources = classLoader.getResources(path);

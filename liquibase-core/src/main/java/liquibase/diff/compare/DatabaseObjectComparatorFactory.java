@@ -39,14 +39,14 @@ public class DatabaseObjectComparatorFactory {
     /**
      * Return singleton DatabaseObjectComparatorFactory
      */
-    public static DatabaseObjectComparatorFactory getInstance() {
+    public static synchronized DatabaseObjectComparatorFactory getInstance() {
         if (instance == null) {
             instance = new DatabaseObjectComparatorFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new DatabaseObjectComparatorFactory();
     }
 
@@ -92,7 +92,7 @@ public class DatabaseObjectComparatorFactory {
     }
 
 
-    public static void resetAll() {
+    public static synchronized void resetAll() {
         instance = null;
     }
 

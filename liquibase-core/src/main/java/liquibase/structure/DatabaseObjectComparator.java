@@ -20,7 +20,6 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
 
         }
 
-
         String name1 = StringUtils.trimToEmpty(o1.getName());
         String name2 = StringUtils.trimToEmpty(o2.getName());
 

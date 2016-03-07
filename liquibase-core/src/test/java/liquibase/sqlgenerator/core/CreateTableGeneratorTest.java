@@ -880,7 +880,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-    			assertEquals("Error with "+database, "CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
+    			assertEquals("Error with "+database, "CREATE TABLE [SCHEMA_NAME]..[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -899,7 +899,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
 	    		// start with not supported by Sybase
-    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE [SCHEMA_NAME]..[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -918,7 +918,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
 	    		// start with and increment by not supported by Sybase
-    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE [SCHEMA_NAME]..[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
     		}
     	}
     }

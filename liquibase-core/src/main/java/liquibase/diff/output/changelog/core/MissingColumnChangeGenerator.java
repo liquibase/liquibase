@@ -70,21 +70,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 
         columnConfig.setType(dataType);
 
-        Object defaultValue = column.getDefaultValue();
         MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
-        if (defaultValue != null) {
-            String defaultValueString = null;
-            try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
-            } catch (NullPointerException e) {
-                throw e;
-            }
-            if (defaultValueString != null) {
-                defaultValueString = defaultValueString.replaceFirst("'",
-                        "").replaceAll("'$", "");
-            }
-            columnConfig.setDefaultValue(defaultValueString);
-        }
 
         if (column.getRemarks() != null) {
             columnConfig.setRemarks(column.getRemarks());

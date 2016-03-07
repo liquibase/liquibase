@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
@@ -12,6 +13,10 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
@@ -73,7 +78,18 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = pk.getBackingIndex();
             if (backingIndex != null && backingIndex.getName() != null) {
-                returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+                try {
+                    if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
+                        CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);
+                        backingIndex.getTable().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
+                    }
+                    if (referenceDatabase.equals(comparisonDatabase) || !SnapshotGeneratorFactory.getInstance().has(backingIndex, comparisonDatabase)) {
+                        returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+                    }
+                } catch (Exception e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
+
 
                 change.setForIndexName(backingIndex.getName());
                 Schema schema = backingIndex.getSchema();

@@ -3,10 +3,14 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,9 +96,17 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
             if (column.getValueClobFile() != null) {
                 needsPreparedStatement = true;
             }
-            // TODO: This could be changed to check the column data types to see if we need the prepared statement
-            if (/*column.getValueText() != null &&*/ database instanceof InformixDatabase) {
-                needsPreparedStatement = true;
+
+            if (!needsPreparedStatement && database instanceof InformixDatabase) {
+                if (column.getValue() != null) {
+                    try {
+                        Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(column), database);
+                        if (snapshot != null) {
+                            needsPreparedStatement = true;
+                        }
+                    } catch (Exception ignore) { //assume it's not a clob
+                    }
+                }
             }
         }
 

@@ -12,7 +12,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
-@DataTypeInfo(name="char", aliases = "java.sql.Types.CHAR", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="char", aliases = {"java.sql.Types.CHAR", "bpchar"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CharType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
@@ -36,7 +36,15 @@ public class CharType extends LiquibaseDataType {
             DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("char"), parameters);
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
+        } else if (database instanceof PostgresDatabase){
+            if (getParameters() != null && getParameters().length == 1 && getParameters()[0].toString().equals("2147483647")) {
+                DatabaseDataType type = new DatabaseDataType("CHARACTER");
+                type.addAdditionalInformation("VARYING");
+                return type;
+            }
+            return super.toDatabaseDataType(database);
         }
+
         return super.toDatabaseDataType(database);
     }
 

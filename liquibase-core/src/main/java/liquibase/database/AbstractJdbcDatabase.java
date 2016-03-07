@@ -482,6 +482,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected boolean isDateTime(final String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
     }
+    
+    protected boolean isTimestamp(final String isoDate) {
+        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
+    }
 
     protected boolean isTimeOnly(final String isoDate) {
         return isoDate.length() == "hh:mm:ss".length();
@@ -1259,7 +1263,15 @@ public abstract class AbstractJdbcDatabase implements Database {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement);
-            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            try {
+                ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            } catch (DatabaseException e) {
+                if (statement.continueOnError()) {
+                    LogFactory.getLogger().severe("Error executing statement '"+statement.toString()+"', but continuing", e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -1530,5 +1542,10 @@ public abstract class AbstractJdbcDatabase implements Database {
             attributes.put(key, value);
         }
         return this;
+    }
+
+    @Override
+    public ValidationErrors validate() {
+        return new ValidationErrors();
     }
 }

@@ -105,7 +105,7 @@ public class FilenameUtils {
      * The extension separator String.
      * @since Commons IO 1.4
      */
-    public static final String EXTENSION_SEPARATOR_STR = (new Character(EXTENSION_SEPARATOR)).toString();
+    public static final String EXTENSION_SEPARATOR_STR = Character.valueOf(EXTENSION_SEPARATOR).toString();
 
     /**
      * The Unix separator character.

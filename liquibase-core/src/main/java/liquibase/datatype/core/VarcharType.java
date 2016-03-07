@@ -4,10 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import liquibase.database.Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -53,6 +50,12 @@ public class VarcharType extends CharType {
             DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"), parameters);
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
+        } else if (database instanceof PostgresDatabase) {
+            if (getParameters() != null && getParameters().length == 1 && getParameters()[0].toString().equals("2147483647")) {
+                DatabaseDataType type = new DatabaseDataType("CHARACTER");
+                type.addAdditionalInformation("VARYING");
+                return type;
+            }
         }
 
         return super.toDatabaseDataType(database);

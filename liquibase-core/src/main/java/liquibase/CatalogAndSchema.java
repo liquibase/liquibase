@@ -92,7 +92,11 @@ public class CatalogAndSchema {
             catalogName = null;
         }
 
-        if (!accordingTo.supportsSchemas()) {
+        if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+            schemaName = null;
+        }
+
+        if (!accordingTo.supportsSchemas() && catalogName != null && schemaName != null && !catalogName.equals(schemaName)) {
             schemaName = null;
         }
 

@@ -296,4 +296,13 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         }
         return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
     }
+
+    @Override
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+        if (name != null) {
+            name = name.replaceFirst("\\.", ".."); //use .. between schemaName and object name
+        }
+        return name;
+    }
 }

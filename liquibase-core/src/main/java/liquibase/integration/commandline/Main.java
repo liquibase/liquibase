@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -28,6 +29,7 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.changelog.visitor.ChangeExecListener;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -65,6 +67,8 @@ public class Main {
     protected String labels;
     protected String driverPropertiesFile;
     protected String propertyProviderClass = null;
+    protected String changeExecListenerClass;
+    protected String changeExecListenerPropertiesFile;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected Boolean strict = Boolean.TRUE;
@@ -238,6 +242,8 @@ public class Main {
                     i++;
                 }
             }
+
+            arg = arg.replace("\\,", ","); //sometimes commas come through escaped still
             fixedArgs.add(arg);
         }
 
@@ -304,6 +310,18 @@ public class Main {
                       && !cmdParm.startsWith("--includeObjects")
                       && !cmdParm.startsWith("--diffTypes")) {
                       messages.add("unexpected command parameter: "+cmdParm);
+                    }
+                }
+            } else if ("snapshot".equalsIgnoreCase(command)
+                    || "generateChangeLog".equalsIgnoreCase(command)) {
+                if (commandParams.size() > 0) {
+                    for (String cmdParm : commandParams) {
+                        if (!cmdParm.startsWith("--includeSchema")
+                                && !cmdParm.startsWith("--includeCatalog")
+                                && !cmdParm.startsWith("--includeTablespace")
+                                && !cmdParm.startsWith("--schemas")) {
+                            messages.add("unexpected command parameter: " + cmdParm);
+                        }
                     }
                 }
             }
@@ -591,6 +609,10 @@ public class Main {
         stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
         stream.println("                                            to be set on the JDBC connection");
         stream.println("                                            to be created");
+        stream.println(" --changeExecListenerClass=<ChangeExecListener.ClassName>     Custom Change Exec");
+        stream.println("                                            listener implementation to use");
+        stream.println(" --changeExecListenerPropertiesFile=</path/to/file.properties> Properties for");
+        stream.println("                                            Custom Change Exec listener");
         stream.println(" --liquibaseCatalogName=<name>              The name of the catalog with the");
         stream.println("                                            liquibase tables");
         stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
@@ -787,6 +809,7 @@ public class Main {
                 classpath = this.classpath.split(":");
             }
 
+            Logger logger = LogFactory.getInstance().getLog();
             for (String classpathEntry : classpath) {
                 File classPathFile = new File(classpathEntry);
                 if (!classPathFile.exists()) {
@@ -803,7 +826,9 @@ public class Main {
                             JarEntry entry = entries.nextElement();
                             if (entry.getName().toLowerCase().endsWith(".jar")) {
                                 File jar = extract(earZip, entry);
-                                urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                                urls.add(newUrl);
+                                logger.debug("Adding '" + newUrl + "' to classpath");
                                 jar.deleteOnExit();
                             } else if (entry.getName().toLowerCase().endsWith("war")) {
                                 File warFile = extract(earZip, entry);
@@ -812,7 +837,9 @@ public class Main {
                         }
 
                     } else {
-                        urls.add(new File(classpathEntry).toURL());
+                        URL newUrl = new File(classpathEntry).toURI().toURL();
+                        logger.debug("Adding '"+newUrl+"' to classpath");
+                        urls.add(newUrl);
                     }
                 } catch (Exception e) {
                     throw new CommandLineParsingException(e);
@@ -841,7 +868,9 @@ public class Main {
     }
 
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
-        URL url = new URL("jar:" + classPathFile.toURL() + "!/WEB-INF/classes/");
+        Logger logger = LogFactory.getInstance().getLog();
+        URL url = new URL("jar:" + classPathFile.toURI().toURL() + "!/WEB-INF/classes/");
+        logger.info("adding '"+url+"' to classpath");
         urls.add(url);
         JarFile warZip = new JarFile(classPathFile);
         Enumeration<? extends JarEntry> entries = warZip.entries();
@@ -850,7 +879,9 @@ public class Main {
             if (entry.getName().startsWith("WEB-INF/lib")
                     && entry.getName().toLowerCase().endsWith(".jar")) {
                 File jar = extract(warZip, entry);
-                urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                URL newUrl = new URL("jar:" + jar.toURI().toURL() + "!/");
+                logger.info("adding '"+newUrl+"' to classpath");
+                urls.add(newUrl);
                 jar.deleteOnExit();
             }
         }
@@ -1017,6 +1048,11 @@ public class Main {
 
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
+            		liquibase.getDatabase(), liquibase.getResourceAccessor(), 
+            		changeExecListenerClass, changeExecListenerPropertiesFile);
+            liquibase.setChangeExecListener(listener);
+            
             liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());

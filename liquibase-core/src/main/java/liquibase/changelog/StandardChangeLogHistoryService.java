@@ -8,6 +8,7 @@ import liquibase.change.CheckSum;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.datatype.core.VarcharType;
 import liquibase.exception.DatabaseException;
@@ -37,6 +38,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     private List<RanChangeSet> ranChangeSetList;
     private boolean serviceInitialized = false;
     private Boolean hasDatabaseChangeLogTable = null;
+    private boolean databaseChecksumsCompatible = true;
     private Integer lastChangeSetSequenceValue;
 
     @Override
@@ -135,6 +137,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
             String charTypeName = getCharTypeName();
+            boolean hasDeploymentIdColumn = changeLogTable.getColumn("DEPLOYMENT_ID") != null;
 
             if (!hasDescription) {
                 executor.comment("Adding missing databasechangelog.description column");
@@ -175,13 +178,34 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", charTypeName + "(10)", false));
             }
 
-            if (!hasContexts) {
+            if (hasContexts) {
+                Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
+                if (columnSize != null && columnSize < Integer.valueOf(getContextsSize())) {
+                    executor.comment("Modifying size of databasechangelog.contexts column");
+                    statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "("+getContextsSize()+")"));
+                }
+            } else {
                 executor.comment("Adding missing databasechangelog.contexts column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "("+getContextsSize()+")", null));
             }
-            if (!hasLabels) {
+
+            if (hasLabels) {
+                Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
+                if (columnSize != null && columnSize < Integer.valueOf(getLabelsSize())) {
+                    executor.comment("Modifying size of databasechangelog.labels column");
+                    statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName+"("+getLabelsSize()+")"));
+                }
+            } else {
                 executor.comment("Adding missing databasechangelog.labels column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName + "(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName + "("+getLabelsSize()+")", null));
+            }
+
+            if (!hasDeploymentIdColumn) {
+                executor.comment("Adding missing databasechangelog.deployment_id column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DEPLOYMENT_ID", "VARCHAR(10)", null));
+                if (database instanceof DB2Database) {
+                    statementsToExecute.add(new ReorganizeTableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
+                }
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
@@ -189,6 +213,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
+                    databaseChecksumsCompatible = false;
                     statementsToExecute.add(new RawSqlStatement(
                             "UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " " +
                             "SET " +  getDatabase().escapeObjectName("MD5SUM", Column.class) + " = NULL"));
@@ -220,6 +245,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         serviceInitialized = true;
     }
 
+    protected String getLabelsSize() {
+        return "255";
+    }
+
+    protected String getContextsSize() {
+        return "255";
+    }
+
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
         super.upgradeChecksums(databaseChangeLog, contexts, labels);
         getDatabase().commit();
@@ -240,7 +273,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String fileName = rs.get("FILENAME").toString();
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
+                    String md5sum = rs.get("MD5SUM") == null || !databaseChecksumsCompatible ? null : rs.get("MD5SUM").toString();
                     String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
                     String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
@@ -255,14 +288,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         }
                     }
                     String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
-                    Integer orderExecuted = (tmpOrderExecuted == null ? null : new Integer(tmpOrderExecuted));
+                    Integer orderExecuted = (tmpOrderExecuted == null ? null : Integer.valueOf(tmpOrderExecuted));
                     String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                     String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
                     Labels labels = new Labels((String) rs.get("LABELS"));
+                    String deploymentId = (String) rs.get("DEPLOYMENT_ID");
 
                     try {
-                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels);
+                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments, contexts, labels, deploymentId);
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {

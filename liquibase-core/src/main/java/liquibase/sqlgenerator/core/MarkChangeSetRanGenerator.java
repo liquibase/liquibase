@@ -76,7 +76,8 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addColumnValue("EXECTYPE", statement.getExecType().value)
                         .addColumnValue("CONTEXTS", changeSet.getContexts() == null || changeSet.getContexts().isEmpty()? null : changeSet.getContexts().toString())
                         .addColumnValue("LABELS", changeSet.getLabels() == null || changeSet.getLabels().isEmpty() ? null : changeSet.getLabels().toString())
-                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"));
+                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"))
+                .addColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId());
 
                 if (tag != null) {
                     ((InsertStatement) runStatement).addColumnValue("TAG", tag);

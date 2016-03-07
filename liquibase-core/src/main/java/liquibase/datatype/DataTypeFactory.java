@@ -2,7 +2,9 @@ package liquibase.datatype;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.core.BigIntType;
+import liquibase.datatype.core.CharType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -43,7 +45,7 @@ public class DataTypeFactory {
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new DataTypeFactory();
     }
 
@@ -59,7 +61,7 @@ public class DataTypeFactory {
                 @Override
                 public int compare(Class<? extends LiquibaseDataType> o1, Class<? extends LiquibaseDataType> o2) {
                     try {
-                        return -1 * new Integer(o1.newInstance().getPriority()).compareTo(o2.newInstance().getPriority());
+                        return -1 * Integer.valueOf(o1.newInstance().getPriority()).compareTo(o2.newInstance().getPriority());
                     } catch (Exception e) {
                         throw new UnexpectedLiquibaseException(e);
                     }
@@ -172,6 +174,9 @@ public class DataTypeFactory {
             for (String param : params) {
                 param = StringUtils.trimToNull(param);
                 if (param != null) {
+                    if (liquibaseDataType instanceof CharType && !(database instanceof OracleDatabase)) {
+                        param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle, not sure what else supports it
+                    }
                     liquibaseDataType.addParameter(param);
                 }
             }

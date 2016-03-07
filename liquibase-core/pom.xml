@@ -56,9 +56,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymockclassextension</artifactId>
-            <scope>test</scope>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
         </dependency>
 
         <dependency>
@@ -92,7 +96,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <optional>true</optional>
+<!--             <optional>true</optional> -->
         </dependency>
 
         <dependency>
@@ -139,6 +143,13 @@
             <version>1.2</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.3.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 
@@ -157,7 +168,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
                 <executions>
@@ -204,26 +215,32 @@
             </plugin>
 
 
-            <!--<plugin>-->
-            <!--<groupId>org.apache.felix</groupId>-->
-            <!--<artifactId>maven-bundle-plugin</artifactId>-->
-            <!--<extensions>true</extensions>-->
-            <!--<configuration>-->
-            <!--<instructions>-->
-            <!--<_include>-osgi.bnd</_include>-->
-            <!--</instructions>-->
-            <!--<manifestLocation>${project.build.directory}/jar-with-deps/META-INF</manifestLocation>-->
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>bundle-manifest</id>-->
-            <!--<phase>process-classes</phase>-->
-            <!--<goals>-->
-            <!--<goal>manifest</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.5.4</version>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
+                        <Import-Package>
+                            javax.servlet.*;version="[2.6,4)";resolution:=optional,
+                            javax.sql.*,
+                            org.osgi.*,
+                            org.yaml.snakeyaml.*,
+                            *;resolution:=optional
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>    
+                            <goal>manifest</goal>
+                        </goals>   
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

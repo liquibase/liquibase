@@ -184,8 +184,10 @@
 					<xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
 						<xsd:complexType>
 							<xsd:attribute name="path" type="xsd:string" use="required" />
+							<xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="false"/>
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-                            <xsd:attribute name="filter" type="xsd:string" />
+							<xsd:attribute name="resourceComparator" type="xsd:string"/>
+							<xsd:attribute name="filter" type="xsd:string" />
 							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
@@ -257,6 +259,7 @@
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
         <xsd:attribute name="created" type="xsd:string"/>
+		<xsd:attribute name="runOrder" type="xsd:string"/>
 	</xsd:attributeGroup>
 
 	<!-- Attributes for constraints -->
@@ -386,7 +389,15 @@
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="booleanExp" />
         <xsd:attribute name="cacheSize" type="xsd:nonNegativeInteger" />
-    </xsd:attributeGroup>
+		<xsd:attribute name="cycle" type="booleanExp">
+			<xsd:annotation>
+				<xsd:documentation>
+					true for a cycling sequence, false for a non-cycling sequence.
+					Default is false.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="renameSequenceAttributes">
 		<xsd:attribute name="catalogName" type="xsd:string" />
@@ -1125,14 +1136,6 @@
 	<xsd:element name="createSequence">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="sequenceAttributes" />
-            <xsd:attribute name="cycle" type="booleanExp">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        true for a cycling sequence, false for a non-cycling sequence.
-                        Default is false.
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>            
 		</xsd:complexType>
 	</xsd:element>
 
