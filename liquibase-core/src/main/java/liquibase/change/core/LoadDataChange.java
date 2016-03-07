@@ -251,6 +251,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
                                 liquibase.statement.DatabaseFunction function = new liquibase.statement.DatabaseFunction(value.toString());
                                 valueConfig.setValueComputed(function);
+                            } else if (columnConfig.getType().equalsIgnoreCase("SEQUENCE")) {
+                                liquibase.statement.SequenceNextValueFunction function = new liquibase.statement.SequenceNextValueFunction(columnConfig.getDefaultValue());
+                                valueConfig.setValueComputed(function);
                             } else if (columnConfig.getType().equalsIgnoreCase("BLOB")) {
                                 valueConfig.setValueBlobFile(value.toString());
                                 needsPreparedStatement = true;
@@ -258,7 +261,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                                 valueConfig.setValueClobFile(value.toString());
                                 needsPreparedStatement = true;
                             } else {
-                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
+                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED, SEQUENCE or SKIP");
                             }
                         }
                     } else {
