@@ -312,9 +312,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                         valueConfig.setName(columnName);
 
-                        if (value.toString().equalsIgnoreCase("NULL")) {
+                        if (value == null || value.toString().equalsIgnoreCase("NULL")) {
                             // value is always going to be a string unless overridden by ColumnConfig
                             valueConfig.setValue((String) value);
+                        } else {
+                            valueConfig.setValue(value.toString());
                         }
                     }
                     columns.add(valueConfig);
