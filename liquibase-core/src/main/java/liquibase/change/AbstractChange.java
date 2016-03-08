@@ -575,9 +575,11 @@ public abstract class AbstractChange implements Change {
 
                                  String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
                                  List<ParsedNode> nodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
-                                 nodes.addAll(parsedNode.getChildren(null, elementName));
+                                if (!elementName.equals(param.getParameterName())) {
+                                    nodes.addAll(parsedNode.getChildren(null, elementName));
+                                }
 
-                                 Object nodeValue = parsedNode.getValue();
+                                Object nodeValue = parsedNode.getValue();
                                  if (nodeValue instanceof ParsedNode) {
                                      nodes.add((ParsedNode) nodeValue);
                                  } else if (nodeValue instanceof Collection) {
