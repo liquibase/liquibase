@@ -1,7 +1,5 @@
 package liquibase.util;
 
-import org.apache.commons.collections.iterators.ArrayListIterator;
-
 import java.util.*;
 
 /**

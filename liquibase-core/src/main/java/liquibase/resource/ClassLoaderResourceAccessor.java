@@ -1,10 +1,7 @@
 package liquibase.resource;
 
 import liquibase.logging.LogFactory;
-import liquibase.util.FileUtil;
 import liquibase.util.StringUtils;
-import org.apache.commons.collections.EnumerationUtils;
-import org.apache.commons.collections.iterators.EnumerationIterator;
 
 import java.io.File;
 import java.io.IOException;
