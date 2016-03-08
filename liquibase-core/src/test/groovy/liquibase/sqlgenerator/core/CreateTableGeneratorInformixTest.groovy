@@ -26,6 +26,6 @@ class CreateTableGeneratorInformixTest extends Specification {
 
         then:
         sql.length == 1
-        sql[0].toString() == "CREATE TABLE schem.tab (id INT, PRIMARY KEY (id));"
+        sql[0].toString() == "CREATE TABLE cat:schem.tab (id INT, PRIMARY KEY (id));"
     }
 }

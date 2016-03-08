@@ -723,6 +723,23 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return dbmsSet;
     }
 
+    public Collection<ContextExpression> getInheritableContexts() {
+        Collection<ContextExpression> expressions = new ArrayList<ContextExpression>();
+        DatabaseChangeLog changeLog = getChangeLog();
+        while (changeLog != null) {
+            ContextExpression expression = changeLog.getContexts();
+            if (expression != null && !expression.isEmpty()) {
+                expressions.add(expression);
+            }
+            ContextExpression includeExpression = changeLog.getIncludeContexts();
+            if (includeExpression != null && !includeExpression.isEmpty()) {
+                expressions.add(includeExpression);
+            }
+            changeLog = changeLog.getParentChangeLog();
+        }
+        return Collections.unmodifiableCollection(expressions);
+    }
+
     public DatabaseChangeLog getChangeLog() {
         return changeLog;
     }
