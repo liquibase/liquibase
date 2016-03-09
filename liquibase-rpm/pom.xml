@@ -80,11 +80,6 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${commons-lang.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <version>${hamcrest-core.version}</version>
@@ -396,7 +391,6 @@
                             <dependency>
                                 <includes>
                                     <include>commons-cli:commons-cli</include>
-                                    <include>commons-lang:commons-lang</include>
                                     <include>org.hamcrest:hamcrest-core</include>
                                     <include>junit:junit</include>
                                 </includes>
