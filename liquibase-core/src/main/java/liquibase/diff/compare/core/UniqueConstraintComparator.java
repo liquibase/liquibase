@@ -10,6 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,7 +106,24 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
         exclude.add("backingIndex");
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
-        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.CompareFunction() {
+            @Override
+            public boolean areEqual(Object referenceValue, Object compareToValue) {
+                List<Column> referenceList = (List) referenceValue;
+                List<Column> compareList = (List) compareToValue;
+
+                if (referenceList.size() != compareList.size()) {
+                    return false;
+                }
+                for (int i=0; i<referenceList.size(); i++) {
+                    if (!StringUtils.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtils.trimToEmpty(compareList.get(i).getName()))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        });
+
         differences.compare("backingIndex", databaseObject1, databaseObject2, new ObjectDifferences.StandardCompareFunction(accordingTo));
         return differences;
     }
