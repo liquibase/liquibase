@@ -187,7 +187,33 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return changeSets;
     }
 
+    protected boolean objectsEqual(Object a, Object b) {
+      return (a == b) || (a != null && a.equals(b));
+    }
+
+    protected boolean isChangesetAlreadyIncluded(ChangeSet changeSet) {
+        boolean changeSetFound = false;
+        Iterator<ChangeSet> iterator = changeSets.iterator();
+        while (iterator.hasNext() && !changeSetFound) {
+            ChangeSet includedChangeSet = iterator.next();
+
+            if (objectsEqual(includedChangeSet.getFilePath(), changeSet.getFilePath())
+                && objectsEqual(includedChangeSet.getId(), changeSet.getId())
+                && objectsEqual(includedChangeSet.getAuthor(), changeSet.getAuthor())
+                && objectsEqual(includedChangeSet.generateCheckSum(), changeSet.generateCheckSum())
+                && objectsEqual(includedChangeSet.getLabels().getLabels(), changeSet.getLabels().getLabels())
+                && objectsEqual(includedChangeSet.getContexts().getContexts(), changeSet.getContexts().getContexts())
+                && objectsEqual(includedChangeSet.getDbmsSet(), changeSet.getDbmsSet())) {
+              changeSetFound = true;
+            }
+        }
+        return changeSetFound;
+    }
+
     public void addChangeSet(ChangeSet changeSet) {
+        if (isChangesetAlreadyIncluded(changeSet)) {
+          return;
+        }
         if (changeSet.getRunOrder() == null) {
             ListIterator<ChangeSet> it = this.changeSets.listIterator(this.changeSets.size());
             boolean added = false;
