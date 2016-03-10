@@ -91,6 +91,10 @@ public class ObjectUtil {
         }
 
         try {
+            if (propertyValue == null) {
+                setProperty(object, propertyName, null);
+                return;
+            }
             if (!method.getParameterTypes()[0].isAssignableFrom(propertyValue.getClass())) {
                 setProperty(object, propertyName, propertyValue.toString());
                 return;
