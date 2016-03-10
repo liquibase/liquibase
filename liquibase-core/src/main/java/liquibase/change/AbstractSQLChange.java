@@ -17,7 +17,7 @@ import java.util.*;
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
-public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange {
+public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange, Closeable {
 
     private boolean stripComments;
     private boolean splitStatements;

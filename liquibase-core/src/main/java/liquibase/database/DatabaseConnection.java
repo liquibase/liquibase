@@ -8,7 +8,7 @@ import liquibase.exception.DatabaseException;
  * connection.
  * 
  */
-public interface DatabaseConnection {
+public interface DatabaseConnection extends AutoCloseable {
 
     public void close() throws DatabaseException;
 
