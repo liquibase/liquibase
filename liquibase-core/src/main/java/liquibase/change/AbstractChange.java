@@ -558,12 +558,12 @@ public abstract class AbstractChange implements Change {
                                     List<ParsedNode> columnChildren = child.getChildren(null, "column");
                                     if (columnChildren != null && columnChildren.size() > 0) {
                                         for (ParsedNode columnChild : columnChildren) {
-                                            ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                            ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);
                                             columnConfig.load(columnChild, resourceAccessor);
                                             ((ChangeWithColumns) this).addColumn(columnConfig);
                                         }
                                     } else {
-                                        ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                        ColumnConfig columnConfig = createEmptyColumnConfig(collectionType);
                                         columnConfig.load(child, resourceAccessor);
                                         ((ChangeWithColumns) this).addColumn(columnConfig);
                                     }
@@ -645,6 +645,10 @@ public abstract class AbstractChange implements Change {
         } catch (SetupException e) {
             throw new ParsedNodeException(e);
         }
+    }
+
+    protected ColumnConfig createEmptyColumnConfig(Class collectionType) throws InstantiationException, IllegalAccessException {
+        return (ColumnConfig) collectionType.newInstance();
     }
 
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
