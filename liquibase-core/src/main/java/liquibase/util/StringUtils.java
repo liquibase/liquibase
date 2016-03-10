@@ -327,6 +327,13 @@ public class StringUtils {
         return value.startsWith(startsWith);
     }
 
+    public static boolean isWhitespace(CharSequence string) {
+        if (string == null) {
+            return true;
+        }
+        return StringUtils.trimToNull(string.toString()) == null;
+    }
+
     public static interface StringUtilsFormatter<Type> {
         public String toString(Type obj);
     }

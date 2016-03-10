@@ -63,8 +63,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String commentLineStartsWith = DEFAULT_COMMENT_PATTERN;
     private Boolean relativeToChangelogFile;
     private String encoding = null;
-    private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
-    private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+    private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
+    private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
@@ -420,7 +420,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         if (separator == null) {
-            separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
+            separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
         }
 
         return new CSVReader(streamReader, separator.charAt(0), quotchar);
