@@ -11,7 +11,7 @@ import liquibase.util.StringUtils;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-@DataTypeInfo(name = "blob", aliases = { "longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary", "binary", "image", "tinyblob", "mediumblob"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
 
     @Override
@@ -21,9 +21,9 @@ public class BlobType extends LiquibaseDataType {
         if (database instanceof H2Database || database instanceof HsqlDatabase) {
             if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
                 return new DatabaseDataType("LONGVARBINARY");
-            } else if(originalDefinition.toLowerCase().startsWith("binary")) {
-				return new DatabaseDataType("BINARY", getParameters());
-			} else {
+            } else if (originalDefinition.toLowerCase().startsWith("binary")) {
+                return new DatabaseDataType("BINARY", getParameters());
+            } else {
                 return new DatabaseDataType("BLOB");
             }
         }
@@ -36,7 +36,7 @@ public class BlobType extends LiquibaseDataType {
                     || originalDefinition.matches("\\[varbinary\\]\\s*\\(.+")) {
 
                 if (parameters.length < 1) {
-                    parameters = new Object[] { 1 };
+                    parameters = new Object[]{1};
                 } else if (parameters.length > 1) {
                     parameters = Arrays.copyOfRange(parameters, 0, 1);
                 }
@@ -48,7 +48,7 @@ public class BlobType extends LiquibaseDataType {
                     || originalDefinition.matches("\\[binary\\]\\s*\\(.+")) {
 
                 if (parameters.length < 1) {
-                    parameters = new Object[] { 1 };
+                    parameters = new Object[]{1};
                 } else if (parameters.length > 1) {
                     parameters = Arrays.copyOfRange(parameters, 0, 1);
                 }
@@ -90,12 +90,16 @@ public class BlobType extends LiquibaseDataType {
             } else if (originalDefinition.toLowerCase().startsWith("mediumblob")) {
                 return new DatabaseDataType("MEDIUMBLOB");
             } else if (originalDefinition.toLowerCase().startsWith("binary")) {
-				return new DatabaseDataType("BINARY", getParameters());
-			} else {
+                return new DatabaseDataType("BINARY", getParameters());
+            } else {
                 return new DatabaseDataType("LONGBLOB");
             }
         }
         if (database instanceof PostgresDatabase) {
+            if (originalDefinition.toLowerCase().startsWith("binary")) {
+                return new DatabaseDataType("BINARY", getParameters());
+            }
+
             return new DatabaseDataType("BYTEA");
         }
         if (database instanceof SybaseASADatabase) {
@@ -108,6 +112,11 @@ public class BlobType extends LiquibaseDataType {
             if (getRawDefinition().toLowerCase().startsWith("bfile")) {
                 return new DatabaseDataType("BFILE");
             }
+
+            if (originalDefinition.toLowerCase().startsWith("raw")) {
+                return new DatabaseDataType("RAW", getParameters());
+            }
+
             return new DatabaseDataType("BLOB");
         }
 
@@ -122,7 +131,7 @@ public class BlobType extends LiquibaseDataType {
         if (value == null) {
             return null;
         } else if (value instanceof String) {
-            return "'"+value+"'";
+            return "'" + value + "'";
         } else {
             return value.toString();
         }
