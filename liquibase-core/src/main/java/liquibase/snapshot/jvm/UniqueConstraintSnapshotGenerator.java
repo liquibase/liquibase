@@ -46,7 +46,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         for (Map<String, ?> col : metadata) {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
+            if (database instanceof H2Database) {
+                for (String columnName : StringUtils.splitAndTrim((String) col.get("COLUMN_NAME"), ",")) {
+                    constraint.getColumns().add(new Column(columnName).setDescending(descending).setRelation(table));
+                }
+            } else {
+                constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
+            }
         }
 
         return constraint;
