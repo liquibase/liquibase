@@ -425,6 +425,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                            boolean errorIfMissingOrEmpty,
                            Comparator<String> resourceComparator, ResourceAccessor resourceAccessor, ContextExpression includeContexts) throws SetupException {
         try {
+            if (pathName == null) {
+                throw new SetupException("No path attribute for includeAll");
+            }
             pathName = pathName.replace('\\', '/');
 
             if (!(pathName.endsWith("/"))) {
