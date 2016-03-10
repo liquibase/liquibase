@@ -243,7 +243,13 @@ public class SqlUtil {
         } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
             return stringVal;
         } else {
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
+            if (stringVal.equals("")) {
+                return stringVal;
+            }
+            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
+            if (strippedSingleQuotes) { //put quotes back
+                return new DatabaseFunction("'"+stringVal+"'");
+            }
             return new DatabaseFunction(stringVal);
         }
     }
