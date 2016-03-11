@@ -93,6 +93,7 @@
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
                         <xsd:attribute name="labels" type="xsd:string" />
+                        <xsd:attribute name="global" type="xsd:boolean"/>
 					</xsd:complexType>
 				</xsd:element>
 
@@ -623,6 +624,7 @@
 		<xsd:attribute name="columnName" type="xsd:string" use="required" />
 		<xsd:attribute name="defaultNullValue" type="xsd:string" />
 		<xsd:attribute name="columnDataType" type="xsd:string" />
+        <xsd:attribute name="constraintName" type="xsd:string"/>
 	</xsd:attributeGroup>
 
 
@@ -1139,6 +1141,14 @@
 	<xsd:element name="createSequence">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="sequenceAttributes" />
+            <xsd:attribute name="cycle" type="booleanExp">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        true for a cycling sequence, false for a non-cycling sequence.
+                        Default is false.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
