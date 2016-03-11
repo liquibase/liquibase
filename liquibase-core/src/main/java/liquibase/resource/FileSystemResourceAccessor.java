@@ -69,6 +69,9 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        path = convertToPath(relativeTo, path);
+
+
         File absoluteFile = new File(path);
         File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
 
