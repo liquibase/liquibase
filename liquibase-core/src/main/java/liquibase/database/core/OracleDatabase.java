@@ -26,6 +26,8 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates Oracle database support.
@@ -38,6 +40,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Set<String> userDefinedTypes = null;
 
     private Boolean canAccessDbaRecycleBin;
+    private Integer databaseMajorVersion;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -92,6 +95,29 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     ; //cannot set it. That is OK
                 }
 
+                Statement statement = null;
+                ResultSet resultSet = null;
+                try {
+                    statement = sqlConn.createStatement();
+                    resultSet = statement.executeQuery("SELECT value FROM v$parameter WHERE name = 'compatible'");
+                    String compatibleVersion = null;
+                    if (resultSet.next()) {
+                        compatibleVersion = resultSet.getString("value");
+                    }
+                    if (compatibleVersion != null) {
+                        Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\..*").matcher(compatibleVersion);
+                        if (majorVersionMatcher.matches()) {
+                            this.databaseMajorVersion = Integer.valueOf(majorVersionMatcher.group(1));
+                        }
+                    }
+                } catch (SQLException e) {
+                    LogFactory.getLogger().info("Could not set check compatibility mode on OracleDatabase: " + e.getMessage());
+                } finally {
+                    JdbcUtils.close(resultSet, statement);
+                }
+
+
+
             }
         }
         super.setConnection(conn);
@@ -105,6 +131,15 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getDefaultDatabaseProductName() {
         return "Oracle";
+    }
+
+    @Override
+    public int getDatabaseMajorVersion() throws DatabaseException {
+        if (databaseMajorVersion == null) {
+            return super.getDatabaseMajorVersion();
+        } else {
+            return databaseMajorVersion;
+        }
     }
 
     @Override
