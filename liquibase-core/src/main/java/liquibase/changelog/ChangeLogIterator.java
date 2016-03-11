@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
@@ -27,13 +29,13 @@ public class ChangeLogIterator {
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-        	ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
-        	if (changeSet != null) {
+            ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
+            if (changeSet != null) {
                 if (changeLog.ignoreClasspathPrefix()) {
                     changeSet.setFilePath(ranChangeSet.getChangeLog());
                 }
-        		changeSets.add(changeSet);
-        	}
+                changeSets.add(changeSet);
+            }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
@@ -46,9 +48,9 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-      Logger log = LogFactory.getLogger();
-      databaseChangeLog.setRuntimeEnvironment(env);
-      log.setChangeLog(databaseChangeLog);
+        Logger log = LogFactory.getLogger();
+        databaseChangeLog.setRuntimeEnvironment(env);
+        log.setChangeLog(databaseChangeLog);
         try {
             List<ChangeSet> changeSetList = new ArrayList<ChangeSet>(databaseChangeLog.getChangeSets());
             if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
@@ -95,10 +97,13 @@ public class ChangeLogIterator {
     }
 
     protected String createKey(ChangeSet changeSet) {
+        Labels labels = changeSet.getLabels();
+        ContextExpression contexts = changeSet.getContexts();
+
         return changeSet.toString(true)
-                +":"+changeSet.getLabels().toString()
-                +":"+changeSet.getContexts().toString()
-                +":"+ StringUtils.join(changeSet.getDbmsSet(), ",");
+                + ":" + (labels == null ? null : labels.toString())
+                + ":" + (contexts == null ? null : contexts.toString())
+                + ":" + StringUtils.join(changeSet.getDbmsSet(), ",");
     }
 
     protected boolean alreadySaw(ChangeSet changeSet) {
