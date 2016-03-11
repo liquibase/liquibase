@@ -1,7 +1,18 @@
 package liquibase.parser.core.xml;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.RuntimeEnvironment;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.visitor.ChangeSetVisitor;
+import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
+import liquibase.sdk.database.MockDatabase;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +30,21 @@ public class XMLChangeLogSAXParserTest {
         DatabaseChangeLog changeLog = xmlParser.parse("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/master.changelog.xml", 
             new ChangeLogParameters(), new JUnitResourceAccessor());
 
-        List<ChangeSet> changeSets = changeLog.getChangeSets();
+        final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+
+        new ChangeLogIterator(changeLog).run(new ChangeSetVisitor() {
+            @Override
+            public Direction getDirection() {
+                return Direction.FORWARD;
+            }
+
+            @Override
+            public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+                changeSets.add(changeSet);
+            }
+        }, new RuntimeEnvironment(new MockDatabase(), new Contexts(), new LabelExpression()));
+
+
         Assert.assertEquals(8, changeSets.size());
         
         Assert.assertEquals("liquibase/parser/core/xml/ignoreDuplicatedChangeLogs/included.changelog4.xml::1::testuser", 
