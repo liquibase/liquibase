@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.liquibase</groupId>
@@ -31,23 +32,23 @@
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <url>scm:git:git@github.com:liquibase/liquibase.git</url>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <developers>
-       <developer>
-         <id>nvoxland</id>
-         <name>Nathan Voxland</name>
-         <email>nathan@voxland.net</email>
-         <url>http://nathan.voxland.net</url>
-         <organizationUrl>http://nathan.voxland.net/</organizationUrl>
-         <roles>
-           <role>architect</role>
-           <role>developer</role>
-         </roles>
-         <timezone>-6</timezone>
-       </developer>
-     </developers>
+        <developer>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan@voxland.net</email>
+            <url>http://nathan.voxland.net</url>
+            <organizationUrl>http://nathan.voxland.net/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
 
     <properties>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
@@ -364,7 +365,7 @@
                     <version>1.4</version>
                     <configuration>
                         <providerSelection>2.0</providerSelection>
-                        <source />
+                        <source/>
                     </configuration>
                     <executions>
                         <execution>
@@ -473,6 +474,19 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>debian</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                </os>
+            </activation>
+            <modules>
+                <module>liquibase-debian</module>
+            </modules>
+        </profile>
+
 
         <profile>
             <id>rpm</id>
