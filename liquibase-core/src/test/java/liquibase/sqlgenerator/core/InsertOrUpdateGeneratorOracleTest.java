@@ -92,7 +92,7 @@ END;*/
         assertTrue("missing update statement", theSql.contains("UPDATE mycatalog.mytable"));
         String[] sqlLines = theSql.split("\n");
         int lineToCheck = 0;
-        assertEquals("UPDATE mycatalog.mytable SET col2 = 'value2' WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
+        assertEquals("UPDATE mycatalog.mytable SET col2 = 'value2' WHERE pk_col1 = 'value1'",sqlLines[lineToCheck].trim());
         lineToCheck++;
         assertEquals( "Wrong number of lines", 1, sqlLines.length);
     }
