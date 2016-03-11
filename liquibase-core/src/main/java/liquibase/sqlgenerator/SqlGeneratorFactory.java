@@ -190,6 +190,14 @@ public class SqlGeneratorFactory {
         return new SqlGeneratorChain(sqlGenerators);
     }
 
+    public SqlGenerator getBestGenerator(SqlStatement statement, Database database) {
+        SortedSet<SqlGenerator> sqlGenerators = getGenerators(statement, database);
+        if (sqlGenerators == null || sqlGenerators.size() == 0) {
+            return null;
+        }
+        return sqlGenerators.iterator().next();
+    }
+
     public Sql[] generateSql(Change change, Database database) {
         SqlStatement[] sqlStatements = change.generateStatements(database);
         if (sqlStatements == null) {
