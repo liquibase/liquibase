@@ -83,6 +83,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -180,10 +181,15 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
                         Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
                         Matcher preconditionMatcher = preconditionPattern.matcher(line);
+                        Matcher validCheckSumMatcher = validCheckSumPattern.matcher(line);
 
                         if (commentMatcher.matches()) {
                             if (commentMatcher.groupCount() == 1) {
                                 changeSet.setComments(commentMatcher.group(1));
+                            }
+                        } else if (validCheckSumMatcher.matches()) {
+                            if (validCheckSumMatcher.groupCount() == 1) {
+                                changeSet.addValidCheckSum(validCheckSumMatcher.group(1));
                             }
                         } else if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
