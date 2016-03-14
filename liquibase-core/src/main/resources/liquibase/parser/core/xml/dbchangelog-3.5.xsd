@@ -275,7 +275,9 @@
 		<xsd:attribute name="unique" type="booleanExp" />
 		<xsd:attribute name="uniqueConstraintName" type="xsd:string" />
 		<xsd:attribute name="references" type="xsd:string" />
-        <xsd:attribute name="referencedTableName" type="xsd:string"/>
+		<xsd:attribute name="referencedTableCatalogName" type="xsd:string" />
+		<xsd:attribute name="referencedTableSchemaName" type="xsd:string" />
+		<xsd:attribute name="referencedTableName" type="xsd:string"/>
         <xsd:attribute name="referencedColumnNames" type="xsd:string"/>
 		<xsd:attribute name="foreignKeyName" type="xsd:string" />
 		<xsd:attribute name="deleteCascade" type="booleanExp" />

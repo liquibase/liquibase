@@ -215,7 +215,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 }
                 buffer.append(referencesString);
             } else {
-                buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableName(), Table.class))
+                buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableCatalogName(), fkConstraint.getReferencedTableSchemaName(), fkConstraint.getReferencedTableName(), Table.class))
                     .append("(")
                     .append(database.escapeColumnNameList(fkConstraint.getReferencedColumnNames()))
                     .append(")");
