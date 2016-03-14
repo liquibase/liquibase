@@ -153,7 +153,7 @@ boolean sql2005OrLater = true;
                     } catch (DatabaseException e) {
                         // Assume SQL Server 2005 or later
                     }
-                    if (sql2005OrLater) {
+                    if (sql2005OrLater && username != null) {
                         ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
                                 "IF USER_NAME() <> N'dbo'\r\n" +
                                 "BEGIN\r\n" +
