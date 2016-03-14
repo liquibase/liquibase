@@ -637,6 +637,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     if (((change instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         continue;
                     }
+                    ValidationErrors errors = change.validate(database);
+                    if (errors.hasErrors()) {
+                        throw new RollbackFailedException("Rollback statement failed validation: "+errors.toString());
+                    }
                     SqlStatement[] changeStatements = change.generateStatements(database);
                     if (changeStatements != null) {
                         statements.addAll(Arrays.asList(changeStatements));
