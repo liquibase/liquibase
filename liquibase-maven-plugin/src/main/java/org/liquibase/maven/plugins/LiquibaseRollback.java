@@ -3,11 +3,13 @@
 package org.liquibase.maven.plugins;
 
 import java.text.*;
+import java.util.Date;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.util.ISODateFormat;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
@@ -35,7 +37,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected int rollbackCount;
 
   /**
-   * The date to rollback the database to. The format of the date must match that of the
+   * The date to rollback the database to. The format of the date must match either an ISO date format, or that of the
    * <code>DateFormat.getDateInstance()</code> for the platform the plugin is executing
    * on.
    * @parameter expression="${liquibase.rollbackDate}"
@@ -104,15 +106,11 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         break;
       }
       case DATE: {
-        DateFormat format = DateFormat.getDateInstance();
         try {
-          liquibase.rollback(format.parse(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
+          liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
         }
         catch (ParseException e) {
           String message = "Error parsing rollbackDate: " + e.getMessage();
-          if (format instanceof SimpleDateFormat) {
-            message += "\nDate must match pattern: " + ((SimpleDateFormat)format).toPattern();
-          }
           throw new LiquibaseException(message, e);
         }
         break;
@@ -125,5 +123,22 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         throw new IllegalStateException("Unexpected rollback type, " + type);
       }
     }
+  }
+
+  protected Date parseDate(String date) throws ParseException {
+    ISODateFormat isoFormat = new ISODateFormat();
+    try {
+      return isoFormat.parse(date);
+    } catch (ParseException e) {
+      DateFormat format = DateFormat.getDateInstance();
+      try {
+        return format.parse(date);
+      } catch (ParseException e1) {
+        throw new ParseException("Date must match ISODateFormat or standard platform format.\n"+e.getMessage(), 0);
+
+      }
+    }
+
+
   }
 }

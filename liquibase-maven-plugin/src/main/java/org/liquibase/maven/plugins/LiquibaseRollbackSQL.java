@@ -104,17 +104,12 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 			break;
 		}
 		case DATE: {
-			DateFormat format = DateFormat.getDateInstance();
 			try {
-				liquibase.rollback(format.parse(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
+				liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
 						outputWriter);
 			} catch (ParseException e) {
 				String message = "Error parsing rollbackDate: "
 						+ e.getMessage();
-				if (format instanceof SimpleDateFormat) {
-					message += "\nDate must match pattern: "
-							+ ((SimpleDateFormat) format).toPattern();
-				}
 				throw new LiquibaseException(message, e);
 			}
 			break;
