@@ -26,10 +26,8 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof InformixDatabase && isAutoIncrement()) {
             return new DatabaseDataType("SERIAL");
         }
-        if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("NUMBER", 10);
-        }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase) {
+
+        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof OracleDatabase) {
             return new DatabaseDataType("INTEGER");
         }
         if (database instanceof PostgresDatabase) {
