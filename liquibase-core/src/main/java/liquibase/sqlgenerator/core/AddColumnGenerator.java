@@ -103,6 +103,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 }
             }
             result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
+
+            for (AddColumnStatement statement : columns) {
+                addUniqueConstrantStatements(statement, database, result);
+                addForeignKeyStatements(statement, database, result);
+            }
+
         } else {
             for (AddColumnStatement column : columns) {
                 result.addAll(Arrays.asList(generateSingleColumn(column, database)));
