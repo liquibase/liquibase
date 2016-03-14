@@ -48,7 +48,10 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType(database.escapeDataTypeName("binary"), parameters);
             }
             if (originalDefinition.equalsIgnoreCase("image")
-                    || originalDefinition.equals("[image]")) {
+                    || originalDefinition.equals("[image]")
+                    || originalDefinition.matches("(?i)image\\s*\\(.+")
+                    || originalDefinition.matches("\\[image\\]\\s*\\(.+")) {
+
                 return new DatabaseDataType(database.escapeDataTypeName("image"));
             }
             return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
