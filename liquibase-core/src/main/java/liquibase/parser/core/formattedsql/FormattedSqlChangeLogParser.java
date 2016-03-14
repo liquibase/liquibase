@@ -187,7 +187,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             }
                         } else if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
-                                currentRollbackSql.append(rollbackMatcher.group(1)).append("\n");
+                                currentRollbackSql.append(rollbackMatcher.group(1)).append(System.lineSeparator());
                             }
                         } else if (preconditionsMatcher.matches()) {
                             if (preconditionsMatcher.groupCount() == 1) {
@@ -219,7 +219,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 }
                             }
                         } else {
-                            currentSql.append(line).append("\n");
+                            currentSql.append(line).append(System.lineSeparator());
                         }
                     }
                 }
