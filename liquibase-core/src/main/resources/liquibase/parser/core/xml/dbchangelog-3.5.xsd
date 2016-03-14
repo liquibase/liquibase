@@ -656,8 +656,7 @@
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:string" use="required" />
 			<xsd:attribute name="author" type="xsd:string" use="required" />
-			<xsd:attribute name="changeLogFile" type="xsd:string"
-				use="required" />
+			<xsd:attribute name="changeLogFile" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
 
