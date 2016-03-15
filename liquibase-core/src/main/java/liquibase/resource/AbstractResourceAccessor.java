@@ -30,9 +30,13 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
             if (classLoader != null) {
                 if (classLoader instanceof URLClassLoader) {
                     baseUrls = new Vector<URL>(Arrays.asList(((URLClassLoader) classLoader).getURLs())).elements();
-                } else {
-                    baseUrls = classLoader.getResources("");
+
+                    while (baseUrls.hasMoreElements()) {
+                        addRootPath(baseUrls.nextElement());
+                    }
                 }
+
+                baseUrls = classLoader.getResources("");
 
                 while (baseUrls.hasMoreElements()) {
                     addRootPath(baseUrls.nextElement());
