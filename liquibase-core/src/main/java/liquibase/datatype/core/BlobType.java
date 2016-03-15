@@ -93,7 +93,7 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType("BFILE");
             }
 
-            if (originalDefinition.toLowerCase().startsWith("raw")) {
+            if (originalDefinition.toLowerCase().startsWith("raw") || originalDefinition.toLowerCase().startsWith("binary")) {
                 return new DatabaseDataType("RAW", getParameters());
             }
 
@@ -120,7 +120,7 @@ public class BlobType extends LiquibaseDataType {
                     || new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0;
         }
         if (max) {
-            return new Object[] {"MAX"};
+            return new Object[]{"MAX"};
         }
         if (parameters.length > 1) {
             parameters = Arrays.copyOfRange(parameters, 0, 1);
