@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -27,7 +28,8 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
     @Override
     public Sql[] generateSql(DropSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql = "DROP SEQUENCE ";
-        if (database instanceof PostgresDatabase && statement.getOnlyIfExists() != null && statement.getOnlyIfExists()) {
+        if ((database instanceof MSSQLDatabase || database instanceof PostgresDatabase)
+                && statement.getOnlyIfExists() != null && statement.getOnlyIfExists()) {
             sql += "IF EXISTS ";
         }
         sql += database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName());
