@@ -61,7 +61,6 @@
         <module>liquibase-maven-plugin</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
-        <module>liquibase-debian</module>
     </modules>
 
     <dependencyManagement>
