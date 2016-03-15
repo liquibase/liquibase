@@ -70,6 +70,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void reset() {
         this.ranChangeSetList = null;
         this.serviceInitialized = false;
+        this.hasDatabaseChangeLogTable = null;
     }
 
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
