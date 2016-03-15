@@ -102,8 +102,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         } catch (Exception e) {
             throw new RuntimeException("Could not determine current schema", e);
         } finally {
-            JdbcUtils.closeResultSet(rs);
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtils.close(rs, stmt);
         }
 
         return defaultSchemaName;
