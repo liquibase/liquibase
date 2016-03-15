@@ -105,7 +105,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 	protected boolean outputDefaultSchema;
 
     /**
-     * Whether to ignore the schema name.
+     * Whether to ignore the catalog/database name.
      *
      * @parameter expression="${liquibase.outputDefaultCatalog}"
      */
