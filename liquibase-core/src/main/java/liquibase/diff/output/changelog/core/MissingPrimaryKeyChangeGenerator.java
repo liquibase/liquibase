@@ -37,7 +37,7 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 
     @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return new Class[] {
+        return new Class[]{
                 Table.class,
                 Column.class
         };
@@ -46,7 +46,7 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {
+        return new Class[]{
                 Index.class
         };
     }
@@ -84,7 +84,16 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
                         backingIndex.getTable().setSchema(schema.getCatalogName(), schema.getSchemaName()); //set table schema so it is found in the correct schema
                     }
                     if (referenceDatabase.equals(comparisonDatabase) || !SnapshotGeneratorFactory.getInstance().has(backingIndex, comparisonDatabase)) {
-                        returnList.addAll(Arrays.asList(ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase)));
+                        Change[] fixes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
+
+                        if (fixes != null) {
+                            for (Change fix : fixes) {
+                                if (fix != null) {
+                                    returnList.add(fix);
+                                }
+                            }
+                        }
+
                     }
                 } catch (Exception e) {
                     throw new UnexpectedLiquibaseException(e);
