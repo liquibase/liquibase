@@ -31,6 +31,9 @@ public class TimestampType extends DateTimeType {
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
+        if (database instanceof DB2Database) {
+            return new DatabaseDataType(database.escapeDataTypeName("timestamp"), getParameters());
+        }
 
 
         if (getAdditionalInformation() != null
