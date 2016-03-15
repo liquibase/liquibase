@@ -85,7 +85,7 @@ public class SqlGeneratorFactory {
         return generators;
     }
 
-    protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+    public SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
         String databaseName = null;
         if (database == null) {
             databaseName = "NULL";
@@ -188,14 +188,6 @@ public class SqlGeneratorFactory {
         }
         //noinspection unchecked
         return new SqlGeneratorChain(sqlGenerators);
-    }
-
-    public SqlGenerator getBestGenerator(SqlStatement statement, Database database) {
-        SortedSet<SqlGenerator> sqlGenerators = getGenerators(statement, database);
-        if (sqlGenerators == null || sqlGenerators.size() == 0) {
-            return null;
-        }
-        return sqlGenerators.iterator().next();
     }
 
     public Sql[] generateSql(Change change, Database database) {

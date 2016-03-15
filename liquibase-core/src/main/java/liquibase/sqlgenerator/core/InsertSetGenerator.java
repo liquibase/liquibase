@@ -1,11 +1,13 @@
 package liquibase.sqlgenerator.core;
 
 import java.util.ArrayList;
+import java.util.SortedSet;
 
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.InsertSetStatement;
@@ -43,7 +45,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 		int index = 0;
 		for (InsertStatement sttmnt : statement.getStatements()) {
 			index++;
-			((InsertGenerator) SqlGeneratorFactory.getInstance().getBestGenerator(sttmnt, database)).generateValues(sql, sttmnt, database);
+			getInsertGenerator(database).generateValues(sql, sttmnt, database);
 			sql.append(",");
 			if (index > statement.getBatchThreshold()) {
 				result.add(completeStatement(statement, sql));
@@ -68,10 +70,18 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
     
     public void generateHeader(StringBuffer sql,InsertSetStatement statement, Database database) {
         InsertStatement insert=statement.peek();
-		((InsertGenerator) SqlGeneratorFactory.getInstance().getBestGenerator(statement, database)).generateHeader(sql,insert,database);
-    }
-    
-    protected Relation getAffectedTable(InsertSetStatement statement) {
+		getInsertGenerator(database).generateHeader(sql, insert, database);
+	}
+
+	protected InsertGenerator getInsertGenerator(Database database) {
+		SortedSet<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(new InsertStatement(null, null, null), database);
+		if (generators == null || generators.size() == 0) {
+			return null;
+		}
+		return (InsertGenerator) generators.iterator().next();
+	}
+
+	protected Relation getAffectedTable(InsertSetStatement statement) {
         return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }
