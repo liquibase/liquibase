@@ -111,7 +111,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                         }
                     }
                 } catch (SQLException e) {
-                    LogFactory.getLogger().info("Could not set check compatibility mode on OracleDatabase: " + e.getMessage());
+                    String message = e.getMessage();
+                    if (message.contains("ORA-00942")) {
+                        message = "Cannot read from v$parameter";
+                    }
+                    LogFactory.getLogger().info("Could not set check compatibility mode on OracleDatabase: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
