@@ -281,6 +281,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
+        if (database instanceof MSSQLDatabase) {
+            if (columnTypeName.equalsIgnoreCase("numeric() identity")) {
+                columnTypeName = "numeric";
+            }
+        }
+
+
         if (database instanceof FirebirdDatabase) {
             if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
                 columnTypeName = "BLOB";
