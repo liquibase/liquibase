@@ -183,7 +183,7 @@ public class DataTypeFactoryTest extends Specification {
         "INT(11) UNSIGNED"                                   | new MySQLDatabase()   | "INT UNSIGNED"                                   | IntType       | false
         "TINYINT"                                            | new MySQLDatabase()   | "TINYINT"                                            | TinyIntType   | false
         "TINYINT UNSIGNED"                                   | new MySQLDatabase()   | "TINYINT UNSIGNED"                                   | TinyIntType   | false
-        "TINYINT(1) UNSIGNED"                                | new MySQLDatabase()   | "TINYINT UNSIGNED"                                | TinyIntType   | false
+        "TINYINT(1) UNSIGNED"                                | new MySQLDatabase()   | "TINYINT(1) UNSIGNED"                                | TinyIntType   | false
         "SMALLINT"                                           | new MySQLDatabase()   | "SMALLINT"                                           | SmallIntType  | false
         "SMALLINT UNSIGNED"                                  | new MySQLDatabase()   | "SMALLINT UNSIGNED"                                  | SmallIntType  | false
         "MEDIUMINT"                                          | new MySQLDatabase()   | "MEDIUMINT"                                          | MediumIntType | false

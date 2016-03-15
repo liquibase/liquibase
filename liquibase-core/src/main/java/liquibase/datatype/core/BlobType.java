@@ -54,7 +54,11 @@ public class BlobType extends LiquibaseDataType {
 
                 return new DatabaseDataType(database.escapeDataTypeName("image"));
             }
-            return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
+            if (parameters.length == 0) {
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), "MAX");
+            } else {
+                return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
+            }
         }
         if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {

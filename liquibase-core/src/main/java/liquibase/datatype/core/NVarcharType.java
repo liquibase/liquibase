@@ -15,7 +15,7 @@ public class NVarcharType extends CharType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (getRawDefinition().toLowerCase().contains("national character varying")) {
+        if (getRawDefinition() != null && getRawDefinition().toLowerCase().contains("national character varying")) {
             setAdditionalInformation(null); //just go to nvarchar
         }
         if (database instanceof HsqlDatabase
