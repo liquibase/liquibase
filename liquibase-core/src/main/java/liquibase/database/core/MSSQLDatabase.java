@@ -331,11 +331,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        String name = super.escapeObjectName(objectName, objectType);
-        if (schemaName != null) {
-            name = super.escapeObjectName(schemaName, Schema.class)+"."+name;
+        if (View.class.isAssignableFrom(objectType)) { //SQLServer does not support specifying the database name as a prefix to the object name
+            String name = super.escapeObjectName(objectName, objectType);
+            if (schemaName != null) {
+                name = super.escapeObjectName(schemaName, Schema.class)+"."+name;
+            }
+            return name;
         }
-        return name;
+        return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
     }
 
     @Override
