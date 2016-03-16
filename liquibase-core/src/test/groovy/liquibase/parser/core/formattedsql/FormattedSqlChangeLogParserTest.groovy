@@ -137,7 +137,7 @@ select 1
         changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(1).getId() == "2"
         changeLog.getChangeSets().get(1).getChanges().size() == 1
-        ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql() == "create table table1 (\n    id int primary key\n);"
+        ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table1 (\n    id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter() == "X"
         assert !((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplitStatements()
         assert !((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStripComments()
@@ -150,13 +150,13 @@ select 1
         changeLog.getChangeSets().get(1).getContexts().toString() == "y"
         StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ",") == "mysql"
         changeLog.getChangeSets().get(1).rollback.changes.size() == 1
-        ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql() == "delete from table1;\ndrop table table1;"
+        ((RawSQLChange) changeLog.getChangeSets().get(1).rollback.changes[0]).getSql().replace("\r\n", "\n") == "delete from table1;\ndrop table table1;"
 
 
         changeLog.getChangeSets().get(2).getAuthor() == "nvoxland"
         changeLog.getChangeSets().get(2).getId() == "3"
         changeLog.getChangeSets().get(2).getChanges().size() == 1
-        ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql() == "create table table2 (\n    id int primary key\n);\ncreate table table3 (\n    id int primary key\n);"
+        ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table2 (\n    id int primary key\n);\ncreate table table3 (\n    id int primary key\n);"
         ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter() == null
         assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplitStatements()
         assert ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments()
@@ -178,7 +178,7 @@ select 1
         changeLog.getChangeSets().get(5).getId() == "6"
         changeLog.getChangeSets().get(5).getChanges().size() == 1
         assert changeLog.getChangeSets().get(5).getChanges().get(0) instanceof RawSQLChange
-        ((RawSQLChange) changeLog.getChangeSets().get(5).getChanges().get(0)).getSql() == "create table table4 (\n    id int primary key\n);"
+        ((RawSQLChange) changeLog.getChangeSets().get(5).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table table4 (\n    id int primary key\n);"
         changeLog.getChangeSets().get(5).rollback.changes.size() == 1
         assert changeLog.getChangeSets().get(5).rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(5).rollback.changes[0]).getSql() == "drop table table4;"
@@ -188,7 +188,7 @@ select 1
         changeLog.getChangeSets().get(6).getId() == "1"
         changeLog.getChangeSets().get(6).getChanges().size() == 1
         assert changeLog.getChangeSets().get(6).getChanges().get(0) instanceof RawSQLChange
-        ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getSql() == "create table mysql_boo (\n    id int primary key\n);"
+        ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table mysql_boo (\n    id int primary key\n);"
         changeLog.getChangeSets().get(6).rollback.changes.size() == 1
         assert changeLog.getChangeSets().get(6).rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) changeLog.getChangeSets().get(6).rollback.changes[0]).getSql() == "drop table mysql_boo;"
@@ -224,7 +224,7 @@ select 1
         p1.getSql() == "select count(*) from information_schema.columns where table_name = 'my_table' and column_name = 'id'"
         cs.getChanges().size() == 1
         assert cs.getChanges().get(0) instanceof RawSQLChange
-        ((RawSQLChange) cs.getChanges().get(0)).getSql() == "create table my_table (\n    id int primary key\n);"
+        ((RawSQLChange) cs.getChanges().get(0)).getSql().replace("\r\n", "\n") == "create table my_table (\n    id int primary key\n);"
         cs.rollback.changes.size() == 1
         assert cs.rollback.changes[0] instanceof RawSQLChange
         ((RawSQLChange) cs.rollback.changes[0]).getSql() == "drop table my_table;"
@@ -293,7 +293,7 @@ select 1
         def changeLog = new MockFormattedSqlChangeLogParser(example).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
 
         then:
-        ((RawSQLChange) changeLog.changeSets[0].changes[0]).sql == expected
+        ((RawSQLChange) changeLog.changeSets[0].changes[0]).sql.replace("\r\n", "\n") == expected
 
         where:
         example                                                                                                  | expected
