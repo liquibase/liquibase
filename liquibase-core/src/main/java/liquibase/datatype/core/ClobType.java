@@ -63,10 +63,8 @@ public class ClobType extends LiquibaseDataType {
                 type.addAdditionalInformation(getAdditionalInformation());
                 return type;
             }
-            if (originalDefinition.equalsIgnoreCase("ntext")
-                    || originalDefinition.equals("[ntext]")
-                    || originalDefinition.matches("(?i)ntext .+")
-                    || originalDefinition.matches("\\[ntext\\] .+")) {
+            if (originalDefinition.toLowerCase().startsWith("ntext")
+                    || originalDefinition.toLowerCase().startsWith("[ntext]")) {
 
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("ntext"));
                 type.addAdditionalInformation(getAdditionalInformation());
