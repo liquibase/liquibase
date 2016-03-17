@@ -284,6 +284,15 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MSSQLDatabase) {
             if (columnTypeName.equalsIgnoreCase("numeric() identity")) {
                 columnTypeName = "numeric";
+            } else if (columnTypeName.equalsIgnoreCase("xml")) {
+                columnMetadataResultSet.set("COLUMN_SIZE", null);
+                columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if (columnTypeName.equalsIgnoreCase("datetimeoffset")) {
+                columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
+                columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if (columnTypeName.equalsIgnoreCase("time")) {
+                columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
+                columnMetadataResultSet.set("DECIMAL_DIGITS", null);
             }
         }
 

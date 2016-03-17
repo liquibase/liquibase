@@ -34,8 +34,8 @@ public class TimeType  extends LiquibaseDataType {
             }
             if (parameters.length == 0) {
                 parameters = new Object[] { 7 };
-            } else if (parameters.length > 1) {
-                parameters = Arrays.copyOfRange(parameters, 0, 1);
+            } else if (parameters.length > 2) {
+                parameters = Arrays.copyOfRange(parameters, 0, 2);
             }
             return new DatabaseDataType(database.escapeDataTypeName("time"), parameters);
         }
