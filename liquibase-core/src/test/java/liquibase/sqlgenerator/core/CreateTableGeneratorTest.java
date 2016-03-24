@@ -22,7 +22,9 @@ import liquibase.datatype.core.IntType;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
 
@@ -588,12 +590,14 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
 	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
-	    			new AutoIncrementConstraint(COLUMN_NAME1)
+	    			new ColumnConstraint[]{
+	    			    new AutoIncrementConstraint(COLUMN_NAME1),
+	    			    new NotNullConstraint(COLUMN_NAME1)}
 	    		);
-
+	    		
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-    			assertEquals("Error on "+database, "CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (1, 1))", generatedSql[0].toSql());
+    			assertEquals("Error on "+database, "CREATE TABLE [CATALOG_NAME].[SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] [bigint] IDENTITY (1, 1) NOT NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -606,12 +610,15 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
 	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
-	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null)
+	    			new ColumnConstraint[]{
+	    			    new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null),
+	    			    new NotNullConstraint(COLUMN_NAME1)
+	    			}
 	    		);
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (0, 1))", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE [CATALOG_NAME].[SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] [bigint] IDENTITY (0, 1) NOT NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -624,12 +631,15 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
 	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
-	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN)
+	    			new ColumnConstraint[]{
+	    			    new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN),
+	    			    new NotNullConstraint(COLUMN_NAME1)
+	    			}
 	    		);
 
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 
-				assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (0, 10))", generatedSql[0].toSql());
+				assertEquals("CREATE TABLE [CATALOG_NAME].[SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] [bigint] IDENTITY (0, 10) NOT NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -921,6 +931,6 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
         statement.addColumnConstraint(new ForeignKeyConstraint("fk_test_parent", TABLE_NAME + "(id)").setColumn("id"));
         Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
-        assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (, CONSTRAINT fk_test_parent FOREIGN KEY (id) REFERENCES my-schema.TABLE_NAME(id))", generatedSql[0].toSql());
+        assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (, CONSTRAINT fk_test_parent FOREIGN KEY (id) REFERENCES \"my-schema\".TABLE_NAME(id))", generatedSql[0].toSql());
     }
 }

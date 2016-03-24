@@ -10,6 +10,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
@@ -62,8 +63,8 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
             rs = stmt.executeQuery(sql);
 
             List<String> columnNames = new ArrayList<String>();
-            for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
-                columnNames.add(rs.getMetaData().getColumnName(i+1));
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+                columnNames.add(rs.getMetaData().getColumnName(i + 1));
             }
 
             List<Change> changes = new ArrayList<Change>();
@@ -91,14 +92,12 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                         column.setValueBoolean((Boolean) value);
                     } else if (value instanceof Date) {
                         column.setValueDate((Date) value);
-                    } else { // string
+                    } else if (value instanceof byte[]) {
                         if (referenceDatabase instanceof InformixDatabase) {
-                            if (value instanceof byte[]) {
-                                byte[] bytes = (byte[]) value;
-                                value = new String(bytes);
-                            }
+                            column.setValue(new String((byte[]) value));
                         }
-
+                        column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
+                    } else { // fall back to simple string
                         column.setValue(value.toString().replace("\\", "\\\\"));
                     }
 
@@ -118,12 +117,14 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException ignore) { }
+                } catch (SQLException ignore) {
+                }
             }
             if (stmt != null) {
                 try {
                     stmt.close();
-                } catch (SQLException ignore) { }
+                } catch (SQLException ignore) {
+                }
             }
         }
     }

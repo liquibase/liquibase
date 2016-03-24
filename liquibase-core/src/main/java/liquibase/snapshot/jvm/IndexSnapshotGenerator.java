@@ -170,7 +170,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                         foundIndexes.put(indexName, index);
                     }
-                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setRelation(index.getTable()));
+                    String ascOrDesc = row.getString("ASC_OR_DESC");
+                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                    index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {
@@ -228,18 +230,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             for (CachedRow row : rs) {
                 String rawIndexName = row.getString("INDEX_NAME");
                 String indexName = cleanNameFromDatabase(rawIndexName, database);
+                String correctedIndexName = database.correctObjectName(indexName, Index.class);
 
                 if (indexName == null) {
                     continue;
                 }
-                if (database.isCaseSensitive()) {
-                    if (exampleName != null && !exampleName.equals(indexName)) {
-                        continue;
-                    }
-                } else {
-                    if (exampleName != null && !exampleName.equalsIgnoreCase(indexName)) {
-                        continue;
-                    }
+                if (exampleName != null && !exampleName.equals(correctedIndexName)) {
+                    continue;
                 }
                 /*
                 * TODO Informix generates indexnames with a leading blank if no name given.
@@ -286,7 +283,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
-                Index returnIndex = foundIndexes.get(indexName);
+                Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
@@ -299,14 +296,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         returnIndex.setClustered(false);
                     }
 
-                    foundIndexes.put(indexName, returnIndex);
+                    foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
                 for (int i = returnIndex.getColumns().size(); i < position; i++) {
                     returnIndex.getColumns().add(null);
                 }
                 if (definition == null) {
-                    returnIndex.getColumns().set(position - 1, new Column(columnName).setComputed(false).setRelation(returnIndex.getTable()));
+                    String ascOrDesc = row.getString("ASC_OR_DESC");
+                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                    returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
                 } else {
                     returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
                 }

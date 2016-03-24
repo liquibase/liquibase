@@ -79,10 +79,10 @@ public class DiffToChangeLog {
             print(new PrintStream(out), changeLogSerializer);
 
             String xml = new String(out.toByteArray());
-            xml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
-            xml = xml.replaceFirst("</databaseChangeLog>", "");
-            xml = xml.trim();
-            if ("".equals(xml)) {
+            String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+            innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
+            innerXml = innerXml.trim();
+            if ("".equals(innerXml)) {
                 LogFactory.getLogger().info("No changes found, nothing to do");
                 return;
             }
@@ -90,9 +90,11 @@ public class DiffToChangeLog {
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
             String line;
             long offset = 0;
+            boolean foundEndTag = false;
             while ((line = randomAccessFile.readLine()) != null) {
                 int index = line.indexOf("</databaseChangeLog>");
                 if (index >= 0) {
+                    foundEndTag = true;
                     break;
                 } else {
                     offset = randomAccessFile.getFilePointer();
@@ -100,11 +102,17 @@ public class DiffToChangeLog {
             }
 
             String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
-            randomAccessFile.seek(offset);
-            randomAccessFile.writeBytes("    ");
-            randomAccessFile.write(xml.getBytes());
-            randomAccessFile.writeBytes(lineSeparator);
-            randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+
+            if (foundEndTag) {
+                randomAccessFile.seek(offset);
+                randomAccessFile.writeBytes("    ");
+                randomAccessFile.write(innerXml.getBytes());
+                randomAccessFile.writeBytes(lineSeparator);
+                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+            } else {
+                randomAccessFile.seek(0);
+                randomAccessFile.write(xml.getBytes());
+            }
             randomAccessFile.close();
 
             // BufferedWriter fileWriter = new BufferedWriter(new
@@ -165,7 +173,7 @@ public class DiffToChangeLog {
 
         types = getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
-            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
+            ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type, comparator)) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
@@ -176,7 +184,7 @@ public class DiffToChangeLog {
 
         types = getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
-            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
+            ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
             for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type, comparator).entrySet()) {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
                     Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());

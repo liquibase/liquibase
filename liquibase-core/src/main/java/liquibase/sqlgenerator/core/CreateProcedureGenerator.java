@@ -43,14 +43,15 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
 
-        String procedureText = addSchemaToText(statement.getProcedureText(), statement.getSchemaName(), "PROCEDURE", database);
+        String schemaName = statement.getSchemaName();
+        if (schemaName == null) {
+            schemaName = database.getDefaultSchemaName();
+        }
+
+        String procedureText = addSchemaToText(statement.getProcedureText(), schemaName, "PROCEDURE", database);
 
         if (statement.getReplaceIfExists() != null && statement.getReplaceIfExists()) {
             String fullyQualifiedName = database.escapeObjectName(statement.getProcedureName(), StoredProcedure.class);
-            String schemaName = statement.getSchemaName();
-            if (schemaName == null) {
-                schemaName = database.getDefaultSchemaName();
-            }
             if (schemaName != null) {
                 fullyQualifiedName = database.escapeObjectName(schemaName, Schema.class) + "." + fullyQualifiedName;
             }

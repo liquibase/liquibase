@@ -30,7 +30,7 @@ public class ChangeLogHistoryServiceFactory {
     }
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
@@ -59,7 +59,7 @@ public class ChangeLogHistoryServiceFactory {
             SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<ChangeLogHistoryService>(new Comparator<ChangeLogHistoryService>() {
                 @Override
                 public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
-                    return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
                 }
             });
 
@@ -93,7 +93,7 @@ public class ChangeLogHistoryServiceFactory {
             }
     }
 
-    public void resetAll() {
+    public synchronized void resetAll() {
         for (ChangeLogHistoryService changeLogHistoryService : registry) {
             changeLogHistoryService.reset();
         }

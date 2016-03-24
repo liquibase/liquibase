@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,6 +91,11 @@ public class LiquibaseFutureRollbackSQL extends LiquibaseRollback {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        liquibase.futureRollbackSQL(null, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+        liquibase.futureRollbackSQL(new Contexts(contexts), new LabelExpression(labels), outputWriter);
+    }
+
+    @Override
+    protected void checkRequiredRollbackParameters() throws MojoFailureException {
+        //nothing to check with futureRollbackSQL
     }
 }

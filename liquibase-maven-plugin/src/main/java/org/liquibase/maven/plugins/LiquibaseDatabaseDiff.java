@@ -10,7 +10,9 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -115,7 +117,21 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      *
      * @parameter expression="${liquibase.diffTypes}"
      */
-    private String diffTypes;
+    protected String diffTypes;
+
+    /**
+     * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
+     *
+     * @parameter expression="${liquibase.diffExcludeObjects}"
+     */
+    protected String diffExcludeObjects;
+
+    /**
+     * Objects to be included in the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
+     *
+     * @parameter expression="${liquibase.diffIncludeObjects}"
+     */
+    protected String diffIncludeObjects;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -147,12 +163,23 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
         Database db = liquibase.getDatabase();
 
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(fileOpener, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null);
+        Database referenceDatabase = CommandLineUtils.createDatabaseObject(fileOpener, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, outputDefaultCatalog, outputDefaultSchema, null, null, propertyProviderClass, null, null, databaseChangeLogTableName, databaseChangeLogLockTableName);
 
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {
             try {
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName)), StringUtils.trimToNull(diffTypes));
+                DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
+                if (diffExcludeObjects != null && diffIncludeObjects != null) {
+                    throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
+                }
+                if (diffExcludeObjects != null) {
+                    diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects));
+                }
+                if (diffIncludeObjects != null) {
+                    diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
+                }
+
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, StringUtils.trimToNull(diffTypes));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
             catch (IOException e) {

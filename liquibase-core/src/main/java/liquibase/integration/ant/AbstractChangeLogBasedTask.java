@@ -10,7 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
-    private FileResource changeLogFile;
+    private String changeLogFile;
     private String contexts;
     private LabelExpression labels;
     private FileResource outputFile;
@@ -34,11 +34,11 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
      * @return The change log file resource.
      */
     @Override
-    public FileResource getChangeLogFile() {
+    public String getChangeLogFile() {
         return changeLogFile;
     }
 
-    public void setChangeLogFile(FileResource changeLogFile) {
+    public void setChangeLogFile(String changeLogFile) {
         this.changeLogFile = changeLogFile;
     }
 

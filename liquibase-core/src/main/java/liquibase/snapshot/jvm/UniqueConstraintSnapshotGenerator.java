@@ -1,6 +1,5 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -45,7 +44,15 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         constraint.setName(example.getName());
         constraint.setBackingIndex(exampleConstraint.getBackingIndex());
         for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setRelation(table));
+            String ascOrDesc = (String) col.get("ASC_OR_DESC");
+            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+            if (database instanceof H2Database) {
+                for (String columnName : StringUtils.splitAndTrim((String) col.get("COLUMN_NAME"), ",")) {
+                    constraint.getColumns().add(new Column(columnName).setDescending(descending).setRelation(table));
+                }
+            } else {
+                constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
+            }
         }
 
         return constraint;
@@ -317,6 +324,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             }
             return rows;
         }
+
 
     }
 

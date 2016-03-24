@@ -1,6 +1,8 @@
 package liquibase.serializer;
 
-public interface LiquibaseSerializer {
+import liquibase.servicelocator.PrioritizedService;
+
+public interface LiquibaseSerializer extends PrioritizedService {
 
     String[] getValidFileExtensions();
 

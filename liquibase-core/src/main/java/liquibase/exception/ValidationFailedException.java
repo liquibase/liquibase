@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class ValidationFailedException extends MigrationFailedException {
 
-    private List<ChangeSet> invalidMD5Sums;
+    private List<String> invalidMD5Sums;
     private List<FailedPrecondition> failedPreconditions;
     private List<ErrorPrecondition> errorPreconditions;
     private Set<ChangeSet> duplicateChangeSets;
@@ -45,9 +45,7 @@ public class ValidationFailedException extends MigrationFailedException {
                 if (i > 25) {
                     break;
                 }
-                ChangeSet invalid = invalidMD5Sums.get(i);
-
-                message.append("          ").append(invalid.toString(false)).append(" is now: ").append(invalid.generateCheckSum());
+                message.append("          ").append(invalidMD5Sums.get(i));
                 message.append(StreamUtil.getLineSeparator());
             }
         }
@@ -98,7 +96,7 @@ public class ValidationFailedException extends MigrationFailedException {
         return message.toString();
     }
 
-    public List<ChangeSet> getInvalidMD5Sums() {
+    public List<String> getInvalidMD5Sums() {
         return invalidMD5Sums;
     }
 
@@ -106,8 +104,8 @@ public class ValidationFailedException extends MigrationFailedException {
         out.println("Validation Error: ");
         if (invalidMD5Sums.size() > 0) {
             out.println("     "+invalidMD5Sums.size()+" change sets have changed since they were ran against the database");
-            for (ChangeSet changeSet : invalidMD5Sums) {
-                out.println("          "+changeSet.toString(false));
+            for (String message : invalidMD5Sums) {
+                out.println("          " + message);
             }
         }
 

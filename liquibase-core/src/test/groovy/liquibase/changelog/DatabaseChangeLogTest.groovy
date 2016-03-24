@@ -1,13 +1,15 @@
 package liquibase.changelog
 
+import liquibase.ContextExpression;
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
+import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
-import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sdk.resource.MockResourceAccessor
+import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -200,7 +202,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children", false, null, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
 
         then:
         changeLogFile.changeSets.collect { it.filePath } == ["com/example/children/file1.sql",
@@ -236,6 +238,38 @@ create view sql_view as select * from sql_table;'''
         [[id: "1"], [id: "2", runOrder: "last"]]                                                                                                                | ["1", "2"]
         [[id: "1", runOrder: "last"], [id: "2"], [id: "3", runOrder: "last"], [id: "4"]]                                                                        | ["2", "4", "1", "3"]
         [[id: "1", runOrder: "last"], [id: "2"], [id: "3", runOrder: "first"], [id: "4"], [id: "5", runOrder: "last"], [id: "6"], [id: "7", runOrder: "first"]] | ["3", "7", "2", "4", "6", "1", "5"]
+    }
+
+    def "includeAll throws exception when directory not found"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/children/file2.sql": "file 2",
+                "com/example/children/file3.sql": "file 3",
+                "com/example/children/file1.sql": "file 1",
+                "com/example/not/fileX.sql": "file X",
+        ])
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+
+        then:
+        SetupException e = thrown()
+        assert e.getMessage().startsWith("Could not find directory or directory was empty for includeAll '");
+
+    }
+
+    def "includeAll throws no exception when directory not found and errorIfMissingOrEmpty is false"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/children/file2.sql": "file 2",
+                "com/example/children/file3.sql": "file 3",
+                "com/example/children/file1.sql": "file 1",
+                "com/example/not/fileX.sql": "file X",
+        ])
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
+        then:
+        changeLogFile.changeSets.collect {it.filePath } == []
+
     }
 
 }

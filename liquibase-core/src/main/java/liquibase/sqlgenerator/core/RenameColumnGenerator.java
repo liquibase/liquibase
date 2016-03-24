@@ -10,6 +10,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
 
@@ -26,7 +27,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         validationErrors.checkRequiredField("newColumnName", renameColumnStatement.getNewColumnName());
 
         if (database instanceof MySQLDatabase) {
-            validationErrors.checkRequiredField("columnDataType", renameColumnStatement.getColumnDataType());
+            validationErrors.checkRequiredField("columnDataType", StringUtils.trimToNull(renameColumnStatement.getColumnDataType()));
         }
 
         return validationErrors;

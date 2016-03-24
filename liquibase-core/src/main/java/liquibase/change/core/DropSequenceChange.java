@@ -17,6 +17,8 @@ public class DropSequenceChange extends AbstractChange {
     private String schemaName;
     private String sequenceName;
 
+    private Boolean onlyIfExists;
+
     @DatabaseChangeProperty(mustEqualExisting = "sequence.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -44,9 +46,22 @@ public class DropSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
+    /**
+     * Not exposed through XML since it's just postgres at this point, as a work-around for table/sequence dropping order
+     */
+    public Boolean getOnlyIfExists() {
+        return onlyIfExists;
+    }
+
+    public void setOnlyIfExists(Boolean onlyIfExists) {
+        this.onlyIfExists = onlyIfExists;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())};
+        DropSequenceStatement statement = new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName());
+        statement.setOnlyIfExists(getOnlyIfExists());
+        return new SqlStatement[]{statement};
     }
 
     @Override

@@ -19,9 +19,12 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 
 /**
@@ -48,9 +51,11 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String propertyProviderClass,
                                                 String liquibaseCatalogName,
-                                                String liquibaseSchemaName) throws DatabaseException {
+                                                String liquibaseSchemaName,
+                                                String databaseChangeLogTableName,
+                                                String databaseChangeLogLockTableName) throws DatabaseException {
 
-            return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName);
+            return createDatabaseObject(new ClassLoaderResourceAccessor(classLoader), url, username, password, driver, defaultCatalogName, defaultSchemaName, outputDefaultCatalog, outputDefaultSchema, databaseClass, driverPropertiesFile, propertyProviderClass, liquibaseCatalogName, liquibaseSchemaName, databaseChangeLogTableName, databaseChangeLogLockTableName);
     }
 
         public static Database createDatabaseObject(ResourceAccessor resourceAccessor,
@@ -66,12 +71,16 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String propertyProviderClass,
                                                 String liquibaseCatalogName,
-                                                String liquibaseSchemaName) throws DatabaseException {
+                                                String liquibaseSchemaName,
+                                                String databaseChangeLogTableName,
+                                                String databaseChangeLogLockTableName) throws DatabaseException {
         try {
             liquibaseCatalogName = StringUtils.trimToNull(liquibaseCatalogName);
             liquibaseSchemaName = StringUtils.trimToNull(liquibaseSchemaName);
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
+            databaseChangeLogTableName = StringUtils.trimToNull(databaseChangeLogTableName);
+            databaseChangeLogLockTableName = StringUtils.trimToNull(databaseChangeLogLockTableName);
 
             Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
@@ -83,7 +92,7 @@ public class CommandLineUtils {
                     liquibaseCatalogName = liquibaseSchemaName;
                 }
             }
-
+            
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
 
@@ -93,7 +102,15 @@ public class CommandLineUtils {
             database.setOutputDefaultSchema(outputDefaultSchema);
             database.setLiquibaseCatalogName(liquibaseCatalogName);
             database.setLiquibaseSchemaName(liquibaseSchemaName);
-
+            if (databaseChangeLogTableName!=null) {
+                database.setDatabaseChangeLogTableName(databaseChangeLogTableName);
+                if (databaseChangeLogLockTableName!=null) {
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogLockTableName);
+                } else {
+                    database.setDatabaseChangeLogLockTableName(databaseChangeLogTableName+"LOCK");
+                }
+            }
+            
             //Todo: move to database object methods in 4.0
             initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
 
@@ -130,9 +147,22 @@ public class CommandLineUtils {
                 }
                 ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
             } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER USER " + username + " WITH DEFAULT_SCHEMA=[" + defaultSchemaName + "]"));
-            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + defaultSchemaName));
+boolean sql2005OrLater = true;
+                    try {
+                        sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
+                    } catch (DatabaseException e) {
+                        // Assume SQL Server 2005 or later
+                    }
+                    if (sql2005OrLater && username != null) {
+                        ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
+                                "IF USER_NAME() <> N'dbo'\r\n" +
+                                "BEGIN\r\n" +
+                                "	DECLARE @sql [nvarchar](MAX)\r\n" +
+                                "	SELECT @sql = N'ALTER USER ' + QUOTENAME(USER_NAME()) + N' WITH DEFAULT_SCHEMA = " + database.escapeStringForDatabase(database.escapeObjectName(username, DatabaseObject.class)) + "'\r\n" +
+                                "	EXEC sp_executesql @sql\r\n" +
+                                "END"));
+                    }            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+                    ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO " + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof DB2Database) {
                 String schema = defaultCatalogName;
                 if (schema == null) {

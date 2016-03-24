@@ -11,6 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.util.StringUtils;
 
+import java.util.List;
 import java.util.Set;
 
 public class PrimaryKeyComparator implements DatabaseObjectComparator {
@@ -58,10 +59,27 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
         exclude.add("name");
         exclude.add("backingIndex");
-        exclude.add("columnNames");
+        exclude.add("columns");
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
 
-        differences.compare("columnNames", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.CompareFunction() {
+            @Override
+            public boolean areEqual(Object referenceValue, Object compareToValue) {
+                List<Column> referenceList = (List) referenceValue;
+                List<Column> compareList = (List) compareToValue;
+
+                if (referenceList.size() != compareList.size()) {
+                    return false;
+                }
+                for (int i=0; i<referenceList.size(); i++) {
+                    if (!StringUtils.trimToEmpty((referenceList.get(i)).getName()).equalsIgnoreCase(StringUtils.trimToEmpty(compareList.get(i).getName()))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        });
+
         return differences;
     }
 }

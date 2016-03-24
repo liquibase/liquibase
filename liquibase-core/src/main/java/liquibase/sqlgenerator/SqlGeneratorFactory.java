@@ -49,14 +49,14 @@ public class SqlGeneratorFactory {
     /**
      * Return singleton SqlGeneratorFactory
      */
-    public static SqlGeneratorFactory getInstance() {
+    public static synchronized SqlGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new SqlGeneratorFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SqlGeneratorFactory();
     }
 
@@ -85,14 +85,22 @@ public class SqlGeneratorFactory {
         return generators;
     }
 
-    protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+    public SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
         String databaseName = null;
         if (database == null) {
             databaseName = "NULL";
         } else {
             databaseName = database.getShortName();
         }
-        String key = statement.getClass().getName()+":"+ databaseName;
+
+        int version;
+        try {
+            version = database.getDatabaseMajorVersion();
+        } catch (Throwable e) {
+            version = 0;
+        }
+
+        String key = statement.getClass().getName()+":"+ databaseName+":"+ version;
 
         if (generatorsByKey.containsKey(key)) {
             return generatorsByKey.get(key);

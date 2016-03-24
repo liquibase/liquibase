@@ -16,11 +16,11 @@ public class ChangeLogParserFactory {
     private Comparator<ChangeLogParser> changelogParserComparator;
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new ChangeLogParserFactory();
     }
 
-    public static ChangeLogParserFactory getInstance() {
+    public static synchronized ChangeLogParserFactory getInstance() {
         if (instance == null) {
              instance = new ChangeLogParserFactory();
         }

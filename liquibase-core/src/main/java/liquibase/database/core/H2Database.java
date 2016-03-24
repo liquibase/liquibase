@@ -206,6 +206,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "EXCEPT",
             "EXISTS",
             "FALSE",
+            "FETCH",
             "FOR",
             "FROM",
             "FULL",
@@ -221,6 +222,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "NATURAL",
             "NOT",
             "NULL",
+            "OFFSET",
             "ON",
             "ORDER",
             "PRIMARY",
@@ -257,6 +259,11 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public boolean createsIndexesForForeignKeys() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
         return true;
     }
 }

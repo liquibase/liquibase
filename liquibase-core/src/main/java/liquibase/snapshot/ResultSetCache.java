@@ -15,7 +15,6 @@ import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
-    private final static int FETCH_SIZE = 1000;
     private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
     private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
 
@@ -176,6 +175,10 @@ class ResultSetCache {
         }
 
         List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+            return executeAndExtract(sql, database, false);
+        }
+
+        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<CachedRow>();
             }
@@ -185,12 +188,11 @@ class ResultSetCache {
                 JdbcConnection connection = (JdbcConnection) database.getConnection();
                 statement = connection.createStatement();
                 resultSet = statement.executeQuery(sql);
-                resultSet.setFetchSize(FETCH_SIZE);
-                return extract(resultSet);
+                resultSet.setFetchSize(database.getFetchSize());
+                return extract(resultSet, informixTrimHint);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
-
         }
 
         public boolean equals(Object expectedValue, Object foundValue) {
@@ -222,7 +224,7 @@ class ResultSetCache {
         }
 
         protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint) throws SQLException {
-            resultSet.setFetchSize(FETCH_SIZE);
+            resultSet.setFetchSize(database.getFetchSize());
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {

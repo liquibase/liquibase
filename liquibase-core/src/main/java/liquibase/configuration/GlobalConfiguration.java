@@ -25,7 +25,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(SHOULD_RUN, Boolean.class)
                 .setDescription("Should Liquibase commands execute")
                 .setDefaultValue(true)
-                .addAlias("liquibase.should.run");
+                .addAlias("should.run");
 
         getContainer().addProperty(DATABASECHANGELOG_TABLE_NAME, String.class)
                 .setDescription("Name of table to use for tracking change history")

@@ -217,9 +217,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     public int getDatabasePatchVersion() throws DatabaseException {
-        String versionStrings[] = this.getDatabaseProductVersion().split("\\.");
+        String databaseProductVersion = this.getDatabaseProductVersion();
+        if (databaseProductVersion == null) {
+            return 0;
+        }
+
+        String versionStrings[] = databaseProductVersion.split("\\.");
         try {
             return Integer.parseInt(versionStrings[2].replaceFirst("\\D.*", ""));
+        } catch (IndexOutOfBoundsException e) {
+            return 0;
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -303,6 +310,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "FOREIGN",
                 "FROM",
                 "FULLTEXT",
+                "GENERATED",
                 "GET",
                 "GRANT",
                 "GROUP",
@@ -369,6 +377,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "NUMERIC",
                 "ON",
                 "OPTIMIZE",
+                "OPTIMIZER_COSTS",
                 "OPTION",
                 "OPTIONALLY",
                 "OR",
@@ -376,6 +385,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "OUT",
                 "OUTER",
                 "OUTFILE",
+                "PARTITION",
                 "PRECISION",
                 "PRIMARY",
                 "PROCEDURE",
@@ -419,6 +429,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "SQL_SMALL_RESULT",
                 "SSL",
                 "STARTING",
+                "STORED",
                 "STRAIGHT_JOIN",
                 "TABLE",
                 "TERMINATED",
@@ -447,6 +458,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "VARCHAR",
                 "VARCHARACTER",
                 "VARYING",
+                "VIRTUAL",
                 "WHEN",
                 "WHERE",
                 "WHILE",

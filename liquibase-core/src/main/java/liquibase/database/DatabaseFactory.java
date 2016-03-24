@@ -12,6 +12,7 @@ import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
@@ -29,7 +30,11 @@ public class DatabaseFactory {
 
             //noinspection unchecked
             for (Class<? extends Database> clazz : classes) {
-                register(clazz.getConstructor().newInstance());
+                try {
+                    register(clazz.getConstructor().newInstance());
+                } catch (Throwable e) {
+                    throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
+                }
             }
 
         } catch (Exception e) {
@@ -38,21 +43,21 @@ public class DatabaseFactory {
 
     }
 
-    public static DatabaseFactory getInstance() {
+    public static synchronized DatabaseFactory getInstance() {
         if (instance == null) {
             instance = new DatabaseFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new DatabaseFactory();
     }
 
     /**
      * Set singleton instance. Primarily used in testing
      */
-    public static void setInstance(DatabaseFactory databaseFactory) {
+    public static synchronized void setInstance(DatabaseFactory databaseFactory) {
         instance = databaseFactory;
     }
 

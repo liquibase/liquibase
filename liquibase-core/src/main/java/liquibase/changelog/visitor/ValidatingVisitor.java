@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
-    private List<ChangeSet> invalidMD5Sums = new ArrayList<ChangeSet>();
+    private List<String> invalidMD5Sums = new ArrayList<String>();
     private List<FailedPrecondition> failedPreconditions = new ArrayList<FailedPrecondition>();
     private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
     private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
@@ -73,9 +73,33 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    @Override
+    private RanChangeSet findChangeSet(ChangeSet changeSet) {
+        RanChangeSet result = ranIndex.get(changeSet.toString(false));
+        if (result == null) {
+            for (RanChangeSet ranChangeSet : ranIndex.values()) {
+                if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())) {
+                    if (ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())) {
+                        String changeSetPath = normalizePath(changeSet.getFilePath());
+                        String ranChangeSetPath = normalizePath(ranChangeSet.getChangeLog());
+                        if (ranChangeSetPath.equalsIgnoreCase(changeSetPath)
+                            || ranChangeSetPath.endsWith(changeSetPath) || changeSetPath.endsWith(ranChangeSetPath)) {
+                            result = ranChangeSet;
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+        
+    private String normalizePath(String filePath) {
+        return filePath.replaceFirst("^classpath:", "");
+    }
+        
+
+        @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        RanChangeSet ranChangeSet = ranIndex.get(changeSet.toString(false));
+        RanChangeSet ranChangeSet = findChangeSet(changeSet);
         boolean ran = ranChangeSet != null;
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
         for (Change change : changeSet.getChanges()) {
@@ -109,7 +133,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         if(ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
                 if (!changeSet.shouldRunOnChange()) {
-                    invalidMD5Sums.add(changeSet);
+                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString());
                 }
             }
         }
@@ -123,7 +147,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
-    public List<ChangeSet> getInvalidMD5Sums() {
+    public List<String> getInvalidMD5Sums() {
         return invalidMD5Sums;
     }
 
