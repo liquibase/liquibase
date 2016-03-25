@@ -3,7 +3,6 @@ package liquibase.change;
 import liquibase.change.core.AddColumnChange;
 import liquibase.database.core.DB2Database;
 import liquibase.sdk.database.MockDatabase;
-import liquibase.sqlgenerator.core.AddColumnGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 
