@@ -138,10 +138,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
             addColumnStatements.add(addColumnStatement);
 
-            if (database instanceof DB2Database) {
-                sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-            }            
-
             if (column.getValueObject() != null) {
                 UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
                 updateStatement.addNewColumnValue(column.getName(), column.getValueObject());
@@ -149,7 +145,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-      if (addColumnStatements.size() == 1) {
+        if (database instanceof DB2Database) {
+            sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+        }
+
+
+        if (addColumnStatements.size() == 1) {
           sql.add(0, addColumnStatements.get(0));
       } else {
           sql.add(0, new AddColumnStatement(addColumnStatements));
