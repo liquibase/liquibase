@@ -87,6 +87,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
         List<AddColumnStatement> addColumnStatements = new ArrayList<AddColumnStatement>();
+        List<UpdateStatement> addColumnUpdateStatements = new ArrayList<UpdateStatement>();
 
         if (getColumns().size() == 0) {
             return new SqlStatement[] {
@@ -141,14 +142,20 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             if (column.getValueObject() != null) {
                 UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
                 updateStatement.addNewColumnValue(column.getName(), column.getValueObject());
-                sql.add(updateStatement);
+                if(database instanceof DB2Database) {
+                    // Cannot update until table is reorganized in DB2
+                    addColumnUpdateStatements.add(updateStatement);
+                } else {
+                    sql.add(updateStatement);
+                }
             }
         }
 
         if (database instanceof DB2Database) {
             sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            // Add all the update statements after the reorg table in DB2
+            sql.addAll(addColumnUpdateStatements);
         }
-
 
         if (addColumnStatements.size() == 1) {
           sql.add(0, addColumnStatements.get(0));
