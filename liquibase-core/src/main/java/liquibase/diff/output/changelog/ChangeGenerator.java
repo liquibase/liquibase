@@ -1,6 +1,8 @@
 package liquibase.diff.output.changelog;
 
+import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.structure.DatabaseObject;
 
 public interface ChangeGenerator {
@@ -14,4 +16,6 @@ public interface ChangeGenerator {
 
     Class<? extends DatabaseObject>[] runAfterTypes();
     Class<? extends DatabaseObject>[] runBeforeTypes();
+
+    Change[] fixSchema(Change[] changes, CompareControl.SchemaComparison[] schemaComparisons);
 }

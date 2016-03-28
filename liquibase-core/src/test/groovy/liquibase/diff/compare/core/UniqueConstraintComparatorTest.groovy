@@ -12,7 +12,7 @@ class UniqueConstraintComparatorTest extends Specification {
     @Unroll
     def "test equality"() {
         expect:
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(constraint1, constraint2, new MockDatabase()) == expected
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(constraint1, constraint2, null, new MockDatabase()) == expected
 
         where:
         constraint1                                                                                       | constraint2                                                                                       | expected

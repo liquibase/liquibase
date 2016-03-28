@@ -328,7 +328,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             return index;
         } else {
             for (Index index : foundIndexes.values()) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, database)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, snapshot.getSchemaComparisons(), database)) {
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
                             return index;

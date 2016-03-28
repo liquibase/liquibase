@@ -67,7 +67,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
                     Schema schema = new Schema(catalog, tableSchema);
-                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, database)) {
+                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, snapshot.getSchemaComparisons(), database)) {
                         if (match == null) {
                             match = schema;
                         } else {

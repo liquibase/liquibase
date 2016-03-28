@@ -116,7 +116,7 @@ public class SnapshotGeneratorFactory {
         }
         DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, false, example.getClass()));
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;
             }
         }

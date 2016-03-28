@@ -9,6 +9,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ChangedUniqueConstraintChangeGenerator  implements ChangedObjectChangeGenerator {
+public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (UniqueConstraint.class.isAssignableFrom(objectType)) {

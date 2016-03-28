@@ -140,6 +140,9 @@ public class DiffCommand extends AbstractCommand {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
         DatabaseSnapshot targetSnapshot = createTargetSnapshot();
 
+        referenceSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
+        targetSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
+
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 

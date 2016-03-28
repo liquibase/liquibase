@@ -45,7 +45,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.getRelation(), otherColumn.getRelation(), accordingTo)) {
+        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.getRelation(), otherColumn.getRelation(), chain.getSchemaComparisons(), accordingTo)) {
             return false;
         }
 

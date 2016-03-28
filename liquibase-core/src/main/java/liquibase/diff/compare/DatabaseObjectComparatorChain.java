@@ -7,15 +7,21 @@ import liquibase.structure.DatabaseObject;
 import java.util.*;
 
 public class DatabaseObjectComparatorChain {
+    private CompareControl.SchemaComparison[] schemaComparisons;
     private List<DatabaseObjectComparator> comparators;
     private int nextIndex = 0; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
 
-    public DatabaseObjectComparatorChain(List<DatabaseObjectComparator> comparators) {
+    public DatabaseObjectComparatorChain(List<DatabaseObjectComparator> comparators, CompareControl.SchemaComparison[] schemaComparisons) {
         this.comparators = comparators;
+        this.schemaComparisons = schemaComparisons;
     }
 
     protected DatabaseObjectComparatorChain copy() {
-        return new DatabaseObjectComparatorChain(comparators);
+        return new DatabaseObjectComparatorChain(comparators, schemaComparisons);
+    }
+
+    public CompareControl.SchemaComparison[] getSchemaComparisons() {
+        return schemaComparisons;
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
@@ -90,5 +96,9 @@ public class DatabaseObjectComparatorChain {
         }
 
         return next.findDifferences(object1, object2, accordingTo, compareControl, this, exclude);
+    }
+
+    public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
+        this.schemaComparisons = schemaComparisons;
     }
 }

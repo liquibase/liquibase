@@ -81,11 +81,11 @@ public class DiffResult {
         return set;
     }
 
-    public <T extends DatabaseObject> T getMissingObject(T example) {
+    public <T extends DatabaseObject> T getMissingObject(T example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
         for (T obj : (Set<T>) getMissingObjects(example.getClass())) {
-            if (comparator.isSameObject(obj, example, accordingTo)) {
+            if (comparator.isSameObject(obj, example, schemaComparisons, accordingTo)) {
                 return obj;
             }
         }
@@ -119,11 +119,11 @@ public class DiffResult {
         return set;
     }
 
-    public <T extends DatabaseObject> T getUnexpectedObject(T example) {
+    public <T extends DatabaseObject> T getUnexpectedObject(T example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = this.getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
         for (T obj : (Set<T>) getUnexpectedObjects(example.getClass())) {
-            if (comparator.isSameObject(obj, example, accordingTo)) {
+            if (comparator.isSameObject(obj, example, schemaComparisons, accordingTo)) {
                 return obj;
             }
         }
@@ -154,11 +154,11 @@ public class DiffResult {
         return map;
     }
 
-    public ObjectDifferences getChangedObject(DatabaseObject example) {
+    public ObjectDifferences getChangedObject(DatabaseObject example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = this.getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
         for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : getChangedObjects(example.getClass()).entrySet()) {
-            if (comparator.isSameObject(entry.getKey(), example, accordingTo)) {
+            if (comparator.isSameObject(entry.getKey(), example, schemaComparisons, accordingTo)) {
                 return entry.getValue();
             }
         }

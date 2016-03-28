@@ -84,7 +84,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     }
 
     private DiffOutputControl getDiffOutputControl() {
-        DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+        DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace, null);
 
         if (excludeObjects != null && includeObjects != null) {
             throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");

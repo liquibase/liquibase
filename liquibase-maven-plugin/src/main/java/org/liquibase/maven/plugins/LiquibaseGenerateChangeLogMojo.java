@@ -100,7 +100,7 @@ public class LiquibaseGenerateChangeLogMojo extends
 
         getLog().info("Generating Change Log from database " + database.toString());
         try {
-            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true);
+            DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true, null);
             if (diffExcludeObjects != null && diffIncludeObjects != null) {
                 throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
             }

@@ -4,12 +4,13 @@ import liquibase.change.Change;
 import liquibase.change.core.DropIndexChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
-public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGenerator {
+public class UnexpectedIndexChangeGenerator extends AbstractChangeGenerator implements UnexpectedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Index.class.isAssignableFrom(objectType)) {

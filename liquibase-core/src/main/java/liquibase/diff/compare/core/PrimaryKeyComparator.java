@@ -28,7 +28,7 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         PrimaryKey pk = (PrimaryKey) databaseObject;
         if (databaseObject.getName() == null) {
-            return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(), accordingTo);
+            return DatabaseObjectComparatorFactory.getInstance().hash(pk.getTable(),chain.getSchemaComparisons(), accordingTo);
         } else {
             if (pk.getTable() == null || pk.getTable().getName() == null) {
                 return new String[] {pk.getName().toLowerCase() };
@@ -48,7 +48,7 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
         PrimaryKey otherPrimaryKey = (PrimaryKey) databaseObject2;
 
         if (thisPrimaryKey.getTable() != null && thisPrimaryKey.getTable().getName() != null && otherPrimaryKey.getTable() != null && otherPrimaryKey.getTable().getName() != null) {
-            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
+            return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), chain.getSchemaComparisons(), accordingTo);
         } else {
             return StringUtils.trimToEmpty(thisPrimaryKey.getName()).equalsIgnoreCase(otherPrimaryKey.getName());
         }

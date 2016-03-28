@@ -31,7 +31,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+        if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
             return false;
         }
 
@@ -78,9 +78,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
             } else if (attribute1 instanceof Column.AutoIncrementInformation || attribute2 instanceof Column.AutoIncrementInformation) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction(false);
             } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
-                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(accordingTo));
+                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo));
             } else {
-                compareFunction = new ObjectDifferences.StandardCompareFunction(accordingTo);
+                compareFunction = new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo);
             }
             differences.compare(attribute, databaseObject1, databaseObject2, compareFunction);
 

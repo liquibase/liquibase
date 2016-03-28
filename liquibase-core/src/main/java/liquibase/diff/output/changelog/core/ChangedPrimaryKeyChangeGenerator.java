@@ -8,6 +8,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
@@ -20,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
+public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (PrimaryKey.class.isAssignableFrom(objectType)) {
