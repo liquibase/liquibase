@@ -54,7 +54,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
         if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
-                viewDefinition.replace("CREATE", "RECREATE");
+                viewDefinition.replaceIfExists("CREATE", "RECREATE");
             } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
                 // Sybase ASA saves view definitions with header.
             } else if (database instanceof MSSQLDatabase) {
@@ -62,11 +62,13 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
                 sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[" + schema.getSchemaName() + "].[" + statement.getViewName() + "]'))\n" +
                         "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].[" + statement.getViewName() + "] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
-                viewDefinition.replace("CREATE", "ALTER");
+                viewDefinition.replaceIfExists("CREATE", "ALTER");
             } else if (database instanceof PostgresDatabase) {
                 sql.add(new UnparsedSql("DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
             } else {
-                viewDefinition.replace("CREATE", "CREATE OR REPLACE");
+                if (!viewDefinition.contains("replace")) {
+                    viewDefinition.replace("CREATE", "CREATE OR REPLACE");
+                }
             }
         }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
