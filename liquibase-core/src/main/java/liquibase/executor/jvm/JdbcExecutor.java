@@ -33,7 +33,7 @@ import java.util.Map;
  * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
  */
 @SuppressWarnings({"unchecked"})
-public class JdbcExecutor extends AbstractExecutor implements Executor {
+public class JdbcExecutor extends AbstractExecutor {
 
     private Logger log = LogFactory.getLogger();
 
@@ -63,21 +63,6 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         }
         finally {
             JdbcUtils.closeStatement(stmt);
-        }
-    }
-
-    @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
         }
     }
 

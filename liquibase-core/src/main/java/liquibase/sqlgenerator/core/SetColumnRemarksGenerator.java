@@ -5,6 +5,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -22,7 +23,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
     @Override
     public boolean supports(SetColumnRemarksStatement statement, Database database) {
-        return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database || database instanceof MSSQLDatabase;
+        return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database || database instanceof MSSQLDatabase || database instanceof H2Database;
     }
 
     @Override
@@ -35,6 +36,9 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
     @Override
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+
+        String remarksEscaped = database.escapeStringForDatabase(StringUtils.trimToEmpty(statement.getRemarks()));
+
         if (database instanceof MSSQLDatabase) {
             String schemaName = statement.getSchemaName();
             if (schemaName == null) {
@@ -51,7 +55,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
                     "DECLARE @ColumnName SYSNAME " +
                     "set @ColumnName = N'" + statement.getColumnName() + "'; " +
                     "DECLARE @MS_DescriptionValue NVARCHAR(200); " +
-                    "SET @MS_DescriptionValue = N'" + statement.getRemarks() + "';" +
+                    "SET @MS_DescriptionValue = N'" + remarksEscaped + "';" +
                     "DECLARE @MS_Description NVARCHAR(200) " +
                     "set @MS_Description = NULL; " +
                     "SET @MS_Description = (SELECT CAST(Value AS NVARCHAR(200)) AS [MS_Description] " +
@@ -86,7 +90,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
         } else {
             return new Sql[]{new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
                     + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
-                    + database.escapeStringForDatabase(StringUtils.trimToEmpty(statement.getRemarks())) + "'", getAffectedColumn(statement))};
+                    + remarksEscaped + "'", getAffectedColumn(statement))};
         }
     }
 

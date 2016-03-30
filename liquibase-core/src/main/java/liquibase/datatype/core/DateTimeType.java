@@ -63,36 +63,36 @@ public class DateTimeType extends LiquibaseDataType {
         }
         if (database instanceof InformixDatabase) {
 
-            // From database to changelog
-            if (getAdditionalInformation() == null || getAdditionalInformation().length() == 0) {
-                if (getParameters() != null && getParameters().length > 0) {
+          // From database to changelog
+          if (getAdditionalInformation() == null || getAdditionalInformation().length() == 0) {
+            if (getParameters() != null && getParameters().length > 0) {
 
-                    String parameter = String.valueOf(getParameters()[0]);
+              String parameter = String.valueOf(getParameters()[0]);
+              
+              if("4365".equals(parameter)) {
+                return new DatabaseDataType("DATETIME YEAR TO FRACTION(3)");
+              }
 
-                    if("4365".equals(parameter)) {
-                        return new DatabaseDataType("DATETIME YEAR TO FRACTION(3)");
-                    }
+              if("3594".equals(parameter)) {
+                return new DatabaseDataType("DATETIME YEAR TO SECOND");
+              }
 
-                    if("3594".equals(parameter)) {
-                        return new DatabaseDataType("DATETIME YEAR TO SECOND");
-                    }
+              if("3080".equals(parameter)) {
+                return new DatabaseDataType("DATETIME YEAR TO MINUTE");
+              }
 
-                    if("3080".equals(parameter)) {
-                        return new DatabaseDataType("DATETIME YEAR TO MINUTE");
-                    }
-
-                    if("2052".equals(parameter)) {
-                        return new DatabaseDataType("DATETIME YEAR TO DAY");
-                    }
-                }
+              if("2052".equals(parameter)) {
+                return new DatabaseDataType("DATETIME YEAR TO DAY");
+              }
             }
+          }
 
-            // From changelog to the database
-            if (getAdditionalInformation() != null && getAdditionalInformation().length() > 0) {
-                return new DatabaseDataType(originalDefinition);
-            }
+          // From changelog to the database
+          if (getAdditionalInformation() != null && getAdditionalInformation().length() > 0) {
+            return new DatabaseDataType(originalDefinition);
+          }
 
-            return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
+          return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
         }
         if (database instanceof PostgresDatabase) {
             String rawDefinition = originalDefinition.toLowerCase();
@@ -101,13 +101,21 @@ public class DateTimeType extends LiquibaseDataType {
                 if (params.length == 0 || !allowFractional) {
                     return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
                 } else {
-                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITH TIME ZONE");
+                    Object param = params[0];
+                    if (params.length == 2) {
+                        param = params[1];
+                    }
+                    return new DatabaseDataType("TIMESTAMP(" + param + ") WITH TIME ZONE");
                 }
             } else {
                 if (params.length == 0 || !allowFractional) {
                     return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
                 } else {
-                    return new DatabaseDataType("TIMESTAMP(" + params[0] + ") WITHOUT TIME ZONE");
+                    Object param = params[0];
+                    if (params.length == 2) {
+                        param = params[1];
+                    }
+                    return new DatabaseDataType("TIMESTAMP(" + param + ") WITHOUT TIME ZONE");
                 }
             }
         }
@@ -176,7 +184,7 @@ public class DateTimeType extends LiquibaseDataType {
         int minMajor = Integer.valueOf(parts[0]);
         int minMinor = parts.length > 1 ? Integer.valueOf(parts[1]) : 0;
         int minPatch = parts.length > 2 ? Integer.valueOf(parts[2]) : 0;
-
+        
         if (minMajor > major) {
             return false;
         }

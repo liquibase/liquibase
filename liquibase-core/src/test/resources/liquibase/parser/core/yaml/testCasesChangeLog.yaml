@@ -16,7 +16,7 @@ databaseChangeLog:
                         afterColumn: firstname
                         name: middlename
                         type: varchar(50)
-                        tableName: person
+                tableName: person
 
     - changeSet:
         id: using before column attribute
@@ -29,7 +29,7 @@ databaseChangeLog:
                         beforeColumn: lastname
                         name: middlename
                         type: varchar(50)
-                        tableName: person
+                tableName: person
 
     - changeSet:
         id: using position attribute
@@ -41,7 +41,7 @@ databaseChangeLog:
                         name: middlename
                         position: 1
                         type: varchar(50)
-                        tableName: person
+                tableName: person
 
     - changeSet:
         id: validCheckSums set
@@ -462,7 +462,7 @@ databaseChangeLog:
             - column:
                 name: new_col_boolean
                 value: 'false'
-                where: id=3
+            where: id=3
 
     - changeSet:
         id: update with whereParams

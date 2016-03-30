@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -8,7 +9,6 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
@@ -21,6 +21,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
+        if (updateStatement.getWhereParameters() != null && updateStatement.getWhereParameters().size() > 0 && updateStatement.getWhereClause() == null) {
+            validationErrors.addError("whereParams set but no whereClause");
+        }
         return validationErrors;
     }
 
@@ -38,21 +41,10 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sql.deleteCharAt(lastComma);
         }
         if (statement.getWhereClause() != null) {
-            String fixedWhereClause = "WHERE " + statement.getWhereClause().trim();
-            for (String columnName : statement.getWhereColumnNames()) {
-                if (columnName == null) {
-                    continue;
-                }
-                fixedWhereClause = fixedWhereClause.replaceFirst(":name",
-                        database.escapeObjectName(columnName, Column.class));
-            }
-            for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?|:value", DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database));
-            }
-            sql.append(" ").append(fixedWhereClause);
+            sql.append(" WHERE ").append(replacePredicatePlaceholders(database, statement.getWhereClause(), statement.getWhereColumnNames(), statement.getWhereParameters()));
         }
 
-        return new Sql[]{
+        return new Sql[] {
                 new UnparsedSql(sql.toString(), getAffectedTable(statement))
         };
     }

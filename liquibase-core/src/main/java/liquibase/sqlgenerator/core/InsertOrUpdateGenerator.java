@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import java.util.Arrays;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -98,7 +99,11 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         		insertOrUpdateStatement.getCatalogName(), 
         		insertOrUpdateStatement.getSchemaName(),
         		insertOrUpdateStatement.getTableName());
-        updateStatement.setWhereClause(whereClause + ";\n");
+        if (!(database instanceof OracleDatabase && insertOrUpdateStatement.getOnlyUpdate() != null && insertOrUpdateStatement.getOnlyUpdate())) {
+            whereClause += ";\n";
+        }
+
+        updateStatement.setWhereClause(whereClause);
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));

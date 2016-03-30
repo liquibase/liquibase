@@ -78,6 +78,8 @@ public interface Database extends PrioritizedService {
 
     Integer getDefaultPort();
 
+    Integer getFetchSize();
+
     String getLiquibaseCatalogName();
 
     void setLiquibaseCatalogName(String catalogName);

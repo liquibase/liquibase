@@ -167,8 +167,9 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	@Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
 		return "Adaptive Server Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
-                || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
-        || "Adaptive Server IQ".equalsIgnoreCase(conn.getDatabaseProductName());
+        || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
+        || "Adaptive Server IQ".equalsIgnoreCase(conn.getDatabaseProductName())
+		|| "Sybase IQ".equalsIgnoreCase(conn.getDatabaseProductName());
 	}
 
 	@Override
@@ -251,5 +252,9 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
     		super.setAutoCommit(b);
         }
 	}
-    
+
+	@Override
+	public String getJdbcCatalogName(CatalogAndSchema schema) {
+		return "";
+	}
 }

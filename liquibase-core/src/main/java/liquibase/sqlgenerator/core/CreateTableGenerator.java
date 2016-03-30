@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
@@ -60,7 +59,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
-            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
+            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column, true));
 
             buffer.append(" ").append(columnType);
 
@@ -141,7 +140,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (statement.getNotNullColumns().contains(column)) {
                 buffer.append(" NOT NULL");
             } else {
-                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
+                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().toLowerCase().contains("timestamp"))) {
                     buffer.append(" NULL");
                 }
             }
@@ -150,16 +149,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 //buffer.append(" PRIMARY KEY");
             }
 
-            if(statement.getColumnRemarks(column) != null){
-                if (database instanceof MySQLDatabase) {
-                    buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
-                } else if (database instanceof MSSQLDatabase) {
-                    String schemaName = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).standardize(database).getSchemaName();
-                    if (schemaName == null) {
-                        schemaName = database.getDefaultSchemaName();
-                    }
-                    additionalSql.add(new UnparsedSql("EXEC sp_addextendedproperty @name = N'MS_Description', @value = '"+statement.getColumnRemarks(column)+"', @level0type = N'Schema', @level0name = "+ schemaName +", @level1type = N'Table', @level1name = "+statement.getTableName()+", @level2type = N'Column', @level2name = "+column));
-                }
+            if(database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null){
+                buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
 
             }
 
@@ -199,7 +190,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
                 buffer.append(")");
                 // Setting up table space for PK's index if it exist
-                if (database instanceof OracleDatabase &&
+                if ((database instanceof OracleDatabase || database instanceof PostgresDatabase) &&
                     statement.getPrimaryKeyConstraint().getTablespace() != null) {
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
@@ -220,11 +211,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
-                    referencesString = database.getDefaultSchemaName() +"."+referencesString;
+                    referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) +"."+referencesString;
                 }
                 buffer.append(referencesString);
             } else {
-                buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableName(), Table.class))
+                buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableCatalogName(), fkConstraint.getReferencedTableSchemaName(), fkConstraint.getReferencedTableName(), Table.class))
                     .append("(")
                     .append(database.escapeColumnNameList(fkConstraint.getReferencedColumnNames()))
                     .append(")");

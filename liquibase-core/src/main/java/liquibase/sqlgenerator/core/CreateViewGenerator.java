@@ -10,6 +10,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.structure.core.View;
+import liquibase.util.SqlParser;
+import liquibase.util.StringClauses;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +20,11 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
     @Override
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().validate(createViewStatement, database, sqlGeneratorChain);
-    	}
-    	
+
+        if (database instanceof InformixDatabase) {
+            return new CreateViewGeneratorInformix().validate(createViewStatement, database, sqlGeneratorChain);
+        }
+
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
@@ -37,49 +39,37 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
     @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
-    	}
-    	
-        String createClause;
+
+        if (database instanceof InformixDatabase) {
+            return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
+        }
 
         List<Sql> sql = new ArrayList<Sql>();
 
-        if (statement.isFullDefinition()) {
-            sql.add(new UnparsedSql(statement.getSelectQuery(), getAffectedView(statement)));
-        } else {
+        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery());
+
+        if (!statement.isFullDefinition()) {
+            viewDefinition.prepend("AS").prepend(database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())).prepend("VIEW").prepend("CREATE");
+        }
+
+        if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
-                if (statement.isReplaceIfExists()) {
-                    createClause = "RECREATE VIEW";
-                } else {
-                    createClause = "RECREATE VIEW";
-                }
+                viewDefinition.replace("CREATE", "RECREATE");
             } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
                 // Sybase ASA saves view definitions with header.
-                return new Sql[]{
-                        new UnparsedSql(statement.getSelectQuery())
-                };
             } else if (database instanceof MSSQLDatabase) {
-                if (statement.isReplaceIfExists()) {
-                    //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
-                    CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
-                    sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["+ schema.getSchemaName() +"].["+statement.getViewName()+"]'))\n" +
-                            "    EXEC sp_executesql N'CREATE VIEW ["+schema.getSchemaName()+"].["+statement.getViewName()+"] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
-                    createClause = "ALTER VIEW";
-                } else {
-                    createClause = "CREATE VIEW";
-                }
+                //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
+                CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
+                sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[" + schema.getSchemaName() + "].[" + statement.getViewName() + "]'))\n" +
+                        "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].[" + statement.getViewName() + "] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
+                viewDefinition.replace("CREATE", "ALTER");
             } else if (database instanceof PostgresDatabase) {
-                if (statement.isReplaceIfExists()) {
-                    sql.add(new UnparsedSql("DROP VIEW IF EXISTS "+database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
-                }
-                createClause = "CREATE VIEW";
+                sql.add(new UnparsedSql("DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
             } else {
-                createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
+                viewDefinition.replace("CREATE", "CREATE OR REPLACE");
             }
-            sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery(), getAffectedView(statement)));
         }
+        sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
 
         return sql.toArray(new Sql[sql.size()]);
     }

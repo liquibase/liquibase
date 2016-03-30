@@ -103,6 +103,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 }
             }
             result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
+
+            for (AddColumnStatement statement : columns) {
+                addUniqueConstrantStatements(statement, database, result);
+                addForeignKeyStatements(statement, database, result);
+            }
+
         } else {
             for (AddColumnStatement column : columns) {
                 result.addAll(Arrays.asList(generateSingleColumn(column, database)));
@@ -225,7 +231,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 if (database instanceof MSSQLDatabase) {
                     clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
                 }
-                clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
+                clause += " DEFAULT " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType(), database).objectToSql(defaultValue, database);
             }
         }
         return clause;

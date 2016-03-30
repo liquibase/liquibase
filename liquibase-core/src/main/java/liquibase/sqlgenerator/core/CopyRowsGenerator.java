@@ -31,6 +31,11 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     @Override
     public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer();
+        
+        if (statement.getCopyColumns().size() == 0) {
+            return new Sql[]{};
+        }
+        
         if (database instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");
 

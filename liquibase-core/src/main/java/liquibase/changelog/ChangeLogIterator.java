@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.RuntimeEnvironment;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
@@ -8,12 +10,16 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.util.CollectionUtil;
+import liquibase.util.StringUtils;
 
 import java.util.*;
 
 public class ChangeLogIterator {
     private DatabaseChangeLog databaseChangeLog;
     private List<ChangeSetFilter> changeSetFilters;
+
+    private Set<String> seenChangeSets = new HashSet<String>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
@@ -23,13 +29,13 @@ public class ChangeLogIterator {
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-        	ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
-        	if (changeSet != null) {
+            ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
+            if (changeSet != null) {
                 if (changeLog.ignoreClasspathPrefix()) {
                     changeSet.setFilePath(ranChangeSet.getChangeLog());
                 }
-        		changeSets.add(changeSet);
-        	}
+                changeSets.add(changeSet);
+            }
         }
         this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
@@ -42,9 +48,9 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-      Logger log = LogFactory.getLogger();
-      databaseChangeLog.setRuntimeEnvironment(env);
-      log.setChangeLog(databaseChangeLog);
+        Logger log = LogFactory.getLogger();
+        databaseChangeLog.setRuntimeEnvironment(env);
+        log.setChangeLog(databaseChangeLog);
         try {
             List<ChangeSet> changeSetList = new ArrayList<ChangeSet>(databaseChangeLog.getChangeSets());
             if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
@@ -69,8 +75,9 @@ public class ChangeLogIterator {
                 }
 
                 log.setChangeSet(changeSet);
-                if (shouldVisit) {
+                if (shouldVisit && !alreadySaw(changeSet)) {
                     visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                    markSeen(changeSet);
                 } else {
                     if (visitor instanceof SkippedChangeSetVisitor) {
                         ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
@@ -82,6 +89,25 @@ public class ChangeLogIterator {
             log.setChangeLog(null);
             databaseChangeLog.setRuntimeEnvironment(null);
         }
+    }
+
+    protected void markSeen(ChangeSet changeSet) {
+        seenChangeSets.add(createKey(changeSet));
+
+    }
+
+    protected String createKey(ChangeSet changeSet) {
+        Labels labels = changeSet.getLabels();
+        ContextExpression contexts = changeSet.getContexts();
+
+        return changeSet.toString(true)
+                + ":" + (labels == null ? null : labels.toString())
+                + ":" + (contexts == null ? null : contexts.toString())
+                + ":" + StringUtils.join(changeSet.getDbmsSet(), ",");
+    }
+
+    protected boolean alreadySaw(ChangeSet changeSet) {
+        return seenChangeSets.contains(createKey(changeSet));
     }
 
     public List<ChangeSetFilter> getChangeSetFilters() {

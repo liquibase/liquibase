@@ -1,6 +1,7 @@
 package liquibase.serializer.core.xml;
 
 import liquibase.change.*;
+import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,11 +15,13 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
+
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.*;
 import java.util.*;
 
@@ -67,7 +70,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     @Override
-    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
+    public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         DocumentBuilder documentBuilder;
@@ -120,8 +123,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         doc.appendChild(changeLogElement);
         setCurrentChangeLogFileDOM(doc);
 
-        for (ChangeSet changeSet : changeSets) {
-            doc.getDocumentElement().appendChild(createNode(changeSet));
+        for (T child : children) {
+            doc.getDocumentElement().appendChild(createNode(child));
         }
 
         new DefaultXmlWriter().write(doc, out);
@@ -184,6 +187,19 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } else if (value instanceof LiquibaseSerializable) {
             node.appendChild(createNode((LiquibaseSerializable) value));
+        } else if (value instanceof Object[]) {
+            if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
+                String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
+                Element newNode = createNode(namespace, objectName, "");
+                for (Object child : (Object[]) value) {
+                    setValueOnNode(newNode, namespace, objectName, child, serializationType, parentNamespace);
+                }
+                node.appendChild(newNode);
+            } else {
+                for (Object child : (Object[]) value) {
+                    setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
+                }
+            }
         } else {
             if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
                 String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
@@ -387,4 +403,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
     }
 
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 }
