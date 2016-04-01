@@ -122,6 +122,7 @@ public class CompareControl {
     public static class SchemaComparison {
         private CatalogAndSchema comparisonSchema;
         private CatalogAndSchema referenceSchema;
+        private String outputSchemaAs;
 
         public SchemaComparison(CatalogAndSchema reference, CatalogAndSchema comparison) {
             this.referenceSchema = reference;
@@ -134,6 +135,14 @@ public class CompareControl {
 
         public CatalogAndSchema getReferenceSchema() {
             return referenceSchema;
+        }
+
+        public String getOutputSchemaAs() {
+            return outputSchemaAs;
+        }
+
+        public void setOutputSchemaAs(String outputSchemaAs) {
+            this.outputSchemaAs = outputSchemaAs;
         }
 
         public static String convertSchema(String schemaName, SchemaComparison[] schemaComparisons) {
@@ -163,7 +172,7 @@ public class CompareControl {
         }
     }
 
-    public static ComputedSchemas computeSchemas(String schemaNames, String referenceSchemaNames, String defaultCatalogName, String defaultSchemaName, String referenceDefaultCatalogName, String referenceDefaultSchemaName, Database database) {
+    public static ComputedSchemas computeSchemas(String schemaNames, String referenceSchemaNames, String outputSchemaNames, String defaultCatalogName, String defaultSchemaName, String referenceDefaultCatalogName, String referenceDefaultSchemaName, Database database) {
 
         //Make sure either both schemaNames and referenceSchemaNames are set or both are null. If only one is set, make them equal
         if (schemaNames == null && referenceSchemaNames == null) {
@@ -171,6 +180,15 @@ public class CompareControl {
         } else if (schemaNames == null && referenceSchemaNames != null) {
             schemaNames = referenceSchemaNames;
         } else if (schemaNames != null && referenceSchemaNames == null) {
+            referenceSchemaNames = schemaNames;
+        }
+
+        if (schemaNames == null && outputSchemaNames != null) {
+            if (defaultSchemaName == null) {
+                schemaNames = database.getDefaultSchemaName();
+            } else {
+                schemaNames = defaultSchemaName;
+            }
             referenceSchemaNames = schemaNames;
         }
 
@@ -188,18 +206,28 @@ public class CompareControl {
 
             List<String> splitReferenceSchemaNames = StringUtils.splitAndTrim(referenceSchemaNames, ",");
             List<String> splitSchemaNames = StringUtils.splitAndTrim(schemaNames, ",");
+            List<String> splitOutputSchemaNames = StringUtils.splitAndTrim(StringUtils.trimToNull(outputSchemaNames), ",");
 
             if (splitReferenceSchemaNames.size() != splitSchemaNames.size()) {
                 throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --referenceSchemas");
+            }
+            if (splitOutputSchemaNames != null && splitOutputSchemaNames.size() != splitSchemaNames.size()) {
+                throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --outputSchemas");
             }
 
             for (int i=0; i<splitReferenceSchemaNames.size(); i++) {
                 String referenceSchema = splitReferenceSchemaNames.get(i);
                 String targetSchema = splitSchemaNames.get(i);
+                String outputSchema = null;
+                if (splitOutputSchemaNames != null) {
+                    outputSchema = splitOutputSchemaNames.get(i);
+                }
 
                 CatalogAndSchema correctedTargetSchema = new CatalogAndSchema(null, targetSchema).customize(database);
                 CatalogAndSchema correctedReferenceSchema = new CatalogAndSchema(null, referenceSchema).customize(database);
-                schemaComparisons.add(new CompareControl.SchemaComparison(correctedReferenceSchema, correctedTargetSchema));
+                SchemaComparison comparison = new SchemaComparison(correctedReferenceSchema, correctedTargetSchema);
+                comparison.setOutputSchemaAs(outputSchema);
+                schemaComparisons.add(comparison);
                 referenceSchemas.add(correctedReferenceSchema);
                 targetSchemas.add(correctedTargetSchema);
             }

@@ -1,6 +1,5 @@
 package liquibase.diff.output.report;
 
-import liquibase.CatalogAndSchema;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;

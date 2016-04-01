@@ -305,6 +305,7 @@ public class Main {
                             && !cmdParm.startsWith("--includeCatalog")
                             && !cmdParm.startsWith("--includeTablespace")
                             && !cmdParm.startsWith("--schemas")
+                            && !cmdParm.startsWith("--outputSchemasAs")
                             && !cmdParm.startsWith("--referenceSchemas")
                             && !cmdParm.startsWith("--referenceUrl")
                             && !cmdParm.startsWith("--excludeObjects")
@@ -663,6 +664,13 @@ public class Main {
         stream.println(" --referenceDefaultSchemaName=<name>        Reference database schema to use");
         stream.println(" --schemas=<name1,name2>                    Database schemas to include");
         stream.println("                                            objects from in comparison");
+        stream.println(" --referenceSchemas=<name1,name2>           Reference database schemas to");
+        stream.println("                                            include objects from in comparison");
+        stream.println("                                            only needed if different than");
+        stream.println("                                            --schemas");
+        stream.println(" --outputSchemaAs=<name1,name2>             On diffChangeLog/generateChangeLog,");
+        stream.println("                                            use these names as schemaName");
+        stream.println("                                            instead of the real names.");
         stream.println(" --includeCatalog=<true|false>              If true, the catalog will be");
         stream.println("                                            included in generated changeSets");
         stream.println("                                            Defaults to false");
@@ -948,7 +956,7 @@ public class Main {
                 this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
         try {
 
-            CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(getCommandParam("schemas", null), getCommandParam("referenceSchemas", null),
+            CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(getCommandParam("schemas", null), getCommandParam("referenceSchemas", null), getCommandParam("outputSchemasAs", null),
                     defaultCatalogName, defaultSchemaName,
                     referenceDefaultCatalogName, referenceDefaultSchemaName,
                     database);

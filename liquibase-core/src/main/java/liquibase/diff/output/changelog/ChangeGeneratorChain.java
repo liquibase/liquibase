@@ -51,7 +51,10 @@ public class ChangeGeneratorChain {
         if (changes.length == 0) {
             return null;
         }
-        return changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        changes = changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        changes = changeGenerator.fixOutputAsSchema(changes, control.getSchemaComparisons());
+
+        return changes;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
@@ -88,7 +91,10 @@ public class ChangeGeneratorChain {
             return null;
         }
 
-        return changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        changes = changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        changes = changeGenerator.fixOutputAsSchema(changes, control.getSchemaComparisons());
+
+        return changes;
     }
 
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
@@ -125,6 +131,7 @@ public class ChangeGeneratorChain {
             return null;
         }
         changes = changeGenerator.fixSchema(changes, control.getSchemaComparisons());
+        changes = changeGenerator.fixOutputAsSchema(changes, control.getSchemaComparisons());
         return changes;
     }
 }

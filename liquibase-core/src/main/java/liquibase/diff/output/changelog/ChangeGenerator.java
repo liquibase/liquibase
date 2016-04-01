@@ -18,4 +18,6 @@ public interface ChangeGenerator {
     Class<? extends DatabaseObject>[] runBeforeTypes();
 
     Change[] fixSchema(Change[] changes, CompareControl.SchemaComparison[] schemaComparisons);
+
+    Change[] fixOutputAsSchema(Change[] changes, CompareControl.SchemaComparison[] schemaComparisons);
 }

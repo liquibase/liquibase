@@ -25,6 +25,31 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
             }
         }
         return changes;
+    }
 
+    @Override
+    public Change[] fixOutputAsSchema(Change[] changes, CompareControl.SchemaComparison[] schemaComparisons) {
+        if (changes == null) {
+            return null;
+        }
+        for (Change change : changes) {
+            for (String field : change.getSerializableFields()) {
+                if (field.toLowerCase().contains("schemaname") || field.toLowerCase().contains("catalogname")) {
+                    Object value = change.getSerializableFieldValue(field);
+                    if (value != null && value instanceof String) {
+                        for (CompareControl.SchemaComparison comparison : schemaComparisons) {
+                            if (comparison.getOutputSchemaAs() != null
+                                    && comparison.getComparisonSchema() != null
+                                    && (comparison.getComparisonSchema().getSchemaName().equalsIgnoreCase((String) value)
+                                    || comparison.getComparisonSchema().getCatalogName().equalsIgnoreCase((String) value))
+                                    ) {
+                                ObjectUtil.setProperty(change, field, comparison.getOutputSchemaAs());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return changes;
     }
 }
