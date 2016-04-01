@@ -36,7 +36,7 @@ public abstract class AbstractChangeGenerator implements ChangeGenerator {
             for (String field : change.getSerializableFields()) {
                 if (field.toLowerCase().contains("schemaname") || field.toLowerCase().contains("catalogname")) {
                     Object value = change.getSerializableFieldValue(field);
-                    if (value != null && value instanceof String) {
+                    if (schemaComparisons != null && value != null && value instanceof String) {
                         for (CompareControl.SchemaComparison comparison : schemaComparisons) {
                             if (comparison.getOutputSchemaAs() != null
                                     && comparison.getComparisonSchema() != null
