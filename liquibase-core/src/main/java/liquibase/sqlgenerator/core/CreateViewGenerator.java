@@ -46,10 +46,18 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
 
         List<Sql> sql = new ArrayList<Sql>();
 
-        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery());
+        StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
 
         if (!statement.isFullDefinition()) {
-            viewDefinition.prepend("AS").prepend(database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())).prepend("VIEW").prepend("CREATE");
+            viewDefinition
+                    .prepend(" ")
+                    .prepend("AS")
+                    .prepend(" ")
+                    .prepend(database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()))
+                    .prepend(" ")
+                    .prepend("VIEW")
+                    .prepend(" ")
+                    .prepend("CREATE");
         }
 
         if (statement.isReplaceIfExists()) {

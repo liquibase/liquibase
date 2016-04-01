@@ -131,6 +131,16 @@ public class StringClauses {
         return this;
     }
 
+    public StringClauses prepend(LiteralClause literal) {
+        if (literal != null) {
+            LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+            newMap.put(uniqueKey(literal.getClass().getName().toLowerCase()), literal);
+            newMap.putAll(this.clauses);
+            this.clauses = newMap;
+        }
+        return this;
+    }
+
     /**
      * Adds a clause with the given key to the beginning of the list.
      */
@@ -149,6 +159,9 @@ public class StringClauses {
      * Convenience method for {@link #prepend(String, String)} that uses the clause as the key.
      */
     public StringClauses prepend(String clause) {
+        if (StringUtils.trimToNull(clause) == null) {
+            return prepend(new Whitespace(clause));
+        }
         return prepend(uniqueKey(clause), clause);
     }
 
