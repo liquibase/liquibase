@@ -29,9 +29,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     private Document currentChangeLogFileDOM;
 
+    private static final String XML_VERSION = "1.1";
+
     public XMLChangeLogSerializer() {
         try {
             this.currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            this.currentChangeLogFileDOM.setXmlVersion(XML_VERSION);
         } catch (ParserConfigurationException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -79,7 +82,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
 
         Document doc = documentBuilder.newDocument();
-        doc.setXmlVersion("1.0");
+        doc.setXmlVersion(XML_VERSION);
         Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, "databaseChangeLog");
 
         changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE);
