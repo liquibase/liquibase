@@ -30,11 +30,14 @@ import liquibase.structure.core.Schema;
 
 public class MockDatabase implements Database, InternalDatabase {
 
+    private final static int FETCH_SIZE = 1000;
+	
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
     private boolean supportsCatalogs = true;
     private boolean supportsSchemas = true;
-    private String defaultCatalogName;
+	private boolean supportsSequences = true;
+	private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
 
@@ -203,10 +206,14 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return true;
+		return supportsSequences;
     }
 
-    @Override
+	public void setSupportsSequences(boolean supportsSequences) {
+		this.supportsSequences = supportsSequences;
+	}
+
+	@Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
     }
@@ -635,6 +642,11 @@ public class MockDatabase implements Database, InternalDatabase {
 
     public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType, final boolean quoteCorrectedName) {
         return correctObjectName(name, objectType);
+    }
+
+    @Override
+    public Integer getFetchSize() {
+        return FETCH_SIZE;
     }
 
     @Override

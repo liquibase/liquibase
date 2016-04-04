@@ -5,6 +5,7 @@ databaseChangeLog:
         author: nvoxland
         changes:
         - createTable:
+            tableName: person
             columns:
             - column:
                 name: id
@@ -16,9 +17,8 @@ databaseChangeLog:
                 name: firstname
                 type: varchar(50)
             - column:
+                name: lastname
                 type: varchar(50)
-                tableName: person
                 constraints:
                     nullable: false
-                    name: lastname
 

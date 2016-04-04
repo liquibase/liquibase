@@ -69,6 +69,7 @@ public class DatabaseType extends DataType {
             if(password != null && !password.isEmpty()) {
                 connectionProps.setProperty(PASSWORD, password);
             }
+            ConnectionProperties connectionProperties = getConnectionProperties();
             if(connectionProperties != null) {
                 connectionProps.putAll(connectionProperties.buildProperties());
             }
@@ -121,9 +122,9 @@ public class DatabaseType extends DataType {
 
             return database;
         } catch (SQLException e) {
-            throw new BuildException("Unable to create Liquibase database instance. A JDBC error occurred.", e);
+            throw new BuildException("Unable to create Liquibase database instance. A JDBC error occurred. " + e.toString(), e);
         } catch (DatabaseException e) {
-            throw new BuildException("Unable to create Liquibase database instance.", e);
+            throw new BuildException("Unable to create Liquibase database instance. " + e.toString(), e);
         }
     }
 
@@ -204,6 +205,10 @@ public class DatabaseType extends DataType {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public ConnectionProperties getConnectionProperties() {
+        return isReference() ? ((DatabaseType) getCheckedRef()).getConnectionProperties() : connectionProperties;
     }
 
     public void addConnectionProperties(ConnectionProperties connectionProperties) {

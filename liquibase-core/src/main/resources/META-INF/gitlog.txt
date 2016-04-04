@@ -1,16 +1,152 @@
+eef7048 CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
+c0550fb CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
+33057b9 Give test a little more time to run on a slow build server
+26a79ae Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+f84921e Merge branch 'ddb-master' into ddb
+3118056 CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
+06622de Merge remote-tracking branch 'origin/ddb-master' into ddb-merge
+23433fe CORE-2589 Output xml changelogs as xml version="1.1" (cherry picked from commit d774f9c)
+d07e657 CORE-2705 diffChangeLog generates dropColumn when dropping an index with a computed column
+8f18491 Use default schema in procedure body if specified on connection
+816bb38 Better handling of index names in mssql
+a72b48e Fixed snapshotting of time and smallmoney handling in mssql snapshots
+34ff414 Need to preserve nullability for timestamp on mssql with types now coming through as [timestamp]
+74dbf80 Commented out tests that are failing because URL.toExternalForm is very platform dependent
+1076676 Fixed tests
+3a17753 Better handling of ntext types in mssql
+084c0b0 Reverted change, MSSQL can reference objects through the catalog name
+84138a2 MSSQL can't reference objects through the catalog name
+e0badd6 CORE-2636 includeAll uses full file path
+db6ab04 CORE-2636 includeAll uses full file path
+b56851a CORE-2531 Wrong type mapping of BINARY type in Oracle
+d7e2d2e CORE-2703 MySQL NCLOB should conver to LONGTEXT CHARACTER SET utf8
+de0a05f CORE-2641 runOnChange change set runs every time even if there wasn't changed
+187caef CORE-2641 runOnChange change set runs every time even if there wasn't changed
+8fc2846 Fixing test issues
+acd7877 CORE-2689 TIMESTAMP parameters dropped for DB2
+dac4c6b CORE-2666 InsertSetGenerator hard-codes the InsertGenerator
+223e194 CORE-2686 StandardChangeLogHistoryService.hasDatabaseChangeLogTable value is cached too aggressively
+d2cec25 CORE-2679 Hibernate diffChangeLog NullPointerException
+be770bb CORE-2547 liquibase.database.core.DB2Database - Improper Resource Shutdown or Release
+6182ab4 CORE-2547 liquibase.database.core.DB2Database - Improper Resource Shutdown or Release
+d134a8f Better Oracle compatibilty check error message
+f494623 CORE-2529 MSSQL auto_increment numeric is 1 smaller in generateChangeLog
+47b1ed9 CORE-2525 Error on dropping sequence
+58a177e CORE-2521 addAutoIncrement on Postgres generates invalid SQL when specific schema is used
+fe0a772 CORE-2514 bad Maven documentation for outputDefaultCatalog and outputDefaultSchema
+d9bcfe4 CORE-2694 "national character varying" type is not recognized
+d65cbc1 CORE-2508 GlobalConfiguration liquibase.should.run alias is incorrect
+96f6df8 Handle image correctly
+58c84a6 Handle VARBINARY(MAX) correctly
+b573a73 CORE-2599 generateChangelog produces incorrect values for binary type
+51c8f00 CORE-2637 Creating column with tinyint(1) instead created as default tinyint
+2131161 CORE-2622 ISO date syntax to rollback to.
+00bf946 CORE-2619 Make changeLogFile optional for changeSetExecuted
+181c74f CORE-2611 Sybase ASE generated table name is wrong. Roll back CORE-2447
+dc84cf3 CORE-2609 Liquibase command line fails when using JTDS driver with SSO
+af4b430 CORE-2605 addColumn with multiple columns, does not create the constraints
+e936ed6 CORE-2601 ORDER keyword isn't escaped for Oracle
+f039a44 CORE-2587 Validation not performed before rollback
+79681bd Switched to SystemUtils.LINE_SEPARATOR
+ae1c603 CORE-2581 mysql update emits incorrect sql for BIT(1) when default specified
+088229b CORE-2548 primaryKeyTablespace is ignored in PostgreSQL
+24c377a CORE-2100 formatted sql validCheckSum
+956ffa1 CORE-2056 generateChangeLog generates too many 'constraints'
+b75c0bf Cannot use catalog names for views in mssql
+7387400 CORE-1985 constraints tag is missing referencedTableSchemaName
+bb452bd CORE-1836 Oracle Integer mapping
+bab1ed8 CORE-1447 Inconsistent line endings in updateSQL produced files
+991f4b1 CORE-2645 Rollback referencing a change set in current child file cannot be parsed
+42ef228 CORE-2658 Move the liquibase-debian module to a separate profile
+b6548de CORE-2591 autoincrement problem with ORA 12c + COMPATIBLE param to 11
+dcc9ab0 CORE-2674 LoadUpdateData with onlyUpdate="true" generates invalid statements for Oracle DB
+95b869d CORE-2662 NumberFormatException with default values of type 'real' in postgresql
+70faa71 CORE-2663 New MySQL 5.7.x reserved keywords are not being escaped
+75763cf CORE-2666 InsertSetGenerator hard-codes the InsertGenerator
+bdbea74 CORE-2671 CORE-521 Handle Timestamp with Time Zone types where supported
+d28d08c CORE-2673 includeAll relativeToChangelogFile doesn't work for FileSystemResourceAccessor
+cb8392e CORE-2674 LoadUpdateData with onlyUpdate="true" generates invalid statements for Oracle DB
+1b5affb Moved duplicate changeset detection logic to ChangeLogIterator to avoid multiple calls to generateCheckSum which can be expensive with files, and also is unneeded and can fail for changeSets that should not run due to context/label/preconditions
+8493ecb Moved duplicate changeset detection logic to ChangeLogIterator to avoid multiple calls to generateCheckSum which can be expensive with files, and also is unneeded and can fail for changeSets that should not run due to context/label/preconditions
+f13cb3a Brought in xsd changes lost from 3.4
+0157590 Brought in xsd changes lost from 3.4
+ffec638 CORE-1839 H2 multicolumn unique constraints
+19c7403 CORE-2333 loadData fails with quoted string containing a comma
+718f4fd Validation error if no path attribute on includeAll
+d4e8849 CORE-2225 please add the OLD check sum to the validation error message
+6218642 CORE-2531 Wrong type mapping of BINARY type in MySQL, H2, HSQLDB and Postgresql
+e56e0d5 CORE-1935 Formatted SQL generateChangeLog failed
+fd6b2b1 Improvements to parsing logic
+7698a18 CORE-1969 Support for AND/OR context expressions in formatted sql
+f2ef729 Support for extensions that have their own ColumnConfig subclasses
+5e4db23 CORE-2411 BLOB string default values not quoted
+6c25294 Merge branch 'balazs-zsoldos-CORE-1887'
+221a8bc Merge branch 'CORE-1887' of https://github.com/balazs-zsoldos/liquibase into balazs-zsoldos-CORE-1887
+3345221 Only compare column names, not full reference since that includes table/schema that may be different
+48f7671 Ignoring changesets that are included twice
+cd56ff7 Reverted CORE-1887 Including the same ChangeSet twice causes ValidationFailedException
+6a16203 CORE-2024 Clear out unused code that was producing uneeded dependencies
+0ffa480 CORE-2024 Clear out unused code that was producing uneeded dependencies
+021624a CORE-2693 Postgresql dropAll with serial columns fails because tables are dropped then sequences which no longer exist
+b2b879c CORE-2024 Clear out unused code that was producing uneeded dependencies
+fbaee66 CORE-2059 escapeObjectName has no respect for quotingStrategy QUOTE_ONLY_RESERVED_WORDS on Postgres
+38a0689 Merge pull request #559 from mbocek/master
+8d42977 Remove apache.commons references.
+52ffb18 maven poms clean up
+20aa0f5 Oracle does not support adding auto_increment to an existing column
+e87c2c7 Removed duplicated collection elements when parsing XML
+2176b06 Merge branch 'master' into ddb-master
+64d2719 Merge remote-tracking branch 'origin/master'
+f02f8f3 Fixed failing tests
+bea87ac Missed setting column value if there is no <column> tag
+f26d6e1 Merge pull request #557 from umcodemonkey/update-poms
+8ffe8e4 Fix build, remove defaults
+a33ec2c CORE-2540 Allow vendor independent SEQUENCE definition
+52be472 Merge branch 'patch-2' of https://github.com/lazaronixon/liquibase into lazaronixon-patch-2
+52098d9 Merge remote-tracking branch 'origin/master'
+b5a293d Merge branch 'support_lob_loadData' of https://github.com/pellcorp/liquibase into pellcorp-support_lob_loadData
+f6018d9 Merge pull request #522 from NSIT/CORE-155
+d54a7ab Converted test to .groovy
+b527243 Merge pull request #528 from zsigmond-czine-everit/master
+03b2fc7 Merge pull request #550 from mbocek/master
+63e474a Merge pull request #555 from SquirrelGrip/master
+79ac877 Merge pull request #556 from RichardBradley/h2-remarks
+7d532f5 Merge branch 'master' into ddb-master
+cab63c8 Merge branch 'RichardBradley-core-2594-PackageScanClassResolver'
+ec89453 Add column remark support for H2.
+4b97aff Merge branch 'ddb'
+1e1654b CORE-2680 Fixed the classpath prefix not being removed when comparing RanChangeSets and ChangeSet
 3af07b4 DB2 sees empty string default values as "NULL", especially in oracle-compatibility mode.
 837de9d Cleaned up View.toString() output
 4d17f52 Improve ForeignKey.toString() format for diff
 4090d77 Improve ForeignKey.toString() format for diff
 1aabaab CORE-2615 Multi-schema improvements: DB2 does support schemas on index names
 6bbccf8 CORE-2615 Multi-schema improvements: DB2 schemas come through as catalogs sometimes
+03b020a CORE-2672 createSequence with order produces invalid statement on postgresql: Postgresql does not support "ordered"
+da4ce59 Merge branch 'ddb'
 1c9e2f3 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 5fcf60d Don't quote object names or it causes problems in mode QUOTE_ALL. Use escapeStringForDatabase instead.
+42ab8b3 Removed commentary from merged commits
 459f2db Fix NPE in Standard Changelog History Service in certain cases
+9ac6d47 Reduced fetch size. Original fetch size causing SQLWarning exception with timesten driver.
+997ec93 Merge branch 'core-2594-PackageScanClassResolver' of https://github.com/RichardBradley/liquibase into RichardBradley-core-2594-PackageScanClassResolver
+9d94532 Merge remote-tracking branch 'origin/master'
+c6d6bea Merge branch '3.4.x'
+91a4e47 Merge pull request #545 from utkuozdemir/CORE-1966
+849d3c1 Merge pull request #552 from syncron/CORE-2669
+6c2c0ac Merge pull request #553 from syncron/CORE-2670
+d1f1ff8 Fixed compilation error from merge
+75df0ba Merge branch 'ddb'
+e190427 CORE-2670, CORE-2497: Fix remarks escapes
+795b055 Revert "CORE-1660 "remarks" attribute is ignored in MSSQL"
+c859d3f CORE-2669: Allow BaseLiquibaseTask extensions to create Database
+76f6b17 CORE-2669: Make closeDatabase(Database) protected
 2ec280f CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
 a6f5dda Merge branch 'CORE-2657_deploymentid' into ddb
 720762c CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 5bafd7b CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+5dd5a44 CORE-2594 replace FileUtil.unzip with loader.getResourceAsStream when package scanning nested JARs
+85976ff CORE-2594 change ClassLoaderResourceAccessor to use JarFile instead of FileUtil.unzip
 34fdcbc CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 4c2b502 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 6eb0731 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
@@ -21,28 +157,46 @@ a12b0d3 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track change
 78058d5 CORE-2615 Multi-schema improvements: better handling of default schema comparisions with offline snapshots that may have no default
 ef76309 CORE-2615 Multi-schema improvements: better handling of default schema comparisions with offline snapshots that may have no default
 b16a5d9 CORE-2657 Add new DATABASECHANGELOG.DEPLOYMENT_ID column to track changeSets deployed together
+0b7fac8 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+f482903 Merge branch 'ddb'
 83bbe2b Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 006a3e9 Merge branch 'multiSchemaImprovements' into ddb
 9a8e7cd Merge branch 'multiSchemaImprovements' into ddb
 bf9faf4 Removed easymock usage
 2889d5e CORE-2615 Multi-schema improvements
+9fcadf0 CORE-1966 disabled sys.extended_properties support for Azure DB <V12
+a3b1a7f CORE-1966 disabled sequence support for Azure DB.
+0885bc4 Merge pull request #538 from jdenly/ranchangeset-classpath-prefix
+f7f3b8f Merge pull request #537 from DevFactory/staging/method-invokes-inefficient-number-constructor-fix-1
+f0e970c Merge pull request #539 from DevFactory/staging/lazy-initialization-of-static-fields-should-be-synchronized-fix-3
+acb210d Merge pull request #540 from Panthro/patch-1
+7af7c66 Merge pull request #541 from gudmundur-heimisson/master
+a8bdee3 Merge pull request #542 from mattbertolini/bug/easymock-case-sensitive-fix
+dbb540c CORE-2651 Derby: Default unknown version to 10.6 to support sequences
+4ea3303 Merge remote-tracking branch 'origin/master'
+52c868a Merge branch 'garagepoort-CORE-2642-fix-xsd-loading-on-osgi'
+4e390f1 Merge branch 'CORE-2642-fix-xsd-loading-on-osgi' of https://github.com/garagepoort/liquibase into garagepoort-CORE-2642-fix-xsd-loading-on-osgi
+3d5802b check for no connection or offline connection (cherry picked from commit 96640cc)
 c2ce48a CORE-2615 Multi-schema improvements - clear schemaName if default schema
 efadbc4 Commented out multi-schema improvement code cherry-picked in
 213c9d8 CORE-2640 Better handling of replaceIfExists in createProcedure (cherry picked from commit dd8f987)
 7461766 CORE-2626 Use schemaName in createProcedure (cherry picked from commit e398239)
 9ea33a5 Cherry pick liquibaseSchemaName -> liquibaseCatalogName logic from master
+71eb86e refactor LiquibaseEntityResolver to use LiquibaseSchemaResolver +  added tests.
 1f72da8 Reverted pom and gitlog.txt files back
 0391f2e Merge branch 'multiSchemaImprovements' of https://github.com/Datical/liquibase into multiSchemaImprovements
 dd8f987 CORE-2640 Better handling of replaceIfExists in createProcedure
 703c015 Merge branch 'createProcedure_schemaName' into multiSchemaImprovements
 b6cfb54 Prep for build 3.4.735-SNAPSHOT
 8b4be15 Prep for build 3.4.
+780dffd fix resource loading of xdd
 a2fab6d CORE-2615 Multi-schema improvements - handle comparing default schemas when they are the only ones compared
 9425d7f CORE-2638 Diff not generating replaceIfExists=“true” attribute for View in changeset
 e116948 CORE-2615 Multi-schema improvements - handle comparing default schemas when they are the only ones compared
 77362ce CORE-2615 Multi-schema improvements - Don't include catalog name in diff comparisons
 90f94d4 CORE-2615 Multi-schema improvements - Better handling of comparing certain schemas from a snapshot that contains more
 8a822c8 CORE-2615 Multi-schema improvements - Don't filter out null-schema-name objects, may be catalog-level objects
+ccd7de9 Fix the Maven artifact name for EasyMock.
 cbcf5f4 CORE-2615 Multi-schema improvements: Use --schemas as the catalog in non-schema-supporting databases
 713d1f0 CORE-2615 Multi-schema improvements: Don't include catalog in object comparisons, only the schema
 1c8a8fe CORE-2615 Multi-schema improvements: Don't include catalog in object comparisons, only the schema
@@ -54,54 +208,195 @@ c6df978 CORE-2625 Diff: should not be case sensitive in column default value fun
 6647434 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
 77ab1f6 CORE-2625 Diff: should not be case sensitive in column default value functions
 e398239 CORE-2626 Use schemaName in createProcedure
+13d70e7 Fix formatted sql precondition not expanding changelog parameters.
 5021ae4 CORE-2624 MSSQL: don't include sizes for UDTs
+bc29a2c FIxing NPE when object name is null
+1b06154 Update RanChangeSet to handle both changelog paths starting with classpath prefix.
 c14da87 Handle errors on snapshot load
 0f4aae3 CORE-2624 MSSQL: support identity UDT columns in update
 45d26b2 CORE-2623 Oracle: primary keys on tables recovered from recyclebin are not properly snapshotted
+4fb29f8 Fixing squid:S2444 -  Lazy initialization of "static" fields should be "synchronized"
+bcfe2a7 Fixing findbugs:DM_NUMBER_CTOR -  Performance - Method invokes inefficient Number constructor; use static valueOf instead
 38da27a Column comments not coming through for alternate schemas
+9ba4bfb Merge pull request #534 from srinivasthallapalli/core_2604_n_core_2606
+a340323 Merge pull request #535 from iihero/3.4.x
+228aebf Merge pull request #532 from mozvip/patch-1
+73ba81f Merge branch 'master' of https://github.com/Datical/liquibase
+ab4a642 Merge branch 'master' of https://github.com/Datical/liquibase
+525bb6b Merge branch 'multiSchemaImprovements'
+08b7515 Merge branch 'ddb'
 f48b567 CORE-2615 Multi-schema snapshot bugfixes
 005f9b9 CORE-2615 Multi-schema snapshot bugfixes
 68a7cfb CORE-2615 Multi-schema snapshot bugfixes
 6f15d8c CORE-2615 Multi-schema snapshot bugfixes
 6b30d04 CORE-2615 Multi-schema snapshot bugfixes
 8136af3 CORE-2615 Multi-schema snapshot bugfixes
+8d72d47 Merge branch '3.4.x_sybase' into 3.4.x
+3ed042a In Sybase ASE database, "timestamp" is an internal type. When mapping in the changeset definition, it should be mapped into "datetime" column type. Fix it here.
+7ba8974 In Sybase ASE database, "timestamp" is an internal type. When mapping in the changeset definition, it should be mapped into "datetime" column type. Fix it here.
 6d90a41 Test fixes
 baaea0a CORE-2615 Multi-schema snapshot bugfixes
 ea4ce11 CORE-2615 Multi-schema snapshot bugfixes
 bd70e7a Correctly escape column names when fetching remarks
 f782fec Unescape commas that sometimes come through still escaped
+fff5072  0# Fixes for CORE-2604 and CORE- 2606
 104c3a3 CORE-2612 Oracle: include BYTE in CHAR and VARCHAR types from snapshot/generateChangeLog
 f735662 Don't throw validation errors for --schemas flag on snapshot and generateChangeLog
+96640cc check for no connection or offline connection
 4e723c3 DVONE-3428 Use a LinkedHashSet in LabelExpression to keep the labels in the input order
+a5caa74 Fix for CORE-2610
+2040559 Merge branch 'ddb'
+cfc5a1d Merge branch 'ddb'
+a8e04b9 Merge branch 'ddb'
+c777ea1 Merge branch '3.4.x'
+b03a618 [maven-release-plugin] prepare for next development iteration
+7d70eb1 [maven-release-plugin] prepare release liquibase-parent-3.4.2
+eff0a2b Preparing for 3.4.2 release
+98ff41b CORE-2544 LogFactory does not get reset
+130ebc4 CORE-2588 Bad cast
+5fba38e CORE-2590 Default constraint names are not quoted
+1613ae6 CORE-2598 Liquibase maven update plugin: "length for type varchar cannot exceed 10485760"
+ba10395 Fixed failing test
+6897cfb CORE-2566 Maven - setting skip= true does not work
+3a57c11 CORE-2481 Primary key creation issue with informix
+f8713be CORE-2436 Logging in ClassLoaderResourceAccessor prevents installation of custom Logger
+7d1c340 CORE-2516 Wrong snapshot generation causes exception during diff snapshot command
+1305a10 CORE-2516 Wrong snapshot generation causes exception during diff snapshot command
 b4fc4bb DVONE-3393 explicitly set xml version to 1.0. In some environments it seemed to default to 1.1
+c73824c Created informix create table test
+a16a627 CORE-1778 createSequence doesn't work on MSSQL
+5eb8528 CORE-1840 Liquibase fails when run on a computer that can't connect to the internet
+03238a2 CORE-2285 Code in Liquibase class inconsistent
+dfd5713 CORE-2317 Custom ConfigurationValueProvider not working
+dd4277e CORE-2328 AbstractExecutor should implement execute(Change)
+91ed438 CORE-2349 loadUpdateData does not escape column names in "ON DUPLICATE" clause
+eb5c24e Merge remote-tracking branch 'origin/master'
+2297ce6 CORE-2376 LiquibaseCatalogName in commandLine not working correctly
+8468e67 CORE-2447 In sybase, schema is bad preixed Fixed tests
+1191021 CORE-2407 Keywords not escaped when used as column/table names
+323d06f CORE-2447 In sybase, schema is bad preixed
+919c99e CORE-2447 In sybase, schema is bad preixed
+c299fca CORE-2447 In sybase, schema is bad preixed
+33681f2 CORE-2596 DatabaseChangeLogLock race condition exists if two nodes both try to create the table
+fad3504 CORE-2469 Error in method ColumnConfig.setValueNumeric(String)
+db724c8 CORE-2475 Check for datatype for clobs in informix and only used prepared statements in that case
+f636356 Removed extra !
+0f7564f CORE-2482 Number type issue with informix
+cda251e REVERT: CORE-2256 Drop Sequences before Tables
+cb77d3f CORE-2491 Shouldn't a custom change produce a warning if run in updateSql mode
+11a026e CORE-2494 Exporting/generating badly formatted SQL
+a4e19da CORE-2498 Generation of TIMESTAMP(29) causing error in PSQL log TIMESTAMP(6) WITHOUT TIME ZONE
+46f8177 CORE-2500 Fast check of ColumnExistsPrecondition causing transaction abort on PostgreSQL database
+45d67e5 Merge pull request #526 from Willem1987/CORE-2554
+0270c71 Handle empty changelog file like the file isn't there
+af9f873 CORE-2576 The 'dbms' attribute on <createProcedure> is not not taken into account when parsing changes
+3171be2 CORE-2579 don't drop Oracle system sequences
+4e93819 Handling nclob type for MySql
+58e1aba Handling binary type for Oracle
+a272d9f ChangeSet's runOnChange fix: make ShouldRunChangeSetFilter consider with the last RanChangeSet execution
+740ef60 Merge pull request #527 from magnusr/feature/oracle_system_sequences
 9a33021 Reverted CORE-2589 Output xml changelogs as xml version="1.1"
+98b9aba CORE-2579 don't drop Oracle system sequences
 28d9b33 Allow extensions to control label and context columns size
 4338052 CORE-2589 Output xml changelogs as xml version="1.1"
+fbfe958 change to changeSets access with field access
+449d525 rename test mehtod name (add test prefix)
+b1e8d71 add newline at end of files
+1a0c58b ignore duplicate change sets
+582dd2b Merge remote-tracking branch 'origin/master'
+1330ea5 CORE-2584 ValidCheckSum is valid for both stored database values and current changeSet checksum
+3b37beb Merge pull request #521 from logemann/master
+efbb8c1 Merge branch 'ahus1-CORE-910-mssql-nocount'
+b3b42f8 CORE-910 Lock is not released if nocount is on for sql server 2008
+815bd5f Merge branch 'CORE-910-mssql-nocount' of https://github.com/ahus1/liquibase into ahus1-CORE-910-mssql-nocount
+b95f7af Merge remote-tracking branch 'origin/3.4.x' into 3.4.x
+3c8f931 CORE-2549 Performance regression in resolving local host (cherry picked from commit 15c5925)
+73111d1 Merge pull request #516 from gbehrmann/fix/localhost
+3c9e8be CORE-155 Add context to ChangeLogInclude/ChangeLogIncludeAll
 96a2362 Support continueOnError flag on SqlStatement
+39a4161 CORE-155 Add ability for a change set to inherit context expressions via databaseChangeLog, include or includeAll parent containers
+0859643 Merge pull request #524 from hoegertn/oracleColumnExists
+728af95 Merge pull request #518 from solarys/deferrable_support
+3508c97 Merge pull request #515 from danielkec/master
+f9a3fd1 CORE-2577 Add resourceComparator attribute to includeAll to override sorting
+69b6731 Merge remote-tracking branch 'origin/master'
+e9e918f Merge pull request #512 from jimmycd/FilterIncludeAll-configurable-comparator
+4eb8a61 Merge branch 'ddb'
 840be42 CORE-2563 DiffChangeLog that adds columns does not preserve column order
 4177583 CORE-2560 Add new runOrder="first|last" attribute to control when a changeSet is ran
+d50997b Merge branch 'ddb'
+b443df8 Merge branch 'ddb'
+5fd3c06 Added databaseChecksumsCompatible variable.
+e388acc Merge remote-tracking branch 'origin/master'
+ccae26f Note on  https://github.com/liquibase/liquibase/pull/359/files says current_schema() works for postgres and redshift
 4079754 CORE-2563 DiffChangeLog that adds columns does not preserve column order
+83e27c9 fix escaping of column, table and schema on ColumnExistsPrecondition
 f8a1095 CORE-2562 MSSQL: Snapshot errors if table names have single quote marks in them
 86743f8 CORE-2561 Add "cycle" attribute to alterSequence
 2ab1080 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 fdc4f15 CORE-2560 Add new runOrder="first|last" attribute to control when a changeSet is ran
 c554bd7 document extracted method
+374e5da logging fix prevents stack trace in user definable log
+12b35f7 Merge pull request #520 from DieterVDW/CORE-2555/BIT-parse
+f1749b9 Merge branch 'jimmycd-ear-changelog-order'
+403ec23 Merged https://github.com/liquibase/liquibase/pull/511
+c0faf91 Merge pull request #513 from gregjones60/informix_connection_schema_name_revisited
+6e9fb70 Merge pull request #508 from bsandiford/CORE-2539
+cc01fa6 Merge branch 'pellcorp-change_exec_listener_class'
+585fb7c CORE-2541 Add support for registering a Change Exec Listener on command line
+bf6f67f Merge branch 'change_exec_listener_class' of https://github.com/pellcorp/liquibase into pellcorp-change_exec_listener_class
 6e42653 DB2 9.7 failing on "null as xyz" columns with error:
+af2acbf Merge remote-tracking branch 'origin/master'
+d5a6da4 Merge branch 'balazs-zsoldos-CORE-1690'
+47713d8 CORE-1690 Improved OSGi support
+30b0d1f Merge branch 'CORE-1690' of https://github.com/balazs-zsoldos/liquibase into balazs-zsoldos-CORE-1690
+ae143f4 CORE-2555: Also support the uppercase B'0' notation.
+e63bae6 CORE-910: Handle MSSQL returning rowcounts of -1 when NOCOUNT enabled
 a1ac8cb CORE-2553 DB2: add ability to disable automatic reorg statements
 d2b609e Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 c54a672 CORE-2552 Oracle performance: fetch view definition along with original view to reduce the number of needed queries
+ddd903a Added deferrable support for PostgresDatabase
 22ab31d make initializeDatabase method public
+ba64bd0 Merge pull request #507 from bsandiford/CORE-2299-bugfix
+560fc27 Merge pull request #504 from iherasymenko/feature/h2-mysql-binary-handling
+cf5028b Merge pull request #503 from pellcorp/oracle_timestamp_3_4_x
+2eaecab Merge remote-tracking branch 'origin/3.4.x' into 3.4.x
+ae3fa86 fix CORE-2510 (cherry picked from commit 1a36932)
+8316f22 Merge pull request #498 from russ-p/patch-1
 5bad67a Refactor out initialization/schema setup logic to its own method
+b34e5fe Merge pull request #497 from talklittle/CORE-1468
+ced7e63 Merge pull request #496 from ArloL/patch-4
+15c5925 CORE-2549 Performance regression in resolving local host
+52197c1 Fix oracle sequence name with schema quoting
 79e463c CORE-2528 Oracle: improve unique constraint snapshot query performance
 8c8418d CORE-2545 MSSQL: createProcedure fails if replaceIfExists=true and body uses "create proc" rather than "create procedure"
+16320aa Fix table name
+e4c0c00 Fix schema name generation
 8bcf816 CORE-2528 Oracle: improve unique constraint snapshot query performance
+4f219ec Adding new Attribute for controllnig order-logic of changelogs by passing a Class implementing Comparator<String>. If no comparator is given, default implementation is taken.
+192b67f by ignoring WEB-INF/classes in path all changelog Files independent whether they are in a WAR or in a JAR are order following the same rule (path only). So in case chagelog files are distributed over multiple modules in ear, they are treated in the right desired (alphanumerical) order driven by path only.
+7240c1c added missing dependency org.easymock.easyMock:2.5.2
 f3d09a0 Cherry-picked improved mssql unique constraint SQL from master
+148b0c2 CORE-2543 added timestamp support for oracle sql generation
+bef71b0 CORE-2541 add support for specifying a change exec listener on command line
+32d20d5 CORE-2542 added support for specifying clob / blob in loadData
+e5b6c08 CORE-2539 - for CSV files, ensure the number of elements in each data line exactly matches the number of header elements. - Also - fix the line number display when they don't match (was off by 1).
+14007e8 CORE-2299 - bugfix - apply 'errorIfMissingOrEmpty' attribute for 'includeAll' to dbchangelog-3.5.xsd.  (Was in 3.4, but not 3.5)
 209ba6d Removed unused columns from Oracle all columns snapshot query
+8854900 Proper handling BINARY type in MySQL and H2
 3fcbe35 CORE-2528 Oracle: improve unique constraint snapshot query performance
 ad22a99 CORE-2528 Oracle: improve unique constraint snapshot query performance
 025f7bd CORE-2528 Oracle: improve unique constraint snapshot query performance
 b2626d9 CORE-2524 MSSQL: need to escape default value constraint names
 477ce51 When checking if the index needs to be made, use the actual schema and handle generateChangeLog correcty
+9f64377 Merge remote-tracking branch 'liquibase/master' into CORE-1690
+a71b06a Merge pull request #495 from mwaylabs/FindForeignKeyConstraintsGeneratorDerby
+e36f8e4 Merge pull request #493 from mwaylabs/AddForeignKeyConstraintGenerator_MSSQL_RESTRICT
+d52a9f9 Merge pull request #491 from oreinert/add-missing-h2-keywords
+e71d271 Merge branch '3.4.x'
+dc41bef Merge branch 'ddb'
+c7aa061 CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
+e538403 CORE-931 addColumn should support not-null constraint with an initial default value
 b0533d7 Do not create a backing primary key if it already exists
 f6540b8 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 0c25f4c CORE-2518 DB2: snapshot sees DATE types as TIMESTAMP
@@ -109,39 +404,172 @@ f6540b8 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 8b3b9d0 add info-level logging of classpath changes
 3040668 CORE-2517 Foreign key snapshot improvements for DB2
 0cb125c CORE-2513 DiffChangeLog fixing changed indexes misses "unique" attribute
+1a36932 fix CORE-2510
 8f7e56d CORE-2512 Both defautValueComputed and defaultValue included in addColumn diffChangeLog outputs if value is a computed value
 e8f191d CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
+5cdae61 [CORE-1468] Comparison database types for missing table
+cdba22c Merge branch 'master' into ddb-master
+2d09956 H2 uses REAL instead of FLOAT
+76a825f implements FindForeignKeyConstraintsGenerator for the Derby database.
+cc0100b onUpdate="RESTRICT" is to be ignored on MS SQL Server like it is done for onDelete already.
+d7d6327 removing liquibase-osgi from parent project pom
+e3b41c9 Merge remote-tracking branch 'liquibase/master' into CORE-1690
 2721e26 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 3edb4d7 CORE-2493 ExecuteShellCommand improvements
 a1c67cb DVONE-2669 Set the orderExecuted field on the RanChangeSet object
+a46668e CORE-2505 Add missing keywords for H2 database.
+ca928b2 Add "SEQUENCE" to exception description.
 d45b672 improve deebug output
+62f5654 Liquibase OSGi compatibility
 57d6d0e removing logged warning when converting a ParsedNode to a Change results in null. This is common for attributes in XML changelogs, so very noisy. Will need a better solution.
+756c0a9 Sequence Support for LoadData
 0960a86 improve exception handling
 3213916 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
 e1421ff prevent possible null pointer exception
 d34b1b2 Improve Exception handling
 4e3b93e Log a warning when there is a changelog tag that is not handled. Includes a test.
+9c04759 Merge remote-tracking branch 'origin/master'
+4e509a2 Merge branch '3.4.x'
+7363f8e Merge pull request #485 from talklittle/fix-generatechangelog-diffchangelog
+2c29b83 Merge pull request #484 from viftodi/getConnectionSchemaName_Fix
+20fb39d Merge pull request #483 from evigeant/fix-valuelobfile-classpath
+cd1d407 Merge pull request #482 from evigeant/fix-mssql-snapshot
+4290d61 Merge pull request #487 from NSIT/CORE-2490
+e29c62e Merge pull request #481 from Vampire/where-params-handling
+2037b2b Merge pull request #480 from Vampire/CORE-2487
+b192192 Merge pull request #476 from lazaronixon/patch-1
+d50e080 Merge pull request #475 from cleiter/fix-recheck-time
+cc125b1 Merge pull request #474 from NSIT/CORE-2470
+b7cce2e Merge pull request #473 from NSIT/CORE-2467
+97e6dc7 Merge pull request #472 from NSIT/CORE-2471
+2a58e1b Merge pull request #471 from NSIT/CORE-2466
+07596f4 Merge pull request #467 from huygun/CORE-2456
+cc72fd5 CORE-2499 Support for commenting lines in csv files
+92cc07b CORE-2499 Support for commenting lines in csv files
+17e0a05 Merge branch 'rgrebski-3.4.x'
+f31002f Merge branch '3.4.x' of https://github.com/rgrebski/liquibase into rgrebski-3.4.x
+15c8d49 Merge branch '3.4.x' of https://github.com/rgrebski/liquibase into rgrebski-3.4.x
+b082da8 Merge branch 'ddb'
 22a781f CORE-2497 Support setColumnRemarks and setTableRemarks on MSSQL
 e3d0d43 CORE-2497 Support setColumnRemarks and setTableRemarks on MSSQL
 5d386b6 CORE-2493 ExecuteShellCommand improvements
 0ad7c42 Bumped version to 3.5-SNAPSHOT
 c2b931c CORE-2493 ExecuteShellCommand improvements
+1003e70 Fix XML for diffChangeLog if empty element
+237f7b5 Remove case sensitive from column name
+cd381e5 CORE-2490 Centralize the predicate placeholder replacing code
+34fec7f CORE-2490 Add test cases for UpdateExecutablePreparedStatement#execute(PreparedStatementFactory)
+5e77041 Refactor getConnectionSchemaName to prevent code errors
+eec0ef2 CORE-2442 Enhance test case to cover :name + :value placeholder pairs in addition to ? param placeholders
+3474a0f CORE-2490 Enhance test case to cover multiple :name + :value pairs
+7e0d427 Fixed a bug where an absolute filename as valueLobFile would never be found when using a ClassPathResourceAccessor.
+9ac92ed Fix MSSQL snapshot did not include any primary key when using the default schema because query checked for schema='null'
+c69d3f4 unify the whereParams handling in all three occurrences
+6d18593 CORE-1749 generate validation error on whereParams but no whereClause for delete change and update change that needs a prepared statement
+2cc135f CORE-2490 fix the where parameters handling of the delete change
+5f0c107 CORE-2487 add two newlines after the warning about prepared statements in updateSql mode
+eb5dd39 Derby sequenceCurrentValue Incorrect SQL
+e561957 Fix StandardLockService changelog recheck time
+3711184 Fix typo in StandardLockService
+0deee61 CORE-2471 Fix dynamic SQL generation for dropping a primary key on MSSQL
+d0d5d55 CORE-2470 Update FindForeignKeyConstraintGeneratorMSSQL to respect the specified schema and work for SQL Server 2000 and later
+eec3ea1 CORE-2467 Support default schema with SSO on MSSQL 2005 and later
+a3e927b CORE-2466 Improve the public API replacing static methods with instance methods
+6936c58 CORE-2466 Don't overwrite the change set on rollback changes that are included by reference, so that relative paths can be resolved with respect to the correct change log. i.e. change.getChangeSet().getChangeLog() is the referenced change log rather than the change log that the rollback node appears.
+af91110 CORE-2466 Resolve change sets referenced in rollback node using the root change log
+f1d1b68 CORE-2466 Make it possible to resolve the root change log from within a nested change log
+033b097 Merge branch 'ddb'
 4e2e763 CORE-2463 Don't include liquibase tables in dbdoc
+182e607 Merge branch '3.4.x'
+fd242bd increamented project.version
+37ca504 [maven-release-plugin] prepare for next development iteration
+c7c0837 [maven-release-plugin] prepare release liquibase-parent-3.4.1
+bee144c Preparing for 3.4.1 release
+6fa9a33 CORE-2461 Don't do DATABASECHANGELOG ALTER statements if column types are different
+cab1190 CORE-2460 Postgres index names cannot include schema name
+16348ab CORE-2460 Postgres index names cannot include schema name
+626377f CORE-2441 Creation of foreign key fails in MySQL if database name contains dashes
+cccf1f6 CORE-2441 Creation of foreign key fails in MySQL if database name contains dashes
+591d2dd CORE-2428 liquibase 2.0.3 to 3.3.3
+bf36259 CORE-2416 Diff drops and creates primary keys for all tables
+1a675ff CORE-2414 CLONE - generateChangeLog creates DOUBLE(22) instead of double in MySql
+ba8bcec CORE-2414 CLONE - generateChangeLog creates DOUBLE(22) instead of double in MySql
+f7384ee CORE-2421 MySQL column sizes are off by 1 in BIGINT and INT for diffChangeLog
+bbab7e7 CORE-2421 MySQL column sizes are off by 1 in BIGINT and INT for diffChangeLog
+df5cde0 CORE-2359 Consistently read dataTypeId for all databases
+8d9b3d6 CORE-2418 Liquibase 3.4.0 tries to do INSERT instead of UPDATE-Statements with Postgres
+0f161a9 Added support for commenting lines in csv files (# by default, can be modified by specifying loadData.commentLineStartsWith)
+9c7eae2 Fixed test for reverting of default stripComments setting
+0c42dcd CORE-2104 ConcurrentModificationException iterating over System.getProperties().entrySet()
+06f42bc CORE-2408 Unknown column 'LABELS' in 'field list'
+9e13ede CORE-2426 Default schema name missing quotes.
+8414c35 CORE-2433 quoting error in table creation
+9c0f5d7 CORE-2435 includeSystemClasspath switch actually includes SystemClassLoader if false
+4934a3e CORE-2459 Un-change Formatted SQL stripComments default back to true
+8446b33 CORE-2437 Index.toString() contains "unique" if and only if index is NOT unique
+2813664 Merge branch 'ddb'
 d36838a CORE-2455 Improve messages in databasechangelog.description column
+21d8817 CORE-2456 includeObjects/excludeObjects not work for UniqueConstraint.  Change filter change to check for UniqueConstraints.
+2f6556c Revert "Added support for commenting lines in csv files (by starting line with hash sign)"
+13be131 CORE-2443 Liquibase 3.4.0 ignores third party loggers in certain situations
+5d598f5 Merge branch 'ddb'
 0fc73d7 CORE-2455 Improve messages in databasechangelog.description column
 036a368 CORE-2455 Improve messages in databasechangelog.description column
+1528d06 Merge pull request #449 from NSIT/CORE-2405_2406
+537fef1 Merge pull request #466 from NSIT/CORE-2452
+41fa2fa Merge pull request #465 from NSIT/CORE-2451
+3ae344e Merge pull request #452 from NSIT/CORE-2419
+ce96b99 Merge remote-tracking branch 'origin/3.4.x' into 3.4.x
+e6c8478 Return null for connection schema name (cherry picked from commit 3784b19)
+c02306b Merge remote-tracking branch 'origin/master'
+ecf1314 Merge branch 'ddb'
+3524c61 Merge pull request #453 from gregjones60/informix_connection_schema_name
 d78aa9f Fixed "Grammar" misspelling
+8de07e8 CORE-2452 Quote index name on SQL Server
+843ec82 CORE-2451 Output USE <database> statement for SQL Server
+9d0b98a Merge pull request #455 from NSIT/CORE-2410
+25bce1d Merge remote-tracking branch 'origin/3.4.x' into 3.4.x
+ae0dc9b Add of new sybase IQ productname to supported names (cherry picked from commit 44d493e)
+8845bde Fix [[ not found error -> [[ is bash-builtin, use /usr/bin/env bash instead of /bin/sh (cherry picked from commit 2539a59)
+e14bca8 Merge pull request #456 from yboujallab/master
+4f60a68 Merge pull request #457 from EVODelavega/bugfix/bash-token
+ee23520 Merge pull request #458 from NSIT/CORE-2438
+8fa8216 Merge branch 'pkozelka-pk/CORE-2385-backport-3.4' into 3.4.x
+3fac2fb CORE-2443 - Liquibase 3.4.0 ignores third party loggers in certain situations
+aabf656 Merge branch 'pk/CORE-2385-backport-3.4' of https://github.com/pkozelka/liquibase into pkozelka-pk/CORE-2385-backport-3.4
+982c05a Merge pull request #461 from NSIT/CORE-2442
+b66dc16 Merge pull request #462 from mattbertolini/bug/CORE-2443-logger-factory-fix
+98919a0 Merge branch 'ddb'
 3f677e1 CORE-2448 New "created" attribute on changeSet
+a043f49 CORE-2443 Revert the default logger change.
 76a9bb4 Updated changelog version to 3.5
+59ef06b CORE-2438 quote special characters \ and $ in regex replacement strings, make more resilent to parameter names and values that contain the match pattern
+13793fb CORE-2442 Make UpdateGenerator more resilent to parameter names and values that contain the pattern to match
+0089b8f CORE-2385 fixed handling of null basePath in FilenameUtils.concat
+dd642c9 CORE-2385 added test to reproduce the problem with null basePath
 f0880d6 Handle NPE when no changes in backing index but a changed unique constraint
+2539a59 Fix [[ not found error -> [[ is bash-builtin, use /usr/bin/env bash instead of /bin/sh
 3b309d8 CORE-931 addColumn should support not-null constraint with an initial default value
+1305ce1 Merge branch 'ddb'
 b28c89a Improved test error message
 01699b5 CORE-2336 Use a grammer for parsing SQL rather than regexps
+44d493e Add of new sybase IQ productname to supported names
+5432929 Merge branch 'ddb'
 c9ab76f CORE-2336 Use a grammer for parsing SQL rather than regexps
 644d503 CORE-2427 Better handle MSSQL stored procedures with a different defaultSchema and replaceOnExists=true
 c1091d2 Better support for addColumn extensions
+6a315b5 CORE-2410 Add test cases for sql_variant, geometry, geography types on MSSQL
+1788967 CORE-2410 Revert unneeded 8713973 while retaining cd69419
+cd69419 Fixing failing tests
+8713973 CORE-2410 Snapshot should not include paramaters for MSSQL geometry, geography or sql_variant types (cherry picked from commit a500871)
+9f56b86 Merge branch 'ddb'
 ed6d259 CORE-2336 Improve parsing of non-standard delimiters with javacc (cherry picked from commit 038a0e5)
 75277de CORE-2336 Use a grammer for parsing SQL rather than regexps (cherry picked from commit 09dbb35)
+de99721 Added support for commenting lines in csv files (by starting line with hash sign)
+af2af40 CORE-2419 Support fluent/builder-style change properties
+3784b19 Return null for connection schema name
+1b1f2fb Merge branch 'CORE-2336_javacc'
+a6eb8f7 Merge branch 'master' into CORE-2336_javacc
 692026b CORE-2401 MSSQL handling timestamp according to sql standard,
 546b0df CORE-2412 Handle Oracle BFILE types
 2734e21 CORE-2411 BLOB string default values not quoted
@@ -149,57 +577,296 @@ cd22eae Handle smalldatetime with parameters
 fc0d769 CORE-2401 MSSQL handling timestamp according to sql standard, not sqlserver usage (cherry picked from commit b7d1f44)
 f37d362 CORE-2401 MSSQL handling timestamp according to sql standard, not sqlserver usage (cherry picked from commit b7d1f44)
 a500871 CORE-2410 Snapshot should not include paramaters for MSSQL geometry, geography or sql_variant types
+a95bc1f CORE-2405 Preserve data collation on MSSQL
+6d78eb9 CORE-2406 Use lower-cased escaped data type names on MSSQL
+909e1e4 Updated version to 3.5.0-SNAPSHOT
+866c057 updated project.version back to snapshot
+939c9f3 [maven-release-plugin] prepare for next development iteration
+61f2578 [maven-release-plugin] prepare release liquibase-parent-3.4.0
+f125df5 Fixed failing test
+bea0eb1 Updated changelog for 3.4.0
+b41374a Preparing for release
+b7d1f44 CORE-2401 MSSQL handling timestamp according to sql standard, not sqlserver usage
+ca12e6b Merge branch 'ddb'
 ddb6ed8 CORE-1924 SQLServer diff - DATETIME2 not being handled correctly
 c516725 CORE-2404 Ability to preserve TEXT type in mssql snapshot and update
+fd830cc Merge remote-tracking branch 'origin/master'
+6811a24 Merge pull request #447 from NSIT/CORE-2386
+c6b3ddc CORE-2386 For MSSQL, escape username, which could be a domain-qualified Windows account e.g. DOMAIN\user
+0d7eae9 Merge pull request #445 from NSIT/CORE-2397
+69115c8 Merge pull request #446 from NSIT/CORE-2383
+5126220 Fix malformed changelogs breaking tests
+df02d7b CORE-2383 Fix broken test
+f82f95c Merge branch 'ddb'
 29f9083 CORE-2402 Oracle NCLOB defaultValues not read correctly
+abc3f35 CORE-2397 Improve robustness of SQL generation for obtaining a view definition on MSSQL
 63fcbbf CORE-1924 SQLServer diff - DATETIME2 not being handled correctly
+080911e Merge branch 'ddb'
 93074d5 CORE-1924 SQLServer diff - DATETIME2 not being handled correctly
+e7938ed CORE-1749 Update change command does not respect whereParams
+5d607a8 CORE-1968 Reject invalid ParsedNode instances when loading them into Liquibase objects
+19c0fe8 CORE-1803 DropAll doesn’t delete sequences if they are used as default value in postgres
+1daba70 CORE-1968 Reject invalid ParsedNode instances when loading them into Liquibase objects
+b3943e7 CORE-2219 DB2 for zOs - adding primary key always emits REORG but REORG does not exist on Db2 for zOs
+4ad58e1 CORE-2224 Index uniqueness is not always recognized correctly
+6c5ffcc CORE-2252 XMLChangeLogSerializer writes array object for rollback tag content
+92e0205 CORE-2256 Drop sequences before tables
+87b8bf3 CORE-2359 Consistently read dataTypeId for all databases
+a8b0871 CORE-2275 YAML update fails with Unexpected error running Liquibase: java.util.LinkedHashMap cannot be cast to java.util.List
+73a422b CORE-1904 Slow indexExists performance in Oracle
+a114b08 CORE-2383 Change formatted SQL stripComments default from "true" to "false"
+48eb32f CORE-2387 dropPrimaryKey without constraint name on sql server doesn't query schema correctly
+cd400bd CORE-2390 NullPointerException when generating changelog
+c22f158 Fixing tests
+209c580 Merge pull request #413 from mrumpf/master
+2607794 Merge remote-tracking branch 'origin/master'
+b3ca368 Merge branch 'AartBluestoke-3.3.x'
+264671e CORE-864 loaddata performance enhancement
+1111b81 Merge branch '3.3.x' of https://github.com/AartBluestoke/liquibase into AartBluestoke-3.3.x
+52ea176 Merge pull request #432 from gquintana/CORE-2334_dontoutputliquibaseddlsql
+ef9d70d Merge pull request #444 from juancarloscruz/dbdoc_extension
+7da3c6e CORE-2005 /usr/bin/liquibase: Syntax error: "else" unexpected
+016fe14 Merge branch 'ddb'
+719f3ba Merge remote-tracking branch 'origin/master'
+f3d30ff Merge pull request #438 from NSIT/CORE-2024-scan-packages-workaround
+b6afe0b Merge pull request #440 from NSIT/CORE-14
+3ae8b6a Merge pull request #441 from zeddever/patch-1
 624b10a CORE-2397 MSSQL View Snapshot should not use sp_helptext
+0f30ffd Merge branch '3.3.x'
+f4f0ee9 Split Table and Columns in referenced primary key (just like in foreign key)
+f6d8cbb Preserve case for changelog files in HTMLListWriter as otherwise these result in bad links
+13ecab6 Write current table foreign keys into dbDoc
+16e3808 Write current table indexes into dbDoc
+5d96d40 Correct whitespace
+6a61f69 Display nullable column status in dbDoc
+6791323 Removed unused import
+842861e Merge remote-tracking branch 'origin/master'
+a433576 Reformatted after merge
+c0fb5fe Merge branch 'ddb'
 4aa5887 Merge branch 'dvone-2772' into ddb
 76415c4 Merge branch 'dvone-2704' into ddb
+75aa5b1 Patch copy rows for edge case with no copy columns
+ce51f7e Merge pull request #439 from NSIT/CORE-2236
 cec53e9 CORE-2386 Set the connection default catalog/schema if defaultCatalogName or defaultSchemaName is set
 82d888c By the time we get to TableSnapshotGenerator and JdbcSnapshotGenerator we need to trust the object captialization. Otherwise things get lost
 330de28 By the time we get to TableSnapshotGenerator and JdbcSnapshotGenerator we need to trust the object captialization. Otherwise things get lost
+f8098b2 CORE-14 Improve robustness of dynamic SQL generation for dropping a default constraint on SQL Server 2000 and later versions
+5f68859 CORE-2236 Update test case to be aware of support for the yml extension
+c2edbbe CORE-2024 Replace liquibase.sdk with liquibase.sdk.database for packages to scan
+7e9cd6c Mak outputLiquibaseSql take values of "true", "false", or "data_only"
 cd09802 CORE-1732 Handle object comments/remarks in diffChangeLog and generateChangeLog
+b6079ae update LoadDataChange to use the new generator also update the unit test, as it now always returns an InsertSet, and the containing items should be examined for accuracy. (passes all tests in LoadDataChangeTest)
+847d3c4 Create InsertSetGenerator So that a batch of insert statements can be handled without requiring N row level transactions for a N row insert.
+1734bec A container for a set of insert statements So that a batch of row inserts can be handled with a larger syntax structure.
+fdf10a4 refactor insertGenerator to allow for emitting only the values
+2567b93 CORE-2236 Support .yml extension in YamlChangeLogSerializer
+abf359b Merge remote-tracking branch 'origin/master'
+cde2f9a Merge pull request #407 from NSIT/CORE-419
+6ac102f Improved javadoc documentation for dropAll
+2d03114 Merge pull request #436 from NSIT/CORE-2345
+2185c98 Merge branch 'mdehoog-master'
+5dd5e10 Merge branch 'master' of https://github.com/mdehoog/liquibase into mdehoog-master
+81d5c14 Fixing tests
+d5eb0f4 Remove special cases for XML types
+997397b Merge pull request #411 from NSIT/CORE-2340
+f56b978 CORE-2340 Add support to override built-in snapshot serializers using the exact same pattern as used for change log serializers
+22163a0 CORE-2340 Enhance ChangeLogSerializerFactory to be aware of ChangeLogSerializer#getPriority() and return the highest priority serializer per file extension.
+350ce69 CORE-2340 Make ChangeLogSerializer extend PrioritizedService. Override PrioritizedService#getPriority() on all existing implementations.
+27b7e90 CORE-419 Workaround index, primary key and unique constraint columns getting replaced
+2490046 Merge pull request #412 from NSIT/CORE-2345
+10dcbbb CORE-419 Add descending key support for index, primary key and unique constraint snapshot
+e0d128a CORE-419 Add support for descending key columns on indexes, unique constraints and primary keys
+75c923d Merge pull request #414 from srskc/master
+c1b2ee6 Merge pull request #416 from 20mithrandir/oracle12c-autoincrement-identity
+c557272 Merge pull request #417 from Datical/check_diffchangelog_params
+5dc28de Merge branch 'mrmaus-nullable-constraint-name'
+6ed4586 Moved new constraintName attribute to the 3.4 xsd
+efeb661 Merge branch 'nullable-constraint-name' of https://github.com/mrmaus/liquibase into mrmaus-nullable-constraint-name
+e80c920 Removed unused import
+6f6b838 Merge branch 'NSIT-CORE-2358'
+7361ecd Merge branch 'CORE-2358' of https://github.com/NSIT/liquibase into NSIT-CORE-2358
+1f74710 Merge pull request #423 from NSIT/CORE-2361
+b56be47 Merge pull request #424 from NSIT/dbchangelog-xsd-whitespace
+0b1c39c Merge pull request #425 from ms-novatti/master
+d44b296 Merge pull request #426 from NSIT/CORE-2363
+0d83b9e Merge branch 'bradhandy-CORE-2019'
+2fa1b4c Merge branch 'CORE-2019' of https://github.com/bradhandy/liquibase into bradhandy-CORE-2019
+051e232 Merge pull request #433 from maberle/master
+9736c26 Merge branch 'padcom-master'
+bf016bf Merge branch 'master' of https://github.com/padcom/liquibase into padcom-master
+18d0416 Updated changelog for 3.3.5
+dc650c1 Updated changelog for 3.3.5
+d26d763 Did not update project.version correctly. Need a new build
+7f21d9b Fixed conflicts from merging 3.3.3 and ddb branches
+5c13821 Merge branch 'ddb'
+d7b908c Merge branch '3.3.x'
+6164542 [maven-release-plugin] prepare for next development iteration
+a687ccd [maven-release-plugin] prepare release liquibase-parent-3.3.4
+8cd9687 Updated changelog for 3.3.4
+92711df CORE-2346 IncludeAll does not work when runing liquibase from inside a jar
+a1d43f8 CORE-2199 Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
 68b5b55 Additional debug logging for where files are found by the ResourceAccessor
+79701b1 CORE-2344 Unknown host exception on OS RHEL 6.5
 d115fd7 Log if liquibase XSD cannot be loaded due to an exception
 25414be CORE-2355 Improve updateSQL performance
+6c95450 CORE-2368 No SQL outputted for <update> change with clob type
+7e0c3c3 Added reading of content of gzipped source files
+0473cdc CORE-2357 alterSequence does not work as expected when you need to change the cache size
+55529c2 CORE-2357 alterSequence does not work as expected when you need to change the cache size
 dba9bdb CORE-2371 Improve performance
 f0142c8 CORE-2371 Improve performance
 bab5eb6 CORE-2371 Improve performance
 21c6c59 CORE-2371 Improve performance
 3872919 CORE-2371 Improve Oracle snapshot performance
 61520d8 CORE-2371 Improve Oracle snapshot performance
+cbee6df CORE-2373 Local DTD files not found in subdirectory
+a79f82f Disable CREATE TABLE DATABASECHANGELOG generation when running on OfflineConnection and outputLiquibaseDdlSql=true
+e38e59e Merge pull request #427 from sanastasiadis/CORE-2357-cp
+5d0e43e Removed duplicated setting of liquibaseShouldRun = true
+eaa48ed Merge pull request #428 from eino-makitalo/master
+2daab33 Merge pull request #429 from foxel/fix_offline_mysql
 699005d Don't hardcode databasechangelog/lock table names
 14721fb CORE-2371 Improve Oracle snapshot performance
+2f21efa CORE-2019: Resolved the issue where a rollback tag containing only a "comment" child tag would cause rollback failures.  This type of rollback is now parsed as an EmptyChange.
+74fa69d Fixed offline running with mysql DB and no version specified
 f3b9acc Temporarily revert change 007701b due to issues with some columns not being found sometimes
 46dd7ec Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
+7616d54 CORE-2361 Ensure changeSet rollback node can be serialized
+caa6bdc Merge pull request #422 from NSIT/CORE-2360
 acfa6bd Depending on when "snapshot all columns" is called, the cache may think it has all columns but only has one per table.
+f1cbc54 git settings in Windows can sometimes replace LF with CR LF  so length of those streams can be +1
+7cb1931 CORE-2366   shouldRun defaulted false
 2bfa4c1 CORE-2364 Better handling of referenceDefaultSchemaName and referenceDefaultCatalogName
+83587a4 CORE-2357 alterSequence does not work as expected when you need to change the cache size
+7fe995a CORE-2363 Improve robustness of MSSQL database case-insensitivity check
+d9e1582 Fix unique constraint generator for informix
+4d9b2e3 Standardize whitespace used for formatting in 3.4 XSD
+99d1b83 CORE-2361 Ensure that all change log children (property, preConditions, changeSet, include, includeAll) can be serialized
+7a4dd31 CORE-2361 Ensure that PreconditionContainer serializes as expected
+175ad1b CORE-2360 Liquibase should run by default
 3132bc4 Don't have a max line length or we produce invalid json
+c0633bf CORE-2358 Delete Firebird-specific generator which has become unnessesary
+f1282d1 CORE-2358 Improve data types for DATABASECHANGELOG and DATABASECHANGELOGLOCK tables for MSSQL. Make it easier for extensions to override the types.
+065ca04 CORE-2358 Add ability to detect if MSSQL driver is configured to send String parameters as Unicode
 7977204 Handle catalog-level and database-level objects better in snapshot output
+ada184a CORE-2358 Quote column name in update statement
+a8f53f7 CORE-2358 Fix incorrect LIQUIBASE column length (255 -> 20)
 e491096 Improved snapshot parsing and serialization
 1adb065 Fixed type due to mistyped ctrl-k
+7b311fc Added support for constraint name in addNotNullConstraint change. Currently supported for Oracle database only, where NOT NULL column property is represented as dedicated database constraint object. Reason: if constraint name is not specified, Oracle generates random/sequenced name SYS_XXXXXXX. In this case 3rd party database diff tools show lots of changes in identical schemas created on separate database instances, since automatically generated names usually don't match SQL syntax:  ALTER TABLE table MODIFY column CONSTRAINT constraint_name NOT NULL
 5aa5313 Fixing failing test
 8c46d9a Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 37cbb3e CORE-2355 Improve updateSQL performance
 1ae1eff DVONE-2770 Do not check LB tables when doing futureRollbackSQL
+5a3b949 Add a message indicating that diffTypes=data has no effect for diffChangeLog
+49b4c98 Removed unused imports
+a0cf9d4 RBOM-1 RBOM-57 Method supportsAutoIncrement now delivers 'true' for Oracle major version >= 12 (since Oracle supports Identity up from version 12c)
+bfff077 Test
+ac394dc RBOM-1 Oracle Hibernate Migration RBOM-57 Liquibase - Fix Oracle Behaviour so that autoincrement / identity for primary keys work Work in progress
 ad77afa Merge remote-tracking branch 'lblb/dont_snapshot_all_columns' into ddb
 8875ef8 Merge pull request #415 from liquibase/dont_snapshot_all_columns
+50b65d0 Fix CSV header and String array size
 007701b Should not always snapshot all columns for performance reasons.
+9897f47 Fixed the classpath handling to make DbDoc work. This is a hack as the concept of storing the path seems to be broken or at least I do not understand it yet.
+cbf38b9 CORE-2345 Add XMLType
+2590ee9 Changed project.version to -SNAPSHOT
+eff4ff8 Changed project.version to -SNAPSHOT
+3e7cb16 Applying changes from ddb branch
+a42b6a0 Merge branch 'ddb'
+1d7dfa1 Fixed signature for 3.4 codebase
+d26f8ab Merge branch '3.3.x'
+186d8c9 Merge remote-tracking branch 'origin/3.3.x' into 3.3.x
+095dcdb Updated release
+d02b51e [maven-release-plugin] prepare for next development iteration
+badd2cc [maven-release-plugin] prepare release liquibase-parent-3.3.3
+815fffc Updating maven dependencies to try to get 3.3.3 to upload correctly on the build server
+f178379 Updated project version
+2255d4f Fixed failing test
+3c6638f Updated release log for 3.3.3
+a1eec21 CORE-2199 Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
+0e6712e CORE-2186 AbstractResourceAccessor#convertToPath(String, String) fails for processing includeAll from Classpath
+041c34e CORE-2156 Resource loader can't load changelog file
 1438fa2 DVONE-2578 Added system property to turn off bulk select.  This helps DaticalDB performance when calling ChangeLogHistoryService.init(), as in the status logic
+a91b12d CORE-2202 liquibase.should.run inverted boolean Fixed javadoc
+42bbe51 CORE-2336 Use a grammer for parsing SQL rather than regexps
+09dbb35 CORE-2336 Use a grammer for parsing SQL rather than regexps
 6be0580 CORE-2228 New usingIndexName attribute on addPrimaryKey and addUniqueConstraint
 613b3da CORE-2254 Ability to save snapshot for later comparison
 c7590fb Use UTF-8 or an overwritted liquibase file.encoding more consistantly
 97de2f3 CORE-2254 Ability to save snapshot for later comparison
 888f6c1 Load yaml as utf-8
+9251990 Fixed invalid YAML output by representing changeSets as a list instead of an associative array
+89c83c9 CORE-2202 liquibase.should.run inverted boolean
+4bb7a8d CORE-2214 When inserting string value starting and ending with apostrophes (quotes) the value is not quoted in the generated SQL
+7a6aa32 CORE-2218 Regression on modifyDataType : VARCHAR2 was supported on 3.2...and fails on 3.3
+39ba959 Merge remote-tracking branch 'origin/3.3.x' into 3.3.x
+db502fc CORE-2329 Escaped reserved keywords in HSQL are stored in lower case instead of upper case.
+2ec6d8d Merge pull request #381 from bsandiford/CORE-2023-branch
+13ed82c CORE-2208 Typo in message
+34a8ec2 CORE-2210 java.lang.NullPointerException when file is empty
+bfe8eae CORE-2284 Creating a DatabaseChangeLog() results in NPE
+a5d3f66 Merge pull request #409 from NSIT/CORE-2301
+977e2f1 CORE-2315 NPE in CommandlineResourceAccessor
+d2319d7 CORE-2301 Fix regression fetching remarks for column snapshot on SQL 2000 by using a SQL 2000-specific query. Improve robustness by narrowing the result set, using two-part object names, qualifying object names, quoting identifiers, escaping strings.
+867489b CORE-1840 Liquibase fails when run on a computer that can't connect to the internet
+e658755 CORE-1958 Column type of "TIMESTAMP(6)" under MySql converted to TIMESTAMP dropping fractional seconds
+6122064 CORE-2204 valueNumeric not being set when using prepared statements
+4413a77 CORE-2240 setDropFirst(true) still broken on empty database
+4bc5352 CORE-2261 UpdateSQL needs to append a "/" to the end of createProcedure for Oracle
+93b9f49 Merge pull request #406 from Tom9729/3.3.x
+bc1b037 Merge remote-tracking branch 'origin/master'
+6aebaa3 Merge branch 'dpalic-master'
+c789990 Merge branch 'master' of https://github.com/dpalic/liquibase into dpalic-master
+5a0365a Merge branch 'master' of https://github.com/dpalic/liquibase into dpalic-master
+0a81a7e CORE-1768 Fixed dropAll issue when using Oracle spatial.
+13a7a20 Merge pull request #402 from NSIT/CORE-2331-3.4.x
+fc88dbb Merge pull request #403 from NSIT/CORE-2300-3.4.x-2
+7576e26 Merge pull request #404 from NSIT/CORE-2325-3.4.x
+b3dafb3 Merge pull request #405 from dpelevin/3.3.x
+1823106 CORE-2331 Ensure additional information such as collation is passed for MSSQL character data types (char, nchar, ntext, nvarchar, text, varchar)
+112d28c URLs connection caching is turned off.
+fc82681 CORE-2331 Add test case for MSSQL character data types with collation
+4b9395a CORE-2325 Improve the merge conflict resolution between CORE-2325 and CORE-2318
+bc8966b CORE-2300 Fix a few incorrect test cases
+020fefd Merge remote-tracking branch 'origin/master'
+5465515 Merge branch '3.3.x'
+848a057 Merge branch 'NSIT-CORE-2318' into 3.3.x
+fb56b10 Merge branch 'CORE-2318' of https://github.com/NSIT/liquibase into NSIT-CORE-2318
+7e98217 Merge pull request #401 from NSIT/CORE-2300-3.4.x
+85611fa Merge pull request #390 from madhead/core-2320
+a690730 Merging from 3.3.x
+11cdbcc Merge branch '3.3.x'
+5bf8fc5 CORE-2300 Ensure type parameters and additional information are passed when creating integer DatabaseDataTypes for MySQL
+6505b9b CORE-2300 Add test case for MySQL signed and unsigned integer types
+1d4a6c4 Core-2206
+f94b6f2 Merge pull request #393 from carter1982/CORE-2206
+fefa505 Merge pull request #395 from NSIT/CORE-2325
+be5ebce Merge branch 'NSIT-CORE-2302-master'
+24e6b6f Merge branch 'CORE-2302-master' of https://github.com/NSIT/liquibase into NSIT-CORE-2302-master
+bbc980a CORE-2322 UpdateToTag support
 5d2c0d2 Don't throw method errors if using an offline connection and updated error message
+e2a39c3 Merge branch 'NSIT-CORE-2217-3.4.x'
+f440afe Merge branch 'CORE-2217-3.4.x' of https://github.com/NSIT/liquibase into NSIT-CORE-2217-3.4.x
+8a34cd1 Merge branch 'NSIT-CORE-2322-3.4.x'
+783ed0e CORE-2322 Added updateToTag functionality to ant and maven
 a4bb430 Set reserved words before setRemarksReporting in case there is a problem calling setRemarksReporting, such as when using OfflineConnection
+aeb275f CORE-2322 Add API for future rollback from tag SQL, Add support for update to tag, update to tag SQL, future rollback from tag SQL to command line interface. Add support for update to tag and future rollback from tag SQL to Spring integration. Update Ant and Maven integration to use simplified method signature.
+150efdd CORE-2322 Add API and change set filter to support updating to a tag
+24976f8 CORE-2217 Improve resolution of blob, clob, real data types for MSSQL, DB2, MySQL, Oracle
+3b5b08a CORE-2217 Add missing @Override annotations
+0197bbe CORE-2217 Account for data types with parameters when unescaping
+8282b5c CORE-2217 Abstract data type unescaping logic, add JUnit tests for escaping and unescaping logic.
+a9f9a36 CORE-2217 Don't have DataType extend AbstractDatabaseObject and don't include brackets on types in generated changeSets
+fa1e083 CORE-2217 Add DataTypeFactory support for delimited data type names
+632062c CORE-2217 Add DataTypeFactory support for delimited data type names
 46049ad CORE-2254 Ability to save snapshot for later comparison
 4ada136 CORE-2321 Update MSSQL query to use a safer, backward-compatible UPDATE statement rather than a MERGE (cherry picked from commit fafc0aa)
 5344eff CORE-2321 Fix compile error on Oracle JDK 6 (cherry picked from commit 9b0e219)
 2b6b05d CORE-2254 Ability to save snapshot for later comparison
+e116520 Merge pull request #397 from NSIT/CORE-2321-master
+fafc0aa CORE-2321 Update MSSQL query to use a safer, backward-compatible UPDATE statement rather than a MERGE
 d47a9ab Improved failed SQL error message
+9b0e219 CORE-2321 Fix compile error on Oracle JDK 6
 375facc Log SQL with exception (cherry picked from commit 8ca9d02)
 37de7cb CORE-2321 Liquibase tag command tags too much
 9ff0170 CORE-2321 Liquibase tag command tags too much
@@ -209,9 +876,31 @@ da8fd98 CORE-2321 Improve flow control and remove now-unneeded TAG IS NULL from 
 30fd36b CORE-2321 Modify logic so that MarkChangeSetRanGenerator can be solely responsible for tagging when executing a change log, while still allowing the database to be tagged outside of that scenario using the necessary update statement with subqueries and aggregate expressions. This can improve performance of executing change logs by eliminating the need to execute unnecessary update statements with subqueries and aggregate expressions. Improve the update statement to use the more-unique ORDEREXECUTED column rather than potentially less unique DATEEXECUTED to ensure that only the minimum number of records get updated. (cherry picked from commit 4014314)
 ea41af7 CORE-2321 Escape column names consistently across change log table-related SQL statements (cherry picked from commit 2128615)
 ad0a020 CORE-2321 Improve robustness and readability (cherry picked from commit 25a7cc6)
+3551bda CORE-2321 Liquibase tag command tags too much
+56eb4c5 Merge branch 'ddb'
+5c76126 CORE-2321 Liquibase tag command tags too much
+3d943c5 CORE-2321 Liquibase tag command tags too much
+8ca9d02 Log SQL with exception
+103c363 CORE-2321 Liquibase tag command tags too much
+bfc3db6 Merge branch 'CORE-2321' of https://github.com/NSIT/liquibase into NSIT-CORE-2321
+0cb4dc7 Merge branch '3.3.x'
+bdefdc9 Merge remote-tracking branch 'origin/master'
 d21da1b CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
+0902201 CORE-2321 Improve flow control and remove now-unneeded TAG IS NULL from the WHERE clause
+4014314 CORE-2321 Modify logic so that MarkChangeSetRanGenerator can be solely responsible for tagging when executing a change log, while still allowing the database to be tagged outside of that scenario using the necessary update statement with subqueries and aggregate expressions. This can improve performance of executing change logs by eliminating the need to execute unnecessary update statements with subqueries and aggregate expressions. Improve the update statement to use the more-unique ORDEREXECUTED column rather than potentially less unique DATEEXECUTED to ensure that only the minimum number of records get updated.
+2128615 CORE-2321 Escape column names consistently across change log table-related SQL statements
+3dcca56 CORE-2321 Modify WHERE clauses to avoid updating too many records
+25a7cc6 CORE-2321 Improve robustness and readability
+eb79dd2 CORE-2318 Add support for converting BigDecimal objects to a SQL string via DataTypeFactory
+4987889 CORE-2318 Add test case for converting various objects including BigDecimal
+38bfa99 CORE-2318 Improve and fix bugs in DataTypeFactoryTest
+85d9d55 CORE-2302 Add further type validation to avoid instantiating interfaces and abstract classes
 a9ff062 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 aecd9a4 CORE-2324 diffChangeLog does not handle changes in sequence incrementBy, maxValue or ordered
+0255fe5 CORE-2325 Add support for converting java.util.UUID via DataTypeFactory.fromObject(...).objectToSql(...)
+95e23e9 CORE-2325 Don't quote null and database functions
+c75e26e CORE-2325 Enhance LiquibaseDataType to allow piecewise override of objectToSql()
+d8abed7 CORE-2325 Add test case for UUIDType
 7ab5460 Allow ##other attributes in tagDatabase
 5aa46a8 CORE-2324 diffChangeLog does not handle changes in sequence incrementBy, maxValue or ordered
 c43a4aa CORE-2308 Track changeSet contexts and labels in databasechangelog table
@@ -221,7 +910,36 @@ c43a4aa CORE-2308 Track changeSet contexts and labels in databasechangelog table
 93e3669 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
 06db228 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
 def9df2 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
+88bf841 Core-2206
+2fd00d2 CORE-2320 MinGW (Git Bash) support for shell
+26f4213 Merge pull request #375 from syncron/for-CORE-2234
+2064d81 CORE-1866 Filtering changelog list by includeAll tag is not working
+2c58a47 Merge pull request #380 from bsandiford/CORE-1866-branch
 fe28da3 DVONE-2617 Give update for Gen SQL ability to skip checkLiquibaseTables
+4b4ce70 Merge pull request #378 from bsandiford/CORE-1943
+1666ed7 Merge pull request #379 from NSIT/CORE-2296
+eb365de Merge remote-tracking branch 'origin/master'
+c2eb30d Merge branch 'CORE-2302' of https://github.com/NSIT/liquibase into NSIT-CORE-2302
+7a9db72 Merge branch 'CORE-2299-branch' of https://github.com/bsandiford/liquibase into bsandiford-CORE-2299-branch
+345e30d Merge pull request #383 from nthorn552/master
+92868f7 Merge branch 'CORE-2302' of https://github.com/NSIT/liquibase into NSIT-CORE-2302
+8cdbbd0 Merge branch 'CORE-2302' of https://github.com/NSIT/liquibase into NSIT-CORE-2302
+1602ddf Merge pull request #385 from sdoxsee/3.3.x
+84ab253 Merge branch 'CORE-2307_ChangeLog_table_name_option_in_command_line_tool' of https://github.com/gquintana/liquibase into gquintana-CORE-2307_ChangeLog_table_name_option_in_command_line_tool
+93c530c Merge branch 'CORE-2307_ChangeLog_table_name_option_in_command_line_tool' of https://github.com/gquintana/liquibase into gquintana-CORE-2307_ChangeLog_table_name_option_in_command_line_tool
+55b6c08 Merge branch 'sabineheider-CORE-2316'
+d92a26b Merge branch 'CORE-2316' of https://github.com/sabineheider/liquibase into sabineheider-CORE-2316
+853ef2f Merging ddb branch
+79a4e64 Merge branch 'ddb'
+55a66e5 Merge branch '3.3.x'
+f88da62 CORE-2316 Don't overwrite datatypes if they have the same priority
+5ffdecc CORE-2302 Add ability to load nested object/collection properties automatically
+cbcf5c2 CORE-2302 Add support for loading BigDecimal properties
+47482b9 CORE-2302 Add test cases for loading nested object/collection properties and BigDecimal properties
+af9d542 Add databaseChangeLogTableName and databaseChangeLogLockTableName options to command line
+be50904 added global property attribute
+0ad6856 added workarounds for eclipse
+571ed67 added metadata to ignore
 b482cc8 CORE-2254 Ability to save snapshot for later comparison
 b7ec604 CORE-2308 Track changeSet contexts and labels in databasechangelog table
 5741070 CORE-2306 Support passing in a script for rollback to override rollback logic included in the changelog
@@ -230,50 +948,103 @@ dc08e6d Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 09fbbc7 Unique constraint backing index names don't always match the unique constraint name
 bfd54ec Merge branch 'ddb' of github.com:Datical/liquibase into ddb
 a99a332 additional diagnostic output
+e3b2857 Merge pull request #1 from NSIT/sdoxsee-3.3.x
 40cf26b CORE-2254 Ability to save snapshot for later comparison
 1ec960b Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+e482cba CORE-2304 Add alias for serial4 and test cases for int4, serial4
 ee49ed4 CORE-2305 Snapshot output too verbose
+febc45d Added recognition for the INT4 alias for the int datatype
 a40a4cc CORE-2254 Ability to save snapshot for later comparison
 62c3a02 debugging issues with logging and database factory
 cd80282 debugging issues with logging and database factory
 bf2b9f8 CORE-2254 Ability to save snapshot for later comparison
+cd445fa Small update
 8cdaad4 CORE-2254 Ability to save snapshot for later comparison
 83f61cd CORE-2254 Ability to save snapshot for later comparison
 5c97335 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 d30bd69 Fixed issue with diff report where null values in the reference field caused a NullPointerException
+ece5b3b Better, scalable approach to supported list
+51e3063 Added HSQL defaultValueComputed option
+056d067 Revert "Added HSQL defaultValueComputed option"
+4397cd0 Added HSQL defaultValueComputed option
+a9d37e5 CORE-2299 - Add capability to ignore missing or empty folder with includeAll
+b08f45f CORE-2023 - Problem using includeAll with SpringLiquibase - fix so that base folder is found using the 'relativeTo', and then the resources within that folder are NOT listed using the 'relativeTo' (i.e. invert the handling).
+5804061 CORE-1866 - Filtering changelog list by includeAll tag is not working - fix bad "filter" entry in xsd's to be "resourceFilter" to match Java code.
 f83057a CORE-2254 Ability to save snapshot for later comparison
+1fc42c9 CORE-2296 Upgrade Groovy and Spock to maintained versions
 fe9eb43 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
 de184d2 CORE-2254 Ability to save snapshot for later comparison
+094ef61 Merge remote-tracking branch 'origin/master'
+ac380c3 Merge branch 'ddb'
 e78c2f4 Merge branch 'CORE-2254_save_snapshot' into ddb
 06d7d41 Merge remote-tracking branch 'lblb/CORE-2254_save_snapshot' into ddb
 db9bf83 CORE-2254 Ability to save snapshot for later comparison
 2026838 CORE-2254 Ability to save snapshot for later comparison
 8bc8e46 Include ran changeSet in ChangeSetStatus
+df7f4a2 CORE-1943 - Handle Error: InetAddress.getLocalHost().getHostName() UnknownHostException results in NoClassDefFoundError - Use 'Smarter' way to get localhost for local host name as well as local host address.  (Basically same approach as 2.0.2 functionality, which worked)
 f0c3e1f CORE-2257 Ability to use a previously saved database snapshot in diff and generateChangeLog
+68bfd36 Merge pull request #341 from ancoron/bugfix/timestamp-precision
+1b3abb7 Merge remote-tracking branch 'origin/master'
+82f526f Fixed failing test (cherry picked from commit b8e6036)
+2374260 Merge pull request #345 from mattbertolini/bug/CORE-2196_ant-error-messages
+085ec94 Merge pull request #346 from foxel/patch-1
+da3cd4c Merge pull request #368 from bsandiford/CORE-2263
+380c414 Merge branch 'ddb'
 09a5c7e CORE-2288 Do not check/updatedatabasechangelog table on status
+c453c0b CORE-2234: columnExists precondition speedup by relying on SQL parser in DB
+0eb61ae Merge branch 'adangel-tagexists-cmdline'
+dc7ef53 Merge branch 'tagexists-cmdline' of https://github.com/adangel/liquibase into adangel-tagexists-cmdline
+05ae505 Merge remote-tracking branch 'origin/master'
+c9374f0 Merge branch 'smasset-CORE-1411'
+38f3604 Merge branch 'CORE-1411' of https://github.com/smasset/liquibase into smasset-CORE-1411
+6c8386f Merge pull request #371 from mattbertolini/bug/CORE-2274_changelog-file-from-classpath
+90d5e4e Merge branch '3.3.x'
+0028984 Merge pull request #359 from syncron/CORE-2232
+dd3742d Merge pull request #360 from pellcorp/core2244_create_table_mssql
+8cbb277 Merge pull request #362 from joaomc/CORE-2192
+0226b9e Merge branch 'ddb'
+c237835 Merge pull request #363 from michaldo/master
+1f9b456 Merge pull request #365 from wardvijf/3.3.x
+c291449 Merge pull request #367 from bsandiford/CORE-2262
+39798e1 Merge pull request #370 from bjamet/patch-1
+9638095 Merge pull request #372 from NSIT/CORE-2287
 1171f91 CORE-2288 Do not check/updatedatabasechangelog table on status
 3770fc6 Increase fetch size for potentially faster access
+48fa051 CORE-2287 Improve support for Groovy-based tests in Eclipse
+191bfc9 CORE-2274 Since the ant task refactoring the change log file was defined as an Ant FileResource which meant the change log could only come from the file system. This negated the usefulness of the resource accessor interface in Liquibase. I am now defining the change log file as a String and letting the resource accessor handle the loading.
 489a4ba CORE-2266 DiffChangeLog: Invalid changelog when a primary key backing index is changed.
 07cae38 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 e13a8b7 CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
+784c49d reset of quoting strategy is wrong
 37079a3 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 df2ac6d CORE-2273 Oracle char column snapshot not differentiating between a default value of 0 and '0'
 f6818f3 CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 bea3582 CORE-2272 DiffChangeLog must drop foreign keys before primary keys
 b708f19 CORE-2271 CLONE - DiffChangeLog: Invalid changelog when a unique constraint backing index is changed
+9d0dad6 CORE-1411 - MariaDB support : Added a MariaDBDatabase class extending MySQLDatabase class and updated tests
 b013390 CORE-2257 Ability to use a previously saved database snapshot in diff and generateChangeLog
+c27478a CORE-2263 Index Snapshot - doesn't include upper cased name indexes when db is NOT case sensitive - Make key to foundIndexes map 'corrected' to match 'corrected' exampleName.
+b95b63e CORE-2262 3.3.2 ant task dies on NPE in ChangeLogParameters - check for "currentLabelExpression == null" before using it. - Fix spurious spacing changes on non-changed lines.
+8cdb506 CORE-2262 3.3.2 ant task dies on NPE in ChangeLogParameters - check for "currentLabelExpression == null" before using it.
 7a6fa1c CORE-2267 Rollback fails for mixed-case objects created with QUOTE_ALL_OBJECTS
 0766491 CORE-2266 DiffChangeLog: Invalid changelog when a primary key backing index is changed
 0058847 Need to support extension elements in any order
+0cbce81 CORE-2054 Add new "definition" column attribute to differentiate between an actual column name and a function as a column
 e89ab8f Error parsing complex labels with nested parentheses
 9c4d803 CORE-2254 Ability to save snapshot for later comparison
+8b5b746 CORE-1857: Wrong column size detection on varchar2 fields with char as datatype
+acf35db Fixed bug that Servlet listener wrongly handle LiquibaseServletListener.LIQUIBASE_PARAMETER
+42a94f7 CORE-2192: Can't generate SQL scripts from Offline Oracle databases. In OracleDatabase, check if the DatabaseConnection is really a JdbcConnection before trying to call getWrappedConnection.
 3ec33b1 Merge branch 'CORE-2253_clob_conversion' into ddb
 e104c79 CORE-2253 Handle oracle varchar <-> clob conversions in diffChangeLog
 6dda4b0 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 17b650a CORE-2249 Index and UniqueConstraint equivalence check should take name into account
 871b75e ensure default delimiter is set
 abd1010 add a new command line option to set the delimiter used when using command line 'executeSql' command
+ca0ca9a CORE-2244 don't rely on ANSI NULL Default, always specify NULL constraint if not null
 a09f200 CORE-2228 New usingIndexName attribute on addPrimaryKey and addUniqueConstraint
+0f80e8a CORE-2232: Improve DropPrimaryKeyGenerator on Postgres when primary key name unknown
+6c62386 CORE-2232: Support schema other than 'public' on Postgres
 66d1204 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 a118560 DVONE-2415 Liquibase: Oracle: Not capturing default CURRENT_TIMESTAMP value for column of type TIMESTAMP.
 1867799 Improve usage of UpdateVisitor and RollbackVistor - deprecate single-arg constructors - use constructors that take a ChangeExecListener, which can be null, to ensure that if a ChangeExecListener is set, it gets used.
@@ -281,17 +1052,48 @@ a118560 DVONE-2415 Liquibase: Oracle: Not capturing default CURRENT_TIMESTAMP va
 895db3e add changeExecListener to RollbackVisitor constructor so it gets used during rollback
 54b862b CORE-2228 New usingIndexName attribute on addPrimaryKey
 dd8e512 Merge pull request #352 from Datical/ddb
+a658015 Implement tag/tagExists for the offline database feature
+a3a1229 Add a "tagExists" command to the liquibase commandline
 7e6a094 substring is annoying. endindex is not index of last character, endindex-1 is
 6710edf be more selective about removing zero-terminator on view definition string
 5a46d69 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
 fc58e82 DVONE-2422 when creating view definition, trim leading and trailing whitespace
 423ef7b CORE-2209 Oracle snapshot sometimes creates "GENERATED ALWAYS AS (null)"
+4272f59 Remove 'Liquibase Home is not set.' from stdout
+64c06dc CORE-2196 Adding root cause message to the build exception when Liquibase is throwing errors. The old ant tasks were not giving custom messages so the root cause was the only message. Now that custom messages are also added, the root cause message is not printed unless debug/verbose flags are used.
 97f6780 Merge pull request #344 from Datical/ddb
 185ff39 switch from HashSet to LinkedHashSet so that the object retains ordering.
 0e26a08 Merge pull request #343 from Datical/ddb
 1414818 add a remove method to the Labels class for use in UI
+1e621a7 Handle timestamp precision correctly
+c17a8f5 [maven-release-plugin] prepare for next development iteration
+bf15154 [maven-release-plugin] prepare release liquibase-parent-3.3.2
+0a53d40 Updated changelog for 3.3.2
+fdd3e3f CORE-1877 SQLOutput prints endDelimiter regexes
+f68f920 Updated version number
+2d87c61 CORE-2114 AddAutoIncrement on Postgres does not work when changes are applied on a specific schema
+591f0e4 CORE-2141 handling dependencies and WAR as classpath
+40c7b35 CORE-2166 SpringLiquibase: includeAll within jar causes SetupException
+efc7891 Null pointer exception running derby in offline mode
+52130b5 Merge pull request #339 from sbonde/master
+0a42a2d CORE-2172 dropPrimaryKey without constraint name on sql server doesn't honour schema information
+732362f CORE-2174 Bad exception handling in OracleDatabase.setConnection
+d362b0a Merge pull request #338 from rhuffman/CORE-2178-lock-exception-sql-server
+539bd27 CORE-2180 NPE with bad name
+47a2628 CORE-2182 ClassLoader leak due to shutdown hooks
+939d1de Update RanChangeSet.java
+e3044fb Chnages needed for extension development for NoSQL databases
+33ab3fd Merge remote-tracking branch 'origin/3.3.x' into 3.3.x
+963fc70 CORE-875 Ignore tables for diffs and generateChangelog
+29c9d1b Fix CORE-2178 Use correct database collation
 e19435a Cherry picked test fix from master
+21f3dee Merge branch 'ddb'
 d753a2d Fixed post-merge test failure
+d9bdc90 Test file missing
+deea21e Fixed post-merge test failure
+761771f Merge branch '3.3.x'
+8e471df Merge remote-tracking branch 'origin/master'
+ffcb83d Merge branch 'ddb'
 17c87f1 If a string context or label was originally passed in, use that as the toString value for less surprises
 97a7d2c If ,'s or other strings are escaped to pass the command line on windows, the "\" remain. Take them out if they are there.
 d03b78d If a string context or label was originally passed in, use that as the toString value for less surprises
@@ -301,25 +1103,81 @@ d03b78d If a string context or label was originally passed in, use that as the t
 55b5143 CORE-1963 Ability to define full CREATE VIEW statement in <createView> change.
 c962bd0 Logic for when to include schema name on foreign keys incorrect. Should only include catalogName and schemaName when they are different than the default
 8d08843 Logic for when to include schema name on foreign keys incorrect. Should only include catalogName and schemaName when they are different than the default
+a578aef Merge pull request #337 from allenmadsen/master
 4286b9e CORE-2167 Issues with generateChangeLog of unique constraints on DB2
 dc0d442 CORE-2167 Issues with generateChangeLog of unique constraints on DB2
+2e727dd [maven-release-plugin] prepare for next development iteration
+a360f8b [maven-release-plugin] prepare release liquibase-parent-3.3.1
+9241b69 Use ssh git url so buildserver can push without exposing passwords in the logs
+2b4e81c Updated changelog for 3.3.1
+1897af4 CORE-2159 Datetime2 no longer used for MSSQL
+c2d5c2d defaultValueComputed is no longer quoted for GUID columns in MSSQL
+2c1a8c4 CORE-2164 SpringLiquibase: includeAll within jar causes NullPointerException
+5ca64ed CORE-1920 SpringLiqubase includeAll is not including files
+de7b084 CORE-2145 junit should be in scope test, not compile
+9a0d22d CORE-1844 bulkFetch of foreign keys on Oracle is very slow
+3615e1b CORE-2103 changelogSchemaName/changelogCatalogName configuration options will not work on Oracle DB
+b560a20 CORE-2146 snakeyaml is pulled in as transitive dependency for using projects
+4e20022 CORE-2146 snakeyaml is pulled in as transitive dependency for using projects
+a231fa4 CORE-2152 Change logs in json format not processed by liquibase - parsing errors
+b595bf8 CORE-2155 diffTypes=data fails with java.sql.SQLException: Attribute value not valid (dataOutputDirectory attribute causes build to fail)
+ed67903 Merge remote-tracking branch 'origin/3.2.x' into 3.3.x
+2b9b726 Merge pull request #333 from laurent-r/3.2.x
+6c71e07 Put "liquibase home not set" echo back in
+c4836c0 CORE-2148 Build failure on jdk-1.8 due to xdoclint
+471c0c6 Merge remote-tracking branch 'origin/master'
+b41f47c Validation error if tablename and primaryKeyName are both not set
+00d5f46 CORE-2153
 8debe94 Sort differences in report alphabetically
 4ed77b0 Allow extension to override create/drop classes created
+6333507 CORE-2137 Special characters (&#13;) copied during generateChangelog on DB2/400
+09048eb CORE-2137 Special characters (&#13;) copied during generateChangelog on DB2/400
+3d4ca6f CORE-2097 "mvn liquibase:futureRollbackSQL" asks for tag, count or date
+b63b504 CORE-2099 SQLAnywhere support (Driver not capable)
+a7a6d6c CORE-2104 ConcurrentModificationException iterating over System.getProperties().entrySet()
+e1052dc CORE-2107 LOWER() keyword fails on Postgres createIndex task
+43b0213 DVONE-2188 Always return true for shouldBulkSelect during getColumns (cherry picked from commit 02caf86)
+d32fe05 CORE-2109 dropAll fails for statements the database requires to run non-transactionally (cherry picked from commit 5bd42d0)
+2de5351 CORE-2114 AddAutoIncrement on Postgres does not work when changes are applied on a specific schema (cherry picked from commit 6f8f71e)
 6f8f71e CORE-2114 AddAutoIncrement on Postgres does not work when changes are applied on a specific schema
+dfc85f5 CORE-2115 Really slow when using fat jars
+6420068 CORE-2139 H2Database.supportsDropTableCascadeConstraints() returns false
+dbcdfcd Merged in changes from master so cherry-picked commits compile
+e2b7fcc CORE-2133 Oracle: GenerateChangeLog of a table with DEFAULT VALUE NULL creates defaultValueComputed="NULL" (cherry picked from commit ac8d1f4)
+20457c03 CORE-2120 LoadUpdateData with value=NUMERIC quoting values (cherry picked from commit adbc5ff)
+8107b55 CORE-2119 Bad finally block in SpringLiquibase.afterPropertiesSet()
+4765fb2 Merge branch 'ddb'
 adbc5ff CORE-2120 LoadUpdateData with value=NUMERIC quoting values
 cdd3882 Merge remote-tracking branch 'origin/ddb' into ddb
 f718593 Merge pull request #330 from Datical/ddb
 f1d82ee Handed null pointer exception
+5ccba80 CORE-2125 Make DatabaseChangeLog#include(String, boolean, ResourceAccessor) public
+f78c654 CORE-2127 updateSQL creates duplicate DATABASECHANGELOGLOCK tables
+6cef308 CORE-2134 ExecuteCommand won't run with no os attribute.
+506fbec Merge pull request #328 from thomasbecker/master
 02caf86 DVONE-2188 Always return true for shouldBulkSelect during getColumns
+1fc29fe CORE-2136 Mysql must quote PARTITION as a keyword
+4f82266 CORE-1422 Support changeset comments in formatted SQL
+dda0458 Merge pull request #329 from mattbertolini/feature/CORE-2124_maven-plugin-jdbc-driver-props
+bea7335 Merge remote-tracking branch 'origin/master'
+1865749 Adding a new maven parameter for the JDBC driver properties file. This is an optional parameter. Passing it down to the database factory so driver properties can be used. Fixes CORE-2124.
 ac8d1f4 CORE-2133 Oracle: GenerateChangeLog of a table with DEFAULT VALUE NULL creates defaultValueComputed="NULL"
 44967cf CORE-2132 Error message for missing sqlFile reference should be more descriptive
 f7aae05 Don't include "catalog" differences in object comparisions by default
 6f83f37 Created 3.4 XSD
+8992e59 CORE-2130 workaround fetchSize exception for oracle jdbc driver
 d925e41 CORE-2121 DB2: DiffChangeLog/GenerateChangeLog/DropAll sees alias column and tries to drop/add them
 97a8c0e CORE-2121 DB2: DiffChangeLog/GenerateChangeLog/DropAll sees alias column and tries to drop/add them
+486ca21 Fixes to better support hibernate plugin including fixing concurrent change exception, improved toString method, and ensuring all columns are available in the snapshot if needed.
+024006e CORE-2118 Change default diffChangeLog/generateChangeLog objectQuotingStrategy back to LEGACY
+51b83c8 Merge pull request #326 from mattbertolini/bug/ref-connection-props
+f70eddd Fixing a bug in the Ant database type where JDBC connection properties are not being included in the connection when the type is used as a reference. There was an inconsistent usage of the field compared to all of the other fields in the type.
 52a16fa Ignore table schema differences in diff output
+e9dc3c3 Ignore table schema differences in diff output (cherry picked from commit 2520c31)
 2fe6375 Merge remote-tracking branch 'origin/master'
 2520c31 Ignore table schema differences in diff output
+61e13c0 Merge remote-tracking branch 'origin/3.3.x' into 3.3.x
+aae6c3c CORE-2009 Fixing regression where the AntClassLoader parentFirst setting was set to true when it should not be. Removing the setting to revert it back to the default setting. (cherry picked from commit bb7f4f7)
 e861d0b Merge pull request #323 from mattbertolini/bug/CORE-2009_ant-regression-classloader-parent
 e8156a9 Merge pull request #324 from ms-novatti/master
 0b88554 Improvements to snapshot output and generateChangeLog with extensions
@@ -330,7 +1188,11 @@ bb7f4f7 CORE-2009 Fixing regression where the AntClassLoader parentFirst setting
 0f7e5e7 Updated master version to 3.4.0-SNAPSHOT after 3.3.0 release
 c0bb035 Merge branch '3.3.x'
 c1b3c9b Merge branch '3.2.x'
+583c287 [maven-release-plugin] prepare for next development iteration
+ce971cf [maven-release-plugin] prepare release liquibase-parent-3.2.3
 d60ef24 Updated POMs in preparation for 3.2.x buildserver config
+f058935 [maven-release-plugin] prepare for next development iteration
+96f9214 [maven-release-plugin] prepare release liquibase-parent-3.3.0
 6c6dc72 Working on 3.3.0 release automation. Reverting changes to try again
 7e3697c [maven-release-plugin] prepare for next development iteration
 0c923bc [maven-release-plugin] prepare release liquibase-parent-3.3.1

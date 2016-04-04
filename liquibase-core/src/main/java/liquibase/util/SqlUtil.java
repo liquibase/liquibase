@@ -9,13 +9,17 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SqlUtil {
 
@@ -121,14 +125,14 @@ public class SqlUtil {
         } else if (typeId == Types.BINARY) {
             return new DatabaseFunction(stringVal.trim());
         } else if (typeId == Types.BIT) {
-            if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
-                stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
+            if (stringVal.startsWith("b'") || stringVal.startsWith("B'")) { //mysql returns boolean values as b'0' and b'1'
+                stringVal = stringVal.replaceFirst("b'", "").replaceFirst("B'", "").replaceFirst("'$", "");
             }
             stringVal = stringVal.trim();
             if (scanner.hasNextBoolean()) {
                 return scanner.nextBoolean();
             } else {
-                return new Integer(stringVal);
+                return Integer.valueOf(stringVal);
             }
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
@@ -239,8 +243,38 @@ public class SqlUtil {
         } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
             return stringVal;
         } else {
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
+            if (stringVal.equals("")) {
+                return stringVal;
+            }
+            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
+            if (strippedSingleQuotes) { //put quotes back
+                return new DatabaseFunction("'"+stringVal+"'");
+            }
             return new DatabaseFunction(stringVal);
         }
+    }
+
+    public static String replacePredicatePlaceholders(Database database, String predicate, List<String> columnNames, List<Object> parameters) {
+        Matcher matcher = Pattern.compile(":name|\\?|:value").matcher(predicate.trim());
+        StringBuffer sb = new StringBuffer();
+        Iterator<String> columnNameIter = columnNames.iterator();
+        Iterator<Object> paramIter = parameters.iterator();
+        while (matcher.find()) {
+            if (matcher.group().equals(":name")) {
+                while (columnNameIter.hasNext()) {
+                    String columnName = columnNameIter.next();
+                    if (columnName == null) {
+                        continue;
+                    }
+                    matcher.appendReplacement(sb, Matcher.quoteReplacement(database.escapeObjectName(columnName, Column.class)));
+                    break;
+                }
+            } else if (paramIter.hasNext()) {
+                Object param = paramIter.next();
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
+            }
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }

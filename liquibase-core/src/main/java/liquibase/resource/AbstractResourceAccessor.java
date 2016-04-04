@@ -1,16 +1,17 @@
 package liquibase.resource;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.SystemUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.List;
+import java.net.URLClassLoader;
+import java.util.*;
 
 
 public abstract class AbstractResourceAccessor implements ResourceAccessor {
@@ -27,6 +28,14 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
             Enumeration<URL> baseUrls;
             ClassLoader classLoader = toClassLoader();
             if (classLoader != null) {
+                if (classLoader instanceof URLClassLoader) {
+                    baseUrls = new Vector<URL>(Arrays.asList(((URLClassLoader) classLoader).getURLs())).elements();
+
+                    while (baseUrls.hasMoreElements()) {
+                        addRootPath(baseUrls.nextElement());
+                    }
+                }
+
                 baseUrls = classLoader.getResources("");
 
                 while (baseUrls.hasMoreElements()) {
@@ -44,6 +53,13 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
 
     protected void addRootPath(URL path) {
     	String externalForm = path.toExternalForm();
+        if (externalForm.startsWith("file:")) {
+            try {
+                externalForm = new File(path.toURI()).getCanonicalFile().toURL().toExternalForm();
+            } catch (Throwable e) {
+                //keep original version
+            }
+        }
     	if (!externalForm.endsWith("/")) {
     		externalForm += "/";
     	}
@@ -129,12 +145,14 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         if (baseUrl.toExternalForm().startsWith("file:")) {
             File baseFile = new File(baseUrl.getPath());
             if (!baseFile.exists()) {
-                throw new UnexpectedLiquibaseException("Base file '"+baseFile.getAbsolutePath()+"' does not exist");
+                throw new UnexpectedLiquibaseException("Base file '" + baseFile.getAbsolutePath() + "' does not exist");
             }
             if (baseFile.isFile()) {
                 baseFile = baseFile.getParentFile();
             }
             base = baseFile.toURI().getPath();
+        } else if (baseUrl.toExternalForm().startsWith("jar:file:")) {
+                return convertToPath(new File(relativeTo).getParent() + '/' + path);
         } else {
             base = relativeTo;
         }

@@ -20,7 +20,7 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         change.setBaseTableName("TABLE_NAME");
         change.setBaseColumnNames("COL_NAME");
 
-        then: change.getConfirmationMessage() == "Foreign key contraint added to TABLE_NAME (COL_NAME)"
+        then: change.getConfirmationMessage() == "Foreign key constraint added to TABLE_NAME (COL_NAME)"
     }
 
     @Unroll

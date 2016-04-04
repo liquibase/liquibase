@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractJdbcDatabase implements Database {
 
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
+    private final static int FETCH_SIZE = 1000;
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -69,6 +70,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected String sequenceCurrentValueFunction;
     protected String quotingStartCharacter = "\"";
     protected String quotingEndCharacter = "\"";
+    protected String quotingEndReplacement = "\"\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -309,7 +311,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     /**
      * Overwrite this method to get the default schema name for the connection.
-     *
+     * If you only need to change the statement that obtains the current schema then override
+     *  @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      * @return
      */
     protected String getConnectionSchemaName() {
@@ -317,12 +320,24 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
-
+            String currentSchemaStatement = getConnectionSchemaNameCallStatement();
+            return ExecutorService.getInstance().getExecutor(this).
+            		queryForObject(new RawCallStatement(currentSchemaStatement), String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
         return null;
+    }
+
+    /**
+     * Used to obtain the connection schema name through a statement
+     * Override this method to change the statement.
+     * Only override this if getConnectionSchemaName is left unchanges or is using this method.
+     * @see AbstractJdbcDatabase#getConnectionSchemaName()
+     * @return
+     */
+    protected String getConnectionSchemaNameCallStatement(){
+        return "call current_schema";
     }
 
     @Override
@@ -339,6 +354,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (!supportsSchemas()) {
             defaultCatalogSet = schemaName != null;
         }
+    }
+
+    @Override
+    public Integer getFetchSize() {
+        return FETCH_SIZE;
     }
 
     /**
@@ -467,6 +487,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected boolean isDateTime(final String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
+    }
+    
+    protected boolean isTimestamp(final String isoDate) {
+        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
     }
 
     protected boolean isTimeOnly(final String isoDate) {
@@ -974,7 +998,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        return quotingStartCharacter + escapeStringForDatabase(objectName) + quotingEndCharacter;
+        if (objectName == null) {
+            return null;
+        }
+
+        return quotingStartCharacter
+                + objectName.replace(quotingEndCharacter, quotingEndReplacement)
+                + quotingEndCharacter;
     }
 
     @Override
@@ -1008,23 +1038,36 @@ public abstract class AbstractJdbcDatabase implements Database {
             return quoteObject(columnName, Column.class);
         }
 
-        if (!quoteNamesThatMayBeFunctions && columnName.contains("(")) {
-            return columnName;
+        if (columnName.contains("(")) {
+            if (quoteNamesThatMayBeFunctions) {
+                return quoteObject(columnName, Column.class);
+            } else {
+                return columnName;
+            }
         }
         return escapeObjectName(columnName, Column.class);
     }
 
     @Override
     public String escapeColumnNameList(final String columnNames) {
-        StringBuffer sb = new StringBuffer();
-        for (String columnName : columnNames.split(",")) {
+        StringBuilder sb = new StringBuilder();
+        for (String columnName : StringUtils.splitAndTrim(columnNames, ",")) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(escapeObjectName(columnName.trim(), Column.class));
+            boolean descending = false;
+            if (columnName.matches("(?i).*\\s+DESC")) {
+                columnName = columnName.replaceFirst("(?i)\\s+DESC$", "");
+                descending = true;
+            } else if (columnName.matches("(?i).*\\s+ASC")) {
+                columnName = columnName.replaceFirst("(?i)\\s+ASC$", "");
+            }
+            sb.append(escapeObjectName(columnName, Column.class));
+            if (descending) {
+                sb.append(" DESC");
+            }
         }
         return sb.toString();
-
     }
 
     @Override
@@ -1390,13 +1433,22 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            String sequenceName = databaseFunction.getValue();
+            if (!sequenceNextValueFunction.contains("'")) {
+                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+            }
+            return String.format(sequenceNextValueFunction, sequenceName);
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+
+            String sequenceName = databaseFunction.getValue();
+            if (!sequenceCurrentValueFunction.contains("'")) {
+                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+            }
+            return String.format(sequenceCurrentValueFunction, sequenceName);
         } else {
             return databaseFunction.getValue();
         }

@@ -6,20 +6,21 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.util.JdbcUtils;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import liquibase.logging.LogFactory;
@@ -32,6 +33,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private Boolean sendsStringParametersAsUnicode = null;
 
     @Override
     public String getShortName() {
@@ -67,8 +70,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
 
-        super.quotingStartCharacter ="[";
-        super.quotingEndCharacter="]";
+        super.quotingStartCharacter = "[";
+        super.quotingEndCharacter = "]";
+        super.quotingEndReplacement = "]]";
     }
 
 
@@ -105,6 +109,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         try {
+            if (isAzureDb()) {
+                return false;
+            }
             if (this.getDatabaseMajorVersion() >= 11) {
                 return true;
             }
@@ -169,18 +176,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
-        }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
-        }
-        return null;
+    protected String getConnectionSchemaNameCallStatement() {
+        return "select schema_name()";
     }
-    
+
     @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
@@ -192,14 +191,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // MSSQL server does not support the schema name for the index -
-        return super.escapeObjectName(indexName, Index.class);
-    }
-
-    @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return escapeObjectName(null, schemaName, tableName, Table.class);
+        return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -277,7 +270,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (objectName.contains("(")) { //probably a function
             return objectName;
         }
-        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+
+        return quoteObject(objectName, objectType);
     }
 
     @Override
@@ -293,6 +287,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
+    }
+
+    @Override
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return Relation.class.isAssignableFrom(type);
     }
 
     @Override
@@ -324,20 +323,24 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return selectOnly;
     }
 
-    /**
-     * SQLServer does not support specifying the database name as a prefix to the object name
-     * @return
-     */
     @Override
-    public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        return escapeObjectName(null, schemaName, viewName, View.class);
-
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        if (View.class.isAssignableFrom(objectType)) { //SQLServer does not support specifying the database name as a prefix to the object name
+            String name = super.escapeObjectName(objectName, objectType);
+            if (schemaName != null) {
+                name = super.escapeObjectName(schemaName, Schema.class)+"."+name;
+            }
+            return name;
+        } else if (Index.class.isAssignableFrom(objectType)) {
+            return super.escapeObjectName(objectName, objectType);
+        }
+        return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
     }
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null) {
+        if (schemaName != null && !isCaseSensitive()) {
             schemaName = schemaName.toLowerCase();
         }
         return schemaName;
@@ -345,22 +348,180 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCaseSensitive() {
-
         if (caseSensitive == null) {
             try {
-                if (getConnection() != null) {
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
-                    caseSensitive = ! collation.contains("_CI_");
+                if (getConnection() instanceof JdbcConnection) {
+                    String catalog = getConnection().getCatalog();
+                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
+                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+                    caseSensitive = collation != null && !collation.contains("_CI_");
+                } else if (getConnection() instanceof OfflineConnection) {
+                    caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (Exception e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
+        return caseSensitive != null && caseSensitive;
+    }
 
-        if (caseSensitive == null) {
-            return false;
-        } else {
-            return caseSensitive.booleanValue();
+    @Override
+    public int getDataTypeMaxParameters(String dataTypeName) {
+        if ("bigint".equalsIgnoreCase(dataTypeName)
+                || "bit".equalsIgnoreCase(dataTypeName)
+                || "date".equalsIgnoreCase(dataTypeName)
+                || "datetime".equalsIgnoreCase(dataTypeName)
+                || "geography".equalsIgnoreCase(dataTypeName)
+                || "geometry".equalsIgnoreCase(dataTypeName)
+                || "hierarchyid".equalsIgnoreCase(dataTypeName)
+                || "image".equalsIgnoreCase(dataTypeName)
+                || "int".equalsIgnoreCase(dataTypeName)
+                || "money".equalsIgnoreCase(dataTypeName)
+                || "ntext".equalsIgnoreCase(dataTypeName)
+                || "real".equalsIgnoreCase(dataTypeName)
+                || "smalldatetime".equalsIgnoreCase(dataTypeName)
+                || "smallint".equalsIgnoreCase(dataTypeName)
+                || "smallmoney".equalsIgnoreCase(dataTypeName)
+                || "text".equalsIgnoreCase(dataTypeName)
+                || "timestamp".equalsIgnoreCase(dataTypeName)
+                || "tinyint".equalsIgnoreCase(dataTypeName)
+                || "rowversion".equalsIgnoreCase(dataTypeName)
+                || "sql_variant".equalsIgnoreCase(dataTypeName)
+                || "sysname".equalsIgnoreCase(dataTypeName)
+                || "uniqueidentifier".equalsIgnoreCase(dataTypeName)) {
+
+            return 0;
         }
+
+        if ("binary".equalsIgnoreCase(dataTypeName)
+                || "char".equalsIgnoreCase(dataTypeName)
+                || "datetime2".equalsIgnoreCase(dataTypeName)
+                || "datetimeoffset".equalsIgnoreCase(dataTypeName)
+                || "float".equalsIgnoreCase(dataTypeName)
+                || "nchar".equalsIgnoreCase(dataTypeName)
+                || "nvarchar".equalsIgnoreCase(dataTypeName)
+                || "time".equalsIgnoreCase(dataTypeName)
+                || "varbinary".equalsIgnoreCase(dataTypeName)
+                || "varchar".equalsIgnoreCase(dataTypeName)
+                || "xml".equalsIgnoreCase(dataTypeName)) {
+
+            return 1;
+        }
+
+        return 2;
+    }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        int indexOfPeriod = dataTypeName.indexOf('.');
+
+        if (indexOfPeriod < 0) {
+            if (!dataTypeName.startsWith(quotingStartCharacter)) {
+                dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
+            }
+
+            return dataTypeName;
+        }
+
+        String schemaName = dataTypeName.substring(0, indexOfPeriod);
+        if (!schemaName.startsWith(quotingStartCharacter)) {
+            schemaName = escapeObjectName(schemaName, Schema.class);
+        }
+
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        if (!dataTypeName.startsWith(quotingStartCharacter)) {
+            dataTypeName = escapeObjectName(dataTypeName, DatabaseObject.class);
+        }
+
+        return schemaName + "." + dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+         int indexOfPeriod = dataTypeName.indexOf('.');
+
+         if (indexOfPeriod < 0) {
+             if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
+                 dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+             }
+
+             return dataTypeName;
+         }
+
+         String schemaName = dataTypeName.substring(0, indexOfPeriod);
+         if (schemaName.matches("\\[[^]\\[]++\\]")) {
+             schemaName = schemaName.substring(1, schemaName.length() - 1);
+         }
+
+         dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+         if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
+             dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+         }
+
+         return schemaName + "." + dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        int indexOfLeftParen = dataTypeString.indexOf('(');
+        if (indexOfLeftParen < 0) {
+            return unescapeDataTypeName(dataTypeString);
+        }
+
+        return unescapeDataTypeName(dataTypeString.substring(0, indexOfLeftParen))
+                + dataTypeString.substring(indexOfLeftParen);
+    }
+
+    public boolean sendsStringParametersAsUnicode() {
+        if (sendsStringParametersAsUnicode == null) {
+            try {
+                if (getConnection() instanceof JdbcConnection) {
+                    PreparedStatement ps = null;
+                    ResultSet rs = null;
+                    try {
+                        String sql = "SELECT CONVERT([sysname], SQL_VARIANT_PROPERTY(?, 'BaseType'))";
+                        ps = ((JdbcConnection) getConnection()).prepareStatement(sql);
+                        ps.setString(1, "Liquibase");
+                        rs = ps.executeQuery();
+                        String baseType = null;
+                        if (rs.next()) {
+                            baseType = rs.getString(1);
+                        }
+                        sendsStringParametersAsUnicode = baseType == null || baseType.startsWith("n"); // i.e. nvarchar (or nchar)
+                    } finally {
+                        JdbcUtils.close(rs, ps);
+                    }
+                } else if (getConnection() instanceof OfflineConnection) {
+                    sendsStringParametersAsUnicode = ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
+                }
+            } catch (Exception e) {
+                LogFactory.getLogger().warning("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+            }
+        }
+
+        return sendsStringParametersAsUnicode == null ? true : sendsStringParametersAsUnicode;
+    }
+
+    public boolean isAzureDb() {
+        return "Azure".equalsIgnoreCase(getEngineEdition());
+    }
+
+    public String getEngineEdition() {
+        try {
+            if (getConnection() instanceof JdbcConnection) {
+                String sql = "SELECT CASE ServerProperty('EngineEdition')\n" +
+                        "         WHEN 1 THEN 'Personal'\n" +
+                        "         WHEN 2 THEN 'Standard'\n" +
+                        "         WHEN 3 THEN 'Enterprise'\n" +
+                        "         WHEN 4 THEN 'Express'\n" +
+                        "         WHEN 5 THEN 'Azure'\n" +
+                        "         ELSE 'Unknown'\n" +
+                        "       END";
+                return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+            }
+        } catch (DatabaseException e) {
+            LogFactory.getLogger().warning("Could not determine engine edition", e);
+        }
+        return "Unknown";
     }
 }

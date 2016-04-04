@@ -9,7 +9,7 @@ import java.io.File;
 
 public class DBDocTask extends BaseLiquibaseTask {
     private FileResource outputDirectory;
-    private FileResource changeLog;
+    private String changeLog;
     private String contexts;
 
     @Override
@@ -33,7 +33,7 @@ public class DBDocTask extends BaseLiquibaseTask {
                 liquibase.generateDocumentation(outputDirectory.toString());
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Liquibase encountered an error while creating database documentation.", e);
+            throw new BuildException("Liquibase encountered an error while creating database documentation. " + e.toString(), e);
         }
     }
 
@@ -50,7 +50,7 @@ public class DBDocTask extends BaseLiquibaseTask {
     }
 
     @Override
-    protected FileResource getChangeLogFile() {
+    protected String getChangeLogFile() {
         return changeLog;
     }
 
@@ -62,7 +62,7 @@ public class DBDocTask extends BaseLiquibaseTask {
         this.outputDirectory = outputDirectory;
     }
 
-    public void setChangeLogFile(FileResource changeLog) {
+    public void setChangeLogFile(String changeLog) {
         this.changeLog = changeLog;
     }
 

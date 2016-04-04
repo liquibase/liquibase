@@ -5,6 +5,7 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.database.Database;
 import liquibase.database.InternalDatabase;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.H2Database;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
@@ -26,9 +27,12 @@ public class DiffOutputControl {
     private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
+    private ObjectQuotingStrategy objectQuotingStrategy = null;
 
     private ContextExpression context = null;
     private Labels labels = null;
+
+    private ObjectChangeFilter objectChangeFilter;
 
     public DiffOutputControl() {
         includeSchema = true;
@@ -129,6 +133,15 @@ public class DiffOutputControl {
         }
     }
 
+    public ObjectChangeFilter getObjectChangeFilter() {
+        return objectChangeFilter;
+    }
+
+    public DiffOutputControl setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
+        this.objectChangeFilter = objectChangeFilter;
+        return this;
+    }
+
     public ContextExpression getContext() {
         return context;
     }
@@ -144,6 +157,15 @@ public class DiffOutputControl {
 
     public DiffOutputControl setLabels(Labels labels) {
         this.labels = labels;
+        return this;
+    }
+
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return objectQuotingStrategy;
+    }
+
+    public DiffOutputControl setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+        this.objectQuotingStrategy = objectQuotingStrategy;
         return this;
     }
 

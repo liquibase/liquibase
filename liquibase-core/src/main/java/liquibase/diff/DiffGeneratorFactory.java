@@ -29,7 +29,7 @@ public class DiffGeneratorFactory {
         }
     }
 
-    public static DiffGeneratorFactory getInstance() {
+    public static synchronized DiffGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new DiffGeneratorFactory();
         }
@@ -45,7 +45,7 @@ public class DiffGeneratorFactory {
         SortedSet<DiffGenerator> foundGenerators = new TreeSet<DiffGenerator>(new Comparator<DiffGenerator>() {
             @Override
             public int compare(DiffGenerator o1, DiffGenerator o2) {
-                return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+                return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
             }
         });
 

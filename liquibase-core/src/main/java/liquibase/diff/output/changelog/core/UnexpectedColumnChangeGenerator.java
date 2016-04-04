@@ -38,6 +38,10 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
 //        if (!shouldModifyColumn(column)) {
 //            continue;
 //        }
+
+        if (column.getComputed() != null && column.getComputed()) { //not really a column to drop, probably part of an index or something
+            return null;
+        }
         if (column.getRelation() instanceof View) {
             return null;
         }

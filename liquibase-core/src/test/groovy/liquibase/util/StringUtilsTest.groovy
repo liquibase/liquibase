@@ -75,7 +75,7 @@ class StringUtilsTest extends Specification {
 
         then:
         result == sql.trim()
-        assert end - start <= 500: "Did not complete within 500ms, took "+(end-start)+"ms";
+        assert end - start <= 800: "Did not complete within 800ms, took "+(end-start)+"ms";
     }
 
     def "join with map"() {

@@ -7,6 +7,7 @@ import liquibase.statement.SequenceNextValueFunction;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Locale;
@@ -61,6 +62,8 @@ public class ObjectUtil {
             finalValue = Long.valueOf(propertyValue);
         } else if (parameterType.equals(BigInteger.class)) {
             finalValue = new BigInteger(propertyValue);
+        } else if (parameterType.equals(BigDecimal.class)) {
+	        finalValue = new BigDecimal(propertyValue);
         } else if (parameterType.equals(DatabaseFunction.class)) {
             finalValue = new DatabaseFunction(propertyValue);
         } else if (parameterType.equals(SequenceNextValueFunction.class)) {
@@ -88,6 +91,10 @@ public class ObjectUtil {
         }
 
         try {
+            if (propertyValue == null) {
+                setProperty(object, propertyName, null);
+                return;
+            }
             if (!method.getParameterTypes()[0].isAssignableFrom(propertyValue.getClass())) {
                 setProperty(object, propertyName, propertyValue.toString());
                 return;

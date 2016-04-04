@@ -20,6 +20,7 @@ import liquibase.util.ObjectUtil;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
@@ -270,6 +271,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<String>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
+            if (field.equals("columns") && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
+                if (fieldValue != null && ((Collection) fieldValue).size() > 0) {
+                    String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName().toUpperCase();
+                    if (columnName.endsWith(" ASC") || columnName.endsWith("DESC")) {
+                        continue;
+                    }
+                }
+            }
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
                 if (object instanceof PrimaryKey && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
@@ -319,7 +328,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             //
             //                }
         } else if (fieldValue instanceof Collection) {
-            Iterator fieldValueIterator = ((Collection) fieldValue).iterator();
+            Iterator fieldValueIterator = new CopyOnWriteArrayList((Collection) fieldValue).iterator();
             List newValues = new ArrayList();
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
@@ -348,7 +357,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return newCollection;
         } else if (fieldValue instanceof Map) {
             Map newMap = (Map) fieldValue.getClass().newInstance();
-            for (Map.Entry entry : (Set<Map.Entry>) ((Map) fieldValue).entrySet()) {
+            for (Map.Entry entry : new HashSet<Map.Entry>((Set<Map.Entry>) ((Map) fieldValue).entrySet())) {
                 Object key = replaceObject(entry.getKey());
                 Object value = replaceObject(entry.getValue());
 

@@ -1,5 +1,14 @@
 package liquibase.parser.core.xml
 
+import com.example.liquibase.change.ColumnConfig
+import com.example.liquibase.change.ComputedConfig
+import com.example.liquibase.change.CreateTableExampleChange
+import com.example.liquibase.change.DefaultConstraintConfig
+import com.example.liquibase.change.IdentityConfig
+import com.example.liquibase.change.KeyColumnConfig
+import com.example.liquibase.change.PrimaryKeyConfig
+import com.example.liquibase.change.UniqueConstraintConfig
+
 import liquibase.Contexts
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
@@ -24,7 +33,6 @@ import spock.lang.FailsWith
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
-
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
@@ -129,9 +137,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         changeLog.getChangeSets().get(1).getComments() == "Testing add column"
         assert changeLog.getChangeSets().get(1).shouldAlwaysRun()
         assert changeLog.getChangeSets().get(1).shouldRunOnChange()
-        changeLog.getChangeSets().get(1).getRollBackChanges().length == 2
-        assert changeLog.getChangeSets().get(1).getRollBackChanges()[0] instanceof RawSQLChange
-        assert changeLog.getChangeSets().get(1).getRollBackChanges()[1] instanceof RawSQLChange
+        changeLog.getChangeSets().get(1).rollback.changes.size() == 2
+        assert changeLog.getChangeSets().get(1).rollback.changes[0] instanceof RawSQLChange
+        assert changeLog.getChangeSets().get(1).rollback.changes[1] instanceof RawSQLChange
 
         ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(1).getChanges()[0]).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges()[0] instanceof AddColumnChange
@@ -332,7 +340,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 		changeLog.getChangeSets()[0].getId() == "1"
         changeLog.getChangeSets()[0].comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'database mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
 		((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql() == "create table my_table_name;"
-		((RawSQLChange) changeLog.getChangeSets()[0].getRollBackChanges()[0]).getSql() == "drop table my_table_name"
+		((RawSQLChange) changeLog.getChangeSets()[0].rollback.changes[0]).getSql() == "drop table my_table_name"
 
         and: "changeSet 2"
         changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
@@ -475,23 +483,23 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "changeSet with UTF8").changes[0]).sql == "insert into testutf8insert (stringvalue) values ('string with € and £')"
 
         and: "rollback blocks are parsed correctly"
-        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").rollBackChanges.size() == 0
+        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").rollback.changes.size() == 0
 
-        changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollBackChanges.length == 1
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollBackChanges[0]).sql == "drop table rollback_test"
+        changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollback.changes.size() == 1
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "one rollback block").rollback.changes[0]).sql == "drop table rollback_test"
 
-        changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollBackChanges.size() == 1
-        assert changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollBackChanges[0] instanceof EmptyChange
+        changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollback.changes.size() == 1
+        assert changeLog.getChangeSet(path, "nvoxland", "empty rollback block").rollback.changes[0] instanceof EmptyChange
 
 
-        changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges.length == 7
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[0]).sql == "drop table multiRollback1"
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[1]).sql == "drop table multiRollback2"
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[2]).sql == "drop table multiRollback3"
-        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[3]).tableName == "multiRollback4"
-        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[4]).tableName == "multiRollback5"
-        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[5]).tableName == "multiRollback6"
-        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollBackChanges[6]).sql == "select * from simple"
+        changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes.size() == 7
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[0]).sql == "drop table multiRollback1"
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[1]).sql == "drop table multiRollback2"
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[2]).sql == "drop table multiRollback3"
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[3]).tableName == "multiRollback4"
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[4]).tableName == "multiRollback5"
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[5]).tableName == "multiRollback6"
+        ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "multiple rollback blocks").rollback.changes[6]).sql == "select * from simple"
 
     }
     def "tests for particular features and edge conditions part 3 testCasesChangeLog.xml"() throws Exception {
@@ -602,5 +610,87 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         and: "single drop column"
         assert 0 == changeLog.getChangeSets().get(3).getChanges().get(0).getColumns().size()
         assert "id" == changeLog.getChangeSets().get(3).getChanges().get(0).getColumnName()
+    }
+
+    def "nested objects are parsed"() {
+        setup:
+        ChangeFactory.getInstance().register(CreateTableExampleChange)
+
+        when:
+        def path = "liquibase/parser/core/xml/nestedObjectsChangeLog.xml"
+        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        changeLog.getChangeSets().size() == 1
+        changeLog.getChangeSets().get(0).getChanges().size() == 1
+        def change1 = changeLog.getChangeSets().get(0).getChanges().get(0)
+        change1.getClass() == CreateTableExampleChange
+        change1.getSchemaName() == "dbo"
+        change1.getTableName() == "Test"
+        change1.getDecimalValue() == 3.14159
+        change1.getColumns().size() == 7
+        change1.getColumns().get(0).getClass() == ColumnConfig
+        change1.getColumns().get(0).getName() == "id"
+        change1.getColumns().get(0).getType() == "bigint"
+        change1.getColumns().get(0).getNullable() == false
+        change1.getColumns().get(0).getIdentity().getClass() == IdentityConfig
+        change1.getColumns().get(0).getIdentity().getSeed() == 1
+        change1.getColumns().get(0).getIdentity().getIncrement() == 1
+        change1.getColumns().get(1).getClass() == ColumnConfig
+        change1.getColumns().get(1).getName() == "key1"
+        change1.getColumns().get(1).getType() == "nvarchar(40)"
+        change1.getColumns().get(1).getNullable() == false
+        change1.getColumns().get(1).getIdentity() == null
+        change1.getColumns().get(1).getDefaultConstraint() == null
+        change1.getColumns().get(1).getComputed() == null
+        change1.getColumns().get(2).getClass() == ColumnConfig
+        change1.getColumns().get(2).getName() == "key2"
+        change1.getColumns().get(2).getType() == "nvarchar(20)"
+        change1.getColumns().get(2).getNullable() == false
+        change1.getColumns().get(3).getClass() == ColumnConfig
+        change1.getColumns().get(3).getName() == "key3"
+        change1.getColumns().get(3).getType() == "nvarchar(10)"
+        change1.getColumns().get(3).getNullable() == true
+        change1.getColumns().get(4).getClass() == ColumnConfig
+        change1.getColumns().get(4).getName() == "value"
+        change1.getColumns().get(4).getType() == "nvarchar(MAX)"
+        change1.getColumns().get(4).getNullable() == false
+        change1.getColumns().get(5).getClass() == ColumnConfig
+        change1.getColumns().get(5).getName() == "lastUpdateDate"
+        change1.getColumns().get(5).getType() == "datetime2"
+        change1.getColumns().get(5).getNullable() == false
+        change1.getColumns().get(5).getDefaultConstraint().getClass() == DefaultConstraintConfig
+        change1.getColumns().get(5).getDefaultConstraint().getName() == "DF_Test_lastUpdateDate"
+        change1.getColumns().get(5).getDefaultConstraint().getExpression() == "GETDATE()"
+        change1.getColumns().get(6).getClass() == ColumnConfig
+        change1.getColumns().get(6).getName() == "partition"
+        change1.getColumns().get(6).getType() == null
+        change1.getColumns().get(6).getNullable() == false
+        change1.getColumns().get(6).getComputed().getClass() == ComputedConfig
+        change1.getColumns().get(6).getComputed().getExpression() == "[id] % 5"
+        change1.getColumns().get(6).getComputed().getPersisted() == true
+        change1.getPrimaryKey().getClass() == PrimaryKeyConfig
+        change1.getPrimaryKey().getName() == "PK_Test_id"
+        change1.getPrimaryKey().getKeyColumns().size() == 1
+        change1.getPrimaryKey().getKeyColumns().get(0).getClass() == KeyColumnConfig
+        change1.getPrimaryKey().getKeyColumns().get(0).getName() == "id"
+        change1.getUniqueConstraints().size() == 2
+        change1.getUniqueConstraints().get(0).getClass() == UniqueConstraintConfig
+        change1.getUniqueConstraints().get(0).getName() == "UQ_Test_key1"
+        change1.getUniqueConstraints().get(0).getKeyColumns().size() == 1
+        change1.getUniqueConstraints().get(0).getKeyColumns().get(0).getClass() == KeyColumnConfig
+        change1.getUniqueConstraints().get(0).getKeyColumns().get(0).getName() == "key1"
+        change1.getUniqueConstraints().get(1).getClass() == UniqueConstraintConfig
+        change1.getUniqueConstraints().get(1).getName() == "UQ_Test_key2_key3_DESC"
+        change1.getUniqueConstraints().get(1).getKeyColumns().size() == 2
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(0).getClass() == KeyColumnConfig
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(0).getName() == "key2"
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(0).getDescending() == null
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getClass() == KeyColumnConfig
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getName() == "key3"
+        change1.getUniqueConstraints().get(1).getKeyColumns().get(1).getDescending() == true
+
+        cleanup:
+        ChangeFactory.getInstance().unregister("createTableExample")
     }
 }

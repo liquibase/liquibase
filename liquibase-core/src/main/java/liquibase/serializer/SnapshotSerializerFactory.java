@@ -1,24 +1,21 @@
 package liquibase.serializer;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SnapshotSerializerFactory {
     private static SnapshotSerializerFactory instance;
 
-    private Map<String, SnapshotSerializer> serializers = new HashMap<String, SnapshotSerializer>();
+    private Map<String, List<SnapshotSerializer>> serializers = new HashMap<String, List<SnapshotSerializer>>();
 
-
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotSerializerFactory();
     }
 
-    public static SnapshotSerializerFactory getInstance() {
+    public static synchronized SnapshotSerializerFactory getInstance() {
         if (instance == null) {
             instance = new SnapshotSerializerFactory();
         }
@@ -37,40 +34,54 @@ public class SnapshotSerializerFactory {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
-
     }
 
-    public Map<String, SnapshotSerializer> getSerializers() {
+    public Map<String, List<SnapshotSerializer>> getSerializers() {
         return serializers;
     }
 
-    public SnapshotSerializer getSerializer(String fileNameOrExtension) {
+    public List<SnapshotSerializer> getSerializers(String fileNameOrExtension) {
         fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
-        SnapshotSerializer snapshotSerializer = serializers.get(fileNameOrExtension);
-        if (snapshotSerializer == null) {
-            throw new RuntimeException("No serializer associated with the filename or extension '" + fileNameOrExtension + "'");
+        List<SnapshotSerializer> snapshotSerializers = serializers.get(fileNameOrExtension);
+        if (snapshotSerializers == null) {
+            return Collections.emptyList();
         }
-        return snapshotSerializer;
+        return snapshotSerializers;
+    }
+
+    public SnapshotSerializer getSerializer(String fileNameOrExtension) {
+        List<SnapshotSerializer> snapshotSerializers = getSerializers(fileNameOrExtension);
+        if (snapshotSerializers.isEmpty()) {
+            throw new RuntimeException("No serializers associated with the filename or extension '" + fileNameOrExtension + "'");
+        }
+        return snapshotSerializers.get(0);
     }
 
     public void register(SnapshotSerializer snapshotSerializer) {
         for (String extension : snapshotSerializer.getValidFileExtensions()) {
-            serializers.put(extension, snapshotSerializer);
+            List<SnapshotSerializer> snapshotSerializers = serializers.get(extension);
+            if (snapshotSerializers == null) {
+                snapshotSerializers = new ArrayList<SnapshotSerializer>();
+                serializers.put(extension, snapshotSerializers);
+            }
+            snapshotSerializers.add(snapshotSerializer);
+            Collections.sort(snapshotSerializers, PrioritizedService.COMPARATOR);
         }
     }
 
     public void unregister(SnapshotSerializer snapshotSerializer) {
-        List<Map.Entry<String, SnapshotSerializer>> entrysToRemove = new ArrayList<Map.Entry<String, SnapshotSerializer>>();
-        for (Map.Entry<String, SnapshotSerializer> entry : serializers.entrySet()) {
-            if (entry.getValue().equals(snapshotSerializer)) {
-                entrysToRemove.add(entry);
+        for (Iterator<Map.Entry<String, List<SnapshotSerializer>>> entryIterator = serializers.entrySet().iterator(); entryIterator.hasNext();) {
+            Map.Entry<String, List<SnapshotSerializer>> entry = entryIterator.next();
+            List<SnapshotSerializer> snapshotSerializers = entry.getValue();
+            for (Iterator<SnapshotSerializer> iterator = snapshotSerializers.iterator(); iterator.hasNext();) {
+                SnapshotSerializer value = iterator.next();
+                if (value.equals(snapshotSerializer)) {
+                    iterator.remove();
+                }
+            }
+            if (snapshotSerializers.isEmpty()) {
+                entryIterator.remove();
             }
         }
-
-        for (Map.Entry<String, SnapshotSerializer> entry : entrysToRemove) {
-            serializers.remove(entry.getKey());
-        }
-
     }
-
 }

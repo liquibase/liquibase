@@ -35,7 +35,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return PRIORITY_DATABASE + 1;
     }
 
 	@Override

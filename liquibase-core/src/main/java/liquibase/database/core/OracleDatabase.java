@@ -6,6 +6,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -24,8 +25,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates Oracle database support.
@@ -38,6 +40,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Set<String> userDefinedTypes = null;
 
     private Boolean canAccessDbaRecycleBin;
+    private Integer databaseMajorVersion;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -57,21 +60,65 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
+        reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC", "ORDER")); //more reserved words not returned by driver
+
+        Connection sqlConn = null;
         if (!(conn instanceof OfflineConnection)) {
             try {
-                Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-                wrappedConn.setAccessible(true);
-                Connection sqlConn = (Connection) wrappedConn.invoke(conn);
-
-                reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-                reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC")); //more reserved words not returned by driver
-
-                Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
-                method.setAccessible(true);
-                method.invoke(sqlConn, true);
+                /**
+                 * Don't try to call getWrappedConnection if the conn instance is
+                 * is not a JdbcConnection. This happens for OfflineConnection.
+                 * @see <a href="https://liquibase.jira.com/browse/CORE-2192">CORE-2192</a>
+                 **/
+                if (conn instanceof JdbcConnection) {
+                    Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+                    wrappedConn.setAccessible(true);
+                    sqlConn = (Connection) wrappedConn.invoke(conn);
+                }
             } catch (Exception e) {
-                LogFactory.getLogger().info("Error configuring OracleDatabase connection: " + e.getMessage(), e);
-                ; //cannot set it. That is OK
+                throw new UnexpectedLiquibaseException(e);
+            }
+
+            if (sqlConn != null) {
+                try {
+                    reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+                } catch (SQLException e) {
+                    LogFactory.getLogger().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    //can not get keywords. Continue on
+                }
+                try {
+                    Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
+                    method.setAccessible(true);
+                    method.invoke(sqlConn, true);
+                } catch (Exception e) {
+                    LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    ; //cannot set it. That is OK
+                }
+
+                Statement statement = null;
+                ResultSet resultSet = null;
+                try {
+                    statement = sqlConn.createStatement();
+                    resultSet = statement.executeQuery("SELECT value FROM v$parameter WHERE name = 'compatible'");
+                    String compatibleVersion = null;
+                    if (resultSet.next()) {
+                        compatibleVersion = resultSet.getString("value");
+                    }
+                    if (compatibleVersion != null) {
+                        Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\..*").matcher(compatibleVersion);
+                        if (majorVersionMatcher.matches()) {
+                            this.databaseMajorVersion = Integer.valueOf(majorVersionMatcher.group(1));
+                        }
+                    }
+                } catch (SQLException e) {
+                    String message = "Cannot read from v$parameter: "+e.getMessage();
+                    LogFactory.getLogger().info("Could not set check compatibility mode on OracleDatabase: " + message);
+                } finally {
+                    JdbcUtils.close(resultSet, statement);
+                }
+
+
+
             }
         }
         super.setConnection(conn);
@@ -85,6 +132,15 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getDefaultDatabaseProductName() {
         return "Oracle";
+    }
+
+    @Override
+    public int getDatabaseMajorVersion() throws DatabaseException {
+        if (databaseMajorVersion == null) {
+            return super.getDatabaseMajorVersion();
+        } else {
+            return databaseMajorVersion;
+        }
     }
 
     @Override
@@ -195,6 +251,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             val.append(normalLiteral);
             val.append(", 'HH24:MI:SS')");
             return val.toString();
+        } else if (isTimestamp(isoDate)) {
+            StringBuffer val = new StringBuffer(26);
+            val.append("to_timestamp(");
+            val.append(normalLiteral);
+            val.append(", 'YYYY-MM-DD HH24:MI:SS.FF')");
+            return val.toString();
         } else if (isDateTime(isoDate)) {
             normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf('.')) + "'";
 
@@ -254,6 +316,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
                 return true;
+            } else if ((example.getName().startsWith("MDRT_") || example.getName().startsWith("MDRS_")) && example.getName().endsWith("$")) {
+                // CORE-1768 - Oracle creates these for spatial indices and will remove them when the index is removed.
+                return true;
             } else if (example.getName().startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.
                 return true;
             } else if (example.getName().startsWith("RUPD$_")) { //Created by materialized view log tables using primary keys. Not available for DDL operations.
@@ -263,6 +328,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             } else if (example.getName().equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
                 return true;
             } else if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
+                return true;
+            } else if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
                 return true;
             }
         }
@@ -277,7 +344,25 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsAutoIncrement() {
-        return false;
+        // Oracle supports Identity beginning with version 12c
+        boolean isAutoIncrementSupported = false;
+
+        try {
+            if (getDatabaseMajorVersion() >= 12) {
+                isAutoIncrementSupported = true;
+            }
+
+            // Returning true will generate create table command with 'IDENTITY' clause, example:
+            // CREATE TABLE AutoIncTest (IDPrimaryKey NUMBER(19) GENERATED BY DEFAULT AS IDENTITY NOT NULL, TypeID NUMBER(3) NOT NULL, Description NVARCHAR2(50), CONSTRAINT PK_AutoIncTest PRIMARY KEY (IDPrimaryKey));
+
+            // While returning false will continue to generate create table command without 'IDENTITY' clause, example:
+            // CREATE TABLE AutoIncTest (IDPrimaryKey NUMBER(19) NOT NULL, TypeID NUMBER(3) NOT NULL, Description NVARCHAR2(50), CONSTRAINT PK_AutoIncTest PRIMARY KEY (IDPrimaryKey));
+
+        } catch (DatabaseException ex) {
+            isAutoIncrementSupported = false;
+        }
+
+        return isAutoIncrementSupported;
     }
 
 
@@ -342,6 +427,14 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         if (databaseFunction != null && databaseFunction.toString().equalsIgnoreCase("current_timestamp")) {
             return databaseFunction.toString();
         }
+        if(databaseFunction instanceof SequenceNextValueFunction
+                || databaseFunction instanceof SequenceCurrentValueFunction){
+            String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
+            // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
+            return quotedSeq.replaceFirst("\"([^\\.\"]*)\\.([^\\.\"]*)\"","\"$1\".\"$2\"");
+
+        }
+
         return super.generateDatabaseFunctionValue(databaseFunction);
     }
 

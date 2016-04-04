@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -38,23 +37,35 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {
-             String productVersion = null;
-             try {
-                 productVersion = database.getDatabaseProductVersion();
-             } catch (DatabaseException e) {
-                 throw new UnexpectedLiquibaseException(e);
-             }
-             if(productVersion == null || productVersion.startsWith("9") || productVersion.startsWith("10") || productVersion.startsWith("11") || productVersion.startsWith("12")) { // SQL Server 2005/2008/2012/2014
-                // SQL Server 2005 does not often work with the simpler query shown below
-                String query = "DECLARE @default sysname\n";
-                query += "SELECT @default = object_name(default_object_id) FROM sys.columns WHERE object_id=object_id('" + escapedTableName + "') AND name='" + statement.getColumnName() + "'\n";
-                query += "EXEC ('ALTER TABLE " + escapedTableName + " DROP CONSTRAINT ' + @default)";
-                // System.out.println("DROP QUERY : " + query);
-                sql = query;
-             } else {
-        		// FIXME this syntax does not supported by MSSQL 2000
-        		sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+statement.getColumnName()+"' AND t.name='"+statement.getTableName()+"'";
-             }
+            boolean sql2005OrLater = true;
+            try {
+                sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
+            } catch (DatabaseException e) {
+                // Assume SQL Server 2005 or later
+            }
+            if (sql2005OrLater) {
+                // SQL Server 2005 or later
+                sql =
+                        "DECLARE @sql [nvarchar](MAX)\r\n" +
+                        "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
+                        "FROM [sys].[columns] AS [c] " +
+                        "INNER JOIN [sys].[default_constraints] AS [df] " +
+                        "ON [df].[object_id] = [c].[default_object_id] " +
+                        "WHERE [c].[object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                        "AND [c].[name] = N'" + database.escapeStringForDatabase(statement.getColumnName()) +  "'\r\n" +
+                        "EXEC sp_executesql @sql";
+            } else {
+                // SQL Server 2000
+                sql =
+                        "DECLARE @sql [nvarchar](4000)\r\n" +
+                        "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([df].[name]) " +
+                        "FROM [dbo].[syscolumns] AS [c] " +
+                        "INNER JOIN [dbo].[sysobjects] AS [df] " +
+                        "ON [df].[id] = [c].[cdefault] " +
+                        "WHERE [c].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                        "AND [c].[name] = N'" + database.escapeStringForDatabase(statement.getColumnName()) +  "'\r\n" +
+                        "EXEC sp_executesql @sql";
+            }
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + escapedTableName + " ALTER " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else if (database instanceof OracleDatabase) {
@@ -73,7 +84,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DROP DEFAULT";
         } else {
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";
-         }
+        }
 
         return new Sql[] {
                 new UnparsedSql(sql, getAffectedColumn(statement))
