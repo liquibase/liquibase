@@ -212,7 +212,7 @@ public class CompareControl {
                 throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --referenceSchemas");
             }
             if (splitOutputSchemaNames != null && splitOutputSchemaNames.size() != splitSchemaNames.size()) {
-                throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --outputSchemas");
+                throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --outputSchemasAs");
             }
 
             for (int i=0; i<splitReferenceSchemaNames.size(); i++) {
