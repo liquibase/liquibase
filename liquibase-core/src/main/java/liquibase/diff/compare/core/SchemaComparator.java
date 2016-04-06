@@ -92,13 +92,19 @@ public class SchemaComparator implements DatabaseObjectComparator {
                     finalSchema1 = comparisonSchema1;
                 }
 
+                if (StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2))) {
+                    return true;
+                }
+
                 if (comparisonSchema1 != null && comparisonSchema1.equalsIgnoreCase(schemaName2)) {
                     finalSchema2 = comparisonSchema2;
                 } else if (comparisonSchema2 != null && comparisonSchema2.equalsIgnoreCase(schemaName2)) {
                     finalSchema2 = comparisonSchema1;
                 }
 
-                return StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2));
+                if (StringUtils.trimToEmpty(finalSchema1).equalsIgnoreCase(StringUtils.trimToEmpty(finalSchema2))) {
+                    return true;
+                }
             }
         }
 

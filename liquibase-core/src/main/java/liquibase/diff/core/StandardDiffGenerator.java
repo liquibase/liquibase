@@ -105,8 +105,13 @@ public class StandardDiffGenerator implements DiffGenerator {
                     //                    continue;
                     //                }
                     Schema comparisonObjectSchema = comparisonObject.getSchema();
-                    if (comparisonObjectSchema != null && !StringUtils.trimToEmpty(comparisonObjectSchema.toCatalogAndSchema().standardize(comparisonDatabase).getSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(schemaComparison.getComparisonSchema().standardize(comparisonDatabase).getSchemaName()))) {
-                        continue;
+                    if (comparisonObjectSchema != null) {
+                        String comparisonObjectSchemaName = StringUtils.trimToEmpty(comparisonObjectSchema.toCatalogAndSchema().standardize(comparisonDatabase).getSchemaName());
+                        String schemaComparisonName1 = StringUtils.trimToEmpty(schemaComparison.getComparisonSchema().standardize(comparisonDatabase).getSchemaName());
+                        String schemaComparisonName2 = StringUtils.trimToEmpty(schemaComparison.getReferenceSchema().standardize(comparisonDatabase).getSchemaName());
+                        if (!(comparisonObjectSchemaName.equalsIgnoreCase(schemaComparisonName1) || comparisonObjectSchemaName.equals(schemaComparisonName2))) {
+                            continue;
+                        }
                     }
 
                     if (referenceSnapshot.get(comparisonObject) == null) {
