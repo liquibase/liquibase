@@ -41,7 +41,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 List<ParsedNode> elementNodes = Collections.emptyList();
                                 if (childNode.getName().equals(elementName)) {
                                     elementNodes = Collections.singletonList(childNode);
-                                } else if (childNode.getName().equals(childNode.getName())) {
+                                } else {
                                     elementNodes = childNode.getChildren(null, elementName);
                                 }
                                 if (!elementNodes.isEmpty()) {
