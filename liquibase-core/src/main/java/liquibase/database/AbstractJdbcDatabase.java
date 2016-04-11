@@ -36,6 +36,7 @@ import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.util.TodayUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -465,7 +466,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public Date parseDate(final String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(" ") > 0) {
+            Date dt;
+            if ((dt = TodayUtil.doToday(dateAsString)) != null) {
+                return dt;
+            } else if (dateAsString.indexOf(" ") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
             } else if (dateAsString.indexOf("T") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dateAsString);
@@ -482,11 +486,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean isDateOnly(final String isoDate) {
-        return isoDate.length() == "yyyy-MM-dd".length();
+        return TodayUtil.isTodayFormat(isoDate) || isoDate.length() == "yyyy-MM-dd".length();
     }
 
     protected boolean isDateTime(final String isoDate) {
-        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
+        return TodayUtil.isTodayFormat(isoDate) || isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
     }
     
     protected boolean isTimestamp(final String isoDate) {

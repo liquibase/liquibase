@@ -5,18 +5,20 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+import liquibase.util.TodayUtil;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
@@ -176,7 +178,10 @@ public class DB2Database extends AbstractJdbcDatabase {
     @Override
     public java.util.Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(' ') > 0) {
+            Date dt;
+            if ((dt = TodayUtil.doToday(dateAsString)) != null) {
+                return dt;
+            }else if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
             } else if (dateAsString.indexOf('.') > 0 && dateAsString.indexOf('-') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSSSSS").parse(dateAsString);

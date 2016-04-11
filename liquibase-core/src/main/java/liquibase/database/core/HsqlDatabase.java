@@ -7,6 +7,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.ISODateFormat;
+import liquibase.util.TodayUtil;
 
 import java.math.BigInteger;
 import java.text.DateFormat;
@@ -166,7 +167,10 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(" ") > 0) {
+            Date dt;
+            if ((dt = TodayUtil.doToday(dateAsString)) != null) {
+                return dt;
+            } else if (dateAsString.indexOf(" ") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dateAsString);
             } else {
                 if (dateAsString.indexOf(":") > 0) {

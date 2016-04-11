@@ -49,7 +49,10 @@ public class ISODateFormat {
     public Date parse(String dateAsString) throws ParseException {
         SimpleDateFormat dateTimeFormat = this.dateTimeFormat;
 
-        if (dateAsString.contains(".") && dateAsString.contains(" ")) {
+        Date dt;
+        if ((dt = TodayUtil.doToday(dateAsString)) != null) {
+            return new java.sql.Date(dt.getTime());
+        } else if (dateAsString.contains(".") && dateAsString.contains(" ")) {
             dateTimeFormat = this.dateTimeFormatWithSpaceAndDecimal;
         } else if (dateAsString.contains(".")) {
             dateTimeFormat = this.dateTimeFormatWithDecimal;
