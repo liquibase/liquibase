@@ -2,6 +2,7 @@ package liquibase.command;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.*;
 import liquibase.util.StringUtils;
@@ -80,7 +81,18 @@ public class SnapshotCommand extends AbstractCommand {
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        DatabaseSnapshot snapshot;
+        try {
+            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+        } finally {
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
+        }
+
+
 
         String format = getSerializerFormat();
         if (format == null) {
