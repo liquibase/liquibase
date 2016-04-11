@@ -573,7 +573,6 @@
 						<xsd:attribute name="defaultValueDate" type="xsd:string" />
 						<xsd:attribute name="defaultValueBoolean" type="booleanExp" />
 						<xsd:attribute name="defaultValueComputed" type="xsd:string" />
-                        <xsd:attribute name="commentLineStartsWith" type="xsd:string" default="#" />
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:sequence>
