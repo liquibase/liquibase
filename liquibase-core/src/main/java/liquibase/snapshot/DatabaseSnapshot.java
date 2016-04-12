@@ -38,6 +38,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
     private CompareControl.SchemaComparison[] schemaComparisons;
 
+    private Map<String, Object> metadata = new HashMap<String, Object>();
+
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
         allFound = new DatabaseObjectCollection(database);
@@ -54,6 +56,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         this.serializableFields.add("referencedObjects");
         this.serializableFields.add("database");
         this.serializableFields.add("created");
+        this.serializableFields.add("metadata");
     }
 
     protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
@@ -113,6 +116,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
             }
 
+            returnSnapshot.getMetadata().putAll(this.getMetadata());
+
             return returnSnapshot;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -152,6 +157,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return allFound;
         } else if (field.equals("referencedObjects")) {
             return referencedObjects;
+        } else if (field.equals("metadata")) {
+            return metadata;
         } else if (field.equals("created")) {
             return new ISODateFormat().format(new Timestamp(new Date().getTime()));
         } else if (field.equals("database")) {
@@ -532,5 +539,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     public CompareControl.SchemaComparison[] getSchemaComparisons() {
         return schemaComparisons;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 }
