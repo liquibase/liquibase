@@ -169,7 +169,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
-        return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+        return "FULL_DEFINITION: " + super.getViewDefinition(schema, name);
     }
 
 
