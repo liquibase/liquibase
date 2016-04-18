@@ -1,6 +1,5 @@
 package liquibase.diff.output.report;
 
-import liquibase.CatalogAndSchema;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -53,12 +52,12 @@ public class DiffToReport {
         types.addAll(diffResult.getCompareControl().getComparedTypes());
         for (Class<? extends DatabaseObject> type : types) {
             printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
-            printSetComparison("Unexpected "+getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
+            printSetComparison("Unexpected " + getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
 
             printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
 
         }
-        
+
 //        printColumnComparison(diffResult.getColumns().getChanged(), out);
     }
 
@@ -101,11 +100,22 @@ public class DiffToReport {
                     if (schemaName == null) {
                         schemaName = object.getSchema().getCatalogName();
                     }
-                    out.println("  SCHEMA: "+schemaName);
+                    schemaName = includeSchemaComparison(schemaName);
+
+                    out.println("  SCHEMA: " + schemaName);
                 }
                 out.println("     " + object);
             }
         }
+    }
+
+    protected String includeSchemaComparison(String schemaName) {
+        String convertedSchemaName = CompareControl.SchemaComparison.convertSchema(schemaName, diffResult.getCompareControl().getSchemaComparisons());
+
+        if (convertedSchemaName != null && !convertedSchemaName.equals(schemaName)) {
+            schemaName = schemaName + " -> " +convertedSchemaName;
+        }
+        return schemaName;
     }
 
 //    private void printColumnComparison(SortedSet<Column> changedColumns,
@@ -159,14 +169,14 @@ public class DiffToReport {
             if (referenceVersion == null) {
                 referenceVersion = "NULL";
             } else {
-                referenceVersion = "'"+referenceVersion+"'";
+                referenceVersion = "'" + referenceVersion + "'";
             }
 
             String targetVersion = string.getTargetVersion();
             if (targetVersion == null) {
                 targetVersion = "NULL";
             } else {
-                targetVersion = "'"+targetVersion+"'";
+                targetVersion = "'" + targetVersion + "'";
             }
 
 

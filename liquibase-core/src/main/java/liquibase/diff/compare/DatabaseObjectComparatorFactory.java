@@ -96,7 +96,7 @@ public class DatabaseObjectComparatorFactory {
         instance = null;
     }
 
-    public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+    public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
         if (object1 == null && object2 == null) {
             return true;
         }
@@ -130,8 +130,8 @@ public class DatabaseObjectComparatorFactory {
 
         boolean aHashMatches = false;
 
-        List<String> hash1 = Arrays.asList(hash(object1, accordingTo));
-        List<String> hash2 = Arrays.asList(hash(object2, accordingTo));
+        List<String> hash1 = Arrays.asList(hash(object1, schemaComparisons, accordingTo));
+        List<String> hash2 = Arrays.asList(hash(object2, schemaComparisons, accordingTo));
         for (String hash : hash1) {
             if (hash2.contains(hash)) {
                 aHashMatches = true;
@@ -144,13 +144,13 @@ public class DatabaseObjectComparatorFactory {
         }
 
 
-        return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
+        return createComparatorChain(object1.getClass(), schemaComparisons, accordingTo).isSameObject(object1, object2, accordingTo);
     }
 
-    public String[] hash(DatabaseObject databaseObject, Database accordingTo) {
+    public String[] hash(DatabaseObject databaseObject, CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
         String[] hash = null;
         if (databaseObject != null) {
-            hash = createComparatorChain(databaseObject.getClass(), accordingTo).hash(databaseObject, accordingTo);
+            hash = createComparatorChain(databaseObject.getClass(), schemaComparisons, accordingTo).hash(databaseObject, accordingTo);
         }
 
         if (hash == null) {
@@ -168,15 +168,17 @@ public class DatabaseObjectComparatorFactory {
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
-        return createComparatorChain(object1.getClass(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
+        return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
 
     }
 
-    private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+    private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, CompareControl.SchemaComparison[] schemaComparisons, Database database) {
         String key = databaseObjectType.getName()+":"+database.getShortName();
 
         if (comparatorChainsByClassAndDatabase.containsKey(key)) {
-            return comparatorChainsByClassAndDatabase.get(key).copy();
+            DatabaseObjectComparatorChain copy = comparatorChainsByClassAndDatabase.get(key).copy();
+            copy.setSchemaComparisons(schemaComparisons);
+            return copy;
         }
 
         List<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
@@ -184,9 +186,11 @@ public class DatabaseObjectComparatorFactory {
             return null;
         }
 
-        DatabaseObjectComparatorChain chain = new DatabaseObjectComparatorChain(comparators);
+        DatabaseObjectComparatorChain chain = new DatabaseObjectComparatorChain(comparators, null);
         comparatorChainsByClassAndDatabase.put(key, chain);
         //noinspection unchecked
+        chain = chain.copy();
+        chain.setSchemaComparisons(schemaComparisons);
         return chain;
     }
 

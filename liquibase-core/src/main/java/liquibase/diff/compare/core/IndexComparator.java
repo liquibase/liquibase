@@ -32,7 +32,7 @@ public class IndexComparator implements DatabaseObjectComparator {
 
         Table table = ((Index) databaseObject).getTable();
         if (table != null) {
-            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
+            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }
 
         return hashes.toArray(new String[hashes.size()]);
@@ -52,10 +52,10 @@ public class IndexComparator implements DatabaseObjectComparator {
         int otherIndexSize = otherIndex.getColumns().size();
 
         if (thisIndex.getTable() != null && otherIndex.getTable() != null) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
 
@@ -73,7 +73,7 @@ public class IndexComparator implements DatabaseObjectComparator {
 
 
                 for (int i = 0; i < otherIndexSize; i++) {
-                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getColumns().get(i), otherIndex.getColumns().get(i), accordingTo)) {
+                    if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getColumns().get(i), otherIndex.getColumns().get(i), chain.getSchemaComparisons(), accordingTo)) {
                         return false;
                     }
                 }
@@ -89,7 +89,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             }
 
             if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
-                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo);
+                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo);
             } else {
                 return true;
             }

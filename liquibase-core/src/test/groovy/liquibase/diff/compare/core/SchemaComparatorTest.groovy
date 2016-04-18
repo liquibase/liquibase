@@ -45,15 +45,15 @@ class SchemaComparatorTest extends Specification {
         }
 
         expect:
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
 
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
 
         // always true if doesn't support catalogs
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportCatalogs) == true
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportCatalogs) == true
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatDoesNotSupportCatalogs) == true
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatDoesNotSupportCatalogs) == true
 
 
         where:

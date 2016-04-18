@@ -1,9 +1,26 @@
+5cabfe6 CORE-2720 DB2: Capture full view definition in snapshot/generateChangeLog to support column options
+a52f575 CORE-2719 Oracle: Cannot snapshot primary keys on lower-case tables
+78b2d46 CORE-2720 DB2: Capture full view definition in snapshot/generateChangeLog to support column options
+1eb589e rollback to tag APIs were throwing away rollbackScript
+7652ebb Added generic "metadata" block to snapshot (cherry picked from commit ad6c6b7)
+d140635 Merge pull request #565 from Datical/ddb
+c8cef44 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+e585081 avoid null pointer exceptions when a null output Writer is supplied.
+ec22f0d CORE-2719 Oracle: Cannot snapshot primary keys on lower-case tables
+ed6f175 Fixed error message
+859c2f0 commentLineStartsWith is only on loadDataChange, not column
+d5da024 CORE-2615 Multi-schema snapshot bugfixes
+ef62348 CORE-2615 Multi-schema snapshot bugfixes
+4afc227 CORE-2615 Multi-schema snapshot bugfixes
+924bc8e CORE-2615 Multi-schema snapshot bugfixes
+105cf55 Merge branch 'ddb' into ddb-diff-map
 eef7048 CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
 c0550fb CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
 33057b9 Give test a little more time to run on a slow build server
 26a79ae Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 f84921e Merge branch 'ddb-master' into ddb
 3118056 CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
+c35d031 CORE-2615	 Multi-schema snapshot bugfixes
 06622de Merge remote-tracking branch 'origin/ddb-master' into ddb-merge
 23433fe CORE-2589 Output xml changelogs as xml version="1.1" (cherry picked from commit d774f9c)
 d07e657 CORE-2705 diffChangeLog generates dropColumn when dropping an index with a computed column

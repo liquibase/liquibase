@@ -629,11 +629,11 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String rollbackScript, String contexts) throws LiquibaseException {
-        rollback(tagToRollBackTo, new Contexts(contexts));
+        rollback(tagToRollBackTo, rollbackScript, new Contexts(contexts));
     }
 
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts) throws LiquibaseException {
-        rollback(tagToRollBackTo, contexts, new LabelExpression());
+        rollback(tagToRollBackTo, rollbackScript, contexts, new LabelExpression());
     }
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);

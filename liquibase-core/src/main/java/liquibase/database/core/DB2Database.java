@@ -5,6 +5,8 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
@@ -168,8 +170,11 @@ public class DB2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
-        return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        schema = schema.customize(this);
+        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+
+        return "FULL_DEFINITION: " + definition;
     }
 
 

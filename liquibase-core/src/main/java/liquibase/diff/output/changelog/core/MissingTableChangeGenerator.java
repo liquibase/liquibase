@@ -12,7 +12,9 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.DateTimeType;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.statement.DatabaseFunction;
@@ -23,7 +25,7 @@ import liquibase.structure.core.Table;
 
 import java.util.Date;
 
-public class MissingTableChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Table.class.isAssignableFrom(objectType)) {

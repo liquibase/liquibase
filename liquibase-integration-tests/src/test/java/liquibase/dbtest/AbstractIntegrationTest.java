@@ -506,7 +506,7 @@ public abstract class AbstractIntegrationTest {
             DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, compareControl);
             output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(emptyDiffResult, new DiffOutputControl(true, true, true)).print(new PrintStream(output));
+                new DiffToChangeLog(emptyDiffResult, new DiffOutputControl(true, true, true, null)).print(new PrintStream(output));
                 output.flush();
             } finally {
                 output.close();
@@ -955,7 +955,7 @@ public abstract class AbstractIntegrationTest {
 
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new CompareControl());
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false));
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals(0, changeSets.size());
     }

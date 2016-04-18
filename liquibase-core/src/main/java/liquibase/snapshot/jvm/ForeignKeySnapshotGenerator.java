@@ -129,7 +129,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 Column fkColumn = new Column(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database)).setRelation(foreignKeyTable);
                 boolean alreadyAdded = false;
                 for (Column existing : foreignKey.getForeignKeyColumns()) {
-                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(existing, fkColumn, database)) {
+                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(existing, fkColumn, snapshot.getSchemaComparisons(), database)) {
                         alreadyAdded = true; //already added. One is probably an alias
                     }
                 }
