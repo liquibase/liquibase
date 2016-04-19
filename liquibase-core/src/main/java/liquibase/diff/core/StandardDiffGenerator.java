@@ -110,7 +110,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                         String schemaComparisonName1 = StringUtils.trimToEmpty(schemaComparison.getComparisonSchema().standardize(comparisonDatabase).getSchemaName());
                         String schemaComparisonName2 = StringUtils.trimToEmpty(schemaComparison.getReferenceSchema().standardize(comparisonDatabase).getSchemaName());
 
-                        if (comparisonObjectSchemaName.equals("")) {
+                        if (comparisonObjectSchemaName.equals("") && !schemaComparisonName1.equals("") && !schemaComparisonName2.equals("")) {
                             comparisonObjectSchemaName = StringUtils.trimToNull(comparisonObjectSchema.getName());
                         }
                         if (!(comparisonObjectSchemaName.equalsIgnoreCase(schemaComparisonName1) || comparisonObjectSchemaName.equals(schemaComparisonName2))) {
