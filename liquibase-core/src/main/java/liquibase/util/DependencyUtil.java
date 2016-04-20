@@ -44,12 +44,14 @@ public class DependencyUtil {
         public void computeDependencies() {
             List<GraphNode<T>> orphanNodes = getOrphanNodes();
             List<GraphNode<T>> nextNodesToDisplay = new ArrayList<GraphNode<T>>();
-            for (GraphNode<T> node : orphanNodes) {
-                listener.evaluating(node.value);
-                evaluatedNodes.add(node);
-                nextNodesToDisplay.addAll(node.getGoingOutNodes());
+            if (orphanNodes != null) {
+                for (GraphNode<T> node : orphanNodes) {
+                    listener.evaluating(node.value);
+                    evaluatedNodes.add(node);
+                    nextNodesToDisplay.addAll(node.getGoingOutNodes());
+                }
+                computeDependencies(nextNodesToDisplay);
             }
-            computeDependencies(nextNodesToDisplay);
         }
 
         private void computeDependencies(List<GraphNode<T>> nodes) {
