@@ -25,7 +25,7 @@ public class DiffToReport {
     }
 
     public void print() throws DatabaseException {
-        DatabaseObjectComparator comparator = new DatabaseObjectComparator();
+        final DatabaseObjectComparator comparator = new DatabaseObjectComparator();
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
@@ -34,7 +34,20 @@ public class DiffToReport {
             out.println("Compared Schemas: " + StringUtils.join(schemas, ", ", new StringUtils.StringUtilsFormatter<Schema>() {
                 @Override
                 public String toString(Schema obj) {
-                    return obj.getName();
+                    String name = obj.getName();
+                    for (CompareControl.SchemaComparison comparison : diffResult.getCompareControl().getSchemaComparisons()) {
+                        if (comparison.getReferenceSchema().getCatalogName().equals(name)) {
+                            name += " -> "+comparison.getComparisonSchema().getCatalogName();
+                        } else if (comparison.getReferenceSchema().getSchemaName().equals(name)) {
+                            name += " -> "+comparison.getComparisonSchema().getSchemaName();
+
+                        } else if (comparison.getComparisonSchema().getCatalogName().equals(name)) {
+                            name += " -> "+comparison.getReferenceSchema().getCatalogName();
+                        } else if (comparison.getComparisonSchema().getSchemaName().equals(name)) {
+                            name += " -> "+comparison.getReferenceSchema().getSchemaName();
+                        }
+                    }
+                    return name;
                 }
             }, true));
         }
