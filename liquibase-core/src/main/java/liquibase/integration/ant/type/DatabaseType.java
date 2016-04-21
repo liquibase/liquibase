@@ -1,9 +1,12 @@
 package liquibase.integration.ant.type;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
@@ -56,29 +59,34 @@ public class DatabaseType extends DataType {
                 databaseFactory.register(databaseInstance);
             }
 
-            Driver driver = (Driver) ClasspathUtils.newInstance(getDriver(), classLoader, Driver.class);
-            if(driver == null) {
-                throw new BuildException("Unable to create Liquibase Database instance. Could not instantiate the JDBC driver.");
-            }
-            Properties connectionProps = new Properties();
-            String user = getUser();
-            if(user != null && !user.isEmpty()) {
-                connectionProps.setProperty(USER, user);
-            }
-            String password = getPassword();
-            if(password != null && !password.isEmpty()) {
-                connectionProps.setProperty(PASSWORD, password);
-            }
-            ConnectionProperties connectionProperties = getConnectionProperties();
-            if(connectionProperties != null) {
-                connectionProps.putAll(connectionProperties.buildProperties());
-            }
+            DatabaseConnection jdbcConnection;
+            if (getUrl().startsWith("offline:")) {
+                jdbcConnection = new OfflineConnection(getUrl(), new ClassLoaderResourceAccessor(classLoader));
+            } else {
+                Driver driver = (Driver) ClasspathUtils.newInstance(getDriver(), classLoader, Driver.class);
+                if(driver == null) {
+                    throw new BuildException("Unable to create Liquibase Database instance. Could not instantiate the JDBC driver.");
+                }
+                Properties connectionProps = new Properties();
+                String user = getUser();
+                if(user != null && !user.isEmpty()) {
+                    connectionProps.setProperty(USER, user);
+                }
+                String password = getPassword();
+                if(password != null && !password.isEmpty()) {
+                    connectionProps.setProperty(PASSWORD, password);
+                }
+                ConnectionProperties connectionProperties = getConnectionProperties();
+                if(connectionProperties != null) {
+                    connectionProps.putAll(connectionProperties.buildProperties());
+                }
 
-            Connection connection = driver.connect(getUrl(), connectionProps);
-            if(connection == null) {
-                throw new BuildException("Unable to create Liquibase Database instance. Could not connect to the database.");
+                Connection connection = driver.connect(getUrl(), connectionProps);
+                if(connection == null) {
+                    throw new BuildException("Unable to create Liquibase Database instance. Could not connect to the database.");
+                }
+                jdbcConnection = new JdbcConnection(connection);
             }
-            JdbcConnection jdbcConnection = new JdbcConnection(connection);
 
             Database database = databaseFactory.findCorrectDatabaseImplementation(jdbcConnection);
 
@@ -129,11 +137,11 @@ public class DatabaseType extends DataType {
     }
 
     private void validateParameters() {
-        if(getDriver() == null) {
-            throw new BuildException("JDBC driver is required.");
-        }
         if(getUrl() == null) {
             throw new BuildException("JDBC URL is required.");
+        }
+        if(getDriver() == null && !getUrl().startsWith("offline:")) {
+            throw new BuildException("JDBC driver is required.");
         }
     }
 
