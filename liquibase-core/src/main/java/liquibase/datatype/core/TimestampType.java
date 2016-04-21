@@ -32,7 +32,11 @@ public class TimestampType extends DateTimeType {
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
         }
         if (database instanceof DB2Database) {
-            return new DatabaseDataType(database.escapeDataTypeName("timestamp"), getParameters());
+            Object[] parameters = getParameters();
+            if (parameters != null && parameters.length > 1) {
+                parameters = new Object[] {parameters[1]};
+            }
+            return new DatabaseDataType(database.escapeDataTypeName("timestamp"), parameters);
         }
 
 
