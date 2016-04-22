@@ -221,12 +221,12 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
 
         boolean deferrable = false;
-        if (getDeferrable() != null) {
+        if (checkDefferable(database) && getDeferrable() != null) {
             deferrable = getDeferrable();
         }
 
         boolean initiallyDeferred = false;
-        if (getInitiallyDeferred() != null) {
+        if (checkDefferable(database) && getInitiallyDeferred() != null) {
             initiallyDeferred = getInitiallyDeferred();
         }
 
@@ -245,6 +245,13 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
         };
+    }
+
+    private boolean checkDefferable(Database database) {
+        if(!database.supportsInitiallyDeferrableColumns() && !database.failOnDefferable()){
+            return false;
+        }
+        return true;
     }
 
     @Override

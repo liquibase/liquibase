@@ -783,4 +783,9 @@ public class MockDatabase implements Database, InternalDatabase {
     public ValidationErrors validate() {
         return new ValidationErrors();
     }
+
+    @Override
+    public boolean failOnDefferable() {
+        return true;
+    }
 }

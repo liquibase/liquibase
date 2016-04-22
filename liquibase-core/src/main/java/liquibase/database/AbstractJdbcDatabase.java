@@ -125,6 +125,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         return null;
     }
 
+    @Override
+    public boolean failOnDefferable() {
+        return true;
+    }
+
     // ------- DATABASE INFORMATION METHODS ---- //
 
     @Override
