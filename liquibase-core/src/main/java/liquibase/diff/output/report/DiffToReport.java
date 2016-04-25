@@ -1,5 +1,6 @@
 package liquibase.diff.output.report;
 
+import liquibase.database.Database;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -34,13 +35,38 @@ public class DiffToReport {
             out.println("Compared Schemas: " + StringUtils.join(Arrays.asList(schemas), ", ", new StringUtils.StringUtilsFormatter<CompareControl.SchemaComparison>() {
                 @Override
                 public String toString(CompareControl.SchemaComparison obj) {
-                    String referenceName = obj.getReferenceSchema().getCatalogName();
-                    String comparisonName = obj.getComparisonSchema().getCatalogName();
+                    String referenceName;
+                    String comparisonName;
 
-                    if (diffResult.getReferenceSnapshot().getDatabase().supportsSchemas()) {
-                        referenceName = referenceName + "." + obj.getReferenceSchema().getSchemaName();
-                        comparisonName = comparisonName + "." + obj.getComparisonSchema().getSchemaName();
+                    Database referenceDatabase = diffResult.getReferenceSnapshot().getDatabase();
+                    Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
 
+                    if (referenceDatabase.supportsSchemas()) {
+                        referenceName = obj.getReferenceSchema().getSchemaName();
+                        if (referenceName == null) {
+                            referenceName = referenceDatabase.getDefaultSchemaName();
+                        }
+                    } else if (referenceDatabase.supportsCatalogs()) {
+                        referenceName = obj.getReferenceSchema().getCatalogName();
+                        if (referenceName == null) {
+                            referenceName = referenceDatabase.getDefaultCatalogName();
+                        }
+                    } else {
+                        return "";
+                    }
+
+                    if (comparisonDatabase.supportsSchemas()) {
+                        comparisonName = obj.getComparisonSchema().getSchemaName();
+                        if (comparisonName == null) {
+                            comparisonName = comparisonDatabase.getDefaultSchemaName();
+                        }
+                    } else if (comparisonDatabase.supportsCatalogs()) {
+                        comparisonName = obj.getComparisonSchema().getCatalogName();
+                        if (comparisonName == null) {
+                            comparisonName = comparisonDatabase.getDefaultCatalogName();
+                        }
+                    } else {
+                        return "";
                     }
 
                     if (referenceName.equalsIgnoreCase(comparisonName)) {
