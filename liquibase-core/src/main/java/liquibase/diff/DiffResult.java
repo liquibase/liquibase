@@ -6,7 +6,9 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 
 import java.io.*;
 import java.util.*;
@@ -167,6 +169,21 @@ public class DiffResult {
 
 
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
+        if (obj instanceof Catalog || obj instanceof Schema) {
+            if (differences.getSchemaComparisons() != null && differences.getDifferences().size() == 1 && differences.getDifference("name") != null) {
+                boolean schemasMapped = false;
+                for (CompareControl.SchemaComparison comparison : differences.getSchemaComparisons()) {
+                    if (comparison.getReferenceSchema() != null
+                            && comparison.getComparisonSchema() != null
+                            && !comparison.getReferenceSchema().toString().equalsIgnoreCase(comparison.getComparisonSchema().toString())) {
+                        schemasMapped = true;
+                    }
+                }
+                if (schemasMapped) {
+                    return; //don't save name differences
+                }
+            }
+        }
         changedObjects.put(obj, differences);
     }
 

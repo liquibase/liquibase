@@ -36,14 +36,14 @@ public class DiffToReport {
                 public String toString(Schema obj) {
                     String name = obj.getName();
                     for (CompareControl.SchemaComparison comparison : diffResult.getCompareControl().getSchemaComparisons()) {
-                        if (comparison.getReferenceSchema().getCatalogName().equals(name)) {
+                        if (name.equals(comparison.getReferenceSchema().getCatalogName())) {
                             name += " -> "+comparison.getComparisonSchema().getCatalogName();
-                        } else if (comparison.getReferenceSchema().getSchemaName().equals(name)) {
+                        } else if (name.equals(comparison.getReferenceSchema().getSchemaName())) {
                             name += " -> "+comparison.getComparisonSchema().getSchemaName();
 
-                        } else if (comparison.getComparisonSchema().getCatalogName().equals(name)) {
+                        } else if (name.equals(comparison.getComparisonSchema().getCatalogName())) {
                             name += " -> "+comparison.getReferenceSchema().getCatalogName();
-                        } else if (comparison.getComparisonSchema().getSchemaName().equals(name)) {
+                        } else if (name.equals(comparison.getComparisonSchema().getSchemaName())) {
                             name += " -> "+comparison.getReferenceSchema().getSchemaName();
                         }
                     }
@@ -64,6 +64,9 @@ public class DiffToReport {
         });
         types.addAll(diffResult.getCompareControl().getComparedTypes());
         for (Class<? extends DatabaseObject> type : types) {
+            if (type.equals(Schema.class) && !diffResult.getComparisonSnapshot().getDatabase().supportsSchemas()) {
+                continue;
+            }
             printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
             printSetComparison("Unexpected " + getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
 
