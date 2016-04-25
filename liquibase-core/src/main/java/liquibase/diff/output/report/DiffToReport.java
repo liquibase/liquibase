@@ -29,25 +29,25 @@ public class DiffToReport {
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
-        Set<Schema> schemas = diffResult.getReferenceSnapshot().get(Schema.class);
-        if (schemas != null && schemas.size() > 0) {
-            out.println("Compared Schemas: " + StringUtils.join(schemas, ", ", new StringUtils.StringUtilsFormatter<Schema>() {
+        CompareControl.SchemaComparison[] schemas = diffResult.getCompareControl().getSchemaComparisons();
+        if (schemas != null && schemas.length > 0) {
+            out.println("Compared Schemas: " + StringUtils.join(Arrays.asList(schemas), ", ", new StringUtils.StringUtilsFormatter<CompareControl.SchemaComparison>() {
                 @Override
-                public String toString(Schema obj) {
-                    String name = obj.getName();
-                    for (CompareControl.SchemaComparison comparison : diffResult.getCompareControl().getSchemaComparisons()) {
-                        if (name.equals(comparison.getReferenceSchema().getCatalogName())) {
-                            name += " -> "+comparison.getComparisonSchema().getCatalogName();
-                        } else if (name.equals(comparison.getReferenceSchema().getSchemaName())) {
-                            name += " -> "+comparison.getComparisonSchema().getSchemaName();
+                public String toString(CompareControl.SchemaComparison obj) {
+                    String referenceName = obj.getReferenceSchema().getCatalogName();
+                    String comparisonName = obj.getComparisonSchema().getCatalogName();
 
-                        } else if (name.equals(comparison.getComparisonSchema().getCatalogName())) {
-                            name += " -> "+comparison.getReferenceSchema().getCatalogName();
-                        } else if (name.equals(comparison.getComparisonSchema().getSchemaName())) {
-                            name += " -> "+comparison.getReferenceSchema().getSchemaName();
-                        }
+                    if (diffResult.getReferenceSnapshot().getDatabase().supportsSchemas()) {
+                        referenceName = referenceName + "." + obj.getReferenceSchema().getSchemaName();
+                        comparisonName = comparisonName + "." + obj.getComparisonSchema().getSchemaName();
+
                     }
-                    return name;
+
+                    if (referenceName.equalsIgnoreCase(comparisonName)) {
+                        return referenceName;
+                    } else {
+                        return referenceName + " -> " + comparisonName;
+                    }
                 }
             }, true));
         }
@@ -129,7 +129,7 @@ public class DiffToReport {
         String convertedSchemaName = CompareControl.SchemaComparison.convertSchema(schemaName, diffResult.getCompareControl().getSchemaComparisons());
 
         if (convertedSchemaName != null && !convertedSchemaName.equals(schemaName)) {
-            schemaName = schemaName + " -> " +convertedSchemaName;
+            schemaName = schemaName + " -> " + convertedSchemaName;
         }
         return schemaName;
     }
