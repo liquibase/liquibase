@@ -64,6 +64,9 @@ public class DiffToReport {
         });
         types.addAll(diffResult.getCompareControl().getComparedTypes());
         for (Class<? extends DatabaseObject> type : types) {
+            if (type.equals(Schema.class) && !diffResult.getComparisonSnapshot().getDatabase().supportsSchemas()) {
+                continue;
+            }
             printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
             printSetComparison("Unexpected " + getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
 
