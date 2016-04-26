@@ -31,6 +31,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP = Collections.unmodifiableMap(tempMap);
     }
     private Boolean oracleSyntax;
+    private Boolean postgresSyntax;
 
     public HsqlDatabase() {
     	super.unquotedObjectsAreUppercased=true;
@@ -500,6 +501,20 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         return oracleSyntax;
     }
 
+    public boolean isUsingPostgresSyntax() {
+        if (postgresSyntax == null) {
+            postgresSyntax = Boolean.FALSE;
+            if (getConnection() != null && getConnection().getURL() != null) {
+                for (String str : getConnection().getURL().split(";")) {
+                    if (str.contains("sql.syntax_pgs") && str.contains("=")) {
+                        postgresSyntax = Boolean.valueOf(str.split("=")[1].trim());
+                        break;
+                    }
+                }
+            }
+        }
+        return postgresSyntax;
+    }
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
