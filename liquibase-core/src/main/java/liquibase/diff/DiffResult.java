@@ -9,6 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -140,7 +141,7 @@ public class DiffResult {
         return changedObjects;
     }
 
-    public  <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
+    public <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
         Map returnSet = new HashMap();
         for (Map.Entry<DatabaseObject, ObjectDifferences> obj : changedObjects.entrySet()) {
             if (type.isAssignableFrom(obj.getKey().getClass())) {
@@ -175,7 +176,12 @@ public class DiffResult {
                 for (CompareControl.SchemaComparison comparison : differences.getSchemaComparisons()) {
                     if (comparison.getReferenceSchema() != null
                             && comparison.getComparisonSchema() != null
-                            && !comparison.getReferenceSchema().toString().equalsIgnoreCase(comparison.getComparisonSchema().toString())) {
+                            && (
+                            StringUtils.trimToEmpty(comparison.getReferenceSchema().getCatalogName()).equalsIgnoreCase(obj.getName())
+                                    || StringUtils.trimToEmpty(comparison.getReferenceSchema().getSchemaName()).equalsIgnoreCase(obj.getName())
+                                    || StringUtils.trimToEmpty(comparison.getComparisonSchema().getSchemaName()).equalsIgnoreCase(obj.getName())
+                                    || StringUtils.trimToEmpty(comparison.getComparisonSchema().getSchemaName()).equalsIgnoreCase(obj.getName())
+                    )) {
                         schemasMapped = true;
                     }
                 }
