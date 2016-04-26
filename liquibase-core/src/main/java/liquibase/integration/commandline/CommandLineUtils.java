@@ -145,7 +145,7 @@ public class CommandLineUtils {
                 if (schema == null) {
                     schema = defaultSchemaName;
                 }
-                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+schema));
+                ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+database.escapeObjectName(schema, Schema.class)));
             } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
 boolean sql2005OrLater = true;
                     try {

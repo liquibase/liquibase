@@ -82,8 +82,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         if ((StringUtils.trimToNull(schemaName) != null) && !LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             String defaultSchema = database.getDefaultSchemaName();
             if (database instanceof OracleDatabase) {
-                sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + schemaName));
-                sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + defaultSchema));
+                sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
+                sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
             } else if (database instanceof DB2Database) {
                 sql.add(0, new UnparsedSql("SET CURRENT SCHEMA "+ schemaName));
                 sql.add(new UnparsedSql("SET CURRENT SCHEMA "+ defaultSchema));
