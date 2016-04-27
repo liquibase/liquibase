@@ -2,19 +2,28 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.AlterSequenceStatement;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.math.BigInteger;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSequenceStatement> {
 
     private static final String SEQUENCE_NAME = "sequence_name";
+
+    H2Database mockH2DatabasePre18Jan2014Version;
+    H2Database mockH2DatabasePost18Jan2014Version;
 
     public AlterSequenceGeneratorTest() throws Exception {
         this(new AlterSequenceGenerator());
@@ -29,26 +38,54 @@ public class AlterSequenceGeneratorTest extends AbstractSqlGeneratorTest<AlterSe
         return new AlterSequenceStatement(null, null, SEQUENCE_NAME);
     }
 
-    @Test
-    public void h2DatabaseSupportsSequenceMaxValue() throws Exception {
+    @Before
+    public void setUpMocks() throws DatabaseException {
 
-        H2Database h2Database = new H2Database();
+        mockH2DatabasePre18Jan2014Version = mock(H2Database.class);
+        when(mockH2DatabasePre18Jan2014Version.getDatabaseMajorVersion()).thenReturn(1);
+        when(mockH2DatabasePre18Jan2014Version.getDatabaseMinorVersion()).thenReturn(3);
+        when(mockH2DatabasePre18Jan2014Version.getDatabaseProductVersion()).thenReturn("1.3.174 (2013-10-19)");
+
+        mockH2DatabasePost18Jan2014Version = mock(H2Database.class);
+        when(mockH2DatabasePost18Jan2014Version.getDatabaseMajorVersion()).thenReturn(1);
+        when(mockH2DatabasePost18Jan2014Version.getDatabaseMinorVersion()).thenReturn(3);
+        when(mockH2DatabasePost18Jan2014Version.getDatabaseProductVersion()).thenReturn("1.3.175 (2014-01-18)");
+    }
+
+    @Test
+    public void h2DatabasePre18Jan2014VersionDoesNotSupportSequenceMaxValue() throws Exception {
 
         AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
         alterSequenceStatement.setMaxValue(new BigInteger("1000"));
 
-        assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+        assertTrue(generatorUnderTest.validate(alterSequenceStatement, mockH2DatabasePre18Jan2014Version, new MockSqlGeneratorChain()).hasErrors());
     }
 
     @Test
-    public void h2DatabaseSupportsSequenceMinValue() throws Exception {
-
-        H2Database h2Database = new H2Database();
+    public void h2DatabasePost18Jan2014VersionSupportsSequenceMaxValue() throws Exception {
 
         AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
-        alterSequenceStatement.setMinValue(new BigInteger("10"));
+        alterSequenceStatement.setMaxValue(new BigInteger("1000"));
 
-        assertFalse(generatorUnderTest.validate(alterSequenceStatement, h2Database, new MockSqlGeneratorChain()).hasErrors());
+        assertFalse(generatorUnderTest.validate(alterSequenceStatement, mockH2DatabasePost18Jan2014Version, new MockSqlGeneratorChain()).hasErrors());
+    }
+
+    @Test
+    public void h2DatabasePre18Jan2014VersionDoesNotSupportSequenceMinValue() throws Exception {
+
+        AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+        alterSequenceStatement.setMinValue(new BigInteger("1000"));
+
+        assertTrue(generatorUnderTest.validate(alterSequenceStatement, mockH2DatabasePre18Jan2014Version, new MockSqlGeneratorChain()).hasErrors());
+    }
+
+    @Test
+    public void h2DatabasePost18Jan2014VersionSupportsSequenceMinValue() throws Exception {
+
+        AlterSequenceStatement alterSequenceStatement = createSampleSqlStatement();
+        alterSequenceStatement.setMinValue(new BigInteger("1000"));
+
+        assertFalse(generatorUnderTest.validate(alterSequenceStatement, mockH2DatabasePost18Jan2014Version, new MockSqlGeneratorChain()).hasErrors());
     }
 
     @Override
