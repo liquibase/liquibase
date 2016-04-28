@@ -154,20 +154,25 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			if (path == null) {
 				return null;
 			}
-            Set<InputStream> returnSet = new HashSet<InputStream>();
-            Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
+			final Set<InputStream> returnSet = new HashSet<InputStream>();
+			final Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader())
+					.getResources(adjustClasspath(path));
 
-            if (resources == null || resources.length == 0) {
-                return null;
-            }
-            for (Resource resource : resources) {
-				LogFactory.getInstance().getLog().debug("Opening "+resource.getURL().toExternalForm()+" as "+path);
-				URLConnection connection = resource.getURL().openConnection();
-            	connection.setUseCaches(false);
-            	returnSet.add(connection.getInputStream());
-            }
-
-            return returnSet;
+			if (resources == null || resources.length == 0) {
+				return null;
+			}
+			for (final Resource resource : resources) {
+				LogFactory.getInstance().getLog().debug("Opening " + resource.getURL().toExternalForm() + " as "
+						+ path);
+				final URLConnection connection = resource.getURL().openConnection();
+				connection.setUseCaches(false);
+				if (path.endsWith(".gz")) {
+					returnSet.add(new GZIPInputStream(connection.getInputStream()));
+				} else {
+					returnSet.add(connection.getInputStream());
+				}
+			}
+			return returnSet;
 		}
 
 		public Resource getResource(String file) {
