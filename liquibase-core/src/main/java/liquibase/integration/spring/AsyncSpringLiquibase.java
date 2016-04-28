@@ -37,7 +37,7 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
 					final StopWatch watch = new StopWatch();
 					watch.start();
 					try {
-						super.afterPropertiesSet();
+						startLiquibase();
 					} catch (final LiquibaseException e) {
 						log.severe("error while running liquibase", e);
 					}
@@ -47,10 +47,17 @@ public class AsyncSpringLiquibase extends SpringLiquibase {
 			});
 			executor.shutdown();
 		} else {
-			super.afterPropertiesSet();
+			startLiquibase();
 		}
 	}
-
+	
+	/**
+	 * Start Liquibase
+	 */
+	 private void startLiquibase(){
+	 	super.afterPropertiesSet();
+	 }
+	
 	/**
 	 * Enable async log
 	 *
