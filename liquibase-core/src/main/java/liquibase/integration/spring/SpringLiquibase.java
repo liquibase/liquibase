@@ -222,7 +222,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean shouldRun = true;
 
 	protected File rollbackFile;
-    /**
+
+	/**
      * Ignores classpath prefix during changeset comparison.
      * This is particularly useful if Liquibase is run in different ways.
      *
@@ -256,6 +257,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      * To avoid this issue, just set ignoreClasspathPrefix to true.
      */
     private boolean ignoreClasspathPrefix = true;
+
+	protected boolean testRollbackOnUpdate = false;
 
 	public SpringLiquibase() {
 		super();
@@ -367,6 +370,22 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	}
 
 	/**
+	 * Returns whether a rollback should be tested at update time or not.
+	 */
+	public boolean isTestRollbackOnUpdate() {
+		return testRollbackOnUpdate;
+	}
+
+	/**
+	 * If testRollbackOnUpdate is set to true a rollback will be tested at tupdate time.
+	 * For doing so when the update is performed
+	 * @param testRollbackOnUpdate
+     */
+	public void setTestRollbackOnUpdate(boolean testRollbackOnUpdate) {
+		this.testRollbackOnUpdate = testRollbackOnUpdate;
+	}
+
+	/**
 	 * Executed automatically when the bean is initialized.
 	 */
 	@Override
@@ -428,11 +447,19 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-        if (tag != null) {
-            liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
-        } else {
-            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
-        }
+		if (isTestRollbackOnUpdate()) {
+			if (tag != null) {
+				liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+			} else {
+				liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+			}
+		} else {
+			if (tag != null) {
+				liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+			} else {
+				liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+			}
+		}
     }
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
