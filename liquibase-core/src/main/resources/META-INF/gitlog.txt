@@ -1,3 +1,18 @@
+482e076 CORE-2615 Multi-schema snapshot bugfixes
+49bba1a Merge branch 'ddb-diff_report_heading' into ddb
+534638c CORE-2615 Multi-schema snapshot bugfixes
+9666df8 CORE-2615 Multi-schema snapshot bugfixes
+0e85d11 CORE-2615 Multi-schema snapshot bugfixes
+e894e3d CORE-2727 NPE in DiffToReport.print() method
+d8a468a CORE-2615 Multi-schema snapshot bugfixes
+8e18387 Does not load plug-ins from nested jars correctly, such as in Spring Boot
+0317fc2 CORE-2615 Multi-schema snapshot bugfixes
+bf558bd Trying out sorting missing objects based on dependencies in DB2
+bf74aae Trying out sorting missing objects based on dependencies in DB2
+d046bc2 CORE-2725 DB2: Don't include system-generated indexes
+7588679 CORE-2615 Multi-schema snapshot bugfixes
+bb5b384 CORE-2615 Multi-schema snapshot bugfixes
+e028522 CORE-2689 TIMESTAMP parameters dropped for DB2
 5cabfe6 CORE-2720 DB2: Capture full view definition in snapshot/generateChangeLog to support column options
 a52f575 CORE-2719 Oracle: Cannot snapshot primary keys on lower-case tables
 78b2d46 CORE-2720 DB2: Capture full view definition in snapshot/generateChangeLog to support column options
