@@ -2,6 +2,7 @@ package liquibase.util;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Various utility methods for working with strings.
@@ -32,10 +33,21 @@ public class StringUtils {
     
     /**
      * Removes any comments from multiple line SQL using {@link #stripComments(String)}
-     *  and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     * and then extracts each individual statement using {@link #splitSQL(String, String)}.
+     *
+     * <p>
+     * Newlines and other special chars in the endDelimiter will be passed escaped (e.g. '\\' + 'n') but will be
+     * processed.  There is a somewhat fragile check to determine whether a string is a regex or a normal delimiter
+     * which is done by first making sure the expression can be parsed as a regex, and secondly whether the regex
+     * matches itself.
+     *
+     * TODO: This probably should be part of the lexical analysis in SqlParser and not performed post-hoc here.  Doing
+     * so makes it very clumsy and fragile.
+     * </p>
      * 
      * @param multiLineSQL A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
+     * @param endDelimiter May be a simple delimter or a Java regular expression.  If null ";|\ngo" is assumed.
      */
     public static String[] processMutliLineSQL(String multiLineSQL, boolean stripComments, boolean splitStatements, String endDelimiter) {
 
@@ -44,10 +56,37 @@ public class StringUtils {
         List<String> returnArray = new ArrayList<String>();
 
         String currentString = "";
-        String previousPiece = null;
         boolean previousDelimiter = false;
+
+        // We do a poor mans tokenization of the end delimiter since we need to handle the case where it may contain newline or
+        // spaces which will require us to match multiple tokens.
+        String[] tokenizedDelimiter = null;
+        Pattern regexDelimiter = null;
+        int requiredLookBehind = 2; // If we are using default delimiter then we need at least tokens of look-behind
+
+        if (endDelimiter != null) {
+            endDelimiter = replaceEscapes(endDelimiter);
+            try {
+                regexDelimiter = Pattern.compile(endDelimiter, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+                if (regexDelimiter.matcher(endDelimiter).matches()) {
+                    regexDelimiter = null;
+                    tokenizedDelimiter = tokenizeEndDelimiter(endDelimiter);;
+                    requiredLookBehind = tokenizedDelimiter.length - 1;
+                } else {
+                    // We may need to keep the whole string
+                    requiredLookBehind = parsed.toArray(true).length - 1;
+                }
+            } catch (PatternSyntaxException e) {
+                tokenizedDelimiter = tokenizeEndDelimiter(endDelimiter);
+                requiredLookBehind = tokenizedDelimiter.length - 1;
+            }
+        }
+
+        // This stack is the amount of look-behind we need to match the delimiter.  lookBehindBuffer[0] is the
+        // most recently parsed token.
+        String[] lookBehindBuffer = new String[requiredLookBehind];
         for (Object piece : parsed.toArray(true)) {
-            if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+            if (splitStatements && piece instanceof String && isDelimiter((String) piece, lookBehindBuffer, tokenizedDelimiter, regexDelimiter)) {
                 currentString = StringUtils.trimToNull(currentString);
                 if (currentString != null) {
                     returnArray.add(currentString);
@@ -62,7 +101,11 @@ public class StringUtils {
                 }
                 previousDelimiter = false;
             }
-            previousPiece = (String) piece;
+            if (previousDelimiter) {
+                Arrays.fill(lookBehindBuffer, null);
+            } else if (requiredLookBehind > 0){
+                pushLookBehind(requiredLookBehind, lookBehindBuffer, (String) piece);
+            }
         }
 
         if (StringUtils.trimToNull(currentString) != null) {
@@ -72,14 +115,63 @@ public class StringUtils {
         return returnArray.toArray(new String[returnArray.size()]);
     }
 
-    protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
+    private static void pushLookBehind(int lookBehind, String[] lookBehindBuffer, String piece) {
+        System.arraycopy(lookBehindBuffer, 0, lookBehindBuffer, 1, lookBehind-1);
+        lookBehindBuffer[0] = piece;
+    }
+
+    private static String[] tokenizeEndDelimiter(String endDelimiter) {
+        String[] tokenizedDelimiter;
+        StringTokenizer stringTokenizer = new StringTokenizer(endDelimiter, " \t\n\r\f", true);
+        tokenizedDelimiter = new String[stringTokenizer.countTokens()];
+        int i = 0;
+        while (stringTokenizer.hasMoreElements()) {
+            tokenizedDelimiter[i++] = stringTokenizer.nextToken();
+        }
+        return tokenizedDelimiter;
+    }
+
+    protected static boolean isDelimiter(String piece, String[] lookBehind, String[] endDelimiter, Pattern regexDelimiter) {
+
+        if (regexDelimiter != null) {
+            return isRegExDelimiter(piece, lookBehind, regexDelimiter);
+        }
         if (endDelimiter == null) {
-            return piece.equals(";") || (piece.equalsIgnoreCase("go") && (previousPiece == null || previousPiece.endsWith("\n")));
+            // Assume default delimiter of ; or \ngo
+            return piece.equals(";") || ((piece.equalsIgnoreCase("go") && (lookBehind[0] == null || lookBehind[0].equals("\n"))));
+        }
+        return isTokenizedDelimiter(piece, lookBehind, endDelimiter);
+    }
+
+    private static boolean isTokenizedDelimiter(String piece, String[] lookBehind, String[] endDelimiter) {
+        if (endDelimiter.length == 1) {
+            // Delimiter is a single token, just compare delimiter with current piece
+            return piece.equalsIgnoreCase(endDelimiter[0]) || piece.matches(endDelimiter[0]);
         }
 
-        endDelimiter = endDelimiter.replace("\\n", "").replace("\\r", "");
+        // Delimiter is multiple tokens, match the current piece
+        int delimOffset = endDelimiter.length - 1;
+        if (!piece.equalsIgnoreCase(endDelimiter[delimOffset--])) {
+            return false;
+        }
 
-        return piece.toLowerCase().matches(endDelimiter.toLowerCase());
+        // Match remaining pieces in the look-behind buffer
+        for (int i = 0; i < lookBehind.length; i++) {
+            if (lookBehind[i] == null) return false;
+            String c = endDelimiter[delimOffset--];
+            if (!lookBehind[i].equalsIgnoreCase(c) && !lookBehind[i].matches(c)) return false;
+        }
+        return true;
+    }
+
+    private static boolean isRegExDelimiter(String piece, String[] lookBehind, Pattern regexDelimiter) {
+        // Concatenate the tokens
+        StringBuilder builder = new StringBuilder();
+        for (int i=0; i < lookBehind.length && lookBehind[i] != null; i++) {
+            builder.insert(0, lookBehind[i]);
+        }
+        builder.append(piece);
+        return regexDelimiter.matcher(builder.toString()).find();
     }
 
     /**
@@ -266,6 +358,134 @@ public class StringUtils {
 
     public static boolean isAscii(char ch) {
         return ch < 128;
+    }
+
+    // This method replaces escapes in a string with their character equivalent
+    // The standard C/Java escapes including u, x and 0 are supported.  If the escape is not recognised
+    // the escape is passed through unprocessed.
+    private static String replaceEscapes(String s) {
+        StringBuilder result = new StringBuilder(s.length());
+        boolean isEscape = false;
+        boolean isSpecial = false;
+        int radix = 0;
+        int bits = 0;
+        int requiredDigits = 0;
+        int maxDigits = 0;
+        char special = 0;
+        char[] chars = s.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (isSpecial) {
+                int x = Character.digit(c, radix);
+                if (x != -1) {
+                    requiredDigits--;
+                    maxDigits--;
+                    special = (char)((int)special << bits | x);
+                    if (maxDigits == 0) {
+                        result.append(special);
+                        isSpecial = false;
+                    }
+                    continue;
+                } else {
+                    if (requiredDigits > 0) throw new IllegalArgumentException("Invalid special char escape for '" + s + "'");
+                    result.append(special);
+                    isSpecial = false;
+                }
+            }
+            if (!isEscape) {
+                if (c == '\\') {
+                    isEscape = true;
+                } else {
+                    result.append(c);
+                }
+
+            } else {
+                switch(c) {
+                    case '\\':
+                        result.append('\\');
+                        break;
+                    case 'n':
+                        result.append('\n');
+                        break;
+                    case 'r':
+                        result.append('\r');
+                        break;
+                    case 't':
+                        result.append('\t');
+                        break;
+                    case 'b':
+                        result.append('\b');
+                        break;
+                    case 'f':
+                        result.append('\f');
+                        break;
+                    case '\'':
+                        result.append('\'');
+                        break;
+                    case '"':
+                        result.append('"');
+                        break;
+                    case 'x':
+                        special = 0;
+                        isSpecial = true;
+                        radix = 16;
+                        bits = 4;
+                        requiredDigits = 1;
+                        maxDigits = 2;
+                        break;
+                    case 'u':
+                        special = 0;
+                        isSpecial = true;
+                        radix = 16;
+                        bits = 4;
+                        requiredDigits = 4;
+                        maxDigits = 4;
+                        break;
+                    case '0':
+                        special = 0;
+                        isSpecial = true;
+                        radix = 8;
+                        bits = 3;
+                        requiredDigits = 1;
+                        maxDigits = 3;
+                        break;
+                    default:
+                        // Preserve the escape
+                        result.append('\\');
+                        result.append(c);
+                }
+                isEscape = false;
+            }
+        }
+        if (isSpecial) {
+            if (requiredDigits > 0) throw new IllegalArgumentException("Invalid special char escape for '" + s + "'");
+            result.append(special);
+        } else if (isEscape) {
+            throw new IllegalArgumentException("Unterminated escape in " + s);
+        }
+        return result.toString();
+    }
+
+    private static char unicode(String s, int i) {
+        if (i + 5 > s.length()) {
+            throw new IllegalArgumentException("Invalid unicode escape sequence in '" + s + "' at offset " + i + 1);
+        }
+        String hexString = s.substring(i + 1, i + 5);
+        if (!hexString.matches("\\p{XDigit}{4}")) {
+            throw new IllegalArgumentException("Invalid unicode escape sequence in '" + s + "' at offset " + i + 1);
+        }
+        return new Character((char)Integer.parseInt(hexString, 16));
+    }
+
+    private static char octal(String s, int i) {
+        if (i + 5 > s.length()) {
+            throw new IllegalArgumentException("Invalid unicode escape sequence in '" + s + "' at offset " + i + 1);
+        }
+        String hexString = s.substring(i + 1, i + 5);
+        if (!hexString.matches("\\p{XDigit}{4}")) {
+            throw new IllegalArgumentException("Invalid unicode escape sequence in '" + s + "' at offset " + i + 1);
+        }
+        return new Character((char)Integer.parseInt(hexString, 16));
     }
 
     public static String escapeHtml(String str) {
