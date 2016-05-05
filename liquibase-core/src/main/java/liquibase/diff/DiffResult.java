@@ -172,21 +172,11 @@ public class DiffResult {
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
         if (obj instanceof Catalog || obj instanceof Schema) {
             if (differences.getSchemaComparisons() != null && differences.getDifferences().size() == 1 && differences.getDifference("name") != null) {
-                boolean schemasMapped = false;
-                for (CompareControl.SchemaComparison comparison : differences.getSchemaComparisons()) {
-                    if (comparison.getReferenceSchema() != null
-                            && comparison.getComparisonSchema() != null
-                            && (
-                            StringUtils.trimToEmpty(comparison.getReferenceSchema().getCatalogName()).equalsIgnoreCase(obj.getName())
-                                    || StringUtils.trimToEmpty(comparison.getReferenceSchema().getSchemaName()).equalsIgnoreCase(obj.getName())
-                                    || StringUtils.trimToEmpty(comparison.getComparisonSchema().getSchemaName()).equalsIgnoreCase(obj.getName())
-                                    || StringUtils.trimToEmpty(comparison.getComparisonSchema().getSchemaName()).equalsIgnoreCase(obj.getName())
-                    )) {
-                        schemasMapped = true;
-                    }
-                }
-                if (schemasMapped) {
-                    return; //don't save name differences
+                if (obj instanceof Catalog && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
+                    changedObjects.put(obj, differences);
+                    return;
+                } else {
+                    return;  //don't save name differences
                 }
             }
         }
