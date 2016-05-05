@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,7 +29,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     public FileSystemResourceAccessor(String base) {
         baseDirectory = new File(base);
         if (!baseDirectory.isDirectory()) {
-            throw new IllegalArgumentException(base+" must be a directory");
+            throw new IllegalArgumentException(base + " must be a directory");
         }
     }
 
@@ -39,7 +41,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         InputStream fileStream = null;
         if (absoluteFile.isAbsolute()) {
             try {
-                fileStream =  openStream(absoluteFile);
+                fileStream = openStream(absoluteFile);
             } catch (FileNotFoundException e) {
                 //will try relative
             }
@@ -67,21 +69,21 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
     }
 
+
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        path = convertToPath(relativeTo, path);
+        File finalDir;
 
+        if (relativeTo == null) {
+            finalDir = new File(this.baseDirectory, path);
+        } else {
+            finalDir = new File(this.baseDirectory, relativeTo);
+            finalDir = new File(finalDir.getParentFile(), path);
+        }
 
-        File absoluteFile = new File(path);
-        File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
-
-        if (absoluteFile.exists() && absoluteFile.isDirectory()) {
+        if (finalDir.exists() && finalDir.isDirectory()) {
             Set<String> returnSet = new HashSet<String>();
-            getContents(absoluteFile, recursive, includeFiles, includeDirectories, path, returnSet);
-            return returnSet;
-        } else if (relativeFile.exists() && relativeFile.isDirectory()) {
-            Set<String> returnSet = new HashSet<String>();
-            getContents(relativeFile, recursive, includeFiles, includeDirectories, path, returnSet);
+            getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
             return returnSet;
         }
 
@@ -89,10 +91,30 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     }
 
     @Override
+    protected String convertToPath(String string) {
+        if (this.baseDirectory != null) {
+            return string;
+        } else {
+            try {
+                return "file:" + new File(string).getCanonicalPath().substring(this.baseDirectory.getCanonicalPath().length());
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+
+    }
+
+    @Override
     public ClassLoader toClassLoader() {
         try {
-            return new URLClassLoader(new URL[]{new URL("file://" + baseDirectory)});
-        } catch (MalformedURLException e) {
+            URL url;
+            if (baseDirectory == null) {
+                url = new File("/").toURI().toURL();
+            } else {
+                url = baseDirectory.toURI().toURL();
+            }
+            return new URLClassLoader(new URL[]{url});
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -103,7 +125,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         if (dir == null) {
             dir = new File(".");
         }
-        return getClass().getName()+"("+ dir.getAbsolutePath() +")";
+        return getClass().getName() + "(" + dir.getAbsolutePath() + ")";
     }
 
 }
