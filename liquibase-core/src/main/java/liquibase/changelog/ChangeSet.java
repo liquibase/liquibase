@@ -75,6 +75,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
     }
 
+    protected String key;
+
     private ChangeLogParameters changeLogParameters;
 
     /**
