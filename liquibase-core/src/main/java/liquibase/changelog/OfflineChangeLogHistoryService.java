@@ -17,6 +17,7 @@ import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
+import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
@@ -48,6 +49,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     private int COLUMN_LIQUIBASE = 10;
     private int COLUMN_CONTEXTS = 11;
     private int COLUMN_LABELS = 12;
+    private int DEPLOYMENT_ID = 13;
     private Integer lastChangeSetSequenceValue;
 
     public OfflineChangeLogHistoryService(Database database, File changeLogFile, boolean executeDmlAgainstDatabase, boolean executeDdlAgainstDatabase) {
@@ -160,6 +162,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             reader = new FileReader(this.changeLogFile);
             CSVReader csvReader = new CSVReader(reader);
             String[] line = csvReader.readNext();
+
+            if (line == null) { //empty file
+                writeHeader(this.changeLogFile);
+                return new ArrayList<RanChangeSet>();
+            }
             if (!line[COLUMN_ID].equals("ID")) {
                 throw new DatabaseException("Missing header in file "+this.changeLogFile.getAbsolutePath());
             }
@@ -175,6 +182,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                     labels = new Labels(line[COLUMN_LABELS]);
                 }
 
+                String deploymentId = null;
+                if (line.length > DEPLOYMENT_ID) {
+                    deploymentId = line[DEPLOYMENT_ID];
+                }
+
                 returnList.add(new RanChangeSet(
                         line[COLUMN_FILENAME],
                         line[COLUMN_ID],
@@ -186,7 +198,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                         line[COLUMN_DESCRIPTION],
                         line[COLUMN_COMMENTS],
                         contexts,
-                        labels));
+                        labels,
+                        deploymentId));
             }
 
             return returnList;
@@ -267,7 +280,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 csvWriter.writeNext(line);
             }
 
-            String[] newLine = new String[13];
+            String[] newLine = new String[14];
             newLine[COLUMN_ID] = changeSet.getId();
             newLine[COLUMN_AUTHOR] = changeSet.getAuthor();
             newLine[COLUMN_FILENAME] =  changeSet.getFilePath();
@@ -282,6 +295,10 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             if (newLine.length > 11) {
                 newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
                 newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
+            }
+
+            if (newLine.length > 13) {
+                newLine[DEPLOYMENT_ID] = getDeploymentId();
             }
 
             csvWriter.writeNext(newLine);

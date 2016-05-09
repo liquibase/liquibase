@@ -34,7 +34,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
 
-        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
+        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
 
         if (metadata.size() == 0) {
             return null;
@@ -46,7 +46,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         for (Map<String, ?> col : metadata) {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-            constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
+            if (database instanceof H2Database) {
+                for (String columnName : StringUtils.splitAndTrim((String) col.get("COLUMN_NAME"), ",")) {
+                    constraint.getColumns().add(new Column(columnName).setDescending(descending).setRelation(table));
+                }
+            } else {
+                constraint.getColumns().add(new Column((String) col.get("COLUMN_NAME")).setDescending(descending).setRelation(table));
+            }
         }
 
         return constraint;
@@ -90,214 +96,236 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
 
-        String sql = null;
-        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
-            sql = "select const.CONSTRAINT_NAME, COLUMN_NAME "
-                    + "from " + database.getSystemSchema() + ".table_constraints const "
-                    + "join " + database.getSystemSchema() + ".key_column_usage col "
-                    + "on const.constraint_schema=col.constraint_schema "
-                    + "and const.table_name=col.table_name "
-                    + "and const.constraint_name=col.constraint_name "
-                    + "where const.constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' "
-                    + "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
-                    + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
-                    + "order by ordinal_position";
-        } else if (database instanceof PostgresDatabase) {
-            sql = "select const.CONSTRAINT_NAME, COLUMN_NAME "
-                    + "from " + database.getSystemSchema() + ".table_constraints const "
-                    + "join " + database.getSystemSchema() + ".key_column_usage col "
-                    + "on const.constraint_schema=col.constraint_schema "
-                    + "and const.table_name=col.table_name "
-                    + "and const.constraint_name=col.constraint_name "
-                    + "where const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' "
-                    + "and const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' "
-                    + "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
-                    + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
-                    + "order by ordinal_position";
-        } else if (database instanceof MSSQLDatabase) {
-            if (database.getDatabaseMajorVersion() >= 9) {
-                sql =
-                        "SELECT " +
-                            "[kc].[name] AS [CONSTRAINT_NAME], " +
-                            "[c].[name] AS [COLUMN_NAME], " +
-                            "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
-                        "FROM [sys].[schemas] AS [s] " +
-                        "INNER JOIN [sys].[tables] AS [t] " +
-                        "ON [t].[schema_id] = [s].[schema_id] " +
-                        "INNER JOIN [sys].[key_constraints] AS [kc] " +
-                        "ON [kc].[parent_object_id] = [t].[object_id] " +
-                        "INNER JOIN [sys].[indexes] AS [i] " +
-                        "ON [i].[object_id] = [kc].[parent_object_id] " +
-                        "AND [i].[index_id] = [kc].[unique_index_id] " +
-                        "INNER JOIN [sys].[index_columns] AS [ic] " +
-                        "ON [ic].[object_id] = [i].[object_id] " +
-                        "AND [ic].[index_id] = [i].[index_id] " +
-                        "INNER JOIN [sys].[columns] AS [c] " +
-                        "ON [c].[object_id] = [ic].[object_id] " +
-                        "AND [c].[column_id] = [ic].[column_id] " +
-                        "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                        "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                        "ORDER BY " +
-                            "[ic].[key_ordinal]";
-            } else if (database.getDatabaseMajorVersion() >= 8) {
-                sql =
-                        "SELECT " +
-                            "[kc].[name] AS [CONSTRAINT_NAME], " +
-                            "[c].[name] AS [COLUMN_NAME], " +
-                            "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
-                        "FROM [dbo].[sysusers] AS [s] " +
-                        "INNER JOIN [dbo].[sysobjects] AS [t] " +
-                        "ON [t].[uid] = [s].[uid] " +
-                        "INNER JOIN [dbo].[sysobjects] AS [kc] " +
-                        "ON [kc].[parent_obj] = [t].[id] " +
-                        "INNER JOIN [dbo].[sysindexes] AS [i] " +
-                        "ON [i].[id] = [kc].[parent_obj] " +
-                        "AND [i].[name] = [kc].[name] " +
-                        "INNER JOIN [dbo].[sysindexkeys] AS [ic] " +
-                        "ON [ic].[id] = [i].[id] " +
-                        "AND [ic].[indid] = [i].[indid] " +
-                        "INNER JOIN [dbo].[syscolumns] AS [c] " +
-                        "ON [c].[id] = [ic].[id] " +
-                        "AND [c].[colid] = [ic].[colid] " +
-                        "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                        "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                        "ORDER BY " +
-                            "[ic].[keyno]";
+        boolean bulkQuery;
+        String sql;
+
+        String cacheKey = "uniqueConstraints-"+example.getClass().getSimpleName()+"-"+example.getSchema().toCatalogAndSchema().customize(database).toString();
+        String queryCountKey = "uniqueConstraints-"+example.getClass().getSimpleName()+"-queryCount";
+
+        Map<String, List<Map<String, ?>>> columnCache = (Map<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
+        Integer columnQueryCount = (Integer) snapshot.getScratchData(queryCountKey);
+        if (columnQueryCount == null) {
+            columnQueryCount = 0;
+        }
+
+        if (columnCache == null) {
+            bulkQuery = (database instanceof OracleDatabase) && columnQueryCount > 3;
+            snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
+
+            if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
+                sql = "select const.CONSTRAINT_NAME, COLUMN_NAME "
+                        + "from " + database.getSystemSchema() + ".table_constraints const "
+                        + "join " + database.getSystemSchema() + ".key_column_usage col "
+                        + "on const.constraint_schema=col.constraint_schema "
+                        + "and const.table_name=col.table_name "
+                        + "and const.constraint_name=col.constraint_name "
+                        + "where const.constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' "
+                        + "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
+                        + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
+                        + "order by ordinal_position";
+            } else if (database instanceof PostgresDatabase) {
+                sql = "select const.CONSTRAINT_NAME, COLUMN_NAME "
+                        + "from " + database.getSystemSchema() + ".table_constraints const "
+                        + "join " + database.getSystemSchema() + ".key_column_usage col "
+                        + "on const.constraint_schema=col.constraint_schema "
+                        + "and const.table_name=col.table_name "
+                        + "and const.constraint_name=col.constraint_name "
+                        + "where const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' "
+                        + "and const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' "
+                        + "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' "
+                        + "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'"
+                        + "order by ordinal_position";
+            } else if (database instanceof MSSQLDatabase) {
+                if (database.getDatabaseMajorVersion() >= 9) {
+                    sql =
+                            "SELECT " +
+                                    "[kc].[name] AS [CONSTRAINT_NAME], " +
+                                    "[c].[name] AS [COLUMN_NAME], " +
+                                    "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
+                                    "FROM [sys].[schemas] AS [s] " +
+                                    "INNER JOIN [sys].[tables] AS [t] " +
+                                    "ON [t].[schema_id] = [s].[schema_id] " +
+                                    "INNER JOIN [sys].[key_constraints] AS [kc] " +
+                                    "ON [kc].[parent_object_id] = [t].[object_id] " +
+                                    "INNER JOIN [sys].[indexes] AS [i] " +
+                                    "ON [i].[object_id] = [kc].[parent_object_id] " +
+                                    "AND [i].[index_id] = [kc].[unique_index_id] " +
+                                    "INNER JOIN [sys].[index_columns] AS [ic] " +
+                                    "ON [ic].[object_id] = [i].[object_id] " +
+                                    "AND [ic].[index_id] = [i].[index_id] " +
+                                    "INNER JOIN [sys].[columns] AS [c] " +
+                                    "ON [c].[object_id] = [ic].[object_id] " +
+                                    "AND [c].[column_id] = [ic].[column_id] " +
+                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                                    "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                    "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                                    "ORDER BY " +
+                                    "[ic].[key_ordinal]";
+                } else if (database.getDatabaseMajorVersion() >= 8) {
+                    sql =
+                            "SELECT " +
+                                    "[kc].[name] AS [CONSTRAINT_NAME], " +
+                                    "[c].[name] AS [COLUMN_NAME], " +
+                                    "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
+                                    "FROM [dbo].[sysusers] AS [s] " +
+                                    "INNER JOIN [dbo].[sysobjects] AS [t] " +
+                                    "ON [t].[uid] = [s].[uid] " +
+                                    "INNER JOIN [dbo].[sysobjects] AS [kc] " +
+                                    "ON [kc].[parent_obj] = [t].[id] " +
+                                    "INNER JOIN [dbo].[sysindexes] AS [i] " +
+                                    "ON [i].[id] = [kc].[parent_obj] " +
+                                    "AND [i].[name] = [kc].[name] " +
+                                    "INNER JOIN [dbo].[sysindexkeys] AS [ic] " +
+                                    "ON [ic].[id] = [i].[id] " +
+                                    "AND [ic].[indid] = [i].[indid] " +
+                                    "INNER JOIN [dbo].[syscolumns] AS [c] " +
+                                    "ON [c].[id] = [ic].[id] " +
+                                    "AND [c].[colid] = [ic].[colid] " +
+                                    "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                                    "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                    "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                                    "ORDER BY " +
+                                    "[ic].[keyno]";
+                } else {
+                    sql =
+                            "SELECT " +
+                                    "[TC].[CONSTRAINT_NAME], " +
+                                    "[KCU].[COLUMN_NAME] " +
+                                    "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
+                                    "INNER JOIN [INFORMATION_SCHEMA].[KEY_COLUMN_USAGE] AS [KCU] " +
+                                    "ON [KCU].[CONSTRAINT_NAME] = [TC].[CONSTRAINT_NAME] " +
+                                    "WHERE [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
+                                    "AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                    "AND [TC].[CONSTRAINT_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
+                                    "ORDER BY " +
+                                    "[KCU].[ORDINAL_POSITION]";
+                }
+            } else if (database instanceof OracleDatabase) {
+                sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name " +
+                        "from all_cons_columns ucc " +
+                        "where " +
+                        (bulkQuery ? "" : "ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ") +
+                        "ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                        "and ucc.table_name not like 'BIN$%' "+
+                        "order by ucc.position";
+            } else if (database instanceof DB2Database) {
+                if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                    sql = "select T1.constraint_name as CONSTRAINT_NAME, T2.COLUMN_NAME as COLUMN_NAME from QSYS2.TABLE_CONSTRAINTS T1, QSYS2.SYSCSTCOL T2\n"
+                            + "where T1.CONSTRAINT_TYPE='UNIQUE' and T1.CONSTRAINT_NAME=T2.CONSTRAINT_NAME\n"
+                            + "and T1.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "'\n"
+                            + "and T2.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "'\n"
+                            //+ "T2.TABLE_NAME='"+ database.correctObjectName(example.getTable().getName(), Table.class) + "'\n"
+                            //+ "\n"
+                            + "order by T2.COLUMN_NAME\n";
+
+                } else {
+                    sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t "
+                            + "where k.constname = t.constname "
+                            + "and k.tabschema = t.tabschema "
+                            + "and t.type='U' "
+                            + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
+                            + "and t.tabschema = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                            + "order by colseq";
+                }
+            } else if (database instanceof DerbyDatabase) {
+                sql = "SELECT cg.descriptor as descriptor, t.tablename "
+                        + "FROM sys.sysconglomerates cg "
+                        + "JOIN sys.syskeys k ON cg.conglomerateid = k.conglomerateid "
+                        + "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid "
+                        + "JOIN sys.systables t ON c.tableid = t.tableid "
+                        + "WHERE c.constraintname='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
+                List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+
+                List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
+                if (rows.size() == 0) {
+                    return returnList;
+                } else if (rows.size() > 1) {
+                    throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
+                } else {
+                    Map rowData = rows.get(0);
+                    String descriptor = rowData.get("DESCRIPTOR").toString();
+                    descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
+                    for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
+                        String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
+                                "select c.columnname from sys.syscolumns c "
+                                        + "join sys.systables t on t.tableid=c.referenceid "
+                                        + "where t.tablename='" + rowData.get("TABLENAME") + "' and c.columnnumber=" + columnNumber), String.class);
+
+                        Map<String, String> row = new HashMap<String, String>();
+                        row.put("COLUMN_NAME", columnName);
+                        returnList.add(row);
+                    }
+                    return returnList;
+                }
+
+            } else if (database instanceof FirebirdDatabase) {
+                sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
+                        "FROM RDB$INDEX_SEGMENTS " +
+                        "LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME " +
+                        "WHERE UPPER(RDB$INDICES.RDB$INDEX_NAME)='" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                        "ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION";
+            } else if (database instanceof SybaseASADatabase) {
+                sql = "select sysconstraint.constraint_name, syscolumn.column_name " +
+                        "from sysconstraint, syscolumn, systable " +
+                        "where sysconstraint.ref_object_id = syscolumn.object_id " +
+                        "and sysconstraint.table_object_id = systable.object_id " +
+                        "and sysconstraint.constraint_name = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                        "and systable.table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
             } else {
-                sql =
-                        "SELECT " +
-                            "[TC].[CONSTRAINT_NAME], " +
-                            "[KCU].[COLUMN_NAME] " +
-                        "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
-                        "INNER JOIN [INFORMATION_SCHEMA].[KEY_COLUMN_USAGE] AS [KCU] " +
-                        "ON [KCU].[CONSTRAINT_NAME] = [TC].[CONSTRAINT_NAME] " +
-                        "WHERE [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                        "AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                        "AND [TC].[CONSTRAINT_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                        "ORDER BY " +
-                            "[KCU].[ORDINAL_POSITION]";
+                String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
+                String schemaName = database.correctObjectName(schema.getName(), Schema.class);
+                String constraintName = database.correctObjectName(name, UniqueConstraint.class);
+                String tableName = database.correctObjectName(table.getName(), Table.class);
+                sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME "
+                        + "from " + database.getSystemSchema() + ".constraints "
+                        + "where constraint_type='UNIQUE' ";
+                if (catalogName != null) {
+                    sql += "and constraint_catalog='" + catalogName + "' ";
+                }
+                if (schemaName != null) {
+                    sql += "and constraint_schema='" + schemaName + "' ";
+                }
+                if (tableName != null) {
+                    sql += "and table_name='" + tableName + "' ";
+                }
+                if (constraintName != null) {
+                    sql += "and constraint_name='" + constraintName + "'";
+                }
             }
-        } else if (database instanceof OracleDatabase) {
-            sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' order by ucc.position";
-        } else if (database instanceof DB2Database) {
-            if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                sql = "select T1.constraint_name as CONSTRAINT_NAME, T2.COLUMN_NAME as COLUMN_NAME from QSYS2.TABLE_CONSTRAINTS T1, QSYS2.SYSCSTCOL T2\n"
-                + "where T1.CONSTRAINT_TYPE='UNIQUE' and T1.CONSTRAINT_NAME=T2.CONSTRAINT_NAME\n"
-                + "and T1.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "'\n"
-                + "and T2.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "'\n"
-                //+ "T2.TABLE_NAME='"+ database.correctObjectName(example.getTable().getName(), Table.class) + "'\n"
-                //+ "\n"
-                + "order by T2.COLUMN_NAME\n";
-                
-            } else {
-                sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t "
-                        + "where k.constname = t.constname "
-                        + "and k.tabschema = t.tabschema "
-                        + "and t.type='U' "
-                        + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
-                        + "and t.tabschema = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
-                        + "order by colseq";
-            }
-        } else if (database instanceof DerbyDatabase) {
-            sql = "SELECT cg.descriptor as descriptor, t.tablename "
-                    + "FROM sys.sysconglomerates cg "
-                    + "JOIN sys.syskeys k ON cg.conglomerateid = k.conglomerateid "
-                    + "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid "
-                    + "JOIN sys.systables t ON c.tableid = t.tableid "
-                    + "WHERE c.constraintname='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
             List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
-            List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
-            if (rows.size() == 0) {
-                return returnList;
-            } else if (rows.size() > 1) {
-                throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
-            } else {
-                Map rowData = rows.get(0);
-                String descriptor = rowData.get("DESCRIPTOR").toString();
-                descriptor = descriptor.replaceFirst(".*\\(", "").replaceFirst("\\).*", "");
-                for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
-                    String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
-                            "select c.columnname from sys.syscolumns c "
-                            + "join sys.systables t on t.tableid=c.referenceid "
-                            + "where t.tablename='" + rowData.get("TABLENAME") + "' and c.columnnumber=" + columnNumber), String.class);
-
-                    Map<String, String> row = new HashMap<String, String>();
-                    row.put("COLUMN_NAME", columnName);
-                    returnList.add(row);
+            if (bulkQuery) {
+                columnCache = new HashMap<String, List<Map<String, ?>>>();
+                snapshot.setScratchData(cacheKey, columnCache);
+                for (Map<String, ?> row : rows) {
+                    String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
+                    List<Map<String, ?>> constraintRows = columnCache.get(key);
+                    if (constraintRows == null) {
+                        constraintRows = new ArrayList<Map<String, ?>>();
+                        columnCache.put(key, constraintRows);
+                    }
+                    constraintRows.add(row);
                 }
-                return returnList;
+
+                return listColumns(example, database, snapshot);
+            } else {
+                return rows;
             }
-        } else if (database instanceof InformixDatabase) {
-            sql = "select sysindexes.idxname as CONSTRAINT_NAME, syscolumns.colname as COLUMN_NAME " +
-                  "from sysindexes, systables, syscolumns " +
-                  "where sysindexes.tabid = systables.tabid and sysindexes.tabid = syscolumns.tabid " +
-                  "and syscolumns.colno in (sysindexes.part1,sysindexes.part2,sysindexes.part3,sysindexes.part4," +
-                                           "sysindexes.part5,sysindexes.part6,sysindexes.part7,sysindexes.part8," +
-                                           "sysindexes.part9,sysindexes.part10,sysindexes.part11,sysindexes.part12," +
-                                           "sysindexes.part13,sysindexes.part14,sysindexes.part15,sysindexes.part16)" +
-                  "and sysindexes.idxtype ='U' " +
-                  "and sysindexes.idxname = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
-                  "order by case syscolumns.colno " +
-                      "when sysindexes.part1 then 1 " +
-                      "when sysindexes.part2 then 2 " +
-                      "when sysindexes.part3 then 3 " +
-                      "when sysindexes.part4 then 4 " +
-                      "when sysindexes.part5 then 5 " +
-                      "when sysindexes.part6 then 6 " +
-                      "when sysindexes.part7 then 7 " +
-                      "when sysindexes.part8 then 8 " +
-                      "when sysindexes.part9 then 9 " +
-                      "when sysindexes.part10 then 10 " +
-                      "when sysindexes.part11 then 11 " +
-                      "when sysindexes.part12 then 12 " +
-                      "when sysindexes.part13 then 13 " +
-                      "when sysindexes.part14 then 14 " +
-                      "when sysindexes.part15 then 15 " +
-                      "when sysindexes.part16 then 16 " +
-                  "end asc";
-        } else if (database instanceof FirebirdDatabase) {
-            sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
-                    "FROM RDB$INDEX_SEGMENTS " +
-                    "LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME " +
-                    "WHERE UPPER(RDB$INDICES.RDB$INDEX_NAME)='"+database.correctObjectName(name, UniqueConstraint.class)+"' " +
-                    "ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION";
-        } else if (database instanceof SybaseASADatabase) {
-            sql = "select sysconstraint.constraint_name, syscolumn.column_name " +
-                    "from sysconstraint, syscolumn, systable " +
-                    "where sysconstraint.ref_object_id = syscolumn.object_id " +
-                    "and sysconstraint.table_object_id = systable.object_id " +
-                    "and sysconstraint.constraint_name = '"+database.correctObjectName(name, UniqueConstraint.class)+"' " +
-                    "and systable.table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
         } else {
-            String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
-            String schemaName = database.correctObjectName(schema.getName(), Schema.class);
-            String constraintName = database.correctObjectName(name, UniqueConstraint.class);
-            String tableName = database.correctObjectName(table.getName(), Table.class);
-            sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME "
-                    + "from " + database.getSystemSchema() + ".constraints "
-                    + "where constraint_type='UNIQUE' ";
-            if (catalogName != null) {
-                sql += "and constraint_catalog='" + catalogName + "' ";
+            String lookupKey = schema.getName() + "_" + example.getName();
+            List<Map<String, ?>> rows = columnCache.get(lookupKey);
+            if (rows == null) {
+                rows = new ArrayList<Map<String, ?>>();
             }
-            if (schemaName != null) {
-                sql += "and constraint_schema='" + schemaName + "' ";
-            }
-            if (tableName != null) {
-                sql += "and table_name='" + tableName + "' ";
-            }
-            if (constraintName != null) {
-                sql += "and constraint_name='" + constraintName + "'";
-            }
+            return rows;
         }
-        return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+
+
     }
 
     //START CODE FROM PostgresDatabseSnapshotGenerator

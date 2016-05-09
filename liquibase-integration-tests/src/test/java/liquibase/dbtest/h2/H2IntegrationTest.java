@@ -44,7 +44,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         runCompleteChangeLog();
 
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
-        new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, true)).print(System.out);
+        new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, true, null)).print(System.out);
     }
 
     @Test

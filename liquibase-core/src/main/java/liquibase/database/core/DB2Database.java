@@ -5,10 +5,13 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -101,8 +104,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         } catch (Exception e) {
             throw new RuntimeException("Could not determine current schema", e);
         } finally {
-            JdbcUtils.closeResultSet(rs);
-            JdbcUtils.closeStatement(stmt);
+            JdbcUtils.close(rs, stmt);
         }
 
         return defaultSchemaName;
@@ -168,8 +170,11 @@ public class DB2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
-        return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        schema = schema.customize(this);
+        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+
+        return "FULL_DEFINITION: " + definition;
     }
 
 
@@ -210,15 +215,11 @@ public class DB2Database extends AbstractJdbcDatabase {
         return pkName;
     }
 
-
-    @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // does not support the schema name for the index -
-        return super.escapeIndexName(null, null, indexName);
-    }
-
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        if (rawCatalogName != null && rawSchemaName == null) {
+            rawSchemaName = rawCatalogName;
+        }
         return new CatalogAndSchema(rawSchemaName, null).customize(this);
     }
 

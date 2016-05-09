@@ -92,6 +92,10 @@ public abstract class BaseLiquibaseTask extends Task {
 
     protected abstract void executeWithLiquibaseClassloader() throws BuildException;
 
+    protected Database createDatabaseFromConfiguredDatabaseType() {
+        return createDatabaseFromType(databaseType);
+    }
+
     protected Database createDatabaseFromType(DatabaseType databaseType) {
         return databaseType.createDatabase(classLoader);
     }
@@ -152,7 +156,7 @@ public abstract class BaseLiquibaseTask extends Task {
      *
      * @param database The database to close.
      */
-    private void closeDatabase(Database database) {
+    protected void closeDatabase(Database database) {
         try {
             if(database != null) {
                 database.close();

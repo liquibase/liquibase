@@ -46,8 +46,7 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
         // this will allow a drop table cascade to remove the sequence as well.
         SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();
 
-        Sql alterSequenceOwner = new UnparsedSql("ALTER SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(),
-                statement.getSchemaName(), sequenceFunction.getValue()) + " OWNED BY " +
+        Sql alterSequenceOwner = new UnparsedSql("ALTER SEQUENCE " + sequenceFunction.getValue() + " OWNED BY " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
                 + database.escapeObjectName(statement.getColumnName(), Column.class),
                 getAffectedColumn(statement),

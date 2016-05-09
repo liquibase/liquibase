@@ -10,11 +10,14 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.DatabaseException;
 
-@DataTypeInfo(name="nvarchar", aliases = {"java.sql.Types.NVARCHAR", "nvarchar2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="nvarchar", aliases = {"java.sql.Types.NVARCHAR", "nvarchar2", "national"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NVarcharType extends CharType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        if (getRawDefinition() != null && getRawDefinition().toLowerCase().contains("national character varying")) {
+            setAdditionalInformation(null); //just go to nvarchar
+        }
         if (database instanceof HsqlDatabase
                 || database instanceof PostgresDatabase
                 || database instanceof DerbyDatabase) {

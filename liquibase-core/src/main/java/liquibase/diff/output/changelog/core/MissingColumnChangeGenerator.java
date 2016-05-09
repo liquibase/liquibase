@@ -7,6 +7,7 @@ import liquibase.change.core.AddColumnChange;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
@@ -15,7 +16,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
-public class MissingColumnChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingColumnChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -70,21 +71,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 
         columnConfig.setType(dataType);
 
-        Object defaultValue = column.getDefaultValue();
         MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
-        if (defaultValue != null) {
-            String defaultValueString = null;
-            try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
-            } catch (NullPointerException e) {
-                throw e;
-            }
-            if (defaultValueString != null) {
-                defaultValueString = defaultValueString.replaceFirst("'",
-                        "").replaceAll("'$", "");
-            }
-            columnConfig.setDefaultValue(defaultValueString);
-        }
 
         if (column.getRemarks() != null) {
             columnConfig.setRemarks(column.getRemarks());

@@ -2,6 +2,7 @@ package liquibase.command;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -140,6 +141,11 @@ public class DiffCommand extends AbstractCommand {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
         DatabaseSnapshot targetSnapshot = createTargetSnapshot();
 
+        referenceSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
+        if (targetSnapshot != null) {
+            targetSnapshot.setSchemaComparisons(compareControl.getSchemaComparisons());
+        }
+
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 
@@ -153,7 +159,14 @@ public class DiffCommand extends AbstractCommand {
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
-                schemas[i++] = comparison.getComparisonSchema();
+                CatalogAndSchema schema;
+                if (targetDatabase.supportsSchemas()) {
+                    schema = new CatalogAndSchema(targetDatabase.getDefaultCatalogName(), comparison.getComparisonSchema().getSchemaName());
+                } else {
+                    schema = new CatalogAndSchema(comparison.getComparisonSchema().getSchemaName(), comparison.getComparisonSchema().getSchemaName());
+                }
+
+                schemas[i++] = schema;
             }
         }
         SnapshotControl snapshotControl = getTargetSnapshotControl();
@@ -163,7 +176,13 @@ public class DiffCommand extends AbstractCommand {
         if (getSnapshotListener() != null) {
             snapshotControl.setSnapshotListener(getSnapshotListener());
         }
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
+        ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
+        try {
+            referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
+        } finally {
+            referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+        }
     }
 
     protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
@@ -176,7 +195,13 @@ public class DiffCommand extends AbstractCommand {
 
             int i = 0;
             for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
-                schemas[i++] = comparison.getReferenceSchema();
+                CatalogAndSchema schema;
+                if (referenceDatabase.supportsSchemas()) {
+                    schema = new CatalogAndSchema(referenceDatabase.getDefaultCatalogName(), comparison.getReferenceSchema().getSchemaName());
+                } else {
+                    schema = new CatalogAndSchema(comparison.getReferenceSchema().getSchemaName(), comparison.getReferenceSchema().getSchemaName());
+                }
+                schemas[i++] = schema;
             }
         }
 
@@ -187,7 +212,14 @@ public class DiffCommand extends AbstractCommand {
         if (getSnapshotListener() != null) {
             snapshotControl.setSnapshotListener(getSnapshotListener());
         }
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
+
+        ObjectQuotingStrategy originalStrategy = referenceDatabase.getObjectQuotingStrategy();
+        try {
+            referenceDatabase.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+            return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
+        } finally {
+            referenceDatabase.setObjectQuotingStrategy(originalStrategy);
+        }
     }
 }
 

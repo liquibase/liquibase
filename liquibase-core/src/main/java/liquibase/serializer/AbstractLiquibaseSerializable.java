@@ -41,7 +41,7 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                                 List<ParsedNode> elementNodes = Collections.emptyList();
                                 if (childNode.getName().equals(elementName)) {
                                     elementNodes = Collections.singletonList(childNode);
-                                } else if (childNode.getName().equals(childNode.getName())) {
+                                } else {
                                     elementNodes = childNode.getChildren(null, elementName);
                                 }
                                 if (!elementNodes.isEmpty()) {
@@ -109,11 +109,17 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
 
         if (parsedNode.getValue() != null) {
             for (String field : this.getSerializableFields()) {
-                if (this.getSerializableFieldType(field) == SerializationType.DIRECT_VALUE) {
+                SerializationType type = this.getSerializableFieldType(field);
+                if (type == SerializationType.DIRECT_VALUE) {
                     Object value = parsedNode.getValue(String.class);
 
                     value = convertEscaped(value);
 
+
+                    ObjectUtil.setProperty(this, field, value);
+                } else if (type == SerializationType.NAMED_FIELD) {
+                    Object value = parsedNode.getChildValue(null, field, Object.class);
+                    value = convertEscaped(value);
 
                     ObjectUtil.setProperty(this, field, value);
                 }
@@ -122,6 +128,9 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
     }
 
     protected Object convertEscaped(Object value) {
+        if (value == null) {
+            return null;
+        }
         Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) value);
         if (matcher.matches()) {
             String stringValue = matcher.group(1);

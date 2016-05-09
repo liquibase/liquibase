@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.liquibase</groupId>
@@ -31,23 +32,23 @@
         <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
         <url>scm:git:git@github.com:liquibase/liquibase.git</url>
         <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <developers>
-       <developer>
-         <id>nvoxland</id>
-         <name>Nathan Voxland</name>
-         <email>nathan@voxland.net</email>
-         <url>http://nathan.voxland.net</url>
-         <organizationUrl>http://nathan.voxland.net/</organizationUrl>
-         <roles>
-           <role>architect</role>
-           <role>developer</role>
-         </roles>
-         <timezone>-6</timezone>
-       </developer>
-     </developers>
+        <developer>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan@voxland.net</email>
+            <url>http://nathan.voxland.net</url>
+            <organizationUrl>http://nathan.voxland.net/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
 
     <properties>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
@@ -58,15 +59,12 @@
     <modules>
         <module>liquibase-core</module>
         <module>liquibase-maven-plugin</module>
-        <module>liquibase-osgi</module>
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
-        <module>liquibase-debian</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-plugin-api</artifactId>
@@ -108,16 +106,23 @@
             </dependency>
 
             <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>1.9.5</version>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>1.5.6</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
-                <groupId>org.easymock</groupId>
-                <artifactId>easymockclassextension</artifactId>
-                <version>2.5.2</version>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <version>1.5.6</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.9.5</version>
                 <scope>test</scope>
             </dependency>
 
@@ -158,7 +163,6 @@
                 <version>1.2</version>
                 <scope>test</scope>
             </dependency>
-
 
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -203,7 +207,47 @@
                 <scope>test</scope>
             </dependency>
 
+            <dependency>
+                <groupId>commons-cli</groupId>
+                <artifactId>commons-cli</artifactId>
+                <version>1.2</version>
+            </dependency>
 
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>1.9.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>1.5.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>1.3.176</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>2.2.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>1.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>4.3.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -222,20 +266,24 @@
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
+
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>2.3.1</version>
                 </plugin>
+
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.9.1</version>
                 </plugin>
+
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <configuration>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
+
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.7.1</version>
@@ -244,6 +292,7 @@
                         <reportFormat>plain</reportFormat>
                     </configuration>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -264,12 +313,12 @@
                         </execution>
                     </executions>
                 </plugin>
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>1.9.1</version>
                 </plugin>
-
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -315,7 +364,7 @@
                     <version>1.4</version>
                     <configuration>
                         <providerSelection>2.0</providerSelection>
-                        <source />
+                        <source/>
                     </configuration>
                     <executions>
                         <execution>
@@ -344,33 +393,45 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>javacc-maven-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.9</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.2</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>2.5.4</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.8</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
             </plugins>
-
         </pluginManagement>
-
     </build>
-
-    <reporting>
-        <plugins>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
-            <!--<configuration>-->
-            <!--<dependencyLocationsEnabled>false</dependencyLocationsEnabled>-->
-            <!--<dependencyDetailsEnabled>false</dependencyDetailsEnabled>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
-            <!--
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>findbugs-maven-plugin</artifactId>
-              <version>2.3</version>
-            </plugin>
-            -->
-
-
-        </plugins>
-    </reporting>
 
     <distributionManagement>
         <repository>
@@ -412,6 +473,19 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>debian</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                </os>
+            </activation>
+            <modules>
+                <module>liquibase-debian</module>
+            </modules>
+        </profile>
+
 
         <profile>
             <id>rpm</id>

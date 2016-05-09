@@ -109,7 +109,9 @@ public class Liquibase {
         log = LogFactory.getLogger();
         this.databaseChangeLog = changeLog;
 
-        this.changeLogFile = changeLog.getPhysicalFilePath();
+        if (changeLog != null) {
+            this.changeLogFile = changeLog.getPhysicalFilePath();
+        }
         if (this.changeLogFile != null) {
             changeLogFile = changeLogFile.replace('\\', '/'); //convert to standard / if using absolute path on windows
         }
@@ -202,6 +204,8 @@ public class Liquibase {
             if (checkLiquibaseTables) {
                 checkLiquibaseTables(true, changeLog, contexts, labelExpression);
             }
+
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
 
             changeLog.validate(database, contexts, labelExpression);
 
@@ -296,6 +300,8 @@ public class Liquibase {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
 
             checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -623,11 +629,11 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String rollbackScript, String contexts) throws LiquibaseException {
-        rollback(tagToRollBackTo, new Contexts(contexts));
+        rollback(tagToRollBackTo, rollbackScript, new Contexts(contexts));
     }
 
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts) throws LiquibaseException {
-        rollback(tagToRollBackTo, contexts, new LabelExpression());
+        rollback(tagToRollBackTo, rollbackScript, contexts, new LabelExpression());
     }
     public void rollback(String tagToRollBackTo, String rollbackScript, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
@@ -788,6 +794,8 @@ public class Liquibase {
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
             checkLiquibaseTables(true, changeLog, contexts, labelExpression);
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -843,6 +851,8 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             changeLog.validate(database, contexts, labelExpression);
 
@@ -920,6 +930,8 @@ public class Liquibase {
             if (checkLiquibaseTables) {
                 checkLiquibaseTables(false, changeLog, contexts, labelExpression);
             }
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator;
@@ -1032,6 +1044,8 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).generateDeploymentId();
+
             checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
             getDatabase().tag(tagString);
         } finally {

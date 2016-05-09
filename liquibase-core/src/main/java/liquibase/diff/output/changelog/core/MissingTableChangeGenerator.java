@@ -12,7 +12,9 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.DateTimeType;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.statement.DatabaseFunction;
@@ -23,7 +25,7 @@ import liquibase.structure.core.Table;
 
 import java.util.Date;
 
-public class MissingTableChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Table.class.isAssignableFrom(objectType)) {
@@ -67,11 +69,11 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
-            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
-            DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
+            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), referenceDatabase);
+            DatabaseDataType ddt = ldt.toDatabaseDataType(comparisonDatabase);
             String typeString = ddt.toString();
-            if (referenceDatabase instanceof MSSQLDatabase) {
-                typeString = referenceDatabase.unescapeDataTypeString(typeString);
+            if (comparisonDatabase instanceof MSSQLDatabase) {
+                typeString = comparisonDatabase.unescapeDataTypeString(typeString);
             }
             columnConfig.setType(typeString);
 
@@ -166,7 +168,18 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             columnConfig.setDefaultValueComputed(function);
         } else {
-            columnConfig.setDefaultValue(defaultValue.toString());
+            String defaultValueString = null;
+            try {
+                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), database).objectToSql(defaultValue, database);
+            } catch (NullPointerException e) {
+                throw e;
+            }
+            if (defaultValueString != null) {
+                defaultValueString = defaultValueString.replaceFirst("'",
+                        "").replaceAll("'$", "");
+            }
+
+            columnConfig.setDefaultValue(defaultValueString);
         }
     }
 

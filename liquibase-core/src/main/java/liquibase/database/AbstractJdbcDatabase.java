@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
 public abstract class AbstractJdbcDatabase implements Database {
 
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
+    private final static int FETCH_SIZE = 1000;
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -103,6 +104,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private boolean defaultCatalogSet = false;
     private boolean defaultSchemaSet = false;
+
+    private Map<String, Object> attributes = new HashMap<String, Object>();
 
     public String getName() {
         return toString();
@@ -353,6 +356,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
+    public Integer getFetchSize() {
+        return FETCH_SIZE;
+    }
+
     /**
      * Returns system (undroppable) views.
      */
@@ -479,6 +487,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected boolean isDateTime(final String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
+    }
+    
+    protected boolean isTimestamp(final String isoDate) {
+        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
     }
 
     protected boolean isTimeOnly(final String isoDate) {
@@ -748,7 +760,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 	        final long changeSetStarted = System.currentTimeMillis();
 	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
-            List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false).addIncludedSchema(schemaToDrop)).generateChangeSets();
+            List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
 	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
@@ -830,10 +842,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     public boolean isLiquibaseObject(final DatabaseObject object) {
         if (object instanceof Table) {
             Schema liquibaseSchema = new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName());
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()).setSchema(liquibaseSchema), this)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()).setSchema(liquibaseSchema), null, this)) {
                 return true;
             }
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()).setSchema(liquibaseSchema), this)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()).setSchema(liquibaseSchema), null, this)) {
                 return true;
             }
             return false;
@@ -1257,7 +1269,15 @@ public abstract class AbstractJdbcDatabase implements Database {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement);
-            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            try {
+                ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            } catch (DatabaseException e) {
+                if (statement.continueOnError()) {
+                    LogFactory.getLogger().severe("Error executing statement '"+statement.toString()+"', but continuing", e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -1515,5 +1535,23 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String unescapeDataTypeString(String dataTypeString) {
         return dataTypeString;
+    }
+
+    public Object get(String key) {
+        return attributes.get(key);
+    }
+
+    public AbstractJdbcDatabase set(String key, Object value) {
+        if (value == null) {
+            attributes.remove(key);
+        } else {
+            attributes.put(key, value);
+        }
+        return this;
+    }
+
+    @Override
+    public ValidationErrors validate() {
+        return new ValidationErrors();
     }
 }

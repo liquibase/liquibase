@@ -13,7 +13,7 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
     private BigInteger maxValue;
     private BigInteger minValue;
     private BigInteger cacheSize;
-    private Boolean willCycle;
+    private Boolean cycle;
     private Boolean ordered;
 
     public AlterSequenceStatement(String catalogName, String schemaName, String sequenceName) {
@@ -84,12 +84,12 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public Boolean getWillCycle() {
-        return willCycle;
+    public Boolean getCycle() {
+        return cycle;
     }
 
-    public AlterSequenceStatement setWillCycle(Boolean willCycle) {
-        this.willCycle = willCycle;
+    public AlterSequenceStatement setCycle(Boolean cycle) {
+        this.cycle = cycle;
         return this;
     }
 }

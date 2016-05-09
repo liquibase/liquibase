@@ -15,8 +15,8 @@ public class CurrencyType  extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.equalsIgnoreCase("smallmoney")
-                    || originalDefinition.equals("[smallmoney]")) {
+            if (originalDefinition.toLowerCase().startsWith("smallmoney")
+                    || originalDefinition.toLowerCase().startsWith("[smallmoney]")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("smallmoney"));
             }

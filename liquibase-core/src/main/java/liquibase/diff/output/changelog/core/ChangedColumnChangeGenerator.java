@@ -10,6 +10,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.logging.LogFactory;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerator {
+public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Column.class.isAssignableFrom(objectType)) {

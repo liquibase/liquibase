@@ -10,10 +10,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -113,6 +110,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         try {
+            if (isAzureDb()) {
+                return false;
+            }
             if (this.getDatabaseMajorVersion() >= 11) {
                 return true;
             }
@@ -192,14 +192,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        // MSSQL server does not support the schema name for the index -
-        return escapeObjectName(indexName, Index.class);
-    }
-
-    @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return escapeObjectName(null, schemaName, tableName, Table.class);
+        return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -297,6 +291,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return Relation.class.isAssignableFrom(type);
+    }
+
+    @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = schema.customize(this);
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
@@ -325,14 +324,18 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return selectOnly;
     }
 
-    /**
-     * SQLServer does not support specifying the database name as a prefix to the object name
-     * @return
-     */
     @Override
-    public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        return escapeObjectName(null, schemaName, viewName, View.class);
-
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        if (View.class.isAssignableFrom(objectType)) { //SQLServer does not support specifying the database name as a prefix to the object name
+            String name = super.escapeObjectName(objectName, objectType);
+            if (schemaName != null) {
+                name = super.escapeObjectName(schemaName, Schema.class)+"."+name;
+            }
+            return name;
+        } else if (Index.class.isAssignableFrom(objectType)) {
+            return super.escapeObjectName(objectName, objectType);
+        }
+        return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
     }
 
     @Override
@@ -498,5 +501,28 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
 
         return sendsStringParametersAsUnicode == null ? true : sendsStringParametersAsUnicode;
+    }
+
+    public boolean isAzureDb() {
+        return "Azure".equalsIgnoreCase(getEngineEdition());
+    }
+
+    public String getEngineEdition() {
+        try {
+            if (getConnection() instanceof JdbcConnection) {
+                String sql = "SELECT CASE ServerProperty('EngineEdition')\n" +
+                        "         WHEN 1 THEN 'Personal'\n" +
+                        "         WHEN 2 THEN 'Standard'\n" +
+                        "         WHEN 3 THEN 'Enterprise'\n" +
+                        "         WHEN 4 THEN 'Express'\n" +
+                        "         WHEN 5 THEN 'Azure'\n" +
+                        "         ELSE 'Unknown'\n" +
+                        "       END";
+                return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+            }
+        } catch (DatabaseException e) {
+            LogFactory.getLogger().warning("Could not determine engine edition", e);
+        }
+        return "Unknown";
     }
 }

@@ -1,6 +1,11 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseASADatabase;
@@ -11,45 +16,32 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.CreateProcedureStatement;
+import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.util.StreamUtil;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @LiquibaseService(skip = true)
-public class LoggingExecutor extends AbstractExecutor implements Executor {
+public class LoggingExecutor extends AbstractExecutor {
 
     private Writer output;
     private Executor delegatedReadExecutor;
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
-        this.output = output;
+        if (output != null) {
+            this.output = output;
+        } else {
+            this.output = new NoopWriter();
+        }
         this.delegatedReadExecutor = delegatedExecutor;
         setDatabase(database);
     }
 
     protected Writer getOutput() {
         return output;
-    }
-
-    @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
-        }
-
     }
 
     @Override
@@ -103,7 +95,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
             if (sql instanceof ExecutablePreparedStatement) {
-                output.write("WARNING!: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode");
+                output.write("WARNING: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode\n\n");
             }
 
             for (String statement : applyVisitors(sql, sqlVisitors)) {
@@ -212,4 +204,25 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     public boolean updatesDatabase() {
         return false;
     }
+    
+    private class NoopWriter extends Writer {
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            // does nothing
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // does nothing
+        }
+
+        @Override
+        public void close() throws IOException {
+            // does nothing
+        }
+
+    }
+
+    
 }

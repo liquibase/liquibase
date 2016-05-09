@@ -42,8 +42,9 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription(charTypeName + "(20)", database))
-                .addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database))
-                .addColumn("LABELS", DataTypeFactory.getInstance().fromDescription(charTypeName + "(255)", database));
+                .addColumn("CONTEXTS", DataTypeFactory.getInstance().fromDescription(charTypeName + "("+getContextsSize()+")", database))
+                .addColumn("LABELS", DataTypeFactory.getInstance().fromDescription(charTypeName + "("+getLabelsSize()+")", database))
+                .addColumn("DEPLOYMENT_ID", DataTypeFactory.getInstance().fromDescription(charTypeName+"(10)", database));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }
@@ -66,6 +67,14 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
             }
         }
         return "datetime";
+    }
+
+    protected String getLabelsSize() {
+        return "255";
+    }
+
+    protected String getContextsSize() {
+        return "255";
     }
 
     protected String getIdColumnSize() {

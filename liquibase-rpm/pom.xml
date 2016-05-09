@@ -30,13 +30,9 @@
         <snakeyaml.version>1.13</snakeyaml.version>
         <postgresql.version>9.3-1101-jdbc41</postgresql.version>
         <commons-cli.version>1.2</commons-cli.version>
-        <commons-collections.version>3.2.1</commons-collections.version>
-        <commons-lang.version>2.4</commons-lang.version>
         <hamcrest-core.version>1.3</hamcrest-core.version>
         <javax.servlet.version>3.0.0.v201112011016</javax.servlet.version>
-        <org.eclipse.jetty.version>8.1.14.v20131031</org.eclipse.jetty.version>
         <junit.version>4.11</junit.version>
-        <org.apache.velocity.version>1.7</org.apache.velocity.version>
     </properties>
     
     <developers>
@@ -82,82 +78,17 @@
             <artifactId>commons-cli</artifactId>
             <version>${commons-cli.version}</version>
         </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>${commons-collections.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${commons-lang.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <version>${hamcrest-core.version}</version>
         </dependency>
-        <!-- Eclipse Jetty Dependencies -->
-        <dependency>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>javax.servlet</artifactId>
-            <version>${javax.servlet.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-continuation</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-io</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-security</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-util</artifactId>
-            <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity</artifactId>
-            <version>${org.apache.velocity.version}</version>
         </dependency>
     </dependencies>
 
@@ -460,19 +391,8 @@
                             <dependency>
                                 <includes>
                                     <include>commons-cli:commons-cli</include>
-                                    <include>commons-collections:commons-collections</include>
-                                    <include>commons-lang:commons-lang</include>
                                     <include>org.hamcrest:hamcrest-core</include>
-                                    <include>org.eclipse.jetty.orbit:javax.servlet</include>
-                                    <include>org.eclipse.jetty:jetty-continuation</include>
-                                    <include>org.eclipse.jetty:jetty-http</include>
-                                    <include>org.eclipse.jetty:jetty-io</include>
-                                    <include>org.eclipse.jetty:jetty-security</include>
-                                    <include>org.eclipse.jetty:jetty-server</include>
-                                    <include>org.eclipse.jetty:jetty-servlet</include>
-                                    <include>org.eclipse.jetty:jetty-util</include>
                                     <include>junit:junit</include>
-                                    <include>org.apache.velocity:velocity</include>
                                 </includes>
                                 <excludes>
                                     <exclude>org.liquibase:liquibase-rpm</exclude>

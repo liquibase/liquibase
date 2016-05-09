@@ -45,14 +45,14 @@ public class SnapshotGeneratorFactory {
     /**
      * Return singleton SnapshotGeneratorFactory
      */
-    public static SnapshotGeneratorFactory getInstance() {
+    public static synchronized SnapshotGeneratorFactory getInstance() {
         if (instance == null) {
             instance = new SnapshotGeneratorFactory();
         }
         return instance;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = new SnapshotGeneratorFactory();
     }
 
@@ -116,7 +116,7 @@ public class SnapshotGeneratorFactory {
         }
         DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, false, example.getClass()));
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;
             }
         }
@@ -141,7 +141,7 @@ public class SnapshotGeneratorFactory {
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         if (database.getConnection() instanceof OfflineConnection) {
-            DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot();
+            DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot(examples);
             if (snapshot == null) {
                 throw new DatabaseException("No snapshotFile parameter specified for offline database");
             }
@@ -193,7 +193,7 @@ public class SnapshotGeneratorFactory {
         }
     }
 
-    public static void resetAll() {
+    public static synchronized void resetAll() {
         instance = null;
     }
 

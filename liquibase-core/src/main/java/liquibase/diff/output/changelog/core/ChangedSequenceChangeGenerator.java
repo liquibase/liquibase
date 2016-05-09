@@ -5,6 +5,7 @@ import liquibase.change.core.AlterSequenceChange;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
@@ -13,7 +14,7 @@ import liquibase.structure.core.Sequence;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenerator {
+public class ChangedSequenceChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Sequence.class.isAssignableFrom(objectType)) {
@@ -64,7 +65,7 @@ public class ChangedSequenceChangeGenerator implements ChangedObjectChangeGenera
 
         if (differences.isDifferent("willCycle")) {
             AlterSequenceChange change = createAlterSequenceChange(sequence, control);
-            change.setWillCycle(sequence.getWillCycle());
+            change.setCycle(sequence.getWillCycle());
             changes.add(change);
         }
 

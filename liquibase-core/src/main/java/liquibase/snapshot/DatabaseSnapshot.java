@@ -4,8 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -31,7 +33,12 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private DatabaseObjectCollection referencedObjects;
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
+    private Map<String, Object> snapshotScratchPad = new HashMap<String, Object>();
+
     private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
+    private CompareControl.SchemaComparison[] schemaComparisons;
+
+    private Map<String, Object> metadata = new HashMap<String, Object>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
@@ -49,6 +56,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         this.serializableFields.add("referencedObjects");
         this.serializableFields.add("database");
         this.serializableFields.add("created");
+        this.serializableFields.add("metadata");
     }
 
     protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
@@ -74,6 +82,46 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
         this(examples, database, new SnapshotControl(database));
+    }
+
+    public DatabaseSnapshot clone(DatabaseObject[] examples) {
+        try {
+            DatabaseSnapshot returnSnapshot = new RestoredDatabaseSnapshot(this.database);
+
+            for (DatabaseObject example : examples) {
+                DatabaseObject existingObject = this.get(example);
+                if (existingObject == null) {
+                    continue;
+                }
+                if (example instanceof Schema) {
+                    for (Class<? extends DatabaseObject> type : this.snapshotControl.getTypesToInclude()) {
+                        for (DatabaseObject object : this.get(type)) {
+                            if (object.getSchema() == null) {
+                                if (object instanceof Catalog) {
+                                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, ((Schema) example).getCatalog(), null, database)) {
+                                        returnSnapshot.allFound.add(object);
+                                    }
+                                } else {
+                                    returnSnapshot.allFound.add(object);
+                                }
+                            } else {
+                                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object.getSchema(), example, null, database)) {
+                                    returnSnapshot.allFound.add(object);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    returnSnapshot.allFound.add(existingObject);
+                }
+            }
+
+            returnSnapshot.getMetadata().putAll(this.getMetadata());
+
+            return returnSnapshot;
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public SnapshotControl getSnapshotControl() {
@@ -109,6 +157,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return allFound;
         } else if (field.equals("referencedObjects")) {
             return referencedObjects;
+        } else if (field.equals("metadata")) {
+            return metadata;
         } else if (field.equals("created")) {
             return new ISODateFormat().format(new Timestamp(new Date().getTime()));
         } else if (field.equals("database")) {
@@ -201,6 +251,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
             collection.add(example);
 
+            if (example instanceof Schema) {
+                LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
+            }
+            if (example instanceof Catalog) {
+                LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
+            }
+
         } else {
             allFound.add(object);
 
@@ -222,16 +279,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<String>(object.getAttributes())) {
-            if (object.getClass() == Index.class && field.equals("columns")) {
-                continue;
-            }
-            if (object.getClass() == PrimaryKey.class && field.equals("columns")) {
-                continue;
-            }
-            if (object.getClass() == UniqueConstraint.class && field.equals("columns")) {
-                continue;
-            }
             Object fieldValue = object.getAttribute(field, Object.class);
+            if (field.equals("columns") && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
+                if (fieldValue != null && ((Collection) fieldValue).size() > 0) {
+                    String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName().toUpperCase();
+                    if (columnName.endsWith(" ASC") || columnName.endsWith("DESC")) {
+                        continue;
+                    }
+                }
+            }
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
                 if (object instanceof PrimaryKey && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
@@ -257,7 +313,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
 
             if (isWrongSchema(((DatabaseObject) fieldValue))) {
-                DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue);
+                DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
                 if (savedFieldValue == null) {
                     savedFieldValue = (DatabaseObject) fieldValue;
                     savedFieldValue.setSnapshotId(SnapshotIdService.getInstance().generateId());
@@ -343,7 +399,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         for (DatabaseObject obj : originalExamples) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(fieldValue.getSchema(), obj, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(fieldValue.getSchema(), obj, schemaComparisons, database)) {
                 return false;
             }
         }
@@ -354,7 +410,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
      * Returns the object described by the passed example if it is already included in this snapshot.
      */
     public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
-        return allFound.get(example);
+        return allFound.get(example, schemaComparisons);
     }
 
     /**
@@ -380,7 +436,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return false;
         }
         for (DatabaseObject obj : databaseObjects) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, schemaComparisons, database)) {
                 return true;
             }
         }
@@ -463,5 +519,33 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     @Override
     public ParsedNode serialize() {
         throw new RuntimeException("TODO");
+    }
+
+    /**
+     * Used to get and store misc data that should be scoped to the snapshot. Helpful for caching snapshot results.
+     * @deprecated Will be removed with 4.0
+     */
+    public Object getScratchData(String key) {
+        return snapshotScratchPad.get(key);
+    }
+
+    public Object setScratchData(String key, Object data) {
+        return snapshotScratchPad.put(key, data);
+    }
+
+    public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
+        this.schemaComparisons = schemaComparisons;
+    }
+
+    public CompareControl.SchemaComparison[] getSchemaComparisons() {
+        return schemaComparisons;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 }

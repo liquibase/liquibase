@@ -1,9 +1,11 @@
 package liquibase.serializer.core.yaml;
 
+import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
+import liquibase.statement.ColumnConstraint;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -92,6 +94,9 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 }
                 if (value instanceof Column.AutoIncrementInformation) {
                     value = ((Map) toMap((Column.AutoIncrementInformation) value)).values().iterator().next();
+                }
+                if (value instanceof ConstraintsConfig) {
+                    value = ((Map) toMap((ConstraintsConfig) value)).values().iterator().next();
                 }
                 if (value instanceof LiquibaseSerializable) {
                     value = toMap((LiquibaseSerializable) value);

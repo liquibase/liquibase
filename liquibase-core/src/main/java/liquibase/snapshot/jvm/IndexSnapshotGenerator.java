@@ -155,7 +155,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         continue;
                     }
 
-                     Index index = foundIndexes.get(indexName);
+                    if (database instanceof DB2Database && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
+                        continue;
+                    }
+
+                    Index index = foundIndexes.get(indexName);
                     if (index == null) {
                         index = new Index();
                         index.setName(indexName);
@@ -186,7 +190,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //        if (foundObject instanceof PrimaryKey) {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
-        if (foundObject instanceof UniqueConstraint && ((UniqueConstraint) foundObject).getBackingIndex() == null && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+        if (foundObject instanceof UniqueConstraint && ((UniqueConstraint) foundObject).getBackingIndex() == null && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
             Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
@@ -210,7 +214,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
 
-        for (int i=0; i<((Index) example).getColumns().size(); i++) {
+        for (int i = 0; i < ((Index) example).getColumns().size(); i++) {
             ((Index) example).getColumns().set(i, ((Index) example).getColumns().get(i));
         }
 
@@ -319,16 +323,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
             // If we are informix then must alter the lookup if we get here
             // Wont get here now though due to the continue for generated indexes above
-            if(database instanceof InformixDatabase) {
-              index = foundIndexes.get("_generated_index_" + exampleName.substring(1));
+            if (database instanceof InformixDatabase) {
+                index = foundIndexes.get("_generated_index_" + exampleName.substring(1));
             } else {
-              index = foundIndexes.get(exampleName);
+                index = foundIndexes.get(exampleName);
             }
-            
+
             return index;
         } else {
             for (Index index : foundIndexes.values()) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, database)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, snapshot.getSchemaComparisons(), database)) {
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
                             return index;

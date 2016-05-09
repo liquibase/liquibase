@@ -94,15 +94,21 @@ public class ObjectDifferences {
         return differences.remove(attribute) != null;
     }
 
+    public CompareControl.SchemaComparison[] getSchemaComparisons() {
+        return compareControl.getSchemaComparisons();
+    }
+
     public interface CompareFunction {
         public boolean areEqual(Object referenceValue, Object compareToValue);
     }
 
     public static class StandardCompareFunction implements CompareFunction {
 
+        private final CompareControl.SchemaComparison[] schemaComparisons;
         private Database accordingTo;
 
-        public StandardCompareFunction(Database accordingTo) {
+        public StandardCompareFunction(CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
+            this.schemaComparisons = schemaComparisons;
             this.accordingTo = accordingTo;
         }
 
@@ -116,7 +122,7 @@ public class ObjectDifferences {
             }
 
             if (referenceValue instanceof DatabaseObject && compareToValue instanceof DatabaseObject) {
-                return DatabaseObjectComparatorFactory.getInstance().isSameObject((DatabaseObject) referenceValue, (DatabaseObject) compareToValue, accordingTo);
+                return DatabaseObjectComparatorFactory.getInstance().isSameObject((DatabaseObject) referenceValue, (DatabaseObject) compareToValue, schemaComparisons, accordingTo);
             } else {
                 if ((referenceValue instanceof Number) && (compareToValue instanceof Number)
                         && !referenceValue.getClass().equals(compareToValue.getClass())) { //standardize on a common number type
@@ -168,6 +174,9 @@ public class ObjectDifferences {
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
             if (referenceValue instanceof Collection) {
+                if (!(compareToValue instanceof Collection)) {
+                    return false;
+                }
                 if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
                     return false;
                 } else {

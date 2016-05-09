@@ -51,17 +51,34 @@ public class StringClauses {
     }
 
     /**
+     * Returns the key if it is not empty and/or not already used. If it is already used, it generates a random value for the key.
+     */
+    private String uniqueKey(String key) {
+        boolean generateOne = false;
+
+        key = StringUtils.trimToNull(key);
+        if (key == null) {
+            generateOne = true;
+        } else if (clauses.containsKey(key.toLowerCase())) {
+            generateOne = true;
+        }
+
+        while (generateOne) {
+            key = UUID.randomUUID().toString().replace("-", "").substring(0,6);
+            generateOne = clauses.containsKey(key);
+        }
+        return key;
+    }
+
+    /**
      * Adds a new clause at the end of the list with the given key.
      */
     public StringClauses append(String key, String clause) {
+        Validate.notNull(StringUtils.trimToNull(key), "key must be a non-null, non-empty value");
+
         key = StringUtils.trimToEmpty(key).toLowerCase();
         clause = StringUtils.trimToEmpty(clause);
-        if (key.equals("")) {
-            key = clause;
-        }
-        if (key.equals("") || clause.equals("")) {
-            return this;
-        }
+
         if (clauses.containsKey(key)) {
             throw new IllegalArgumentException("Cannot add clause with key '" + key + "' because it is already defined");
         }
@@ -73,8 +90,9 @@ public class StringClauses {
      * Adds a new sub-clause at the end of the list with the given key.
      */
     public StringClauses append(String key, StringClauses subclauses) {
+        Validate.notNull(StringUtils.trimToNull(key), "key must be a non-null, non-empty value");
+
         key = StringUtils.trimToEmpty(key).toLowerCase();
-        Validate.notNull(key, "key must be a non-null, non-empty value");
 
         if (clauses.containsKey(key)) {
             throw new IllegalArgumentException("Cannot add clause with key '" + key + "' because it is already defined");
@@ -89,7 +107,7 @@ public class StringClauses {
      * There is no corresponding append with just a StringClauses because the subclause may not be fully created when appended and so the key may be an unexpected value.
      */
     public StringClauses append(String clause) {
-        return this.append(clause, clause);
+        return this.append(uniqueKey(clause), clause);
     }
 
     /**
@@ -107,7 +125,19 @@ public class StringClauses {
     }
 
     public StringClauses append(LiteralClause literal) {
-        clauses.put(literal.getClass().getName().toLowerCase()+" #"+clauses.size(), literal);
+        if (literal != null) {
+            clauses.put(literal.getClass().getName().toLowerCase() + " #" + clauses.size(), literal);
+        }
+        return this;
+    }
+
+    public StringClauses prepend(LiteralClause literal) {
+        if (literal != null) {
+            LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+            newMap.put(uniqueKey(literal.getClass().getName().toLowerCase()), literal);
+            newMap.putAll(this.clauses);
+            this.clauses = newMap;
+        }
         return this;
     }
 
@@ -129,7 +159,10 @@ public class StringClauses {
      * Convenience method for {@link #prepend(String, String)} that uses the clause as the key.
      */
     public StringClauses prepend(String clause) {
-        return prepend(clause, clause);
+        if (StringUtils.trimToNull(clause) == null) {
+            return prepend(new Whitespace(clause));
+        }
+        return prepend(uniqueKey(clause), clause);
     }
 
     /**
@@ -148,10 +181,9 @@ public class StringClauses {
 
 
     private StringClauses prependImpl(String key, Object clause) throws IllegalArgumentException {
+        Validate.notNull(StringUtils.trimToNull(key), "key must be a non-null, non-empty value");
+
         key = StringUtils.trimToEmpty(key).toLowerCase();
-        if (key.equals("")) {
-            throw new IllegalArgumentException("Cannot specify a null or empty key");
-        }
 
         if (clauses.containsKey(key)) {
             throw new IllegalArgumentException("Cannot add clause with key '" + key + "' because it is already defined");
@@ -187,6 +219,21 @@ public class StringClauses {
      */
     public StringClauses replace(String key, String newValue) throws IllegalArgumentException {
         return replaceImpl(key, StringUtils.trimToEmpty(newValue));
+    }
+
+    /**
+     * Replaces the given key with a new string. If the existing key does not exist, throws IllegalArgumentException
+     */
+    public StringClauses replaceIfExists(String key, String newValue) throws IllegalArgumentException {
+        if (contains(key)) {
+            return replaceImpl(key, StringUtils.trimToEmpty(newValue));
+        } else {
+            return this;
+        }
+    }
+
+    public boolean contains(String key) {
+        return clauses.containsKey(key.toLowerCase());
     }
 
     /**
@@ -266,6 +313,8 @@ public class StringClauses {
 
 
     private StringClauses insertBeforeImpl(String existingKey, String newKey, Object newValue) {
+        Validate.notNull(StringUtils.trimToNull(newKey), "key must be a non-null, non-empty value");
+
         existingKey = StringUtils.trimToEmpty(existingKey).toLowerCase();
         newKey = StringUtils.trimToEmpty(newKey).toLowerCase();
 
@@ -321,14 +370,13 @@ public class StringClauses {
     }
 
     private StringClauses insertAfterImpl(String existingKey, String newKey, Object newValue) {
+        Validate.notNull(StringUtils.trimToNull(existingKey), "key must be a non-null, non-empty value");
+
         existingKey = StringUtils.trimToEmpty(existingKey).toLowerCase();
         newKey = StringUtils.trimToEmpty(newKey).toLowerCase();
 
         if (!clauses.containsKey(existingKey)) {
             throw new IllegalArgumentException("Existing key '" + existingKey + "' does not exist");
-        }
-        if (newKey.equals("")) {
-            throw new IllegalArgumentException("New key cannot be null or empty");
         }
         if (clauses.containsKey(newKey)) {
             throw new IllegalArgumentException("Cannot add clause with key '" + newKey + "' because it is already defined");
@@ -402,6 +450,10 @@ public class StringClauses {
      */
     public StringClauses getSubclause(Enum exitingKey) {
         return getSubclause(exitingKey.name());
+    }
+
+    public ClauseIterator getClauseIterator() {
+        return new ClauseIterator(clauses);
     }
 
     @Override
@@ -491,6 +543,51 @@ public class StringClauses {
         @Override
         public String toString() {
             return value;
+        }
+    }
+
+    public static class ClauseIterator implements Iterator {
+
+        private ListIterator<String> keyIterator;
+        private final LinkedHashMap<String, Object> clauses;
+
+        public ClauseIterator(LinkedHashMap<String, Object> clauses) {
+            this.keyIterator = new ArrayList(clauses.keySet()).listIterator();
+            this.clauses = clauses;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return keyIterator.hasNext();
+        }
+
+        @Override
+        public Object next() {
+            return clauses.get(keyIterator.next());
+        }
+
+        public Object nextNonWhitespace() {
+            Object next;
+            while (hasNext()) {
+                next = clauses.get(keyIterator.next());
+                if (!(next instanceof Whitespace) && !(next instanceof Comment)) {
+                    return next;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void remove() {
+            clauses.remove(keyIterator.previous());
+            keyIterator.remove();
+        }
+
+        public void replace(Object newClause) {
+            keyIterator.previous();
+            String keyToReplace = keyIterator.next();
+
+            clauses.put(keyToReplace, newClause);
         }
     }
 }

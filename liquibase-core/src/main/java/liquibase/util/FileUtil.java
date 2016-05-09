@@ -1,27 +1,8 @@
 package liquibase.util;
 
 import java.io.*;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 public class FileUtil {
-
-    /**
-     * Schedule a file to be deleted when JVM exits.
-     * If file is directory delete it and all sub-directories.
-     */
-    public static void deleteOnExit(final File file) {
-        file.deleteOnExit();
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File child  : files) {
-                    deleteOnExit(child);
-                }
-            }
-        }
-    }
 
     /**
      * Clean a directory without deleting it.
@@ -54,47 +35,6 @@ public class FileUtil {
         if ( null != exception ) {
             throw exception;
         }
-    }
-
-    /**
-     * Unzips the given zip file and returns a File object corresponding to the root directory.
-     * The returned directory is a temporary directory that will be deleted on application exit.
-     */
-    public static File unzip(File zipFile) throws IOException {
-        File tempDir = File.createTempFile("liquibase-unzip", ".dir");
-        tempDir.delete();
-        tempDir.mkdir();
-
-        JarFile jarFile = new JarFile(zipFile);
-        try {
-            Enumeration<JarEntry> entries = jarFile.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                File entryFile = new File(tempDir, entry.getName());
-                if (!entry.isDirectory()) {
-                    entryFile.getParentFile().mkdirs();
-                    FileOutputStream out = new FileOutputStream(entryFile);
-
-                    byte[] buf = new byte[1024];
-                    int len;
-                    InputStream inputStream = jarFile.getInputStream(entry);
-                    while ((len = inputStream.read(buf)) > 0) {
-                        if (!zipFile.exists()) {
-                            zipFile.getParentFile().mkdirs();
-                        }
-                        out.write(buf, 0, len);
-                    }
-                    inputStream.close();
-                    out.close();
-                }
-            }
-
-            FileUtil.deleteOnExit(tempDir);
-        } finally {
-            jarFile.close();
-        }
-
-        return tempDir;
     }
 
     public static String getContents(File file) throws IOException {

@@ -28,7 +28,7 @@ public class LiquibaseConfiguration {
     /**
      * Returns the singleton instance, creating it if necessary. On creation, the configuration is initialized with {@link liquibase.configuration.SystemPropertyProvider}
      */
-    public static LiquibaseConfiguration getInstance() {
+    public static synchronized LiquibaseConfiguration getInstance() {
         if (instance == null) {
             instance = new LiquibaseConfiguration();
             instance.init(new SystemPropertyProvider());
@@ -97,7 +97,7 @@ public class LiquibaseConfiguration {
     protected  <T extends ConfigurationContainer> T createConfiguration(Class<T> type) {
         try {
             T configuration = type.newInstance();
-            configuration.init(new SystemPropertyProvider());
+            configuration.init(configurationValueProviders);
             return configuration;
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName(), e);

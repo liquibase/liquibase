@@ -3,6 +3,12 @@ package liquibase.util.csv;
 import java.io.Reader;
 
 public class CSVReader extends liquibase.util.csv.opencsv.CSVReader {
+
+    public static final char DEFAULT_SEPARATOR = ',';
+
+    public static final char DEFAULT_QUOTE_CHARACTER = '"';
+
+
     public CSVReader(Reader reader) {
         super(reader);
     }

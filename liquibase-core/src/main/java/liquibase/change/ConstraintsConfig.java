@@ -5,11 +5,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
-
-import java.util.Set;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
@@ -21,6 +17,8 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String primaryKeyName;
     private String primaryKeyTablespace;
     private String references;
+    private String referencedTableCatalogName;
+    private String referencedTableSchemaName;
     private String referencedTableName;
     private String referencedColumnNames;
     private Boolean unique;
@@ -259,6 +257,22 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 		this.primaryKeyTablespace = primaryKeyTablespace;
         return this;
 	}
+
+    public String getReferencedTableCatalogName() {
+        return referencedTableCatalogName;
+    }
+
+    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
+        this.referencedTableCatalogName = referencedTableCatalogName;
+    }
+
+    public String getReferencedTableSchemaName() {
+        return referencedTableSchemaName;
+    }
+
+    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
+        this.referencedTableSchemaName = referencedTableSchemaName;
+    }
 
     public String getReferencedTableName() {
         return referencedTableName;

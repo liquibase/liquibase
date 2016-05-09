@@ -48,6 +48,11 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
             ParsedNode snapshotNode = new ParsedNode(null, "snapshot");
             snapshotNode.setValue(rootList);
 
+            Map metadata = (Map) rootList.get("metadata");
+            if (metadata != null) {
+                snapshot.getMetadata().putAll(metadata);
+            }
+
             snapshot.load(snapshotNode, resourceAccessor);
 
             return snapshot;

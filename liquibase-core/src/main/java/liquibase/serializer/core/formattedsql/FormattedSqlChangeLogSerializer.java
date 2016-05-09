@@ -58,7 +58,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     protected Database getTargetDatabase(ChangeSet changeSet) {
         String filePath = changeSet.getFilePath();
         if (filePath == null) {
-            throw new UnexpectedLiquibaseException("No changeset file path set. Cannot determine target database type");
+            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
         }
         Matcher matcher = fileNamePatter.matcher(filePath);
         if (!matcher.matches()) {

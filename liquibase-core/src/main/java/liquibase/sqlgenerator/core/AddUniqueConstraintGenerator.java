@@ -54,20 +54,18 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 					, database.escapeColumnNameList(statement.getColumnNames())
 			);
 		}
-		if(database instanceof OracleDatabase) {
-	        if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
-	            if (statement.isDeferrable()) {
-	            	sql += " DEFERRABLE";
-	            }
+		if(database instanceof OracleDatabase || database instanceof PostgresDatabase) {
+            if (statement.isDeferrable()) {
+                sql += " DEFERRABLE";
+            }
 
-	            if (statement.isInitiallyDeferred()) {
-	            	sql +=" INITIALLY DEFERRED";
-	            }
-	        }
+            if (statement.isInitiallyDeferred()) {
+                sql +=" INITIALLY DEFERRED";
+            }
             if (statement.isDisabled()) {
                 sql +=" DISABLE";
             }
-		}
+        }
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

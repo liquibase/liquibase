@@ -226,6 +226,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
             this.valueNumeric = null;
         } else {
+          String saved = new String(valueNumeric);
             if (valueNumeric.startsWith("(")) {
                 valueNumeric = valueNumeric.replaceFirst("^\\(", "");
                 valueNumeric = valueNumeric.replaceFirst("\\)$", "");
@@ -234,7 +235,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             try {
                 this.valueNumeric = ValueNumeric.of(Locale.US, valueNumeric);
             } catch (ParseException e) {
-                this.valueComputed = new DatabaseFunction(valueNumeric);
+                this.valueComputed = new DatabaseFunction(saved);
             }
         }
 
@@ -847,6 +848,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setPrimaryKeyName(constraintsNode.getChildValue(null, "primaryKeyName", String.class));
         constraints.setPrimaryKeyTablespace(constraintsNode.getChildValue(null, "primaryKeyTablespace", String.class));
         constraints.setReferences(constraintsNode.getChildValue(null, "references", String.class));
+        constraints.setReferencedTableCatalogName(constraintsNode.getChildValue(null, "referencedTableCatalogName", String.class));
+        constraints.setReferencedTableSchemaName(constraintsNode.getChildValue(null, "referencedTableSchemaName", String.class));
         constraints.setReferencedTableName(constraintsNode.getChildValue(null, "referencedTableName", String.class));
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));

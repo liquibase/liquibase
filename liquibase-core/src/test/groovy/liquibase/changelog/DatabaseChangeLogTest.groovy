@@ -1,5 +1,6 @@
 package liquibase.changelog
 
+import liquibase.ContextExpression;
 import liquibase.change.core.CreateTableChange
 import liquibase.change.core.RawSQLChange
 import liquibase.exception.SetupException
@@ -11,10 +12,12 @@ import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class DatabaseChangeLogTest extends Specification {
 
-    @Shared resourceSupplier = new ResourceSupplier()
+    @Shared
+            resourceSupplier = new ResourceSupplier()
     def test1Xml = '''<databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -89,8 +92,8 @@ create view sql_view as select * from sql_table;'''
         when:
         def children = [
                 new ParsedNode(null, "preConditions").setValue([[runningAs: [username: "user1"]], [runningAs: [username: "user2"]]]),
-                new ParsedNode(null, "changeSet").addChildren([id:"1", author: "nvoxland", createTable: [tableName: "my_table"]]),
-                new ParsedNode(null, "changeSet").addChildren([id:"2", author: "nvoxland", createTable: [tableName: "my_other_table"]]),
+                new ParsedNode(null, "changeSet").addChildren([id: "1", author: "nvoxland", createTable: [tableName: "my_table"]]),
+                new ParsedNode(null, "changeSet").addChildren([id: "2", author: "nvoxland", createTable: [tableName: "my_other_table"]]),
         ]
         def nodeWithChildren = new ParsedNode(null, "databaseChangeLog").addChildren([logicalFilePath: "com/example/logical.xml"])
         for (child in children) {
@@ -134,7 +137,7 @@ create view sql_view as select * from sql_table;'''
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
                 .addChildren([include: [file: "com/example/test1.xml"]])
                 .addChildren([include: [file: "com/example/test2.xml"]])
-        , resourceAccessor)
+                , resourceAccessor)
 
         then:
         rootChangeLog.preconditions.nestedPreconditions.size() == 3
@@ -196,15 +199,45 @@ create view sql_view as select * from sql_table;'''
                 "com/example/children/file2.sql": "file 2",
                 "com/example/children/file3.sql": "file 3",
                 "com/example/children/file1.sql": "file 1",
-                "com/example/not/fileX.sql": "file X",
+                "com/example/not/fileX.sql"     : "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/children", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
 
         then:
-        changeLogFile.changeSets.collect { it.filePath } == [ "com/example/children/file1.sql",
-                                                              "com/example/children/file2.sql",
-                                                              "com/example/children/file3.sql" ]
+        changeLogFile.changeSets.collect { it.filePath } == ["com/example/children/file1.sql",
+                                                             "com/example/children/file2.sql",
+                                                             "com/example/children/file3.sql"]
+    }
+
+    @Unroll("#featureName: #changeSets")
+    def "addChangeSet works with first/last combinations"() {
+        when:
+        def changeLog = new DatabaseChangeLog()
+        for (def changeSetDef : changeSets) {
+            def changeSet = new ChangeSet(changeSetDef["id"], "test", false, false, "path.txt", null, null, true, changeLog)
+            changeSet.runOrder = changeSetDef["runOrder"]
+            changeLog.addChangeSet(changeSet)
+        }
+
+        then:
+        changeLog.getChangeSets()*.getId() == order
+
+        where:
+        changeSets                                                                                                                                              | order
+        [[id: "1"], [id: "2"], [id: "3"]]                                                                                                                       | ["1", "2", "3"]
+        [[id: "1", runOrder: "first"]]                                                                                                                          | ["1"]
+        [[id: "1", runOrder: "first"], [id: "2"]]                                                                                                               | ["1", "2"]
+        [[id: "1"], [id: "2", runOrder: "first"]]                                                                                                               | ["2", "1"]
+        [[id: "1"], [id: "2", runOrder: "first"], [id: "3"]]                                                                                                    | ["2", "1", "3"]
+        [[id: "1"], [id: "2", runOrder: "first"], [id: "3", runOrder: "first"], [id: "4"]]                                                                      | ["2", "3", "1", "4"]
+        [[id: "1"], [id: "2", runOrder: "first"], [id: "3"], [id: "4", runOrder: "first"], [id: "5"]]                                                           | ["2", "4", "1", "3", "5"]
+        [[id: "1", runOrder: "last"]]                                                                                                                           | ["1"]
+        [[id: "1", runOrder: "last"], [id: "2"]]                                                                                                                | ["2", "1"]
+        [[id: "1", runOrder: "last"], [id: "2"]]                                                                                                                | ["2", "1"]
+        [[id: "1"], [id: "2", runOrder: "last"]]                                                                                                                | ["1", "2"]
+        [[id: "1", runOrder: "last"], [id: "2"], [id: "3", runOrder: "last"], [id: "4"]]                                                                        | ["2", "4", "1", "3"]
+        [[id: "1", runOrder: "last"], [id: "2"], [id: "3", runOrder: "first"], [id: "4"], [id: "5", runOrder: "last"], [id: "6"], [id: "7", runOrder: "first"]] | ["3", "7", "2", "4", "6", "1", "5"]
     }
 
     def "includeAll throws exception when directory not found"() {
@@ -216,7 +249,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/missing", false, null, true, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
 
         then:
         SetupException e = thrown()
@@ -233,7 +266,7 @@ create view sql_view as select * from sql_table;'''
                 "com/example/not/fileX.sql": "file X",
         ])
         def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
-        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+        changeLogFile.includeAll("com/example/missing", false, null, false, changeLogFile.getStandardChangeLogComparator(), resourceAccessor, new ContextExpression())
         then:
         changeLogFile.changeSets.collect {it.filePath } == []
 

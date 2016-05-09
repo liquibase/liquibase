@@ -3,14 +3,16 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.DropSequenceChange;
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 
-public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChangeGenerator {
+public class UnexpectedSequenceChangeGenerator extends AbstractChangeGenerator implements UnexpectedObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Sequence.class.isAssignableFrom(objectType)) {
@@ -21,12 +23,12 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
 
     @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
+        return new Class[] { Table.class};
     }
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] { Table.class};
+        return null;
     }
 
     @Override
@@ -40,6 +42,10 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
         }
         if (control.getIncludeSchema()) {
             change.setSchemaName(sequence.getSchema().getName());
+        }
+
+        if (comparisonDatabase instanceof PostgresDatabase) {
+            change.setOnlyIfExists(true);
         }
 
         return new Change[] { change };

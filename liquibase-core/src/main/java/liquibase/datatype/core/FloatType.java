@@ -32,7 +32,8 @@ public class FloatType  extends LiquibaseDataType {
             }
             return new DatabaseDataType(database.escapeDataTypeName("float"), parameters);
         }
-        if (database instanceof MySQLDatabase || database instanceof DB2Database) {
+        if (database instanceof MySQLDatabase || database instanceof DB2Database
+                || database instanceof H2Database) {
             if (originalDefinition.equalsIgnoreCase("REAL")) {
                 return new DatabaseDataType("REAL");
             }

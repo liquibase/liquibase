@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.RuntimeEnvironment;
@@ -16,6 +17,7 @@ import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -23,25 +25,22 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditional {
+    private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<DatabaseChangeLog>();
+    private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<DatabaseChangeLog>();
+
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
@@ -53,7 +52,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private RuntimeEnvironment runtimeEnvironment;
     private boolean ignoreClasspathPrefix = false;
 
+    private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+    private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
+
+    private ContextExpression contexts;
+    private ContextExpression includeContexts;
+
     public DatabaseChangeLog() {
+    }
+
+    public DatabaseChangeLog getRootChangeLog() {
+        return rootChangeLog != null ? rootChangeLog : this;
+    }
+
+    public DatabaseChangeLog getParentChangeLog() {
+        return parentChangeLog;
     }
 
     public DatabaseChangeLog(String physicalFilePath) {
@@ -127,6 +140,22 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.objectQuotingStrategy = objectQuotingStrategy;
     }
 
+    public ContextExpression getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(ContextExpression contexts) {
+        this.contexts = contexts;
+    }
+
+    public ContextExpression getIncludeContexts() {
+        return includeContexts;
+    }
+
+    public void setIncludeContexts(ContextExpression includeContexts) {
+        this.includeContexts = includeContexts;
+    }
+
     @Override
     public String toString() {
         return getFilePath();
@@ -160,7 +189,38 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void addChangeSet(ChangeSet changeSet) {
-        this.changeSets.add(changeSet);
+        if (changeSet.getRunOrder() == null) {
+            ListIterator<ChangeSet> it = this.changeSets.listIterator(this.changeSets.size());
+            boolean added = false;
+            while (it.hasPrevious() && !added) {
+                if (!"last".equals(it.previous().getRunOrder())) {
+                    it.next();
+                    it.add(changeSet);
+                    added = true;
+                }
+            }
+            if (!added) {
+                it.add(changeSet);
+            }
+
+        } else if (changeSet.getRunOrder().equals("first")) {
+            ListIterator<ChangeSet> it = this.changeSets.listIterator();
+            boolean added = false;
+            while (it.hasNext() && !added) {
+                if (!"first".equals(it.next().getRunOrder())) {
+                    it.previous();
+                    it.add(changeSet);
+                    added = true;
+                }
+            }
+            if (!added) {
+                this.changeSets.add(changeSet);
+            }
+        } else if (changeSet.getRunOrder().equals("last")) {
+            this.changeSets.add(changeSet);
+        } else {
+            throw new UnexpectedLiquibaseException("Unknown runOrder: "+changeSet.getRunOrder());
+        }
     }
 
     @Override
@@ -213,6 +273,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
+        setContexts(new ContextExpression(parsedNode.getChildValue(null, "context", String.class)));
         String objectQuotingStrategy = parsedNode.getChildValue(null, "objectQuotingStrategy", String.class);
         if (objectQuotingStrategy != null) {
             setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(objectQuotingStrategy));
@@ -254,8 +315,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
             }
             path = path.replace('\\', '/');
+            ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
             try {
-                include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor);
+                include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor, includeContexts);
             } catch (LiquibaseException e) {
                 throw new SetupException(e);
             }
@@ -271,9 +333,22 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
+            String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
+            Comparator<?> resourceComparator = null;
+            if (resourceComparatorDef != null) {
+                try {
+                	resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
+                } catch (Exception e) {
+            		//take default comparator
+                	LogFactory.getInstance().getLog().info("no resourceComparator defined - taking default implementation");
+                	resourceComparator=getStandardChangeLogComparator();
+                }
+            }
+
+            ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
             includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
                     node.getChildValue(null, "errorIfMissingOrEmpty", true),
-                    getStandardChangeLogComparator(), resourceAccessor);
+                    getStandardChangeLogComparator(), resourceAccessor, includeContexts);
         } else if (nodeName.equals("preConditions")) {
             this.preconditionContainer = new PreconditionContainer();
             try {
@@ -323,8 +398,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter,
                            boolean errorIfMissingOrEmpty,
-                           Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
+                           Comparator<String> resourceComparator, ResourceAccessor resourceAccessor, ContextExpression includeContexts) throws SetupException {
         try {
+            if (pathName == null) {
+                throw new SetupException("No path attribute for includeAll");
+            }
             pathName = pathName.replace('\\', '/');
 
             if (!(pathName.endsWith("/"))) {
@@ -361,14 +439,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             for (String path : resources) {
-                include(path, false, resourceAccessor);
+                include(path, false, resourceAccessor, includeContexts);
             }
         } catch (Exception e) {
             throw new SetupException(e);
         }
     }
 
-    public boolean include(String fileName, boolean isRelativePath, ResourceAccessor resourceAccessor) throws LiquibaseException {
+    public boolean include(String fileName, boolean isRelativePath, ResourceAccessor resourceAccessor, ContextExpression includeContexts) throws LiquibaseException {
 
         if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
             return false;
@@ -386,9 +464,30 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         DatabaseChangeLog changeLog;
         try {
-            changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+            if (rootChangeLog == null) {
+                ROOT_CHANGE_LOG.set(this);
+            }
+            DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
+            PARENT_CHANGE_LOG.set(this);
+            try {
+                ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+                changeLog = parser.parse(fileName, changeLogParameters, resourceAccessor);
+                changeLog.setIncludeContexts(includeContexts);
+            } finally {
+                if (rootChangeLog == null) {
+                    ROOT_CHANGE_LOG.remove();
+                }
+                if (parentChangeLog == null) {
+                    PARENT_CHANGE_LOG.remove();
+                } else {
+                    PARENT_CHANGE_LOG.set(parentChangeLog);
+                }
+            }
         } catch (UnknownChangelogFormatException e) {
-            LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            if (StringUtils.trimToEmpty(fileName).matches("\\.\\w+$")) {
+                LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            }
             return false;
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();
@@ -399,7 +498,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             this.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
-            this.changeSets.add(changeSet);
+            addChangeSet(changeSet);
         }
 
         return true;
@@ -416,7 +515,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
-                return o1. compareTo(o2);
+            	//by ignoring WEB-INF/classes in path all changelog Files independent 
+            	//whehther they are in a WAR or in a JAR are order following the same rule
+            	return o1.replace("WEB-INF/classes/", "").compareTo(o2.replace("WEB-INF/classes/", ""));
             }
         };
     }

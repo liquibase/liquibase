@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
-    private List<ChangeSet> invalidMD5Sums = new ArrayList<ChangeSet>();
+    private List<String> invalidMD5Sums = new ArrayList<String>();
     private List<FailedPrecondition> failedPreconditions = new ArrayList<FailedPrecondition>();
     private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
     private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
@@ -133,7 +133,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         if(ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
                 if (!changeSet.shouldRunOnChange()) {
-                    invalidMD5Sums.add(changeSet);
+                    invalidMD5Sums.add(changeSet.toString(false)+" was: "+ranChangeSet.getLastCheckSum().toString()+" but is now: "+changeSet.generateCheckSum().toString());
                 }
             }
         }
@@ -147,7 +147,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
-    public List<ChangeSet> getInvalidMD5Sums() {
+    public List<String> getInvalidMD5Sums() {
         return invalidMD5Sums;
     }
 

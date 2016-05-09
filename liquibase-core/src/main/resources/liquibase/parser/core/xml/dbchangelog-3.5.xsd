@@ -93,6 +93,7 @@
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
                         <xsd:attribute name="labels" type="xsd:string" />
+                        <xsd:attribute name="global" type="xsd:boolean"/>
 					</xsd:complexType>
 				</xsd:element>
 
@@ -178,14 +179,18 @@
 						<xsd:complexType>
 							<xsd:attribute name="file" type="xsd:string" use="required" />
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
+							<xsd:attribute name="context" type="xsd:string" />
 							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
 						<xsd:complexType>
 							<xsd:attribute name="path" type="xsd:string" use="required" />
+							<xsd:attribute name="errorIfMissingOrEmpty" type="booleanExp" default="false"/>
 							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-                            <xsd:attribute name="filter" type="xsd:string" />
+							<xsd:attribute name="resourceComparator" type="xsd:string"/>
+							<xsd:attribute name="filter" type="xsd:string" />
+							<xsd:attribute name="context" type="xsd:string" />
 							<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 						</xsd:complexType>
 					</xsd:element>
@@ -239,6 +244,7 @@
 	<!-- Attributes for changeSet -->
 	<xsd:attributeGroup name="changeLogAttributes">
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
+		<xsd:attribute name="context" type="xsd:string" />
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" default="LEGACY" />
 	</xsd:attributeGroup>
 
@@ -257,6 +263,7 @@
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
         <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
         <xsd:attribute name="created" type="xsd:string"/>
+		<xsd:attribute name="runOrder" type="xsd:string"/>
 	</xsd:attributeGroup>
 
 	<!-- Attributes for constraints -->
@@ -268,7 +275,9 @@
 		<xsd:attribute name="unique" type="booleanExp" />
 		<xsd:attribute name="uniqueConstraintName" type="xsd:string" />
 		<xsd:attribute name="references" type="xsd:string" />
-        <xsd:attribute name="referencedTableName" type="xsd:string"/>
+		<xsd:attribute name="referencedTableCatalogName" type="xsd:string" />
+		<xsd:attribute name="referencedTableSchemaName" type="xsd:string" />
+		<xsd:attribute name="referencedTableName" type="xsd:string"/>
         <xsd:attribute name="referencedColumnNames" type="xsd:string"/>
 		<xsd:attribute name="foreignKeyName" type="xsd:string" />
 		<xsd:attribute name="deleteCascade" type="booleanExp" />
@@ -386,7 +395,15 @@
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="booleanExp" />
         <xsd:attribute name="cacheSize" type="xsd:nonNegativeInteger" />
-    </xsd:attributeGroup>
+		<xsd:attribute name="cycle" type="booleanExp">
+			<xsd:annotation>
+				<xsd:documentation>
+					true for a cycling sequence, false for a non-cycling sequence.
+					Default is false.
+				</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="renameSequenceAttributes">
 		<xsd:attribute name="catalogName" type="xsd:string" />
@@ -538,6 +555,7 @@
 			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
 			<xsd:attribute name="separator" type="xsd:string" default=","/>
 			<xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>
+            <xsd:attribute name="commentLineStartsWith" type="xsd:string" default="#" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -607,6 +625,7 @@
 		<xsd:attribute name="columnName" type="xsd:string" use="required" />
 		<xsd:attribute name="defaultNullValue" type="xsd:string" />
 		<xsd:attribute name="columnDataType" type="xsd:string" />
+        <xsd:attribute name="constraintName" type="xsd:string"/>
 	</xsd:attributeGroup>
 
 
@@ -636,8 +655,7 @@
 		<xsd:complexType>
 			<xsd:attribute name="id" type="xsd:string" use="required" />
 			<xsd:attribute name="author" type="xsd:string" use="required" />
-			<xsd:attribute name="changeLogFile" type="xsd:string"
-				use="required" />
+			<xsd:attribute name="changeLogFile" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -1123,14 +1141,6 @@
 	<xsd:element name="createSequence">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="sequenceAttributes" />
-            <xsd:attribute name="cycle" type="booleanExp">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        true for a cycling sequence, false for a non-cycling sequence.
-                        Default is false.
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:attribute>            
 		</xsd:complexType>
 	</xsd:element>
 

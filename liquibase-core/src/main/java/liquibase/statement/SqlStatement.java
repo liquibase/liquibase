@@ -16,5 +16,7 @@ public interface SqlStatement {
 
     boolean skipOnUnsupported();
 
+    boolean continueOnError();
+
 
 }

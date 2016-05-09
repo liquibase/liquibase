@@ -12,33 +12,33 @@ import org.junit.Test;
 
 public class AbstractResourceAccessorJavaTest {
 
-	@Test
-	public void testConvertToPathIsInsensibleToTrailingSlashOnRootPath() throws MalformedURLException {
-		{
-			AbstractResourceAccessor ara = new MyARA();
-			ara.addRootPath(new URL("file:/a/"));
-			String path = ara.convertToPath("file:/a/b");
-			assertEquals("b", path);
-		}
-		{
-			AbstractResourceAccessor ara = new MyARA();
-			ara.addRootPath(new URL("file:/a"));
-			String path = ara.convertToPath("file:/a/b");
-			//path must not be '/b'
-			assertEquals("b", path);
-		}
-	}
+//	@Test
+//	public void testConvertToPathIsInsensibleToTrailingSlashOnRootPath() throws MalformedURLException {
+//		{
+//			AbstractResourceAccessor ara = new MyARA();
+//			ara.addRootPath(new URL("file:/a/"));
+//			String path = ara.convertToPath("file:/a/b");
+//			assertEquals("b", path);
+//		}
+//		{
+//			AbstractResourceAccessor ara = new MyARA();
+//			ara.addRootPath(new URL("file:/a"));
+//			String path = ara.convertToPath("file:/a/b");
+//			//path must not be '/b'
+//			assertEquals("b", path);
+//		}
+//	}
 	
-	@Test
-	public void testConvertToPathIsConsistentGivenTheRootPathInsertionOrder() throws MalformedURLException {
-		//Fixed the order of insertion of the rootPaths the resolution convertToPath() must
-		//work always in the same way. Otherwise the content of the rootPath strings will influence
-		//the path generation and the identity of the changesets.
-		//This is a problem when you deploy on multiple machines with the same file structure but
-		//path different (e.g. because every country has a specific folder).
-		checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder("file:/th/");
-		checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder("file:/sa/");
-	}
+//	@Test
+//	public void testConvertToPathIsConsistentGivenTheRootPathInsertionOrder() throws MalformedURLException {
+//		//Fixed the order of insertion of the rootPaths the resolution convertToPath() must
+//		//work always in the same way. Otherwise the content of the rootPath strings will influence
+//		//the path generation and the identity of the changesets.
+//		//This is a problem when you deploy on multiple machines with the same file structure but
+//		//path different (e.g. because every country has a specific folder).
+//		checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder("file:/th/");
+//		checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder("file:/sa/");
+//	}
 
 	@Test
 	public void testConvertToPathRelativeDoesntGenerateDoubleSlahes() {

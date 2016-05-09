@@ -185,7 +185,10 @@ public class Column extends AbstractDatabaseObject {
             return getName() + (getDescending() != null && getDescending() ? " DESC" : "");
         } else {
             String tableOrViewName = getRelation().getName();
-            return tableOrViewName + "." + getName() + (getDescending() != null && getDescending() ? " DESC" : "");
+            if (getRelation().getSchema() != null && getRelation().getSchema().getName() != null) {
+                tableOrViewName = getRelation().getSchema().getName()+"."+tableOrViewName;
+            }
+            return tableOrViewName + "." + getName();
         }
     }
 
@@ -202,6 +205,9 @@ public class Column extends AbstractDatabaseObject {
                 return -1;
             } else {
                 returnValue = this.getRelation().compareTo(o.getRelation());
+                if (returnValue == 0 && this.getRelation().getSchema() != null && o.getRelation().getSchema() != null) {
+                    returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareTo(StringUtils.trimToEmpty(o.getRelation().getSchema().getName()));
+                }
             }
 
             if (returnValue == 0) {
@@ -294,6 +300,15 @@ public class Column extends AbstractDatabaseObject {
         }
         return new Column(columnName)
                 .setDescending(descending);
+    }
+
+    public Integer getOrder() {
+        return getAttribute("order", Integer.class);
+    }
+
+    public Column setOrder(Integer order) {
+        setAttribute("order", order);
+        return this;
     }
 
     public static Column[] arrayFromNames(String columnNames) {
