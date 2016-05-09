@@ -16,6 +16,8 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.opencsv.enums.CSVReaderNullFieldIndicator;
 
@@ -62,11 +64,7 @@ public class CSVParser {
      * constructor.
      */
     public static final boolean DEFAULT_STRICT_QUOTES = false;
-    /**
-     * The default leading whitespace behavior to use if none is supplied to the
-     * constructor.
-     */
-    public static final boolean DEFAULT_IGNORE_LEADING_WHITESPACE = true;
+
     /**
      * If the quote character is set to null then there is no quote character.
      */
@@ -156,7 +154,7 @@ public class CSVParser {
      * @param strictQuotes if true, characters outside the quotes are ignored
      */
     public CSVParser(char separator, char quotechar, char escape, boolean strictQuotes) {
-        this(separator, quotechar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
+        this(separator, quotechar, escape, strictQuotes, LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CSV_TRIM_WHITESPACE).getValue(Boolean.class));
     }
 
     /**
