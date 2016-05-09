@@ -9,6 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Index;
@@ -245,8 +246,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaNameCallStatement() {
-        return "select current_schema";
+    protected SqlStatement getConnectionSchemaNameCallStatement() {
+        return new RawCallStatement("select current_schema");
     }
 
     private boolean catalogExists(String catalogName) throws DatabaseException {

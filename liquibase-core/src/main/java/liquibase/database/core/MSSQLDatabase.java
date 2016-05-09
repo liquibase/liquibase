@@ -7,6 +7,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -176,8 +177,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaNameCallStatement() {
-        return "select schema_name()";
+    protected SqlStatement getConnectionSchemaNameCallStatement() {
+        return new RawSqlStatement("select schema_name()");
     }
 
     @Override

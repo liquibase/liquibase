@@ -317,9 +317,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            String currentSchemaStatement = getConnectionSchemaNameCallStatement();
+            SqlStatement currentSchemaStatement = getConnectionSchemaNameCallStatement();
             return ExecutorService.getInstance().getExecutor(this).
-            		queryForObject(new RawCallStatement(currentSchemaStatement), String.class);
+            		queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -333,8 +333,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
      * @return
      */
-    protected String getConnectionSchemaNameCallStatement(){
-        return "call current_schema";
+    protected SqlStatement getConnectionSchemaNameCallStatement(){
+        return new RawCallStatement("call current_schema");
     }
 
     @Override
