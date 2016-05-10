@@ -42,7 +42,18 @@ class EmptyLineAndCommentSkippingInputStreamTest extends Specification {
 
                 ["just data in windows format",
                  "Line1\r\nLine2", "Line1\nLine2"],
+
+                ["comments and newlines in the middle",
+                 "Line1\n\n#\n###\n#\nLine2", "Line1\nLine2"],
         ]
+    }
+
+    def "files ready by LoadDataChangeTest are the same"() {
+        expect:
+        inputStreamToString(new EmptyLineAndCommentSkippingInputStream(getClass().getResourceAsStream("/liquibase/change/core/sample.data1-withComments.csv"), COMMENT_CHAR)) ==
+        inputStreamToString(new EmptyLineAndCommentSkippingInputStream(getClass().getResourceAsStream("/liquibase/change/core/sample.data1-removedComments.csv"), COMMENT_CHAR))
+
+
     }
 
     private String inputStreamToString(InputStream inputStreamWithComments) {
