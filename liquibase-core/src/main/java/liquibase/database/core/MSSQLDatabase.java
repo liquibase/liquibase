@@ -325,11 +325,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        boolean includeCatalog = false;
         if (View.class.isAssignableFrom(objectType)) { //SQLServer does not support specifying the database name as a prefix to the object name
-            String name = super.escapeObjectName(objectName, objectType);
+            String name = this.escapeObjectName(objectName, objectType);
             if (schemaName != null) {
-                name = super.escapeObjectName(schemaName, Schema.class)+"."+name;
+                name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;
         } else if (Index.class.isAssignableFrom(objectType)) {
@@ -339,9 +338,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (catalogName != null && !catalogName.equalsIgnoreCase(this.getDefaultCatalogName())) {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
-            String name = super.escapeObjectName(objectName, objectType);
+            String name = this.escapeObjectName(objectName, objectType);
             if (schemaName != null) {
-                name = super.escapeObjectName(schemaName, Schema.class)+"."+name;
+                name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;
         }
