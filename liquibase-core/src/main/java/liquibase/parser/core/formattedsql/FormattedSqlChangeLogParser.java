@@ -1,5 +1,13 @@
 package liquibase.parser.core.formattedsql;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.any23.encoding.TikaEncodingDetector;
+
 import liquibase.Labels;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
@@ -17,12 +25,6 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.SystemUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
     @Override
@@ -34,7 +36,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 if (fileStream == null) {
                     return false;
                 }
-                reader = new BufferedReader(new UtfBomAwareReader(fileStream));
+                reader = new BufferedReader(new UtfBomAwareReader(fileStream, new TikaEncodingDetector().guessEncoding(fileStream)));
 
                 String line = reader.readLine();
                 return line != null && line.matches("\\-\\-\\s*liquibase formatted.*");
@@ -71,7 +73,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
 
         try {
-            reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
+            InputStream fileStream = openChangeLogFile(physicalChangeLogLocation, resourceAccessor);
+            reader = new BufferedReader(new UtfBomAwareReader(fileStream, new TikaEncodingDetector().guessEncoding(fileStream)));
             StringBuffer currentSql = new StringBuffer();
             StringBuffer currentRollbackSql = new StringBuffer();
 
@@ -126,6 +129,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             } else {
                                 RawSQLChange rollbackChange = new RawSQLChange();
                                 rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeLog));
+                                rollbackChange.setEndDelimiter(change.getEndDelimiter());
                                 changeSet.addRollbackChange(rollbackChange);
                             }
                         }
@@ -161,7 +165,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                        logicalFilePath = changeLog.getLogicalFilePath ();
                     }
                     String dbms = parseString(dbmsPatternMatcher);
-
 
                     changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setLabels(new Labels(labels));
@@ -247,6 +250,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     } else {
                         RawSQLChange rollbackChange = new RawSQLChange();
                         rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
+                        rollbackChange.setEndDelimiter(change.getEndDelimiter());
                         changeSet.addRollbackChange(rollbackChange);
                     }
                 }
