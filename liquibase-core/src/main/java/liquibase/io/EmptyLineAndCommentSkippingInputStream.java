@@ -17,6 +17,8 @@ public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream 
     private final boolean commentSkipEnabled;
     private final int commentLineStartsWithLength;
 
+    private int lastRead = -1;
+
     /**
      * Creates  Input stream that does not read (skips) lines starting with <code>commentLineStartsWith</code>
      *
@@ -33,11 +35,39 @@ public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream 
 
     @Override
     public synchronized int read() throws IOException {
-        if (isPositionAtStart() || skipIfNewLine()) {
-            skipCommentsAndNewLines();
+        int read = super.read();
+        if (read < 0) {
+            return read;
+        }
+        if (read == '\r') {
+            return this.read();
+        } else if (read == '\n') {
+            if (lastRead == '\n') {
+                return this.read();
+            }
+        } else if (read == this.commentLineStartsWith.toCharArray()[0]) {
+            while ((read = this.read()) != '\n' && read > 0) {
+                ;//keep looking
+            }
+            read = this.read(); //read past newline
         }
 
-        return super.read();
+        if (read == '\n') {
+            if (lastRead < 0) {  //don't include beginning newlines
+                return this.read();
+            } else {//don't include last newline
+                mark(MAX_CHAR_SIZE_IN_BYTES);
+                if (this.read() < 0) {
+                    return -1;
+                } else {
+                    reset();
+                }
+            }
+        }
+
+        this.lastRead = read;
+        return read;
+
     }
 
     private boolean isPositionAtStart() {
