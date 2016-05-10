@@ -18,7 +18,6 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String CONVERT_DATA_TYPES = "convertDataTypes";
     public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
     public static final String AUTO_REORG = "autoReorg";
-    public static final String CSV_TRIM_WHITESPACE = "trimCsvWhitespace";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -72,10 +71,6 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
         getContainer().addProperty(AUTO_REORG, Boolean.class)
                 .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
-                .setDefaultValue(true);
-
-        getContainer().addProperty(CSV_TRIM_WHITESPACE, Boolean.class)
-                .setDescription("Should Liquibase trim whitespace when parsing CSV files")
                 .setDefaultValue(true);
     }
 

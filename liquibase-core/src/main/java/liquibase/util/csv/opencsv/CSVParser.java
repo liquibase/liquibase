@@ -154,7 +154,7 @@ public class CSVParser {
      * @param strictQuotes if true, characters outside the quotes are ignored
      */
     public CSVParser(char separator, char quotechar, char escape, boolean strictQuotes) {
-        this(separator, quotechar, escape, strictQuotes, LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CSV_TRIM_WHITESPACE).getValue(Boolean.class));
+        this(separator, quotechar, escape, strictQuotes, false);
     }
 
     /**

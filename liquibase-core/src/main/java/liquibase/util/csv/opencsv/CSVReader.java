@@ -147,7 +147,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      * @param strictQuotes sets if characters outside the quotes are ignored
      */
     public CSVReader(Reader reader, char separator, char quotechar, char escape, int line, boolean strictQuotes) {
-        this(reader, separator, quotechar, escape, line, strictQuotes, LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CSV_TRIM_WHITESPACE).getValue(Boolean.class));
+        this(reader, separator, quotechar, escape, line, strictQuotes, false);
     }
 
     /**
