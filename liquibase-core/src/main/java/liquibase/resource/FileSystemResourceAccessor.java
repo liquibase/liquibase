@@ -92,7 +92,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     @Override
     protected String convertToPath(String string) {
-        if (this.baseDirectory != null) {
+        if (this.baseDirectory == null) {
             return string;
         } else {
             try {
