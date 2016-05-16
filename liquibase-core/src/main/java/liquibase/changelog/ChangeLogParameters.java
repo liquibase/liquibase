@@ -5,10 +5,10 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Labels;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -83,6 +83,10 @@ public class ChangeLogParameters {
 
     public Contexts getContexts() {
         return currentContexts;
+    }
+
+    public List<ChangeLogParameter> getChangeLogParameters() {
+        return Collections.unmodifiableList(changeLogParameters);
     }
 
     public void set(String paramter, Object value) {
