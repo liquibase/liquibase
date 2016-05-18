@@ -84,7 +84,34 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         if (finalDir.exists() && finalDir.isDirectory()) {
             Set<String> returnSet = new HashSet<String>();
             getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
-            return returnSet;
+
+            SortedSet<String> rootPaths = new TreeSet<String>(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    int i = -1 * ((Integer) o1.length()).compareTo(o2.length());
+                    if (i == 0) {
+                        i = o1.compareTo(o2);
+                    }
+                    return i;
+                }
+            });
+
+            for (String rootPath : getRootPaths()) {
+                rootPaths.add(rootPath.replaceFirst("^file:/", "").replace("\\", "/"));
+            }
+
+            Set<String> finalReturnSet = new LinkedHashSet<String>();
+            for (String returnPath : returnSet) {
+                returnPath = returnPath.replace("\\", "/");
+                for (String rootPath : rootPaths) {
+                    if (returnPath.startsWith(rootPath)) {
+                        returnPath = returnPath.substring(rootPath.length());
+                        break;
+                    }
+                }
+                finalReturnSet.add(returnPath);
+            }
+            return finalReturnSet;
         }
 
         return null;
