@@ -25,6 +25,7 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
@@ -484,7 +485,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
         } catch (UnknownChangelogFormatException e) {
-            LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            if (StringUtils.trimToEmpty(fileName).matches("\\.\\w+$")) {
+                LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            }
             return false;
         }
         PreconditionContainer preconditions = changeLog.getPreconditions();

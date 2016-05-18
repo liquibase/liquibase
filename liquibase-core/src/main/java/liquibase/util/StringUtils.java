@@ -43,21 +43,21 @@ public class StringUtils {
 
         List<String> returnArray = new ArrayList<String>();
 
-        String currentString = "";
+        StringBuilder currentString = new StringBuilder();
         String previousPiece = null;
         boolean previousDelimiter = false;
         for (Object piece : parsed.toArray(true)) {
             if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
-                currentString = StringUtils.trimToNull(currentString);
-                if (currentString != null) {
-                    returnArray.add(currentString);
+                String trimmedString = StringUtils.trimToNull(currentString.toString());
+                if (trimmedString != null) {
+                    returnArray.add(trimmedString);
                 }
-                currentString = "";
+                currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
                 if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
                     if (!currentString.equals("") || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
-                        currentString += piece;
+                        currentString.append(piece);
                     }
                 }
                 previousDelimiter = false;
@@ -65,8 +65,9 @@ public class StringUtils {
             previousPiece = (String) piece;
         }
 
-        if (StringUtils.trimToNull(currentString) != null) {
-            returnArray.add(currentString);
+        String trimmedString = StringUtils.trimToNull(currentString.toString());
+        if (trimmedString != null) {
+            returnArray.add(trimmedString);
         }
 
         return returnArray.toArray(new String[returnArray.size()]);
@@ -74,12 +75,10 @@ public class StringUtils {
 
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
-            return piece.equals(";") || (piece.equalsIgnoreCase("go") && (previousPiece == null || previousPiece.endsWith("\n")));
+            return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equalsIgnoreCase("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
+        } else {
+            return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches(endDelimiter.toLowerCase());
         }
-
-        endDelimiter = endDelimiter.replace("\\n", "").replace("\\r", "");
-
-        return piece.toLowerCase().matches(endDelimiter.toLowerCase());
     }
 
     /**

@@ -320,9 +320,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            String currentSchemaStatement = getConnectionSchemaNameCallStatement();
+            SqlStatement currentSchemaStatement = getConnectionSchemaNameCallStatement();
             return ExecutorService.getInstance().getExecutor(this).
-            		queryForObject(new RawCallStatement(currentSchemaStatement), String.class);
+            		queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -336,8 +336,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @see AbstractJdbcDatabase#getConnectionSchemaName()
      * @return
      */
-    protected String getConnectionSchemaNameCallStatement(){
-        return "call current_schema";
+    protected SqlStatement getConnectionSchemaNameCallStatement(){
+        return new RawCallStatement("call current_schema");
     }
 
     @Override
@@ -1434,8 +1434,10 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
             String sequenceName = databaseFunction.getValue();
+            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+
             if (!sequenceNextValueFunction.contains("'")) {
-                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+                sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             }
             return String.format(sequenceNextValueFunction, sequenceName);
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
@@ -1444,9 +1446,10 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
+            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
             String sequenceName = databaseFunction.getValue();
             if (!sequenceCurrentValueFunction.contains("'")) {
-                sequenceName = escapeObjectName(sequenceName, Sequence.class);
+                sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             }
             return String.format(sequenceCurrentValueFunction, sequenceName);
         } else {

@@ -3,6 +3,7 @@ package liquibase.lockservice;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
@@ -37,6 +38,8 @@ public class StandardLockService implements LockService {
 
     private Boolean hasDatabaseChangeLogLockTable = null;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
+    private ObjectQuotingStrategy quotingStrategy;
+
 
     public StandardLockService() {
     }
@@ -194,6 +197,8 @@ public class StandardLockService implements LockService {
             return true;
         }
 
+        quotingStrategy = database.getObjectQuotingStrategy();
+
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         try {
@@ -247,6 +252,13 @@ public class StandardLockService implements LockService {
 
     @Override
     public void releaseLock() throws LockException {
+
+        ObjectQuotingStrategy incomingQuotingStrategy = null;
+        if (this.quotingStrategy != null) {
+            incomingQuotingStrategy = database.getObjectQuotingStrategy();
+            database.setObjectQuotingStrategy(this.quotingStrategy);
+        }
+
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
@@ -279,6 +291,9 @@ public class StandardLockService implements LockService {
                 database.rollback();
             } catch (DatabaseException e) {
                 ;
+            }
+            if (incomingQuotingStrategy != null) {
+                database.setObjectQuotingStrategy(incomingQuotingStrategy);
             }
         }
     }
