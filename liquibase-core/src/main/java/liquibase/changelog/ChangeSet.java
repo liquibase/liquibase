@@ -76,6 +76,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     private ChangeLogParameters changeLogParameters;
+    
+    /**
+     * The checksum changeset used for checksum computation. Basically this is the same
+     * as the current changeset, except that it does not contain unsubstituted properties
+     * so that
+     */
+    private ChangeSet checksumChangeSet;
 
     /**
      * List of change objects defined in this changeset
@@ -230,6 +237,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     }
 
     public CheckSum generateCheckSum() {
+        if (checksumChangeSet != null) {
+          return checksumChangeSet.generateCheckSum();
+        }
         StringBuffer stringToMD5 = new StringBuffer();
         for (Change change : getChanges()) {
             stringToMD5.append(change.generateCheckSum()).append(":");
@@ -706,6 +716,10 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public void setLabels(Labels labels) {
         this.labels = labels;
+    }
+
+    public void setChecksumChangeSet(ChangeSet checksumChangeSet) {
+      this.checksumChangeSet = checksumChangeSet;
     }
 
     public Set<String> getDbmsSet() {
