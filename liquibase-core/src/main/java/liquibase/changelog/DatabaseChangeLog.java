@@ -253,10 +253,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        ParsedNode checksumNode = node.clone();
         expandExpressions(node);
         String nodeName = node.getName();
         if (nodeName.equals("changeSet")) {
-            this.addChangeSet(createChangeSet(node, resourceAccessor));
+            ChangeSet cs = createChangeSet(node, resourceAccessor);
+            cs.setChecksumChangeSet(createChangeSet(checksumNode, resourceAccessor));
+            this.addChangeSet(cs);
         } else if (nodeName.equals("include")) {
             String path = node.getChildValue(null, "file", String.class);
             if (path == null) {
