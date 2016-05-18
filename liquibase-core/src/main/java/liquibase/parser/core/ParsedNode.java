@@ -25,7 +25,7 @@ import java.util.*;
  * <li>The value node cannot be a ParsedNode. If you attempt to set value to be or contain a ParsedNode it will actually be set as a child</li>
  * </ul>
  */
-public class ParsedNode {
+public class ParsedNode implements Cloneable {
     private String namespace;
     private String name;
     private List<ParsedNode> children = new ArrayList<ParsedNode>();
@@ -34,6 +34,25 @@ public class ParsedNode {
     public ParsedNode(String namespace, String name) {
         this.namespace = namespace;
         this.name = name;
+    }
+    
+    /**
+     * @see java.lang.Object#clone
+     */
+    public ParsedNode clone() {
+      ParsedNode result = null;
+      try {
+        result = (ParsedNode) super.clone();
+      } catch (CloneNotSupportedException e) {
+        throw new RuntimeException("Clone failed", e);
+      }
+      // We copy the list to ensure there's no reference leak.
+      result.children = new ArrayList<ParsedNode>();
+      for (ParsedNode node: this.children) {
+        result.children.add(node.clone());
+      }
+      
+      return result;
     }
 
     /**
