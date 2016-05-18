@@ -150,7 +150,7 @@
                                 <data>
                                     <type>link</type>
                                     <linkName>/usr/bin/liquibase</linkName>
-                                    <linkTarget>/usr/lib/liquibase-${project.version}/liquibase</linkTarget>  
+                                    <linkTarget>../lib/liquibase-${project.version}/liquibase</linkTarget>  
                                     <symlink>true</symlink>
                                 </data>
 			    
