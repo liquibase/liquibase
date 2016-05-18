@@ -1,6 +1,7 @@
 package liquibase;
 
 import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
@@ -100,11 +101,20 @@ public class CatalogAndSchema {
             schemaName = null;
         }
 
-        if (catalogName != null) {
-            catalogName = catalogName.toUpperCase();
-        }
-        if (schemaName != null) {
-            schemaName = schemaName.toUpperCase();
+        if (accordingTo instanceof PostgresDatabase) {
+            if (catalogName != null) {
+                catalogName = catalogName.toLowerCase();
+            }
+            if (schemaName != null) {
+                schemaName = schemaName.toLowerCase();
+            }
+        } else {
+            if (catalogName != null) {
+                catalogName = catalogName.toUpperCase();
+            }
+            if (schemaName != null) {
+                schemaName = schemaName.toUpperCase();
+            }
         }
 
         return new CatalogAndSchema(catalogName, schemaName);
