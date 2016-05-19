@@ -1,3 +1,8 @@
+72813ec CORE-2757 Databasechangelog ORDEREXECUTED and DEPLOYMENT_ID not updated when a changeSet is reran
+b592aa9 Added getter for parameter array
+4a04c9d Ensure streams are closed
+95d218f Ensure streams are closed
+d7f0d25 Ensure streams are closed
 482e076 CORE-2615 Multi-schema snapshot bugfixes
 49bba1a Merge branch 'ddb-diff_report_heading' into ddb
 534638c CORE-2615 Multi-schema snapshot bugfixes

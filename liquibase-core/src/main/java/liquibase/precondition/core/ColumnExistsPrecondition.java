@@ -139,11 +139,15 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
                 String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname)='"+schemaName.toLowerCase()+"' AND lower(relname) = lower('"+tableName+"') AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower('"+columnName+"');";
                 try {
                     ResultSet rs = statement.executeQuery(sql);
-                    if (rs.next()) {
-                        return ;
-                    } else {
-                        // column or table does not exist
-                        throw new PreconditionFailedException(format("Column %s.%s.%s does not exist", schemaName, tableName, columnName), changeLog, this);
+                    try {
+                        if (rs.next()) {
+                            return ;
+                        } else {
+                            // column or table does not exist
+                            throw new PreconditionFailedException(format("Column %s.%s.%s does not exist", schemaName, tableName, columnName), changeLog, this);
+                        }
+                    } finally {
+                        rs.close();
                     }
                 } catch (SQLException e) {
                     throw new PreconditionErrorException(e, changeLog, this);

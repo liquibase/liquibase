@@ -33,7 +33,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private String schemaName;
     private String procedureName;
     private String procedureText;
-	private String dbms;
+    private String dbms;
 
     private String path;
     private Boolean relativeToChangelogFile;
@@ -103,11 +103,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
 
     @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE,
-    exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
-            "    IS\n" +
-            "    BEGIN\n" +
-            "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
-            "    END;")
+            exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
+                    "    IS\n" +
+                    "    BEGIN\n" +
+                    "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
+                    "    END;")
     /**
      * @deprecated Use getProcedureText() instead
      */
@@ -132,13 +132,13 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @DatabaseChangeProperty(since = "3.1", exampleValue = "h2, oracle")
-	public String getDbms() {
-		return dbms;
-	}
+    public String getDbms() {
+        return dbms;
+    }
 
-	public void setDbms(final String dbms) {
-		this.dbms = dbms;
-	}
+    public void setDbms(final String dbms) {
+        this.dbms = dbms;
+    }
 
     public String getComments() {
         return comments;
@@ -161,11 +161,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public ValidationErrors validate(Database database) {
         ValidationErrors validate = new ValidationErrors(); //not falling back to default because of path/procedureText option group. Need to specify everything
         if (StringUtils.trimToNull(getProcedureText()) != null && StringUtils.trimToNull(getPath()) != null) {
-            validate.addError("Cannot specify both 'path' and a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
+            validate.addError("Cannot specify both 'path' and a nested procedure text in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
         }
 
         if (StringUtils.trimToNull(getProcedureText()) == null && StringUtils.trimToNull(getPath()) == null) {
-            validate.addError("Cannot specify either 'path' or a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
+            validate.addError("Cannot specify either 'path' or a nested procedure text in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
         }
 
         if (this.getReplaceIfExists() != null && (DatabaseList.definitionMatches(getDbms(), database, true))) {
@@ -191,7 +191,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             return StreamUtil.openStream(getPath(), isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
-            throw new IOException("<"+ChangeFactory.getInstance().getChangeMetaData(this).getName()+" path=" + path + "> -Unable to read file", e);
+            throw new IOException("<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
         }
     }
 
@@ -213,22 +213,31 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             throw new UnexpectedLiquibaseException(e);
         }
 
-        String procedureText = this.procedureText;
-        if (stream == null && procedureText == null) {
-            procedureText = "";
-        }
+        try {
+            String procedureText = this.procedureText;
+            if (stream == null && procedureText == null) {
+                procedureText = "";
+            }
 
-        if (procedureText != null) {
-            try {
-                stream = new ByteArrayInputStream(procedureText.getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                throw new AssertionError("UTF-8 is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+            if (procedureText != null) {
+                try {
+                    stream = new ByteArrayInputStream(procedureText.getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    throw new AssertionError("UTF-8 is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                }
+            }
+
+            CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
+
+            return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignore) {
+                }
             }
         }
-
-        CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
-
-        return CheckSum.compute(super.generateCheckSum().toString()+":"+checkSum.toString());
 
     }
 
@@ -249,7 +258,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             try {
                 InputStream stream = openSqlStream();
                 if (stream == null) {
-                    throw new IOException("File does not exist: "+path);
+                    throw new IOException("File does not exist: " + path);
                 }
                 procedureText = StreamUtil.getStreamContents(stream, encoding);
             } catch (IOException e) {
