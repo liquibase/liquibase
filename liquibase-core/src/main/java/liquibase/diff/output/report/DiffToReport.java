@@ -69,6 +69,8 @@ public class DiffToReport {
                         return "";
                     }
 
+                    referenceName = StringUtils.trimToEmpty(referenceName);
+                    comparisonName = StringUtils.trimToEmpty(comparisonName);
                     if (referenceName.equalsIgnoreCase(comparisonName)) {
                         return referenceName;
                     } else {
