@@ -316,9 +316,13 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @return
      */
     protected String getConnectionSchemaName() {
-        if (connection == null || connection instanceof OfflineConnection) {
+        if (connection == null) {
             return null;
         }
+        if (connection instanceof OfflineConnection) {
+            return ((OfflineConnection) connection).getSchema();
+        }
+
         try {
             SqlStatement currentSchemaStatement = getConnectionSchemaNameCallStatement();
             return ExecutorService.getInstance().getExecutor(this).
