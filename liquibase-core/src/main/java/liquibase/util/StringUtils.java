@@ -77,7 +77,11 @@ public class StringUtils {
         if (endDelimiter == null) {
             return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equalsIgnoreCase("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
         } else {
-            return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches(endDelimiter.toLowerCase());
+            if (endDelimiter.length() == 1) {
+                return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
+            } else {
+                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches(endDelimiter.toLowerCase());
+            }
         }
     }
 
