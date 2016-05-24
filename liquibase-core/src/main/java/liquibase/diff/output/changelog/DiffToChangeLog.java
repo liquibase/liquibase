@@ -30,7 +30,6 @@ import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -88,7 +87,7 @@ public class DiffToChangeLog {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             print(new PrintStream(out), changeLogSerializer);
 
-            String xml = new String(out.toByteArray(), StandardCharsets.UTF_8);
+            String xml = new String(out.toByteArray(), "UTF-8");
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
             innerXml = innerXml.replaceFirst("bblacha", "Bart");
@@ -118,12 +117,12 @@ public class DiffToChangeLog {
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
                 randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes(StandardCharsets.UTF_8));
+                randomAccessFile.write(innerXml.getBytes("UTF-8"));
                 randomAccessFile.writeBytes(lineSeparator);
                 randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes(StandardCharsets.UTF_8));
+                randomAccessFile.write(xml.getBytes("UTF-8"));
             }
             randomAccessFile.close();
 
