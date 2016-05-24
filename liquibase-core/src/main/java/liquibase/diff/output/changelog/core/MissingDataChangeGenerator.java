@@ -16,6 +16,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,7 +96,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValueDate((Date) value);
                     } else if (value instanceof byte[]) {
                         if (referenceDatabase instanceof InformixDatabase) {
-                            column.setValue(new String((byte[]) value));
+                            column.setValue(new String((byte[]) value, StandardCharsets.UTF_8));
                         }
                         column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
                     } else { // fall back to simple string
