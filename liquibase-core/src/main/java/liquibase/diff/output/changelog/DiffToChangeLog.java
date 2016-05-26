@@ -87,8 +87,10 @@ public class DiffToChangeLog {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             print(new PrintStream(out), changeLogSerializer);
 
-            String xml = new String(out.toByteArray());
+            String xml = new String(out.toByteArray(), "UTF-8");
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+
+            innerXml = innerXml.replaceFirst("bblacha", "Bart");
             innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
@@ -115,12 +117,12 @@ public class DiffToChangeLog {
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
                 randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes());
+                randomAccessFile.write(innerXml.getBytes("UTF-8"));
                 randomAccessFile.writeBytes(lineSeparator);
                 randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes());
+                randomAccessFile.write(xml.getBytes("UTF-8"));
             }
             randomAccessFile.close();
 
