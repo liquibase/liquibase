@@ -75,12 +75,12 @@ public class StringUtils {
 
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
-            return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equalsIgnoreCase("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
+            return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equals("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
-                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches(endDelimiter.toLowerCase());
+                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[.\n\r]*"+endDelimiter.toLowerCase());
             }
         }
     }
