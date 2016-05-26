@@ -5,12 +5,11 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.snapshot.jvm.metainformation.MSSQLDatabasRemarkProvider;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -50,18 +49,10 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     schemaName = tableSchema.getName();
                 }
 
-                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
-                        " CAST(value as varchar(max)) as REMARKS\n" +
-                        " FROM\n" +
-                        " sys.extended_properties\n" +
-                        "  WHERE\n" +
-                        " name='MS_Description' " +
-                        " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "')\n" +
-                        " AND\n" +
-                        " minor_id = 0"), String.class);
+                String remark = new MSSQLDatabasRemarkProvider().getRemark(table, database, schemaName);
 
-                if (remarks != null && remarks.size() > 0) {
-                    table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+                if (remark != null) {
+                    table.setRemarks(remark);
                 }
             }
 
