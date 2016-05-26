@@ -9,7 +9,7 @@ import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.snapshot.jvm.metainformation.MSSQLDatabasRemarkProvider;
+import liquibase.snapshot.jvm.metainformation.MSSQLDatabaseRemarkProvider;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -49,7 +49,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     schemaName = tableSchema.getName();
                 }
 
-                String remark = new MSSQLDatabasRemarkProvider().getRemark(table, database, schemaName);
+                String remark = new MSSQLDatabaseRemarkProvider().getRemark(table, database, schemaName);
 
                 if (remark != null) {
                     table.setRemarks(remark);

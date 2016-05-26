@@ -9,7 +9,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
-import liquibase.snapshot.jvm.metainformation.MSSQLDatabasRemarkProvider;
+import liquibase.snapshot.jvm.metainformation.MSSQLDatabaseRemarkProvider;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -63,7 +63,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
             if (column != null && database instanceof MSSQLDatabase && ((!((MSSQLDatabase) database).isAzureDb() && database.getDatabaseMajorVersion() >= 8) || database.getDatabaseMajorVersion() >= 12)) {
-                String remark = new MSSQLDatabasRemarkProvider().getRemark(column, database, schema, relation);
+                String remark = new MSSQLDatabaseRemarkProvider().getRemark(column, database, schema, relation);
                 if (remark != null) {
                     column.setRemarks(remark);
                 }

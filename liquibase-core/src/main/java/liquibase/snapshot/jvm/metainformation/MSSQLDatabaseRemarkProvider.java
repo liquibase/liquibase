@@ -25,7 +25,7 @@ import liquibase.util.StringUtils;
 import com.sun.istack.internal.Nullable;
 import java.util.List;
 
-public class MSSQLDatabasRemarkProvider {
+public class MSSQLDatabaseRemarkProvider {
 
     /** Get remarks columns */
     @Nullable
