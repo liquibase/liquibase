@@ -25,10 +25,6 @@ import liquibase.util.StringUtils;
 import com.sun.istack.internal.Nullable;
 import java.util.List;
 
-/**
- * @author <a href="mailto:marcel.scheeler@micros.com">marcel.scheeler</a>
- * @version $Revision: 491374 $ $Date: 2014-05-19 14:37:41 +0200 (Mo, 19 Mai 2014) $ $Author: daniel.warmuth $
- */
 public class MSSQLDatabasRemarkProvider {
 
     /** Get remarks columns */
