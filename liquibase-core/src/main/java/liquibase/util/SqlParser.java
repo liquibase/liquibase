@@ -6,8 +6,6 @@ import liquibase.util.grammar.SimpleSqlGrammarConstants;
 import liquibase.util.grammar.Token;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SqlParser {
 
