@@ -3,10 +3,9 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -21,7 +20,8 @@ import liquibase.util.csv.CSVWriter;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -83,7 +83,8 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                         + " is not a directory");
             }
 
-            CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
+            CSVWriter outputFile = new CSVWriter(
+                    new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8")));
             String[] dataTypes = new String[columnNames.size()];
             String[] line = new String[columnNames.size()];
             for (int i = 0; i < columnNames.size(); i++) {
