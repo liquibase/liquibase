@@ -11,7 +11,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -22,7 +21,13 @@ import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
-    private Boolean isZOS;
+    private DataServerType dataServerType;
+    
+    public static enum DataServerType {
+    	DB2LUW,
+    	DB2I,
+    	DB2Z
+    }
 
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
@@ -238,19 +243,36 @@ public class DB2Database extends AbstractJdbcDatabase {
         return true;
     }
 
-    public boolean isZOS() {
-        if (this.isZOS == null) {
+    /**
+     * Determine the DB2 data server type. This replaces the isZOS() method, 
+     * which was based on DatabaseMetaData.getDatabaseProductName(), which
+     * does not work correctly for some DB2 types.
+     * 
+     * @see http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.dita
+     * @return the data server type
+     */
+    public DataServerType getDataServerType() {
+        if(this.dataServerType == null) {
             if (getConnection() != null && getConnection() instanceof JdbcConnection) {
-                try {
-                    this.isZOS = getConnection().getDatabaseProductName().toLowerCase().contains("zos");
-                } catch (DatabaseException e) {
-                    this.isZOS = false;
-                }
-            } else {
-                this.isZOS = false;
-            }
-        }
-        return this.isZOS;
+            	try {
+					String databaseProductVersion = getConnection().getDatabaseProductVersion();
+					if(databaseProductVersion.startsWith("SQL")){
+						this.dataServerType = DataServerType.DB2LUW;
+					}
+					else if(databaseProductVersion.startsWith("QSQ")){
+						this.dataServerType = DataServerType.DB2I;
+					}
+					else if(databaseProductVersion.startsWith("DSN")){
+						this.dataServerType = DataServerType.DB2Z;
+					}
+				} catch (DatabaseException e) {
+					this.dataServerType = DataServerType.DB2LUW;
+				}
+    		} else {
+				this.dataServerType = DataServerType.DB2LUW;
+    		}
+    	}
+        return this.dataServerType;
     }
-
+    
 }
