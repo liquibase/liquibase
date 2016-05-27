@@ -799,6 +799,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 sql += " and table_name = '" + tableName + "'";
                             }
                         }
+                        // if we are on DB2 z/OS
+                        else if (((DB2Database)database).isZOS()){
+                            sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from sysibm.syskeycoluse k, sysibm.systabconst t "
+                                    + "where k.constname = t.constname "
+                                    + "and t.tabschema = '" + jdbcCatalogName + "' "
+                                    + "and t.type='U'";
+                            if (tableName != null) {
+                                sql += " and t.tbname = '" + tableName + "'";
+                            }
+                        }
                         // here we are on DB2 UDB
                         else {
                             sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME from syscat.keycoluse k, syscat.tabconst t "
