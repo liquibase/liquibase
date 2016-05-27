@@ -22,18 +22,15 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-import com.sun.istack.internal.Nullable;
 import java.util.List;
 
 public class MSSQLDatabaseRemarkProvider {
 
     /** Get remarks columns */
-    @Nullable
     public String getRemark(Column column, Database database, Schema schema, Relation relation) throws DatabaseException {
         return getRemarkValue(database, getColumnRemarkQuery(column, database, schema, relation));
     }
 
-    @Nullable
     public String getRemark(Table table, Database database, String schemaName) throws DatabaseException {
         String tableName = database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName()));
         return getRemarkValue(database, getTableRemarkQuery(database, tableName));
