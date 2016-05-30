@@ -218,7 +218,7 @@ public class ColumnConfigTest extends Specification {
 
         Date today = new Date();
         new ColumnConfig().setValueDate(today).getValueDate() == today
-        new ColumnConfig().setValueDate("1992-02-11T13:22:44.6").getValueDate().toString() == "1992-02-11 13:22:44.006"
+        new ColumnConfig().setValueDate("1992-02-11T13:22:44.006").getValueDate().toString() == "1992-02-11 13:22:44.006"
         new ColumnConfig().setValueDate("1992-02-12").getValueDate().toString() == "1992-02-12"
 
         new ColumnConfig().setValueDate("date_func").getValueComputed().toString() == "date_func"
@@ -289,7 +289,7 @@ public class ColumnConfigTest extends Specification {
 
         Date today = new Date();
         new ColumnConfig().setDefaultValueDate(today).getDefaultValueDate() == today
-        new ColumnConfig().setDefaultValueDate("1992-02-11T13:22:44.6").getDefaultValueDate().toString() == "1992-02-11 13:22:44.006"
+        new ColumnConfig().setDefaultValueDate("1992-02-11T13:22:44.006").getDefaultValueDate().toString() == "1992-02-11 13:22:44.006"
         new ColumnConfig().setDefaultValueDate("1992-02-12").getDefaultValueDate().toString() == "1992-02-12"
 
         new ColumnConfig().setDefaultValueDate("date_func").getDefaultValueComputed().toString() == "date_func"
