@@ -8,6 +8,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Data;
@@ -56,6 +57,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
         Statement stmt = null;
         ResultSet rs = null;
+        String sql = null;
         try {
             Data data = (Data) missingObject;
 
@@ -64,10 +66,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
+            sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(100);
+            stmt.setFetchSize(10000);
             rs = stmt.executeQuery(sql);
 
             List<String> columnNames = new ArrayList<String>();
@@ -168,7 +170,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     change
             };
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+        	// Don't stop on failed sql
+        	// throw new UnexpectedLiquibaseException(e);
+        	LogFactory.getInstance().getLog().warning("Failed sql: " + sql);
+        	return new Change[]{};
         } finally {
             if (rs != null) {
                 try {
