@@ -804,7 +804,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         else if (((DB2Database)database).getDataServerType() == DataServerType.DB2Z){
                             sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from sysibm.syskeycoluse k, sysibm.systabconst t "
                                     + "where k.constname = t.constname "
-                                    + "and t.tabschema = '" + jdbcCatalogName + "' "
+                                    + "and t.tbcreator = '" + jdbcSchemaName + "' "
                                     + "and t.type='U'";
                             if (tableName != null) {
                                 sql += " and t.tbname = '" + tableName + "'";
