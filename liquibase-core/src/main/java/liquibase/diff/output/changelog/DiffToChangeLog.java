@@ -213,12 +213,14 @@ public class DiffToChangeLog {
 
         if (missingObjects.size() > 0 && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<String>();
-            for (CompareControl.SchemaComparison comparison : this.diffOutputControl.getSchemaComparisons()) {
-                String schemaName = comparison.getReferenceSchema().getSchemaName();
-                if (schemaName == null) {
-                    schemaName = database.getDefaultSchemaName();
+            if (this.diffOutputControl.getSchemaComparisons() != null) {
+                for (CompareControl.SchemaComparison comparison : this.diffOutputControl.getSchemaComparisons()) {
+                    String schemaName = comparison.getReferenceSchema().getSchemaName();
+                    if (schemaName == null) {
+                        schemaName = database.getDefaultSchemaName();
+                    }
+                    schemas.add(schemaName);
                 }
-                schemas.add(schemaName);
             }
 
             if (schemas.size() == 0) {
