@@ -36,11 +36,11 @@ public class FindForeignKeyConstraintsGeneratorDB2 extends AbstractSqlGenerator<
         if (((DB2Database)database).getDataServerType() == DataServerType.DB2Z){
         	CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(database);
 
-        	sb.append("SELECT PK.TBNAME    as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(",");
-			sb.append("       PK.NAME      as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(",");
-			sb.append("       FK.TBNAME    as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(",");
-			sb.append("       FK.COLNAME   as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(",");
-			sb.append("       FK.CONSTNAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
+        	sb.append("SELECT PK.TBNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(",");
+			sb.append("       PK.NAME    as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(",");
+			sb.append("       FK.TBNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(",");
+			sb.append("       FK.COLNAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(",");
+			sb.append("       R.RELNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
 			sb.append("  FROM SYSIBM.SYSRELS R,");
 			sb.append("       SYSIBM.SYSFOREIGNKEYS FK,");
 			sb.append("       SYSIBM.SYSCOLUMNS PK");
