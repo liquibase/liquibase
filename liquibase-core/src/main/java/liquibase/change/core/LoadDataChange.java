@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 
 @DatabaseChange(name = "loadData",
@@ -404,6 +405,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         if (stream == null) {
             return null;
         }
+        if (file.endsWith(".gz")) {
+        	stream = new GZIPInputStream(stream);
+        }
         Reader streamReader;
         if (getEncoding() == null) {
             streamReader = new UtfBomAwareReader(stream);
@@ -467,6 +471,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             stream = StreamUtil.openStream(file, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
             if (stream == null) {
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
+            }
+            if (file.endsWith(".gz")) {
+            	stream = new GZIPInputStream(stream);
             }
             stream = new EmptyLineAndCommentSkippingInputStream(stream, commentLineStartsWith);
             return CheckSum.compute(getTableName() + ":" + CheckSum.compute(stream, /*standardizeLineEndings*/ true));

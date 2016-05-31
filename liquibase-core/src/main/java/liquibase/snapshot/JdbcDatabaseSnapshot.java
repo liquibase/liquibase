@@ -5,9 +5,11 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
+import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
@@ -82,10 +84,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                     if (database instanceof DB2Database) {
-                        String sql = getDB2Sql(jdbcSchemaName);
-                        if (tableName != null) {
-                            sql = sql.replace(" ORDER BY ", " AND fk_col.tabname='" + tableName + "' ORDER BY ");
-                        }
+                        String sql = getDB2Sql(jdbcSchemaName, tableName);
                         return executeAndExtract(sql, database);
                     } else {
                         if (tableName == null) {
@@ -153,15 +152,46 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                        String sql = getDB2Sql(jdbcSchemaName);
+                        String sql = getDB2Sql(jdbcSchemaName, null);
                         return executeAndExtract(sql, database);
                     } else {
                         throw new RuntimeException("Cannot bulk select");
                     }
                 }
 
-                protected String getDB2Sql(String jdbcSchemaName) {
-                    return "SELECT  " +
+                protected String getDB2Sql(String jdbcSchemaName, String tableName) {
+                    if (((DB2Database)database).getDataServerType() == DataServerType.DB2Z){
+                        StringBuilder sb = new StringBuilder();
+                    	sb.append("SELECT PK.TBCREATOR AS PKTABLE_CAT,");
+                    	sb.append("       PK.TBNAME    AS PKTABLE_NAME,");
+            			sb.append("       PK.NAME      AS PKCOLUMN_NAME,");
+            			sb.append("       FK.CREATOR   AS FKTABLE_CAT,");
+            			sb.append("       FK.TBNAME    AS FKTABLE_NAME,");
+            			sb.append("       FK.COLNAME   AS FKCOLUMN_NAME,");
+            			sb.append("       FK.COLSEQ    AS KEY_SEQ,");
+            			sb.append("       1            AS UPDATE_RULE,");
+            			sb.append("       DECODE (R.DELETERULE, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) AS DELETE_RULE,");
+            			sb.append("       R.RELNAME    AS FK_NAME,");
+            			sb.append("       ''           AS PK_NAME,");
+            			sb.append("       7            AS DEFERRABILITY");
+            			sb.append("  FROM SYSIBM.SYSRELS R,");
+            			sb.append("       SYSIBM.SYSFOREIGNKEYS FK,");
+            			sb.append("       SYSIBM.SYSCOLUMNS PK");
+            			sb.append(" WHERE R.CREATOR      = '").append(jdbcSchemaName).append("'");
+                        if (tableName != null) {
+                        	sb.append(" AND R.TBNAME     = '").append(tableName).append("'");
+                        }
+            			sb.append("   AND R.RELNAME      = FK.RELNAME ");
+            			sb.append("   AND R.CREATOR      = FK.CREATOR ");
+            			sb.append("   AND R.TBNAME       = FK.TBNAME ");
+            			sb.append("   AND R.REFTBCREATOR = PK.TBCREATOR ");
+            			sb.append("   AND R.REFTBNAME    = PK.TBNAME ");
+            			sb.append("   AND FK.COLSEQ      = PK.KEYSEQ ");
+            			sb.append(" ORDER BY R.RELNAME, FK.COLSEQ asc ");
+            			return sb.toString();
+                    }
+
+                    String sql = "SELECT  " +
                             "  pk_col.tabschema AS pktable_cat,  " +
                             "  pk_col.tabname as pktable_name,  " +
                             "  pk_col.colname as pkcolumn_name, " +
@@ -179,8 +209,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "join syscat.keycoluse fk_col on ref.constname=fk_col.constname and ref.tabschema=fk_col.tabschema and ref.tabname=fk_col.tabname " +
                             "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
                             "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
-                            "and pk_col.colseq=fk_col.colseq " +
-                            "ORDER BY fk_col.colseq";
+                            "and pk_col.colseq=fk_col.colseq ";
+                    if (tableName != null) {
+                        sql += " AND fk_col.tabname='" + tableName + "' ";
+                    }
+                    sql += "ORDER BY fk_col.colseq";
+                    return sql;
                 }
 
                 @Override
@@ -793,10 +827,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     } else if (database instanceof DB2Database) {
                         // if we are on DB2 AS400 iSeries
-                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                        if (((DB2Database)database).getDataServerType() == DataServerType.DB2I) {
                             sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
                             if (tableName != null) {
                                 sql += " and table_name = '" + tableName + "'";
+                            }
+                        }
+                        // if we are on DB2 z/OS
+                        else if (((DB2Database)database).getDataServerType() == DataServerType.DB2Z){
+                            sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from sysibm.syskeycoluse k, sysibm.systabconst t "
+                                    + "where k.constname = t.constname "
+                                    + "and t.tbcreator = '" + jdbcSchemaName + "' "
+                                    + "and t.type='U'";
+                            if (tableName != null) {
+                                sql += " and t.tbname = '" + tableName + "'";
                             }
                         }
                         // here we are on DB2 UDB

@@ -4,13 +4,11 @@ import liquibase.change.Change;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Data;
@@ -21,21 +19,30 @@ import liquibase.util.csv.CSVWriter;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 @LiquibaseService(skip = true)
 public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGenerator {
 
     private String dataDir;
-
+    
+    private boolean dataDirCompress = false;
+    
     public MissingDataExternalFileChangeGenerator(String dataDir) {
         this.dataDir = dataDir;
+        if(dataDir.endsWith(":gz")) {
+        	this.dataDirCompress = true;
+        	this.dataDir = this.dataDir.substring(0,  this.dataDir.length() - 3);
+        }
     }
 
     @Override
@@ -50,6 +57,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
         Statement stmt = null;
         ResultSet rs = null;
+        String sql = null;
         try {
             Data data = (Data) missingObject;
 
@@ -58,10 +66,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                 return null;
             }
 
-            String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
+            sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(100);
+            stmt.setFetchSize(10000);
             rs = stmt.executeQuery(sql);
 
             List<String> columnNames = new ArrayList<String>();
@@ -70,6 +78,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             }
 
             String fileName = table.getName().toLowerCase() + ".csv";
+            if(dataDirCompress) {
+            	fileName += ".gz";
+            }
+            
             if (dataDir != null) {
                 fileName = dataDir + "/" + fileName;
             }
@@ -83,7 +95,13 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                         + " is not a directory");
             }
 
-            CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
+            OutputStream outputStream = new FileOutputStream(fileName);
+            if(dataDirCompress) {
+            	outputStream = new GZIPOutputStream(outputStream);
+            }
+
+            CSVWriter outputFile = new CSVWriter(
+                    new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8")));
             String[] dataTypes = new String[columnNames.size()];
             String[] line = new String[columnNames.size()];
             for (int i = 0; i < columnNames.size(); i++) {
@@ -152,7 +170,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     change
             };
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+        	// Don't stop on failed sql
+        	// throw new UnexpectedLiquibaseException(e);
+        	LogFactory.getInstance().getLog().warning("Failed sql: " + sql);
+        	return new Change[]{};
         } finally {
             if (rs != null) {
                 try {
