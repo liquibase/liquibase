@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 public class DB2Database extends AbstractJdbcDatabase {
 
     private Boolean isZOS;
+    private Boolean isAS400;
 
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
@@ -251,6 +252,21 @@ public class DB2Database extends AbstractJdbcDatabase {
             }
         }
         return this.isZOS;
+    }
+
+    public boolean isAS400() {
+        if (this.isAS400 == null) {
+            if (getConnection() != null && getConnection() instanceof JdbcConnection) {
+                try {
+                    this.isAS400 = getConnection().getDatabaseProductName().startsWith("DB2 UDB for AS/400");
+                } catch (DatabaseException e) {
+                    this.isAS400 = false;
+                }
+            } else {
+                this.isAS400 = false;
+            }
+        }
+        return this.isAS400;
     }
 
 }
