@@ -1194,6 +1194,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void close() throws DatabaseException {
+        ExecutorService.getInstance().clearExecutor(this);
         DatabaseConnection connection = getConnection();
         if (connection != null) {
             if (previousAutoCommit != null) {
@@ -1207,7 +1208,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
             connection.close();
         }
-        ExecutorService.getInstance().clearExecutor(this);
     }
 
     @Override
