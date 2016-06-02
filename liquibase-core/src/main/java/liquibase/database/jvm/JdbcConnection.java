@@ -427,12 +427,28 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof JdbcConnection && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
+        if (!(obj instanceof JdbcConnection)) {
+            return false;
+        }
+        Connection underlyingConnection = this.getUnderlyingConnection();
+        if (underlyingConnection == null) {
+            return ((JdbcConnection) obj).getUnderlyingConnection() == null;
+        }
+
+        return underlyingConnection.equals(((JdbcConnection) obj).getUnderlyingConnection());
 
     }
 
     @Override
     public int hashCode() {
-        return this.getUnderlyingConnection().hashCode();
+        Connection underlyingConnection = this.getUnderlyingConnection();
+        try {
+            if (underlyingConnection == null || underlyingConnection.isClosed()) {
+                return super.hashCode();
+            }
+        } catch (SQLException e) {
+            return super.hashCode();
+        }
+        return underlyingConnection.hashCode();
     }
 }
