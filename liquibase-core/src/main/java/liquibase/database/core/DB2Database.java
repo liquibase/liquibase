@@ -257,4 +257,11 @@ public class DB2Database extends AbstractJdbcDatabase {
         return this.isZOS;
     }
 
+    @Override
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Index && example.getName() != null && example.getName().matches("SQL\\d+")) {
+            return true;
+        }
+        return super.isSystemObject(example);
+    }
 }
