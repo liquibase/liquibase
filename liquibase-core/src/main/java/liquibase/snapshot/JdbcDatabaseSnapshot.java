@@ -82,9 +82,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                     if (database instanceof DB2Database) {
-                        String sql = getDB2Sql(jdbcSchemaName);
+                        String sql;
+                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                            sql = getDB2ISql(jdbcSchemaName);
+                        } else {
+                            sql = getDB2Sql(jdbcSchemaName);
+                        }
                         if (tableName != null) {
-                            sql = sql.replace(" ORDER BY ", " AND fk_col.tabname='" + tableName + "' ORDER BY ");
+                            sql = sql.replace(" ORDER BY ", " AND fktable_name='" + tableName + "' ORDER BY ");
                         }
                         return executeAndExtract(sql, database);
                     } else {
@@ -153,7 +158,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                        String sql = getDB2Sql(jdbcSchemaName);
+                        String sql;
+                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                            sql = getDB2ISql(jdbcSchemaName);
+                        } else {
+                            sql = getDB2Sql(jdbcSchemaName);
+                        }
                         return executeAndExtract(sql, database);
                     } else {
                         throw new RuntimeException("Cannot bulk select");
@@ -181,6 +191,26 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
                             "and pk_col.colseq=fk_col.colseq " +
                             "ORDER BY fk_col.colseq";
+                }
+
+                protected String getDB2ISql(String jdbcSchemaName) {
+                    return  " SELECT " +
+                            " PKTABLE_SCHEM AS pktable_cat, " +
+                            " PKTABLE_NAME as pktable_name, " +
+                            " PKCOLUMN_NAME as pkcolumn_name, " +
+                            " FKTABLE_SCHEM as fktable_cat, " +
+                            " FKTABLE_NAME as fktable_name, " +
+                            " FKCOLUMN_NAME as fkcolumn_name, " +
+                            " KEY_SEQ as key_seq, " +
+                            " UPDATE_RULE as update_rule, " +
+                            " DELETE_RULE as delete_rule, " +
+                            " FK_NAME as fk_name, " +
+                            " PK_NAME as pk_name, " +
+                            " DEFERRABILITY as deferrability " +
+                            " FROM " +
+                            " sysibm.SQLFOREIGNKEYS " +
+                            " WHERE pktable_schem = '" + jdbcSchemaName + "' " +
+                            " ORDER BY key_seq ";
                 }
 
                 @Override
