@@ -66,7 +66,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             }
         }
 
-        if (statement.getForIndexName() != null) {
+        if (database instanceof OracleDatabase && statement.getForIndexName() != null) {
             sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
 
