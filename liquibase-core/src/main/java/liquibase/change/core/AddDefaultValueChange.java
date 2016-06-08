@@ -196,6 +196,7 @@ public class AddDefaultValueChange extends AbstractChange {
             defaultValue = getDefaultValueComputed();
         } else if (getDefaultValueSequenceNext() != null) {
             defaultValue = getDefaultValueSequenceNext();
+            ((SequenceNextValueFunction) defaultValue).setSequenceSchemaName(this.getSchemaName());
         }
 
         return new SqlStatement[]{

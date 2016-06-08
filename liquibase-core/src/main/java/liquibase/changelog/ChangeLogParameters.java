@@ -169,7 +169,7 @@ public class ChangeLogParameters {
         return currentLabelExpression;
     }
 
-    private class ChangeLogParameter {
+    public class ChangeLogParameter {
         private String key;
         private Object value;
         private ContextExpression validContexts;

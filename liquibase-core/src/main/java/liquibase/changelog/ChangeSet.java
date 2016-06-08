@@ -75,6 +75,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
     }
 
+    protected String key;
+
     private ChangeLogParameters changeLogParameters;
 
     /**
@@ -559,7 +561,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                             listener.willRun(change, this, changeLog, database);
                         }
                         if (change.generateStatementsVolatile(database)) {
-                            executor.comment("WARNING The following SQL is possibly incorrect, invalid, and/or may change on each run:");
+                            executor.comment("WARNING The following SQL may change each run and therefore is possibly incorrect and/or invalid:");
                         }
 
 

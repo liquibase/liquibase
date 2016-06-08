@@ -85,9 +85,13 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
 
 
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if (getConnection() == null) {
             return null;
         }
+        if (getConnection() instanceof OfflineConnection) {
+            return ((OfflineConnection) getConnection()).getSchema();
+        }
+
         Statement stmt = null;
         ResultSet rs = null;
         try {

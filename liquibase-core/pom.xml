@@ -19,13 +19,16 @@
       liquibase-parent
     </artifactId>
     <version>
-      3.5.888
+      3.5.902
     </version>
   </parent>
   <properties>
     <bundle.namespace>
       liquibase.*
     </bundle.namespace>
+    <project.version>
+      3.5.1
+    </project.version>
   </properties>
   <dependencies>
     <dependency>

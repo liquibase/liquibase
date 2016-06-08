@@ -65,6 +65,7 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
+        this.changeSetPath = changeLogFile;
         ChangeLogSerializer changeLogSerializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeLogFile);
         this.print(changeLogFile, changeLogSerializer);
     }
@@ -74,6 +75,7 @@ public class DiffToChangeLog {
     }
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+        this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -85,8 +87,10 @@ public class DiffToChangeLog {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             print(new PrintStream(out), changeLogSerializer);
 
-            String xml = new String(out.toByteArray());
+            String xml = new String(out.toByteArray(), "UTF-8");
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+
+            innerXml = innerXml.replaceFirst("bblacha", "Bart");
             innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
@@ -113,12 +117,12 @@ public class DiffToChangeLog {
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
                 randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes());
+                randomAccessFile.write(innerXml.getBytes("UTF-8"));
                 randomAccessFile.writeBytes(lineSeparator);
                 randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes());
+                randomAccessFile.write(xml.getBytes("UTF-8"));
             }
             randomAccessFile.close();
 
@@ -333,7 +337,7 @@ public class DiffToChangeLog {
             if (diffOutputControl.getContext() != null) {
                 changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, null, changeSetContext,
+            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                     null, false, quotingStrategy, null);
             changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {

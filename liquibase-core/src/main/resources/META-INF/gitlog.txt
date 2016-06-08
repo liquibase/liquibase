@@ -1,36 +1,100 @@
+5655a2f ChangelogParameter needs to be public now that it is accessable
+404af23 CORE-2750 MSSQL catalog/database included all the time
+855454d Merge remote-tracking branch 'origin/ddb' into ddb
+0525f26 CORE-2734 Liquibase no longer handle newline correctly in endDelimiter when using sqlFile change
+f134828 Merge pull request #580 from Datical/ddb
+983e3da Explicit UTF-8 constructing string from byte array
+bd8a22d Merge pull request #579 from Datical/ddb
+d0da985 Explicit UTF_8 constructing string from byte array
+98c021e Don't use regexp match for one-char endDelimiters
+c2a35a6 Find default schema from offline connection with snapshot
+fc07389 CORE-2615 Multi-schema snapshot bugfixes  Improve diff report output
+ce46c28 Merge branch '3.5.x' into ddb
+5ddfe06 Don't include "USE null" if catalog is null
+f8ea9df CORE-2753 defaultValueSequenceNext forgets schema name
+e56b2c9 CORE-2763 Postgresql schemas should default to lower case
+39a8400 CORE-2753 defaultValueSequenceNext forgets schema name
+a2db447 CORE-2761 3.5.1: includeAll from the command line uses the absolute path as the changeSet path
+75d5d81 Merge branch 'fix-sql-default-schema' of https://github.com/evigeant/liquibase into evigeant-fix-sql-default-schema
+02eeab5 deb: don't symlink binary to absolute path (cherry picked from commit c3c605d)
+3bae22e Improved compatibility check failed error message
 72813ec CORE-2757 Databasechangelog ORDEREXECUTED and DEPLOYMENT_ID not updated when a changeSet is reran
 b592aa9 Added getter for parameter array
 4a04c9d Ensure streams are closed
 95d218f Ensure streams are closed
 d7f0d25 Ensure streams are closed
+76b1407 CORE-2756 Null pointer exception from FileSystemResourceAccessor
+bdb359e [maven-release-plugin] prepare for next development iteration
+d049ac7 [maven-release-plugin] prepare release liquibase-parent-3.5.1
+7a547a6 Preparing for 3.5.1 release
+a0e13f9 CORE-2744 changeset with loadUpdateData changes checksum in 3.5.0
+930098a CORE-2744 changeset with loadUpdateData changes checksum in 3.5.0
+5aeea16 CORE-2750 MSSQL catalog/database included all the time
+0150ff9 CORE-2750 MSSQL catalog/database included all the time
+1a40b89 Less scary volitile statements message
+500f4ef CORE-2743 CSV whitespace trimmed in 3.5.0
+6acedb8 Save changeSet key so checksum doesn't have to be recomputed
+bb11512 CORE-2743 Configurable setting for trimming CSV whitespace
+348a18e Escaped schema names for case when schema name can contain hyphen ( for Oracle's "ALTER SESSION SET CURRENT_SCHEMA = <schema>" command ) (cherry picked from commit d415041)
+3d05d6a Merge branch 'master' into fix-sql-default-schema
+9d6b841 Fixed a bug where retrieving the connection schema name on SQL Server with JTDS driver failed with a syntax error.
+9639796 CORE-2745 Performance degradation of sqlFile change
+4f49459 CORE-1935 Formatted SQL generateChangeLog failed: make sure changeSetPath is specified
+a76f481 CORE-2734 Liquibase no longer handle newline correctly in endDelimiter when using sqlFile change
+690f653 CORE-2733 relativeToChangelogFile fails with FileSystemResourceAccessor
+40bb1a0 Merge branch 'ddb' into 3.5.x
+fd41575 CORE-2732 releaseLock fails because ObjectQuotingStrategy is reset to LEGACY
 482e076 CORE-2615 Multi-schema snapshot bugfixes
+f866c0a Merge branch 'ddb' into 3.5.x
 49bba1a Merge branch 'ddb-diff_report_heading' into ddb
 534638c CORE-2615 Multi-schema snapshot bugfixes
 9666df8 CORE-2615 Multi-schema snapshot bugfixes
 0e85d11 CORE-2615 Multi-schema snapshot bugfixes
+17cbf1a Merge remote-tracking branch 'origin/3.5.x' into 3.5.x
+4597732 Merge branch 'ddb-diff_report_heading' into 3.5.x
+6c9865e Merge branch 'ddb' into 3.5.x
 e894e3d CORE-2727 NPE in DiffToReport.print() method
 d8a468a CORE-2615 Multi-schema snapshot bugfixes
 8e18387 Does not load plug-ins from nested jars correctly, such as in Spring Boot
+baf7f78 [maven-release-plugin] prepare for next development iteration
+4d423b6 [maven-release-plugin] prepare release liquibase-parent-3.5.0
+a98e058 Prep for 3.5.0 release
+bdf1acf CORE-2520 Spurious warning with includeAll: file is not a recognized file type
+1db6789 CORE-2721 endDelimiter regex does not work in SQL changelogs/changesets
+e2032b6 Merge remote-tracking branch 'origin/master'
+53dd915 CORE-2724 Support offline databases in ant-tasks
+99f2575 Merge pull request #566 from rglow/db2-tinyint
+94f22b0 Merge branch 'ddb-diff_report_heading'
 0317fc2 CORE-2615 Multi-schema snapshot bugfixes
 bf558bd Trying out sorting missing objects based on dependencies in DB2
 bf74aae Trying out sorting missing objects based on dependencies in DB2
 d046bc2 CORE-2725 DB2: Don't include system-generated indexes
 7588679 CORE-2615 Multi-schema snapshot bugfixes
 bb5b384 CORE-2615 Multi-schema snapshot bugfixes
+3cf2249 * fixed the mapping of TINYINT type for DB2 database
 e028522 CORE-2689 TIMESTAMP parameters dropped for DB2
 5cabfe6 CORE-2720 DB2: Capture full view definition in snapshot/generateChangeLog to support column options
 a52f575 CORE-2719 Oracle: Cannot snapshot primary keys on lower-case tables
 78b2d46 CORE-2720 DB2: Capture full view definition in snapshot/generateChangeLog to support column options
 1eb589e rollback to tag APIs were throwing away rollbackScript
 7652ebb Added generic "metadata" block to snapshot (cherry picked from commit ad6c6b7)
+ad6c6b7 Added generic "metadata" block to snapshot
+4357fa2 Merge remote-tracking branch 'origin/master'
+10dfb4c Merge branch 'ddb'
 d140635 Merge pull request #565 from Datical/ddb
+168ee6a Merge pull request #564 from andipohl/feature/RemarksOnASANY
+cdb887f Merge branch 'smrutimo-master'
+064c112 Merge branch 'master' of https://github.com/smrutimo/liquibase into smrutimo-master
+f3171ed CORE-2706 Two sides of equal are the same
 c8cef44 Merge branch 'ddb' of github.com:Datical/liquibase into ddb
 e585081 avoid null pointer exceptions when a null output Writer is supplied.
+6b27b5b CORE-2718 H2 Database should query for default schema instead always use PUBLIC
 ec22f0d CORE-2719 Oracle: Cannot snapshot primary keys on lower-case tables
 ed6f175 Fixed error message
 859c2f0 commentLineStartsWith is only on loadDataChange, not column
 d5da024 CORE-2615 Multi-schema snapshot bugfixes
 ef62348 CORE-2615 Multi-schema snapshot bugfixes
+4f98ba0 SQL Anywhere has also a Standard-SQL "comment on" statement
 4afc227 CORE-2615 Multi-schema snapshot bugfixes
 924bc8e CORE-2615 Multi-schema snapshot bugfixes
 105cf55 Merge branch 'ddb' into ddb-diff-map
@@ -41,6 +105,9 @@ c0550fb CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition
 f84921e Merge branch 'ddb-master' into ddb
 3118056 CORE-2713 CreateView disregards replaceIfExists=true when fullDefinition=true
 c35d031 CORE-2615	 Multi-schema snapshot bugfixes
+2fa551f CORE-2704 Multiple Add Columns should not result in multiple table reorgs in DB2
+6218231 CORE-2704 Multiple Add Columns should not result in multiple table reorgs in DB2
+375cfca CORE-2704 Multiple Add Columns should not result in multiple table reorgs in DB2
 06622de Merge remote-tracking branch 'origin/ddb-master' into ddb-merge
 23433fe CORE-2589 Output xml changelogs as xml version="1.1" (cherry picked from commit d774f9c)
 d07e657 CORE-2705 diffChangeLog generates dropColumn when dropping an index with a computed column

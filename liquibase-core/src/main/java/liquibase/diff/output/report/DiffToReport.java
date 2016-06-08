@@ -69,6 +69,14 @@ public class DiffToReport {
                         return "";
                     }
 
+                    if (referenceName == null) {
+                        referenceName = StringUtils.trimToEmpty(referenceDatabase.getDefaultSchemaName());
+                    }
+
+                    if (comparisonName == null) {
+                        comparisonName = StringUtils.trimToEmpty(comparisonDatabase.getDefaultSchemaName());
+                    }
+
                     if (referenceName.equalsIgnoreCase(comparisonName)) {
                         return referenceName;
                     } else {
