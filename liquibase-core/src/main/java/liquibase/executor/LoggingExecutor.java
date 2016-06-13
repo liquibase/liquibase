@@ -122,10 +122,14 @@ public class LoggingExecutor extends AbstractExecutor {
 
                     if (potentialDelimiter != null) {
                         potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", ""); //ignore trailing $ as a regexp to determine if it should be output
+
+                        if (potentialDelimiter.replaceAll("\\\\n", "\n").replace("\\\\r", "\r").matches("[;/\r\n\\w@\\-]+")) {
+                            endDelimiter = potentialDelimiter;
+                        }
                     }
-                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n@\\-]+")) {
-                        endDelimiter = potentialDelimiter;
-                    }
+
+                    endDelimiter = endDelimiter.replace("\\n", "\n");
+                    endDelimiter = endDelimiter.replace("\\r", "\r");
 
 
                     if (!statement.endsWith(endDelimiter)) {

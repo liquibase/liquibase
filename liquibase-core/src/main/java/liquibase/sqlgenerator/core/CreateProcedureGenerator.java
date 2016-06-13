@@ -11,7 +11,6 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.SqlParser;
@@ -20,6 +19,7 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
     @Override
@@ -68,11 +68,26 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = parsedSql.toString();
         }
 
+        procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
+
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
 
 
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
+    }
+
+    public static String removeTrailingDelimiter(String procedureText, String endDelimiter) {
+        String endDelimiterRegexp;
+        if (endDelimiter.length() == 1) {
+            endDelimiterRegexp = "(?s)(.*)"+ Pattern.quote(endDelimiter);
+        } else {
+            endDelimiterRegexp = "(?s)(.*)"+ endDelimiter;
+        }
+        endDelimiterRegexp+="[\\s\\n]*$";
+
+        procedureText = procedureText.replaceFirst(endDelimiterRegexp, "$1");
+        return procedureText;
     }
 
     /**
