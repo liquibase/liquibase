@@ -5,6 +5,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.*;
+import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -83,7 +84,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     if (database instanceof DB2Database) {
                         String sql;
-                        if (((DB2Database) database).isAS400()) {
+                        if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                             sql = getDB2ISql(jdbcSchemaName);
                         } else {
                             sql = getDB2Sql(jdbcSchemaName);
@@ -159,7 +160,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                         String sql;
-                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                        if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                             sql = getDB2ISql(jdbcSchemaName);
                         } else {
                             sql = getDB2Sql(jdbcSchemaName);
@@ -823,7 +824,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     } else if (database instanceof DB2Database) {
                         // if we are on DB2 AS400 iSeries
-                        if (((DB2Database) database).isAS400()) {
+                        if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                             sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
                             if (tableName != null) {
                                 sql += " and table_name = '" + tableName + "'";
