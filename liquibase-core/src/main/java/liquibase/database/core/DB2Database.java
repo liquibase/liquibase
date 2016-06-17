@@ -11,6 +11,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -258,7 +259,7 @@ public class DB2Database extends AbstractJdbcDatabase {
      * getDatabaseProductName(), which does not work correctly for some DB2
      * types.
      * 
-     * @see http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.html
+     * @see <a href="http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.html">ibm.com</a>
      * @return the data server type
      */
     public DataServerType getDataServerType() {
@@ -284,19 +285,12 @@ public class DB2Database extends AbstractJdbcDatabase {
         return this.dataServerType;
     }
 
+    public boolean isZOS() {
+        return getDataServerType() == DataServerType.DB2Z;
+    }
+
     public boolean isAS400() {
-        if (this.isAS400 == null) {
-            if (getConnection() != null && getConnection() instanceof JdbcConnection) {
-                try {
-                    this.isAS400 = getConnection().getDatabaseProductName().startsWith("DB2 UDB for AS/400");
-                } catch (DatabaseException e) {
-                    this.isAS400 = false;
-                }
-            } else {
-                this.isAS400 = false;
-            }
-        }
-        return this.isAS400;
+       return getDataServerType() == DataServerType.DB2I;
     }
 
     @Override
