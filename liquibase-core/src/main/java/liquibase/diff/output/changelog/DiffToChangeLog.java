@@ -211,7 +211,7 @@ public class DiffToChangeLog {
 
     private List<DatabaseObject> sortMissingObjects(Collection<DatabaseObject> missingObjects, Database database) {
 
-        if (missingObjects.size() > 0 && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+        if (diffOutputControl.getSchemaComparisons() != null && missingObjects.size() > 0 && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<String>();
             for (CompareControl.SchemaComparison comparison : this.diffOutputControl.getSchemaComparisons()) {
                 String schemaName = comparison.getReferenceSchema().getSchemaName();
