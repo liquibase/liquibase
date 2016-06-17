@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -183,7 +184,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     //probably older version of java, need to select from the column to find out if it is auto-increment
                     String selectStatement;
-                    if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                    if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                         selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
                         LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
                         LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
