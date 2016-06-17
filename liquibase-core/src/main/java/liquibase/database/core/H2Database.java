@@ -120,15 +120,7 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(' ') > 0) {
-                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
-            } else {
-                if (dateAsString.indexOf(':') > 0) {
-                    return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
-                } else {
-                    return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
-                }
-            }
+            return new ISODateFormat().parse(dateAsString);
         } catch (ParseException e) {
             throw new DateParseException(dateAsString);
         }
@@ -190,17 +182,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getDateLiteral(String isoDate) {
-        String returnString = isoDate;
-        try {
-            if (isDateTime(isoDate)) {
-                ISODateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException("Unexpected date format: " + isoDate, e);
-        }
-        return "'" + returnString + "'";
+        return "'" + isoDate.replace('T', ' ') + "'";
     }
 
 
