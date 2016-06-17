@@ -86,9 +86,13 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
 
 
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if (getConnection() == null) {
             return null;
         }
+        if (getConnection() instanceof OfflineConnection) {
+            return ((OfflineConnection) getConnection()).getSchema();
+        }
+
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -269,4 +273,11 @@ public class DB2Database extends AbstractJdbcDatabase {
         return this.isAS400;
     }
 
+    @Override
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Index && example.getName() != null && example.getName().matches("SQL\\d+")) {
+            return true;
+        }
+        return super.isSystemObject(example);
+    }
 }

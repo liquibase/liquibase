@@ -225,7 +225,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     }
 
                     try {
-                        loadImplementationsInJar(packageName, stream, loader, urlPath);
+                        loadImplementationsInJar(packageName, stream, loader, urlPath, null);
                     } catch (IOException ioe) {
                         log.warning("Cannot search jar file '" + urlPath + "' for classes due to an IOException: " + ioe.getMessage(), ioe);
                     } finally {
@@ -397,26 +397,31 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      *
      * Any nested JAR files found inside this JAR will be assumed to also be
      * on the classpath and will be recursively examined for classes in `parentPackage`.
-
      * @param parentPackage  the parent package under which classes must be in order to
      *                be considered
      * @param parentFileStream  the inputstream of the jar file to be examined for classes
-     * @param parentFileName a unique name for the parentFileStream, to be used for caching.
-     *                       This is the URL of the parentFileStream, if it comes from a URL,
-     *                       or a composite ID if we are currently examining a nested JAR.
      * @param loader a classloader which can load classes contained within the JAR file
-     *               of `parentFileStream`.
+     * @param parentFileName a unique name for the parentFileStream, to be used for caching.
+*                       This is the URL of the parentFileStream, if it comes from a URL,
+*                       or a composite ID if we are currently examining a nested JAR.
      */
     protected void loadImplementationsInJar(
             String parentPackage,
             InputStream parentFileStream,
             ClassLoader loader,
-            String parentFileName) throws IOException {
+            String parentFileName,
+            String grandparentFileName) throws IOException {
         Set<String> classFiles = classFilesByLocation.get(parentFileName);
 
         if (classFiles == null) {
             classFiles = new HashSet<String>();
             classFilesByLocation.put(parentFileName, classFiles);
+
+            Set<String> grandparentClassFiles = classFilesByLocation.get(grandparentFileName);
+            if (grandparentClassFiles == null) {
+                grandparentClassFiles = new HashSet<String>();
+                classFilesByLocation.put(grandparentFileName, grandparentClassFiles);
+            }
             JarInputStream jarStream;
             if (parentFileStream instanceof JarInputStream) {
                 jarStream = (JarInputStream) parentFileStream;
@@ -450,13 +455,15 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                                         parentPackage,
                                         nestedJarStream,
                                         loader,
-                                        parentFileName + "!" + name);
+                                        parentFileName + "!" + name,
+                                        parentFileName);
                             } finally {
                                 nestedJarStream.close();
                             }
                         }
                     } else if (!entry.isDirectory() && name.endsWith(".class")) {
                         classFiles.add(name.trim());
+                        grandparentClassFiles.add(name.trim());
                     }
                 }
             }

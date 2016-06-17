@@ -92,7 +92,11 @@ public class ChangeLogIterator {
     }
 
     protected void markSeen(ChangeSet changeSet) {
-        seenChangeSets.add(createKey(changeSet));
+        if (changeSet.key == null) {
+            changeSet.key = createKey(changeSet);
+        }
+
+        seenChangeSets.add(changeSet.key);
 
     }
 
@@ -107,7 +111,10 @@ public class ChangeLogIterator {
     }
 
     protected boolean alreadySaw(ChangeSet changeSet) {
-        return seenChangeSets.contains(createKey(changeSet));
+        if (changeSet.key == null) {
+            changeSet.key = createKey(changeSet);
+        }
+        return seenChangeSets.contains(changeSet.key);
     }
 
     public List<ChangeSetFilter> getChangeSetFilters() {

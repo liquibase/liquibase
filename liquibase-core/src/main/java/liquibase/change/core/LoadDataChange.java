@@ -224,7 +224,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                 List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
                 for (int i = 0; i < headers.length; i++) {
-                    Object value = line[i].trim();
+                    Object value = line[i];
                     String columnName = headers[i].trim();
 
                     ColumnConfig valueConfig = new ColumnConfig();

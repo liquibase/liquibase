@@ -7,6 +7,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddPrimaryKeyChange;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.DiffOutputControl;
@@ -76,7 +77,8 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             change.setClustered(false);
         }
 
-        if (comparisonDatabase instanceof OracleDatabase) {
+        if (comparisonDatabase instanceof OracleDatabase
+                || (comparisonDatabase instanceof DB2Database && pk.getBackingIndex() != null && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
             if (backingIndex != null && backingIndex.getName() != null) {
                 try {
