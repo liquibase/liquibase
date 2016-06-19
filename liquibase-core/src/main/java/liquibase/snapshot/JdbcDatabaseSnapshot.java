@@ -86,6 +86,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String sql;
                         if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                             sql = getDB2ISql(jdbcSchemaName);
+                        } else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z) {
+                            sql = getDB2ZSql(jdbcSchemaName);
                         } else {
                             sql = getDB2Sql(jdbcSchemaName);
                         }
@@ -162,6 +164,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String sql;
                         if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                             sql = getDB2ISql(jdbcSchemaName);
+                        } else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z) {
+                            sql = getDB2ZSql(jdbcSchemaName);
                         } else {
                             sql = getDB2Sql(jdbcSchemaName);
                         }
@@ -212,6 +216,33 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             " sysibm.SQLFOREIGNKEYS " +
                             " WHERE pktable_schem = '" + jdbcSchemaName + "' " +
                             " ORDER BY key_seq ";
+                }
+
+                protected String getDB2ZSql(String jdbcSchemaName) {
+                	return  " SELECT " +
+                            " PK.TBCREATOR AS PKTABLE_CAT, " +
+                            " PK.TBNAME    AS PKTABLE_NAME, " +
+                            " PK.NAME      AS PKCOLUMN_NAME, " +
+                            " FK.CREATOR   AS FKTABLE_CAT, " +
+                            " FK.TBNAME    AS FKTABLE_NAME, " +
+                            " FK.COLNAME   AS FKCOLUMN_NAME, " +
+                            " FK.COLSEQ    AS KEY_SEQ, " +
+                            " 1            AS UPDATE_RULE, " +
+                            " DECODE (R.DELETERULE, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) AS DELETE_RULE, " +
+                            " R.RELNAME    AS FK_NAME, " +
+                            " ''           AS PK_NAME, " +
+                            " 7            AS DEFERRABILITY " +
+                            " FROM SYSIBM.SYSRELS R, " +
+                            "      SYSIBM.SYSFOREIGNKEYS FK, " +
+                            "      SYSIBM.SYSCOLUMNS PK " +
+                            " WHERE R.CREATOR      = '" + jdbcSchemaName + "'" +
+                            "   AND R.RELNAME      = FK.RELNAME" +
+                            "   AND R.CREATOR      = FK.CREATOR" +
+                            "   AND R.TBNAME       = FK.TBNAME" +
+                            "   AND R.REFTBCREATOR = PK.TBCREATOR" +
+                            "   AND R.REFTBNAME    = PK.TBNAME" +
+                            "   AND FK.COLSEQ      = PK.KEYSEQ" +
+                            " ORDER BY R.RELNAME, FK.COLSEQ asc ";
                 }
 
                 @Override
@@ -828,6 +859,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
                             if (tableName != null) {
                                 sql += " and table_name = '" + tableName + "'";
+                            }
+                        }
+                        // if we are on DB2 z/OS
+                        else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z){
+                            sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from sysibm.syskeycoluse k, sysibm.systabconst t "
+                                    + "where k.constname = t.constname "
+                                    + "and t.tbcreator = '" + jdbcSchemaName + "' "
+                                    + "and t.type='U'";
+                            if (tableName != null) {
+                                sql += " and t.tbname = '" + tableName + "'";
                             }
                         }
                         // here we are on DB2 UDB
