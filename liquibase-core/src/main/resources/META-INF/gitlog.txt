@@ -1,3 +1,13 @@
+95fb72e CORE-2791 Strip off trailing end delimiter in createProcedure on update, include on updateSql
+b6629ec CORE-2791 Strip off trailing end delimiter in createProcedure on update, include on updateSql
+83d4292 CORE-2787 YAML Snapshot parser not handling strings that get stored as binary
+c0f9ec2 CORE-2781 DB2: custom-generated indexes for primary keys are not preserved in diff/generateChangeLog
+05fadc3 CORE-2781 DB2: custom-generated indexes for primary keys are not preserved in diff/generateChangeLog
+5072866 CORE-2782 Update SnakeYAML version to 1.17
+8dba1de CORE-2780 Better handling of equals and hashcode if connection is closed or null
+2ca3d9a Merge pull request #584 from lbodor/CORE-2780
+9db3d00 CORE-2781 DB2: custom-generated indexes for primary keys are not preserved in diff/generateChangeLog
+36b4612 CORE-2780 Clear executor before closing connection
 5655a2f ChangelogParameter needs to be public now that it is accessable
 404af23 CORE-2750 MSSQL catalog/database included all the time
 855454d Merge remote-tracking branch 'origin/ddb' into ddb

@@ -9,7 +9,7 @@
     liquibase-parent
   </artifactId>
   <version>
-    3.5.902
+    3.5.925
   </version>
   <packaging>
     pom
@@ -315,7 +315,7 @@
           snakeyaml
         </artifactId>
         <version>
-          1.13
+          1.17
         </version>
         <optional>
           true
