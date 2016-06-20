@@ -57,6 +57,15 @@ public class DefaultLogger extends AbstractLogger {
         }
     }
 
+    public void closeLogFile() {
+        if (err.equals(System.err) || err.equals(System.out)) {
+            return;
+        }
+        err.flush();
+        err.close();
+        err = System.err;
+    }
+
     @Override
     public void severe(String message) {
         if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
