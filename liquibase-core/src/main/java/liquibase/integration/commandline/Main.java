@@ -160,7 +160,11 @@ public class Main {
             }
             if (propertiesFile.exists()) {
                 FileInputStream stream = new FileInputStream(propertiesFile);
-                main.parsePropertiesFile(stream);
+                try {
+                    main.parsePropertiesFile(stream);
+                } finally {
+                    stream.close();
+                }
             } else {
                 InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(main.defaultsFile);
                 if (resourceAsStream != null) {

@@ -6,7 +6,10 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -138,7 +141,7 @@ public class DiffResult {
         return changedObjects;
     }
 
-    public  <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
+    public <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
         Map returnSet = new HashMap();
         for (Map.Entry<DatabaseObject, ObjectDifferences> obj : changedObjects.entrySet()) {
             if (type.isAssignableFrom(obj.getKey().getClass())) {
@@ -167,6 +170,16 @@ public class DiffResult {
 
 
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
+        if (obj instanceof Catalog || obj instanceof Schema) {
+            if (differences.getSchemaComparisons() != null && differences.getDifferences().size() == 1 && differences.getDifference("name") != null) {
+                if (obj instanceof Catalog && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
+                    changedObjects.put(obj, differences);
+                    return;
+                } else {
+                    return;  //don't save name differences
+                }
+            }
+        }
         changedObjects.put(obj, differences);
     }
 
