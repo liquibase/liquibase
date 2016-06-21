@@ -133,6 +133,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof DB2Database) {
             if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
+            } else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z){
+                return "SELECT NAME AS SEQUENCE_NAME FROM SYSIBM.SYSSEQUENCES WHERE SEQTYPE='S' AND SCHEMA = '" + schema.getCatalogName() + "'";
             } else {
                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
             }
