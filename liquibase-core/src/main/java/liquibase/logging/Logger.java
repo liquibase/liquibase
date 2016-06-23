@@ -14,6 +14,8 @@ public interface Logger extends PrioritizedService {
 
     public void setLogLevel(String logLevel, String logFile);
 
+    public void closeLogFile();
+
     void severe(String message);
 
     void severe(String message, Throwable e);

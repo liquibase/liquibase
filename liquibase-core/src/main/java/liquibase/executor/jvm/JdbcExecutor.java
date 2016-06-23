@@ -288,7 +288,9 @@ public class JdbcExecutor extends AbstractExecutor {
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
-                    statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    }
                 }
 
                 log.debug("Executing EXECUTE database command: "+statement);

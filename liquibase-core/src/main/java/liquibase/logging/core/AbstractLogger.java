@@ -21,6 +21,11 @@ public abstract class AbstractLogger implements Logger {
         setLogLevel(toLogLevel(logLevel));
     }
 
+    @Override
+    public void closeLogFile() {
+
+    }
+
     protected LogLevel toLogLevel(String logLevel) {
         if ("debug".equalsIgnoreCase(logLevel)) {
             return LogLevel.DEBUG;

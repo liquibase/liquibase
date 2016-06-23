@@ -11,7 +11,6 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 import liquibase.util.SqlParser;
@@ -20,6 +19,7 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
     @Override
@@ -68,11 +68,38 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             procedureText = parsedSql.toString();
         }
 
+        procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
+
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
 
 
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
+    }
+
+    public static String removeTrailingDelimiter(String procedureText, String endDelimiter) {
+        if (procedureText == null) {
+            return null;
+        }
+        if (endDelimiter == null) {
+            return procedureText;
+        }
+
+        String fixedText = procedureText;
+        while (fixedText.length() > 0) {
+            String lastChar = fixedText.substring(fixedText.length() - 1);
+            if (lastChar.equals(" ") || lastChar.equals("\n") || lastChar.equals("\r") || lastChar.equals("\t")) {
+                fixedText = fixedText.substring(0, fixedText.length() - 1);
+            } else {
+                break;
+            }
+        }
+        endDelimiter = endDelimiter.replace("\\r", "\r").replace("\\n", "\n");
+        if (fixedText.endsWith(endDelimiter)) {
+            return fixedText.substring(0, fixedText.length() - endDelimiter.length());
+        } else {
+            return procedureText;
+        }
     }
 
     /**
@@ -85,8 +112,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
             } else if (database instanceof DB2Database) {
-                sql.add(0, new UnparsedSql("SET CURRENT SCHEMA "+ schemaName));
-                sql.add(new UnparsedSql("SET CURRENT SCHEMA "+ defaultSchema));
+                sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
+                sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
             }
         }
     }
