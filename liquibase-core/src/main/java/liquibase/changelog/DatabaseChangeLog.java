@@ -536,4 +536,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         return filePath;
     }
+
+    public void clearCheckSums() {
+        for (ChangeSet changeSet : getChangeSets()) {
+            changeSet.clearCheckSum();
+        }
+    }
+
 }
