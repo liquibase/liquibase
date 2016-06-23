@@ -37,6 +37,8 @@ import java.util.*;
  */
 public class ChangeSet implements Conditional, ChangeLogChild {
 
+    protected CheckSum checkSum;
+
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
     }
@@ -238,18 +240,26 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         return filePath;
     }
 
+    public void clearCheckSum() {
+        this.checkSum = null;
+    }
+
     public CheckSum generateCheckSum() {
-        StringBuffer stringToMD5 = new StringBuffer();
-        for (Change change : getChanges()) {
-            stringToMD5.append(change.generateCheckSum()).append(":");
+        if (checkSum == null) {
+            StringBuffer stringToMD5 = new StringBuffer();
+            for (Change change : getChanges()) {
+                stringToMD5.append(change.generateCheckSum()).append(":");
+            }
+
+            for (SqlVisitor visitor : this.getSqlVisitors()) {
+                stringToMD5.append(visitor.generateCheckSum()).append(";");
+            }
+
+
+            checkSum = CheckSum.compute(stringToMD5.toString());
         }
 
-        for (SqlVisitor visitor : this.getSqlVisitors()) {
-            stringToMD5.append(visitor.generateCheckSum()).append(";");
-        }
-
-
-        return CheckSum.compute(stringToMD5.toString());
+        return checkSum;
     }
 
     @Override
