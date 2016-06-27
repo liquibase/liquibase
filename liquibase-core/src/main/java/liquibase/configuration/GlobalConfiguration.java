@@ -18,6 +18,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String CONVERT_DATA_TYPES = "convertDataTypes";
     public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
     public static final String AUTO_REORG = "autoReorg";
+    public static final String DIFF_COLUMN_ORDER = "diffColumnOrder";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -71,6 +72,10 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
         getContainer().addProperty(AUTO_REORG, Boolean.class)
                 .setDescription("Should Liquibase automatically include REORG TABLE commands when needed?")
+                .setDefaultValue(true);
+
+        getContainer().addProperty(DIFF_COLUMN_ORDER, Boolean.class)
+                .setDescription("Should Liquibase compare column order in diff operation?")
                 .setDefaultValue(true);
     }
 
@@ -191,6 +196,15 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setOutputEncoding(String name) {
         getContainer().setValue(OUTPUT_ENCODING, name);
+        return this;
+    }
+
+    public Boolean getDiffColumnOrder() {
+        return getContainer().getValue(DIFF_COLUMN_ORDER, Boolean.class);
+    }
+
+    public GlobalConfiguration setDiffColumnOrder(boolean diff) {
+        getContainer().setValue(DIFF_COLUMN_ORDER, diff);
         return this;
     }
 }

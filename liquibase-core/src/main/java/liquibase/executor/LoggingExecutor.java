@@ -8,6 +8,7 @@ import java.util.Map;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
@@ -102,8 +103,14 @@ public class LoggingExecutor extends AbstractExecutor {
                 if (statement == null) {
                     continue;
                 }
-                output.write(statement);
 
+                if (database instanceof OracleDatabase) { //remove trailing /
+                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    }
+                }
+
+                output.write(statement);
 
                 if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
                     output.write(StreamUtil.getLineSeparator());
@@ -122,10 +129,14 @@ public class LoggingExecutor extends AbstractExecutor {
 
                     if (potentialDelimiter != null) {
                         potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", ""); //ignore trailing $ as a regexp to determine if it should be output
+
+                        if (potentialDelimiter.replaceAll("\\n", "\n").replace("\\r", "\r").matches("[;/\r\n\\w@\\-]+")) {
+                            endDelimiter = potentialDelimiter;
+                        }
                     }
-                    if (potentialDelimiter != null && potentialDelimiter.matches("[;/\\w\r\n@\\-]+")) {
-                        endDelimiter = potentialDelimiter;
-                    }
+
+                    endDelimiter = endDelimiter.replace("\\n", "\n");
+                    endDelimiter = endDelimiter.replace("\\r", "\r");
 
 
                     if (!statement.endsWith(endDelimiter)) {
