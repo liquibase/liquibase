@@ -14,6 +14,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,12 @@ public class YamlSnapshotParser extends YamlParser implements SnapshotParser {
                 parsedYaml = yaml.loadAs(new InputStreamReader(stream, "UTF-8"), Map.class);
             } catch (Exception e) {
                 throw new LiquibaseParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
+            }
+            finally {
+                try {
+                    stream.close();
+                } catch (IOException ioe) {
+                }
             }
 
             Map rootList = (Map) parsedYaml.get("snapshot");
