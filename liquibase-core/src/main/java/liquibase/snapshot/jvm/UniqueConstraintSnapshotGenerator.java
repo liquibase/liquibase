@@ -223,7 +223,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             //+ "T2.TABLE_NAME='"+ database.correctObjectName(example.getTable().getName(), Table.class) + "'\n"
                             //+ "\n"
                             + "order by T2.COLUMN_NAME\n";
-
+                } else if (((DB2Database) database).getDataServerType() == DataServerType.DB2Z){
+                    sql = "select k.colname as column_name from sysibm.syskeycoluse k, sysibm.systabconst t "
+                            + "where k.constname = t.constname "
+                            + "and k.tbcreator = t.tbcreator "
+                            + "and t.type='U' "
+                            + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
+                            + "and t.tbcreator = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                            + "order by colseq";
                 } else {
                     sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t "
                             + "where k.constname = t.constname "
