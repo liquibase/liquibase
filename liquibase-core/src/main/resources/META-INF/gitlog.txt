@@ -1,3 +1,11 @@
+8c2831a Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+852a48e Better handling of releasing changelog locks when there is an exception on the unlock
+d40ad9d Merge pull request #1 from liquibase/ddb
+19c211b Merge pull request #594 from Datical/CORE-2806
+4bab35e Close input stream after parsing JSON snapshot
+1b5d9c1 CORE-2791 Strip off trailing end delimiter in createProcedure on update, include on updateSql
+312d914 CORE-2801 Add method to Logger to allow closing of the output file stream
+88ecb80 CORE-2800 Add flag to diff command that suppresses reporting of column order difference in tables
 95fb72e CORE-2791 Strip off trailing end delimiter in createProcedure on update, include on updateSql
 b6629ec CORE-2791 Strip off trailing end delimiter in createProcedure on update, include on updateSql
 83d4292 CORE-2787 YAML Snapshot parser not handling strings that get stored as binary

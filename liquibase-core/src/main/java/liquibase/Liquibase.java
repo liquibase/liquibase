@@ -313,7 +313,11 @@ public class Liquibase {
 
             logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
             resetServices();
         }
     }
@@ -354,7 +358,11 @@ public class Liquibase {
 
             logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
             resetServices();
         }
     }
@@ -665,7 +673,11 @@ public class Liquibase {
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
         }
         resetServices();
     }
@@ -742,7 +754,11 @@ public class Liquibase {
                 removeRunStatus(logIterator, contexts, labelExpression);
             }
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
         }
         resetServices();
     }
@@ -806,7 +822,11 @@ public class Liquibase {
 
             logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
             resetServices();
         }
     }
@@ -865,7 +885,11 @@ public class Liquibase {
 
             logIterator.run(new ChangeLogSyncVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
             resetServices();
         }
     }
@@ -988,7 +1012,11 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database, changeExecListener), new RuntimeEnvironment(database, contexts, labelExpression));
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
             resetServices();
         }
@@ -1049,7 +1077,11 @@ public class Liquibase {
             checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
             getDatabase().tag(tagString);
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
         }
     }
 
@@ -1061,7 +1093,11 @@ public class Liquibase {
             checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
             return getDatabase().doesTagExist(tagString);
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
         }
     }
 
@@ -1306,7 +1342,11 @@ public class Liquibase {
             ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
             getDatabase().commit();
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
         }
         resetServices();
     }
@@ -1370,7 +1410,11 @@ public class Liquibase {
         } catch (IOException e) {
             throw new LiquibaseException(e);
         } finally {
-            lockService.releaseLock();
+            try {
+                lockService.releaseLock();
+            } catch (LockException e) {
+                log.severe("Could not release lock", e);
+            }
         }
 
 //        try {

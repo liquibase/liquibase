@@ -78,16 +78,28 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     }
 
     public static String removeTrailingDelimiter(String procedureText, String endDelimiter) {
-        String endDelimiterRegexp;
-        if (endDelimiter.length() == 1) {
-            endDelimiterRegexp = "(?s)(.*)"+ Pattern.quote(endDelimiter);
-        } else {
-            endDelimiterRegexp = "(?s)(.*)"+ endDelimiter;
+        if (procedureText == null) {
+            return null;
         }
-        endDelimiterRegexp+="[\\s\\n]*$";
+        if (endDelimiter == null) {
+            return procedureText;
+        }
 
-        procedureText = procedureText.replaceFirst(endDelimiterRegexp, "$1");
-        return procedureText;
+        String fixedText = procedureText;
+        while (fixedText.length() > 0) {
+            String lastChar = fixedText.substring(fixedText.length() - 1);
+            if (lastChar.equals(" ") || lastChar.equals("\n") || lastChar.equals("\r") || lastChar.equals("\t")) {
+                fixedText = fixedText.substring(0, fixedText.length() - 1);
+            } else {
+                break;
+            }
+        }
+        endDelimiter = endDelimiter.replace("\\r", "\r").replace("\\n", "\n");
+        if (fixedText.endsWith(endDelimiter)) {
+            return fixedText.substring(0, fixedText.length() - endDelimiter.length());
+        } else {
+            return procedureText;
+        }
     }
 
     /**
@@ -100,8 +112,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 sql.add(0, new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(schemaName, Schema.class)));
                 sql.add(new UnparsedSql("ALTER SESSION SET CURRENT_SCHEMA=" + database.escapeObjectName(defaultSchema, Schema.class)));
             } else if (database instanceof DB2Database) {
-                sql.add(0, new UnparsedSql("SET CURRENT SCHEMA "+ schemaName));
-                sql.add(new UnparsedSql("SET CURRENT SCHEMA "+ defaultSchema));
+                sql.add(0, new UnparsedSql("SET CURRENT SCHEMA " + schemaName));
+                sql.add(new UnparsedSql("SET CURRENT SCHEMA " + defaultSchema));
             }
         }
     }
