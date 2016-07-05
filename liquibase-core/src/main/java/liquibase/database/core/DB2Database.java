@@ -256,22 +256,25 @@ public class DB2Database extends AbstractJdbcDatabase {
     /**
      * Determine the DB2 data server type. This replaces the isZOS() and
      * isAS400() methods, which was based on DatabaseMetaData
-     * getDatabaseProductName(), which does not work correctly for some DB2
-     * types.
-     * 
-     * @see <a href="http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.html">ibm.com</a>
-     * @return the data server type
+     * getDatabaseProductName(), which does not work correctly for DB2 z/OS and DB2 LUW,
+     * but does work for DB2 i.
+     *
+     * @see <a href="http://www.ibm.com/support/knowledgecenter/SSEPEK_11.0.0/com.ibm.db2z11.doc.java/src/tpc/imjcc_c0053013.html">ibm.com</a>
+     * @see <a href="https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.apdv.java.doc/src/tpc/imjcc_c0053013.html">ibm.com</a>
+
+     *  @return the data server type
      */
     public DataServerType getDataServerType() {
         if (this.dataServerType == null) {
             DatabaseConnection databaseConnection = getConnection();
             if (databaseConnection != null && databaseConnection instanceof JdbcConnection) {
                 try {
+                    String databaseProductName = databaseConnection.getDatabaseProductName();
                     String databaseProductVersion = databaseConnection.getDatabaseProductVersion();
-                    if (databaseProductVersion.startsWith("SQL")) {
-                        this.dataServerType = DataServerType.DB2LUW;
-                    } else if (databaseProductVersion.startsWith("QSQ")) {
+                    if (databaseProductName.startsWith("DB2 UDB for AS/400") || databaseProductVersion.startsWith("QSQ")){
                         this.dataServerType = DataServerType.DB2I;
+                    } else if (databaseProductVersion.startsWith("SQL")) {
+                        this.dataServerType = DataServerType.DB2LUW;
                     } else if (databaseProductVersion.startsWith("DSN")) {
                         this.dataServerType = DataServerType.DB2Z;
                     }
