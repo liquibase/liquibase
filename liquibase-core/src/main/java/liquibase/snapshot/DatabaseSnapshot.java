@@ -282,7 +282,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             Object fieldValue = object.getAttribute(field, Object.class);
             if (field.equals("columns") && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
                 if (fieldValue != null && ((Collection) fieldValue).size() > 0) {
-                    String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName().toUpperCase();
+                    String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
                     if (columnName.endsWith(" ASC") || columnName.endsWith("DESC")) {
                         continue;
                     }
