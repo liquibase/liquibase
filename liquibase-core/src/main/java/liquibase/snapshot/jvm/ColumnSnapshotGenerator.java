@@ -284,6 +284,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MSSQLDatabase) {
             if (columnTypeName.equalsIgnoreCase("numeric() identity")) {
                 columnTypeName = "numeric";
+            } else if (columnTypeName.equalsIgnoreCase("decimal() identity")) {
+                    columnTypeName = "decimal";
             } else if (columnTypeName.equalsIgnoreCase("xml")) {
                 columnMetadataResultSet.set("COLUMN_SIZE", null);
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);

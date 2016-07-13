@@ -2,6 +2,7 @@ package liquibase.util;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -129,11 +130,22 @@ public class SqlUtil {
                 stringVal = stringVal.replaceFirst("b'", "").replaceFirst("B'", "").replaceFirst("'$", "");
             }
             stringVal = stringVal.trim();
+
+            Object value;
             if (scanner.hasNextBoolean()) {
-                return scanner.nextBoolean();
+                value = scanner.nextBoolean();
             } else {
-                return Integer.valueOf(stringVal);
+                value = Integer.valueOf(stringVal);
             }
+
+            if (database instanceof MSSQLDatabase && value instanceof Boolean) {
+                if ((Boolean) value) {
+                    return new DatabaseFunction("'true'");
+                } else {
+                    return new DatabaseFunction("'false'");
+                }
+            }
+            return value;
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
                 return stringVal;
@@ -199,6 +211,10 @@ public class SqlUtil {
             return null;
         } else if ((liquibaseDataType instanceof NumberType || typeId == Types.NUMERIC)) {
             if (scanner.hasNextBigDecimal()) {
+                if (database instanceof MSSQLDatabase && stringVal.endsWith(".0") || stringVal.endsWith(".00") || stringVal.endsWith(".000")) {
+                    //MSSQL can store the value with the decimal digits. return it directly to avoid unexpected differences
+                    return new DatabaseFunction(stringVal);
+                }
                 return scanner.nextBigDecimal();
             } else {
                 return new DatabaseFunction(stringVal);
