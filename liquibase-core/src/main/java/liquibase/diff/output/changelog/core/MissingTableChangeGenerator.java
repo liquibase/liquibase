@@ -84,17 +84,21 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             ConstraintsConfig constraintsConfig = null;
             // In MySQL, the primary key must be specified at creation for an autoincrement column
             if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumnNamesAsList().contains(column.getName())) {
-                constraintsConfig = new ConstraintsConfig();
-                constraintsConfig.setPrimaryKey(true);
-                constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
-                // MySQL sets some primary key names as PRIMARY which is invalid
-                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
-                    constraintsConfig.setPrimaryKeyName(null);
-                } else  {
-                    constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                if (referenceDatabase instanceof MSSQLDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && !primaryKey.getBackingIndex().getClustered()) {
+                    // have to handle PK as a separate statement
+                } else {
+                    constraintsConfig = new ConstraintsConfig();
+                    constraintsConfig.setPrimaryKey(true);
+                    constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
+                    // MySQL sets some primary key names as PRIMARY which is invalid
+                    if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
+                        constraintsConfig.setPrimaryKeyName(null);
+                    } else  {
+                        constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                    }
+                    control.setAlreadyHandledMissing(primaryKey);
+                    control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
                 }
-                control.setAlreadyHandledMissing(primaryKey);
-                control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
             } else if (column.isNullable() != null && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
