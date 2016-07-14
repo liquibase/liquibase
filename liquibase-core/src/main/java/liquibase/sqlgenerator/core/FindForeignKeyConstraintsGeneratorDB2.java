@@ -36,23 +36,23 @@ public class FindForeignKeyConstraintsGeneratorDB2 extends AbstractSqlGenerator<
         if (((DB2Database)database).getDataServerType() == DataServerType.DB2Z){
         	CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(database);
 
-        	sb.append("SELECT PK.TBNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(",");
-			sb.append("       PK.NAME    as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(",");
-			sb.append("       FK.TBNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(",");
-			sb.append("       FK.COLNAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(",");
-			sb.append("       R.RELNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
-			sb.append("  FROM SYSIBM.SYSRELS R,");
-			sb.append("       SYSIBM.SYSFOREIGNKEYS FK,");
-			sb.append("       SYSIBM.SYSCOLUMNS PK");
-			sb.append(" WHERE R.CREATOR = '").append(baseTableSchema.getSchemaName()).append("'");
-			sb.append("   AND R.TBNAME  = '").append(statement.getBaseTableName()).append("'");
-			sb.append("   AND R.RELNAME = FK.RELNAME ");
-			sb.append("   AND R.CREATOR=FK.CREATOR ");
-			sb.append("   AND R.TBNAME=FK.TBNAME ");
-			sb.append("   AND R.REFTBCREATOR=PK.TBCREATOR ");
-			sb.append("   AND R.REFTBNAME=PK.TBNAME ");
-			sb.append("   AND FK.COLSEQ=PK.KEYSEQ ");
-			sb.append(" ORDER BY R.RELNAME, FK.COLSEQ asc ");
+          sb.append("SELECT PK.TBNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(",");
+          sb.append("       PK.COLNAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(",");
+          sb.append("       FK.TBNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(",");
+          sb.append("       FK.NAME    as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(",");
+          sb.append("       R.RELNAME  as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
+          sb.append("  FROM SYSIBM.SYSRELS R,");
+          sb.append("       SYSIBM.SYSFOREIGNKEYS PK,");
+          sb.append("       SYSIBM.SYSCOLUMNS FK");
+          sb.append(" WHERE R.CREATOR      = '").append(baseTableSchema.getSchemaName()).append("'");
+          sb.append("   AND R.TBNAME       = '").append(statement.getBaseTableName()).append("'");
+          sb.append("   AND R.RELNAME      = PK.RELNAME ");
+          sb.append("   AND R.CREATOR      = PK.CREATOR ");
+          sb.append("   AND R.TBNAME       = PK.TBNAME ");
+          sb.append("   AND R.REFTBCREATOR = FK.TBCREATOR ");
+          sb.append("   AND R.REFTBNAME    = FK.TBNAME ");
+          sb.append("   AND PK.COLSEQ      = FK.KEYSEQ ");
+          sb.append(" ORDER BY R.RELNAME, PK.COLSEQ asc ");
         }
 		else {
 			sb.append("SELECT ");
