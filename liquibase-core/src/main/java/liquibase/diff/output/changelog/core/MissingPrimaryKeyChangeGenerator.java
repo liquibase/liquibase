@@ -59,7 +59,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         PrimaryKey pk = (PrimaryKey) missingObject;
 
-        AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+        AddPrimaryKeyChange change = createAddPrimaryKeyChange();
         change.setTableName(pk.getTable().getName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(pk.getTable().getSchema().getCatalogName());
@@ -122,4 +122,9 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
         return returnList.toArray(new Change[returnList.size()]);
 
     }
+
+    protected AddPrimaryKeyChange createAddPrimaryKeyChange() {
+        return new AddPrimaryKeyChange();
+    }
+
 }
