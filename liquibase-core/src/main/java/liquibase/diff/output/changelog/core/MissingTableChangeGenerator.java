@@ -23,6 +23,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
@@ -112,6 +113,17 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
             if (column.getRemarks() != null) {
                 columnConfig.setRemarks(column.getRemarks());
+            }
+
+            if (column.getAutoIncrementInformation() != null) {
+                BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
+                BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
+                if (startWith != null && !startWith.equals(BigInteger.ONE)) {
+                    columnConfig.setStartWith(startWith);
+                }
+                if (incrementBy != null && !incrementBy.equals(BigInteger.ONE)) {
+                    columnConfig.setIncrementBy(incrementBy);
+                }
             }
 
             change.addColumn(columnConfig);

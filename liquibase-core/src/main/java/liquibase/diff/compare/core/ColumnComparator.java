@@ -59,6 +59,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
         exclude.add("name");
         exclude.add("type");
+        exclude.add("autoIncrementInformation");
 
         if (!LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDiffColumnOrder()) {
             exclude.add("order");
@@ -68,6 +69,13 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+
+        boolean autoIncrement1 = ((Column) databaseObject1).isAutoIncrement();
+        boolean autoIncrement2 = ((Column) databaseObject2).isAutoIncrement();
+
+        if (autoIncrement1 != autoIncrement2) { //only compare if autoIncrement or not since there are sometimes expected differences in start/increment/etc value.
+            differences.addDifference("autoIncrement", autoIncrement1, autoIncrement2);
+        }
 
         return differences;
     }
