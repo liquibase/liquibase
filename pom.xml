@@ -9,7 +9,7 @@
     liquibase-parent
   </artifactId>
   <version>
-    3.5.946
+    3.5.955
   </version>
   <packaging>
     pom

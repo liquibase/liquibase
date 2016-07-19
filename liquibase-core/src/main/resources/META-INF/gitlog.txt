@@ -1,3 +1,7 @@
+3161cbd Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+5ac9854 CORE-2815 Rollback by tag doesn't roll back tagDatabase changeSet
+2e498ed CORE-2805 Multiple calls to generateChecksum() impacting deploy performance
+0c4975f CORE-2814 DB2: Quoting strategy not respected, objects are always saved as upper case
 8c2831a Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 852a48e Better handling of releasing changelog locks when there is an exception on the unlock
 d40ad9d Merge pull request #1 from liquibase/ddb
