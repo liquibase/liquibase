@@ -36,21 +36,6 @@ public class SchemaComparator implements DatabaseObjectComparator {
         String schemaName2 = null;
 
         if (accordingTo.supportsSchemas()) {
-            if (accordingTo.supportsCatalogs()) {
-                String catalog1 = ((Schema) databaseObject1).getCatalogName();
-                String catalog2 = ((Schema) databaseObject2).getCatalogName();
-
-                if (catalog1 == null) {
-                    catalog1 = StringUtils.trimToEmpty(accordingTo.getDefaultCatalogName());
-                }
-                if (catalog2 == null) {
-                    catalog2 = StringUtils.trimToEmpty(accordingTo.getDefaultCatalogName());
-                }
-                if (!catalog1.equalsIgnoreCase(catalog2)) {
-                    return false;
-                }
-            }
-
             schemaName1 = databaseObject1.getName();
             schemaName2 = databaseObject2.getName();
 
