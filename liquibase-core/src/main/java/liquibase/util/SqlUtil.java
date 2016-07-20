@@ -217,6 +217,9 @@ public class SqlUtil {
                 }
                 return scanner.nextBigDecimal();
             } else {
+                if (stringVal.equals("")) {
+                    return new DatabaseFunction("''"); //can have numeric default '' on sql server
+                }
                 return new DatabaseFunction(stringVal);
             }
         } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
