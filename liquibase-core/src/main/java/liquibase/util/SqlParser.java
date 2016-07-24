@@ -29,6 +29,9 @@ public class SqlParser {
                 } else if (token.kind == SimpleSqlGrammarConstants.LINE_COMMENT || token.kind == SimpleSqlGrammarConstants.MULTI_LINE_COMMENT) {
                     if (preserveComments) {
                         clauses.append(new StringClauses.Comment(token.image));
+                        if (!preserveWhitespace) {
+                            clauses.append(new StringClauses.Whitespace("\n"));
+                        }
                     }
                 } else {
                     clauses.append(token.image);
