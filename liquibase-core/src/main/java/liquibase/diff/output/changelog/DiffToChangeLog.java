@@ -312,7 +312,7 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof MSSQLDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz join sys.views v on v.object_id=referenced_id where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "object_schema_name(referenced_id)='" + obj + "'";
@@ -325,16 +325,6 @@ public class DiffToChangeLog {
                     String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
                     graph.add(bName, tabName);
-                }
-
-                for (DatabaseObject missingObject : missingObjects) { //mssql does not include tables with dependency info, need to depend on all tables so views go after them
-                    if (missingObject instanceof View) {
-                        for (DatabaseObject maybeTable : missingObjects) {
-                            if (maybeTable instanceof Table) {
-                                graph.add(maybeTable.getSchema().getName()+"."+maybeTable.getName(), missingObject.getSchema().getName()+"."+missingObject.getName());
-                            }
-                        }
-                    }
                 }
             }
         }
