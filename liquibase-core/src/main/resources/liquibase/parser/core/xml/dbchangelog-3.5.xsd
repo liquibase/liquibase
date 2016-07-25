@@ -430,6 +430,9 @@
 
 	<xsd:element name="addPrimaryKey">
 		<xsd:complexType>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+			</xsd:choice>
             <xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attribute name="columnNames" type="xsd:string"
 				use="required" />

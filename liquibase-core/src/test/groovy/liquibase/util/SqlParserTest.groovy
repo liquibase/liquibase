@@ -82,7 +82,7 @@ class SqlParserTest extends Specification {
         "a string /* with a comment */ here"                                                               | ["a", "string", "/* with a comment */", "here"]
         "a string /* with a 'quoted' comment */ here"                                                      | ["a", "string", "/* with a 'quoted' comment */", "here"]
         "'a quoted semicolon; here' and /* a commented semicolon; here */"                                 | ["'a quoted semicolon; here'", "and", "/* a commented semicolon; here */"]
-        "--here is a comment\nand a statement;\nand another --followed by a comment"                       | ["--here is a comment", "and", "a", "statement", ";", "and", "another", "--followed by a comment"]
+        "--here is a comment\nand a statement;\nand another --followed by a comment"                       | ["--here is a comment\n", "and", "a", "statement", ";", "and", "another", "--followed by a comment\n"]
         "/*\nLets start a multiline comment\n\nThat actually covers multiple lines\nhere\n*/ then regular" | ["/*\nLets start a multiline comment\n\nThat actually covers multiple lines\nhere\n*/", "then", "regular"]
     }
 }

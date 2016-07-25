@@ -91,7 +91,11 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
                 if (rs.size() > 0) {
-                    table.setPrimaryKey(new PrimaryKey().setName(rs.get(0).getString("PK_NAME")).setTable(table));
+                    PrimaryKey primaryKey = new PrimaryKey().setName(rs.get(0).getString("PK_NAME"));
+                    primaryKey.setTable((Table) foundObject);
+                    if (!database.isSystemObject(primaryKey)) {
+                        table.setPrimaryKey(primaryKey.setTable(table));
+                    }
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

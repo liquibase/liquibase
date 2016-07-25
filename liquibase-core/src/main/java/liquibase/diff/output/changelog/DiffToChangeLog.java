@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
@@ -25,6 +26,8 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
 
@@ -239,7 +242,7 @@ public class DiffToChangeLog {
                 };
 
                 DependencyUtil.DependencyGraph graph = new DependencyUtil.DependencyGraph(nameListener);
-                addDependencies(graph, schemas, database);
+                addDependencies(graph, schemas, missingObjects, database);
                 graph.computeDependencies();
 
                 if (dependencyOrder.size() > 0) {
@@ -285,13 +288,13 @@ public class DiffToChangeLog {
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
-        return database instanceof DB2Database;
+        return database instanceof DB2Database || database instanceof MSSQLDatabase;
     }
 
     /**
      * Adds dependencies to the graph as schema.object_name.
      */
-    protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
+    protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Collection<DatabaseObject> missingObjects, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
@@ -306,6 +309,23 @@ public class DiffToChangeLog {
                 String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
 
                 graph.add(bName, tabName);
+            }
+        } else if (database instanceof MSSQLDatabase) {
+            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+                        @Override
+                        public String toString(String obj) {
+                            return "object_schema_name(referenced_id)='" + obj + "'";
+                        }
+                    }
+            )));
+            if (rs.size() > 0) {
+                for (Map<String, ?> row : rs) {
+                    String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
+                    String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
+
+                    graph.add(bName, tabName);
+                }
             }
         }
     }
