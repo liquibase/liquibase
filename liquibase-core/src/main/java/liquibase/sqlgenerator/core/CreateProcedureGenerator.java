@@ -70,6 +70,10 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
 
+        if (database instanceof MSSQLDatabase && procedureText.matches("(?si).*as[\\s\\r\\n.]+merge.*") && !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
+            procedureText = procedureText + ";";
+        }
+
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
 
 
