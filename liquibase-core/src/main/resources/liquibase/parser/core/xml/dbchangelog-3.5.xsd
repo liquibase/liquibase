@@ -1172,7 +1172,7 @@
                 <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
             </xsd:choice>
 			<xsd:attributeGroup ref="createIndex" />
-			<anyAttribute namespace="##other"  processContents="lax"/>
+			<xsd:anyAttribute namespace="##other"  processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>
 
