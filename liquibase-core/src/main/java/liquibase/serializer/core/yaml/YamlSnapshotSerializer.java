@@ -2,6 +2,7 @@ package liquibase.serializer.core.yaml;
 
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -11,8 +12,10 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.DatabaseObjectComparator;
+import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 
+import liquibase.util.StringUtils;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
@@ -47,10 +50,27 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
 //    }
 
     @Override
-    protected Object toMap(LiquibaseSerializable object) {
+    protected Object toMap(final LiquibaseSerializable object) {
         if (object instanceof DatabaseObject) {
             if (alreadySerializingObject) {
-                return ((DatabaseObject) object).getClass().getName()+"#"+((DatabaseObject) object).getSnapshotId();
+                String snapshotId = ((DatabaseObject) object).getSnapshotId();
+                if (snapshotId == null) {
+                    String name = ((DatabaseObject) object).getName();
+                    Object table = ((DatabaseObject) object).getAttribute("table", Object.class);
+                    if (table == null) {
+                        table = ((DatabaseObject) object).getAttribute("relation", Object.class);
+                    }
+                    if (table != null) {
+                        name = table.toString() + "." + name;
+                    }
+
+                    if (((DatabaseObject) object).getSchema() != null) {
+                        name = ((DatabaseObject) object).getSchema().toString() + "." + name;
+                    }
+
+                    throw new UnexpectedLiquibaseException("Found a null snapshotId for " + StringUtils.lowerCaseFirst(object.getClass().getSimpleName()) + " " + name);
+                }
+                return ((DatabaseObject) object).getClass().getName() + "#" + snapshotId;
             } else {
                 alreadySerializingObject = true;
                 Object map = super.toMap(object);
@@ -60,7 +80,7 @@ public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSe
         }
         if (object instanceof DatabaseObjectCollection) {
             SortedMap<String, Object> returnMap = new TreeMap<String, Object>();
-            for (Map.Entry<Class<? extends DatabaseObject>,Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
+            for (Map.Entry<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> entry : ((DatabaseObjectCollection) object).toMap().entrySet()) {
                 ArrayList value = new ArrayList(entry.getValue());
                 Collections.sort(value, new DatabaseObjectComparator());
                 returnMap.put(entry.getKey().getName(), value);

@@ -11,10 +11,7 @@ import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 
 public class MissingColumnChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 

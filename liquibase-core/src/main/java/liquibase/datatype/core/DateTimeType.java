@@ -243,6 +243,9 @@ public class DateTimeType extends LiquibaseDataType {
                 }
             }
 
+            if (value.contains("/") || value.contains("-")) { //maybe a custom format the database expects. Just return it.
+                return value;
+            }
 
             return new DatabaseFunction(value);
         }
