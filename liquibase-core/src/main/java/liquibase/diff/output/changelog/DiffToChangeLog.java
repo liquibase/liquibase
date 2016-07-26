@@ -245,36 +245,38 @@ public class DiffToChangeLog {
                 addDependencies(graph, schemas, missingObjects, database);
                 graph.computeDependencies();
 
-                if (dependencyOrder.size() > 0) {
+                boolean sortAllObjects;
+                if (database instanceof DB2Database) {
+                    sortAllObjects = true;
+                } else if (database instanceof MSSQLDatabase) {
+                    sortAllObjects = false;
+                } else {
+                    throw new UnexpectedLiquibaseException("Do not know if "+database.getClass().getName()+" can sort all objects or just by type");
+                }
 
-                    List<DatabaseObject> toSort = new ArrayList<DatabaseObject>();
-                    List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
-
+                if (sortAllObjects) {
+                    List<DatabaseObject> toSort = sortObjects(missingObjects, dependencyOrder);
+                    if (toSort != null) return toSort;
+                } else {
+                    List<DatabaseObject> sortedObjects = new ArrayList<DatabaseObject>();
+                    List<DatabaseObject> missingObjectsByType = new ArrayList<DatabaseObject>();
                     for (DatabaseObject obj : missingObjects) {
-                        if (!(obj instanceof Column) && obj.getSchema() != null) {
-                            String name = obj.getSchema().getName()+"."+obj.getName();
-                            if (dependencyOrder.contains(name)) {
-                                toSort.add(obj);
-                            } else {
-                                toNotSort.add(obj);
-                            }
+                        if (missingObjectsByType.size() == 0) {
+                            missingObjectsByType.add(obj);
+                        } else if (missingObjectsByType.get(0).getClass().equals(obj.getClass())) {
+                            missingObjectsByType.add(obj);
                         } else {
-                            toNotSort.add(obj);
+                            sortObjects(missingObjectsByType, dependencyOrder);
+                            sortedObjects.addAll(missingObjectsByType);
+                            missingObjectsByType.clear();
+                            missingObjectsByType.add(obj);
                         }
                     }
-
-                    Collections.sort(toSort, new Comparator<DatabaseObject>() {
-                        @Override
-                        public int compare(DatabaseObject o1, DatabaseObject o2) {
-                            Integer o1Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o1.getName());
-                            int o2Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o2.getName());
-
-                            return o1Order.compareTo(o2Order);
-                        }
-                    });
-
-                    toSort.addAll(toNotSort);
-                    return toSort;
+                    if (missingObjectsByType.size() > 0) {
+                        sortObjects(missingObjectsByType, dependencyOrder);
+                        sortedObjects.addAll(missingObjectsByType);
+                    }
+                    missingObjects = sortedObjects;
                 }
             } catch (DatabaseException e) {
                 LogFactory.getInstance().getLog().debug("Cannot get view dependencies: " + e.getMessage());
@@ -282,6 +284,41 @@ public class DiffToChangeLog {
         }
 
         return new ArrayList<DatabaseObject>(missingObjects);
+    }
+
+    protected List<DatabaseObject> sortObjects(Collection<DatabaseObject> missingObjects, final List<String> dependencyOrder) {
+        if (dependencyOrder.size() > 0) {
+
+            List<DatabaseObject> toSort = new ArrayList<DatabaseObject>();
+            List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
+
+            for (DatabaseObject obj : missingObjects) {
+                if (!(obj instanceof Column) && obj.getSchema() != null) {
+                    String name = obj.getSchema().getName()+"."+obj.getName();
+                    if (dependencyOrder.contains(name)) {
+                        toSort.add(obj);
+                    } else {
+                        toNotSort.add(obj);
+                    }
+                } else {
+                    toNotSort.add(obj);
+                }
+            }
+
+            Collections.sort(toSort, new Comparator<DatabaseObject>() {
+                @Override
+                public int compare(DatabaseObject o1, DatabaseObject o2) {
+                    Integer o1Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o1.getName());
+                    int o2Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o2.getName());
+
+                    return o1Order.compareTo(o2Order);
+                }
+            });
+
+            toSort.addAll(toNotSort);
+            return toSort;
+        }
+        return null;
     }
 
     /**
