@@ -44,6 +44,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         constraint.setTable(table);
         constraint.setName(example.getName());
         constraint.setBackingIndex(exampleConstraint.getBackingIndex());
+        constraint.setInitiallyDeferred(((UniqueConstraint) example).isInitiallyDeferred());
+        constraint.setDeferrable(((UniqueConstraint) example).isDeferrable());
+        constraint.setClustered(((UniqueConstraint) example).isClustered());
+
         for (Map<String, ?> col : metadata) {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
@@ -85,6 +89,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 UniqueConstraint uq = new UniqueConstraint().setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
                 if (constraint.containsColumn("INDEX_NAME")) {
                     uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getName()));
+                }
+                if ("CLUSTERED".equals(constraint.get("TYPE_DESC"))) {
+                    uq.setClustered(true);
                 }
                 if (seenConstraints.add(uq.getName())) {
                     table.getUniqueConstraints().add(uq);
