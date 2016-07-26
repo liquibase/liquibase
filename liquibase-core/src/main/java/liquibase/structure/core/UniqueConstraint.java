@@ -135,7 +135,16 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     }
 
-    @Override
+	public UniqueConstraint setClustered(boolean clustered) {
+		this.setAttribute("clustered", clustered);
+		return this;
+	}
+
+	public boolean isClustered() {
+		return getAttribute("clustered", false);
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
