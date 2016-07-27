@@ -247,36 +247,34 @@ public class DiffToChangeLog {
 
                 if (dependencyOrder.size() > 0) {
 
-                    List<DatabaseObject> toSortMissingObjects = new ArrayList<DatabaseObject>(missingObjects);
-                    final List<String> originalOrder = new ArrayList<String>();
-                    for (DatabaseObject object : toSortMissingObjects) {
-                        originalOrder.add(createSortKey(object));
+                    List<DatabaseObject> toSort = new ArrayList<DatabaseObject>();
+                    List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
+
+                    for (DatabaseObject obj : missingObjects) {
+                        if (!(obj instanceof Column) && obj.getSchema() != null) {
+                            String name = obj.getSchema().getName()+"."+obj.getName();
+                            if (dependencyOrder.contains(name)) {
+                                toSort.add(obj);
+                            } else {
+                                toNotSort.add(obj);
+                            }
+                        } else {
+                            toNotSort.add(obj);
+                        }
                     }
 
-                    Collections.sort(toSortMissingObjects, new Comparator<DatabaseObject>() {
+                    Collections.sort(toSort, new Comparator<DatabaseObject>() {
                         @Override
                         public int compare(DatabaseObject o1, DatabaseObject o2) {
-                            if (o1.getSchema() != null && o2.getSchema() != null) {
-                                String schemaAndName1 = o1.getSchema().getName()+"."+o1.getName();
-                                String schemaAndName2 = o2.getSchema().getName()+"."+o2.getName();
+                            Integer o1Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o1.getName());
+                            int o2Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o2.getName());
 
-                                Integer index1 = dependencyOrder.indexOf(schemaAndName1);
-                                Integer index2 = dependencyOrder.indexOf(schemaAndName2);
-
-                                if (index1 >= 0 && index2 >= 0) {
-                                    return index1.compareTo(index2);
-                                }
-                            }
-
-
-                            String o1Key = createSortKey(o1);
-                            String o2Key = createSortKey(o2);
-
-                            return ((Integer)originalOrder.indexOf(o1Key)).compareTo(originalOrder.indexOf(o2Key));
+                            return o1Order.compareTo(o2Order);
                         }
                     });
 
-                    return toSortMissingObjects;
+                    toSort.addAll(0, toNotSort);
+                    return toSort;
                 }
             } catch (DatabaseException e) {
                 LogFactory.getInstance().getLog().debug("Cannot get view dependencies: " + e.getMessage());
@@ -284,10 +282,6 @@ public class DiffToChangeLog {
         }
 
         return new ArrayList<DatabaseObject>(missingObjects);
-    }
-
-    protected String createSortKey(DatabaseObject object) {
-        return object.getClass().getName()+":"+ object.toString();
     }
 
     /**
