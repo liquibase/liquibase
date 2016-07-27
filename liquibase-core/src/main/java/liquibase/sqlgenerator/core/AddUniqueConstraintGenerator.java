@@ -35,9 +35,9 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             validationErrors.checkDisallowedField("forIndexName", addUniqueConstraintStatement.getForIndexName(), database);
         }
 
-//        if (!(database instanceof MSSQLDatabase) && addUniqueConstraintStatement.isClustered()) {
-//            validationErrors.checkDisallowedField("clustered", addUniqueConstraintStatement.isClustered(), database);
-//        }
+        if (!(database instanceof MSSQLDatabase) && addUniqueConstraintStatement.isClustered()) {
+            validationErrors.checkDisallowedField("clustered", addUniqueConstraintStatement.isClustered(), database);
+        }
         return validationErrors;
     }
 
