@@ -14,8 +14,7 @@ public class AddUniqueConstraintGeneratorTDSTest extends
 
 	@Override
 	protected boolean shouldBeImplementation(Database database) {
-        return  (database instanceof MSSQLDatabase)
-			|| (database instanceof SybaseDatabase)
+        return  (database instanceof SybaseDatabase)
 			|| (database instanceof SybaseASADatabase)
 		;
 	}

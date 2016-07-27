@@ -30,7 +30,6 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<A
     @Override
     protected boolean shouldBeImplementation(Database database) {
         return !(database instanceof SQLiteDatabase)
-                && !(database instanceof MSSQLDatabase)
                 && !(database instanceof SybaseDatabase)
                 && !(database instanceof SybaseASADatabase)
                 && !(database instanceof InformixDatabase)
