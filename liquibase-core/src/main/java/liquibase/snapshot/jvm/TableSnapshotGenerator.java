@@ -50,15 +50,22 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     schemaName = tableSchema.getName();
                 }
 
-                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
-                        " CAST(value as varchar(max)) as REMARKS\n" +
-                        " FROM\n" +
-                        " sys.extended_properties\n" +
-                        "  WHERE\n" +
-                        " name='MS_Description' " +
-                        " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "')\n" +
-                        " AND\n" +
-                        " minor_id = 0"), String.class);
+                String sql;
+                if (database.getDatabaseMajorVersion() >=9 ) {
+                    sql = "SELECT" +
+                            " CAST(value as varchar(max)) as REMARKS" +
+                            " FROM" +
+                            " sys.extended_properties" +
+                            " WHERE" +
+                            " name='MS_Description'" +
+                            " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "')" +
+                            " AND" +
+                            " minor_id = 0";
+                } else {
+                    sql = "SELECT CAST(value as varchar) as REMARKS FROM dbo.sysproperties WHERE name='MS_Description' AND id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "') AND smallid = 0";
+                }
+
+                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
 
                 if (remarks != null && remarks.size() > 0) {
                     table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
