@@ -373,8 +373,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     Statement stmt = null;
                     ResultSet resultSet = null;
                     try {
+                        String sql;
+                        if (database.getDatabaseMajorVersion() >=9) {
+                            sql = "select name from sys.types where is_user_defined=1";
+                        } else {
+                            sql = "SELECT * FROM SysTypes WHERE xusertype > 256";
+                        }
+
                         stmt = ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement();
-                        resultSet = stmt.executeQuery("select name from sys.types where is_user_defined=1");
+                        resultSet = stmt.executeQuery(sql);
+
                         while (resultSet.next()) {
                             userDefinedTypes.add(resultSet.getString("name").toLowerCase());
                         }
