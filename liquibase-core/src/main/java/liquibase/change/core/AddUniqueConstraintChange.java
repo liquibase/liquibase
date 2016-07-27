@@ -24,7 +24,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean deferrable;
     private Boolean initiallyDeferred;
     private Boolean disabled;
-    private Boolean clustered;
 
     private String forIndexName;
     private String forIndexSchemaName;
@@ -110,14 +109,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.disabled = disabled;
     }
 
-    public Boolean getClustered() {
-        return clustered;
-    }
-
-    public void setClustered(Boolean clustered) {
-        this.clustered = clustered;
-    }
-
     public String getForIndexName() {
         return forIndexName;
     }
@@ -164,17 +155,11 @@ public class AddUniqueConstraintChange extends AbstractChange {
             disabled = getDisabled();
         }
 
-        boolean clustered = false;
-        if (getClustered() != null) {
-            clustered = getClustered();
-        }
-
-        AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
-                        .setDisabled(disabled)
-                        .setClustered(clustered);
+                        .setDisabled(disabled);
 
         statement.setForIndexName(getForIndexName());
         statement.setForIndexSchemaName(getForIndexSchemaName());

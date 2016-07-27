@@ -19,10 +19,11 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     @Override
     public boolean supports(AddUniqueConstraintStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase)
-                && !(database instanceof SybaseDatabase)
-                && !(database instanceof SybaseASADatabase)
-                && !(database instanceof InformixDatabase)
-                ;
+        		&& !(database instanceof MSSQLDatabase)
+        		&& !(database instanceof SybaseDatabase)
+        		&& !(database instanceof SybaseASADatabase)
+        		&& !(database instanceof InformixDatabase)
+        ;
     }
 
     @Override
@@ -44,29 +45,29 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     @Override
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        String sql = null;
-        if (statement.getConstraintName() == null) {
-            sql = String.format("ALTER TABLE %s ADD UNIQUE" + (statement.isClustered() ? " CLUSTERED " : " ") + "(%s)"
-                    , database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
-                    , database.escapeColumnNameList(statement.getColumnNames())
-            );
-        } else {
-            sql = String.format("ALTER TABLE %s ADD CONSTRAINT %s UNIQUE" + (statement.isClustered() ? " CLUSTERED " : " ") + "(%s)"
-                    , database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
-                    , database.escapeConstraintName(statement.getConstraintName())
-                    , database.escapeColumnNameList(statement.getColumnNames())
-            );
-        }
-        if (database instanceof OracleDatabase || database instanceof PostgresDatabase) {
+		String sql = null;
+		if (statement.getConstraintName() == null) {
+			sql = String.format("ALTER TABLE %s ADD UNIQUE (%s)"
+					, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+					, database.escapeColumnNameList(statement.getColumnNames())
+			);
+		} else {
+			sql = String.format("ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)"
+					, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
+					, database.escapeConstraintName(statement.getConstraintName())
+					, database.escapeColumnNameList(statement.getColumnNames())
+			);
+		}
+		if(database instanceof OracleDatabase || database instanceof PostgresDatabase) {
             if (statement.isDeferrable()) {
                 sql += " DEFERRABLE";
             }
 
             if (statement.isInitiallyDeferred()) {
-                sql += " INITIALLY DEFERRED";
+                sql +=" INITIALLY DEFERRED";
             }
             if (statement.isDisabled()) {
-                sql += " DISABLE";
+                sql +=" DISABLE";
             }
         }
 
@@ -74,8 +75,8 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + statement.getTablespace();
             } else if (database instanceof DB2Database
-                    || database instanceof SybaseASADatabase
-                    || database instanceof InformixDatabase) {
+                || database instanceof SybaseASADatabase
+                || database instanceof InformixDatabase) {
                 ; //not supported
             } else {
                 sql += " USING INDEX TABLESPACE " + statement.getTablespace();
@@ -83,10 +84,10 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         }
 
         if (statement.getForIndexName() != null) {
-            sql += " USING INDEX " + database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
+            sql += " USING INDEX "+database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
 
-        return new Sql[]{
+        return new Sql[] {
                 new UnparsedSql(sql, getAffectedUniqueConstraint(statement))
         };
 

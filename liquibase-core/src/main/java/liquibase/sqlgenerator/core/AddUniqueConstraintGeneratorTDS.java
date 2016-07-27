@@ -22,7 +22,8 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 
     @Override
 	public boolean supports(AddUniqueConstraintStatement statement, Database database) {
-        return  (database instanceof SybaseDatabase)
+        return  (database instanceof MSSQLDatabase)
+			|| (database instanceof SybaseDatabase)
 			|| (database instanceof SybaseASADatabase)
 		;
 	}

@@ -16,7 +16,6 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean deferrable;
     private boolean initiallyDeferred;
     private boolean disabled;
-    private boolean clustered;
 
     private String forIndexName;
     private String forIndexSchemaName;
@@ -92,15 +91,6 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
     public boolean isDisabled() {
         return disabled;
-    }
-
-    public AddUniqueConstraintStatement setClustered(boolean clustered) {
-        this.clustered= clustered;
-        return this;
-    }
-
-    public boolean isClustered() {
-        return clustered;
     }
 
     public String getForIndexName() {
