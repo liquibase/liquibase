@@ -297,13 +297,13 @@ public class DiffToChangeLog {
     protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Collection<DatabaseObject> missingObjects, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "TABSCHEMA='" + obj + "'";
                         }
                     }
-            )));
+            )+")"));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
@@ -312,23 +312,24 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 9) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+            String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "object_schema_name(referenced_id)='" + obj + "'";
                         }
                     }
             );
-            sql += " UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
+            sql += ") UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
                     "from sys.objects " +
                     "where parent_object_id > 0 " +
-                    "and " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+                    "and is_ms_shipped=0 " +
+                    "and )" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "object_schema_name(object_id)='" + obj + "'";
                         }
                     }
-            );
+            )+")";
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
