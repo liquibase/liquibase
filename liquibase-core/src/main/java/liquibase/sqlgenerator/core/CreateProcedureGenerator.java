@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -44,7 +45,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         List<Sql> sql = new ArrayList<Sql>();
 
         String schemaName = statement.getSchemaName();
-        if (schemaName == null) {
+        if (schemaName == null && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getAlwaysOverrideStoredLogicSchema()) {
             schemaName = database.getDefaultSchemaName();
         }
 
@@ -126,6 +127,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      * Convenience method for other classes similar to this that want to be able to modify the procedure text to add the schema
      */
     public static String addSchemaToText(String procedureText, String schemaName, String keywordBeforeName, Database database) {
+        if (schemaName == null) {
+            return procedureText;
+        }
         if ((StringUtils.trimToNull(schemaName) != null) && LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();

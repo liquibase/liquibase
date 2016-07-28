@@ -19,6 +19,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
     public static final String GENERATE_CHANGESET_CREATED_VALUES = "generateChangeSetCreatedValues";
     public static final String AUTO_REORG = "autoReorg";
     public static final String DIFF_COLUMN_ORDER = "diffColumnOrder";
+    public static final String ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA = "alwaysOverrideStoredLogicSchema";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -77,6 +78,10 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().addProperty(DIFF_COLUMN_ORDER, Boolean.class)
                 .setDescription("Should Liquibase compare column order in diff operation?")
                 .setDefaultValue(true);
+
+        getContainer().addProperty(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, Boolean.class)
+                .setDescription("When generating SQL for createProcedure, should the procedure schema be forced to the default schema if no schemaName attribute is set?")
+                .setDefaultValue(false);
     }
 
     /**
@@ -205,6 +210,16 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public GlobalConfiguration setDiffColumnOrder(boolean diff) {
         getContainer().setValue(DIFF_COLUMN_ORDER, diff);
+        return this;
+    }
+
+
+    public Boolean getAlwaysOverrideStoredLogicSchema() {
+        return getContainer().getValue(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, Boolean.class);
+    }
+
+    public GlobalConfiguration setAlwaysOverrideStoredLogicSchema(boolean override) {
+        getContainer().setValue(ALWAYS_OVERRIDE_STORED_LOGIC_SCHEMA, override);
         return this;
     }
 }
