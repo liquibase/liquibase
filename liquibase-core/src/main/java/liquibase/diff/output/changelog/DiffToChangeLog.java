@@ -273,7 +273,7 @@ public class DiffToChangeLog {
                         }
                     });
 
-                    toSort.addAll(0, toNotSort);
+                    toSort.addAll(toNotSort);
                     return toSort;
                 }
             } catch (DatabaseException e) {
@@ -310,15 +310,27 @@ public class DiffToChangeLog {
 
                 graph.add(bName, tabName);
             }
-        } else if (database instanceof MSSQLDatabase) {
+        } else if (database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 9) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+            String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "object_schema_name(referenced_id)='" + obj + "'";
                         }
                     }
-            )));
+            );
+            sql += " UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
+                    "from sys.objects " +
+                    "where parent_object_id > 0 " +
+                    "and " + StringUtils.join(schemas, " AND ", new StringUtils.StringUtilsFormatter<String>() {
+                        @Override
+                        public String toString(String obj) {
+                            return "object_schema_name(object_id)='" + obj + "'";
+                        }
+                    }
+            );
+
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
                 for (Map<String, ?> row : rs) {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
