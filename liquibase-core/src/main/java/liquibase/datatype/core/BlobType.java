@@ -76,10 +76,6 @@ public class BlobType extends LiquibaseDataType {
             }
         }
         if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("binary")) {
-                return new DatabaseDataType("BINARY", getParameters());
-            }
-
             return new DatabaseDataType("BYTEA");
         }
         if (database instanceof SybaseASADatabase) {
