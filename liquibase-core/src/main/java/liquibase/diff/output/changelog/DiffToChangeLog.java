@@ -251,8 +251,13 @@ public class DiffToChangeLog {
                     List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
 
                     for (DatabaseObject obj : missingObjects) {
-                        if (!(obj instanceof Column) && obj.getSchema() != null) {
-                            String name = obj.getSchema().getName()+"."+obj.getName();
+                        if (!(obj instanceof Column)) {
+                            String schemaName = null;
+                            if (obj.getSchema() != null) {
+                                schemaName = obj.getSchema().getName();
+                            }
+
+                            String name = schemaName + "." + obj.getName();
                             if (dependencyOrder.contains(name)) {
                                 toSort.add(obj);
                             } else {
@@ -266,8 +271,18 @@ public class DiffToChangeLog {
                     Collections.sort(toSort, new Comparator<DatabaseObject>() {
                         @Override
                         public int compare(DatabaseObject o1, DatabaseObject o2) {
-                            Integer o1Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o1.getName());
-                            int o2Order = dependencyOrder.indexOf(o1.getSchema().getName()+"."+o2.getName());
+                            String o1Schema = null;
+                            if (o1.getSchema() != null) {
+                                o1Schema = o1.getSchema().getName();
+                            }
+
+                            String o2Schema = null;
+                            if (o2.getSchema() != null) {
+                                o2Schema = o2.getSchema().getName();
+                            }
+
+                            Integer o1Order = dependencyOrder.indexOf(o1Schema + "." + o1.getName());
+                            int o2Order = dependencyOrder.indexOf(o2Schema + "." + o2.getName());
 
                             return o1Order.compareTo(o2Order);
                         }
@@ -303,7 +318,7 @@ public class DiffToChangeLog {
                             return "TABSCHEMA='" + obj + "'";
                         }
                     }
-            )+")"));
+            ) + ")"));
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
@@ -318,7 +333,7 @@ public class DiffToChangeLog {
                             return "object_schema_name(referenced_id)='" + obj + "'";
                         }
                     }
-            )+")";
+            ) + ")";
             sql += " UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
                     "from sys.objects " +
                     "where parent_object_id > 0 " +
@@ -329,9 +344,9 @@ public class DiffToChangeLog {
                             return "object_schema_name(object_id)='" + obj + "'";
                         }
                     }
-            )+")";
+            ) + ")";
 
-            sql += "UNION select object_schema_name(fk.object_id) as referencing_schema_name, fk.name as referencing_name, i.name as referenced_name, object_schema_name(i.object_id) as referenced_schema_name " +
+            sql += " UNION select object_schema_name(fk.object_id) as referencing_schema_name, fk.name as referencing_name, i.name as referenced_name, object_schema_name(i.object_id) as referenced_schema_name " +
                     "from sys.foreign_keys fk " +
                     "join sys.indexes i on fk.referenced_object_id=i.object_id and fk.key_index_id=i.index_id " +
                     "where fk.is_ms_shipped=0 " +
@@ -341,10 +356,17 @@ public class DiffToChangeLog {
                             return "object_schema_name(fk.object_id)='" + obj + "'";
                         }
                     }
-            )+")";
+            ) + ")";
+
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, object_name(i.object_id) as referencing_name, s.name as referenced_name, null as referenced_schema_name " +
+                    "from sys.indexes i " +
+                    "join sys.partition_schemes s on i.data_space_id = s.data_space_id";
+
+            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, f.name as referenced_name, null as referenced_schema_name from sys.partition_functions f " +
+                    "join sys.partition_schemes s on s.function_id=f.function_id";
 
 
-                    List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
                 for (Map<String, ?> row : rs) {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
