@@ -277,7 +277,7 @@ public class DiffToChangeLog {
                     return toSort;
                 }
             } catch (DatabaseException e) {
-                LogFactory.getInstance().getLog().debug("Cannot get view dependencies: " + e.getMessage());
+                LogFactory.getInstance().getLog().debug("Cannot get object dependencies: " + e.getMessage());
             }
         }
 
@@ -318,12 +318,12 @@ public class DiffToChangeLog {
                             return "object_schema_name(referenced_id)='" + obj + "'";
                         }
                     }
-            );
-            sql += ") UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
+            )+")";
+            sql += " UNION select object_schema_name(object_id) as referencing_schema_name, object_name(object_id) as referencing_name, object_name(parent_object_id) as referenced_name, object_schema_name(parent_object_id) as referenced_schema_name " +
                     "from sys.objects " +
                     "where parent_object_id > 0 " +
                     "and is_ms_shipped=0 " +
-                    "and )" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                    "and (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "object_schema_name(object_id)='" + obj + "'";
@@ -331,7 +331,20 @@ public class DiffToChangeLog {
                     }
             )+")";
 
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
+            sql += "UNION select object_schema_name(fk.object_id) as referencing_schema_name, fk.name as referencing_name, i.name as referenced_name, object_schema_name(i.object_id) as referenced_schema_name " +
+                    "from sys.foreign_keys fk " +
+                    "join sys.indexes i on fk.referenced_object_id=i.object_id and fk.key_index_id=i.index_id " +
+                    "where fk.is_ms_shipped=0 " +
+                    "and (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                        @Override
+                        public String toString(String obj) {
+                            return "object_schema_name(fk.object_id)='" + obj + "'";
+                        }
+                    }
+            )+")";
+
+
+                    List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
                 for (Map<String, ?> row : rs) {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
