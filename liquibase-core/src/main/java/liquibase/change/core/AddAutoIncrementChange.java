@@ -103,7 +103,15 @@ public class AddAutoIncrementChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
-            String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
+            String sequenceName = (getTableName() + "_" + getColumnName() + "_seq");
+
+            String escapedTableName = database.escapeObjectName(getTableName(), Table.class);
+            String escapedColumnName = database.escapeObjectName(getColumnName(), Table.class);
+            if (escapedTableName != null && escapedColumnName != null && !escapedTableName.startsWith("\"") && !escapedColumnName.startsWith("\"")) {
+                sequenceName = sequenceName.toLowerCase();
+            }
+
+
             String schemaPrefix;
             if (this.schemaName == null) {
                 schemaPrefix = database.getDefaultSchemaName();
