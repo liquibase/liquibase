@@ -90,6 +90,14 @@ public class ValidationErrors {
         return toString().hashCode();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof ValidationErrors)) {
+            return false;
+        }
+        return this.toString().equals(obj.toString());
+    }
+
     public List<String> getRequiredErrorMessages() {
         List<String> requiredErrorMessages = new ArrayList<String>();
         for (String message : errorMessages) {

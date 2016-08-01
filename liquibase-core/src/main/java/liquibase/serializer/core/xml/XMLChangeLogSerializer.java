@@ -133,8 +133,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         FileInputStream in = new FileInputStream(changeLogFile);
-        String existingChangeLog = StreamUtil.getStreamContents(in);
-        in.close();
+        String existingChangeLog;
+        try {
+            existingChangeLog = StreamUtil.getStreamContents(in);
+        } finally {
+            in.close();
+        }
 
         FileOutputStream out = new FileOutputStream(changeLogFile);
 

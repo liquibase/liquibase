@@ -17,6 +17,9 @@ public class DatabaseDataType {
     }
     
     public DatabaseDataType(String name, Object... parameters) {
+        if (parameters == null) {
+            parameters = new Object[0];
+        }
         this.type = name;
 
         String[] stringParams = new String[parameters.length];
