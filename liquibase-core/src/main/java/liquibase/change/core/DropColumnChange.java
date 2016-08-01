@@ -179,7 +179,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             }
 
             public boolean createThisIndex(Index index) {
-                return !index.getColumns().contains(columnName);
+                return !index.getColumnNames().contains(columnName);
             }
         };
 

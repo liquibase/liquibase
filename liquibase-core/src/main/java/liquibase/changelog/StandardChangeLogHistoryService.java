@@ -181,7 +181,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasContexts) {
                 Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
-                if (columnSize != null && columnSize < Integer.valueOf(getContextsSize())) {
+                if (columnSize != null && columnSize < Integer.parseInt(getContextsSize())) {
                     executor.comment("Modifying size of databasechangelog.contexts column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "("+getContextsSize()+")"));
                 }
@@ -192,7 +192,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasLabels) {
                 Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
-                if (columnSize != null && columnSize < Integer.valueOf(getLabelsSize())) {
+                if (columnSize != null && columnSize < Integer.parseInt(getLabelsSize())) {
                     executor.comment("Modifying size of databasechangelog.labels column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName+"("+getLabelsSize()+")"));
                 }

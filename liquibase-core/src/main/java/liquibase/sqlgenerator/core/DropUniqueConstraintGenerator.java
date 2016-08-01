@@ -37,7 +37,12 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()) + " DROP INDEX";
         } else if (database instanceof SybaseASADatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP UNIQUE (" + statement.getUniqueColumns() + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP UNIQUE (" + StringUtils.join(statement.getUniqueColumns(), ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
+                @Override
+                public String toString(ColumnConfig obj) {
+                    return obj.getName();
+                }
+            }) + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         }
