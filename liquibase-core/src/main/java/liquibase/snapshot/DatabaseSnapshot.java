@@ -378,7 +378,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return newCollection;
         } else if (fieldValue instanceof Map) {
             Map newMap = (Map) fieldValue.getClass().newInstance();
-            for (Map.Entry entry : new HashSet<Map.Entry>((Set<Map.Entry>) ((Map) fieldValue).entrySet())) {
+            for (Map.Entry entry : (Set<Map.Entry>) ((Map) fieldValue).entrySet()) {
                 Object key = replaceObject(entry.getKey());
                 Object value = replaceObject(entry.getValue());
 

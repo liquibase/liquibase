@@ -28,7 +28,7 @@ public class ChangeLogParameters {
     }
 
     public ChangeLogParameters(Database database) {
-        for (Map.Entry entry : new HashSet<Map.Entry>(((Properties) System.getProperties().clone()).entrySet())) {
+        for (Map.Entry entry : ((Properties) System.getProperties().clone()).entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
 

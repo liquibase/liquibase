@@ -66,9 +66,9 @@ public class OfflineConnection implements DatabaseConnection {
                 this.productVersion = paramEntry.getValue();
                 String[] versionParts = productVersion.split("\\.");
                 try {
-                    this.databaseMajorVersion = Integer.valueOf(versionParts[0]);
+                    this.databaseMajorVersion = Integer.parseInt(versionParts[0]);
                     if (versionParts.length > 1) {
-                        this.databaseMinorVersion = Integer.valueOf(versionParts[1]);
+                        this.databaseMinorVersion = Integer.parseInt(versionParts[1]);
                     }
                 } catch (NumberFormatException e) {
                     LogFactory.getInstance().getLog().warning("Cannot parse database version "+productVersion);

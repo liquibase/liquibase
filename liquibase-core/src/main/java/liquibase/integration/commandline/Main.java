@@ -750,7 +750,7 @@ public class Main {
                     if (attributeName.toLowerCase().contains("password")) {
                         value = new String(c.readPassword(attributeName + ": "));
                     } else {
-                        value = new String(c.readLine(attributeName + ": "));
+                        value = c.readLine(attributeName + ": ");
                     }
                 }
 

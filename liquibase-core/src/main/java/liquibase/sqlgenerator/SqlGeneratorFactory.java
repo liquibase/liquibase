@@ -94,10 +94,14 @@ public class SqlGeneratorFactory {
         }
 
         int version;
-        try {
-            version = database.getDatabaseMajorVersion();
-        } catch (Throwable e) {
+        if (database == null) {
             version = 0;
+        } else {
+            try {
+                version = database.getDatabaseMajorVersion();
+            } catch (Throwable e) {
+                version = 0;
+            }
         }
 
         String key = statement.getClass().getName()+":"+ databaseName+":"+ version;

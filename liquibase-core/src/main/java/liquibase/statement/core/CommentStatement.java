@@ -15,6 +15,15 @@ public class CommentStatement extends AbstractSqlStatement {
 		return text.hashCode();
 	}
 
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof CommentStatement)) {
+			return false;
+		}
+		return this.toString().equals(obj.toString());
+	}
+
 	@Override
 	public String toString() {
 		if (text != null && text.length() >= MAX_LENGTH) {
