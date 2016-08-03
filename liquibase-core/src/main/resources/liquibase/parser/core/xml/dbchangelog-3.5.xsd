@@ -41,7 +41,23 @@
             </xsd:simpleType>
         </xsd:union>
     </xsd:simpleType>
-    
+
+	<xsd:simpleType name="longExp" id="longExp">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<xsd:documentation>Extension to standard XSD long type to allow ${} parameters</xsd:documentation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:union>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:long"/>
+			</xsd:simpleType>
+			<xsd:simpleType>
+				<xsd:restriction base="propertyExpression"/>
+			</xsd:simpleType>
+		</xsd:union>
+	</xsd:simpleType>
+
 	<xsd:simpleType name="onChangeSetPreconditionErrorOrFail">
 		<xsd:restriction base="xsd:string">
 			<xsd:enumeration value="HALT" />
@@ -307,8 +323,8 @@
         <xsd:attribute name="defaultValueSequenceCurrent" type="xsd:string" />
         <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
 		<xsd:attribute name="autoIncrement" type="booleanExp" />
-		<xsd:attribute name="startWith" type="xsd:long" />
-		<xsd:attribute name="incrementBy" type="xsd:long" />
+		<xsd:attribute name="startWith" type="longExp" />
+		<xsd:attribute name="incrementBy" type="longExp" />
 		<xsd:attribute name="remarks" type="xsd:string" />
         <xsd:attribute name="encoding" type="xsd:string">
             <xsd:annotation>
@@ -508,8 +524,8 @@
             <xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attribute name="columnName" type="xsd:string" use="required" />
 			<xsd:attribute name="columnDataType" type="xsd:string" />
-			<xsd:attribute name="startWith" type="xsd:long" />
-			<xsd:attribute name="incrementBy" type="xsd:long" />
+			<xsd:attribute name="startWith" type="longExp" />
+			<xsd:attribute name="incrementBy" type="longExp" />
 		</xsd:complexType>
 	</xsd:element>
 
