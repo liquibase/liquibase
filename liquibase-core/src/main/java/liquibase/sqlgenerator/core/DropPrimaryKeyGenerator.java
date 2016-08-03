@@ -90,6 +90,10 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP PRIMARY KEY DROP INDEX";
         } else if (database instanceof InformixDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+        } else if (database instanceof SybaseDatabase) {
+            String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            String escapedConstraintName = database.escapeConstraintName(statement.getConstraintName());
+            sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT " + escapedConstraintName;
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP PRIMARY KEY";
         }
