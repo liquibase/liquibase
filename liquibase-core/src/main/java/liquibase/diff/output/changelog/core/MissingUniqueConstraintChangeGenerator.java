@@ -3,6 +3,7 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
@@ -64,6 +65,9 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
         change.setDeferrable(uc.isDeferrable() ? Boolean.TRUE : null);
         change.setInitiallyDeferred(uc.isInitiallyDeferred() ? Boolean.TRUE : null);
         change.setDisabled(uc.isDisabled() ? Boolean.TRUE : null);
+        if (referenceDatabase instanceof MSSQLDatabase) {
+            change.setClustered(uc.isClustered() ? Boolean.TRUE : null);
+        }
 
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = uc.getBackingIndex();

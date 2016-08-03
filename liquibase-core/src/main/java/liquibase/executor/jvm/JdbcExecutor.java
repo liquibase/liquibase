@@ -59,7 +59,13 @@ public class JdbcExecutor extends AbstractExecutor {
             // in the case when the exception translator hasn't been initialized yet.
             JdbcUtils.closeStatement(stmt);
             stmt = null;
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
+            String url;
+            if (con.isClosed()) {
+                url = "CLOSED CONNECTION";
+            } else {
+                url = con.getURL();
+            }
+            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
         }
         finally {
             JdbcUtils.closeStatement(stmt);

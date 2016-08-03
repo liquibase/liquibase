@@ -1,3 +1,34 @@
+b8ce5ac Fixed null pointer exception
+6dbf1f0 Check for null connection in metadata check
+e49bf93 Experimental ordering of views in mssql
+24b2a78 Ensure XML writer is closed
+e8b1ca7 Experimental ordering of views in mssql
+7a10893 Experimental ordering of views in mssql
+1ed39ed CORE-2840 MSSQL createProcedure for CREATE MERGE AS procedures need a trailing semicolon
+7b35f96 Experimental ordering of views in mssql
+5f85beb Experimental ordering of views in mssql
+f5565c1 Experimental ordering of views in mssql
+ea4ba43 Fixed failing test
+9c05cc7 CORE-2842 MSSQL: Support creating clustered unique constraints (cherry picked from commit 2cfd5e6)
+b28148d Updated xsd to 3.6 (cherry picked from commit 07d6fe1)
+cf4c977 Experimental ordering of views in mssql
+bd7a7f4 CORE-2840 MSSQL createProcedure for CREATE MERGE AS procedures need a trailing semicolon
+d7d8e2d Need to include a newline after a line comment or the resulting SQL is now just a comment
+9ee9874 Need to include a newline after a line comment or the resulting SQL is now just a comment
+6c9ae1a Experimental ordering of views in mssql
+f052b2f CORE-2835 GenerateChangeLog doesn't correctly "numeric DEFAULT '" " columns
+78f823b Cannot take catalog into account when comparing schemas or cross-database diffs will nto work
+0164a16 Schemas are not the same if catalogs are different
+94e60d7 Experimental ordering of views in mssql
+5446258 Snapshot autoIncrement information on mssql
+97c38bb Add better extensions support to addPrimaryKey
+817c43a CORE-2830 GenerateChangeLog does not handle tables with compound primary keys
+89197eb CORE-2828 MSSQL not capturing that primary key are non-clustered in generateChangeLog
+5d13708 Improved error message when connection is closed
+61ef1dc CORE-2827 MSSQL: misc default value fixes
+b0da65a CORE-2816 Snapshot error when snapshotting an index or primary key against a column that ends with "DESC"
+a549396 CORE-2816 Snapshot error when snapshotting an index or primary key against a case-sensitive column or system primary key
+cfb102d CORE-2816 Snapshot error when snapshotting an index or primary key against a case-sensitive column
 3161cbd Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
 5ac9854 CORE-2815 Rollback by tag doesn't roll back tagDatabase changeSet
 2e498ed CORE-2805 Multiple calls to generateChecksum() impacting deploy performance

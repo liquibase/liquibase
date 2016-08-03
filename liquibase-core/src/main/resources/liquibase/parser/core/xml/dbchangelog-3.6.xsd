@@ -465,6 +465,7 @@
             <xsd:attribute name="forIndexCatalogName" type="xsd:string" />
             <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
             <xsd:attribute name="forIndexName" type="xsd:string" />
+			<xsd:attribute name="clustered" type="booleanExp" />
         </xsd:complexType>
 	</xsd:element>
 

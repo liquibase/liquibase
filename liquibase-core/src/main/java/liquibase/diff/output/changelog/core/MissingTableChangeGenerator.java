@@ -23,6 +23,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
@@ -83,18 +84,22 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
             ConstraintsConfig constraintsConfig = null;
             // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumnNamesAsList().contains(column.getName())) {
-                constraintsConfig = new ConstraintsConfig();
-                constraintsConfig.setPrimaryKey(true);
-                constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
-                // MySQL sets some primary key names as PRIMARY which is invalid
-                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
-                    constraintsConfig.setPrimaryKeyName(null);
-                } else  {
-                    constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+            if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumns().size() == 1 && primaryKey.getColumnNamesAsList().contains(column.getName())) {
+                if (referenceDatabase instanceof MSSQLDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && !primaryKey.getBackingIndex().getClustered()) {
+                    // have to handle PK as a separate statement
+                } else {
+                    constraintsConfig = new ConstraintsConfig();
+                    constraintsConfig.setPrimaryKey(true);
+                    constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
+                    // MySQL sets some primary key names as PRIMARY which is invalid
+                    if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
+                        constraintsConfig.setPrimaryKeyName(null);
+                    } else  {
+                        constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                    }
+                    control.setAlreadyHandledMissing(primaryKey);
+                    control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
                 }
-                control.setAlreadyHandledMissing(primaryKey);
-                control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
             } else if (column.isNullable() != null && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
@@ -108,6 +113,17 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
             if (column.getRemarks() != null) {
                 columnConfig.setRemarks(column.getRemarks());
+            }
+
+            if (column.getAutoIncrementInformation() != null) {
+                BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
+                BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
+                if (startWith != null && !startWith.equals(BigInteger.ONE)) {
+                    columnConfig.setStartWith(startWith);
+                }
+                if (incrementBy != null && !incrementBy.equals(BigInteger.ONE)) {
+                    columnConfig.setIncrementBy(incrementBy);
+                }
             }
 
             change.addColumn(columnConfig);
