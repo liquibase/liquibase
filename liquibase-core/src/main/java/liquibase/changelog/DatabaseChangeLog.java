@@ -323,7 +323,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
         } else if (nodeName.equals("includeAll")) {
             String path = node.getChildValue(null, "path", String.class);
-            String resourceFilterDef = node.getChildValue(null, "resourceFilter", String.class);
+            String resourceFilterDef = node.getChildValue(null, "filter", String.class);
+            if (resourceFilterDef == null) {
+                resourceFilterDef = node.getChildValue(null, "resourceFilter", String.class);
+            }
             IncludeAllFilter resourceFilter = null;
             if (resourceFilterDef != null) {
                 try {
