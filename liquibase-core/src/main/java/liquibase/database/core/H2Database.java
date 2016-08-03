@@ -10,9 +10,6 @@ import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
 
@@ -319,13 +316,5 @@ public class H2Database extends AbstractJdbcDatabase {
             }
         }
         super.setConnection(conn);
-    }
-
-    @Override
-    public String correctObjectName(String name, Class<? extends DatabaseObject> objectType) {
-        if (Schema.class.equals(objectType)) {
-            return name.toLowerCase();
-        }
-        return super.correctObjectName(name, objectType);
     }
 }
