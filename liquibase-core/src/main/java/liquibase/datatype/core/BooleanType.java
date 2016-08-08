@@ -64,9 +64,9 @@ public class BooleanType extends LiquibaseDataType {
 
         String returnValue;
         if (value instanceof String) {
-            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || value.equals("t") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
+            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase("b'1'") || value.equals("t") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
                 returnValue = this.getTrueBooleanValue(database);
-            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || value.equals("f") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
+            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase("b'0'") || value.equals("f") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
                 returnValue = this.getFalseBooleanValue(database);
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
