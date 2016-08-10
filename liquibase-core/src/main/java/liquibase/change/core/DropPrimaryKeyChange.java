@@ -24,6 +24,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String constraintName;
+    private Boolean dropIndex;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -69,6 +70,14 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    public Boolean getDropIndex() {
+        return dropIndex;
+    }
+
+    public void setDropIndex(Boolean dropIndex) {
+        this.dropIndex = dropIndex;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
@@ -76,9 +85,11 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);
         }
-    	
+
+        DropPrimaryKeyStatement statement = new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
+        statement.setDropIndex(this.dropIndex);
         return new SqlStatement[]{
-                new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
+                statement,
         };
     }
 
