@@ -1,4 +1,10 @@
+96560cd CORE-2848 Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
+bfbe95c CORE-2848 Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
+f8ebad7 Merge branch 'findbugs' into ddb
+a69a1b5 Experimental ordering of views in mssql
+812b366 Include referenced catalogs in snapshot if it isn't already there.
 b8ce5ac Fixed null pointer exception
+59b5496 Findbugs fixes
 6dbf1f0 Check for null connection in metadata check
 e49bf93 Experimental ordering of views in mssql
 24b2a78 Ensure XML writer is closed

@@ -1450,7 +1450,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
-            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
             String sequenceName = databaseFunction.getValue();
             if (!sequenceCurrentValueFunction.contains("'")) {
                 sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);

@@ -365,6 +365,10 @@ public class DiffToChangeLog {
             sql += " UNION select null as referencing_schema_name, s.name as referencing_name, f.name as referenced_name, null as referenced_schema_name from sys.partition_functions f " +
                     "join sys.partition_schemes s on s.function_id=f.function_id";
 
+            sql += " UNION select select null as referencing_schema_name, s.name as referencing_name, fg.name, null as referenced_schema_name from sys.partition_schemes s " +
+                    "join sys.destination_data_spaces ds on s.data_space_id=ds.partition_scheme_id " +
+                    "join sys.filegroups fg on ds.data_space_id=fg.data_space_id";
+
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {

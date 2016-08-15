@@ -160,8 +160,8 @@ public class MergeColumnChange extends AbstractChange {
     			}
     			@Override
                 public boolean createThisIndex(Index index) {
-    				return !(index.getColumns().contains(getColumn1Name()) ||
-    						index.getColumns().contains(getColumn2Name()));
+    				return !(index.getColumnNames().contains(getColumn1Name()) ||
+    						index.getColumnNames().contains(getColumn2Name()));
     			}
     		};
         	

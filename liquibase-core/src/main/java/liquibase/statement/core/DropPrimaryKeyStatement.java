@@ -8,6 +8,7 @@ public class DropPrimaryKeyStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String constraintName;
+    private Boolean dropIndex;
 
     public DropPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String constraintName) {
         this.catalogName = catalogName;
@@ -32,4 +33,11 @@ public class DropPrimaryKeyStatement extends AbstractSqlStatement {
         return constraintName;
     }
 
+    public Boolean getDropIndex() {
+        return dropIndex;
+    }
+
+    public void setDropIndex(Boolean dropIndex) {
+        this.dropIndex = dropIndex;
+    }
 }

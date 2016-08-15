@@ -63,7 +63,7 @@ public class ObjectUtil {
         } else if (parameterType.equals(BigInteger.class)) {
             finalValue = new BigInteger(propertyValue);
         } else if (parameterType.equals(BigDecimal.class)) {
-	        finalValue = new BigDecimal(propertyValue);
+            finalValue = new BigDecimal(propertyValue);
         } else if (parameterType.equals(DatabaseFunction.class)) {
             finalValue = new DatabaseFunction(propertyValue);
         } else if (parameterType.equals(SequenceNextValueFunction.class)) {
@@ -78,7 +78,7 @@ public class ObjectUtil {
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+finalValue.getClass().getName());
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
         } catch (InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -104,7 +104,7 @@ public class ObjectUtil {
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+propertyValue.getClass().getName());
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
         } catch (InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         }

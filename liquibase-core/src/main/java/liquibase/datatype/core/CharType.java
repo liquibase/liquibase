@@ -75,7 +75,7 @@ public class CharType extends LiquibaseDataType {
         }
 
         if (getParameters()[0] instanceof String) {
-            return Integer.valueOf((String) getParameters()[0]);
+            return Integer.parseInt((String) getParameters()[0]);
         }
 
         if (getParameters()[0] instanceof Number) {
