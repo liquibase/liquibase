@@ -76,8 +76,8 @@ public class BlobType extends LiquibaseDataType {
             }
         }
         if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("binary")) {
-                return new DatabaseDataType("BINARY", getParameters());
+            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+                return new DatabaseDataType("OID");
             }
 
             return new DatabaseDataType("BYTEA");
