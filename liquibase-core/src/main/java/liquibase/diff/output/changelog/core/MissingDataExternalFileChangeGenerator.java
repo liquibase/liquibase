@@ -72,15 +72,15 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             String fileName = table.getName().toLowerCase() + ".csv";
             if (dataDir != null) {
                 fileName = dataDir + "/" + fileName;
-            }
 
-            File parentDir = new File(dataDir);
-            if (!parentDir.exists()) {
-                parentDir.mkdirs();
-            }
-            if (!parentDir.isDirectory()) {
-                throw new RuntimeException(parentDir
-                        + " is not a directory");
+                File parentDir = new File(dataDir);
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+                if (!parentDir.isDirectory()) {
+                    throw new RuntimeException(parentDir
+                            + " is not a directory");
+                }
             }
 
             CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));

@@ -162,7 +162,7 @@ public class FilenameUtils {
      * @return true if it is a separator character
      */
     private static boolean isSeparator(char ch) {
-        return (ch == UNIX_SEPARATOR) || (ch == WINDOWS_SEPARATOR);
+        return ch == '/'; //java uses this as a separator in both windows and unix
     }
 
     //-----------------------------------------------------------------------
