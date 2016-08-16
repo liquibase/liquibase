@@ -473,7 +473,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             Statement statement = null;
             try {
                 statement = ((JdbcConnection) connection).createStatement();
-                statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+                ResultSet resultSet = statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+                resultSet.close(); //don't need to do anything with the result set, just make sure statement ran.
                 this.canAccessDbaRecycleBin = true;
             } catch (Exception e) {
                 if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
