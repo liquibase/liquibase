@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -75,6 +76,9 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         if (referenceDatabase instanceof MSSQLDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && !pk.getBackingIndex().getClustered()) {
             change.setClustered(false);
+        }
+        if (referenceDatabase instanceof PostgresDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && pk.getBackingIndex().getClustered()) {
+            change.setClustered(true);
         }
 
         if (comparisonDatabase instanceof OracleDatabase
