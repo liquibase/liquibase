@@ -111,8 +111,12 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.any23</groupId>
+            <artifactId>apache-any23-encoding</artifactId>
+            <version>1.1</version>
+        </dependency>
     </dependencies>
-
 
     <build>
         <finalName>liquibase-${project.version}</finalName>
@@ -174,7 +178,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <plugin>
                 <groupId>org.apache.felix</groupId>
