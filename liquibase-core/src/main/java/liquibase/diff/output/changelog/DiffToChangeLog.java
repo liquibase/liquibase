@@ -365,10 +365,24 @@ public class DiffToChangeLog {
             sql += " UNION select null as referencing_schema_name, s.name as referencing_name, f.name as referenced_name, null as referenced_schema_name from sys.partition_functions f " +
                     "join sys.partition_schemes s on s.function_id=f.function_id";
 
-            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, fg.name, null as referenced_schema_name from sys.partition_schemes s " +
+            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, fg.name as referenced_name, null as referenced_schema_name from sys.partition_schemes s " +
                     "join sys.destination_data_spaces ds on s.data_space_id=ds.partition_scheme_id " +
                     "join sys.filegroups fg on ds.data_space_id=fg.data_space_id";
 
+            //get data file -> filegroup dependencies
+            sql += " UNION select distinct null as referencing_schema_name, f.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.database_files f " +
+                    "join sys.data_spaces ds on f.data_space_id=ds.data_space_id " +
+                    "where f.data_space_id > 1";
+
+            //get table -> filestream dependencies
+            sql += " UNION select object_schema_name(t.object_id) as referencing_schema_name, t.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.tables t " +
+                    "join sys.data_spaces ds on t.filestream_data_space_id=ds.data_space_id " +
+                    "where t.filestream_data_space_id > 1";
+
+            //get index -> filegroup dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.indexes i " +
+                    "join sys.data_spaces ds on i.data_space_id=ds.data_space_id " +
+                    "where i.data_space_id > 1";
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
