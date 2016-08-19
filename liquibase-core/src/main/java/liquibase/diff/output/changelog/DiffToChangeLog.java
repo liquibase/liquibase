@@ -392,6 +392,15 @@ public class DiffToChangeLog {
                     return "object_schema_name(i.object_id)='" + obj + "'";
                 }
             });
+
+            //get schema -> base object dependencies
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
+                }
+            });
+
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
                 for (Map<String, ?> row : rs) {
