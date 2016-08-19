@@ -384,6 +384,14 @@ public class DiffToChangeLog {
                     "join sys.data_spaces ds on i.data_space_id=ds.data_space_id " +
                     "where i.data_space_id > 1";
 
+            //get index -> table dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, object_name(i.object_id) as referenced_name, object_schema_name(i.object_id) as referenced_schema_name from sys.indexes i " +
+                    "where " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "object_schema_name(i.object_id)='" + obj + "'";
+                }
+            });
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
                 for (Map<String, ?> row : rs) {
