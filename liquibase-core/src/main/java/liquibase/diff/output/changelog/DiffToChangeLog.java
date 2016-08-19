@@ -407,7 +407,9 @@ public class DiffToChangeLog {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
                     String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
-                    graph.add(bName, tabName);
+                    if (!bName.equals(tabName)) {
+                        graph.add(bName, tabName);
+                    }
                 }
             }
         }
