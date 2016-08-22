@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -86,6 +87,8 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             // In MySQL, the primary key must be specified at creation for an autoincrement column
             if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumns().size() == 1 && primaryKey.getColumnNamesAsList().contains(column.getName())) {
                 if (referenceDatabase instanceof MSSQLDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && !primaryKey.getBackingIndex().getClustered()) {
+                    // have to handle PK as a separate statement
+                } else if (referenceDatabase instanceof PostgresDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && primaryKey.getBackingIndex().getClustered()) {
                     // have to handle PK as a separate statement
                 } else {
                     constraintsConfig = new ConstraintsConfig();
