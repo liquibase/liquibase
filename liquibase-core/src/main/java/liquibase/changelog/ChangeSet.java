@@ -592,7 +592,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + DurationPrinter.prettyDuration(startTime));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
