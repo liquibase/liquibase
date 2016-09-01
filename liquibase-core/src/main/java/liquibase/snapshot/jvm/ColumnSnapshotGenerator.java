@@ -400,6 +400,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
 
+        if (database instanceof PostgresDatabase && dataType == Types.OTHER && columnSize != null && columnSize.equals(Integer.MAX_VALUE)) {
+            columnSize = null;
+        }
+
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
         type.setColumnSize(columnSize);
