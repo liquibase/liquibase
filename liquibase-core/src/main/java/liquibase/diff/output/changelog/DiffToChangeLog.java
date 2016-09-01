@@ -442,7 +442,7 @@ public class DiffToChangeLog {
             if (diffOutputControl.getContext() != null) {
                 changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                     null, false, quotingStrategy, null);
             changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {
@@ -483,8 +483,17 @@ public class DiffToChangeLog {
         this.idRoot = idRoot;
     }
 
-    protected String generateId() {
-        return idRoot + "-" + changeNumber++;
+    protected String generateId(Change[] changes) {
+        String id = idRoot + "-" + changeNumber++;
+
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription() && changes != null && changes.length == 1) {
+            id = id + " (" + changes[0].getDescription() + ")";
+
+            if (id.length() > 100) {
+                id = id.substring(0, 97) + "...";
+            }
+        }
+        return id;
     }
 
     private static class DependencyGraph {
