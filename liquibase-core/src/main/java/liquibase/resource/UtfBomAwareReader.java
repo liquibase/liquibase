@@ -1,5 +1,8 @@
 package liquibase.resource;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -96,7 +99,7 @@ public class UtfBomAwareReader extends Reader {
 		}
 
 		if (charsetName == null) {
-			is = new InputStreamReader(pis);
+			is = new InputStreamReader(pis, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 		} else {
 			is = new InputStreamReader(pis, charsetName);
 		}

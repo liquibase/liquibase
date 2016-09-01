@@ -1,5 +1,7 @@
 package liquibase.servicelocator;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
 import liquibase.util.StringUtils;
@@ -147,7 +149,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
                 String urlPath = url.getFile();
                 String host = null;
-                urlPath = URLDecoder.decode(urlPath, "UTF-8");
+                urlPath = URLDecoder.decode(urlPath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
                 if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
                     urlPath = "vfs:"+urlPath;

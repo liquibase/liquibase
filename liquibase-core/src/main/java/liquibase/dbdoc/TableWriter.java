@@ -2,15 +2,11 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +23,7 @@ public class TableWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+    protected void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException {
         final Table table = (Table) object;
         writeTableRemarks(fileWriter, table, database);
         writeColumns(fileWriter, table, database);
@@ -35,7 +31,7 @@ public class TableWriter extends HTMLWriter {
         writeTableForeignKeys(fileWriter, table, database);
     }
 
-    private void writeColumns(FileWriter fileWriter, Table table, Database database) throws IOException {
+    private void writeColumns(Writer fileWriter, Table table, Database database) throws IOException {
         List<List<String>> cells = new ArrayList<List<String>>();
 
         for (Column column : table.getColumns()) {
@@ -51,7 +47,7 @@ public class TableWriter extends HTMLWriter {
         writeTable("Current Columns", cells, fileWriter);
     }
     
-    private void writeTableRemarks(FileWriter fileWriter, Table table, Database database) throws IOException {
+    private void writeTableRemarks(Writer fileWriter, Table table, Database database) throws IOException {
         final String tableRemarks = table.getRemarks();
         if (tableRemarks != null && tableRemarks.length() > 0) {
         	final List<List<String>> cells = new ArrayList<List<String>>();
@@ -60,7 +56,7 @@ public class TableWriter extends HTMLWriter {
         }
     }
     
-    private void writeTableIndexes(FileWriter fileWriter, Table table, Database database) throws IOException {
+    private void writeTableIndexes(Writer fileWriter, Table table, Database database) throws IOException {
         final List<List<String>> cells = new ArrayList<List<String>>();
         final PrimaryKey primaryKey = table.getPrimaryKey();
         if (!table.getIndexes().isEmpty()) {
@@ -74,7 +70,7 @@ public class TableWriter extends HTMLWriter {
         }
     }
     
-    private void writeTableForeignKeys(FileWriter fileWriter, Table table, Database database) throws IOException {
+    private void writeTableForeignKeys(Writer fileWriter, Table table, Database database) throws IOException {
         final List<List<String>> cells = new ArrayList<List<String>>();
         if(!table.getOutgoingForeignKeys().isEmpty())
         {

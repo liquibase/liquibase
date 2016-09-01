@@ -27,7 +27,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
 
         if (!(database instanceof MSSQLDatabase || database instanceof MockDatabase)) {
-            if (!addPrimaryKeyStatement.isClustered()) {
+            if (addPrimaryKeyStatement.isClustered() != null && !addPrimaryKeyStatement.isClustered()) {
                 validationErrors.checkDisallowedField("clustered", addPrimaryKeyStatement.isClustered(), database);
             }
         }
@@ -46,7 +46,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName())+" PRIMARY KEY";
-            if (database instanceof MSSQLDatabase && !statement.isClustered()) {
+            if (database instanceof MSSQLDatabase && statement.isClustered() != null) {
                 if (statement.isClustered()) {
                     sql += " CLUSTERED";
                 } else {

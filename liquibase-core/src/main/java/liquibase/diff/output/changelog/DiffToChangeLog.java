@@ -83,14 +83,14 @@ public class DiffToChangeLog {
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
-            print(new PrintStream(stream), changeLogSerializer);
+            print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
             stream.close();
         } else {
             LogFactory.getLogger().info(file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            print(new PrintStream(out), changeLogSerializer);
+            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
-            String xml = new String(out.toByteArray(), "UTF-8");
+            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
             innerXml = innerXml.replaceFirst("bblacha", "Bart");
@@ -120,12 +120,12 @@ public class DiffToChangeLog {
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
                 randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes("UTF-8"));
+                randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                 randomAccessFile.writeBytes(lineSeparator);
                 randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes("UTF-8"));
+                randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
             }
             randomAccessFile.close();
 
@@ -365,10 +365,41 @@ public class DiffToChangeLog {
             sql += " UNION select null as referencing_schema_name, s.name as referencing_name, f.name as referenced_name, null as referenced_schema_name from sys.partition_functions f " +
                     "join sys.partition_schemes s on s.function_id=f.function_id";
 
-            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, fg.name, null as referenced_schema_name from sys.partition_schemes s " +
+            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, fg.name as referenced_name, null as referenced_schema_name from sys.partition_schemes s " +
                     "join sys.destination_data_spaces ds on s.data_space_id=ds.partition_scheme_id " +
                     "join sys.filegroups fg on ds.data_space_id=fg.data_space_id";
 
+            //get data file -> filegroup dependencies
+            sql += " UNION select distinct null as referencing_schema_name, f.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.database_files f " +
+                    "join sys.data_spaces ds on f.data_space_id=ds.data_space_id " +
+                    "where f.data_space_id > 1";
+
+            //get table -> filestream dependencies
+            sql += " UNION select object_schema_name(t.object_id) as referencing_schema_name, t.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.tables t " +
+                    "join sys.data_spaces ds on t.filestream_data_space_id=ds.data_space_id " +
+                    "where t.filestream_data_space_id > 1";
+
+            //get index -> filegroup dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.indexes i " +
+                    "join sys.data_spaces ds on i.data_space_id=ds.data_space_id " +
+                    "where i.data_space_id > 1";
+
+            //get index -> table dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, object_name(i.object_id) as referenced_name, object_schema_name(i.object_id) as referenced_schema_name from sys.indexes i " +
+                    "where " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "object_schema_name(i.object_id)='" + obj + "'";
+                }
+            });
+
+            //get schema -> base object dependencies
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
+                }
+            });
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
@@ -376,7 +407,9 @@ public class DiffToChangeLog {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
                     String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
-                    graph.add(bName, tabName);
+                    if (!bName.equals(tabName)) {
+                        graph.add(bName, tabName);
+                    }
                 }
             }
         }
@@ -409,7 +442,7 @@ public class DiffToChangeLog {
             if (diffOutputControl.getContext() != null) {
                 changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                     null, false, quotingStrategy, null);
             changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {
@@ -450,8 +483,17 @@ public class DiffToChangeLog {
         this.idRoot = idRoot;
     }
 
-    protected String generateId() {
-        return idRoot + "-" + changeNumber++;
+    protected String generateId(Change[] changes) {
+        String id = idRoot + "-" + changeNumber++;
+
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription() && changes != null && changes.length == 1) {
+            id = id + " (" + changes[0].getDescription() + ")";
+
+            if (id.length() > 100) {
+                id = id.substring(0, 97) + "...";
+            }
+        }
+        return id;
     }
 
     private static class DependencyGraph {

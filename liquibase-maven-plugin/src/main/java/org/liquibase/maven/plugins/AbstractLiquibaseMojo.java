@@ -294,7 +294,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new FileWriter(outputFile);
+            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter( new FileOutputStream(outputFile), outputFileEncoding));
