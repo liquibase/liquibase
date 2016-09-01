@@ -1,5 +1,6 @@
 package liquibase.logging.core;
 
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogLevel;
 import liquibase.util.StringUtils;
@@ -50,7 +51,7 @@ public class DefaultLogger extends AbstractLogger {
                         throw new RuntimeException("Could not create logFile "+log.getAbsolutePath());
                     }
                 }
-                err = new PrintStream(log);
+                err = new PrintStream(log, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

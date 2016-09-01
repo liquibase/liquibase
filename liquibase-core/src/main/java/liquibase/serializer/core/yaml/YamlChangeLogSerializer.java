@@ -2,6 +2,8 @@ package liquibase.serializer.core.yaml;
 
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 
@@ -27,7 +29,7 @@ public class YamlChangeLogSerializer extends YamlSerializer implements ChangeLog
         Map<String, Object> containerMap = new HashMap<String, Object>();
         containerMap.put("databaseChangeLog", maps);
 
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
         writer.write(yaml.dumpAsMap(containerMap));
         writer.write("\n");
         writer.flush();

@@ -3,6 +3,8 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -95,7 +97,7 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
                         column.setValueDate((Date) value);
                     } else if (value instanceof byte[]) {
                         if (referenceDatabase instanceof InformixDatabase) {
-                            column.setValue(new String((byte[]) value, "UTF-8"));
+                            column.setValue(new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                         }
                         column.setValueComputed(new DatabaseFunction("UNSUPPORTED FOR DIFF: BINARY DATA"));
                     } else { // fall back to simple string

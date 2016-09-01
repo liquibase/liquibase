@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 
@@ -27,7 +29,7 @@ public class MD5Util {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
-            digest.update(input.getBytes("UTF-8"));
+            digest.update(input.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
