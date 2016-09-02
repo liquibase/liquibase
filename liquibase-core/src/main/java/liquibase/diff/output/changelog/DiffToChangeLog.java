@@ -39,6 +39,8 @@ import java.util.*;
 public class DiffToChangeLog {
 
     private String idRoot = String.valueOf(new Date().getTime());
+    private boolean overriddenIdRoot = false;
+
     private int changeNumber = 1;
 
     private String changeSetContext;
@@ -481,19 +483,34 @@ public class DiffToChangeLog {
 
     public void setIdRoot(String idRoot) {
         this.idRoot = idRoot;
+        this.overriddenIdRoot = true;
     }
 
     protected String generateId(Change[] changes) {
-        String id = idRoot + "-" + changeNumber++;
+        String desc = "";
 
-        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription() && changes != null && changes.length == 1) {
-            id = id + " (" + changes[0].getDescription() + ")";
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription()) {
+            if (!overriddenIdRoot) { //switch timestamp to a shorter string (last 4 digits in base 36 format). Still mostly unique, but shorter since we also now have mostly-unique descriptions of the changes
+                this.idRoot = Long.toString(Long.decode(idRoot), 36);
+                idRoot = idRoot.substring(idRoot.length() - 4);
+                this.overriddenIdRoot = true;
+            }
 
-            if (id.length() > 100) {
-                id = id.substring(0, 97) + "...";
+             if (changes != null && changes.length > 0) {
+                 desc = " ("+StringUtils.join(changes, " :: ", new StringUtils.StringUtilsFormatter<Change>() {
+                     @Override
+                     public String toString(Change obj) {
+                         return obj.getDescription();
+                     }
+                 })+")";
+             }
+
+            if (desc.length() > 150) {
+                desc = desc.substring(0, 146) + "...)";
             }
         }
-        return id;
+
+        return idRoot + "-" + changeNumber++ + desc;
     }
 
     private static class DependencyGraph {
