@@ -146,6 +146,9 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
             while (next != null && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
+                if (!keywordBeforeName.equalsIgnoreCase("PACKAGE") && ((String) next).equalsIgnoreCase("PACKAGE")) {
+                    return procedureText;
+                }
                 next = clauseIterator.nextNonWhitespace();
             }
             if (next != null && clauseIterator.hasNext()) {
