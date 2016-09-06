@@ -1,3 +1,16 @@
+b6501f9 CORE-2857 Support clustered primary keys in postgresql
+01b19bf CORE-2857 Support clustered primary keys in postgresql
+6fc1a9f Experimental ordering of views in mssql: Don't include if reference points to itself (like for a cross-database reference)
+3056676 Experimental ordering of views in mssql
+83e8dd6 Experimental ordering of views in mssql
+cbebbe6 Experimental ordering of views in mssql
+22fbbe7 CORE-2857 Support clustered primary keys in postgresql
+780e381 CORE-2855 Don't recreate primary keys if clustered changed from null to true/false (cherry picked from commit 9ec7a0c)
+2379837 Experimental ordering of views in mssql
+d4b6e02 Findbugs fixes
+404963b CORE-2693 Postgresql dropAll with serial columns fails because tables are dropped then sequences which no longer exist
+62ea5af CORE-2853 Diff comparisions reporting differences between '0.0' and '0' in decimals
+2ff2646 CORE-2852 Postgresql snapshots not correctly handling serial-backing sequences
 96560cd CORE-2848 Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
 bfbe95c CORE-2848 Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
 f8ebad7 Merge branch 'findbugs' into ddb

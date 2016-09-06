@@ -59,11 +59,7 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
     }
 
     public AddPrimaryKeyStatement setClustered(Boolean clustered) {
-        if (clustered == null) {
-            this.clustered = true;
-        } else {
-            this.clustered = clustered;
-        }
+        this.clustered = clustered;
         return this;
     }
 

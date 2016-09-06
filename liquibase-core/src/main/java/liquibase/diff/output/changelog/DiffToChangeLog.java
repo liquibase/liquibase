@@ -365,10 +365,41 @@ public class DiffToChangeLog {
             sql += " UNION select null as referencing_schema_name, s.name as referencing_name, f.name as referenced_name, null as referenced_schema_name from sys.partition_functions f " +
                     "join sys.partition_schemes s on s.function_id=f.function_id";
 
-            sql += " UNION select select null as referencing_schema_name, s.name as referencing_name, fg.name, null as referenced_schema_name from sys.partition_schemes s " +
+            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, fg.name as referenced_name, null as referenced_schema_name from sys.partition_schemes s " +
                     "join sys.destination_data_spaces ds on s.data_space_id=ds.partition_scheme_id " +
                     "join sys.filegroups fg on ds.data_space_id=fg.data_space_id";
 
+            //get data file -> filegroup dependencies
+            sql += " UNION select distinct null as referencing_schema_name, f.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.database_files f " +
+                    "join sys.data_spaces ds on f.data_space_id=ds.data_space_id " +
+                    "where f.data_space_id > 1";
+
+            //get table -> filestream dependencies
+            sql += " UNION select object_schema_name(t.object_id) as referencing_schema_name, t.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.tables t " +
+                    "join sys.data_spaces ds on t.filestream_data_space_id=ds.data_space_id " +
+                    "where t.filestream_data_space_id > 1";
+
+            //get index -> filegroup dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.indexes i " +
+                    "join sys.data_spaces ds on i.data_space_id=ds.data_space_id " +
+                    "where i.data_space_id > 1";
+
+            //get index -> table dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, object_name(i.object_id) as referenced_name, object_schema_name(i.object_id) as referenced_schema_name from sys.indexes i " +
+                    "where " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "object_schema_name(i.object_id)='" + obj + "'";
+                }
+            });
+
+            //get schema -> base object dependencies
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
+                }
+            });
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
@@ -376,7 +407,9 @@ public class DiffToChangeLog {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
                     String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
-                    graph.add(bName, tabName);
+                    if (!bName.equals(tabName)) {
+                        graph.add(bName, tabName);
+                    }
                 }
             }
         }
@@ -581,10 +614,10 @@ public class DiffToChangeLog {
 
             @Override
             public boolean equals(Object obj) {
-                if (!(obj instanceof Edge)) {
+                if (obj == null) {
                     return false;
                 }
-                if (obj == null) {
+                if (!(obj instanceof Edge)) {
                     return false;
                 }
                 Edge e = (Edge) obj;

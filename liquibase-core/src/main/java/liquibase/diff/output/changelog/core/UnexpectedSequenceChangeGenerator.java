@@ -44,10 +44,6 @@ public class UnexpectedSequenceChangeGenerator extends AbstractChangeGenerator i
             change.setSchemaName(sequence.getSchema().getName());
         }
 
-        if (comparisonDatabase instanceof PostgresDatabase) {
-            change.setOnlyIfExists(true);
-        }
-
         return new Change[] { change };
 
     }
