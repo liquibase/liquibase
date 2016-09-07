@@ -84,7 +84,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackSplitStatementsPattern = Pattern.compile(".*rollbackSplitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackEndDelimiterPattern = Pattern.compile(".*rollbackEndDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
             Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
 
@@ -99,6 +101,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
+
+            boolean rollbackSplitStatements = true;
+            String rollbackEndDelimiter = null;
 
             String line;
             while ((line = reader.readLine()) != null) {
@@ -133,7 +138,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
                     Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
+                    Matcher rollbackSplitStatementsPatternMatcher = rollbackSplitStatementsPattern.matcher(line);
                     Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
+                    Matcher rollbackEndDelimiterPatternMatcher = rollbackEndDelimiterPattern.matcher(line);
 
                     Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
@@ -146,12 +153,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
                     boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
+                    rollbackSplitStatements = parseBoolean(rollbackSplitStatementsPatternMatcher, changeSet, true);
                     boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
                     boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
                     boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true);
                     boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
 
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
+                    rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
                     String context = StringUtils.trimToNull(
                             StringUtils.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
                     );
@@ -247,6 +256,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     } else {
                         RawSQLChange rollbackChange = new RawSQLChange();
                         rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
+                        rollbackChange.setSplitStatements(rollbackSplitStatements);
+                        if (rollbackEndDelimiter != null) {
+                            rollbackChange.setEndDelimiter(rollbackEndDelimiter);
+                        }
                         changeSet.addRollbackChange(rollbackChange);
                     }
                 }
