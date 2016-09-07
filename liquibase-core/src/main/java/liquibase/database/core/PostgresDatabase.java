@@ -117,7 +117,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
         Logger log = LogFactory.getInstance().getLog();
 
-        if (conn != null && conn instanceof JdbcConnection) {
+        if (conn instanceof JdbcConnection) {
             Statement statement = null;
             ResultSet resultSet = null;
             try {

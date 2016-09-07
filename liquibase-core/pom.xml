@@ -320,6 +320,9 @@
                         <goals>
                             <goal>javacc</goal>
                         </goals>
+                        <configuration>
+                            <userCharStream>true</userCharStream>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
