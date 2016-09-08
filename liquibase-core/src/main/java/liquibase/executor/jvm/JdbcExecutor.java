@@ -106,13 +106,13 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if(sql instanceof ExecutablePreparedStatement) {
-            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
-            return;
+            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));        	
+        } else if(sql instanceof ExecutableConnectionStatement) {
+        	((ExecutableConnectionStatement) sql).execute((JdbcConnection)database.getConnection());        	
+        } else {
+        	execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
         }
-
-        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
     }
-
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
         return query(sql, rse, new ArrayList<SqlVisitor>());
