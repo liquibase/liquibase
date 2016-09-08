@@ -124,8 +124,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 statement = ((JdbcConnection) conn).createStatement();
                 resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'");
                 if (resultSet.next()) {
-                    boolean setting = resultSet.getBoolean(1);
-                    if (setting) {
+                    String setting = resultSet.getString(1);
+                    if (setting != null && setting.equals("on")) {
                         log.warning("EnterpriseDB "+conn.getURL()+" does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
