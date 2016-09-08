@@ -952,8 +952,9 @@ public class Main {
         }
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
-        CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
+        ClassLoaderResourceAccessor clOpener = new ClassLoaderResourceAccessor(classLoader);
+        ResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
+        //fileOpener = new liquibase.resource.LegacyResourceAccessorProxy(fileOpener).enableFuzyRootSlash();
 
         Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
                 this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName,

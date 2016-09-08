@@ -1,6 +1,7 @@
 package liquibase.resource;
 
 import liquibase.util.StringUtils;
+import liquibase.util.Validate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,21 +13,23 @@ import java.util.*;
  */
 public class CompositeResourceAccessor implements ResourceAccessor {
 
-    private List<ResourceAccessor> resourceAccessors;
-
-    public CompositeResourceAccessor(List<ResourceAccessor> resourceAccessors) {
-        this.resourceAccessors = resourceAccessors;
-    }
+    private final CompositeClassLoader classLoader;
+    private final List<ResourceAccessor> resourceAccessors;
 
     public CompositeResourceAccessor(ResourceAccessor... resourceAccessors) {
-        this.resourceAccessors = Arrays.asList(resourceAccessors);
+        this(Arrays.asList(resourceAccessors));
+    }
+
+    public CompositeResourceAccessor(List<ResourceAccessor> resourceAccessors) {
+        this.resourceAccessors = Validate.notNullArgument(resourceAccessors, "Can create composite with null value");
+        this.classLoader = new CompositeClassLoader();
     }
 
     @Override
     public Set<InputStream> getResourcesAsStream(String path) throws IOException {
         for (ResourceAccessor accessor : resourceAccessors) {
             Set<InputStream> returnSet = accessor.getResourcesAsStream(path);
-            if (returnSet != null && returnSet.size() > 0) {
+            if (returnSet != null && !returnSet.isEmpty()) {
                 return returnSet;
             }
         }
@@ -42,8 +45,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
                 returnSet.addAll(thisSet);
             }
         }
-
-        if (returnSet.size() > 0) {
+        if (!returnSet.isEmpty()) {
             return returnSet;
         }
         return null;
@@ -51,57 +53,29 @@ public class CompositeResourceAccessor implements ResourceAccessor {
 
     @Override
     public ClassLoader toClassLoader() {
-        ClassLoader[] loaders=new ClassLoader[resourceAccessors.size()];
-        int i=0;
-        for (ResourceAccessor fo: resourceAccessors) {
-           loaders[i++]=fo.toClassLoader();
-        }
-
-        return new CompositeClassLoader(loaders);
+        return classLoader;
     }
 
     //based on code from http://fisheye.codehaus.org/browse/xstream/trunk/xstream/src/java/com/thoughtworks/xstream/core/util/CompositeClassLoader.java?r=root
-    private static class CompositeClassLoader extends ClassLoader {
-
-        private final List<ClassLoader> classLoaders = new ArrayList<ClassLoader>();
-
-        public CompositeClassLoader(ClassLoader... classLoaders) {
-            this.classLoaders.addAll(Arrays.asList(classLoaders));
-        }
+    private class CompositeClassLoader extends ClassLoader {
 
         @Override
-        public Class loadClass(String name,boolean resolve) throws ClassNotFoundException {
-            for (Object classLoader1 : classLoaders) {
-                ClassLoader classLoader = (ClassLoader) classLoader1;
+        public Class<?> loadClass(String name,boolean resolve) throws ClassNotFoundException {
+            for (ResourceAccessor resourceAccessor : resourceAccessors) {
+                ClassLoader classLoader = resourceAccessor.toClassLoader();
                 try {
-                    Class classe=classLoader.loadClass(name);
-                    if(resolve)
+                    Class<?> classe=classLoader.loadClass(name);
+                    if(resolve) {
                         resolveClass(classe);
+                    }
                     return classe;
                 } catch (ClassNotFoundException notFound) {
                     // ok.. try another one
                 }
             }
-
-            // One last try - the context class loader associated with the current thread. Often used in j2ee servers.
-            // Note: The contextClassLoader cannot be added to the classLoaders list up front as the thread that constructs
-            // liquibase is potentially different to thread that uses it.
-            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-            if (contextClassLoader != null) {
-                Class classe=contextClassLoader.loadClass(name);
-                if(resolve)
-                    resolveClass(classe);
-                return classe;
-            } else {
-                throw new ClassNotFoundException(name);
-            }
-
-
+            throw new ClassNotFoundException(name);
         }
-
-        
-
- 	}
+    }
 
     @Override
     public String toString() {

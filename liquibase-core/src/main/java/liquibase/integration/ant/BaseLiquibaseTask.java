@@ -146,7 +146,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return A ResourceAccessor.
      */
     private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
-        FileSystemResourceAccessor fileSystemResourceAccessor = new FileSystemResourceAccessor();
+        FileSystemResourceAccessor fileSystemResourceAccessor = new FileSystemResourceAccessor(getProject().getBaseDir());
         ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(classLoader);
         return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
     }

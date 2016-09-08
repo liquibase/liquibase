@@ -1,173 +1,71 @@
 package liquibase.resource;
 
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.CollectionUtil;
-import liquibase.util.StringUtils;
-import liquibase.util.SystemUtils;
-
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.net.URLConnection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import liquibase.util.Validate;
 
 public abstract class AbstractResourceAccessor implements ResourceAccessor {
 
-    //We don't use an HashSet otherwise iteration order is not deterministic
-	private List<String> rootStrings = new ArrayList<String>();
+    protected final ClassLoader classLoader;
+    protected final Logger logger;
 
-    protected AbstractResourceAccessor() {
-        init();
+    protected AbstractResourceAccessor(ClassLoader classLoader) {
+        this.classLoader = Validate.notNullArgument(classLoader,"classLoader is required");
+        this.logger = LogFactory.getInstance().getLog();
+        this.logger.debug("Created ResourceAccessor: "+this);
     }
 
-    protected void init() {
-        try {
-            Enumeration<URL> baseUrls;
-            ClassLoader classLoader = toClassLoader();
-            if (classLoader != null) {
-                if (classLoader instanceof URLClassLoader) {
-                    baseUrls = new Vector<URL>(Arrays.asList(((URLClassLoader) classLoader).getURLs())).elements();
-
-                    while (baseUrls.hasMoreElements()) {
-                        addRootPath(baseUrls.nextElement());
-                    }
-                }
-
-                baseUrls = classLoader.getResources("");
-
-                while (baseUrls.hasMoreElements()) {
-                    addRootPath(baseUrls.nextElement());
-                }
-            }
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+    @Override
+    public final ClassLoader toClassLoader() {
+        return classLoader;
     }
 
-    protected boolean isCaseSensitive() {
-        return !SystemUtils.isWindows();
+    @Override
+    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+        Enumeration<URL> resources = classLoader.getResources(path);
+        if (resources == null || !resources.hasMoreElements()) {
+            return null;
+        }
+        Set<String> seenUrls = new HashSet<String>();
+        Set<InputStream> returnSet = new HashSet<InputStream>();
+        while (resources.hasMoreElements()) {
+            URL url = resources.nextElement();
+            if (seenUrls.contains(url.toExternalForm())) {
+                continue;
+            }
+            seenUrls.add(url.toExternalForm());
+            InputStream in = openStream(url,path);
+            if (in != null) {
+                returnSet.add(in);
+            }
+        };
+        return returnSet;
     }
 
-    protected void addRootPath(URL path) {
-        if (path == null) {
-            return;
+
+    protected InputStream openStream(URL url,String path) throws IOException {
+        logger.debug(this.getClass().getSimpleName() + " openStream " + url.toExternalForm() + " as " + path);
+        URLConnection connection = url.openConnection();
+        connection.setUseCaches(false);
+        InputStream resourceAsStream = connection.getInputStream();
+        if (resourceAsStream != null && path.endsWith(".gz")) {
+            resourceAsStream = new BufferedInputStream(new GZIPInputStream(resourceAsStream)); // TODO: rm buffered so we don't double buffer when caller creates buffers.
+        } else if (resourceAsStream != null && path.endsWith(".zip")) {
+            resourceAsStream = new BufferedInputStream(new ZipInputStream(resourceAsStream)); // TODO: rm buffered so we don't double buffer when caller creates buffers.
         }
-    	String externalForm = path.toExternalForm();
-        if (externalForm.startsWith("file:")) {
-            try {
-                externalForm = new File(path.toURI()).getCanonicalFile().toURL().toExternalForm();
-            } catch (Throwable e) {
-                //keep original version
-            }
-        }
-    	if (!externalForm.endsWith("/")) {
-    		externalForm += "/";
-    	}
-    	if (!rootStrings.contains(externalForm)) {
-    		rootStrings.add(externalForm);
-    	}
+
+        return resourceAsStream;
     }
-
-    protected List<String> getRootPaths() {
-        return rootStrings;
-    }
-
-    protected void getContents(File rootFile, boolean recursive, boolean includeFiles, boolean includeDirectories, String basePath, Set<String> returnSet) {
-        File[] files = rootFile.listFiles();
-        if (files == null) {
-            return;
-        }
-        for (File file : files) {
-            if (file.isDirectory()) {
-                if (includeDirectories) {
-                    returnSet.add(convertToPath(file.getAbsolutePath()));
-                }
-                if (recursive) {
-                    getContents(file, recursive, includeFiles, includeDirectories, basePath, returnSet);
-                }
-            } else {
-                if (includeFiles) {
-                    returnSet.add(convertToPath(file.getAbsolutePath()));
-                }
-            }
-        }
-    }
-
-    protected String convertToPath(String string) {
-        string = string.replace("\\", "/");
-
-        String stringAsUrl = string;
-        if (!stringAsUrl.matches("[a-zA-Z0-9]{2,}:.*")) {
-            if (stringAsUrl.startsWith("/")) {
-                stringAsUrl = "file:"+stringAsUrl;
-            } else {
-                stringAsUrl = "file:/" + stringAsUrl;
-            }
-        }
-        for (String rootString : getRootPaths()) {
-            boolean matches = false;
-            if (isCaseSensitive()) {
-                matches = stringAsUrl.startsWith(rootString);
-            } else {
-                matches = stringAsUrl.toLowerCase().startsWith(rootString.toLowerCase());
-            }
-
-            if (matches) {
-                string = stringAsUrl.substring(rootString.length());
-                break;
-            }
-        }
-
-        string = string.replaceFirst("^//", "/");
-        while (string.matches(".*[^:]//.*")) {
-            string = string.replaceAll("([^:])//", "$1/");
-        }
-        while (string.contains("/./")) {
-            string = string.replace("/./", "/");
-        }
-        while (string.matches(".*/.*?/\\.\\./.*")) {
-            string = string.replaceAll("/[^/]+/\\.\\./", "/");
-        }
-
-        string = string.replaceFirst(".*liquibase-unzip\\d+\\.dir/", ""); //
-        return string;
-    }
-
-    protected String convertToPath(String relativeTo, String path) {
-        if (StringUtils.trimToNull(relativeTo) == null) {
-            return path;
-        }
-        URL baseUrl = toClassLoader().getResource(relativeTo);
-        if (baseUrl == null) {
-            throw new UnexpectedLiquibaseException("Cannot find base path '"+relativeTo+"'");
-        }
-        String base;
-        if (baseUrl.toExternalForm().startsWith("file:")) {
-            File baseFile = new File(baseUrl.getPath());
-            if (!baseFile.exists()) {
-                throw new UnexpectedLiquibaseException("Base file '" + baseFile.getAbsolutePath() + "' does not exist");
-            }
-            if (baseFile.isFile()) {
-                baseFile = baseFile.getParentFile();
-            }
-            base = baseFile.toURI().getPath();
-        } else if (baseUrl.toExternalForm().startsWith("jar:file:")) {
-                return convertToPath(new File(relativeTo).getParent() + '/' + path);
-        } else {
-            base = relativeTo;
-        }
-        String separator = "";
-        if (!base.endsWith("/") && !path.startsWith("/")) {
-        	separator = "/";
-        }
-        if (base.endsWith("/") && path.startsWith("/")) {
-        	base = base.substring(0, base.length() - 1);
-        }            
-        return convertToPath(base + separator + path);
-    }
-
 
 }

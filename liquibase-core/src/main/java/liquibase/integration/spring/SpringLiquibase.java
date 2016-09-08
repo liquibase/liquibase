@@ -15,6 +15,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -69,6 +70,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         private String parentFile;
         public SpringResourceOpener(String parentFile) {
+            super(getResourceLoader().getClassLoader());
             this.parentFile = parentFile;
         }
 
@@ -111,12 +113,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     for (String foundPackage : liquibasePackages) {
 						resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(foundPackage);
 						for (Resource res : resources) {
-							addRootPath(res.getURL());
+//							addRootPath(res.getURL(), null);
 						}
 					}
 				} else {
 					for (Resource res : resources) {
-						addRootPath(res.getURL());
+//						addRootPath(res.getURL(), null);
 					}
 				}
             } catch (IOException e) {
@@ -186,11 +188,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 				return true;
 			}
 			return false;
-		}
-
-		@Override
-        public ClassLoader toClassLoader() {
-			return getResourceLoader().getClassLoader();
 		}
 	}
 

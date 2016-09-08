@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="TagDatabaseTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+<project name="TagDatabaseTaskTest" basedir="../../../../.." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
          xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
     <tempfile property="temp.dir" prefix="TagDatabaseTaskTest" destDir="${java.io.tmpdir}"/>
 

@@ -2,12 +2,14 @@ package liquibase.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.Set;
 
 /**
- * Abstracts file access so they can be read in a variety of manners.
+ * Extension of classloader api with recursive listing feature,
+ * which may be implemented in a variety of manners.
+ *
+ * In most cases all resources access will go thru the classloader code and
+ * the listing can/will use other means to meet its goals.
  */
 public interface ResourceAccessor {
 
@@ -33,5 +35,8 @@ public interface ResourceAccessor {
      */
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException;
 
+    /**
+     * @return The ClassLoader to load/list all resources from.
+     */
     public ClassLoader toClassLoader();
 }

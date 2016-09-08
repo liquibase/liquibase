@@ -8,6 +8,18 @@ import liquibase.exception.UnexpectedLiquibaseException;
  */
 public class Validate {
 
+    public static <T> T notNullArgument(T value,String message) {
+        if (value == null) {
+            throw new IllegalArgumentException(message);
+        }
+        return value;
+    }
+
+    public static void isTrueArgument(boolean value,String message) {
+        if (!value) {
+            throw new IllegalArgumentException(message);
+        }
+    }
 
     /**
      * Throws exception if passed object is null

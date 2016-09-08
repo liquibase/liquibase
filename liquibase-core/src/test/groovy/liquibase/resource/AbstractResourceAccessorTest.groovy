@@ -5,6 +5,7 @@ import spock.lang.Unroll
 
 class AbstractResourceAccessorTest extends Specification {
 
+/*
     @Unroll("#featureName: #path -> #expected")
     def "convertToPath creates correct paths"() {
         when:
@@ -104,4 +105,5 @@ class AbstractResourceAccessorTest extends Specification {
 
         }
     }
+*/
 }
