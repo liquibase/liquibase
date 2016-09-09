@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
-    private final ListHandlerBuilder listHandlerBuilder;
+    protected final ListHandlerBuilder listHandlerBuilder;
     private Map<String,ListHandler> listHandlers = new HashMap<String,ListHandler>();
     private static final String JAR_SCAN_RESOURCE = "META-INF/MANIFEST.MF";
 

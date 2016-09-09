@@ -29,6 +29,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
+import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -113,12 +114,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     for (String foundPackage : liquibasePackages) {
 						resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(foundPackage);
 						for (Resource res : resources) {
-//							addRootPath(res.getURL(), null);
+							String urlPath = res.getURL().toExternalForm();
+							addListHandler(urlPath, listHandlerBuilder.buildListHandler(urlPath));
 						}
 					}
 				} else {
 					for (Resource res : resources) {
-//						addRootPath(res.getURL(), null);
+						String urlPath = res.getURL().toExternalForm();
+						addListHandler(urlPath, listHandlerBuilder.buildListHandler(urlPath));
 					}
 				}
             } catch (IOException e) {

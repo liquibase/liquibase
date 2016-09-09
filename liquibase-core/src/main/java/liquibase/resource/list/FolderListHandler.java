@@ -28,6 +28,11 @@ public class FolderListHandler implements ListHandler {
     public Set<String> list(String relativeToFile, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
         File finalDir;
         String resourceUrlPrefix = path;
+
+        if (path.startsWith(baseDirectory.toURI().toString())) {
+            path = path.substring(baseDirectory.toURI().toString().length());
+        }
+
         if (relativeToFile == null) {
             finalDir = new File(baseDirectory, path);
         } else {
