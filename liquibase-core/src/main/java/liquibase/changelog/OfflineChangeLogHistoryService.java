@@ -4,6 +4,8 @@ import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet.ExecType;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
@@ -21,10 +23,7 @@ import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 import liquibase.util.csv.CSVWriter;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @LiquibaseService(skip = true)
@@ -114,9 +113,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     }
 
     protected void writeHeader(File file) throws IOException {
-        FileWriter writer = null;
+        Writer writer = null;
         try {
-            writer = new FileWriter(file);
+            writer = new OutputStreamWriter(new FileOutputStream(file), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             CSVWriter csvWriter = new CSVWriter(writer);
             csvWriter.writeNext(new String[]{
                     "ID",
@@ -157,9 +156,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        FileReader reader = null;
+        Reader reader = null;
         try {
-            reader = new FileReader(this.changeLogFile);
+            reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             CSVReader csvReader = new CSVReader(reader);
             String[] line = csvReader.readNext();
 
@@ -218,12 +217,12 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         File oldFile = this.changeLogFile;
         File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
 
-        FileReader reader = null;
-        FileWriter writer = null;
+        Reader reader = null;
+        Writer writer = null;
 
         try {
-            reader = new FileReader(oldFile);
-            writer = new FileWriter(newFile);
+            reader = new InputStreamReader(new FileInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            writer = new OutputStreamWriter(new FileOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             CSVReader csvReader = new CSVReader(reader);
             CSVWriter csvWriter = new CSVWriter(writer);
             String[] line;
@@ -267,12 +266,12 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         File oldFile = this.changeLogFile;
         File newFile = new File(oldFile.getParentFile(), oldFile.getName()+".new");
 
-        FileReader reader = null;
-        FileWriter writer = null;
+        Reader reader = null;
+        Writer writer = null;
 
         try {
-            reader = new FileReader(oldFile);
-            writer = new FileWriter(newFile);
+            reader = new InputStreamReader(new FileInputStream(oldFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            writer = new OutputStreamWriter(new FileOutputStream(newFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             CSVReader csvReader = new CSVReader(reader);
             CSVWriter csvWriter = new CSVWriter(writer);
             String[] line;
@@ -373,9 +372,9 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         if (lastChangeSetSequenceValue == null) {
             lastChangeSetSequenceValue = 0;
 
-            FileReader reader = null;
+            Reader reader = null;
             try {
-                reader = new FileReader(this.changeLogFile);
+                reader = new InputStreamReader(new FileInputStream(this.changeLogFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
                 CSVReader csvReader = new CSVReader(reader);
                 String[] line = csvReader.readNext(); //skip header line
 

@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 
@@ -80,7 +82,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 } else {
                     zipFilePath = zipFilePath.replaceFirst("file:", "");
                 }
-                zipFilePath = URLDecoder.decode(zipFilePath, "UTF-8");
+                zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
                 if (path.startsWith("classpath:")) {
                     path = path.replaceFirst("classpath:", "");

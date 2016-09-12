@@ -39,6 +39,8 @@ import java.util.*;
 public class DiffToChangeLog {
 
     private String idRoot = String.valueOf(new Date().getTime());
+    private boolean overriddenIdRoot = false;
+
     private int changeNumber = 1;
 
     private String changeSetContext;
@@ -83,14 +85,14 @@ public class DiffToChangeLog {
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
-            print(new PrintStream(stream), changeLogSerializer);
+            print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
             stream.close();
         } else {
             LogFactory.getLogger().info(file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            print(new PrintStream(out), changeLogSerializer);
+            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
-            String xml = new String(out.toByteArray(), "UTF-8");
+            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
             innerXml = innerXml.replaceFirst("bblacha", "Bart");
@@ -120,12 +122,12 @@ public class DiffToChangeLog {
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
                 randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes("UTF-8"));
+                randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                 randomAccessFile.writeBytes(lineSeparator);
                 randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes("UTF-8"));
+                randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
             }
             randomAccessFile.close();
 
@@ -442,7 +444,7 @@ public class DiffToChangeLog {
             if (diffOutputControl.getContext() != null) {
                 changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                     null, false, quotingStrategy, null);
             changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {
@@ -481,10 +483,34 @@ public class DiffToChangeLog {
 
     public void setIdRoot(String idRoot) {
         this.idRoot = idRoot;
+        this.overriddenIdRoot = true;
     }
 
-    protected String generateId() {
-        return idRoot + "-" + changeNumber++;
+    protected String generateId(Change[] changes) {
+        String desc = "";
+
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription()) {
+            if (!overriddenIdRoot) { //switch timestamp to a shorter string (last 4 digits in base 36 format). Still mostly unique, but shorter since we also now have mostly-unique descriptions of the changes
+                this.idRoot = Long.toString(Long.decode(idRoot), 36);
+                idRoot = idRoot.substring(idRoot.length() - 4);
+                this.overriddenIdRoot = true;
+            }
+
+             if (changes != null && changes.length > 0) {
+                 desc = " ("+StringUtils.join(changes, " :: ", new StringUtils.StringUtilsFormatter<Change>() {
+                     @Override
+                     public String toString(Change obj) {
+                         return obj.getDescription();
+                     }
+                 })+")";
+             }
+
+            if (desc.length() > 150) {
+                desc = desc.substring(0, 146) + "...)";
+            }
+        }
+
+        return idRoot + "-" + changeNumber++ + desc;
     }
 
     private static class DependencyGraph {

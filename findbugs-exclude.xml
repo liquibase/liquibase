@@ -2,6 +2,7 @@
 
 <FindBugsFilter>
   <LastVersion value="-1" relOp="NEQ"/>
+  <Class name="liquibase.util.grammar.SimpleCharStream"/>
   <And>
     <Rank value="10"/>
     <Bug category="SECURITY"/>

@@ -1,6 +1,8 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -528,7 +530,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     } else {
                         if (value != null && ObjectUtil.hasProperty(object, attr)) {
                             if (value instanceof byte[] && ObjectUtil.getPropertyType(object, attr).equals(String.class)) {
-                                value = new String((byte[]) value, "UTF-8");
+                                value = new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
                             }
                             object.setAttribute(attr, null);
                             ObjectUtil.setProperty(object, attr, value);

@@ -1,5 +1,7 @@
 package liquibase.dbdoc;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
@@ -35,7 +37,7 @@ public class ChangeLogWriter {
         File xmlFile = new File(outputDir, changeLogOutFile + ".html");
         xmlFile.getParentFile().mkdirs();
 
-        BufferedWriter changeLogStream = new BufferedWriter(new FileWriter(xmlFile, false));
+        BufferedWriter changeLogStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlFile, false), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
         try {
             changeLogStream.write("<html><body><pre>\n");
             changeLogStream.write(StreamUtil.getStreamContents(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));

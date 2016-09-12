@@ -27,10 +27,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -405,9 +402,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
         if (rollbackFile != null) {
-            FileWriter output = null;
+            Writer output = null;
             try {
-                output = new FileWriter(rollbackFile);
+                output = new OutputStreamWriter(new FileOutputStream(rollbackFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
                 if (tag != null) {
                     liquibase.futureRollbackSQL(tag, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
                 } else {

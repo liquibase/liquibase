@@ -498,7 +498,11 @@ public abstract class AbstractChange implements Change {
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getCurrentValue(this);
+        ChangeParameterMetaData fieldMetaData = ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field);
+        if (fieldMetaData == null) {
+            return null;
+        }
+        return fieldMetaData.getCurrentValue(this);
     }
 
     @Override

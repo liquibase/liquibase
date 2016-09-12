@@ -1,3 +1,12 @@
+0e831e1 Output warning message for EnterpriseDB running in oracle mode
+b700c3b CORE-2874 Ensure consistent charset encoding usage Don't use ascii-assuming SimpleCharStream implementation in JavaCC generated code
+8de9307 Output warning message for EnterpriseDB running in oracle mode
+631a54a CORE-2873 Postgresql custom types are snapshotted as having length 2147483647
+260e29e CORE-2872 "ON DELETE" not supported for FK constraints in Sybase
+781ff27 Add flag liquibase.generatedChangeSetIdsContainsDescription to allow the change description to be included in generated changeSet ids
+936b617 CORE-2874 Ensure consistent charset encoding usage
+e9e5afe Add flag liquibase.generatedChangeSetIdsContainsDescription to allow the change description to be included in generated changeSet ids
+945038c CORE-2873 Postgresql custom types are snapshotted as having length 2147483647
 b6501f9 CORE-2857 Support clustered primary keys in postgresql
 01b19bf CORE-2857 Support clustered primary keys in postgresql
 6fc1a9f Experimental ordering of views in mssql: Don't include if reference points to itself (like for a cross-database reference)
