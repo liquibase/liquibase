@@ -177,9 +177,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
-                    stmt.setBinaryStream(i, lob.content, (int) lob.length);
+                    stmt.setBlob(i, lob.content, (int) lob.length);
                 } else {
-                    stmt.setBinaryStream(i, lob.content, lob.length);
+                    stmt.setBlob(i, lob.content, lob.length);
                 }
             } catch (IOException | LiquibaseException e) {
                 throw new DatabaseException(e.getMessage(), e); // wrap
