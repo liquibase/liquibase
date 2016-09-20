@@ -15,7 +15,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -29,7 +28,6 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
-import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -71,7 +69,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         private String parentFile;
         public SpringResourceOpener(String parentFile) {
-            super(getResourceLoader().getClassLoader());
             this.parentFile = parentFile;
         }
 
@@ -114,14 +111,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     for (String foundPackage : liquibasePackages) {
 						resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(foundPackage);
 						for (Resource res : resources) {
-							String urlPath = res.getURL().toExternalForm();
-							addListHandler(urlPath, listHandlerBuilder.buildListHandler(urlPath));
+							addRootPath(res.getURL());
 						}
 					}
 				} else {
 					for (Resource res : resources) {
-						String urlPath = res.getURL().toExternalForm();
-						addListHandler(urlPath, listHandlerBuilder.buildListHandler(urlPath));
+						addRootPath(res.getURL());
 					}
 				}
             } catch (IOException e) {
@@ -191,6 +186,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 				return true;
 			}
 			return false;
+		}
+
+		@Override
+        public ClassLoader toClassLoader() {
+			return getResourceLoader().getClassLoader();
 		}
 	}
 

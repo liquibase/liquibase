@@ -10,21 +10,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import liquibase.exception.UnexpectedLiquibaseException;
-
 public class AbstractResourceAccessorJavaTest {
-
-	@Test(expected=IllegalArgumentException.class)
-	public void testConstructorNull() {
-		new MyARA(null);
-	}
-
-	@Test()
-	public void testToClassLoader() {
-		ClassLoader myClassLoader = new ClassLoader() {};
-		MyARA test = new MyARA(myClassLoader);
-		assertEquals(myClassLoader.hashCode(), test.toClassLoader().hashCode());
-	}
 
 //	@Test
 //	public void testConvertToPathIsInsensibleToTrailingSlashOnRootPath() throws MalformedURLException {
@@ -54,46 +40,54 @@ public class AbstractResourceAccessorJavaTest {
 //		checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder("file:/sa/");
 //	}
 
-//	@Test
-//	public void testConvertToPathRelativeDoesntGenerateDoubleSlahes() {
-//		AbstractResourceAccessor ara = new MyARA();
-//		URL rootPathURL = ara.toClassLoader().getResource("liquibase/resource/");
-//		ara.addRootPath(rootPathURL);
-//		String path = ara.convertToPath("liquibase/resource/empty.txt", "changelogs/");
-//		//liquibase.resource.AbstractResourceAccessor.convertToPath(String, String) introduces a double slash
-//		//then in liquibase.resource.AbstractResourceAccessor.convertToPath(String), if it matches the part
-//		//before the double slash, then an absolute path is generated instead of a relative one (E.g. '/changelogs/'
-//		//instead of 'changelogs/').
-//		assertEquals("changelogs/", path);
-//	}
-//
-//	private void checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder(
-//			String prefix) throws MalformedURLException {
-//		AbstractResourceAccessor ara = new MyARA();
-//		ara.addRootPath(new URL(prefix + "logs/"));
-//		ara.addRootPath(new URL(prefix));
-//		//System.out.println(ara.getRootPaths());
-//		String path = ara.convertToPath(prefix + "logs/cs-1.0.xml");
-//		assertEquals("cs-1.0.xml", path);
-//	}
+	@Test
+	public void testConvertToPathRelativeDoesntGenerateDoubleSlahes() {
+		AbstractResourceAccessor ara = new MyARA();
+		URL rootPathURL = ara.toClassLoader().getResource("liquibase/resource/");
+		ara.addRootPath(rootPathURL);
+		String path = ara.convertToPath("liquibase/resource/empty.txt", "changelogs/");
+		//liquibase.resource.AbstractResourceAccessor.convertToPath(String, String) introduces a double slash
+		//then in liquibase.resource.AbstractResourceAccessor.convertToPath(String), if it matches the part
+		//before the double slash, then an absolute path is generated instead of a relative one (E.g. '/changelogs/'
+		//instead of 'changelogs/').
+		assertEquals("changelogs/", path);		
+	}
+
+	private void checkConvertToPathIsConsistentGivenTheRootPathInsertionOrder(
+			String prefix) throws MalformedURLException {
+		AbstractResourceAccessor ara = new MyARA();
+		ara.addRootPath(new URL(prefix + "logs/"));
+		ara.addRootPath(new URL(prefix));
+		//System.out.println(ara.getRootPaths());
+		String path = ara.convertToPath(prefix + "logs/cs-1.0.xml");
+		assertEquals("cs-1.0.xml", path);
+	}
 
 	private final static class MyARA extends AbstractResourceAccessor {
-
-		protected MyARA(ClassLoader classLoader) {
-			super(classLoader);
+		
+		@Override
+		protected void init() {
+			//We don't pollute the tests with external rootPaths
 		}
-
+	
 		@Override
 		public Set<InputStream> getResourcesAsStream(String path)
 				throws IOException {
 			return null;
 		}
-
+	
 		@Override
 		public Set<String> list(String relativeTo, String path,
 				boolean includeFiles, boolean includeDirectories, boolean recursive)
 				throws IOException {
 			return null;
 		}
+	
+		@Override
+		public ClassLoader toClassLoader() {
+			return Thread.currentThread().getContextClassLoader();
+		}
+	
 	}
+	
 }

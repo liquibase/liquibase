@@ -5,6 +5,8 @@ package org.liquibase.maven.plugins;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -63,6 +65,13 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     getLog().info(indent + "changeLogFile: " + changeLogFile);
     getLog().info(indent + "context(s): " + contexts);
       getLog().info(indent + "label(s): " + labels);
+  }
+
+  @Override
+  protected ResourceAccessor getFileOpener(ClassLoader cl) {
+    ResourceAccessor mFO = new MavenResourceAccessor(cl);
+    ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
+    return new CompositeResourceAccessor(mFO, fsFO);
   }
 
   @Override
