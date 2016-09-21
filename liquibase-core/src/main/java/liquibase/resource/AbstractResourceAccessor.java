@@ -52,6 +52,9 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
     }
 
     protected void addRootPath(URL path) {
+        if (path == null) {
+            return;
+        }
     	String externalForm = path.toExternalForm();
         if (externalForm.startsWith("file:")) {
             try {

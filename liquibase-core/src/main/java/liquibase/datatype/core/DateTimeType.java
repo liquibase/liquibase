@@ -181,9 +181,9 @@ public class DateTimeType extends LiquibaseDataType {
 
     protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
         String[] parts = minimumVersion.split("\\.", 3);
-        int minMajor = Integer.valueOf(parts[0]);
-        int minMinor = parts.length > 1 ? Integer.valueOf(parts[1]) : 0;
-        int minPatch = parts.length > 2 ? Integer.valueOf(parts[2]) : 0;
+        int minMajor = Integer.parseInt(parts[0]);
+        int minMinor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        int minPatch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
         
         if (minMajor > major) {
             return false;

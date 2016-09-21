@@ -45,7 +45,15 @@ public class TimestampType extends DateTimeType {
                 || database instanceof OracleDatabase)
                 || database instanceof HsqlDatabase){
             DatabaseDataType type = new DatabaseDataType("TIMESTAMP");
-            type.addAdditionalInformation(this.getAdditionalInformation());
+            String additionalInformation = this.getAdditionalInformation();
+
+            if (additionalInformation != null && database instanceof PostgresDatabase) {
+                if (additionalInformation.toUpperCase().contains("TIMEZONE")) {
+                    additionalInformation = additionalInformation.toUpperCase().replace("TIMEZONE", "TIME ZONE");
+                }
+            }
+
+            type.addAdditionalInformation(additionalInformation);
             return type;
         }
 

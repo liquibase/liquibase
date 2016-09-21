@@ -205,6 +205,10 @@ public class AddPrimaryKeyChange extends AbstractChange {
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
 
+        if (this.getForIndexName() != null) {
+            inverse.setDropIndex(false);
+        }
+
         return new Change[]{
                 inverse,
         };

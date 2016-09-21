@@ -32,7 +32,11 @@ public class DBMSPrecondition extends AbstractPrecondition {
     }
 
     public void setType(String atype) {
-        this.type = atype.toLowerCase();
+        if (atype == null) {
+            this.type = null;
+        } else {
+            this.type = atype.toLowerCase();
+        }
     }
 
 

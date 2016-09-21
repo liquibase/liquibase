@@ -4,6 +4,8 @@ import liquibase.change.*;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
@@ -133,8 +135,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         FileInputStream in = new FileInputStream(changeLogFile);
-        String existingChangeLog = StreamUtil.getStreamContents(in);
-        in.close();
+        String existingChangeLog;
+        try {
+            existingChangeLog = StreamUtil.getStreamContents(in);
+        } finally {
+            in.close();
+        }
 
         FileOutputStream out = new FileOutputStream(changeLogFile);
 
@@ -144,7 +150,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
             }
             out.flush();
         } finally {

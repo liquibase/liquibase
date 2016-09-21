@@ -1,5 +1,7 @@
 package liquibase.resource;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 
@@ -80,7 +82,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 } else {
                     zipFilePath = zipFilePath.replaceFirst("file:", "");
                 }
-                zipFilePath = URLDecoder.decode(zipFilePath, "UTF-8");
+                zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
                 if (path.startsWith("classpath:")) {
                     path = path.replaceFirst("classpath:", "");
@@ -98,28 +100,32 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 // it works for zip files as well as JAR files
                 JarFile zipfile = new JarFile(zipFilePath, false);
 
-                Enumeration<JarEntry> entries = zipfile.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
+                try {
+                    Enumeration<JarEntry> entries = zipfile.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
 
-                    if (entry.getName().startsWith(path)) {
+                        if (entry.getName().startsWith(path)) {
 
-                        if (!recursive) {
-                            String pathAsDir = path.endsWith("/")
-                                    ? path
-                                    : path + "/";
-                            if (!entry.getName().startsWith(pathAsDir)
-                             || entry.getName().substring(pathAsDir.length()).contains("/")) {
-                                continue;
+                            if (!recursive) {
+                                String pathAsDir = path.endsWith("/")
+                                        ? path
+                                        : path + "/";
+                                if (!entry.getName().startsWith(pathAsDir)
+                                 || entry.getName().substring(pathAsDir.length()).contains("/")) {
+                                    continue;
+                                }
+                            }
+
+                            if (entry.isDirectory() && includeDirectories) {
+                                returnSet.add(entry.getName());
+                            } else if (includeFiles) {
+                                returnSet.add(entry.getName());
                             }
                         }
-
-                        if (entry.isDirectory() && includeDirectories) {
-                            returnSet.add(entry.getName());
-                        } else if (includeFiles) {
-                            returnSet.add(entry.getName());
-                        }
                     }
+                } finally {
+                    zipfile.close();
                 }
             } else {
                 try {

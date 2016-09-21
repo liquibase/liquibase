@@ -49,7 +49,7 @@ public class TimeType  extends LiquibaseDataType {
             } catch (Exception ignore) {
                 //assume supports parameters
             }
-            if (supportsParameters && getParameters().length > 0 && Integer.valueOf(getParameters()[0].toString()) <= 6) {
+            if (supportsParameters && getParameters().length > 0 && Integer.parseInt(getParameters()[0].toString()) <= 6) {
                 return new DatabaseDataType(getName(), getParameters());
             } else {
                 return new DatabaseDataType(getName());

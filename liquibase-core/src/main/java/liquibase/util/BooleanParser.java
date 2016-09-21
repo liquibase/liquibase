@@ -29,7 +29,7 @@ public class BooleanParser {
         catch(NumberFormatException ex){
             // it's not a number
             // cast it as a String
-            String test = s.toString().trim().toLowerCase();
+            String test = s.trim().toLowerCase();
             if(test.equalsIgnoreCase("true")){
                 return true;
             }

@@ -258,6 +258,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	 */
 	@Override
     public int getDatabaseMajorVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            return -1;
+        }
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
@@ -273,6 +276,10 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	 */
 	@Override
     public int getDatabaseMinorVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            return -1;
+        }
+
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {

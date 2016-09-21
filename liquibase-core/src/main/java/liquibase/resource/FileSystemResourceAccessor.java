@@ -4,6 +4,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -15,12 +16,15 @@ import java.util.zip.GZIPInputStream;
 public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     private File baseDirectory;
+    private boolean readyForInit = false;
 
     /**
      * Creates with no base directory. All files will be resolved exactly as they are given.
      */
     public FileSystemResourceAccessor() {
         baseDirectory = null;
+        readyForInit = true;
+        init();
     }
 
     /**
@@ -31,6 +35,32 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         if (!baseDirectory.isDirectory()) {
             throw new IllegalArgumentException(base + " must be a directory");
         }
+        readyForInit = true;
+        init();
+    }
+
+    @Override
+    protected void init() {
+        if (readyForInit) {
+            super.init();
+        }
+    }
+
+    @Override
+    protected void addRootPath(URL path) {
+        try {
+            File pathAsFile = new File(path.toURI());
+
+            for (File fileSystemRoot : File.listRoots()) {
+                if (pathAsFile.equals(fileSystemRoot)) { //don't include root
+                    return;
+                }
+            }
+        } catch (URISyntaxException e) {
+            //add like normal
+        }
+
+        super.addRootPath(path);
     }
 
     @Override

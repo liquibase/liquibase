@@ -18,8 +18,10 @@ public class BlobType extends LiquibaseDataType {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
         if (database instanceof H2Database || database instanceof HsqlDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
-                return new DatabaseDataType("LONGVARBINARY");
+            if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
+                return new DatabaseDataType("VARBINARY", getParameters());
+            } else if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
+                return new DatabaseDataType("LONGVARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase().startsWith("binary")) {
                 return new DatabaseDataType("BINARY", getParameters());
             } else {
@@ -76,8 +78,8 @@ public class BlobType extends LiquibaseDataType {
             }
         }
         if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("binary")) {
-                return new DatabaseDataType("BINARY", getParameters());
+            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+                return new DatabaseDataType("OID");
             }
 
             return new DatabaseDataType("BYTEA");
@@ -93,7 +95,7 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType("BFILE");
             }
 
-            if (originalDefinition.toLowerCase().startsWith("raw") || originalDefinition.toLowerCase().startsWith("binary")) {
+            if (originalDefinition.toLowerCase().startsWith("raw") || originalDefinition.toLowerCase().startsWith("binary") || originalDefinition.toLowerCase().startsWith("varbinary")) {
                 return new DatabaseDataType("RAW", getParameters());
             }
 

@@ -1,6 +1,8 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -324,6 +326,18 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
                 return savedFieldValue;
             }
+            if (fieldValue instanceof Catalog && isWrongCatalog(((DatabaseObject) fieldValue))) {
+                DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
+                if (savedFieldValue == null) {
+                    savedFieldValue = (DatabaseObject) fieldValue;
+                    savedFieldValue.setSnapshotId(SnapshotIdService.getInstance().generateId());
+
+                    referencedObjects.add(savedFieldValue);
+                }
+
+                return savedFieldValue;
+            }
+
 
             if (((DatabaseObject) fieldValue).getSnapshotId() == null) {
                 return include((DatabaseObject) fieldValue);
@@ -406,6 +420,39 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         return true;
     }
 
+    protected boolean isWrongCatalog(DatabaseObject fieldValue) {
+        String fieldCatalog;
+        if (fieldValue instanceof Catalog) {
+            fieldCatalog = fieldValue.getName();
+        } else if (fieldValue instanceof Schema) {
+            fieldCatalog = ((Schema) fieldValue).getCatalogName();
+        } else {
+            Schema fieldSchema = fieldValue.getSchema();
+            if (fieldSchema == null) {
+                return false;
+            }
+            fieldCatalog = fieldSchema.getCatalogName();
+        }
+        if (fieldCatalog == null) {
+            return false;
+        }
+
+        Set<String> catalogNames = new HashSet<String>();
+        for (DatabaseObject obj : originalExamples) {
+            String catalogName = null;
+            if (obj instanceof Schema) {
+                catalogName = ((Schema) obj).getCatalogName();
+            } else if (obj instanceof Catalog) {
+                catalogName = obj.getName();
+            }
+            if (catalogName != null) {
+                catalogNames.add(catalogName.toLowerCase());
+            }
+        }
+
+        return !catalogNames.contains(fieldCatalog.toLowerCase());
+    }
+
     /**
      * Returns the object described by the passed example if it is already included in this snapshot.
      */
@@ -483,7 +530,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                     } else {
                         if (value != null && ObjectUtil.hasProperty(object, attr)) {
                             if (value instanceof byte[] && ObjectUtil.getPropertyType(object, attr).equals(String.class)) {
-                                value = new String((byte[]) value, "UTF-8");
+                                value = new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
                             }
                             object.setAttribute(attr, null);
                             ObjectUtil.setProperty(object, attr, value);

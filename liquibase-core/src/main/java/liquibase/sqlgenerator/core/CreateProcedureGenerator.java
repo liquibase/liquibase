@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -44,7 +45,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         List<Sql> sql = new ArrayList<Sql>();
 
         String schemaName = statement.getSchemaName();
-        if (schemaName == null) {
+        if (schemaName == null && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getAlwaysOverrideStoredLogicSchema()) {
             schemaName = database.getDefaultSchemaName();
         }
 
@@ -70,8 +71,19 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
         procedureText = removeTrailingDelimiter(procedureText, statement.getEndDelimiter());
 
-        if (database instanceof MSSQLDatabase && procedureText.matches("(?si).*as[\\s\\r\\n.]+merge.*") && !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
-            procedureText = procedureText + ";";
+        if (database instanceof MSSQLDatabase && procedureText.toLowerCase().contains("merge") && !procedureText.endsWith(";")) { //mssql "AS MERGE" procedures need a trailing ; (regardless of the end delimiter)
+            StringClauses parsed = SqlParser.parse(procedureText);
+            StringClauses.ClauseIterator clauseIterator = parsed.getClauseIterator();
+            boolean reallyMerge = false;
+            while (clauseIterator.hasNext()) {
+                Object clause = clauseIterator.nextNonWhitespace();
+                if (((String) clause).equalsIgnoreCase("merge")) {
+                    reallyMerge = true;
+                }
+            }
+            if (reallyMerge) {
+                procedureText = procedureText + ";";
+            }
         }
 
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
@@ -126,11 +138,17 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
      * Convenience method for other classes similar to this that want to be able to modify the procedure text to add the schema
      */
     public static String addSchemaToText(String procedureText, String schemaName, String keywordBeforeName, Database database) {
+        if (schemaName == null) {
+            return procedureText;
+        }
         if ((StringUtils.trimToNull(schemaName) != null) && LiquibaseConfiguration.getInstance().getProperty(ChangeLogParserCofiguration.class, ChangeLogParserCofiguration.USE_PROCEDURE_SCHEMA).getValue(Boolean.class)) {
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
             while (next != null && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
+                if (!keywordBeforeName.equalsIgnoreCase("PACKAGE") && ((String) next).equalsIgnoreCase("PACKAGE")) {
+                    return procedureText;
+                }
                 next = clauseIterator.nextNonWhitespace();
             }
             if (next != null && clauseIterator.hasNext()) {

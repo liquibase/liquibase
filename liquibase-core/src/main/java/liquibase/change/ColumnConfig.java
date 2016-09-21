@@ -226,7 +226,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
             this.valueNumeric = null;
         } else {
-          String saved = new String(valueNumeric);
+          String saved = valueNumeric;
             if (valueNumeric.startsWith("(")) {
                 valueNumeric = valueNumeric.replaceFirst("^\\(", "");
                 valueNumeric = valueNumeric.replaceFirst("\\)$", "");

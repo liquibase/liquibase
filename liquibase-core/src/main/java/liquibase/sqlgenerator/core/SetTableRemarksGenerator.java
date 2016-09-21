@@ -47,11 +47,11 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 					"set @TableName = N'" + statement.getTableName() + "'; " +
 					"DECLARE @FullTableName SYSNAME; " +
 					"SET @FullTableName = N'" + schemaName+"."+statement.getTableName() + "';" +
-					"DECLARE @MS_DescriptionValue NVARCHAR(200); " +
+					"DECLARE @MS_DescriptionValue NVARCHAR(3749); " +
 					"SET @MS_DescriptionValue = N'" + remarksEscaped + "';" +
-					"DECLARE @MS_Description NVARCHAR(200) " +
+					"DECLARE @MS_Description NVARCHAR(3749) " +
 					"set @MS_Description = NULL; " +
-					"SET @MS_Description = (SELECT CAST(Value AS NVARCHAR(200)) AS [MS_Description] " +
+					"SET @MS_Description = (SELECT CAST(Value AS NVARCHAR(3749)) AS [MS_Description] " +
 					"FROM sys.extended_properties AS ep " +
 					"WHERE ep.major_id = OBJECT_ID(@FullTableName) " +
 					"AND ep.name = N'MS_Description' AND ep.minor_id=0); " +

@@ -42,9 +42,22 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+
+        //don't try to recreate PKs that differ in just clustered
+        Difference clusteredDiff = differences.getDifference("clustered");
+        if (clusteredDiff != null) {
+            if (clusteredDiff.getReferenceValue() == null || clusteredDiff.getComparedValue() == null) {
+                differences.removeDifference("clustered");
+            }
+        }
+        if (!differences.hasDifferences()) {
+            return new Change[0];
+        }
+
         PrimaryKey pk = (PrimaryKey) changedObject;
 
         List<Change> returnList = new ArrayList<Change>();
+
 
         DropPrimaryKeyChange dropPkChange = new DropPrimaryKeyChange();
         dropPkChange.setTableName(pk.getTable().getName());

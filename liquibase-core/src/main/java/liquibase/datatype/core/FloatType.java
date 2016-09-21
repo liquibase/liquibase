@@ -40,6 +40,10 @@ public class FloatType  extends LiquibaseDataType {
         }
         if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("FLOAT");
+        } else if (database instanceof PostgresDatabase) {
+            if (originalDefinition.equalsIgnoreCase("real")) {
+                return new DatabaseDataType("REAL");
+            }
         }
         return super.toDatabaseDataType(database);
     }

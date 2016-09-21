@@ -1440,9 +1440,11 @@ public abstract class AbstractJdbcDatabase implements Database {
             String sequenceName = databaseFunction.getValue();
             String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
 
-            if (!sequenceNextValueFunction.contains("'")) {
-                sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
+            sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
+            if (sequenceNextValueFunction.contains("'")) {
+                sequenceName = sequenceName.replace("\"", "");
             }
+
             return String.format(sequenceNextValueFunction, sequenceName);
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
@@ -1450,7 +1452,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         getDefaultDatabaseProductName()));
             }
 
-            String sequenceSchemaName = ((SequenceNextValueFunction) databaseFunction).getSequenceSchemaName();
+            String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
             String sequenceName = databaseFunction.getValue();
             if (!sequenceCurrentValueFunction.contains("'")) {
                 sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);

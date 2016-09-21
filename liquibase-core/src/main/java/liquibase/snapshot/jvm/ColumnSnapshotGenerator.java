@@ -204,57 +204,64 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database.supportsAutoIncrement()) {
             if (table instanceof Table) {
-                if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
-                    String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                    isAutoincrement = StringUtils.trimToNull(isAutoincrement);
-                    if (isAutoincrement == null) {
-                        column.setAutoIncrementInformation(null);
-                    } else if (isAutoincrement.equals("YES")) {
+                if (database instanceof OracleDatabase) {
+                    String data_default = StringUtils.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
+                    if (data_default.contains("iseq$$") && data_default.endsWith("nextval")) {
                         column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                    } else if (isAutoincrement.equals("NO")) {
-                        column.setAutoIncrementInformation(null);
-                    } else if (isAutoincrement.equals("")) {
-                        LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                        column.setAutoIncrementInformation(null);
-                    } else {
-                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
                     }
                 } else {
-                    //probably older version of java, need to select from the column to find out if it is auto-increment
-                    String selectStatement;
-                    if (((DB2Database) database).getDataServerType() == DataServerType.DB2I) {
-                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                        LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
-                        LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
-                        LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
-                        LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
-
-
-                    } else {
-                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
-                    }
-                    LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
-                    Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                    Statement statement = null;
-                    ResultSet columnSelectRS = null;
-
-                    try {
-                        statement = underlyingConnection.createStatement();
-                        columnSelectRS = statement.executeQuery(selectStatement);
-                        if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                        } else {
+                    if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                        String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
+                        isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                        if (isAutoincrement == null) {
                             column.setAutoIncrementInformation(null);
+                        } else if (isAutoincrement.equals("YES")) {
+                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                        } else if (isAutoincrement.equals("NO")) {
+                            column.setAutoIncrementInformation(null);
+                        } else if (isAutoincrement.equals("")) {
+                            LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            column.setAutoIncrementInformation(null);
+                        } else {
+                            throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
                         }
-                    } finally {
+                    } else {
+                        //probably older version of java, need to select from the column to find out if it is auto-increment
+                        String selectStatement;
+                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                            selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
+                            LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
+                            LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
+                            LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
+                            LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
+
+
+                        } else {
+                            selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                        }
+                        LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                        Statement statement = null;
+                        ResultSet columnSelectRS = null;
+
                         try {
-                            if (statement != null) {
-                                statement.close();
+                            statement = underlyingConnection.createStatement();
+                            columnSelectRS = statement.executeQuery(selectStatement);
+                            if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
+                                column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                            } else {
+                                column.setAutoIncrementInformation(null);
                             }
-                        } catch (SQLException ignore) {
-                        }
-                        if (columnSelectRS != null) {
-                            columnSelectRS.close();
+                        } finally {
+                            try {
+                                if (statement != null) {
+                                    statement.close();
+                                }
+                            } catch (SQLException ignore) {
+                            }
+                            if (columnSelectRS != null) {
+                                columnSelectRS.close();
+                            }
                         }
                     }
                 }
@@ -401,6 +408,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
 
+        if (database instanceof PostgresDatabase && columnSize != null && columnSize.equals(Integer.MAX_VALUE)) {
+            columnSize = null;
+        }
+
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
         type.setColumnSize(columnSize);
@@ -441,6 +452,15 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (column_def != null && !column_def.equals("null")) {
                         columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS (" + column_def + ")");
                     }
+                }
+
+                Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+                if (defaultValue != null && defaultValue instanceof String) {
+                    String lowerCaseDefaultValue = ((String) defaultValue).toLowerCase();
+                    if (lowerCaseDefaultValue.contains("iseq$$") && lowerCaseDefaultValue.endsWith(".nextval")) {
+                        columnMetadataResultSet.set("COLUMN_DEF", null);
+                    }
+
                 }
             }
 

@@ -131,6 +131,10 @@ public class SqlUtil {
             }
             stringVal = stringVal.trim();
 
+            if (database instanceof MySQLDatabase) {
+                return stringVal.equals("1") || stringVal.equalsIgnoreCase("true");
+            }
+
             Object value;
             if (scanner.hasNextBoolean()) {
                 value = scanner.nextBoolean();
@@ -138,13 +142,6 @@ public class SqlUtil {
                 value = Integer.valueOf(stringVal);
             }
 
-            if (database instanceof MSSQLDatabase && value instanceof Boolean) {
-                if ((Boolean) value) {
-                    return new DatabaseFunction("'true'");
-                } else {
-                    return new DatabaseFunction("'false'");
-                }
-            }
             return value;
         } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
             if (strippedSingleQuotes) {
