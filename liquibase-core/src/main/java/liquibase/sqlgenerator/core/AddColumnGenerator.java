@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.datatype.DatabaseDataType;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
@@ -231,7 +232,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 if (database instanceof MSSQLDatabase) {
                     clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
                 }
-                clause += " DEFAULT " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType(), database).objectToSql(defaultValue, database);
+                if (defaultValue instanceof DatabaseFunction) {
+                    clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
+                } else {
+                    clause += " DEFAULT " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType(), database).objectToSql(defaultValue, database);
+                }
             }
         }
         return clause;
