@@ -12,8 +12,6 @@ import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
-
 import java.sql.*;
 import java.util.*;
 
@@ -105,10 +103,39 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             if (database instanceof OracleDatabase) {
                                 throw new RuntimeException("Should have bulk selected");
                             } else {
-                                returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+                                List<CachedRow> importedKeys = extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable));
+                                returnList.addAll(importedKeys);
                             }
                         }
 
+                        // The sp_fkeys stored procedure in Sybase ASE returns null fk_name.
+                        //  Use fktable_name and pktable_name columns on each returned row to identify and update fk_name.
+                        if (database instanceof SybaseDatabase) {
+                            String fkSelectQuery = "SELECT object_name(cn.constrid) FK_NAME " +
+                                    "FROM sysconstraints cn INNER JOIN " +
+                                    "sysreferences sr ON sr.constrid = cn.constrid " +
+                                    "WHERE object_name(cn.tableid)=? AND object_name(sr.reftabid)=?";
+
+                            PreparedStatement fkSelectStatement = null;
+                            ResultSet rs = null;
+
+                            try {
+                                    fkSelectStatement = ((JdbcConnection) database.getConnection()).prepareStatement(fkSelectQuery);
+                                    for (CachedRow importedKeyRow : returnList) {
+                                        fkSelectStatement.setString(1, importedKeyRow.getString("FKTABLE_NAME"));
+                                        fkSelectStatement.setString(2, importedKeyRow.getString("PKTABLE_NAME"));
+                                        rs = fkSelectStatement.executeQuery();
+                                        while (rs.next()) {
+                                                importedKeyRow.set("FK_NAME", rs.getString("FK_NAME"));
+                                                }
+                                        }
+                            } catch (SQLException e) {
+                                throw new DatabaseException("Can't execute query to generate foreign key name" , e);
+                            } finally {
+                                JdbcUtils.closeResultSet(rs);
+                                JdbcUtils.closeStatement(fkSelectStatement);
+                            }
+                        }
                         return returnList;
                     }
                 }
