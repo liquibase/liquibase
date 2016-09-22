@@ -134,6 +134,9 @@ public class SqlUtil {
             if (database instanceof MySQLDatabase) {
                 return stringVal.equals("1") || stringVal.equalsIgnoreCase("true");
             }
+            if ( stringVal.endsWith("'::\"bit\"") ) { //postgres defaults for bit columns look like: B'0'::"bit"
+              stringVal = stringVal.replaceFirst("'::\"bit\"", "");
+            }
 
             Object value;
             if (scanner.hasNextBoolean()) {
