@@ -56,10 +56,14 @@ public class DiffToChangeLogCommand extends DiffCommand {
         }
 
         if (StringUtils.trimToNull(changeLogFile) == null) {
-            new DiffToChangeLog(diffResult, diffOutputControl).print(outputStream);
+            createDiffToChangeLogObject(diffResult).print(outputStream);
         } else {
-            new DiffToChangeLog(diffResult, diffOutputControl).print(changeLogFile);
+            createDiffToChangeLogObject(diffResult).print(changeLogFile);
         }
         return new CommandResult("OK");
+    }
+
+    protected DiffToChangeLog createDiffToChangeLogObject(DiffResult diffResult) {
+        return new DiffToChangeLog(diffResult, diffOutputControl);
     }
 }

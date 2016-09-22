@@ -19,7 +19,7 @@ import liquibase.util.StringUtils;
 import java.io.PrintStream;
 import java.util.Set;
 
-public class DiffCommand extends AbstractCommand {
+public class DiffCommand extends AbstractCommand<CommandResult> {
 
     private Database referenceDatabase;
     private Database targetDatabase;
