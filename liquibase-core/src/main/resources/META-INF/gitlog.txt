@@ -1,3 +1,7 @@
+3837e4d Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+d881752 specify versions of several maven plugins to ensure reproducible builds
+3b13189 CORE-2894 Oracle snapshot not detecting custom datatypes in different schemas
+133c926 CORE-2881 DiffChangeLog unnecessarily includes referenceTableCatalogName attribute if comparing Schema with different names
 0e831e1 Output warning message for EnterpriseDB running in oracle mode
 b700c3b CORE-2874 Ensure consistent charset encoding usage Don't use ascii-assuming SimpleCharStream implementation in JavaCC generated code
 8de9307 Output warning message for EnterpriseDB running in oracle mode
