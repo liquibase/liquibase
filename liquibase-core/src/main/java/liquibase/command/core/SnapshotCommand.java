@@ -1,8 +1,12 @@
-package liquibase.command;
+package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.command.AbstractCommand;
+import liquibase.command.CommandResult;
+import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.exception.LiquibaseException;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.*;
 import liquibase.util.StringUtils;
@@ -11,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SnapshotCommand extends AbstractCommand {
+public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCommandResult> {
 
     private Database database;
     private CatalogAndSchema[] schemas;
@@ -83,7 +87,7 @@ public class SnapshotCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected SnapshotCommandResult run() throws Exception {
         SnapshotControl snapshotControl = new SnapshotControl(database);
         snapshotControl.setSnapshotListener(snapshotListener);
 
@@ -104,15 +108,34 @@ public class SnapshotCommand extends AbstractCommand {
 
         snapshot.setMetadata(this.getSnapshotMetadata());
 
-        String format = getSerializerFormat();
-        if (format == null) {
-            format = "txt";
-        }
-        return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
+        return new SnapshotCommandResult(snapshot);
     }
 
     @Override
     public CommandValidationErrors validate() {
         return new CommandValidationErrors(this);
+    }
+
+    public class SnapshotCommandResult extends CommandResult {
+
+        public DatabaseSnapshot snapshot;
+
+
+        public SnapshotCommandResult() {
+        }
+
+        public SnapshotCommandResult(DatabaseSnapshot snapshot) {
+            this.snapshot = snapshot;
+        }
+
+        @Override
+        public String print() throws LiquibaseException {
+            String format = getSerializerFormat();
+            if (format == null) {
+                format = "txt";
+            }
+
+            return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
+        }
     }
 }

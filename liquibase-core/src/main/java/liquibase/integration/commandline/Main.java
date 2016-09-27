@@ -6,8 +6,9 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
-import liquibase.command.ExecuteSqlCommand;
-import liquibase.command.SnapshotCommand;
+import liquibase.command.CommandFactory;
+import liquibase.command.core.ExecuteSqlCommand;
+import liquibase.command.core.SnapshotCommand;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
@@ -1011,7 +1012,7 @@ public class Main {
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalTargetSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
                 return;
             } else if ("snapshot".equalsIgnoreCase(command)) {
-                SnapshotCommand command = new SnapshotCommand();
+                SnapshotCommand command = (SnapshotCommand) CommandFactory.getInstance().getCommand("snapshot");
                 command.setDatabase(database);
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
                 command.setSerializerFormat(getCommandParam("snapshotFormat", null));
@@ -1021,7 +1022,7 @@ public class Main {
                 outputWriter.close();
                 return;
             } else if ("executeSql".equalsIgnoreCase(command)) {
-                ExecuteSqlCommand command = new ExecuteSqlCommand();
+                ExecuteSqlCommand command = (ExecuteSqlCommand) CommandFactory.getInstance().getCommand("execute");
                 command.setDatabase(database);
                 command.setSql(getCommandParam("sql", null));
                 command.setSqlFile(getCommandParam("sqlFile", null));
@@ -1032,7 +1033,7 @@ public class Main {
                 outputWriter.close();
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {
-                SnapshotCommand command = new SnapshotCommand();
+                SnapshotCommand command = (SnapshotCommand) CommandFactory.getInstance().getCommand("snapshot");
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams, fileOpener);
                 command.setDatabase(referenceDatabase);
                 command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
