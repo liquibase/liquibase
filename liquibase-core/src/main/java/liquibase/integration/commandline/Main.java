@@ -1017,7 +1017,7 @@ public class Main {
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
                 command.setSerializerFormat(getCommandParam("snapshotFormat", null));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(command.execute().toString());
+                outputWriter.write(command.execute().print());
                 outputWriter.flush();
                 outputWriter.close();
                 return;
@@ -1028,7 +1028,7 @@ public class Main {
                 command.setSqlFile(getCommandParam("sqlFile", null));
                 command.setDelimiter(getCommandParam("delimiter", ";"));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(command.execute().toString());
+                outputWriter.write(command.execute().print());
                 outputWriter.flush();
                 outputWriter.close();
                 return;
@@ -1038,7 +1038,7 @@ public class Main {
                 command.setDatabase(referenceDatabase);
                 command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(command.execute().toString());
+                outputWriter.write(command.execute().print());
                 outputWriter.flush();
                 outputWriter.close();
 
