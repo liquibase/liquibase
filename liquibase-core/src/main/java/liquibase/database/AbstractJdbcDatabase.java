@@ -68,9 +68,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected String sequenceNextValueFunction;
     protected String sequenceCurrentValueFunction;
-    protected String quotingStartCharacter = "\"";
-    protected String quotingEndCharacter = "\"";
-    protected String quotingEndReplacement = "\"\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -278,8 +275,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
-                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
-                quotingEndCharacter))) {
+                || objectName == null || (objectName.startsWith(getQuotingStartCharacter()) && objectName.endsWith(getQuotingEndCharacter()))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase();
@@ -992,7 +988,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quoteObject(objectName, objectType);
             }
-            objectName = objectName.trim();
         }
         return objectName;
     }
@@ -1000,15 +995,24 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.matches(".*\\W.*");
     }
+    
+    protected String getQuotingStartCharacter() {
+        return "\"";
+    }
+
+    protected String getQuotingEndCharacter() {
+        return "\"";
+    }
+
+    protected String getQuotingEndReplacement() {
+        return "\"\"";
+    }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
-
-        return quotingStartCharacter
-                + objectName.replace(quotingEndCharacter, quotingEndReplacement)
-                + quotingEndCharacter;
+        return getQuotingStartCharacter() + objectName.replace(getQuotingEndCharacter(), getQuotingEndReplacement()) + getQuotingEndCharacter();
     }
 
     @Override

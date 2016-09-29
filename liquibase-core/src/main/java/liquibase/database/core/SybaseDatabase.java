@@ -3,7 +3,6 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -56,10 +55,6 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("sysquerymetrics");
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
-
-        super.quotingStartCharacter ="[";
-        super.quotingEndCharacter="]";
-
     }
 
 /*    public void setConnection(Connection connection) {
@@ -295,13 +290,28 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
+        return getQuotingStartCharacter() + objectName + getQuotingEndCharacter();
+    }
+
+    @Override
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName.contains("(")) { //probably a function
-            return objectName;
+            return false;
         }
-        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+        return super.mustQuoteObjectName(objectName, objectType);
+    }
+
+    @Override
+    protected String getQuotingStartCharacter() {
+        return "[";
+    }
+
+    @Override
+    protected String getQuotingEndCharacter() {
+        return "]";
     }
 }
