@@ -72,11 +72,12 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             URL fileUrl = fileUrls.nextElement();
 
             if (fileUrl.toExternalForm().startsWith("jar:file:")
-                    || fileUrl.toExternalForm().startsWith("wsjar:file:")
-                    || fileUrl.toExternalForm().startsWith("zip:")) {
+                || fileUrl.toExternalForm().startsWith("wsjar:file:")
+                || fileUrl.toExternalForm().startsWith("zip:")) {
 
                 String[] zipAndFile = fileUrl.getFile().split("!");
                 String zipFilePath = zipAndFile[0];
+                path = zipAndFile[1];
                 if (zipFilePath.matches("file:\\/[A-Za-z]:\\/.*")) {
                     zipFilePath = zipFilePath.replaceFirst("file:\\/", "");
                 } else {
@@ -84,11 +85,15 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
                 zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
+
                 if (path.startsWith("classpath:")) {
                     path = path.replaceFirst("classpath:", "");
                 }
                 if (path.startsWith("classpath*:")) {
                     path = path.replaceFirst("classpath\\*:", "");
+                }
+                if (path.startsWith("/")) {
+                    path = path.replaceFirst("/", "");
                 }
 
                 // TODO:When we update to Java 7+, we can can create a FileSystem from the JAR (zip)
@@ -109,10 +114,10 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
                             if (!recursive) {
                                 String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
+                                    ? path
+                                    : path + "/";
                                 if (!entry.getName().startsWith(pathAsDir)
-                                 || entry.getName().substring(pathAsDir.length()).contains("/")) {
+                                    || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;
                                 }
                             }
