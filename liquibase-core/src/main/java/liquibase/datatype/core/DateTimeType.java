@@ -23,15 +23,15 @@ public class DateTimeType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         boolean allowFractional = supportsFractionalDigits(database);
-        if (database instanceof DB2Database
-                || database instanceof DerbyDatabase
+        if (database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
                 || database instanceof H2Database
                 || database instanceof HsqlDatabase) {
             return new DatabaseDataType("TIMESTAMP");
         }
 
-        if (database instanceof OracleDatabase) {
+        if (database instanceof DB2Database
+                || database instanceof OracleDatabase) {
             return new DatabaseDataType("TIMESTAMP", getParameters());
         }
 

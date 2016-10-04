@@ -23,8 +23,19 @@ import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
-    private Boolean isZOS;
-
+    private DataServerType dataServerType;
+    
+    public static enum DataServerType {
+        /** DB2 on Linux, Unix and Windows */
+        DB2LUW,
+        
+        /** DB2 on IBM iSeries */
+        DB2I,
+        
+        /** DB2 on IBM zSeries */
+        DB2Z
+    }
+    
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
@@ -236,19 +247,44 @@ public class DB2Database extends AbstractJdbcDatabase {
         return true;
     }
 
-    public boolean isZOS() {
-        if (this.isZOS == null) {
-            if (getConnection() != null && getConnection() instanceof JdbcConnection) {
+    /**
+     * Determine the DB2 data server type. This replaces the isZOS() and
+     * isAS400() methods, which was based on DatabaseMetaData
+     * getDatabaseProductName(), which does not work correctly for some DB2
+     * types.
+     * 
+     * @see <a href="http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.html">ibm.com</a>
+     * @return the data server type
+     */
+    public DataServerType getDataServerType() {
+        if (this.dataServerType == null) {
+            DatabaseConnection databaseConnection = getConnection();
+            if (databaseConnection != null && databaseConnection instanceof JdbcConnection) {
                 try {
-                    this.isZOS = getConnection().getDatabaseProductName().toLowerCase().contains("zos");
+                    String databaseProductVersion = databaseConnection.getDatabaseProductVersion();
+                    if (databaseProductVersion.startsWith("SQL")) {
+                        this.dataServerType = DataServerType.DB2LUW;
+                    } else if (databaseProductVersion.startsWith("QSQ")) {
+                        this.dataServerType = DataServerType.DB2I;
+                    } else if (databaseProductVersion.startsWith("DSN")) {
+                        this.dataServerType = DataServerType.DB2Z;
+                    }
                 } catch (DatabaseException e) {
-                    this.isZOS = false;
+                    this.dataServerType = DataServerType.DB2LUW;
                 }
             } else {
-                this.isZOS = false;
+                this.dataServerType = DataServerType.DB2LUW;
             }
         }
-        return this.isZOS;
+        return this.dataServerType;
+    }
+
+    public boolean isZOS() {
+        return getDataServerType() == DataServerType.DB2Z;
+    }
+
+    public boolean isAS400() {
+       return getDataServerType() == DataServerType.DB2I;
     }
 
     @Override

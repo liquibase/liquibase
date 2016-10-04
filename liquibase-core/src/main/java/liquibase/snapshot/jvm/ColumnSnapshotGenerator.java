@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
+import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
