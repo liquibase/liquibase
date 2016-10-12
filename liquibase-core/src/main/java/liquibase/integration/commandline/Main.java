@@ -7,6 +7,7 @@ import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.command.CommandFactory;
+import liquibase.command.core.DropAllCommand;
 import liquibase.command.core.ExecuteSqlCommand;
 import liquibase.command.core.SnapshotCommand;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -1079,8 +1080,11 @@ public class Main {
                 }
                 return;
             } else if ("dropAll".equals(command)) {
-                liquibase.dropAll();
-                System.err.println("All objects dropped from " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                DropAllCommand command = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
+                command.setDatabase(liquibase.getDatabase());
+                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
+
+                System.err.println(command.execute().print());
                 return;
             } else if ("status".equalsIgnoreCase(command)) {
                 boolean runVerbose = false;

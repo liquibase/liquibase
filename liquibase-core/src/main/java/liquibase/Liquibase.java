@@ -1046,22 +1046,7 @@ public class Liquibase {
      * Drops all database objects in the passed schema(s).
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
-        try {
-            LockServiceFactory.getInstance().getLockService(database).waitForLock();
 
-            for (CatalogAndSchema schema : schemas) {
-                log.info("Dropping Database Objects in schema: " + schema);
-                checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
-                getDatabase().dropDatabaseObjects(schema);
-            }
-        } catch (DatabaseException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            LockServiceFactory.getInstance().getLockService(database).destroy();
-            resetServices();
-        }
     }
 
     /**

@@ -331,6 +331,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
                 return true;
+            } else if (example.getName().startsWith("USLOG$")) { //for update materialized view
+                return true;
             }
         }
 
