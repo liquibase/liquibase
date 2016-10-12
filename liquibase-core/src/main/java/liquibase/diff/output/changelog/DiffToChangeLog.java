@@ -344,7 +344,7 @@ public class DiffToChangeLog {
             }
         } else if (database instanceof OracleDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
-            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where OWNER != 'SYS' AND NAME NOT(LIKE 'BIN$%') AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override
                         public String toString(String obj) {
                             return "OWNER='" + obj + "'";
