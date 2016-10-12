@@ -16,6 +16,10 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
+import liquibase.command.CommandExecutionException;
+import liquibase.command.CommandFactory;
+import liquibase.command.LiquibaseCommand;
+import liquibase.command.core.DropAllCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -1046,7 +1050,19 @@ public class Liquibase {
      * Drops all database objects in the passed schema(s).
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
+        if (schemas == null || schemas.length == 0) {
+            schemas = new CatalogAndSchema[] {new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())}
+        }
 
+        DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
+        dropAll.setDatabase(this.getDatabase());
+        dropAll.setSchemas(schemas);
+
+        try {
+            dropAll.execute();
+        } catch (CommandExecutionException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     /**
