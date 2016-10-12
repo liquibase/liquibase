@@ -1051,7 +1051,7 @@ public class Liquibase {
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         if (schemas == null || schemas.length == 0) {
-            schemas = new CatalogAndSchema[] {new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())}
+            schemas = new CatalogAndSchema[] {new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())};
         }
 
         DropAllCommand dropAll = (DropAllCommand) CommandFactory.getInstance().getCommand("dropAll");
