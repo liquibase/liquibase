@@ -1,6 +1,10 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.5.3 (2016.10.13)
+
+- No changes
+
 Changes in version 3.5.2 (2016.09.21)
 
 -  [CORE-1863] - PostgreSQL blob is mapped to bytea instead of oid
