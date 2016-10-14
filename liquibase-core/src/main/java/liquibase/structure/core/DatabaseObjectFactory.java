@@ -73,4 +73,7 @@ public class DatabaseObjectFactory {
         return standardTypes;
     }
 
+    public void reset() {
+        this.standardTypes = null;
+    }
 }
