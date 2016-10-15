@@ -86,6 +86,21 @@ public class LiquibaseConfiguration {
         return (T) configurations.get(type);
     }
 
+    public ConfigurationContainer getConfiguration(String typeName) {
+        for (Map.Entry<Class, ConfigurationContainer> entry : configurations.entrySet()) {
+            if (entry.getKey().getName().equals(typeName)) {
+                return entry.getValue();
+            }
+        }
+        try {
+            Class typeClass = Class.forName(typeName);
+            configurations.put(typeClass, createConfiguration(typeClass));
+            return configurations.get(typeName);
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     /**
      * Convenience method for liquibaseConfiguration.getConfiguration(type).getProperty(property)
      */
