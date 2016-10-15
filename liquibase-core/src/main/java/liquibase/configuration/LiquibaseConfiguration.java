@@ -95,7 +95,7 @@ public class LiquibaseConfiguration {
         try {
             Class typeClass = Class.forName(typeName);
             configurations.put(typeClass, createConfiguration(typeClass));
-            return configurations.get(typeName);
+            return configurations.get(typeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
