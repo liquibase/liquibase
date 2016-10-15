@@ -82,20 +82,21 @@ public class DiffToChangeLog {
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
         this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
+        String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
-            print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
+            print(new PrintStream(stream, true, encoding), changeLogSerializer);
             stream.close();
         } else {
             LogFactory.getLogger().info(file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
+            print(new PrintStream(out, true, encoding), changeLogSerializer);
 
-            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            String xml = new String(out.toByteArray(), encoding);
+            LogFactory.getLogger().info(file + " XML is, before we do anything:\n" + xml);
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
-            innerXml = innerXml.replaceFirst("bblacha", "Bart");
             innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
@@ -108,8 +109,7 @@ public class DiffToChangeLog {
             long offset = 0;
             boolean foundEndTag = false;
             while ((line = randomAccessFile.readLine()) != null) {
-                int index = line.indexOf("</databaseChangeLog>");
-                if (index >= 0) {
+                if (line.contains("</databaseChangeLog>")) { 
                     foundEndTag = true;
                     break;
                 } else {
@@ -121,14 +121,16 @@ public class DiffToChangeLog {
 
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
-                randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-                randomAccessFile.writeBytes(lineSeparator);
-                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+                LogFactory.getLogger().info("Writing 4 space-bytes and innerXML at offset " + offset + ":\n" + innerXml);
+                randomAccessFile.write("    ".getBytes(encoding));
+                randomAccessFile.write(innerXml.getBytes(encoding));
+                randomAccessFile.write(lineSeparator.getBytes(encoding));
+                randomAccessFile.write(("</databaseChangeLog>" + lineSeparator).getBytes(encoding));
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+                randomAccessFile.write(xml.getBytes(encoding));
             }
+            randomAccessFile.setLength(randomAccessFile.getFilePointer());
             randomAccessFile.close();
 
             // BufferedWriter fileWriter = new BufferedWriter(new
