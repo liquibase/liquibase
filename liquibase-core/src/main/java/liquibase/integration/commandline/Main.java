@@ -55,6 +55,8 @@ public class Main {
     protected String outputDefaultCatalog;
 	protected String liquibaseCatalogName;
 	protected String liquibaseSchemaName;
+    protected String databaseChangeLogTableName;
+    protected String databaseChangeLogLockTableName;
     protected String defaultCatalogName;
     protected String changeLogFile;
     protected String classpath;
@@ -573,6 +575,13 @@ public class Main {
         stream.println("                                            liquibase tables");
         stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
         stream.println("                                            liquibase tables");
+        stream.println(" --databaseChangeLogTableName=<name>        The name of the Liquibase ChangeLog");
+        stream.println("                                            table (default: DATABASECHANGELOG)");
+        stream.println(" --databaseChangeLogLockTableName=<name>    The name of the Liquibase ChangeLog");
+        stream.println("                                            Lock table");
+        stream.println("                                            (default: DATABASECHANGELOGLOCK)");
+        stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
+        stream.println("                                            liquibase tables");
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
         stream.println("                                            in the Liquibase classpath");
         stream.println("                                            (default: true)");
@@ -882,7 +891,8 @@ public class Main {
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url,
-            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
+            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName,
+            this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
         try {
 
 
@@ -1166,7 +1176,8 @@ public class Main {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
-        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName);
+        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName,
+                this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
