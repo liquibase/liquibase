@@ -1,6 +1,9 @@
-package liquibase.command;
+package liquibase.command.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.command.AbstractCommand;
+import liquibase.command.CommandResult;
+import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
@@ -11,15 +14,12 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 
-public class DiffCommand extends AbstractCommand {
+public class DiffCommand extends AbstractCommand<CommandResult> {
 
     private Database referenceDatabase;
     private Database targetDatabase;
@@ -129,12 +129,12 @@ public class DiffCommand extends AbstractCommand {
     }
 
     @Override
-    protected Object run() throws Exception {
+    protected CommandResult run() throws Exception {
         DiffResult diffResult = createDiffResult();
 
         new DiffToReport(diffResult, outputStream).print();
 
-        return null;
+        return new CommandResult("OK");
     }
 
     protected DiffResult createDiffResult() throws DatabaseException, InvalidExampleException {

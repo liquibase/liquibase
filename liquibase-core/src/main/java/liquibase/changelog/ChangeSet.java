@@ -186,6 +186,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      */
     private String runOrder;
 
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -377,7 +379,12 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 handleChildNode(changeNode, resourceAccessor);
             }
         } else {
-            addChange(toChange(child, resourceAccessor));
+            Change change = toChange(child, resourceAccessor);
+            if (change == null && child.getValue() instanceof String) {
+                this.setAttribute(child.getName(), child.getValue());
+            } else {
+                addChange(change);
+            }
         }
     }
 
@@ -1115,5 +1122,15 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     @Override
     public int hashCode() {
         return toString(false).hashCode();
+    }
+
+    public Object getAttribute(String attribute) {
+        return attributes.get(attribute);
+    }
+
+    public ChangeSet setAttribute(String attribute, Object value) {
+        this.attributes.put(attribute, value);
+
+        return this;
     }
 }

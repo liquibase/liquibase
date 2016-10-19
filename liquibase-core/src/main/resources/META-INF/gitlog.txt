@@ -1,6 +1,26 @@
+8b9656c Undo temporary debug changes
+404fa25 Used correct key type to access stored logic configuration object
+68c68a9 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+6165d04 Allow looking up configuration by class name
+abe1bb7 Use encoding, and set file length after writing.  Also, some extra debug
+b3134e2 Add reset() method to DatabaseObjectFactory
+c2bc389 Put back Liquibase.dropAll to call DropAllCommand
+729b67b Put back Liquibase.dropAll to call DropAllCommand
+d55fd6f - Experimental ordering of dependencies in oracle: don't include USLOG$ objects and fixed query - Added DropAllCommand
+8ba8762 Experimental ordering of dependencies in oracle: don't include SYS and deleted objects
+a07ddb7 Experimental ordering of dependencies in oracle, plus order objects for drop
+635aa47 Work-around for handling public synonyms in a snapshot
+029ff9a Work-around for handling public synonyms in a snapshot
+93e050d CORE-2911 Oracle: generateChangeLog on RAW types not including the size param
+816935e CORE-2891 Liquibase "Command" objects can be extended and overridden
+07b08cf CORE-2891 Liquibase "Command" objects can be extended and overridden
+3cd1f06 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+43f80c5 Merge branch 'command' into ddb
 3837e4d Merge branch 'ddb' of github.com:Datical/liquibase into ddb
 d881752 specify versions of several maven plugins to ensure reproducible builds
 3b13189 CORE-2894 Oracle snapshot not detecting custom datatypes in different schemas
+2a89f92 Improve extensibility of changeSet object
+48fa7e7 CORE-2891 Liquibase "Command" objects can be extended and overridden
 133c926 CORE-2881 DiffChangeLog unnecessarily includes referenceTableCatalogName attribute if comparing Schema with different names
 0e831e1 Output warning message for EnterpriseDB running in oracle mode
 b700c3b CORE-2874 Ensure consistent charset encoding usage Don't use ascii-assuming SimpleCharStream implementation in JavaCC generated code

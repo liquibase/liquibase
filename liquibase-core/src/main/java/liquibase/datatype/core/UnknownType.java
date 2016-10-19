@@ -54,10 +54,12 @@ public class UnknownType extends LiquibaseDataType {
                     || getName().equalsIgnoreCase("SDO_GEOMETRY")
                     ) {
                 parameters = new Object[0];
+            } else if (getName().equalsIgnoreCase("RAW")) {
+                return new DatabaseDataType(getName(), parameters);
             } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
                 return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
-            } else if (((OracleDatabase) database).getUserDefinedTypes().contains(getName().toUpperCase())) {
-                return new DatabaseDataType(getName().toUpperCase()); //user defined tye
+            } else { //probably a user defined type. Can't call getUserDefinedTypes() to know for sure, since that returns all types including system types.
+                return new DatabaseDataType(getName().toUpperCase());
             }
         }
 
