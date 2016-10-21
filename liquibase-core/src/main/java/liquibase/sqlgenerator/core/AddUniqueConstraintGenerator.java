@@ -66,9 +66,11 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             if (statement.isInitiallyDeferred()) {
                 sql +=" INITIALLY DEFERRED";
             }
-            if (statement.isDisabled()) {
-                sql +=" DISABLE";
-            }
+        }
+
+        // Currently, only OracleDatabase supports the DISABLE command.
+        if (database instanceof OracleDatabase && statement.isDisabled()) {
+            sql += " DISABLE";
         }
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
