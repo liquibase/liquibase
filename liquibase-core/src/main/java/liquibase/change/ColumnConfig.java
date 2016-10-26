@@ -91,15 +91,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             nonDefaultConstraints = true;
         }
 
-        if (columnSnapshot.isAutoIncrement()) {
-            setAutoIncrement(true);
-            setStartWith(columnSnapshot.getAutoIncrementInformation().getStartWith());
-            setIncrementBy(columnSnapshot.getAutoIncrementInformation().getIncrementBy());
-        } else {
-            setAutoIncrement(false);
-        }
 
         if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
+            if (columnSnapshot.isAutoIncrement()) {
+                setAutoIncrement(true);
+                setStartWith(columnSnapshot.getAutoIncrementInformation().getStartWith());
+                setIncrementBy(columnSnapshot.getAutoIncrementInformation().getIncrementBy());
+            } else {
+                setAutoIncrement(false);
+            }
 
 
             Table table = (Table) columnSnapshot.getRelation();
