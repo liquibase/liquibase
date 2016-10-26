@@ -307,6 +307,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         String finalDef =definition.replaceAll("\\r\\n", "\n").trim();
 
+        if (finalDef.startsWith("--") || finalDef.startsWith("/*")) { //keep comment as beginning of statement
+            return "FULL_DEFINITION: " + finalDef;
+        }
+
         String selectOnly = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("");
         if (selectOnly.equals(finalDef)) {
             return "FULL_DEFINITION: " + finalDef;
