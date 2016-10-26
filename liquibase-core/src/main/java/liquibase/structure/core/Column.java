@@ -41,7 +41,7 @@ public class Column extends AbstractDatabaseObject {
         setDescending(columnConfig.getDescending());
         setType(new DataType(columnConfig.getType()));
 
-        if (columnConfig.getDefaultValue() != null) {
+        if (columnConfig.getDefaultValueObject() != null) {
             setDefaultValue(columnConfig.getDefaultValueObject());
         }
 
