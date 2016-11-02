@@ -24,46 +24,43 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
-	private enum ChangeSetBlock {
-		SQL, ROLLBACK;
-	}
 
-	@Override
-	public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-		BufferedReader reader = null;
-		try {
-			if (changeLogFile.endsWith(".sql")) {
-				InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
-				if (fileStream == null) {
-					return false;
-				}
-				reader = new BufferedReader(new UtfBomAwareReader(fileStream));
+    @Override
+    public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
+        BufferedReader reader = null;
+        try {
+            if (changeLogFile.endsWith(".sql")) {
+                InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
+                if (fileStream == null) {
+                    return false;
+                }
+                reader = new BufferedReader(new UtfBomAwareReader(fileStream));
 
-				String line = reader.readLine();
-				return line != null && line.matches("\\-\\-\\s*liquibase formatted.*");
-			} else {
-				return false;
-			}
-		} catch (IOException e) {
-			LogFactory.getInstance().getLog().debug("Exception reading " + changeLogFile, e);
-			return false;
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					LogFactory.getInstance().getLog().debug("Exception closing " + changeLogFile, e);
-				}
-			}
-		}
-	}
+                String line = reader.readLine();
+                return line != null && line.matches("\\-\\-\\s*liquibase formatted.*");
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            LogFactory.getLogger().debug("Exception reading " + changeLogFile, e);
+            return false;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    LogFactory.getLogger().debug("Exception closing " + changeLogFile, e);
+                }
+            }
+        }
+    }
 
-	@Override
-	public int getPriority() {
-		return PRIORITY_DEFAULT + 5;
-	}
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT + 5;
+    }
 
-	@Override
+    @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();
@@ -275,78 +272,59 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 try {
                     reader.close();
                 } catch (IOException ignore) { }
-			}
-		}
+            }
+        }
 
-		return changeLog;
-	}
+        return changeLog;
+    }
 
-	/** Executes SQL generation from either next changeset or end of file. TODO Refactor this logic into a ChangeBuilder class */
-	private void finishChangeSet(ChangeLogParameters changeLogParameters, StringBuffer currentSql, StringBuffer currentRollbackSql,
-			boolean currentChangeHasRollback, ChangeSet changeSet, RawSQLChange change) throws ChangeLogParseException {
-		String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()));
 
-		if (finalCurrentSql == null) {
-			throw new ChangeLogParseException("No SQL for changeset " + changeSet.toString(false));
-		}
 
-		change.setSql(finalCurrentSql);
-		if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
-			if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
-				changeSet.addRollbackChange(new EmptyChange());
-			} else {
-				RawSQLChange rollbackChange = new RawSQLChange();
-				rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
-				changeSet.addRollbackChange(rollbackChange);
-			}
-		} else if (currentChangeHasRollback) {
-			changeSet.addRollbackChange(new EmptyChange());
-		}
-	}
-
-	private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException {
+    private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
         Pattern[] patterns = new Pattern[] {
             Pattern.compile("^(?:expectedResult:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
-				Pattern.compile("^(?:expectedResult:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^(?:expectedResult:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
             Pattern.compile("^(?:expectedResult:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE)
         };
-		for (Pattern pattern : patterns) {
-			Matcher matcher = pattern.matcher(body);
-			if (matcher.matches() && matcher.groupCount() == 2) {
-				SqlPrecondition p = new SqlPrecondition();
-				p.setExpectedResult(matcher.group(1));
-				p.setSql(matcher.group(2));
-				return p;
-			}
-		}
-		throw new ChangeLogParseException("Could not parse a SqlCheck precondition from '" + body + "'.");
-	}
+        for (Pattern pattern : patterns) {
+            Matcher matcher = pattern.matcher(body);
+            if (matcher.matches() && matcher.groupCount() == 2) {
+                SqlPrecondition p = new SqlPrecondition();
+                p.setExpectedResult(matcher.group(1));
+                p.setSql(matcher.group(2));
+                return p;
+            }
+        }
+        throw new ChangeLogParseException("Could not parse a SqlCheck precondition from '" + body + "'.");
+    }
 
-	private String parseString(Matcher matcher) {
-		String endDelimiter = null;
-		if (matcher.matches()) {
-			endDelimiter = matcher.group(1);
-		}
-		return endDelimiter;
-	}
 
-	private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
-		boolean stripComments = defaultValue;
-		if (matcher.matches()) {
-			try {
-				stripComments = Boolean.parseBoolean(matcher.group(1));
-			} catch (Exception e) {
-				throw new ChangeLogParseException("Cannot parse " + changeSet + " " + matcher.toString().replaceAll("\\.*", "") + " as a boolean");
-			}
-		}
-		return stripComments;
-	}
 
-	protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
-		InputStream resourceAsStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
-		if (resourceAsStream == null) {
-			throw new IOException("File does not exist: " + physicalChangeLogLocation);
-		}
-		return resourceAsStream;
-	}
+    private String parseString(Matcher matcher) {
+        String endDelimiter = null;
+        if (matcher.matches()) {
+            endDelimiter = matcher.group(1);
+        }
+        return endDelimiter;
+    }
+
+    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
+        boolean stripComments = defaultValue;
+        if (matcher.matches()) {
+            try {
+                stripComments = Boolean.parseBoolean(matcher.group(1));
+            } catch (Exception e) {
+                throw new ChangeLogParseException("Cannot parse "+changeSet+" "+matcher.toString().replaceAll("\\.*","")+" as a boolean");
+            }
+        }
+        return stripComments;
+    }
+
+    protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
+        InputStream resourceAsStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+        if (resourceAsStream == null) {
+            throw new IOException("File does not exist: "+physicalChangeLogLocation);
+        }
+        return resourceAsStream;
+    }
 }
