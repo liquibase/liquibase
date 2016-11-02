@@ -1,34 +1,32 @@
 package liquibase.serializer.core.json;
 
-import liquibase.serializer.LiquibaseSerializable;
+import liquibase.changelog.ChangeLogChild;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Represent;
+import liquibase.util.StringUtils;
+
+import java.io.*;
+import java.util.*;
 
 public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
 
     @Override
-    protected Yaml createYaml() {
-        DumperOptions dumperOptions = new DumperOptions();
-        dumperOptions.setPrettyFlow(true);
-        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
-        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-
-        return new Yaml(new LiquibaseRepresenter(), dumperOptions);
+    public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        writer.write("{ \"databaseChangeLog\": [\n");
+        int i = 0;
+        for (T child : children) {
+            String serialized = serialize(child, true);
+            if (++i < children.size()) {
+                serialized = serialized.replaceFirst("}\\s*$", "},\n");
+            }
+            writer.write(StringUtils.indent(serialized, 2));
+            writer.write("\n");
+        }
+        writer.write("]}");
+        writer.flush();
     }
-
-    @Override
-    public String serialize(LiquibaseSerializable object, boolean pretty) {
-        String out = yaml.dumpAs(toMap(object), Tag.MAP, DumperOptions.FlowStyle.FLOW);
-        out = out.replaceAll("!!int \"(\\d+)\"", "$1");
-        out = out.replaceAll("!!bool \"(\\w+)\"", "$1");
-        out = out.replaceAll("!!timestamp \"([^\"]*)\"", "$1");
-        return out;
-    }
-
 
     @Override
     public String[] getValidFileExtensions() {

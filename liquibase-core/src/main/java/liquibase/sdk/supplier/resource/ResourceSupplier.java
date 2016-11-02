@@ -2,6 +2,8 @@ package liquibase.sdk.supplier.resource;
 
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.CreateProcedureChange;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.resource.ResourceAccessor;
 
@@ -29,12 +31,13 @@ public class ResourceSupplier {
         @Override
         public Set<InputStream> getResourcesAsStream(String path) throws IOException {
             InputStream stream = null;
+            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
             if (path.toLowerCase().endsWith("csv")) {
-                stream = new ByteArrayInputStream(usersCsv.getBytes());
+                stream = new ByteArrayInputStream(usersCsv.getBytes(encoding));
             } else if (path.toLowerCase().endsWith("my-logic.sql")) {
-                stream = new ByteArrayInputStream(((String)ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(new HsqlDatabase())).getBytes());
+                stream = new ByteArrayInputStream(((String)ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(new HsqlDatabase())).getBytes(encoding));
             } else if (path.toLowerCase().endsWith("sql")) {
-                stream =new ByteArrayInputStream(fileSql.getBytes());
+                stream =new ByteArrayInputStream(fileSql.getBytes(encoding));
             } else {
                 throw new RuntimeException("Unknown resource type: "+ path);
             }

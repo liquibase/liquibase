@@ -2,13 +2,17 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
+import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -16,9 +20,18 @@ import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 
 import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
+
+    private static final String LIQUIBASE_COMPLETE = "liquibase-complete";
+
+    private Pattern postgresStringValuePattern = Pattern.compile("'(.*)'::[\\w ]+");
+    private Pattern postgresNumberValuePattern = Pattern.compile("(\\d*)::[\\w ]+");
 
     public ColumnSnapshotGenerator() {
         super(Column.class, new Class[]{Table.class, View.class});
@@ -36,35 +49,54 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         List<CachedRow> columnMetadataRs = null;
         try {
 
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+            Column column = null;
 
-            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+            if (example.getAttribute(LIQUIBASE_COMPLETE, false)) {
+                column = (Column) example;
+                example.setAttribute(LIQUIBASE_COMPLETE, null);
+            } else {
+                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-            if (columnMetadataRs.size() > 0) {
-                CachedRow data = columnMetadataRs.get(0);
-                Column column = readColumn(data, relation, database);
+                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
 
-                if (column != null && database instanceof MSSQLDatabase) {
-                    List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT\n" +
-                            " CAST(value as varchar(max)) as REMARKS\n" +
-                            " FROM\n" +
-                            " sys.extended_properties\n" +
-                            "  WHERE\n" +
-                            " name='MS_Description' " +
-                            " AND major_id = OBJECT_ID('"+column.getRelation().getName()+"')\n" +
-                            " AND\n" +
-                            " minor_id = COLUMNPROPERTY(major_id, '"+column.getName()+"', 'ColumnId')"), String.class);
+                if (columnMetadataRs.size() > 0) {
+                    CachedRow data = columnMetadataRs.get(0);
+                    column = readColumn(data, relation, database);
+                    setAutoIncrementDetails(column, database, snapshot);
+                }
+            }
 
-                    if (remarks != null && remarks.size() > 0) {
-                        column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
-                    }
-
+            // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
+            if (column != null && database instanceof MSSQLDatabase && ((!((MSSQLDatabase) database).isAzureDb() && database.getDatabaseMajorVersion() >= 8) || database.getDatabaseMajorVersion() >= 12)) {
+                String sql;
+                if (database.getDatabaseMajorVersion() >= 9) {
+                    // SQL Server 2005 or later
+                    // https://technet.microsoft.com/en-us/library/ms177541.aspx
+                    sql =
+                            "SELECT CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS] " +
+                                    "FROM [sys].[extended_properties] AS [ep] " +
+                                    "WHERE [ep].[class] = 1 " +
+                                    "AND [ep].[major_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
+                                    "AND [ep].[minor_id] = COLUMNPROPERTY([ep].[major_id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
+                                    "AND [ep].[name] = 'MS_Description'";
+                } else {
+                    // SQL Server 2000
+                    // https://technet.microsoft.com/en-us/library/aa224810%28v=sql.80%29.aspx
+                    sql =
+                            "SELECT CAST([p].[value] AS [ntext]) AS [REMARKS] " +
+                                    "FROM [dbo].[sysproperties] AS [p] " +
+                                    "WHERE [p].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
+                                    "AND [p].[smallid] = COLUMNPROPERTY([p].[id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
+                                    "AND [p].[type] = 4 " +
+                                    "AND [p].[name] = 'MS_Description'";
                 }
 
-                return column;
-            } else {
-                return null;
+                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
+                if (remarks != null && remarks.size() > 0) {
+                    column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+                }
             }
+            return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -89,14 +121,48 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
 
                 for (CachedRow row : allColumnsMetadataRs) {
-                    Column exampleColumn = new Column().setRelation(relation).setName(row.getString("COLUMN_NAME"));
-                    relation.getColumns().add(exampleColumn);
+                    Column column = readColumn(row, relation, database);
+                    setAutoIncrementDetails(column, database, snapshot);
+                    column.setAttribute(LIQUIBASE_COMPLETE, true);
+                    relation.getColumns().add(column);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);
             }
         }
 
+    }
+
+    protected void setAutoIncrementDetails(Column column, Database database, DatabaseSnapshot snapshot) {
+        if (column.getAutoIncrementInformation() != null && database instanceof MSSQLDatabase && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+            Map<String, Column.AutoIncrementInformation> autoIncrementColumns = (Map) snapshot.getScratchData("autoIncrementColumns");
+            if (autoIncrementColumns == null) {
+                autoIncrementColumns = new HashMap<String, Column.AutoIncrementInformation>();
+                Executor executor = ExecutorService.getInstance().getExecutor(database);
+                try {
+                    List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement("select object_schema_name(object_id) as schema_name, object_name(object_id) as table_name, name as column_name, cast(seed_value as bigint) as start_value, cast(increment_value as bigint) as increment_by from sys.identity_columns"));
+                    for (Map row : rows) {
+                        String schemaName = (String) row.get("SCHEMA_NAME");
+                        String tableName = (String) row.get("TABLE_NAME");
+                        String columnName = (String) row.get("COLUMN_NAME");
+                        Long startValue = (Long) row.get("START_VALUE");
+                        Long incrementBy = (Long) row.get("INCREMENT_BY");
+
+                        Column.AutoIncrementInformation info = new Column.AutoIncrementInformation(startValue, incrementBy);
+                        autoIncrementColumns.put(schemaName+"."+tableName+"."+columnName, info);
+                    }
+                    snapshot.setScratchData("autoIncrementColumns", autoIncrementColumns);
+                } catch (DatabaseException e) {
+                    LogFactory.getInstance().getLog().info("Could not read identity information", e);
+                }
+            }
+            if (column.getRelation() != null && column.getSchema() != null) {
+                Column.AutoIncrementInformation autoIncrementInformation = autoIncrementColumns.get(column.getSchema().getName() + "." + column.getRelation().getName() + "." + column.getName());
+                if (autoIncrementInformation != null) {
+                    column.setAutoIncrementInformation(autoIncrementInformation);
+                }
+            }
+        }
     }
 
     protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
@@ -108,12 +174,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
+        Integer position = columnMetadataResultSet.getInt("ORDINAL_POSITION");
 
 
         Column column = new Column();
-        column.setName(rawColumnName);
+        column.setName(StringUtils.trimToNull(rawColumnName));
         column.setRelation(table);
         column.setRemarks(remarks);
+        column.setOrder(position);
 
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");
@@ -136,58 +204,64 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database.supportsAutoIncrement()) {
             if (table instanceof Table) {
-                if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
-                    String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                    isAutoincrement = StringUtils.trimToNull(isAutoincrement);
-                    if (isAutoincrement == null) {
-                        column.setAutoIncrementInformation(null);
-                    } else if (isAutoincrement.equals("YES")) {
+                if (database instanceof OracleDatabase) {
+                    String data_default = StringUtils.trimToEmpty((String) columnMetadataResultSet.get("DATA_DEFAULT")).toLowerCase();
+                    if (data_default.contains("iseq$$") && data_default.endsWith("nextval")) {
                         column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                    } else if (isAutoincrement.equals("NO")) {
-                        column.setAutoIncrementInformation(null);
-                    } else if (isAutoincrement.equals("")) {
-                        LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                        column.setAutoIncrementInformation(null);
-                    } else {
-                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement+"'");
                     }
                 } else {
-                    //probably older version of java, need to select from the column to find out if it is auto-increment
-                    String selectStatement;
-                    if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
-                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                        LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
-                        LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
-                        LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
-                        LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
-                        
-                        
-                    }
-                    else{
-                        selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
-                    }
-                    LogFactory.getLogger().debug("Checking "+rawTableName+"."+rawCatalogName+" for auto-increment with SQL: '"+selectStatement+"'");
-                    Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                    Statement statement = null;
-                    ResultSet columnSelectRS = null;
-
-                    try {
-                        statement = underlyingConnection.createStatement();
-                        columnSelectRS = statement.executeQuery(selectStatement);
-                        if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                        } else {
+                    if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                        String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
+                        isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                        if (isAutoincrement == null) {
                             column.setAutoIncrementInformation(null);
+                        } else if (isAutoincrement.equals("YES")) {
+                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                        } else if (isAutoincrement.equals("NO")) {
+                            column.setAutoIncrementInformation(null);
+                        } else if (isAutoincrement.equals("")) {
+                            LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            column.setAutoIncrementInformation(null);
+                        } else {
+                            throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
                         }
-                    } finally {
+                    } else {
+                        //probably older version of java, need to select from the column to find out if it is auto-increment
+                        String selectStatement;
+                        if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+                            selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
+                            LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
+                            LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
+                            LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
+                            LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
+
+
+                        } else {
+                            selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                        }
+                        LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                        Statement statement = null;
+                        ResultSet columnSelectRS = null;
+
                         try {
-                            if (statement != null) {
-                                statement.close();
+                            statement = underlyingConnection.createStatement();
+                            columnSelectRS = statement.executeQuery(selectStatement);
+                            if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
+                                column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                            } else {
+                                column.setAutoIncrementInformation(null);
                             }
-                        } catch (SQLException ignore) {
-                        }
-                        if (columnSelectRS != null) {
-                            columnSelectRS.close();
+                        } finally {
+                            try {
+                                if (statement != null) {
+                                    statement.close();
+                                }
+                            } catch (SQLException ignore) {
+                            }
+                            if (columnSelectRS != null) {
+                                columnSelectRS.close();
+                            }
                         }
                     }
                 }
@@ -197,7 +271,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         DataType type = readDataType(columnMetadataResultSet, column, database);
         column.setType(type);
 
-        column.setDefaultValue(readDefaultValue(columnMetadataResultSet, column, database));
+        Object defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
+        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().matches("\\w+")) {
+            defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());
+        }
+        column.setDefaultValue(defaultValue);
+
 
         return column;
     }
@@ -205,12 +284,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
 
         if (database instanceof OracleDatabase) {
-            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
+            String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
             dataType = dataType.replace("VARCHAR2", "VARCHAR");
             dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
 
             DataType type = new DataType(dataType);
-//            type.setDataTypeId(dataType);
+            type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
 //                if (type.getColumnSize() == null) {
@@ -234,7 +313,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     DataType.ColumnSizeUnit unit = null;
                     if ("C".equals(charUsed)) {
                         unit = DataType.ColumnSizeUnit.CHAR;
-                        type.setColumnSize(type.getColumnSize());
+                        type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
+                    } else if ("B".equals(charUsed)) {
+                        unit = DataType.ColumnSizeUnit.BYTE;
                     }
                     type.setColumnSizeUnit(unit);
                 }
@@ -245,6 +326,24 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
+
+        if (database instanceof MSSQLDatabase) {
+            if (columnTypeName.equalsIgnoreCase("numeric() identity")) {
+                columnTypeName = "numeric";
+            } else if (columnTypeName.equalsIgnoreCase("decimal() identity")) {
+                columnTypeName = "decimal";
+            } else if (columnTypeName.equalsIgnoreCase("xml")) {
+                columnMetadataResultSet.set("COLUMN_SIZE", null);
+                columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if (columnTypeName.equalsIgnoreCase("datetimeoffset")) {
+                columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
+                columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            } else if (columnTypeName.equalsIgnoreCase("time")) {
+                columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
+                columnMetadataResultSet.set("DECIMAL_DIGITS", null);
+            }
+        }
+
 
         if (database instanceof FirebirdDatabase) {
             if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
@@ -266,14 +365,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         "FROM INFORMATION_SCHEMA.COLUMNS\n" +
                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
-                        "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
-                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
+                        "WHERE TABLE_NAME = '" + column.getRelation().getName() + "' \n" +
+                        "AND COLUMN_NAME = '" + column.getName() + "'"), String.class);
                 String enumClause = "";
                 for (String enumValue : enumValues) {
-                    enumClause += "'"+enumValue+"', ";
+                    enumClause += "'" + enumValue + "', ";
                 }
                 enumClause = enumClause.replaceFirst(", $", "");
-                return new DataType(columnTypeName + "("+enumClause+")");
+                return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
                 LogFactory.getLogger().warning("Error fetching enum values", e);
             }
@@ -302,8 +401,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     columnSize = columnSize / 2; //Stored as double length chars
                 }
             }
+            if (columnTypeName.equalsIgnoreCase("TIMESTAMP") && decimalDigits == null) { //actually a date
+                columnTypeName = "DATE";
+                dataType = Types.DATE;
+            }
         }
 
+
+        if (database instanceof PostgresDatabase && columnSize != null && columnSize.equals(Integer.MAX_VALUE)) {
+            columnSize = null;
+        }
 
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
@@ -335,11 +442,51 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     columnMetadataResultSet.set("COLUMN_DEF", null);
                 }
 
+                Object columnDef = columnMetadataResultSet.get("COLUMN_DEF");
+                if (columnInfo.getType().getTypeName().equalsIgnoreCase("CHAR") && columnDef instanceof String && !((String) columnDef).startsWith("'") && !((String) columnDef).endsWith("'")) {
+                    return new DatabaseFunction((String) columnDef);
+                }
+
                 if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS ("+columnMetadataResultSet.get("COLUMN_DEF")+")");
+                    Object column_def = columnMetadataResultSet.get("COLUMN_DEF");
+                    if (column_def != null && !column_def.equals("null")) {
+                        columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS (" + column_def + ")");
+                    }
+                }
+
+                Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+                if (defaultValue != null && defaultValue instanceof String) {
+                    String lowerCaseDefaultValue = ((String) defaultValue).toLowerCase();
+                    if (lowerCaseDefaultValue.contains("iseq$$") && lowerCaseDefaultValue.endsWith(".nextval")) {
+                        columnMetadataResultSet.set("COLUMN_DEF", null);
+                    }
+
                 }
             }
 
+        }
+
+        if (database instanceof PostgresDatabase) {
+            Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+            if (defaultValue != null && defaultValue instanceof String) {
+                Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
+                if (matcher.matches()) {
+                    defaultValue = matcher.group(1);
+                } else {
+                    matcher = postgresNumberValuePattern.matcher((String) defaultValue);
+                    if (matcher.matches()) {
+                        defaultValue = matcher.group(1);
+                    }
+
+                }
+                columnMetadataResultSet.set("COLUMN_DEF", defaultValue);
+            }
+        }
+
+        if (database instanceof DB2Database) {
+            if (columnMetadataResultSet.get("COLUMN_DEF") != null && ((String) columnMetadataResultSet.get("COLUMN_DEF")).equalsIgnoreCase("NULL")) {
+                columnMetadataResultSet.set("COLUMN_DEF", null);
+            }
         }
 
         return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());

@@ -32,7 +32,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
         String[] lines = recordCheck.split("\n");
         assertEquals("DECLARE @reccount integer", lines[lineNumber]);
         lineNumber++;
-        assertEquals("SELECT @reccount = count(*) FROM [myschema].[mytable] WHERE " + where, lines[lineNumber]);
+        assertEquals("SELECT @reccount = count(*) FROM [mycatalog].[myschema].[mytable] WHERE " + where, lines[lineNumber]);
         lineNumber++;
         assertEquals("IF @reccount = 0", lines[lineNumber]);
 

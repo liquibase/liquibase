@@ -41,7 +41,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     }
 
     public static String getSchemaVersion() {
-        return "3.4";
+        return "3.6";
     }
 
     @Override
@@ -92,7 +92,13 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
         	
             inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
             if (inputStream == null) {
-                throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
+                if (physicalChangeLogLocation.startsWith("WEB-INF/classes/")) {
+                    physicalChangeLogLocation = physicalChangeLogLocation.replaceFirst("WEB-INF/classes/", "");
+                    inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
+                }
+                if (inputStream == null) {
+                    throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
+                }
             }
 
             XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);

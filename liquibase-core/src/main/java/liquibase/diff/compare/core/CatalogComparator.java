@@ -58,7 +58,55 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return otherSchema.getCatalogName() == null;
         }
 
-        return thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
+        if (thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
+            return true;
+        }
+
+        if (accordingTo.supportsSchemas()) { //no need to check schema mappings
+            return false;
+        }
+
+        //check with schemaComparisons
+        if (chain.getSchemaComparisons() != null && chain.getSchemaComparisons().length > 0) {
+            for (CompareControl.SchemaComparison comparison : chain.getSchemaComparisons()) {
+                String comparisonCatalog1;
+                String comparisonCatalog2;
+                if (accordingTo.supportsSchemas()) {
+                    comparisonCatalog1 = comparison.getComparisonSchema().getSchemaName();
+                    comparisonCatalog2 = comparison.getReferenceSchema().getSchemaName();
+                } else if (accordingTo.supportsCatalogs()) {
+                    comparisonCatalog1 = comparison.getComparisonSchema().getCatalogName();
+                    comparisonCatalog2 = comparison.getReferenceSchema().getCatalogName();
+                } else {
+                    break;
+                }
+
+                String finalCatalog1 = thisSchema.getCatalogName();
+                String finalCatalog2 = otherSchema.getCatalogName();
+
+                if (comparisonCatalog1 != null && comparisonCatalog1.equalsIgnoreCase(finalCatalog1)) {
+                    finalCatalog1 = comparisonCatalog2;
+                } else if (comparisonCatalog2 != null && comparisonCatalog2.equalsIgnoreCase(finalCatalog1)) {
+                    finalCatalog1 = comparisonCatalog1;
+                }
+
+                if (StringUtils.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtils.trimToEmpty(finalCatalog2))) {
+                    return true;
+                }
+
+                if (comparisonCatalog1 != null && comparisonCatalog1.equalsIgnoreCase(finalCatalog2)) {
+                    finalCatalog2 = comparisonCatalog2;
+                } else if (comparisonCatalog2 != null && comparisonCatalog2.equalsIgnoreCase(finalCatalog2)) {
+                    finalCatalog2 = comparisonCatalog1;
+                }
+
+                if (StringUtils.trimToEmpty(finalCatalog1).equalsIgnoreCase(StringUtils.trimToEmpty(finalCatalog2))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

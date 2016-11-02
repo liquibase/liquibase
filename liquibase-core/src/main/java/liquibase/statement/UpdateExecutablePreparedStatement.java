@@ -1,15 +1,14 @@
 package liquibase.statement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.structure.core.Column;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
@@ -22,7 +21,12 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 		super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);
 	}
 
-	@Override
+    @Override
+    public boolean continueOnError() {
+        return false;
+    }
+
+    @Override
 	protected String generateSql(List<ColumnConfig> cols) {
 
 		StringBuilder sql = new StringBuilder("UPDATE ").append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
@@ -38,23 +42,12 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 	    params.deleteCharAt(params.lastIndexOf(","));
 	    sql.append(params);
         if (getWhereClause() != null) {
-            String fixedWhereClause = "WHERE " + getWhereClause().trim();
-            for (String columnName : getWhereColumnNames()) {
-                if (columnName == null) {
-                    continue;
-                }
-                fixedWhereClause = fixedWhereClause.replaceFirst(":name",
-                        database.escapeObjectName(columnName, Column.class));
-            }
-            for (Object param : getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?|:value", DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database));
-            }
-            sql.append(" ").append(fixedWhereClause);
+            sql.append(" WHERE ").append(replacePredicatePlaceholders(database, getWhereClause(), getWhereColumnNames(), getWhereParameters()));
         }
 
-		return sql.toString();		
+		return sql.toString();
 	}
-	
+
 
     public String getWhereClause() {
         return whereClause;

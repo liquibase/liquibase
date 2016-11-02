@@ -1,10 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -38,6 +35,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         validationErrors.checkRequiredField("referencedTableName", addForeignKeyConstraintStatement.getReferencedTableName());
         validationErrors.checkRequiredField("constraintName", addForeignKeyConstraintStatement.getConstraintName());
 
+        validationErrors.checkDisallowedField("onDelete", addForeignKeyConstraintStatement.getOnDelete(), database, SybaseDatabase.class);
+
         return validationErrors;
     }
 
@@ -61,6 +60,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    if (statement.getOnUpdate() != null) {
 		    if (database instanceof OracleDatabase) {
 			    //don't use
+            } else if ((database instanceof MSSQLDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+                //don't use
 		    } else if (database instanceof InformixDatabase) {
 			    //TODO don't know if correct
 		    } else {
@@ -72,7 +73,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
             if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
                 //don't use
             } else if ((database instanceof MSSQLDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
-                //don't use                        
+                //don't use
 		    } else if (database instanceof InformixDatabase && !(statement.getOnDelete().equalsIgnoreCase("CASCADE"))) {
 			    //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
 		    	// see "REFERENCES Clause" in manual

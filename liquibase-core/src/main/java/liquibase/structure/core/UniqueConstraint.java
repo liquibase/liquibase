@@ -1,5 +1,8 @@
 package liquibase.structure.core;
 
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -67,8 +70,10 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     public UniqueConstraint setColumns(List<Column> columns) {
         setAttribute("columns", columns);
-        for (Column column : getColumns()) {
-            column.setRelation(getTable());
+        if (getAttribute("table", Object.class) instanceof Table) {
+            for (Column column : getColumns()) {
+                column.setRelation(getTable());
+            }
         }
 
         return this;
@@ -130,7 +135,16 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     }
 
-    @Override
+	public UniqueConstraint setClustered(boolean clustered) {
+		this.setAttribute("clustered", clustered);
+		return this;
+	}
+
+	public boolean isClustered() {
+		return getAttribute("clustered", false);
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
@@ -182,7 +196,12 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return returnValue;
 	}
 
-	@Override
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, resourceAccessor);
+    }
+
+    @Override
 	public int hashCode() {
 		int result = 0;
 		if (this.getTable() != null) {
@@ -199,7 +218,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
 	@Override
 	public String toString() {
-		return getName() + " on " + getTable().getName() + "("
-				+ getColumnNames() + ")";
-	}
+        if (getTable() == null) {
+            return getName();
+        } else {
+            return getName() + " on " + getTable().getName() + "("
+                    + getColumnNames() + ")";
+        }
+    }
 }

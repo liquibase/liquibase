@@ -65,7 +65,11 @@ public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
         } else {
             objectQuotingStrategy = changeSet.getObjectQuotingStrategy();
         }
-        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), null, null, false, objectQuotingStrategy, changeLog);
+        String changeLogFile = getChangeLogFile();
+        if (changeLogFile == null) {
+            changeLogFile = changeLog.getLogicalFilePath();
+        }
+        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, changeLogFile, null, null, false, objectQuotingStrategy, changeLog);
         RanChangeSet ranChangeSet;
         try {
             ranChangeSet = database.getRanChangeSet(interestedChangeSet);

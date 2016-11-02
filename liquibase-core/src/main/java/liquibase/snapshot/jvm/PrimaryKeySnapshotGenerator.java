@@ -14,7 +14,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
@@ -56,7 +55,9 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     position = (short) (position + 1);
                 }
 
-                returnKey.addColumn(position - 1, new Column(columnName).setRelation(((PrimaryKey) example).getTable()));
+                String ascOrDesc = row.getString("ASC_OR_DESC");
+                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                returnKey.addColumn(position - 1, new Column(columnName).setDescending(descending).setRelation(((PrimaryKey) example).getTable()));
             }
 
             if (returnKey != null) {
@@ -90,7 +91,11 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
                 if (rs.size() > 0) {
-                    table.setPrimaryKey(new PrimaryKey().setName(rs.get(0).getString("PK_NAME")).setTable(table));
+                    PrimaryKey primaryKey = new PrimaryKey().setName(rs.get(0).getString("PK_NAME"));
+                    primaryKey.setTable((Table) foundObject);
+                    if (!database.isSystemObject(primaryKey)) {
+                        table.setPrimaryKey(primaryKey.setTable(table));
+                    }
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

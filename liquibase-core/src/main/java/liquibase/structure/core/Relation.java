@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,12 @@ public abstract class Relation extends AbstractDatabaseObject {
         return getAttribute("columns", List.class);
     }
 
+    public Relation addColumn(Column column) {
+        this.getColumns().add(column);
+
+        return this;
+    }
+
     /**
      * Returns the column object for the given columnName.  If the column does not exist in this table,
      * return null.
@@ -85,7 +92,16 @@ public abstract class Relation extends AbstractDatabaseObject {
     }
 
     public int compareTo(Object o) {
-        return this.getName().compareToIgnoreCase(((Relation) o).getName());
+        Relation that = (Relation) o;
+        int returnValue = 0;
+        if (this.getSchema() != null && that.getSchema() != null) {
+            returnValue = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
+        }
+
+        if (returnValue == 0) {
+            returnValue = this.getName().compareToIgnoreCase(((Relation) o).getName());
+        }
+        return  returnValue;
     }
 
 }

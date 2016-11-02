@@ -2,15 +2,15 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.Date;
@@ -28,14 +28,14 @@ public abstract class HTMLWriter {
         }
     }
 
-    protected abstract void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException;
+    protected abstract void writeCustomHTML(Writer fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
-    private FileWriter createFileWriter(Object object) throws IOException {
-        return new FileWriter(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html"));
+    private Writer createFileWriter(Object object) throws IOException {
+        return new OutputStreamWriter(new FileOutputStream(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html")), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
-        FileWriter fileWriter = createFileWriter(object);
+        Writer fileWriter = createFileWriter(object);
 
 
         try {
@@ -57,7 +57,7 @@ public abstract class HTMLWriter {
 
     }
 
-    private void writeFooter(FileWriter fileWriter, String changeLog) throws IOException {
+    private void writeFooter(Writer fileWriter, String changeLog) throws IOException {
         fileWriter.append("<hr>Generated: ");
         fileWriter.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
         fileWriter.append("<BR>Against: ");
@@ -68,13 +68,13 @@ public abstract class HTMLWriter {
         fileWriter.append("<a href='http://www.liquibase.org' target='_TOP'>Liquibase ").append(LiquibaseUtil.getBuildVersion()).append("</a>");
     }
 
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeBody(Writer fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
         writeCustomHTML(fileWriter, object, ranChanges, database);
         writeChanges("Pending Changes", fileWriter, changesToRun);
         writeChanges("Past Changes", fileWriter, ranChanges);
     }
 
-    protected void writeTable(String title, List<List<String>> cells, FileWriter fileWriter) throws IOException {
+    protected void writeTable(String title, List<List<String>> cells, Writer fileWriter) throws IOException {
         fileWriter.append("<P>");
         int colspan = 0;
         if (cells.size() == 0) {
@@ -96,13 +96,13 @@ public abstract class HTMLWriter {
         fileWriter.append("</TABLE>\n");
     }
 
-    private void writeTD(FileWriter fileWriter, String filePath) throws IOException {
+    private void writeTD(Writer fileWriter, String filePath) throws IOException {
         fileWriter.append("<TD VALIGN=\"top\">\n");
         fileWriter.append(filePath);
         fileWriter.append("</TD>\n");
     }
 
-    private void writeHeader(Object object, FileWriter fileWriter) throws IOException {
+    private void writeHeader(Object object, Writer fileWriter) throws IOException {
         String title = createTitle(object);
         fileWriter.append("<head>")
                 .append("<title>").append(title).append("</title>")
@@ -117,7 +117,7 @@ public abstract class HTMLWriter {
 
     protected abstract String createTitle(Object object);
 
-    protected void writeChanges(String title, FileWriter fileWriter, List<Change> changes) throws IOException, DatabaseHistoryException, DatabaseException {
+    protected void writeChanges(String title, Writer fileWriter, List<Change> changes) throws IOException, DatabaseHistoryException, DatabaseException {
         fileWriter.append("<p><TABLE BORDER=\"1\" WIDTH=\"100%\" CELLPADDING=\"3\" CELLSPACING=\"0\" SUMMARY=\"\">\n");
         fileWriter.append("<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">\n");
         fileWriter.append("<TD COLSPAN='4'><FONT SIZE=\"+2\">\n");

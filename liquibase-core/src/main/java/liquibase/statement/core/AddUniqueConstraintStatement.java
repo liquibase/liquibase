@@ -16,6 +16,11 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     private boolean deferrable;
     private boolean initiallyDeferred;
     private boolean disabled;
+    private boolean clustered;
+
+    private String forIndexName;
+    private String forIndexSchemaName;
+    private String forIndexCatalogName;
 
     public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, ColumnConfig[] columns, String constraintName) {
         this.catalogName = catalogName;
@@ -45,9 +50,10 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return StringUtils.join(columns, ", ", new StringUtils.StringUtilsFormatter<ColumnConfig>() {
             @Override
             public String toString(ColumnConfig obj) {
-                return obj.getName();
+                return obj.getName() + (obj.getDescending() != null && obj.getDescending() ? " DESC" : "");
             }
-        });    }
+        });
+    }
 
     public String getConstraintName() {
         return constraintName;
@@ -88,4 +94,36 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return disabled;
     }
 
+    public AddUniqueConstraintStatement setClustered(boolean clustered) {
+        this.clustered= clustered;
+        return this;
+    }
+
+    public boolean isClustered() {
+        return clustered;
+    }
+
+    public String getForIndexName() {
+        return forIndexName;
+    }
+
+    public void setForIndexName(String forIndexName) {
+        this.forIndexName = forIndexName;
+    }
+
+    public String getForIndexSchemaName() {
+        return forIndexSchemaName;
+    }
+
+    public void setForIndexSchemaName(String forIndexSchemaName) {
+        this.forIndexSchemaName = forIndexSchemaName;
+    }
+
+    public String getForIndexCatalogName() {
+        return forIndexCatalogName;
+    }
+
+    public void setForIndexCatalogName(String forIndexCatalogName) {
+        this.forIndexCatalogName = forIndexCatalogName;
+    }
 }

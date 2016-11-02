@@ -33,7 +33,7 @@ import java.util.Map;
  * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
  */
 @SuppressWarnings({"unchecked"})
-public class JdbcExecutor extends AbstractExecutor implements Executor {
+public class JdbcExecutor extends AbstractExecutor {
 
     private Logger log = LogFactory.getLogger();
 
@@ -59,25 +59,16 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             // in the case when the exception translator hasn't been initialized yet.
             JdbcUtils.closeStatement(stmt);
             stmt = null;
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
+            String url;
+            if (con.isClosed()) {
+                url = "CLOSED CONNECTION";
+            } else {
+                url = con.getURL();
+            }
+            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ url)+": "+ex.getMessage(), ex);
         }
         finally {
             JdbcUtils.closeStatement(stmt);
-        }
-    }
-
-    @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
         }
     }
 
@@ -303,7 +294,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (database instanceof OracleDatabase) {
-                    statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    }
                 }
 
                 log.debug("Executing EXECUTE database command: "+statement);
@@ -313,7 +306,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                 try {
                     stmt.execute(statement);
                 } catch (Throwable e) {
-                    throw new DatabaseException(e);
+                    throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
             }
             return null;

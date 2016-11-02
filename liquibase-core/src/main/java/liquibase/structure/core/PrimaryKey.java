@@ -115,10 +115,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        int result;
-        result = (getColumnNames() != null ? getColumnNames().hashCode() : 0);
-        result = 31 * result + (getTable().getName() != null ? getTable().getName().hashCode() : 0);
-        return result;
+        return toString().hashCode();
     }
 
     @Override
@@ -126,7 +123,11 @@ public class PrimaryKey extends AbstractDatabaseObject {
         if (getTable() == null) {
             return getName();
         } else {
-            return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
+            String tableName = getTable().getName();
+            if (getTable().getSchema() != null) {
+                tableName = getTable().getSchema().getName()+"."+tableName;
+            }
+            return getName() + " on " + tableName + "(" + getColumnNames() + ")";
         }
     }
 

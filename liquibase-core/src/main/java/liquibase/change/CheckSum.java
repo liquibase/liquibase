@@ -32,7 +32,7 @@ public class CheckSum {
             return null;
         }
         if (checksumValue.matches("^\\d:.*")) {
-            return new CheckSum(checksumValue.substring(2), Integer.valueOf(checksumValue.substring(0,1)));
+            return new CheckSum(checksumValue.substring(2), Integer.parseInt(checksumValue.substring(0,1)));
         } else {
             return new CheckSum(checksumValue, 1);
         }

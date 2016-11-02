@@ -37,6 +37,8 @@ public class MainTest {
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "--promptForNonLocalDatabase=true",
+                "--changeExecListenerClass=MockChangeExecListener",
+                "--changeExecListenerPropertiesFile=PROPS",
                 "update",
         };
 
@@ -52,6 +54,8 @@ public class MainTest {
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
         assertEquals("update", cli.command);
+        assertEquals("MockChangeExecListener", cli.changeExecListenerClass);
+        assertEquals("PROPS", cli.changeExecListenerPropertiesFile);
     }
 
     @Test
@@ -365,8 +369,6 @@ public class MainTest {
         }
         
         String[] singleArgCommand = { "updateCount", "updateCountSQL",
-                "rollback", "rollbackToDate", "rollbackCount",
-                "rollbackSQL", "rollbackToDateSQL", "rollbackCountSQL",
                 "tag", "dbDoc"
         };
         
@@ -516,4 +518,29 @@ public class MainTest {
 
 		assertEquals(argValue, tested.password);
 	}
+
+    @Test
+    public void testDatabaseChangeLogTableName_Properties() throws IOException, CommandLineParsingException {
+        Main main = new Main();
+        Properties props = new Properties();
+        props.setProperty("databaseChangeLogTableName", "PROPSCHANGELOG");
+        props.setProperty("databaseChangeLogLockTableName", "PROPSCHANGELOGLOCK");
+        ByteArrayOutputStream propFile = new ByteArrayOutputStream();
+        props.store(propFile, "");
+        main.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
+
+        assertEquals("PROPSCHANGELOG", main.databaseChangeLogTableName);
+        assertEquals("PROPSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+    }
+
+    @Test
+    public void testDatabaseChangeLogTableName_Options() throws IOException, CommandLineParsingException {
+        Main main = new Main();
+        String[] opts = {
+                "--databaseChangeLogTableName=OPTSCHANGELOG",
+                "--databaseChangeLogLockTableName=OPTSCHANGELOGLOCK"};
+        main.parseOptions(opts);
+        assertEquals("OPTSCHANGELOG", main.databaseChangeLogTableName);
+        assertEquals("OPTSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+    }
 }

@@ -18,12 +18,12 @@ public class SnapshotGeneratorChain {
 
         if (snapshotGenerators != null) {
             this.snapshotGenerators = snapshotGenerators.iterator();
-        }
 
-        for (SnapshotGenerator generator : snapshotGenerators) {
-            Class<? extends SnapshotGenerator>[] replaces = generator.replaces();
-            if (replaces != null && replaces.length > 0) {
-                replacedGenerators.addAll(Arrays.asList(replaces));
+            for (SnapshotGenerator generator : snapshotGenerators) {
+                Class<? extends SnapshotGenerator>[] replaces = generator.replaces();
+                if (replaces != null && replaces.length > 0) {
+                    replacedGenerators.addAll(Arrays.asList(replaces));
+                }
             }
         }
     }

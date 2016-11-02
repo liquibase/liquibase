@@ -6,12 +6,16 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.DateTimeType;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.statement.DatabaseFunction;
@@ -20,9 +24,10 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
+import java.math.BigInteger;
 import java.util.Date;
 
-public class MissingTableChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingTableChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Table.class.isAssignableFrom(objectType)) {
@@ -66,9 +71,13 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
-            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase);
-            DatabaseDataType ddt = ldt.toDatabaseDataType(referenceDatabase);
-            columnConfig.setType(ddt.toString());
+            LiquibaseDataType ldt = DataTypeFactory.getInstance().from(column.getType(), referenceDatabase);
+            DatabaseDataType ddt = ldt.toDatabaseDataType(comparisonDatabase);
+            String typeString = ddt.toString();
+            if (comparisonDatabase instanceof MSSQLDatabase) {
+                typeString = comparisonDatabase.unescapeDataTypeString(typeString);
+            }
+            columnConfig.setType(typeString);
 
             if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);
@@ -76,18 +85,24 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             ConstraintsConfig constraintsConfig = null;
             // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumnNamesAsList().contains(column.getName())) {
-                constraintsConfig = new ConstraintsConfig();
-                constraintsConfig.setPrimaryKey(true);
-                constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
-                // MySQL sets some primary key names as PRIMARY which is invalid
-                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
-                    constraintsConfig.setPrimaryKeyName(null);
-                } else  {
-                    constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+            if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumns().size() == 1 && primaryKey.getColumnNamesAsList().contains(column.getName())) {
+                if (referenceDatabase instanceof MSSQLDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && !primaryKey.getBackingIndex().getClustered()) {
+                    // have to handle PK as a separate statement
+                } else if (referenceDatabase instanceof PostgresDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && primaryKey.getBackingIndex().getClustered()) {
+                    // have to handle PK as a separate statement
+                } else {
+                    constraintsConfig = new ConstraintsConfig();
+                    constraintsConfig.setPrimaryKey(true);
+                    constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
+                    // MySQL sets some primary key names as PRIMARY which is invalid
+                    if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
+                        constraintsConfig.setPrimaryKeyName(null);
+                    } else  {
+                        constraintsConfig.setPrimaryKeyName(primaryKey.getName());
+                    }
+                    control.setAlreadyHandledMissing(primaryKey);
+                    control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
                 }
-                control.setAlreadyHandledMissing(primaryKey);
-                control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
             } else if (column.isNullable() != null && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
@@ -101,6 +116,17 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             if (column.getRemarks() != null) {
                 columnConfig.setRemarks(column.getRemarks());
+            }
+
+            if (column.getAutoIncrementInformation() != null) {
+                BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
+                BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
+                if (startWith != null && !startWith.equals(BigInteger.ONE)) {
+                    columnConfig.setStartWith(startWith);
+                }
+                if (incrementBy != null && !incrementBy.equals(BigInteger.ONE)) {
+                    columnConfig.setIncrementBy(incrementBy);
+                }
             }
 
             change.addColumn(columnConfig);
@@ -161,7 +187,18 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             columnConfig.setDefaultValueComputed(function);
         } else {
-            columnConfig.setDefaultValue(defaultValue.toString());
+            String defaultValueString = null;
+            try {
+                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), database).objectToSql(defaultValue, database);
+            } catch (NullPointerException e) {
+                throw e;
+            }
+            if (defaultValueString != null) {
+                defaultValueString = defaultValueString.replaceFirst("'",
+                        "").replaceAll("'$", "");
+            }
+
+            columnConfig.setDefaultValue(defaultValueString);
         }
     }
 

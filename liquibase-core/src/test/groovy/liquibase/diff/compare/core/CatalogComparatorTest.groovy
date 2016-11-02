@@ -42,12 +42,12 @@ class CatalogComparatorTest extends Specification {
         }
 
         expect:
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
-        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatSupportCatalogs) == isSameIfSupportsCatalogs
 
         // always true if doesn't support catalogs
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportCatalogs)
-        assert DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportCatalogs)
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, null, databaseThatDoesNotSupportCatalogs)
+        assert DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, null, databaseThatDoesNotSupportCatalogs)
 
 
         where:

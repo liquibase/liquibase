@@ -24,60 +24,164 @@ import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class CsvToBean {
+/**
+ * Converts CSV data to objects.
+ *
+ * @param <T> - class to convert the objects to.
+ */
+public class CsvToBean<T> extends AbstractCSVToBean {
+   private Map<Class<?>, PropertyEditor> editorMap = null;
 
-    public CsvToBean() {
-    }
+   /**
+    * Default constructor.
+    */
+   public CsvToBean() {
+   }
 
-    public List parse(MappingStrategy mapper, Reader reader) {
-        try {
-            CSVReader csv = new CSVReader(reader);
-            mapper.captureHeader(csv);
-            String[] line;
-            List list = new ArrayList();
-            while(null != (line = csv.readNext())) {
-                Object obj = processLine(mapper, line);
-                list.add(obj); 
-            }
-            return list;
-        } catch (Exception e) {
-            throw new RuntimeException("Error parsing CSV!", e);
-        }
-    }
+   /**
+    * parse the values from a csvReader constructed from the passed in Reader.
+    * @param mapper - mapping strategy for the bean.
+    * @param reader - Reader used to construct a CSVReader
+    * @return List of Objects.
+    */
 
-    protected Object processLine(MappingStrategy mapper, String[] line) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
-        Object bean = mapper.createBean();
-        for(int col = 0; col < line.length; col++) {
-            String value = line[col];
-            PropertyDescriptor prop = mapper.findDescriptor(col);
-            if (null != prop) {
-                Object obj = convertValue(value, prop);
-                prop.getWriteMethod().invoke(bean, new Object[] {obj});
-            }
-        }
-        return bean;
-    }
+   public List<T> parse(MappingStrategy<T> mapper, Reader reader) {
+      return parse(mapper, new CSVReader(reader));
+   }
 
-    protected Object convertValue(String value, PropertyDescriptor prop) throws InstantiationException, IllegalAccessException {
-        PropertyEditor editor = getPropertyEditor(prop);
-        Object obj = value;
-        if (null != editor) {
-            editor.setAsText(value);
-            obj = editor.getValue();
-        }
-        return obj;
-    }
+   /**
+    * parse the values from a csvReader constructed from the passed in Reader.
+    * @param mapper - mapping strategy for the bean.
+    * @param reader - Reader used to construct a CSVReader
+    * @param filter - CsvToBeanFilter to apply - null if no filter.
+    * @return List of Objects.
+    */
+   public List<T> parse(MappingStrategy<T> mapper, Reader reader, CsvToBeanFilter filter) {
+      return parse(mapper, new CSVReader(reader), filter);
+   }
 
-    /*
-     * Attempt to find custom property editor on descriptor first, else try the propery editor manager.
-     */
-    protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws InstantiationException, IllegalAccessException {
-        Class cls = desc.getPropertyEditorClass();
-        if (null != cls) return (PropertyEditor) cls.newInstance();
-        return PropertyEditorManager.findEditor(desc.getPropertyType());
-    }
+   /**
+    * parse the values from the csvReader.
+    * @param mapper - mapping strategy for the bean.
+    * @param csv - CSVReader
+    * @return List of Objects.
+    */
+   public List<T> parse(MappingStrategy<T> mapper, CSVReader csv) {
+      return parse(mapper, csv, null);
+   }
 
+   /**
+    * parse the values from the csvReader.
+    * @param mapper - mapping strategy for the bean.
+    * @param csv - CSVReader
+    * @param filter - CsvToBeanFilter to apply - null if no filter.
+    * @return List of Objects.
+    */
+   public List<T> parse(MappingStrategy<T> mapper, CSVReader csv, CsvToBeanFilter filter) {
+      long lineProcessed = 0;
+      String[] line = null;
+
+      try {
+         mapper.captureHeader(csv);
+      } catch (Exception e) {
+         throw new RuntimeException("Error capturing CSV header!", e);
+      }
+
+      try {
+         List<T> list = new ArrayList<T>();
+         while (null != (line = csv.readNext())) {
+            lineProcessed++;
+            processLine(mapper, filter, line, list);
+         }
+         return list;
+      } catch (Exception e) {
+         throw new RuntimeException("Error parsing CSV line: " + lineProcessed + " values: " + Arrays.toString(line), e);
+      }
+   }
+
+   private void processLine(MappingStrategy<T> mapper, CsvToBeanFilter filter, String[] line, List<T> list) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
+      if (filter == null || filter.allowLine(line)) {
+         T obj = processLine(mapper, line);
+         list.add(obj);
+      }
+   }
+
+   /**
+    * Creates a single object from a line from the csv file.
+    * @param mapper - MappingStrategy
+    * @param line  - array of Strings from the csv file.
+    * @return - object containing the values.
+    * @throws IllegalAccessException - thrown on error creating bean.
+    * @throws InvocationTargetException - thrown on error calling the setters.
+    * @throws InstantiationException - thrown on error creating bean.
+    * @throws IntrospectionException - thrown on error getting the PropertyDescriptor.
+    */
+   protected T processLine(MappingStrategy<T> mapper, String[] line) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
+      T bean = mapper.createBean();
+      for (int col = 0; col < line.length; col++) {
+         if (mapper.isAnnotationDriven()) {
+            processField(mapper, line, bean, col);
+         } else {
+            processProperty(mapper, line, bean, col);
+         }
+      }
+      return bean;
+   }
+
+   private void processProperty(MappingStrategy<T> mapper, String[] line, T bean, int col) throws IntrospectionException, InstantiationException, IllegalAccessException, InvocationTargetException {
+      PropertyDescriptor prop = mapper.findDescriptor(col);
+      if (null != prop) {
+         String value = checkForTrim(line[col], prop);
+         Object obj = convertValue(value, prop);
+         prop.getWriteMethod().invoke(bean, obj);
+      }
+   }
+
+   private void processField(MappingStrategy<T> mapper, String[] line, T bean, int col) throws IllegalAccessException {
+      BeanField beanField = mapper.findField(col);
+      if (beanField != null) {
+         String value = line[col];
+         beanField.setFieldValue(bean, value);
+      }
+   }
+
+   private PropertyEditor getPropertyEditorValue(Class<?> cls) {
+      if (editorMap == null) {
+         editorMap = new HashMap<Class<?>, PropertyEditor>();
+      }
+
+      PropertyEditor editor = editorMap.get(cls);
+
+      if (editor == null) {
+         editor = PropertyEditorManager.findEditor(cls);
+         addEditorToMap(cls, editor);
+      }
+
+      return editor;
+   }
+
+   private void addEditorToMap(Class<?> cls, PropertyEditor editor) {
+      if (editor != null) {
+         editorMap.put(cls, editor);
+      }
+   }
+
+
+   /**
+    * Attempt to find custom property editor on descriptor first, else try the propery editor manager.
+    *
+    * @param desc - PropertyDescriptor.
+    * @return - the PropertyEditor for the given PropertyDescriptor.
+    * @throws InstantiationException - thrown when getting the PropertyEditor for the class.
+    * @throws IllegalAccessException - thrown when getting the PropertyEditor for the class.
+    */
+   protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws InstantiationException, IllegalAccessException {
+      Class<?> cls = desc.getPropertyEditorClass();
+      if (null != cls) {
+         return (PropertyEditor) cls.newInstance();
+      }
+      return getPropertyEditorValue(desc.getPropertyType());
+   }
 }

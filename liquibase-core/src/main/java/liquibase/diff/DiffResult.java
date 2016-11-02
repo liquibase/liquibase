@@ -6,7 +6,10 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
@@ -81,11 +84,11 @@ public class DiffResult {
         return set;
     }
 
-    public <T extends DatabaseObject> T getMissingObject(T example) {
+    public <T extends DatabaseObject> T getMissingObject(T example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
         for (T obj : (Set<T>) getMissingObjects(example.getClass())) {
-            if (comparator.isSameObject(obj, example, accordingTo)) {
+            if (comparator.isSameObject(obj, example, schemaComparisons, accordingTo)) {
                 return obj;
             }
         }
@@ -119,11 +122,11 @@ public class DiffResult {
         return set;
     }
 
-    public <T extends DatabaseObject> T getUnexpectedObject(T example) {
+    public <T extends DatabaseObject> T getUnexpectedObject(T example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = this.getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
         for (T obj : (Set<T>) getUnexpectedObjects(example.getClass())) {
-            if (comparator.isSameObject(obj, example, accordingTo)) {
+            if (comparator.isSameObject(obj, example, schemaComparisons, accordingTo)) {
                 return obj;
             }
         }
@@ -138,7 +141,7 @@ public class DiffResult {
         return changedObjects;
     }
 
-    public  <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
+    public <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
         Map returnSet = new HashMap();
         for (Map.Entry<DatabaseObject, ObjectDifferences> obj : changedObjects.entrySet()) {
             if (type.isAssignableFrom(obj.getKey().getClass())) {
@@ -154,11 +157,11 @@ public class DiffResult {
         return map;
     }
 
-    public ObjectDifferences getChangedObject(DatabaseObject example) {
+    public ObjectDifferences getChangedObject(DatabaseObject example, CompareControl.SchemaComparison[] schemaComparisons) {
         Database accordingTo = this.getComparisonSnapshot().getDatabase();
         DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
         for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : getChangedObjects(example.getClass()).entrySet()) {
-            if (comparator.isSameObject(entry.getKey(), example, accordingTo)) {
+            if (comparator.isSameObject(entry.getKey(), example, schemaComparisons, accordingTo)) {
                 return entry.getValue();
             }
         }
@@ -167,6 +170,16 @@ public class DiffResult {
 
 
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
+        if (obj instanceof Catalog || obj instanceof Schema) {
+            if (differences.getSchemaComparisons() != null && differences.getDifferences().size() == 1 && differences.getDifference("name") != null) {
+                if (obj instanceof Catalog && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
+                    changedObjects.put(obj, differences);
+                    return;
+                } else {
+                    return;  //don't save name differences
+                }
+            }
+        }
         changedObjects.put(obj, differences);
     }
 

@@ -7,15 +7,13 @@ import liquibase.change.core.AddColumnChange;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 
-public class MissingColumnChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingColumnChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
 
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -54,7 +52,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         }
 
 
-        AddColumnChange change = new AddColumnChange();
+        AddColumnChange change = createAddColumnChange();
         change.setTableName(column.getRelation().getName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(column.getRelation().getSchema().getCatalogName());
@@ -63,28 +61,14 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
             change.setSchemaName(column.getRelation().getSchema().getName());
         }
 
-        AddColumnConfig columnConfig = new AddColumnConfig();
+        AddColumnConfig columnConfig = createAddColumnConfig();
         columnConfig.setName(column.getName());
 
         String dataType = column.getType().toString();
 
         columnConfig.setType(dataType);
 
-        Object defaultValue = column.getDefaultValue();
         MissingTableChangeGenerator.setDefaultValue(columnConfig, column, comparisonDatabase);
-        if (defaultValue != null) {
-            String defaultValueString = null;
-            try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
-            } catch (NullPointerException e) {
-                throw e;
-            }
-            if (defaultValueString != null) {
-                defaultValueString = defaultValueString.replaceFirst("'",
-                        "").replaceAll("'$", "");
-            }
-            columnConfig.setDefaultValue(defaultValueString);
-        }
 
         if (column.getRemarks() != null) {
             columnConfig.setRemarks(column.getRemarks());
@@ -103,5 +87,13 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         change.addColumn(columnConfig);
 
         return new Change[] { change };
+    }
+
+    protected AddColumnConfig createAddColumnConfig() {
+        return new AddColumnConfig();
+    }
+
+    protected AddColumnChange createAddColumnChange() {
+        return new AddColumnChange();
     }
 }

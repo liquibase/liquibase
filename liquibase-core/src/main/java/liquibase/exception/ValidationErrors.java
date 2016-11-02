@@ -12,6 +12,7 @@ import java.util.List;
 public class ValidationErrors {
 
     protected List<String> errorMessages = new ArrayList<String>();
+    protected List<String> warningMessages = new ArrayList<String>();
 
     public boolean hasErrors() {
         return errorMessages.size() > 0;
@@ -53,6 +54,15 @@ public class ValidationErrors {
         return errorMessages;
     }
 
+    public ValidationErrors addWarning(String message) {
+        warningMessages.add(message);
+        return this;
+    }
+
+    public List<String> getWarningMessages() {
+        return warningMessages;
+    }
+
     public ValidationErrors addAll(ValidationErrors validationErrors) {
         if (validationErrors == null) {
             return this;
@@ -78,6 +88,14 @@ public class ValidationErrors {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof ValidationErrors)) {
+            return false;
+        }
+        return this.toString().equals(obj.toString());
     }
 
     public List<String> getRequiredErrorMessages() {

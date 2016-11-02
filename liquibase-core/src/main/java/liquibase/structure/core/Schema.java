@@ -69,7 +69,7 @@ public class Schema extends AbstractDatabaseObject {
         Schema schema = (Schema) o;
 
         if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
-        if (getName() != null ? !getName().equals(schema.getName()) : schema.getName() != null) return false;
+        if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
 
         return true;
     }
@@ -97,7 +97,7 @@ public class Schema extends AbstractDatabaseObject {
             schemaName = "DEFAULT";
         }
 
-        if (catalogName == null) {
+        if (catalogName == null || catalogName.equals(schemaName)) {
             return schemaName;
         } else {
             return catalogName +"."+ schemaName;
@@ -144,5 +144,12 @@ public class Schema extends AbstractDatabaseObject {
         }
         objects.add(databaseObject);
 
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> fields = super.getSerializableFields();
+        fields.remove("objects");
+        return fields;
     }
 }

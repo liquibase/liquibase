@@ -1,6 +1,7 @@
 package liquibase.structure;
 
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
@@ -78,7 +79,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
             cache.put(databaseObject.getClass(), collectionMap);
         }
 
-        String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(databaseObject, database);
+        String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(databaseObject, null, database);
 
         for (String hash : hashes) {
             Set<DatabaseObject> collection = collectionMap.get(hash);
@@ -93,14 +94,14 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     /**
      * Returns the object described by the passed example if it is already included in this snapshot.
      */
-    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
+    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example, CompareControl.SchemaComparison[] schemaComparisons) {
         Map<String, Set<DatabaseObject>> databaseObjectsByHash = cache.get(example.getClass());
 
         if (databaseObjectsByHash == null) {
             return null;
         }
 
-        String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(example, database);
+        String[] hashes = DatabaseObjectComparatorFactory.getInstance().hash(example, null, database);
 
         SortedSet<Set<DatabaseObject>> objectSets = new TreeSet<Set<DatabaseObject>>(new Comparator<Set<DatabaseObject>>() {
             @Override
@@ -111,7 +112,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
                 }
                 return sizeComparison;
             }
-        } );
+        });
 
         for (String hash : hashes) {
             Set<DatabaseObject> databaseObjects = databaseObjectsByHash.get(hash);
@@ -122,7 +123,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
 
         for (Set<DatabaseObject> databaseObjects : objectSets) {
             for (DatabaseObject obj : databaseObjects) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, schemaComparisons, database)) {
                     //noinspection unchecked
                     return (DatabaseObjectType) obj;
                 }
@@ -135,7 +136,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     /**
      * Returns all objects of the given type that are already included in this snapshot.
      */
-    public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
+    public <DatabaseObjectType extends DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
 
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
@@ -150,8 +151,8 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     }
 
 
-    public boolean contains(DatabaseObject wantedObject) {
-        return get(wantedObject) != null;
+    public boolean contains(DatabaseObject wantedObject, CompareControl.SchemaComparison[] schemaComparisons) {
+        return get(wantedObject, schemaComparisons) != null;
     }
 
     @Override
@@ -162,6 +163,15 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     @Override
     public ParsedNode serialize() {
         throw new RuntimeException("TODO");
+    }
+
+    public Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> toMap() {
+        Map<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>> returnMap = new HashMap<Class<? extends DatabaseObject>, Set<? extends DatabaseObject>>();
+        for (Class<? extends DatabaseObject> type : this.cache.keySet()) {
+            returnMap.put(type, get(type));
+        }
+
+        return returnMap;
     }
 
 }

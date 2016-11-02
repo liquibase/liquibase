@@ -5,10 +5,11 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.structure.core.Sequence;
+
+import java.math.BigInteger;
 
 public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
 
@@ -56,6 +57,22 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
                 buffer.append(" ORDER");
+            }
+        }
+
+        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
+            if (statement.getCacheSize().equals(BigInteger.ZERO)) {
+                buffer.append(" NOCACHE ");
+            } else {
+                buffer.append(" CACHE ").append(statement.getCacheSize());
+            }
+        }
+
+        if (statement.getCycle() != null && database instanceof OracleDatabase) {
+            if (statement.getCycle()) {
+                buffer.append(" CYCLE ");
+            } else {
+                buffer.append(" NOCYCLE ");
             }
         }
 

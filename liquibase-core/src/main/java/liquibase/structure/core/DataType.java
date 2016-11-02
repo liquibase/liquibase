@@ -1,8 +1,8 @@
 package liquibase.structure.core;
 
-import java.math.BigInteger;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 
-public class DataType {
+public class DataType extends AbstractLiquibaseSerializable {
 
     private String typeName;
 
@@ -14,12 +14,19 @@ public class DataType {
     private Integer radix;
     private Integer characterOctetLength;
 
+    public DataType() {
+    }
+
     public DataType(String typeName) {
         this.typeName = typeName;
     }
 
     public String getTypeName() {
         return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 
     public Integer getDataTypeId() {
@@ -76,7 +83,7 @@ public class DataType {
             }
 
             //Failing on data types such as nvarchar if included
-            if (columnSizeUnit != null && columnSizeUnit.equals(ColumnSizeUnit.CHAR) && (typeName.equalsIgnoreCase("VARCHAR") || typeName.equalsIgnoreCase("VARCHAR2"))) {
+            if (columnSizeUnit != null && (typeName.equalsIgnoreCase("VARCHAR") || typeName.equalsIgnoreCase("VARCHAR2")|| typeName.equalsIgnoreCase("CHAR"))) {
                 value += " " + columnSizeUnit;
             }
 
@@ -110,5 +117,15 @@ public class DataType {
     public static enum ColumnSizeUnit {
         BYTE,
         CHAR,
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+        return "dataType";
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_SNAPSHOT_NAMESPACE;
     }
 }

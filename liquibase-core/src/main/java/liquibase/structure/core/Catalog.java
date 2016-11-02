@@ -87,7 +87,7 @@ public class Catalog extends AbstractDatabaseObject {
 
         Catalog catalog = (Catalog) o;
 
-        if (getName() != null ? !getName().equals(catalog.getName()) : catalog.getName() != null) return false;
+        if (getName() != null ? !getName().equalsIgnoreCase(catalog.getName()) : catalog.getName() != null) return false;
 
         return true;
     }
@@ -99,5 +99,10 @@ public class Catalog extends AbstractDatabaseObject {
         return getName() != null ? getName().hashCode() : 0;
     }
 
-
+    @Override
+    public Set<String> getSerializableFields() {
+        Set<String> fields = super.getSerializableFields();
+        fields.remove("objects");
+        return fields;
+    }
 }

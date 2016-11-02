@@ -12,6 +12,7 @@ import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -155,8 +156,15 @@ public class RenameColumnChange extends AbstractChange {
 			}
 			@Override
             public boolean createThisIndex(Index index) {
-				if (index.getColumns().contains(getOldColumnName())) {
-					index.getColumns().remove(getOldColumnName());
+				if (index.getColumnNames().contains(getOldColumnName())) {
+                    Iterator<Column> columnIterator = index.getColumns().iterator();
+                    while (columnIterator.hasNext()) {
+                        Column column = columnIterator.next();
+                        if (column.getName().equals(getOldColumnName())) {
+                            columnIterator.remove();
+                            break;
+                        }
+                    }
 					index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
 				}
 				return true;

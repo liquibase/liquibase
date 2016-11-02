@@ -22,8 +22,7 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 
     @Override
 	public boolean supports(AddUniqueConstraintStatement statement, Database database) {
-        return  (database instanceof MSSQLDatabase)
-			|| (database instanceof SybaseDatabase)
+        return  (database instanceof SybaseDatabase)
 			|| (database instanceof SybaseASADatabase)
 		;
 	}
@@ -32,11 +31,11 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
 		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)";
-		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD UNIQUE (%s)";
+		final String sqlNoConstraintNameTemplate = "ALTER TABLE %s ADD UNIQUE (%s)";
 		
 		if (statement.getConstraintName() == null) {
 			return new Sql[] {
-				new UnparsedSql(String.format(sqlNoContraintNameTemplate 
+				new UnparsedSql(String.format(sqlNoConstraintNameTemplate
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
 				), getAffectedUniqueConstraint(statement))

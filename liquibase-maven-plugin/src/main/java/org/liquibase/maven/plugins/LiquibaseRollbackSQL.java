@@ -100,27 +100,22 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 			throws LiquibaseException {
 		switch (type) {
 		case COUNT: {
-			liquibase.rollback(rollbackCount, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+			liquibase.rollback(rollbackCount, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
 			break;
 		}
 		case DATE: {
-			DateFormat format = DateFormat.getDateInstance();
 			try {
-				liquibase.rollback(format.parse(rollbackDate), new Contexts(contexts), new LabelExpression(labels),
+				liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels),
 						outputWriter);
 			} catch (ParseException e) {
 				String message = "Error parsing rollbackDate: "
 						+ e.getMessage();
-				if (format instanceof SimpleDateFormat) {
-					message += "\nDate must match pattern: "
-							+ ((SimpleDateFormat) format).toPattern();
-				}
 				throw new LiquibaseException(message, e);
 			}
 			break;
 		}
 		case TAG: {
-			liquibase.rollback(rollbackTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
+			liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels), outputWriter);
 			break;
 		}
 		default: {

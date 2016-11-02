@@ -1,10 +1,14 @@
 package liquibase.resource;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * A @{link ResourceAccessor} implementation which finds Files in the File System.
@@ -12,12 +16,15 @@ import java.util.*;
 public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     private File baseDirectory;
+    private boolean readyForInit = false;
 
     /**
      * Creates with no base directory. All files will be resolved exactly as they are given.
      */
     public FileSystemResourceAccessor() {
         baseDirectory = null;
+        readyForInit = true;
+        init();
     }
 
     /**
@@ -26,8 +33,34 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
     public FileSystemResourceAccessor(String base) {
         baseDirectory = new File(base);
         if (!baseDirectory.isDirectory()) {
-            throw new IllegalArgumentException(base+" must be a directory");
+            throw new IllegalArgumentException(base + " must be a directory");
         }
+        readyForInit = true;
+        init();
+    }
+
+    @Override
+    protected void init() {
+        if (readyForInit) {
+            super.init();
+        }
+    }
+
+    @Override
+    protected void addRootPath(URL path) {
+        try {
+            File pathAsFile = new File(path.toURI());
+
+            for (File fileSystemRoot : File.listRoots()) {
+                if (pathAsFile.equals(fileSystemRoot)) { //don't include root
+                    return;
+                }
+            }
+        } catch (URISyntaxException e) {
+            //add like normal
+        }
+
+        super.addRootPath(path);
     }
 
     @Override
@@ -36,43 +69,109 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
 
         InputStream fileStream = null;
-        if (absoluteFile.exists() && absoluteFile.isFile() && absoluteFile.isAbsolute()) {
-            fileStream = new BufferedInputStream(new FileInputStream(absoluteFile));
-        } else if (relativeFile.exists() && relativeFile.isFile()) {
-            fileStream = new BufferedInputStream(new FileInputStream(relativeFile));
+        if (absoluteFile.isAbsolute()) {
+            try {
+                fileStream = openStream(absoluteFile);
+            } catch (FileNotFoundException e) {
+                //will try relative
+            }
         }
+
         if (fileStream == null) {
-            return null;
+            try {
+                fileStream = openStream(relativeFile);
+            } catch (FileNotFoundException e2) {
+                return null;
+            }
+        }
+
+
+        Set<InputStream> returnSet = new HashSet<InputStream>();
+        returnSet.add(fileStream);
+        return returnSet;
+    }
+
+    private InputStream openStream(File file) throws IOException, FileNotFoundException {
+        if (file.getName().toLowerCase().endsWith(".gz")) {
+            return new BufferedInputStream(new GZIPInputStream(new FileInputStream(file)));
         } else {
-            Set<InputStream> returnSet = new HashSet<InputStream>();
-            returnSet.add(fileStream);
-            return returnSet;
+            return new BufferedInputStream(new FileInputStream(file));
         }
     }
 
+
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        File absoluteFile = new File(path);
-        File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
+        File finalDir;
 
-        if (absoluteFile.exists() && absoluteFile.isDirectory()) {
+        if (relativeTo == null) {
+            finalDir = new File(this.baseDirectory, path);
+        } else {
+            finalDir = new File(this.baseDirectory, relativeTo);
+            finalDir = new File(finalDir.getParentFile(), path);
+        }
+
+        if (finalDir.exists() && finalDir.isDirectory()) {
             Set<String> returnSet = new HashSet<String>();
-            getContents(absoluteFile, recursive, includeFiles, includeDirectories, path, returnSet);
-            return returnSet;
-        } else if (relativeFile.exists() && relativeFile.isDirectory()) {
-            Set<String> returnSet = new HashSet<String>();
-            getContents(relativeFile, recursive, includeFiles, includeDirectories, path, returnSet);
-            return returnSet;
+            getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
+
+            SortedSet<String> rootPaths = new TreeSet<String>(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    int i = -1 * ((Integer) o1.length()).compareTo(o2.length());
+                    if (i == 0) {
+                        i = o1.compareTo(o2);
+                    }
+                    return i;
+                }
+            });
+
+            for (String rootPath : getRootPaths()) {
+                rootPaths.add(rootPath.replaceFirst("^file:/", "").replace("\\", "/"));
+            }
+
+            Set<String> finalReturnSet = new LinkedHashSet<String>();
+            for (String returnPath : returnSet) {
+                returnPath = returnPath.replace("\\", "/");
+                for (String rootPath : rootPaths) {
+                    if (returnPath.startsWith(rootPath)) {
+                        returnPath = returnPath.substring(rootPath.length());
+                        break;
+                    }
+                }
+                finalReturnSet.add(returnPath);
+            }
+            return finalReturnSet;
         }
 
         return null;
     }
 
     @Override
+    protected String convertToPath(String string) {
+        if (this.baseDirectory == null) {
+            return string;
+        } else {
+            try {
+                return "file:" + new File(string).getCanonicalPath().substring(this.baseDirectory.getCanonicalPath().length());
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+
+    }
+
+    @Override
     public ClassLoader toClassLoader() {
         try {
-            return new URLClassLoader(new URL[]{new URL("file://" + baseDirectory)});
-        } catch (MalformedURLException e) {
+            URL url;
+            if (baseDirectory == null) {
+                url = new File("/").toURI().toURL();
+            } else {
+                url = baseDirectory.toURI().toURL();
+            }
+            return new URLClassLoader(new URL[]{url});
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -83,7 +182,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         if (dir == null) {
             dir = new File(".");
         }
-        return getClass().getName()+"("+ dir.getAbsolutePath() +")";
+        return getClass().getName() + "(" + dir.getAbsolutePath() + ")";
     }
 
 }

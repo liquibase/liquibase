@@ -15,8 +15,11 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.util.SystemUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,182 +66,214 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 	@Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
-		DatabaseChangeLog changeLog = new DatabaseChangeLog();
-		changeLog.setChangeLogParameters(changeLogParameters);
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        changeLog.setChangeLogParameters(changeLogParameters);
 
-		changeLog.setPhysicalFilePath(physicalChangeLogLocation);
+        changeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
-		BufferedReader reader = null;
+        BufferedReader reader = null;
 
-		try {
-			reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
-			StringBuffer currentSql = new StringBuffer();
-			StringBuffer currentRollbackSql = new StringBuffer();
-			ChangeSetBlock activeBlock = ChangeSetBlock.SQL;
-			boolean currentChangeHasRollback = false;
+        try {
+            reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
+            StringBuffer currentSql = new StringBuffer();
+            StringBuffer currentRollbackSql = new StringBuffer();
 
-			ChangeSet changeSet = null;
-			RawSQLChange change = null;
-			Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
-			Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset\\s+([^:]+):(\\S+).*", Pattern.CASE_INSENSITIVE);
-			Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
-			Pattern rollbackPattern2 = Pattern.compile("\\s*\\-\\-[\\s]*rollback\\s*", Pattern.CASE_INSENSITIVE);
-			Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
-			Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
-			Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
-			Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment: (.*)", Pattern.CASE_INSENSITIVE);
+            ChangeSet changeSet = null;
+            RawSQLChange change = null;
+            Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
+            Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset\\s+([^:]+):(\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
+            Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackSplitStatementsPattern = Pattern.compile(".*rollbackSplitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackEndDelimiterPattern = Pattern.compile(".*rollbackEndDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment:? (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern validCheckSumPattern = Pattern.compile("\\-\\-[\\s]*validCheckSum:? (.*)", Pattern.CASE_INSENSITIVE);
 
-			Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern contextPattern = Pattern.compile(".*context:(\\S*).*", Pattern.CASE_INSENSITIVE);
-			Pattern logicalFilePathPattern = Pattern.compile(".*logicalFilePath:(\\S*).*", Pattern.CASE_INSENSITIVE);
-			Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
-			Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
-			Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
-			Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern contextPattern = Pattern.compile(".*context:(\".*\"|\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern logicalFilePathPattern = Pattern.compile(".*logicalFilePath:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
+            Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
-			String line;
-			while ((line = reader.readLine()) != null) {
+            boolean rollbackSplitStatements = true;
+            String rollbackEndDelimiter = null;
 
-				Matcher changeLogPatterMatcher = changeLogPattern.matcher(line);
-				if (changeLogPatterMatcher.matches()) {
-					Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher(line);
-					changeLog.setLogicalFilePath(parseString(logicalFilePathMatcher));
-				}
+            String line;
+            while ((line = reader.readLine()) != null) {
 
-				Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
-				if (changeSetPatternMatcher.matches()) {
-					if (changeSet != null) {
-						finishChangeSet(changeLogParameters, currentSql, currentRollbackSql, currentChangeHasRollback, changeSet, change);
-					}
+                Matcher changeLogPatterMatcher = changeLogPattern.matcher (line);
+                if (changeLogPatterMatcher.matches ()) {
+                   Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
+                   changeLog.setLogicalFilePath (parseString(logicalFilePathMatcher));
+                }
 
-					Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
-					Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
-					Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
+                Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
+                if (changeSetPatternMatcher.matches()) {
+                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeLog);
+                    if (changeSet != null) {
 
-					Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher(line);
-					Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
-					Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
-					Matcher contextPatternMatcher = contextPattern.matcher(line);
-					Matcher labelsPatternMatcher = labelsPattern.matcher(line);
-					Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
-					Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
-					Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
+                        if (finalCurrentSql == null) {
+                            throw new ChangeLogParseException("No SQL for changeset " + changeSet.toString(false));
+                        }
 
-					boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
-					boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
-					boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
-					boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
-					boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true);
-					boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
+                        change.setSql(finalCurrentSql);
 
-					String endDelimiter = parseString(endDelimiterPatternMatcher);
-					String context = parseString(contextPatternMatcher);
-					String labels = parseString(labelsPatternMatcher);
-					String logicalFilePath = parseString(logicalFilePathMatcher);
-					if (logicalFilePath == null || "".equals(logicalFilePath)) {
-						logicalFilePath = changeLog.getLogicalFilePath();
-					}
-					String dbms = parseString(dbmsPatternMatcher);
+                        if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
+                            if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                                changeSet.addRollbackChange(new EmptyChange());
+                            } else {
+                                RawSQLChange rollbackChange = new RawSQLChange();
+                                rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeLog));
+                                changeSet.addRollbackChange(rollbackChange);
+                            }
+                        }
+                    }
+
+                    Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
+                    Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
+                    Matcher rollbackSplitStatementsPatternMatcher = rollbackSplitStatementsPattern.matcher(line);
+                    Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
+                    Matcher rollbackEndDelimiterPatternMatcher = rollbackEndDelimiterPattern.matcher(line);
+
+                    Matcher logicalFilePathMatcher = logicalFilePathPattern.matcher (line);
+                    Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
+                    Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
+                    Matcher contextPatternMatcher = contextPattern.matcher(line);
+                    Matcher labelsPatternMatcher = labelsPattern.matcher(line);
+                    Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
+                    Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
+                    Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
+
+                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
+                    boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
+                    rollbackSplitStatements = parseBoolean(rollbackSplitStatementsPatternMatcher, changeSet, true);
+                    boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
+                    boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
+                    boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true);
+                    boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
+
+                    String endDelimiter = parseString(endDelimiterPatternMatcher);
+                    rollbackEndDelimiter = parseString(rollbackEndDelimiterPatternMatcher);
+                    String context = StringUtils.trimToNull(
+                            StringUtils.trimToEmpty(parseString(contextPatternMatcher)).replaceFirst("^\"", "").replaceFirst("\"$", "") //remove surrounding quotes if they're in there
+                    );
+                    String labels = parseString(labelsPatternMatcher);
+                    String logicalFilePath = parseString(logicalFilePathMatcher);
+                    if (logicalFilePath == null || "".equals (logicalFilePath)) {
+                       logicalFilePath = changeLog.getLogicalFilePath ();
+                    }
+                    String dbms = parseString(dbmsPatternMatcher);
 
 
                     changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, logicalFilePath, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
-					changeSet.setLabels(new Labels(labels));
-					changeSet.setFailOnError(failOnError);
-					changeLog.addChangeSet(changeSet);
+                    changeSet.setLabels(new Labels(labels));
+                    changeSet.setFailOnError(failOnError);
+                    changeLog.addChangeSet(changeSet);
 
-					change = new RawSQLChange();
-					change.setResourceAccessor(resourceAccessor);
-					change.setSplitStatements(splitStatements);
-					change.setStripComments(stripComments);
-					change.setEndDelimiter(endDelimiter);
-					changeSet.addChange(change);
+                    change = new RawSQLChange();
+                    change.setSql(finalCurrentSql);
+                    change.setResourceAccessor(resourceAccessor);
+                    change.setSplitStatements(splitStatements);
+                    change.setStripComments(stripComments);
+                    change.setEndDelimiter(endDelimiter);
+                    changeSet.addChange(change);
 
-					currentSql = new StringBuffer();
-					currentRollbackSql = new StringBuffer();
-					activeBlock = ChangeSetBlock.SQL;
-					currentChangeHasRollback = false;
-				} else {
-					if (changeSet != null) {
-						Matcher commentMatcher = commentPattern.matcher(line);
-						Matcher rollbackMatcher = rollbackPattern.matcher(line);
-						Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
-						Matcher preconditionMatcher = preconditionPattern.matcher(line);
+                    currentSql = new StringBuffer();
+                    currentRollbackSql = new StringBuffer();
+                } else {
+                    if (changeSet != null) {
+                        Matcher commentMatcher = commentPattern.matcher(line);
+                        Matcher rollbackMatcher = rollbackPattern.matcher(line);
+                        Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
+                        Matcher preconditionMatcher = preconditionPattern.matcher(line);
+                        Matcher validCheckSumMatcher = validCheckSumPattern.matcher(line);
 
-						if (commentMatcher.matches()) {
-							if (commentMatcher.groupCount() == 1) {
-								changeSet.setComments(commentMatcher.group(1));
-							}
-							activeBlock = ChangeSetBlock.SQL;
-						} else if (rollbackMatcher.matches()) {
-							if (rollbackMatcher.groupCount() == 1) {
-								currentRollbackSql.append(rollbackMatcher.group(1)).append("\n");
-							}
-							activeBlock = ChangeSetBlock.ROLLBACK;
-							currentChangeHasRollback = true;
-						} else if (rollbackPattern2.matcher(line).matches()) {
-							activeBlock = ChangeSetBlock.ROLLBACK;
-							currentChangeHasRollback = true;
-						} else if (preconditionsMatcher.matches()) {
-							if (preconditionsMatcher.groupCount() == 1) {
-								String body = preconditionsMatcher.group(1);
-								Matcher onFailMatcher = onFailPattern.matcher(body);
-								Matcher onErrorMatcher = onErrorPattern.matcher(body);
-								Matcher onUpdateSqlMatcher = onUpdateSqlPattern.matcher(body);
+                        if (commentMatcher.matches()) {
+                            if (commentMatcher.groupCount() == 1) {
+                                changeSet.setComments(commentMatcher.group(1));
+                            }
+                        } else if (validCheckSumMatcher.matches()) {
+                            if (validCheckSumMatcher.groupCount() == 1) {
+                                changeSet.addValidCheckSum(validCheckSumMatcher.group(1));
+                            }
+                        } else if (rollbackMatcher.matches()) {
+                            if (rollbackMatcher.groupCount() == 1) {
+                                currentRollbackSql.append(rollbackMatcher.group(1)).append(SystemUtils.LINE_SEPARATOR);
+                            }
+                        } else if (preconditionsMatcher.matches()) {
+                            if (preconditionsMatcher.groupCount() == 1) {
+                                String body = preconditionsMatcher.group(1);
+                                Matcher onFailMatcher = onFailPattern.matcher(body);
+                                Matcher onErrorMatcher = onErrorPattern.matcher(body);
+                                Matcher onUpdateSqlMatcher = onUpdateSqlPattern.matcher(body);
 
-								PreconditionContainer pc = new PreconditionContainer();
-								pc.setOnFail(StringUtils.trimToNull(parseString(onFailMatcher)));
-								pc.setOnError(StringUtils.trimToNull(parseString(onErrorMatcher)));
-								pc.setOnSqlOutput(StringUtils.trimToNull(parseString(onUpdateSqlMatcher)));
-								changeSet.setPreconditions(pc);
-							}
-							activeBlock = ChangeSetBlock.SQL;
-						} else if (preconditionMatcher.matches()) {
-							if (changeSet.getPreconditions() == null) {
-								// create the defaults
-								changeSet.setPreconditions(new PreconditionContainer());
-							}
-							if (preconditionMatcher.groupCount() == 2) {
-								String name = StringUtils.trimToNull(preconditionMatcher.group(1));
-								if (name != null) {
-									String body = preconditionMatcher.group(2).trim();
-									if ("sql-check".equals(name)) {
-										changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(body));
-									} else {
-										throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
-									}
-								}
-							}
-							activeBlock = ChangeSetBlock.SQL;
-						} else {
-							switch (activeBlock) {
-							case SQL:
-							default:
-								currentSql.append(line).append("\n");
-								break;
-							case ROLLBACK:
-								currentRollbackSql.append(line).append("\n");
-								break;
-							}
-						}
-					}
-				}
-			}
+                                PreconditionContainer pc = new PreconditionContainer();
+                                pc.setOnFail(StringUtils.trimToNull(parseString(onFailMatcher)));
+                                pc.setOnError(StringUtils.trimToNull(parseString(onErrorMatcher)));
+                                pc.setOnSqlOutput(StringUtils.trimToNull(parseString(onUpdateSqlMatcher)));
+                                changeSet.setPreconditions(pc);
+                            }
+                        } else if (preconditionMatcher.matches()) {
+                            if (changeSet.getPreconditions() == null) {
+                                // create the defaults
+                                changeSet.setPreconditions(new PreconditionContainer());
+                            }
+                            if (preconditionMatcher.groupCount() == 2) {
+                                String name = StringUtils.trimToNull(preconditionMatcher.group(1));
+                                if (name != null) {
+                                    String body = preconditionMatcher.group(2).trim();
+                                    if ("sql-check".equals(name)) {
+                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(changeLogParameters.expandExpressions(StringUtils.trimToNull(body), changeSet.getChangeLog())));
+                                    } else {
+                                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                                    }
+                                }
+                            }
+                        } else {
+                            currentSql.append(line).append(SystemUtils.LINE_SEPARATOR);
+                        }
+                    }
+                }
+            }
 
-			if (changeSet != null) {
-				finishChangeSet(changeLogParameters, currentSql, currentRollbackSql, currentChangeHasRollback, changeSet, change);
-			}
-		} catch (IOException e) {
-			throw new ChangeLogParseException(e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
+            if (changeSet != null) {
+                change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()), changeSet.getChangeLog()));
+
+                if (change.getEndDelimiter() == null && StringUtils.trimToEmpty(change.getSql()).endsWith("\n/")) {
+                    change.setEndDelimiter("\n/$");
+                }
+
+                if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
+                    if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                        changeSet.addRollbackChange(new EmptyChange());
+                    } else {
+                        RawSQLChange rollbackChange = new RawSQLChange();
+                        rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString(), changeSet.getChangeLog()));
+                        rollbackChange.setSplitStatements(rollbackSplitStatements);
+                        if (rollbackEndDelimiter != null) {
+                            rollbackChange.setEndDelimiter(rollbackEndDelimiter);
+                        }
+                        changeSet.addRollbackChange(rollbackChange);
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            throw new ChangeLogParseException(e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
                 } catch (IOException ignore) { }
 			}
 		}

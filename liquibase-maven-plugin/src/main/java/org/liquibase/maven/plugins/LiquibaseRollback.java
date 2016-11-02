@@ -3,11 +3,13 @@
 package org.liquibase.maven.plugins;
 
 import java.text.*;
+import java.util.Date;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.util.ISODateFormat;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
@@ -35,7 +37,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected int rollbackCount;
 
   /**
-   * The date to rollback the database to. The format of the date must match that of the
+   * The date to rollback the database to. The format of the date must match either an ISO date format, or that of the
    * <code>DateFormat.getDateInstance()</code> for the platform the plugin is executing
    * on.
    * @parameter expression="${liquibase.rollbackDate}"
@@ -45,10 +47,17 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   /** The type of the rollback that is being performed. */
   protected RollbackType type;
 
-  @Override
+    /** External script containing rollback logic. Set to override the rollback logic contained in the changelog*/
+    protected String rollbackScript;
+
+    @Override
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     super.checkRequiredParametersAreSpecified();
 
+    checkRequiredRollbackParameters();
+  }
+
+  protected void checkRequiredRollbackParameters() throws MojoFailureException {
     if (rollbackCount == -1 && rollbackDate == null && rollbackTag == null) {
       throw new MojoFailureException("One of the rollback options must be specified, "
                                      + "please specify one of rollbackTag, rollbackCount "
@@ -93,30 +102,43 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     switch (type) {
       case COUNT: {
-        liquibase.rollback(rollbackCount, new Contexts(contexts), new LabelExpression(labels));
+        liquibase.rollback(rollbackCount, rollbackScript, new Contexts(contexts), new LabelExpression(labels));
         break;
       }
       case DATE: {
-        DateFormat format = DateFormat.getDateInstance();
         try {
-          liquibase.rollback(format.parse(rollbackDate), new Contexts(contexts), new LabelExpression(labels));
+          liquibase.rollback(parseDate(rollbackDate), rollbackScript,new Contexts(contexts), new LabelExpression(labels));
         }
         catch (ParseException e) {
           String message = "Error parsing rollbackDate: " + e.getMessage();
-          if (format instanceof SimpleDateFormat) {
-            message += "\nDate must match pattern: " + ((SimpleDateFormat)format).toPattern();
-          }
           throw new LiquibaseException(message, e);
         }
         break;
       }
       case TAG: {
-        liquibase.rollback(rollbackTag, new Contexts(contexts), new LabelExpression(labels));
+        liquibase.rollback(rollbackTag, rollbackScript,new Contexts(contexts), new LabelExpression(labels));
         break;
       }
       default: {
         throw new IllegalStateException("Unexpected rollback type, " + type);
       }
     }
+  }
+
+  protected Date parseDate(String date) throws ParseException {
+    ISODateFormat isoFormat = new ISODateFormat();
+    try {
+      return isoFormat.parse(date);
+    } catch (ParseException e) {
+      DateFormat format = DateFormat.getDateInstance();
+      try {
+        return format.parse(date);
+      } catch (ParseException e1) {
+        throw new ParseException("Date must match ISODateFormat or standard platform format.\n"+e.getMessage(), 0);
+
+      }
+    }
+
+
   }
 }

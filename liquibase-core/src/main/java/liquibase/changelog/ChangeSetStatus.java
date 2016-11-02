@@ -25,6 +25,8 @@ public class ChangeSetStatus {
     private Date dateLastExecuted;
     private boolean previouslyRan = false;
 
+    private RanChangeSet ranChangeSet;
+
     public ChangeSetStatus(ChangeSet changeSet) {
         this.changeSet = changeSet;
 
@@ -136,5 +138,13 @@ public class ChangeSetStatus {
 
     public void setPreviouslyRan(boolean previouslyRan) {
         this.previouslyRan = previouslyRan;
+    }
+
+    public RanChangeSet getRanChangeSet() {
+        return ranChangeSet;
+    }
+
+    public void setRanChangeSet(RanChangeSet ranChangeSet) {
+        this.ranChangeSet = ranChangeSet;
     }
 }

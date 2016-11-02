@@ -7,6 +7,7 @@ import liquibase.statement.SequenceNextValueFunction;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Locale;
@@ -23,6 +24,14 @@ public class ObjectUtil {
         }
 
         return readMethod.invoke(object);
+    }
+
+    public static Class getPropertyType(Object object, String propertyName) {
+        Method readMethod = getReadMethod(object, propertyName);
+        if (readMethod == null) {
+            return null;
+        }
+        return readMethod.getReturnType();
     }
 
     public static boolean hasProperty(Object object, String propertyName) {
@@ -53,6 +62,8 @@ public class ObjectUtil {
             finalValue = Long.valueOf(propertyValue);
         } else if (parameterType.equals(BigInteger.class)) {
             finalValue = new BigInteger(propertyValue);
+        } else if (parameterType.equals(BigDecimal.class)) {
+            finalValue = new BigDecimal(propertyValue);
         } else if (parameterType.equals(DatabaseFunction.class)) {
             finalValue = new DatabaseFunction(propertyValue);
         } else if (parameterType.equals(SequenceNextValueFunction.class)) {
@@ -67,7 +78,33 @@ public class ObjectUtil {
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+finalValue.getClass().getName());
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
+        } catch (InvocationTargetException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    public static void setProperty(Object object, String propertyName, Object propertyValue) {
+        Method method = getWriteMethod(object, propertyName);
+        if (method == null) {
+            throw new UnexpectedLiquibaseException("Property '" + propertyName + "' not found on object type " + object.getClass().getName());
+        }
+
+        try {
+            if (propertyValue == null) {
+                setProperty(object, propertyName, null);
+                return;
+            }
+            if (!method.getParameterTypes()[0].isAssignableFrom(propertyValue.getClass())) {
+                setProperty(object, propertyName, propertyValue.toString());
+                return;
+            }
+
+            method.invoke(object, propertyValue);
+        } catch (IllegalAccessException e) {
+            throw new UnexpectedLiquibaseException(e);
+        } catch (IllegalArgumentException e) {
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
         } catch (InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         }

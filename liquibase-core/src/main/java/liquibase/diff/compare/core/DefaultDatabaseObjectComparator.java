@@ -3,6 +3,7 @@ package liquibase.diff.compare.core;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
@@ -30,6 +31,10 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
+            return false;
+        }
+
         if (databaseObject1.getClass().isAssignableFrom(databaseObject2.getClass()) || databaseObject2.getClass().isAssignableFrom(databaseObject1.getClass())) {
             return nameMatches(databaseObject1, databaseObject2, accordingTo);
         }
@@ -56,6 +61,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
             Object attribute1 = databaseObject1.getAttribute(attribute, Object.class);
             Object attribute2 = databaseObject2.getAttribute(attribute, Object.class);
 
+            attribute1 = undoCollection(attribute1, attribute2);
+            attribute2 = undoCollection(attribute2, attribute1);
+
             ObjectDifferences.CompareFunction compareFunction;
             if (attribute1 instanceof DatabaseObject || attribute2 instanceof DatabaseObject) {
                 Class<? extends DatabaseObject> type;
@@ -70,15 +78,29 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
             } else if (attribute1 instanceof Column.AutoIncrementInformation || attribute2 instanceof Column.AutoIncrementInformation) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction(false);
             } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
-                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(accordingTo));
+                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo));
             } else {
-                compareFunction = new ObjectDifferences.StandardCompareFunction(accordingTo);
+                compareFunction = new ObjectDifferences.StandardCompareFunction(chain.getSchemaComparisons(), accordingTo);
             }
             differences.compare(attribute, databaseObject1, databaseObject2, compareFunction);
 
         }
 
         return differences;
+    }
+
+    /**
+     * Sometimes an attribute in one object is a single-entity collection and on the other it is just the object.
+     * Check the passed potentialCollection and if it is a single-entry collection of the same type as the otherObject, return just the collection element.
+     * Otherwise, return the original collection.
+     */
+    protected Object undoCollection(Object potentialCollection, Object otherObject) {
+        if (potentialCollection != null && otherObject != null && potentialCollection instanceof Collection && !(otherObject instanceof Collection)) {
+            if (((Collection) potentialCollection).size() == 1 && ((Collection) potentialCollection).iterator().next().getClass().equals(otherObject.getClass())) {
+                potentialCollection = ((Collection) potentialCollection).iterator().next();
+            }
+        }
+        return potentialCollection;
     }
 
     //Static so it can be used in other comparators if needed

@@ -105,7 +105,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 	protected boolean outputDefaultSchema;
 
     /**
-     * Whether to ignore the schema name.
+     * Whether to ignore the catalog/database name.
      *
      * @parameter expression="${liquibase.outputDefaultCatalog}"
      */
@@ -235,12 +235,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Properties expressionVars;
 
     /**
-     * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
+     * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
-     * @parameter expression="${liquibase.should.run}"
+     * @parameter expression="${liquibase.skip}"
      */
-    protected boolean skip;
+    protected boolean skip = false;
 
     /**
      * Array to put a expression variable to maven plugin.
@@ -261,6 +261,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.changelogCatalogName}"
      */
     protected String changelogCatalogName;
+
     /**
      * Schema against which Liquibase changelog tables will be created.
      *
@@ -275,11 +276,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private File driverPropertiesFile;
 
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogTableName}"
+     */
+    protected String databaseChangeLogTableName;
+
+    /**
+     * Table name to use for the databasechangelog.
+     *
+     * @parameter expression="${liquibase.databaseChangeLogLockTableName}"
+     */
+    protected String databaseChangeLogLockTableName;
+
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
             getLog().info("Char encoding not set! The created file will be system dependent!");
-            return new FileWriter(outputFile);
+            return new OutputStreamWriter(new FileOutputStream(outputFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
         }
         getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
         return new BufferedWriter(new OutputStreamWriter( new FileOutputStream(outputFile), outputFileEncoding));
@@ -305,14 +320,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
-
         if (skip) {
             getLog().warn("Liquibase skipped due to maven configuration");
             return;
         }
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
-        configureFieldsAndValues(getFileOpener(artifactClassLoader));
+        ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
+        configureFieldsAndValues(fileOpener);
 
         LogFactory.getInstance().setDefaultLoggingLevel(logging);
 
@@ -339,8 +354,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     driverPropsFile,
                     propertyProviderClass,
                     changelogCatalogName,
-                    changelogSchemaName);
-            liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
+                    changelogSchemaName,
+                    databaseChangeLogTableName,
+                    databaseChangeLogLockTableName);
+            liquibase = createLiquibase(fileOpener, database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
 

@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -20,9 +22,16 @@ public class ChangeFactory {
     private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
     private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
 
+    private Logger log;
+
     private ChangeFactory() {
+      log = LogFactory.getInstance().getLog();
     }
 
+    protected Logger getLogger() {
+      return log;
+    }
+    
     private void init() {
         Class<? extends Change>[] classes;
         classes = ServiceLocator.getInstance().findClasses(Change.class);
@@ -47,7 +56,7 @@ public class ChangeFactory {
     /**
      * Reset the ChangeFactory so it reloads the registry on the next call to @{link #getInstance()}. Mainly used in testing
      */
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
@@ -66,7 +75,7 @@ public class ChangeFactory {
                     @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
-                            return -1 * new Integer(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
+                            return -1 * Integer.valueOf(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
                         } catch (Exception e) {
                             throw new UnexpectedLiquibaseException(e);
                         }
@@ -76,7 +85,7 @@ public class ChangeFactory {
             registry.get(name).add(changeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
-        }
+		}
     }
 
     public ChangeMetaData getChangeMetaData(String change) {
@@ -164,5 +173,10 @@ public class ChangeFactory {
         }
 
         return returnMap;
+    }
+
+    // exposed for test only
+    protected void setLogger(Logger mockLogger) {
+      log = mockLogger;
     }
 }

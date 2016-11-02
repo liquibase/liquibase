@@ -1,24 +1,21 @@
 package liquibase.serializer.core.formattedsql;
 
 import liquibase.change.Change;
+import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
 
 public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
@@ -61,7 +58,7 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     protected Database getTargetDatabase(ChangeSet changeSet) {
         String filePath = changeSet.getFilePath();
         if (filePath == null) {
-            throw new UnexpectedLiquibaseException("No changeset file path set. Cannot determine target database type");
+            throw new UnexpectedLiquibaseException("You must specify the changelog file name as filename.DB_TYPE.sql. Example: changelog.mysql.sql");
         }
         Matcher matcher = fileNamePatter.matcher(filePath);
         if (!matcher.matches()) {
@@ -79,21 +76,26 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
     }
 
     @Override
-    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
+    public <T extends ChangeLogChild> void write(List<T> children, OutputStream out) throws IOException {
         StringBuilder builder = new StringBuilder();
         builder.append("--liquibase formatted sql\n\n");
 
-        for (ChangeSet changeSet : changeSets) {
-            builder.append(serialize(changeSet, true));
+        for (T child : children) {
+            builder.append(serialize(child, true));
             builder.append("\n");
         }
 
-        out.write(builder.toString().getBytes("UTF-8"));
+        out.write(builder.toString().getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
 
     }
 
     @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 }

@@ -1,32 +1,42 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
-import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
-import liquibase.exception.DatabaseException;
-import liquibase.servicelocator.LiquibaseService;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
-import liquibase.util.StreamUtil;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.LiquibaseService;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateProcedureStatement;
+import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.util.StreamUtil;
+
 @LiquibaseService(skip = true)
-public class LoggingExecutor extends AbstractExecutor implements Executor {
+public class LoggingExecutor extends AbstractExecutor {
 
     private Writer output;
     private Executor delegatedReadExecutor;
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
-        this.output = output;
+        if (output != null) {
+            this.output = output;
+        } else {
+            this.output = new NoopWriter();
+        }
         this.delegatedReadExecutor = delegatedExecutor;
         setDatabase(database);
     }
@@ -36,35 +46,19 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
-        }
-
-    }
-
-    @Override
     public void execute(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
     }
 
     @Override
     public int update(SqlStatement sql) throws DatabaseException {
+        outputStatement(sql);
+
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return 1;
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
             return 1;
         }
-
-        outputStatement(sql);
 
         return 0;
     }
@@ -101,12 +95,22 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
+            if (sql instanceof ExecutablePreparedStatement) {
+                output.write("WARNING: This statement uses a prepared statement which cannot be execute directly by this script. Only works in 'update' mode\n\n");
+            }
+
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 if (statement == null) {
                     continue;
                 }
-                output.write(statement);
 
+                if (database instanceof OracleDatabase) { //remove trailing /
+                    while (statement.matches("(?s).*[\\s\\r\\n]*/[\\s\\r\\n]*$")) { //all trailing /'s
+                        statement = statement.replaceFirst("[\\s\\r\\n]*/[\\s\\r\\n]*$", "");
+                    }
+                }
+
+                output.write(statement);
 
                 if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
                     output.write(StreamUtil.getLineSeparator());
@@ -116,11 +120,25 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     //                output.write("/");
                 } else {
                     String endDelimiter = ";";
+                    String potentialDelimiter = null;
                     if (sql instanceof RawSqlStatement) {
-                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                        potentialDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
                     } else if (sql instanceof CreateProcedureStatement) {
-                        endDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
+                        potentialDelimiter = ((CreateProcedureStatement) sql).getEndDelimiter();
                     }
+
+                    if (potentialDelimiter != null) {
+                        potentialDelimiter = potentialDelimiter.replaceFirst("\\$$", ""); //ignore trailing $ as a regexp to determine if it should be output
+
+                        if (potentialDelimiter.replaceAll("\\n", "\n").replace("\\r", "\r").matches("[;/\r\n\\w@\\-]+")) {
+                            endDelimiter = potentialDelimiter;
+                        }
+                    }
+
+                    endDelimiter = endDelimiter.replace("\\n", "\n");
+                    endDelimiter = endDelimiter.replace("\\r", "\r");
+
+
                     if (!statement.endsWith(endDelimiter)) {
                         output.write(endDelimiter);
                     }
@@ -197,4 +215,25 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     public boolean updatesDatabase() {
         return false;
     }
+    
+    private class NoopWriter extends Writer {
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            // does nothing
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // does nothing
+        }
+
+        @Override
+        public void close() throws IOException {
+            // does nothing
+        }
+
+    }
+
+    
 }

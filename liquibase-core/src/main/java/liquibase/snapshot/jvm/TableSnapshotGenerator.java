@@ -3,11 +3,14 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -29,7 +32,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         List<CachedRow> rs = null;
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
-            rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class));
+            rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), objectName);
 
             Table table;
             if (rs.size() > 0) {
@@ -37,6 +40,38 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 return null;
             }
+
+            if (table != null && database instanceof MSSQLDatabase) {
+                String schemaName;
+                Schema tableSchema = table.getSchema();
+                if (tableSchema == null) {
+                    schemaName = database.getDefaultSchemaName();
+                } else {
+                    schemaName = tableSchema.getName();
+                }
+
+                String sql;
+                if (database.getDatabaseMajorVersion() >=9 ) {
+                    sql = "SELECT" +
+                            " CAST(value as varchar(max)) as REMARKS" +
+                            " FROM" +
+                            " sys.extended_properties" +
+                            " WHERE" +
+                            " name='MS_Description'" +
+                            " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "')" +
+                            " AND" +
+                            " minor_id = 0";
+                } else {
+                    sql = "SELECT CAST(value as varchar) as REMARKS FROM dbo.sysproperties WHERE name='MS_Description' AND id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "') AND smallid = 0";
+                }
+
+                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
+
+                if (remarks != null && remarks.size() > 0) {
+                    table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
+                }
+            }
+
 
             return table;
         } catch (SQLException e) {

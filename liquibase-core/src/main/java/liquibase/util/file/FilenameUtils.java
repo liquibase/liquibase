@@ -105,7 +105,7 @@ public class FilenameUtils {
      * The extension separator String.
      * @since Commons IO 1.4
      */
-    public static final String EXTENSION_SEPARATOR_STR = (new Character(EXTENSION_SEPARATOR)).toString();
+    public static final String EXTENSION_SEPARATOR_STR = Character.valueOf(EXTENSION_SEPARATOR).toString();
 
     /**
      * The Unix separator character.
@@ -162,7 +162,7 @@ public class FilenameUtils {
      * @return true if it is a separator character
      */
     private static boolean isSeparator(char ch) {
-        return (ch == UNIX_SEPARATOR) || (ch == WINDOWS_SEPARATOR);
+        return ch == '/'; //java uses this as a separator in both windows and unix
     }
 
     //-----------------------------------------------------------------------
@@ -405,7 +405,7 @@ public class FilenameUtils {
             return normalize(fullFilenameToAdd);
         }
         if (basePath == null) {
-            return null;
+            return fullFilenameToAdd;
         }
         int len = basePath.length();
         if (len == 0) {

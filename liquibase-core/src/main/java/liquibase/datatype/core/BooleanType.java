@@ -12,23 +12,26 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
+import liquibase.util.StringUtils;
 
-@DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit", "bool"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("BIT");
+            return new DatabaseDataType(database.escapeDataTypeName("bit"));
         } else if (database instanceof MySQLDatabase) {
-            if (getRawDefinition().toLowerCase().startsWith("bit")) {
+            if (originalDefinition.toLowerCase().startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
             return new DatabaseDataType("BIT", 1);
@@ -44,7 +47,11 @@ public class BooleanType extends LiquibaseDataType {
             }
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
-        }
+        } else if (database instanceof PostgresDatabase) {
+            if (originalDefinition.toLowerCase().startsWith("bit")) {
+                return new DatabaseDataType("BIT", getParameters());
+            }
+	}
 
         return super.toDatabaseDataType(database);
     }
@@ -57,9 +64,9 @@ public class BooleanType extends LiquibaseDataType {
 
         String returnValue;
         if (value instanceof String) {
-            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || value.equals("t") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
+            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase("b'1'") || value.equals("t") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
                 returnValue = this.getTrueBooleanValue(database);
-            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || value.equals("f") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
+            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase("b'0'") || value.equals("f") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
                 returnValue = this.getFalseBooleanValue(database);
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);

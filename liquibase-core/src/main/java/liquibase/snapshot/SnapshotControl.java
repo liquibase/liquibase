@@ -21,10 +21,18 @@ public class SnapshotControl implements LiquibaseSerializable {
     }
 
     public SnapshotControl(Database database, Class<? extends DatabaseObject>... types) {
+        this(database, true, types);
+    }
+
+    public SnapshotControl(Database database, boolean expandTypesIfNeeded, Class<? extends DatabaseObject>... types) {
         if (types == null || types.length == 0) {
             setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
         } else {
-            setTypes(new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types)), database);
+            if (expandTypesIfNeeded) {
+                setTypes(new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types)), database);
+            } else {
+                this.types = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types));
+            }
         }
     }
 

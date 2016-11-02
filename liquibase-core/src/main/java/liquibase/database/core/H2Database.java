@@ -3,23 +3,36 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
+import liquibase.util.JdbcUtils;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class H2Database extends AbstractJdbcDatabase {
 
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
+    private String connectionSchemaName = "PUBLIC";
 
     public H2Database() {
         super.unquotedObjectsAreUppercased=true;
@@ -107,15 +120,7 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(' ') > 0) {
-                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
-            } else {
-                if (dateAsString.indexOf(':') > 0) {
-                    return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
-                } else {
-                    return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
-                }
-            }
+            return new ISODateFormat().parse(dateAsString);
         } catch (ParseException e) {
             throw new DateParseException(dateAsString);
         }
@@ -149,7 +154,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
-        return "PUBLIC";
+        return connectionSchemaName;
     }
 
     @Override
@@ -177,17 +182,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getDateLiteral(String isoDate) {
-        String returnString = isoDate;
-        try {
-            if (isDateTime(isoDate)) {
-                ISODateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException("Unexpected date format: " + isoDate, e);
-        }
-        return "'" + returnString + "'";
+        return "'" + isoDate.replace('T', ' ') + "'";
     }
 
 
@@ -206,6 +201,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "EXCEPT",
             "EXISTS",
             "FALSE",
+            "FETCH",
             "FOR",
             "FROM",
             "FULL",
@@ -221,6 +217,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "NATURAL",
             "NOT",
             "NULL",
+            "OFFSET",
             "ON",
             "ORDER",
             "PRIMARY",
@@ -258,5 +255,48 @@ public class H2Database extends AbstractJdbcDatabase {
     @Override
     public boolean createsIndexesForForeignKeys() {
         return true;
+    }
+
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        return true;
+    }
+
+    @Override
+    public void setConnection(DatabaseConnection conn) {
+        Connection sqlConn = null;
+
+        if (!(conn instanceof OfflineConnection)) {
+            try {
+                if (conn instanceof JdbcConnection) {
+                    Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+                    wrappedConn.setAccessible(true);
+                    sqlConn = (Connection) wrappedConn.invoke(conn);
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+
+            if (sqlConn != null) {
+                Statement statement = null;
+                ResultSet resultSet = null;
+                try {
+                    statement = sqlConn.createStatement();
+                    resultSet = statement.executeQuery("SELECT SCHEMA()");
+                    String schemaName = null;
+                    if (resultSet.next()) {
+                        schemaName = resultSet.getString(1);
+                    }
+                    if (schemaName != null) {
+                        this.connectionSchemaName = schemaName;
+                    }
+                } catch (SQLException e) {
+                    LogFactory.getLogger().info("Could not read current schema name: "+e.getMessage());
+                } finally {
+                    JdbcUtils.close(resultSet, statement);
+                }
+            }
+        }
+        super.setConnection(conn);
     }
 }

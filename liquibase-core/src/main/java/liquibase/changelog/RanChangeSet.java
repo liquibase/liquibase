@@ -1,11 +1,13 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.change.CheckSum;
 
 import java.util.Date;
 
 /**
- * Encapsulates information about a previously-ran change set.  Used to build rollback statements. 
+ * Encapsulates information about a previously-ran change set.  Used to build rollback statements.
  */
 public class RanChangeSet {
     private final String changeLog;
@@ -17,24 +19,32 @@ public class RanChangeSet {
     private ChangeSet.ExecType execType;
     private String description;
     private String comments;
+    private Integer orderExecuted;
+    private ContextExpression contextExpression;
+    private Labels labels;
+    private String deploymentId;
+
 
     public RanChangeSet(ChangeSet changeSet) {
-        this(changeSet, null);
+        this(changeSet, null, null, null);
     }
 
-    public RanChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType) {
+    public RanChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType, ContextExpression contexts, Labels labels) {
         this(changeSet.getFilePath(),
-             changeSet.getId(),
-             changeSet.getAuthor(),
-             changeSet.generateCheckSum(),
-             new Date(),
-             null,
-             execType,
-            changeSet.getDescription(),
-            changeSet.getComments());
+                changeSet.getId(),
+                changeSet.getAuthor(),
+                changeSet.generateCheckSum(),
+                new Date(),
+                null,
+                execType,
+                changeSet.getDescription(),
+                changeSet.getComments(),
+                contexts,
+                labels,
+                null);
     }
 
-    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments) {
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType, String description, String comments, ContextExpression contextExpression, Labels labels, String deploymentId) {
         this.changeLog = changeLog;
         this.id = id;
         this.author = author;
@@ -48,6 +58,9 @@ public class RanChangeSet {
         this.execType = execType;
         this.description = description;
         this.comments = comments;
+        this.contextExpression = contextExpression;
+        this.labels = labels;
+        this.deploymentId = deploymentId;
     }
 
     public String getChangeLog() {
@@ -101,6 +114,30 @@ public class RanChangeSet {
         this.comments = comments;
     }
 
+    public ContextExpression getContextExpression() {
+        return contextExpression;
+    }
+
+    public Labels getLabels() {
+        return labels;
+    }
+
+    public Integer getOrderExecuted() {
+        return orderExecuted;
+    }
+
+    public void setOrderExecuted(Integer orderExecuted) {
+        this.orderExecuted = orderExecuted;
+    }
+
+    public String getDeploymentId() {
+        return deploymentId;
+    }
+
+    public void setDeploymentId(String deploymentId) {
+        this.deploymentId = deploymentId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -131,7 +168,7 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return this.getChangeLog().replace('\\', '/').equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/'))
+        return this.getChangeLog().replace('\\', '/').replaceFirst("^classpath:", "").equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/').replaceFirst("^classpath:", ""))
                 && this.getId().equalsIgnoreCase(changeSet.getId())
                 && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor());
     }

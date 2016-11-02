@@ -20,13 +20,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.LockException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
@@ -36,11 +30,14 @@ import liquibase.structure.core.Schema;
 
 public class MockDatabase implements Database, InternalDatabase {
 
+    private final static int FETCH_SIZE = 1000;
+	
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
     private boolean supportsCatalogs = true;
     private boolean supportsSchemas = true;
-    private String defaultCatalogName;
+	private boolean supportsSequences = true;
+	private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
 
@@ -209,10 +206,14 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return true;
+		return supportsSequences;
     }
 
-    @Override
+	public void setSupportsSequences(boolean supportsSequences) {
+		this.supportsSequences = supportsSequences;
+	}
+
+	@Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
     }
@@ -644,6 +645,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public Integer getFetchSize() {
+        return FETCH_SIZE;
+    }
+
+    @Override
     public boolean isFunction(final String string) {
         if (string.endsWith("()")) {
             return true;
@@ -756,5 +762,25 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public String toString() {
         return "Mock database";
+    }
+
+    @Override
+    public String escapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeName(String dataTypeName) {
+        return dataTypeName;
+    }
+
+    @Override
+    public String unescapeDataTypeString(String dataTypeString) {
+        return dataTypeString;
+    }
+
+    @Override
+    public ValidationErrors validate() {
+        return new ValidationErrors();
     }
 }

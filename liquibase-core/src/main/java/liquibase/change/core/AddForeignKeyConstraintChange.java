@@ -289,7 +289,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     @Override
     public String getConfirmationMessage() {
-        return "Foreign key contraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
+        return "Foreign key constraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
     }
 
     /**

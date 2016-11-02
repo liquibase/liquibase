@@ -3,7 +3,9 @@ package liquibase.lockservice;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -13,6 +15,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Table;
@@ -25,15 +29,17 @@ import java.util.Map;
 
 public class StandardLockService implements LockService {
 
-    private Database database;
+    protected Database database;
 
-    private boolean hasChangeLogLock = false;
+    protected boolean hasChangeLogLock = false;
 
     private Long changeLogLockPollRate;
-    private long changeLogLocRecheckTime;
+    private Long changeLogLockRecheckTime;
 
-    private boolean hasDatabaseChangeLogLockTable = false;
+    private Boolean hasDatabaseChangeLogLockTable = null;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
+    private ObjectQuotingStrategy quotingStrategy;
+
 
     public StandardLockService() {
     }
@@ -66,13 +72,13 @@ public class StandardLockService implements LockService {
     }
 
     @Override
-    public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
-        this.changeLogLocRecheckTime = changeLogLocRecheckTime;
+    public void setChangeLogLockRecheckTime(long changeLogLockRecheckTime) {
+        this.changeLogLockRecheckTime = changeLogLockRecheckTime;
     }
 
     public Long getChangeLogLockRecheckTime() {
-        if (changeLogLockPollRate != null) {
-            return changeLogLockPollRate;
+        if (changeLogLockRecheckTime != null) {
+            return changeLogLockRecheckTime;
         }
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockPollRate();
     }
@@ -83,11 +89,22 @@ public class StandardLockService implements LockService {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         if (!hasDatabaseChangeLogLockTable()) {
-            executor.comment("Create Database Lock Table");
-            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-            database.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            try {
+                executor.comment("Create Database Lock Table");
+                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                database.commit();
+                LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            } catch (DatabaseException e) {
+                if (e.getMessage() != null && e.getMessage().contains("exists")) {
+                    //hit a race condition where the table got created by another node.
+                    LogFactory.getLogger().debug("Database lock table already appears to exist, due to exception: " + e.getMessage()+". Continuing on");
+                }  else {
+                    throw e;
+                }
+            }
+            this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
+            hasDatabaseChangeLogLockTable = true;
         }
 
         if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
@@ -133,7 +150,7 @@ public class StandardLockService implements LockService {
     }
 
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        if (!hasDatabaseChangeLogLockTable) {
+        if (hasDatabaseChangeLogLockTable == null) {
             try {
                 hasDatabaseChangeLogLockTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(database);
             } catch (LiquibaseException e) {
@@ -180,6 +197,8 @@ public class StandardLockService implements LockService {
             return true;
         }
 
+        quotingStrategy = database.getObjectQuotingStrategy();
+
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         try {
@@ -194,6 +213,15 @@ public class StandardLockService implements LockService {
 
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
+                if (rowsUpdated == -1 && database instanceof MSSQLDatabase) {
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might have NOCOUNT enabled)");
+                    database.rollback();
+                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(new LockDatabaseChangeLogStatement(), database);
+                    if (sql.length != 1) {
+                        throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
+                    }
+                    rowsUpdated = executor.update(new RawSqlStatement("EXEC sp_executesql N'SET NOCOUNT OFF "+sql[0].toSql().replace("'", "''")+"'"));
+                }
                 if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
                 }
@@ -224,12 +252,28 @@ public class StandardLockService implements LockService {
 
     @Override
     public void releaseLock() throws LockException {
+
+        ObjectQuotingStrategy incomingQuotingStrategy = null;
+        if (this.quotingStrategy != null) {
+            incomingQuotingStrategy = database.getObjectQuotingStrategy();
+            database.setObjectQuotingStrategy(this.quotingStrategy);
+        }
+
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
+                if (updatedRows == -1 && database instanceof MSSQLDatabase) {
+                    LogFactory.getLogger().debug("Database did not return a proper row count (Might have NOCOUNT enabled.)");
+                    database.rollback();
+                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(new UnlockDatabaseChangeLogStatement(), database);
+                    if (sql.length != 1) {
+                        throw new UnexpectedLiquibaseException("Did not expect "+sql.length+" statements");
+                    }
+                    updatedRows = executor.update(new RawSqlStatement("EXEC sp_executesql N'SET NOCOUNT OFF "+sql[0].toSql().replace("'", "''")+"'"));
+                }
                 if (updatedRows != 1) {
                     throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
                 }
@@ -247,6 +291,9 @@ public class StandardLockService implements LockService {
                 database.rollback();
             } catch (DatabaseException e) {
                 ;
+            }
+            if (incomingQuotingStrategy != null) {
+                database.setObjectQuotingStrategy(incomingQuotingStrategy);
             }
         }
     }
@@ -294,7 +341,7 @@ public class StandardLockService implements LockService {
     @Override
     public void reset() {
         hasChangeLogLock = false;
-        hasDatabaseChangeLogLockTable = false;
+        hasDatabaseChangeLogLockTable = null;
         isDatabaseChangeLogLockTableInitialized = false;
     }
 
@@ -303,7 +350,7 @@ public class StandardLockService implements LockService {
         try {
             if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
-                hasDatabaseChangeLogLockTable = false;
+                hasDatabaseChangeLogLockTable = null;
             }
             reset();
         } catch (InvalidExampleException e) {

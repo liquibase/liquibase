@@ -95,8 +95,10 @@ public class Index extends AbstractDatabaseObject {
     }
 
     public Index setColumns(List<Column> columns) {
-        for (Column column :columns) {
-            column.setRelation(getTable());
+        if (getAttribute("table", Object.class) instanceof Table) {
+            for (Column column :columns) {
+                column.setRelation(getTable());
+            }
         }
         setAttribute("columns", columns);
         return this;
@@ -160,7 +162,14 @@ public class Index extends AbstractDatabaseObject {
     @Override
     public int compareTo(Object other) {
         Index o = (Index) other;
-        int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
+        int returnValue = 0;
+
+        if (this.getTable() != null && o.getTable() != null) {
+            returnValue = this.getTable().compareTo(o.getTable());
+            if (returnValue == 0 && this.getTable().getSchema() != null && o.getTable().getSchema() != null) {
+                returnValue = StringUtils.trimToEmpty(this.getTable().getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(o.getTable().getSchema().getName()));
+            }
+        }
 
         if (returnValue == 0) {
             String thisName = StringUtils.trimToEmpty(this.getName());
@@ -199,11 +208,15 @@ public class Index extends AbstractDatabaseObject {
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());
-        if (this.isUnique() != null && !this.isUnique()) {
+        if (this.isUnique() != null && this.isUnique()) {
             stringBuffer.append(" unique ");
         }
         if (getTable() != null && getColumns() != null) {
-            stringBuffer.append(" on ").append(getTable().getName());
+            String tableName = getTable().getName();
+            if (getTable().getSchema() != null && getTable().getSchema().getName() != null) {
+                tableName = getTable().getSchema().getName()+"."+tableName;
+            }
+            stringBuffer.append(" on ").append(tableName);
             if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
                 for (Column column : getColumns()) {

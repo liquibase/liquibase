@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
@@ -223,18 +224,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
-            return null;
-        }
-        try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
-        } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
-        }
-        return null;
+    protected SqlStatement getConnectionSchemaNameCallStatement() {
+        return new RawSqlStatement("select user_name()");
     }
-
 
     @Override
     public boolean supportsRestrictForeignKeys() {
@@ -266,6 +258,9 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	 */
 	@Override
     public int getDatabaseMajorVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            return -1;
+        }
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
@@ -281,6 +276,10 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 	 */
 	@Override
     public int getDatabaseMinorVersion() throws DatabaseException {
+        if (getConnection() == null) {
+            return -1;
+        }
+
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {

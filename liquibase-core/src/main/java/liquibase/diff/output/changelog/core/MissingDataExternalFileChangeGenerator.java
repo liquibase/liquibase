@@ -3,9 +3,9 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
@@ -20,7 +20,8 @@ import liquibase.util.csv.CSVWriter;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -60,9 +61,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            if (!(referenceDatabase instanceof PostgresDatabase || referenceDatabase instanceof OracleDatabase)) {
-                stmt.setFetchSize(Integer.MIN_VALUE);
-            }
+            stmt.setFetchSize(100);
             rs = stmt.executeQuery(sql);
 
             List<String> columnNames = new ArrayList<String>();
@@ -73,18 +72,18 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             String fileName = table.getName().toLowerCase() + ".csv";
             if (dataDir != null) {
                 fileName = dataDir + "/" + fileName;
+
+                File parentDir = new File(dataDir);
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+                if (!parentDir.isDirectory()) {
+                    throw new RuntimeException(parentDir
+                            + " is not a directory");
+                }
             }
 
-            File parentDir = new File(dataDir);
-            if (!parentDir.exists()) {
-                parentDir.mkdirs();
-            }
-            if (!parentDir.isDirectory()) {
-                throw new RuntimeException(parentDir
-                        + " is not a directory");
-            }
-
-            CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
+            CSVWriter outputFile = new CSVWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())));
             String[] dataTypes = new String[columnNames.size()];
             String[] line = new String[columnNames.size()];
             for (int i = 0; i < columnNames.size(); i++) {
@@ -130,7 +129,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
 
             LoadDataChange change = new LoadDataChange();
             change.setFile(fileName);
-            change.setEncoding("UTF-8");
+            change.setEncoding(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             if (outputControl.getIncludeCatalog()) {
                 change.setCatalogName(table.getSchema().getCatalogName());
             }

@@ -38,7 +38,7 @@ public class LockServiceFactory {
     }
 
 
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 
@@ -65,7 +65,7 @@ public class LockServiceFactory {
 			SortedSet<LockService> foundServices = new TreeSet<LockService>(new Comparator<LockService>() {
 				@Override
                 public int compare(LockService o1, LockService o2) {
-					return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+					return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
 				}
 			});
 
@@ -91,7 +91,7 @@ public class LockServiceFactory {
 
 	}
 
-	public void resetAll() {
+	public synchronized void resetAll() {
 		for (LockService lockService : registry) {
 			lockService.reset();
 		}

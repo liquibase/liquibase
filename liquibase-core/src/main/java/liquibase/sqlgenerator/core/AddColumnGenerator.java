@@ -2,6 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
@@ -102,6 +104,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 }
             }
             result.add(new UnparsedSql(alterTable, getAffectedColumns(columns)));
+
+            for (AddColumnStatement statement : columns) {
+                addUniqueConstrantStatements(statement, database, result);
+                addForeignKeyStatements(statement, database, result);
+            }
+
         } else {
             for (AddColumnStatement column : columns) {
                 result.addAll(Arrays.asList(generateSingleColumn(column, database)));
@@ -128,17 +136,21 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected String generateSingleColumnSQL(AddColumnStatement statement, Database database) {
-        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+        DatabaseDataType columnType = DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
+
+        String alterTable = " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + columnType;
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
             alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
         }
 
+        alterTable += getDefaultClause(statement, database);
+
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
+            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase|| (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
                 alterTable += " NULL";
             }
         }
@@ -146,8 +158,6 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (statement.isPrimaryKey()) {
             alterTable += " PRIMARY KEY";
         }
-
-        alterTable += getDefaultClause(statement, database);
 
         if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
             alterTable += " COMMENT '" + statement.getRemarks() + "' ";
@@ -222,7 +232,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 if (database instanceof MSSQLDatabase) {
                     clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
                 }
-                clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
+                if (defaultValue instanceof DatabaseFunction) {
+                    clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
+                } else {
+                    clause += " DEFAULT " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType(), database).objectToSql(defaultValue, database);
+                }
             }
         }
         return clause;

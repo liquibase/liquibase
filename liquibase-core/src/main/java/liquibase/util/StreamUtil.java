@@ -8,6 +8,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 
@@ -49,25 +50,29 @@ public class StreamUtil {
             throw new IOException("No stream to open");
         }
 
-		if (charsetName == null) {
-			reader = new UtfBomAwareReader(ins);
-		} else {
-			String charsetCanonicalName = Charset.forName(charsetName).name();
-			String encoding;
+        try {
+            if (charsetName == null) {
+                reader = new UtfBomAwareReader(ins);
+            } else {
+                String charsetCanonicalName = Charset.forName(charsetName).name();
+                String encoding;
 
-			reader = new UtfBomAwareReader(ins, charsetName);
-			encoding = Charset.forName(reader.getEncoding()).name();
+                reader = new UtfBomAwareReader(ins, charsetName);
+                encoding = Charset.forName(reader.getEncoding()).name();
 
-			if (charsetCanonicalName.startsWith("UTF")
-					&& !charsetCanonicalName.equals(encoding)) {
-				reader.close();
-				throw new IllegalArgumentException("Expected encoding was '"
-						+ charsetCanonicalName + "' but a BOM was detected for '"
-						+ encoding + "'");
-			}
-		}
-		return getReaderContents(reader);
-	}
+                if (charsetCanonicalName.startsWith("UTF")
+                        && !charsetCanonicalName.equals(encoding)) {
+                    reader.close();
+                    throw new IllegalArgumentException("Expected encoding was '"
+                            + charsetCanonicalName + "' but a BOM was detected for '"
+                            + encoding + "'");
+                }
+            }
+            return getReaderContents(reader);
+        } finally {
+            ins.close();
+        }
+    }
     
     /**
      * Reads all the characters into a String.
@@ -183,10 +188,22 @@ public class StreamUtil {
             return null;
         }
         if (streams.size() != 1) {
-            for (InputStream stream : streams) {
-                stream.close();
+            if (streams.size() > 1 && path != null && path.startsWith("liquibase/parser/core/xml/") && path.endsWith(".xsd")) {
+                LogFactory.getLogger().debug("Found " + streams.size() + " files that match " + path+", but choosing one at random.");
+                InputStream returnStream = null;
+                for (InputStream stream : streams) {
+                    if (returnStream == null) {
+                        returnStream = stream;
+                    } else {
+                        stream.close();
+                    }
+                }
+            } else {
+                for (InputStream stream : streams) {
+                    stream.close();
+                }
+                throw new IOException("Found " + streams.size() + " files that match " + path);
             }
-            throw new IOException("Found "+streams.size()+" files that match "+path);
         }
 
         return streams.iterator().next();

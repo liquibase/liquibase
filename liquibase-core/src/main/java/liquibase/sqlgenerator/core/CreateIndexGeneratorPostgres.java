@@ -59,10 +59,14 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
 	    while (iterator.hasNext()) {
 		    AddColumnConfig column = iterator.next();
-            if (column.getComputed() != null && column.getComputed()) {
-                buffer.append(column.getName());
+            if (column.getComputed() == null) {
+                buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
             } else {
-                buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
+                if (column.getComputed()) {
+                    buffer.append(column.getName());
+                } else {
+                    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
+                }
             }
             if (iterator.hasNext()) {
 			    buffer.append(", ");

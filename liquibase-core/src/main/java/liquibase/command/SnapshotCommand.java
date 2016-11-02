@@ -2,19 +2,22 @@ package liquibase.command;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.*;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SnapshotCommand extends AbstractCommand {
 
     private Database database;
     private CatalogAndSchema[] schemas;
-    private String serializerFormat = "txt";
+    private String serializerFormat;
     private SnapshotListener snapshotListener;
+    private Map<String, Object> snapshotMetadata;
 
     @Override
     public String getName() {
@@ -71,6 +74,14 @@ public class SnapshotCommand extends AbstractCommand {
         this.snapshotListener = snapshotListener;
     }
 
+    public Map<String, Object> getSnapshotMetadata() {
+        return snapshotMetadata;
+    }
+
+    public void setSnapshotMetadata(Map<String, Object> snapshotMetadata) {
+        this.snapshotMetadata = snapshotMetadata;
+    }
+
     @Override
     protected Object run() throws Exception {
         SnapshotControl snapshotControl = new SnapshotControl(database);
@@ -80,9 +91,24 @@ public class SnapshotCommand extends AbstractCommand {
         if (schemas == null) {
             schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
-        return SnapshotSerializerFactory.getInstance().getSerializer(getSerializerFormat()).serialize(snapshot, true);
+        ObjectQuotingStrategy originalQuotingStrategy = database.getObjectQuotingStrategy();
+
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        DatabaseSnapshot snapshot;
+        try {
+            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
+        } finally {
+            database.setObjectQuotingStrategy(originalQuotingStrategy);
+        }
+
+        snapshot.setMetadata(this.getSnapshotMetadata());
+
+        String format = getSerializerFormat();
+        if (format == null) {
+            format = "txt";
+        }
+        return SnapshotSerializerFactory.getInstance().getSerializer(format).serialize(snapshot, true);
     }
 
     @Override

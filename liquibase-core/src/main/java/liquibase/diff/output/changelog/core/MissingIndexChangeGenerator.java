@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
@@ -12,7 +13,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
-public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator {
+public class MissingIndexChangeGenerator extends AbstractChangeGenerator implements MissingObjectChangeGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Index.class.isAssignableFrom(objectType)) {
@@ -50,9 +51,9 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
             change.setSchemaName(index.getTable().getSchema().getName());
         }
         change.setIndexName(index.getName());
-        change.setUnique(index.isUnique());
+        change.setUnique(index.isUnique() != null && index.isUnique() ? Boolean.TRUE : null);
         change.setAssociatedWith(index.getAssociatedWithAsString());
-        change.setClustered(index.getClustered());
+        change.setClustered(index.getClustered() != null && index.getClustered() ? Boolean.TRUE : null);
 
 //        if (index.getAssociatedWith().contains(Index.MARK_PRIMARY_KEY) || index.getAssociatedWith().contains(Index.MARK_FOREIGN_KEY) || index.getAssociatedWith().contains(Index.MARK_UNIQUE_CONSTRAINT)) {
 //            continue;
