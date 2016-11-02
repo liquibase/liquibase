@@ -314,6 +314,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
+                <version>2.6</version>
                 <executions>
                     <execution>
                         <id>javacc</id>
@@ -321,7 +322,8 @@
                             <goal>javacc</goal>
                         </goals>
                         <configuration>
-                            <userCharStream>true</userCharStream>
+                            <javaUnicodeEscape>true</javaUnicodeEscape>
+                            <unicodeInput>true</unicodeInput>
                         </configuration>
                     </execution>
                 </executions>

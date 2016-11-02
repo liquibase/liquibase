@@ -45,6 +45,17 @@ class SqlParserTest extends Specification {
 
     }
 
+    @Unroll
+    def "parse with unicode"() {
+        expect:
+        SqlParser.parse(input).toArray(true) == output
+
+        where:
+        input | output
+        "\u2002word regular\u2002unicode" | ["word", "regular", "unicode"]
+        "x\u0282abc" | ["x\u0282abc"]
+    }
+
     @Unroll("#featureName `#input`")
     def "parse with whitespace preserved"() {
         expect:

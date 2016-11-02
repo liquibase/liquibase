@@ -2,6 +2,7 @@ options {
   STATIC = false;
   IGNORE_CASE=true;
   UNICODE_INPUT=true;
+  JAVA_UNICODE_ESCAPE=true;
   DEBUG_PARSER=false;
 }
 
@@ -16,10 +17,35 @@ public class SimpleSqlGrammar {
 
 PARSER_END(SimpleSqlGrammar)
 
-
 TOKEN :
 {
-  < WHITESPACE: (" " | "\t" | "\n" | "\r")+ >
+  < WHITESPACE: (" " | "\t" | "\n" | "\r"
+        | "\u0085"
+        | "\u00A0"
+        | "\u1680"
+        | "\u180e"
+        | "\u2000"
+        | "\u2001"
+        | "\u2002"
+        | "\u2003"
+        | "\u2004"
+        | "\u2005"
+        | "\u2006"
+        | "\u2007"
+        | "\u2008"
+        | "\u2009"
+        | "\u200a"
+        | "\u200b"
+        | "\u200c"
+        | "\u200d"
+        | "\u2028"
+        | "\u2029"
+        | "\u202f"
+        | "\u205f"
+        | "\u2060"
+        | "\u3000"
+        | "\ufeff"
+  )+ >
 }
 
 TOKEN:
@@ -43,7 +69,7 @@ TOKEN : /* Numeric Constants */
 TOKEN:
 {
     < COMPLEX_IDENTIFIER: (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>) ((["\r","\n"," "])* "." (<S_IDENTIFIER> | <S_QUOTED_IDENTIFIER>))+ >
-|	< S_IDENTIFIER: ( <LETTER> | <ADDITIONAL_LETTERS> )+ ( <DIGIT> | <LETTER> | <ADDITIONAL_LETTERS> | <SPECIAL_CHARS> )* >
+|	< S_IDENTIFIER: ( <LETTER> | <ADDITIONAL_LETTERS> | <UNICODE_LETTERS> )+ ( <DIGIT> | <LETTER> | <ADDITIONAL_LETTERS> | <UNICODE_LETTERS> | <SPECIAL_CHARS> )* >
 | 	< #LETTER: ["a"-"z", "A"-"Z", "_", "$"] >
 |   < #SPECIAL_CHARS: "$" | "_" | "#" | "@" >
 |   < S_CHAR_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
@@ -58,6 +84,8 @@ There seems to be no way to recognize letters by an external function to allow
 a configurable addition. One must rebuild JSqlParser with this new "Letterset".
 */
 |   < #ADDITIONAL_LETTERS: ["ä","ö","ü","Ä","Ö","Ü","ß"] >
+
+| < #UNICODE_LETTERS: ["\u0282", "\u00C0"-"\u00D6", "\u00D8"-"\u00F6", "\u00F8"-"\u02FF", "\u0370"-"\u037D", "\u037F"-"\u1FFF", "\u200C"-"\u200D", "\u2070"-"\u218F", "\u2C00"-"\u2FEF", "\u3001"-"\uD7FF", "\uF900"-"\uFDCF", "\uFDF0"-"\uFFFD"] >
 }
 
 TOKEN: /* symbols */
