@@ -272,7 +272,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return objectName;
         }
 
-        return quoteObject(objectName, objectType);
+        return super.escapeObjectName(objectName, objectType);
     }
 
     @Override
