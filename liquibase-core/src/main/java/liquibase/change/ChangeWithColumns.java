@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Markers a Change class as containing one or more {@link ColumnConfig} configuration.
  */
-public interface ChangeWithColumns<T extends ColumnConfig> {
+public interface ChangeWithColumns<T extends ColumnConfig> extends Change {
 
     /**
      * Add a column configuration to the Change.
