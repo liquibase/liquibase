@@ -42,6 +42,10 @@ class SqlParserTest extends Specification {
         "a test.[name] b"                                                                                  | ["a", "test.[name]", "b"]
         "a [test].name b"                                                                                  | ["a", "[test].name", "b"]
         "a [test].\"name\".[here].[four] b"                                                                | ["a", "[test].\"name\".[here].[four]", "b"]
+        "a + b"                                                                                            | ["a", "+", "b"]
+        "a ~ b"                                                                                            | ["a", "~", "b"]
+        "a > b"                                                                                            | ["a", ">", "b"]
+        "a <> b"                                                                                           | ["a", "<", ">", "b"]
 
     }
 
@@ -51,9 +55,11 @@ class SqlParserTest extends Specification {
         SqlParser.parse(input).toArray(true) == output
 
         where:
-        input | output
-        "\u2002word regular\u2002unicode" | ["word", "regular", "unicode"]
-        "x\u0282abc" | ["x\u0282abc"]
+        input                                               | output
+        "\u2002word regular\u2002unicode"                   | ["word", "regular", "unicode"]
+        "x\u0282abc"                                        | ["x\u0282abc"] //unicode letter
+        "x \u2013 abc"                                      | ["x", "\u2013", "abc"] //ndash synmbol
+        "x 'quote with unicode punctuation \u2013 in it' y" | ["x", "'quote with unicode punctuation \u2013 in it'", "y"]
     }
 
     @Unroll("#featureName `#input`")
