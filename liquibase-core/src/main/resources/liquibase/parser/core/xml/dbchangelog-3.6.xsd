@@ -684,8 +684,7 @@
 		<xsd:complexType>
             <xsd:attribute name="catalogName" type="xsd:string" />
 			<xsd:attribute name="schemaName" type="xsd:string" />
-			<xsd:attribute name="sequenceName" type="xsd:string"
-				use="required" />
+			<xsd:attribute name="sequenceName" type="xsd:string" use="required" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -694,7 +693,7 @@
             <xsd:attribute name="catalogName" type="xsd:string" />
 			<xsd:attribute name="schemaName" type="xsd:string" />
 			<xsd:attribute name="foreignKeyTableName" type="xsd:string" />
-			<xsd:attribute name="foreignKeyName" type="xsd:string"/>
+			<xsd:attribute name="foreignKeyName" type="xsd:string" use="required" />
 		</xsd:complexType>
 	</xsd:element>
 
