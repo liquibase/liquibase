@@ -14,7 +14,7 @@ public class SqlParser {
     public static StringClauses parse(String sqlBlock, boolean preserveWhitespace, boolean preserveComments) {
         StringClauses clauses = new StringClauses(preserveWhitespace?"":" ");
 
-        SimpleSqlGrammarTokenManager tokenManager = new SimpleSqlGrammarTokenManager(new JavaCharStream(new StringReader(sqlBlock)));
+        SimpleSqlGrammarTokenManager tokenManager = new SimpleSqlGrammarTokenManager(new SimpleCharStream(new StringReader(sqlBlock)));
         SimpleSqlGrammar t = new SimpleSqlGrammar(tokenManager);
         try {
             Token token = t.getNextToken();

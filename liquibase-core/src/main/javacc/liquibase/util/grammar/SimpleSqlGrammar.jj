@@ -76,7 +76,6 @@ TOKEN:
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])+ "\"" | ("`" (~["\n","\r","`"])+ "`") | ( "[" ~["0"-"9","]"] (~["\n","\r","]"])* "]" ) >
 |    <EMPTY_QUOTE: "\"" "\"">
 
-
 /*
 Built list from http://stackoverflow.com/a/37668315/45756
 */

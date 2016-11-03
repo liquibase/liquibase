@@ -322,7 +322,7 @@
                             <goal>javacc</goal>
                         </goals>
                         <configuration>
-                            <javaUnicodeEscape>true</javaUnicodeEscape>
+                            <javaUnicodeEscape>false</javaUnicodeEscape>
                             <unicodeInput>true</unicodeInput>
                         </configuration>
                     </execution>
