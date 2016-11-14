@@ -19,6 +19,7 @@ import java.util.*;
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
     private boolean warnedAboutDbaRecycleBin = false;
+    private static final boolean bIgnoreWarning_RecycleBin = Boolean.getBoolean( "liquibase.oracle.ignoreRecycleBin" ); 
 
     private CachingDatabaseMetaData cachingDatabaseMetaData;
 
@@ -284,7 +285,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         protected void warnAboutDbaRecycleBin() {
-            if (!warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
+            if (!bIgnoreWarning_RecycleBin && !warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
                 LogFactory.getInstance().getLog().warning(((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
