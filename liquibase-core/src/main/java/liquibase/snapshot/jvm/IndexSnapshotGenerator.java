@@ -300,6 +300,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         returnIndex.setClustered(false);
                     }
 
+                    if (database instanceof MSSQLDatabase) {
+                        returnIndex.setAttribute("padIndex", row.get("IS_PADDED"));
+                        returnIndex.setAttribute("fillFactor", row.get("FILL_FACTOR"));
+                        returnIndex.setAttribute("ignoreDuplicateKeys", row.get("IGNORE_DUP_KEY"));
+                        returnIndex.setAttribute("recomputeStatistics", row.get("NO_RECOMPUTE"));
+                        returnIndex.setAttribute("incrementalStatistics", row.get("IS_INCREMENTAL"));
+                        returnIndex.setAttribute("allowRowLocks", row.get("ALLOW_ROW_LOCKS"));
+                        returnIndex.setAttribute("allowPageLocks", row.get("ALLOW_PAGE_LOCKS"));
+                    }
+
                     foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
