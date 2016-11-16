@@ -138,7 +138,8 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
                 "incrementalStatistics",
                 "allowRowLocks",
                 "allowPageLocks",
-                "dataCompression"
+                "dataCompression",
+                "includedColumns"
         };
     }
 
