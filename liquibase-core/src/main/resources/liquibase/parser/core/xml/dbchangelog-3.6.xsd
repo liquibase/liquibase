@@ -443,7 +443,8 @@
             <xsd:attribute name="forIndexCatalogName" type="xsd:string" />
             <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
             <xsd:attribute name="forIndexName" type="xsd:string" />
-        </xsd:complexType>
+			<xsd:anyAttribute namespace="##other" processContents="lax" />
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="dropPrimaryKey">
