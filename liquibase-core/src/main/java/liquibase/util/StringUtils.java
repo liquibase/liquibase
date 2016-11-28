@@ -80,7 +80,7 @@ public class StringUtils {
             if (endDelimiter.length() == 1) {
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
             } else {
-                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[.\n\r]*"+endDelimiter.toLowerCase());
+                return piece.toLowerCase().matches(endDelimiter.toLowerCase()) || (previousPiece+piece).toLowerCase().matches("[\\s\n\r]*"+endDelimiter.toLowerCase());
             }
         }
     }
