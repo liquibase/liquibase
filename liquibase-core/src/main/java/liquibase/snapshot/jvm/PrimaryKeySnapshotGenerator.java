@@ -63,9 +63,6 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             if (returnKey != null) {
                 Index exampleIndex = new Index().setTable(returnKey.getTable());
                 exampleIndex.setColumns(returnKey.getColumns());
-                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
-                    exampleIndex.setName(returnKey.getName());
-                }
                 returnKey.setBackingIndex(exampleIndex);
             }
 

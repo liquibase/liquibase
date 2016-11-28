@@ -179,8 +179,25 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
 
+                //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
+                List<Index> stillToAdd = new ArrayList<Index>();
                 for (Index exampleIndex : foundIndexes.values()) {
-                    table.getIndexes().add(exampleIndex);
+                    if (exampleIndex.getClustered() != null && exampleIndex.getClustered()) {
+                        table.getIndexes().add(exampleIndex);
+                    } else {
+                        stillToAdd.add(exampleIndex);
+                    }
+                }
+                for (Index exampleIndex : stillToAdd) {
+                    boolean alreadyAddedSimilar = false;
+                    for (Index index : table.getIndexes()) {
+                        if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index, exampleIndex, null, database)) {
+                            alreadyAddedSimilar = true;
+                        }
+                    }
+                    if (!alreadyAddedSimilar) {
+                        table.getIndexes().add(exampleIndex);
+                    }
                 }
 
             } catch (Exception e) {
@@ -331,18 +348,31 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
             return index;
         } else {
+            //prefer clustered version of the index
+            List<Index> nonClusteredIndexes = new ArrayList<Index>();
             for (Index index : foundIndexes.values()) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, snapshot.getSchemaComparisons(), database)) {
+                    boolean actuallyMatches = false;
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
-                            return index;
+                            actuallyMatches = true;
                         }
                     } else {
                         if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
+                            actuallyMatches = true;
+                        }
+                    }
+                    if (actuallyMatches) {
+                        if (index.getClustered() != null && index.getClustered()) {
                             return index;
+                        } else {
+                            nonClusteredIndexes.add(index);
                         }
                     }
                 }
+            }
+            if (nonClusteredIndexes.size() > 0) {
+                return nonClusteredIndexes.get(0);
             }
             return null;
         }
