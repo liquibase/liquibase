@@ -20,7 +20,6 @@ import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ChangedIndexChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
@@ -51,6 +50,11 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
                 differences.removeDifference("clustered");
             }
         }
+
+        for (String field : getIgnoredFields()) {
+            differences.removeDifference(field);
+        }
+
         if (!differences.hasDifferences()) {
             return new Change[0];
         }
@@ -65,7 +69,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             List<UniqueConstraint> uniqueConstraints = index.getTable().getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
-                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject,differences.getSchemaComparisons(), comparisonDatabase)) {
+                    if (constraint.getBackingIndex() != null && DatabaseObjectComparatorFactory.getInstance().isSameObject(constraint.getBackingIndex(), changedObject, differences.getSchemaComparisons(), comparisonDatabase)) {
                         return ChangeGeneratorFactory.getInstance().fixChanged(constraint, differences, control, referenceDatabase, comparisonDatabase);
                     }
 
@@ -76,7 +80,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         DropIndexChange dropIndexChange = createDropIndexChange();
         dropIndexChange.setTableName(index.getTable().getName());
         dropIndexChange.setIndexName(index.getName());
-        
+
         CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
         List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
@@ -97,7 +101,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         Difference columnsDifference = differences.getDifference("columns");
-        
+
         if (columnsDifference != null) {
             List<Column> referenceColumns = (List<Column>) columnsDifference.getReferenceValue();
             List<Column> comparedColumns = (List<Column>) columnsDifference.getComparedValue();
@@ -113,7 +117,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
             if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
                 control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
             }
-    
+
             if (index.isUnique() != null && index.isUnique()) {
                 control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
                 if (!StringUtils.join(referenceColumns, ",", formatter).equalsIgnoreCase(StringUtils.join(comparedColumns, ",", formatter))) {
@@ -123,6 +127,20 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
         }
 
         return new Change[] { dropIndexChange, addIndexChange };
+    }
+
+    protected String[] getIgnoredFields() {
+        return new String[] {
+                "padIndex",
+                "fillFactor",
+                "ignoreDuplicateKeys",
+                "recomputeStatistics",
+                "incrementalStatistics",
+                "allowRowLocks",
+                "allowPageLocks",
+                "dataCompression",
+                "includedColumns"
+        };
     }
 
     protected DropIndexChange createDropIndexChange() {
