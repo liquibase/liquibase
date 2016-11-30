@@ -1,12 +1,5 @@
 package liquibase.change;
 
-import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -14,14 +7,17 @@ import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+
+import java.math.BigInteger;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * The standard configuration used by Change classes to represent a column.
@@ -69,19 +65,34 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             setType(columnSnapshot.getType().toString());
         }
 
+
+        if (columnSnapshot.getDefaultValue() != null) {
+            Object defaultValue = columnSnapshot.getDefaultValue();
+            if (defaultValue instanceof Boolean) {
+                setDefaultValueBoolean((Boolean) defaultValue);
+            } else if (defaultValue instanceof Number) {
+                setDefaultValueNumeric(defaultValue.toString());
+            } else if (defaultValue instanceof SequenceNextValueFunction) {
+                setDefaultValueSequenceNext((SequenceNextValueFunction) defaultValue);
+            } else if (defaultValue instanceof DatabaseFunction) {
+                setDefaultValueComputed((DatabaseFunction) defaultValue);
+            } else if (defaultValue instanceof Date) {
+                setDefaultValueDate((Date) defaultValue);
+            } else {
+                setDefaultValue(defaultValue.toString());
+            }
+        }
+
+        boolean nonDefaultConstraints = false;
+        ConstraintsConfig constraints = new ConstraintsConfig();
+
+        if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
+            constraints.setNullable(columnSnapshot.isNullable());
+            nonDefaultConstraints = true;
+        }
+
+
         if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
-            if (columnSnapshot.getDefaultValue() != null) {
-                setDefaultValue(columnSnapshot.getDefaultValue().toString());
-            }
-
-            boolean nonDefaultConstraints = false;
-            ConstraintsConfig constraints = new ConstraintsConfig();
-
-            if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
-                constraints.setNullable(columnSnapshot.isNullable());
-                nonDefaultConstraints = true;
-            }
-
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
                 setStartWith(columnSnapshot.getAutoIncrementInformation().getStartWith());

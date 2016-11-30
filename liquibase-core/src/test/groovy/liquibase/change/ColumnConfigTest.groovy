@@ -42,7 +42,7 @@ public class ColumnConfigTest extends Specification {
 
         then:
         config.getName() == "colName"
-        config.getDefaultValue() == "123"
+        config.getDefaultValueObject() == 123
         config.getRemarks() == "A Test Column"
         config.getType() == "BIGINT"
         assert !config.getConstraints().isNullable()

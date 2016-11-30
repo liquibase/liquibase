@@ -772,7 +772,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "[TC].[TABLE_NAME], " +
                                         "[IDX].[TYPE_DESC] " +
                                         "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
-                                        "JOIN SYS.INDEXES AS IDX ON IDX.name=[TC].[CONSTRAINT_NAME] AND object_schema_name(object_id)=[TC].[CONSTRAINT_SCHEMA] " +
+                                        "JOIN sys.indexes AS IDX ON IDX.name=[TC].[CONSTRAINT_NAME] AND object_schema_name(object_id)=[TC].[CONSTRAINT_SCHEMA] " +
                                         "WHERE [TC].[CONSTRAINT_TYPE] = 'UNIQUE' " +
                                         "AND [TC].[CONSTRAINT_CATALOG] = N'" + database.escapeStringForDatabase(jdbcCatalogName) + "' " +
                                         "AND [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(jdbcSchemaName) + "'";

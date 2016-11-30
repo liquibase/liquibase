@@ -7,19 +7,22 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ForeignKeySnapshotGenerator() {
-        super(ForeignKey.class, new Class[] { Table.class});
+        super(ForeignKey.class, new Class[]{Table.class});
     }
 
 //    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
@@ -74,7 +77,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             List<CachedRow> importedKeyMetadataResultSet;
             try {
                 importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getForeignKeys(((AbstractJdbcDatabase) database)
-                        .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+                                .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
                         database.correctObjectName(table.getName(), Table.class), null);
 
                 for (CachedRow row : importedKeyMetadataResultSet) {
@@ -172,6 +175,9 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
                     foreignKey.setBackingIndex(exampleIndex);
                 }
+            }
+            if (snapshot.get(ForeignKey.class).contains(foreignKey)) {
+                return null;
             }
             return foreignKey;
         } catch (Exception e) {

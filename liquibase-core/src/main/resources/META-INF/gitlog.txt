@@ -1,3 +1,15 @@
+321043a Fix MSSQL case-sensitivity issue on sys.indexes
+82b80fa CORE-2875 UTF-8 character not understood: don't expect SQL to have \uXYZZ unicode escape chars in it
+fee3a31 CORE-2875 UTF-8 character not understood: Handle utf-8 punctuation as symbols
+0bb314b CORE-2875 UTF-8 character not understood
+a56585e CORE-2875 UTF-8 character not understood
+4852f8b Merge pull request #617 from Datical/AddRemoveForContexts
+bdf68f5 Added remove support for contexts
+4b662ea Not all attributes are copied correctly in new ColumnConfig(Column)
+8a0e9d1 Cherry picked improved mssql remarks length
+ca75828 Not all attributes are copied correctly in new ColumnConfig(Column)
+c7a193f CORE-2929 Views with definitions that start with a comment are not captured correctly in generateChangeLog
+b2fad70 CORE-2928 Invalid snapshot of "duplicate" foreign keys
 8b9656c Undo temporary debug changes
 404fa25 Used correct key type to access stored logic configuration object
 68c68a9 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
