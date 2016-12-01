@@ -274,6 +274,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (nonUnique == null) {
                     nonUnique = true;
                 }
+                if (nonUnique) {
+                    List<Column> columns = ((Index) example).getColumns();
+                    PrimaryKey tablePK = new PrimaryKey(null, schema.getCatalogName(), schema.getName(), tableName, columns.toArray(new Column[((Index) example).getColumns().size()]));
+                    if (snapshot.get(tablePK) != null) { //actually is unique since it's the PK
+                        nonUnique = false;
+                    }
+                }
+
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
                 /*
