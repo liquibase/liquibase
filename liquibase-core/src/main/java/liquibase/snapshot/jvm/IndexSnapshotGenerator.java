@@ -317,18 +317,42 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         returnIndex.setClustered(false);
                     }
 
+                    if (database instanceof MSSQLDatabase) {
+                        Boolean recompute = (Boolean) row.get("NO_RECOMPUTE");
+                        if (recompute != null) {
+                            recompute = !recompute;
+                        }
+
+                        returnIndex.setAttribute("padIndex", row.get("IS_PADDED"));
+                        returnIndex.setAttribute("fillFactor", row.get("FILL_FACTOR"));
+                        returnIndex.setAttribute("ignoreDuplicateKeys", row.get("IGNORE_DUP_KEY"));
+                        returnIndex.setAttribute("recomputeStatistics", recompute);
+                        returnIndex.setAttribute("incrementalStatistics", row.get("IS_INCREMENTAL"));
+                        returnIndex.setAttribute("allowRowLocks", row.get("ALLOW_ROW_LOCKS"));
+                        returnIndex.setAttribute("allowPageLocks", row.get("ALLOW_PAGE_LOCKS"));
+                    }
+
                     foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
-                for (int i = returnIndex.getColumns().size(); i < position; i++) {
-                    returnIndex.getColumns().add(null);
-                }
-                if (definition == null) {
-                    String ascOrDesc = row.getString("ASC_OR_DESC");
-                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                if (database instanceof MSSQLDatabase && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
+                    List<String> includedColumns = returnIndex.getAttribute("includedColumns", List.class);
+                    if (includedColumns == null) {
+                        includedColumns = new ArrayList<String>();
+                        returnIndex.setAttribute("includedColumns", includedColumns);
+                    }
+                    includedColumns.add(columnName);
                 } else {
-                    returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                    for (int i = returnIndex.getColumns().size(); i < position; i++) {
+                        returnIndex.getColumns().add(null);
+                    }
+                    if (definition == null) {
+                        String ascOrDesc = row.getString("ASC_OR_DESC");
+                        Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                        returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                    } else {
+                        returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                    }
                 }
             }
         } catch (Exception e) {
