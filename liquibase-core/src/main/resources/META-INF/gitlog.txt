@@ -1,3 +1,61 @@
+321043a Fix MSSQL case-sensitivity issue on sys.indexes
+82b80fa CORE-2875 UTF-8 character not understood: don't expect SQL to have \uXYZZ unicode escape chars in it
+fee3a31 CORE-2875 UTF-8 character not understood: Handle utf-8 punctuation as symbols
+0bb314b CORE-2875 UTF-8 character not understood
+a56585e CORE-2875 UTF-8 character not understood
+4852f8b Merge pull request #617 from Datical/AddRemoveForContexts
+bdf68f5 Added remove support for contexts
+4b662ea Not all attributes are copied correctly in new ColumnConfig(Column)
+8a0e9d1 Cherry picked improved mssql remarks length
+ca75828 Not all attributes are copied correctly in new ColumnConfig(Column)
+c7a193f CORE-2929 Views with definitions that start with a comment are not captured correctly in generateChangeLog
+b2fad70 CORE-2928 Invalid snapshot of "duplicate" foreign keys
+8b9656c Undo temporary debug changes
+404fa25 Used correct key type to access stored logic configuration object
+68c68a9 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+6165d04 Allow looking up configuration by class name
+abe1bb7 Use encoding, and set file length after writing.  Also, some extra debug
+b3134e2 Add reset() method to DatabaseObjectFactory
+c2bc389 Put back Liquibase.dropAll to call DropAllCommand
+729b67b Put back Liquibase.dropAll to call DropAllCommand
+d55fd6f - Experimental ordering of dependencies in oracle: don't include USLOG$ objects and fixed query - Added DropAllCommand
+8ba8762 Experimental ordering of dependencies in oracle: don't include SYS and deleted objects
+a07ddb7 Experimental ordering of dependencies in oracle, plus order objects for drop
+635aa47 Work-around for handling public synonyms in a snapshot
+029ff9a Work-around for handling public synonyms in a snapshot
+93e050d CORE-2911 Oracle: generateChangeLog on RAW types not including the size param
+816935e CORE-2891 Liquibase "Command" objects can be extended and overridden
+07b08cf CORE-2891 Liquibase "Command" objects can be extended and overridden
+3cd1f06 Merge branch 'ddb' of https://github.com/Datical/liquibase into ddb
+43f80c5 Merge branch 'command' into ddb
+3837e4d Merge branch 'ddb' of github.com:Datical/liquibase into ddb
+d881752 specify versions of several maven plugins to ensure reproducible builds
+3b13189 CORE-2894 Oracle snapshot not detecting custom datatypes in different schemas
+2a89f92 Improve extensibility of changeSet object
+48fa7e7 CORE-2891 Liquibase "Command" objects can be extended and overridden
+133c926 CORE-2881 DiffChangeLog unnecessarily includes referenceTableCatalogName attribute if comparing Schema with different names
+0e831e1 Output warning message for EnterpriseDB running in oracle mode
+b700c3b CORE-2874 Ensure consistent charset encoding usage Don't use ascii-assuming SimpleCharStream implementation in JavaCC generated code
+8de9307 Output warning message for EnterpriseDB running in oracle mode
+631a54a CORE-2873 Postgresql custom types are snapshotted as having length 2147483647
+260e29e CORE-2872 "ON DELETE" not supported for FK constraints in Sybase
+781ff27 Add flag liquibase.generatedChangeSetIdsContainsDescription to allow the change description to be included in generated changeSet ids
+936b617 CORE-2874 Ensure consistent charset encoding usage
+e9e5afe Add flag liquibase.generatedChangeSetIdsContainsDescription to allow the change description to be included in generated changeSet ids
+945038c CORE-2873 Postgresql custom types are snapshotted as having length 2147483647
+b6501f9 CORE-2857 Support clustered primary keys in postgresql
+01b19bf CORE-2857 Support clustered primary keys in postgresql
+6fc1a9f Experimental ordering of views in mssql: Don't include if reference points to itself (like for a cross-database reference)
+3056676 Experimental ordering of views in mssql
+83e8dd6 Experimental ordering of views in mssql
+cbebbe6 Experimental ordering of views in mssql
+22fbbe7 CORE-2857 Support clustered primary keys in postgresql
+780e381 CORE-2855 Don't recreate primary keys if clustered changed from null to true/false (cherry picked from commit 9ec7a0c)
+2379837 Experimental ordering of views in mssql
+d4b6e02 Findbugs fixes
+404963b CORE-2693 Postgresql dropAll with serial columns fails because tables are dropped then sequences which no longer exist
+62ea5af CORE-2853 Diff comparisions reporting differences between '0.0' and '0' in decimals
+2ff2646 CORE-2852 Postgresql snapshots not correctly handling serial-backing sequences
 96560cd CORE-2848 Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
 bfbe95c CORE-2848 Oracle: primary keys that use a pre-existing index drop the index along with the primary key on rollback
 f8ebad7 Merge branch 'findbugs' into ddb
