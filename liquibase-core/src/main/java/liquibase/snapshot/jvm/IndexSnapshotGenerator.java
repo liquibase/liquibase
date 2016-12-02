@@ -5,13 +5,19 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
@@ -274,13 +280,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (nonUnique == null) {
                     nonUnique = true;
                 }
-                if (nonUnique) {
-                    List<Column> columns = ((Index) example).getColumns();
-                    PrimaryKey tablePK = new PrimaryKey(null, schema.getCatalogName(), schema.getName(), tableName, columns.toArray(new Column[((Index) example).getColumns().size()]));
-                    if (snapshot.get(tablePK) != null) { //actually is unique since it's the PK
-                        nonUnique = false;
-                    }
-                }
 
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
@@ -396,7 +395,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     if (actuallyMatches) {
                         if (index.getClustered() != null && index.getClustered()) {
-                            return index;
+                            return finalizeIndex(schema, tableName, index, snapshot);
                         } else {
                             nonClusteredIndexes.add(index);
                         }
@@ -405,6 +404,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             }
             if (nonClusteredIndexes.size() > 0) {
                 return nonClusteredIndexes.get(0);
+            }
+            if (nonClusteredIndexes.size() > 0) {
+                return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot);
             }
             return null;
         }
@@ -436,6 +438,18 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //        }
 //        snapshot.removeDatabaseObjects(schema, indexesToRemove.toArray(new Index[indexesToRemove.size()]));
+    }
+
+    protected Index finalizeIndex(Schema schema, String tableName, Index index, DatabaseSnapshot snapshot) {
+        if (index.isUnique() == null || !index.isUnique()) {
+            List<Column> columns = index.getColumns();
+            PrimaryKey tablePK = new PrimaryKey(null, schema.getCatalogName(), schema.getName(), tableName, columns.toArray(new Column[index.getColumns().size()]));
+            if (snapshot.get(tablePK) != null) { //actually is unique since it's the PK
+                index.setUnique(true);
+            }
+        }
+
+        return index;
     }
 
     //METHOD FROM SQLIteDatabaseSnapshotGenerator
