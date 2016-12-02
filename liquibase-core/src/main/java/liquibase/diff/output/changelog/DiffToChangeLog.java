@@ -39,6 +39,8 @@ import java.util.*;
 public class DiffToChangeLog {
 
     private String idRoot = String.valueOf(new Date().getTime());
+    private boolean overriddenIdRoot = false;
+
     private int changeNumber = 1;
 
     private String changeSetContext;
@@ -74,7 +76,7 @@ public class DiffToChangeLog {
     }
 
     public void print(PrintStream out) throws ParserConfigurationException, IOException, DatabaseException {
-        this.print(out, new XMLChangeLogSerializer());
+        this.print(out, ChangeLogSerializerFactory.getInstance().getSerializer("xml"));
     }
 
     public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
@@ -83,17 +85,16 @@ public class DiffToChangeLog {
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
-            print(new PrintStream(stream), changeLogSerializer);
+            print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
             stream.close();
         } else {
             LogFactory.getLogger().info(file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            print(new PrintStream(out), changeLogSerializer);
+            print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
-            String xml = new String(out.toByteArray(), "UTF-8");
+            String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
-            innerXml = innerXml.replaceFirst("bblacha", "Bart");
             innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
@@ -120,12 +121,12 @@ public class DiffToChangeLog {
             if (foundEndTag) {
                 randomAccessFile.seek(offset);
                 randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes("UTF-8"));
+                randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
                 randomAccessFile.writeBytes(lineSeparator);
                 randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             } else {
                 randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes("UTF-8"));
+                randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
             }
             randomAccessFile.close();
 
@@ -195,7 +196,7 @@ public class DiffToChangeLog {
         types = getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
             ObjectQuotingStrategy quotingStrategy = diffOutputControl.getObjectQuotingStrategy();
-            for (DatabaseObject object : diffResult.getUnexpectedObjects(type, comparator)) {
+            for (DatabaseObject object : sortUnexpectedObjects(diffResult.getUnexpectedObjects(type, comparator), diffResult.getReferenceSnapshot().getDatabase())) {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy, created);
@@ -216,16 +217,27 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
-    private List<DatabaseObject> sortMissingObjects(Collection<DatabaseObject> missingObjects, Database database) {
+    private List<DatabaseObject> sortUnexpectedObjects(Collection<? extends DatabaseObject> unexpectedObjects, Database database) {
+        return sortObjects("unexpected", (Collection<DatabaseObject>) unexpectedObjects, database);
+    }
 
-        if (missingObjects.size() > 0 && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+    private List<DatabaseObject> sortMissingObjects(Collection<DatabaseObject> missingObjects, Database database) {
+        return sortObjects("missing", (Collection<DatabaseObject>) missingObjects, database);
+    }
+
+    private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
+
+        if (objects.size() > 0 && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<String>();
-            for (CompareControl.SchemaComparison comparison : this.diffOutputControl.getSchemaComparisons()) {
-                String schemaName = comparison.getReferenceSchema().getSchemaName();
-                if (schemaName == null) {
-                    schemaName = database.getDefaultSchemaName();
+            CompareControl.SchemaComparison[] schemaComparisons = this.diffOutputControl.getSchemaComparisons();
+            if (schemaComparisons != null) {
+                for (CompareControl.SchemaComparison comparison : schemaComparisons) {
+                    String schemaName = comparison.getReferenceSchema().getSchemaName();
+                    if (schemaName == null) {
+                        schemaName = database.getDefaultSchemaName();
+                    }
+                    schemas.add(schemaName);
                 }
-                schemas.add(schemaName);
             }
 
             if (schemas.size() == 0) {
@@ -242,15 +254,15 @@ public class DiffToChangeLog {
                 };
 
                 DependencyUtil.DependencyGraph graph = new DependencyUtil.DependencyGraph(nameListener);
-                addDependencies(graph, schemas, missingObjects, database);
+                addDependencies(graph, schemas, objects, database);
                 graph.computeDependencies();
 
                 if (dependencyOrder.size() > 0) {
 
-                    List<DatabaseObject> toSort = new ArrayList<DatabaseObject>();
-                    List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
+                    final List<DatabaseObject> toSort = new ArrayList<DatabaseObject>();
+                    final List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
 
-                    for (DatabaseObject obj : missingObjects) {
+                    for (DatabaseObject obj : objects) {
                         if (!(obj instanceof Column)) {
                             String schemaName = null;
                             if (obj.getSchema() != null) {
@@ -284,7 +296,11 @@ public class DiffToChangeLog {
                             Integer o1Order = dependencyOrder.indexOf(o1Schema + "." + o1.getName());
                             int o2Order = dependencyOrder.indexOf(o2Schema + "." + o2.getName());
 
-                            return o1Order.compareTo(o2Order);
+                            int order = o1Order.compareTo(o2Order);
+                            if (type.equals("unexpected")) {
+                                order = order * -1;
+                            }
+                            return order;
                         }
                     });
 
@@ -296,14 +312,14 @@ public class DiffToChangeLog {
             }
         }
 
-        return new ArrayList<DatabaseObject>(missingObjects);
+        return new ArrayList<DatabaseObject>(objects);
     }
 
     /**
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
-        return database instanceof DB2Database || database instanceof MSSQLDatabase;
+        return database instanceof DB2Database || database instanceof MSSQLDatabase || database instanceof OracleDatabase;
     }
 
     /**
@@ -322,6 +338,21 @@ public class DiffToChangeLog {
             for (Map<String, ?> row : rs) {
                 String tabName = StringUtils.trimToNull((String) row.get("TABSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("TABNAME"));
                 String bName = StringUtils.trimToNull((String) row.get("BSCHEMA")) + "." + StringUtils.trimToNull((String) row.get("BNAME"));
+
+                graph.add(bName, tabName);
+            }
+        } else if (database instanceof OracleDatabase) {
+            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select OWNER, NAME, REFERENCED_OWNER, REFERENCED_NAME from DBA_DEPENDENCIES where REFERENCED_OWNER != 'SYS' AND NOT(NAME LIKE 'BIN$%') AND NOT(OWNER = REFERENCED_OWNER AND NAME = REFERENCED_NAME) AND (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                        @Override
+                        public String toString(String obj) {
+                            return "OWNER='" + obj + "'";
+                        }
+                    }
+            ) + ")"));
+            for (Map<String, ?> row : rs) {
+                String tabName = StringUtils.trimToNull((String) row.get("OWNER")) + "." + StringUtils.trimToNull((String) row.get("NAME"));
+                String bName = StringUtils.trimToNull((String) row.get("REFERENCED_OWNER")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
 
                 graph.add(bName, tabName);
             }
@@ -365,10 +396,41 @@ public class DiffToChangeLog {
             sql += " UNION select null as referencing_schema_name, s.name as referencing_name, f.name as referenced_name, null as referenced_schema_name from sys.partition_functions f " +
                     "join sys.partition_schemes s on s.function_id=f.function_id";
 
-            sql += " UNION select select null as referencing_schema_name, s.name as referencing_name, fg.name, null as referenced_schema_name from sys.partition_schemes s " +
+            sql += " UNION select null as referencing_schema_name, s.name as referencing_name, fg.name as referenced_name, null as referenced_schema_name from sys.partition_schemes s " +
                     "join sys.destination_data_spaces ds on s.data_space_id=ds.partition_scheme_id " +
                     "join sys.filegroups fg on ds.data_space_id=fg.data_space_id";
 
+            //get data file -> filegroup dependencies
+            sql += " UNION select distinct null as referencing_schema_name, f.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.database_files f " +
+                    "join sys.data_spaces ds on f.data_space_id=ds.data_space_id " +
+                    "where f.data_space_id > 1";
+
+            //get table -> filestream dependencies
+            sql += " UNION select object_schema_name(t.object_id) as referencing_schema_name, t.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.tables t " +
+                    "join sys.data_spaces ds on t.filestream_data_space_id=ds.data_space_id " +
+                    "where t.filestream_data_space_id > 1";
+
+            //get index -> filegroup dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.indexes i " +
+                    "join sys.data_spaces ds on i.data_space_id=ds.data_space_id " +
+                    "where i.data_space_id > 1";
+
+            //get index -> table dependencies
+            sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, object_name(i.object_id) as referenced_name, object_schema_name(i.object_id) as referenced_schema_name from sys.indexes i " +
+                    "where " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "object_schema_name(i.object_id)='" + obj + "'";
+                }
+            });
+
+            //get schema -> base object dependencies
+            sql += " UNION SELECT SCHEMA_NAME(SCHEMA_ID) as referencing_schema_name, name as referencing_name, PARSENAME(BASE_OBJECT_NAME,1) AS referenced_name, (CASE WHEN PARSENAME(BASE_OBJECT_NAME,2) IS NULL THEN schema_name(schema_id) else PARSENAME(BASE_OBJECT_NAME,2) END) AS referenced_schema_name FROM SYS.SYNONYMS WHERE is_ms_shipped='false' AND " + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
+                @Override
+                public String toString(String obj) {
+                    return "SCHEMA_NAME(SCHEMA_ID)='" + obj + "'";
+                }
+            });
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
             if (rs.size() > 0) {
@@ -376,7 +438,9 @@ public class DiffToChangeLog {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
                     String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
 
-                    graph.add(bName, tabName);
+                    if (!bName.equals(tabName)) {
+                        graph.add(bName, tabName);
+                    }
                 }
             }
         }
@@ -409,7 +473,7 @@ public class DiffToChangeLog {
             if (diffOutputControl.getContext() != null) {
                 changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
                     null, false, quotingStrategy, null);
             changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {
@@ -448,10 +512,34 @@ public class DiffToChangeLog {
 
     public void setIdRoot(String idRoot) {
         this.idRoot = idRoot;
+        this.overriddenIdRoot = true;
     }
 
-    protected String generateId() {
-        return idRoot + "-" + changeNumber++;
+    protected String generateId(Change[] changes) {
+        String desc = "";
+
+        if (LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getGeneratedChangeSetIdsContainDescription()) {
+            if (!overriddenIdRoot) { //switch timestamp to a shorter string (last 4 digits in base 36 format). Still mostly unique, but shorter since we also now have mostly-unique descriptions of the changes
+                this.idRoot = Long.toString(Long.decode(idRoot), 36);
+                idRoot = idRoot.substring(idRoot.length() - 4);
+                this.overriddenIdRoot = true;
+            }
+
+             if (changes != null && changes.length > 0) {
+                 desc = " ("+StringUtils.join(changes, " :: ", new StringUtils.StringUtilsFormatter<Change>() {
+                     @Override
+                     public String toString(Change obj) {
+                         return obj.getDescription();
+                     }
+                 })+")";
+             }
+
+            if (desc.length() > 150) {
+                desc = desc.substring(0, 146) + "...)";
+            }
+        }
+
+        return idRoot + "-" + changeNumber++ + desc;
     }
 
     private static class DependencyGraph {
@@ -581,10 +669,10 @@ public class DiffToChangeLog {
 
             @Override
             public boolean equals(Object obj) {
-                if (!(obj instanceof Edge)) {
+                if (obj == null) {
                     return false;
                 }
-                if (obj == null) {
+                if (!(obj instanceof Edge)) {
                     return false;
                 }
                 Edge e = (Edge) obj;

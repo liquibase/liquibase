@@ -52,6 +52,11 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
             }
         }
 
+        if (thisForeignKey.getPrimaryKeyTable() == null || thisForeignKey.getForeignKeyTable() == null
+                || otherForeignKey.getPrimaryKeyTable() == null || otherForeignKey.getForeignKeyTable() == null) {
+            return false; //tables not set, have to rely on name
+        }
+
         if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
                 otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
         boolean columnsTheSame;

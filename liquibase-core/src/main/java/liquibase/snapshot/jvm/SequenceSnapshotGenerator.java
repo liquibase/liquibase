@@ -157,10 +157,26 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof OracleDatabase) {
             return "SELECT SEQUENCE_NAME AS SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE, ORDER_FLAG AS IS_ORDERED, LAST_NUMBER as START_VALUE, CACHE_SIZE FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
         } else if (database instanceof PostgresDatabase) {
-            return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
-                    "WHERE relkind='S' " +
-                    "AND pg_class.relnamespace = pg_namespace.oid " +
-                    "AND nspname = '" + schema.getName() + "'";
+            return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
+                    "join pg_namespace on c.relnamespace = pg_namespace.oid "+
+                    "WHERE c.relkind='S' " +
+                    "AND nspname = '" + schema.getName() + "' " +
+                    "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)"
+            ;
+
+
+
+//        select c.relname FROM pg_class c, pg_user u
+//            WHERE c.relowner = u.usesysid and c.relkind = 'S'
+//            AND relnamespace IN (
+//                    SELECT oid
+//                    FROM pg_namespace
+//                    WHERE nspname ='public'
+//            ) and c.oid not in (SELECT d.objid
+//                    FROM   pg_depend    d
+//                    JOIN   pg_attribute a ON a.attrelid = d.refobjid AND a.attnum = d.refobjsubid
+//                    WHERE  d.refobjsubid > 0
+//            );
         } else if (database instanceof MSSQLDatabase) {
             return "SELECT SEQUENCE_NAME, " +
                     "cast(START_VALUE AS BIGINT) AS START_VALUE, " +

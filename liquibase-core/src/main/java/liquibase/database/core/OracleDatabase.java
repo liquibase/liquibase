@@ -331,6 +331,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
                 return true;
+            } else if (example.getName().startsWith("USLOG$")) { //for update materialized view
+                return true;
             }
         }
 
@@ -412,7 +414,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             userDefinedTypes = new HashSet<String>();
             if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
                 try {
-                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                    try {
+                        userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
+                    } catch (DatabaseException e) { //fall back to USER_TYPES if the user cannot see ALL_TYPES
+                        userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                    }
                 } catch (DatabaseException e) {
                     //ignore error
                 }
@@ -473,7 +479,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             Statement statement = null;
             try {
                 statement = ((JdbcConnection) connection).createStatement();
-                statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+                ResultSet resultSet = statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+                resultSet.close(); //don't need to do anything with the result set, just make sure statement ran.
                 this.canAccessDbaRecycleBin = true;
             } catch (Exception e) {
                 if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist

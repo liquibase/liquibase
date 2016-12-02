@@ -4,6 +4,8 @@ import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -174,8 +176,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             ;
         }
 
-        LogFactory.getLogger().severe(errorStream.toString());
-        LogFactory.getLogger().info(inputStream.toString());
+        LogFactory.getLogger().severe(errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        LogFactory.getLogger().info(inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
 
         if (returnCode != 0) {
             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);

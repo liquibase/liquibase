@@ -4,6 +4,8 @@ import liquibase.change.*;
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
@@ -148,7 +150,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), out);
             }
             out.flush();
         } finally {

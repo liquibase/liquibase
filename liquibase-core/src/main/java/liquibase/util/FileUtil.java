@@ -1,5 +1,8 @@
 package liquibase.util;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
+
 import java.io.*;
 
 public class FileUtil {
@@ -41,9 +44,9 @@ public class FileUtil {
         if (!file.exists()) {
             return null;
         }
-        FileReader reader = null;
+        Reader reader = null;
         try {
-            reader = new FileReader(file);
+            reader = new InputStreamReader(new FileInputStream(file), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             return StreamUtil.getReaderContents(reader);
         } catch (FileNotFoundException e) {
             return null;
@@ -58,7 +61,7 @@ public class FileUtil {
         file.getParentFile().mkdirs();
         FileOutputStream output = new FileOutputStream(file);
         try {
-            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes("UTF-8")), output);
+            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())), output);
         } finally {
             output.close();
         }

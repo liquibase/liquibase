@@ -4,6 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.ValidationErrors;
+import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -12,9 +16,13 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.*;
 
@@ -103,8 +111,34 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return super.getDatabaseChangeLogLockTableName().toLowerCase();
     }
 
+    @Override
+    public void setConnection(DatabaseConnection conn) {
+        super.setConnection(conn);
 
-//    public void dropDatabaseObjects(String schema) throws DatabaseException {
+        Logger log = LogFactory.getInstance().getLog();
+
+        if (conn instanceof JdbcConnection) {
+            Statement statement = null;
+            ResultSet resultSet = null;
+            try {
+                statement = ((JdbcConnection) conn).createStatement();
+                resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'");
+                if (resultSet.next()) {
+                    String setting = resultSet.getString(1);
+                    if (setting != null && setting.equals("on")) {
+                        log.warning("EnterpriseDB "+conn.getURL()+" does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
+                    }
+                }
+            } catch (Exception e) {
+                log.info("Cannot check pg_settings", e);
+            } finally {
+                JdbcUtils.close(resultSet, statement);
+            }
+        }
+
+    }
+
+    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        try {
 //            if (schema == null) {
 //                schema = getConnectionUsername();

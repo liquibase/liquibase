@@ -1,6 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.core.HsqlDatabase;
@@ -219,11 +221,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 procedureText = "";
             }
 
+            String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
             if (procedureText != null) {
                 try {
-                    stream = new ByteArrayInputStream(procedureText.getBytes("UTF-8"));
+                    stream = new ByteArrayInputStream(procedureText.getBytes(encoding));
                 } catch (UnsupportedEncodingException e) {
-                    throw new AssertionError("UTF-8 is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+                    throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
                 }
             }
 
