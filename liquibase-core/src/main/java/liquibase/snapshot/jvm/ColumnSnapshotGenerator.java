@@ -421,7 +421,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (defaultValue != null && defaultValue instanceof String) {
                 if (defaultValue.equals("(NULL)")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", null);
+                    columnMetadataResultSet.set("COLUMN_DEF", new DatabaseFunction("null"));
                 }
             }
         }
