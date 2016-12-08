@@ -264,7 +264,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "object_name(i.object_id) as INDEX_QUALIFIER, " +
                                 "i.name as INDEX_NAME, " +
                                 "case type when 1 then 1 ELSE 3 end as TYPE, " +
-                                "index_column_id as ORDINAL_POSITION, " +
+                                "key_ordinal as ORDINAL_POSITION, " +
                                 "COL_NAME(c.object_id,c.column_id) AS COLUMN_NAME, " +
                                 "case is_descending_key when 0 then 'A' else 'D' end as ASC_OR_DESC, " +
                                 "null as CARDINALITY, " +
@@ -277,14 +277,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "WHERE object_schema_name(i.object_id)='"+database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
 
                         if (!bulkFetch && tableName != null) {
-                            sql += " AND object_name(i.object_id)='" + tableName + "'";
+                            sql += " AND object_name(i.object_id)='" + database.escapeStringForDatabase(tableName) + "'";
                         }
 
                         if (!bulkFetch && indexName != null) {
-                            sql += " AND i.name='" + indexName + "'";
+                            sql += " AND i.name='" + database.escapeStringForDatabase(indexName) + "'";
                         }
 
-                        sql += "ORDER BY i.object_id, i.index_id, c.index_column_id";
+                        sql += "ORDER BY i.object_id, i.index_id, c.key_ordinal";
 
                         returnList.addAll(executeAndExtract(sql, database));
 
