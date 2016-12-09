@@ -283,6 +283,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
+                if (position == 0) { //not really a column, position is 1-based.
+                    continue;
+                }
                 /*
                 * TODO maybe bug in jdbc driver? Need to investigate.
                 * If this "if" is commented out ArrayOutOfBoundsException is thrown
