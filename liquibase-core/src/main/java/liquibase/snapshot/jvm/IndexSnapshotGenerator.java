@@ -283,9 +283,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
-                if (position == 0) { //not really a column, position is 1-based.
-                    continue;
-                }
                 /*
                 * TODO maybe bug in jdbc driver? Need to investigate.
                 * If this "if" is commented out ArrayOutOfBoundsException is thrown
@@ -353,15 +350,17 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     includedColumns.add(columnName);
                 } else {
-                    for (int i = returnIndex.getColumns().size(); i < position; i++) {
-                        returnIndex.getColumns().add(null);
-                    }
-                    if (definition == null) {
-                        String ascOrDesc = row.getString("ASC_OR_DESC");
-                        Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                        returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
-                    } else {
-                        returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                    if (position != 0) { //if really a column, position is 1-based.
+                        for (int i = returnIndex.getColumns().size(); i < position; i++) {
+                            returnIndex.getColumns().add(null);
+                        }
+                        if (definition == null) {
+                            String ascOrDesc = row.getString("ASC_OR_DESC");
+                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                        } else {
+                            returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                        }
                     }
                 }
             }
