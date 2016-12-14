@@ -410,6 +410,11 @@ public class DiffToChangeLog {
                     "join sys.data_spaces ds on t.filestream_data_space_id=ds.data_space_id " +
                     "where t.filestream_data_space_id > 1";
 
+            //get table -> filestream dependencies
+            sql += " UNION select object_schema_name(t.object_id) as referencing_schema_name, t.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.tables t " +
+                    "join sys.data_spaces ds on t.lob_data_space_id=ds.data_space_id " +
+                    "where t.lob_data_space_id > 1";
+
             //get index -> filegroup dependencies
             sql += " UNION select object_schema_name(i.object_id) as referencing_schema_name, i.name as referencing_name, ds.name as referenced_name, null as referenced_schema_name from sys.indexes i " +
                     "join sys.data_spaces ds on i.data_space_id=ds.data_space_id " +
