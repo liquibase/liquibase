@@ -7,6 +7,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -130,7 +131,9 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                     view.setSchema(schema);
                     view.setRemarks(row.getString("REMARKS"));
                     view.setDefinition(row.getString("OBJECT_BODY"));
-
+                    if(database instanceof OracleDatabase) {
+                        view.setAttribute("editioned", "Y".equals(row.getString("EDITIONING_VIEW")));
+                    }
                     schema.addDatabaseObject(view);
                 }
             } catch (SQLException e) {
