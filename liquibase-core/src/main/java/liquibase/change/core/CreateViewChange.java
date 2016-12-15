@@ -98,14 +98,18 @@ public class CreateViewChange extends AbstractChange {
 
 		if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
 			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
-			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), false)
+			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), false)
                     .setFullDefinition(fullDefinition));
 		} else {
-			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists)
+			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists)
                     .setFullDefinition(fullDefinition));
 		}
 
 		return statements.toArray(new SqlStatement[statements.size()]);
+	}
+
+	protected CreateViewStatement createViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean b) {
+    	return new CreateViewStatement(catalogName, schemaName, viewName, selectQuery, b);
 	}
 
 	@Override

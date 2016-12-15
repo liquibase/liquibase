@@ -922,6 +922,7 @@
 					<xsd:attribute name="viewName" type="xsd:string" use="required" />
 					<xsd:attribute name="replaceIfExists" type="booleanExp" />
                     <xsd:attribute name="fullDefinition" type="booleanExp" />
+					<xsd:anyAttribute namespace="##other" processContents="lax" />
 				</xsd:extension>
 			</xsd:simpleContent>
 		</xsd:complexType>
