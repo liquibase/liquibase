@@ -134,7 +134,8 @@ public class HsqlDatabase extends AbstractDatabase {
     public String escapeDatabaseObject(String objectName) {
     	if (objectName != null) {
             if (keywords.contains(objectName.toUpperCase())) {
-                return "\""+objectName+"\"";
+                // CORE-1158 HSQL always uses upper case identifiers
+                return "\""+objectName.toUpperCase()+"\"";
             }
     	}
         return objectName;
