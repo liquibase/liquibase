@@ -306,6 +306,7 @@
 		<xsd:attribute name="defaultValueComputed" type="xsd:string" />
         <xsd:attribute name="defaultValueSequenceCurrent" type="xsd:string" />
         <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
+		<xsd:attribute name="defaultValueConstraintName" type="xsd:string"/>
 		<xsd:attribute name="autoIncrement" type="booleanExp" />
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />

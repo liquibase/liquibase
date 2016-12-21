@@ -101,7 +101,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
-                    buffer.append(" CONSTRAINT ").append(database.escapeObjectName(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column), ForeignKey.class));
+                    String constraintName = statement.getDefaultValueConstraintName(column);
+                    if (constraintName == null) {
+                        constraintName = ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column);
+                    }
+                    buffer.append(" CONSTRAINT ").append(database.escapeObjectName(constraintName, ForeignKey.class));
                 }
                 if (database instanceof OracleDatabase && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
                     buffer.append(" ");

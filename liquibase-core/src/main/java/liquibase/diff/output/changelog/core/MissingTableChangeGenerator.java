@@ -207,6 +207,8 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
             columnConfig.setDefaultValue(defaultValueString);
         }
+
+        columnConfig.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
     }
 
     protected CreateTableChange createCreateTableChange() {

@@ -45,6 +45,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
     private SequenceNextValueFunction defaultValueSequenceNext;
+    private String defaultValueConstraintName;
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
@@ -82,6 +83,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 setDefaultValue(defaultValue.toString());
             }
         }
+        setDefaultValueConstraintName(columnSnapshot.getDefaultValueConstraintName());
 
         boolean nonDefaultConstraints = false;
         ConstraintsConfig constraints = new ConstraintsConfig();
@@ -766,7 +768,15 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         return this;
     }
-    
+
+    public String getDefaultValueConstraintName() {
+        return defaultValueConstraintName;
+    }
+
+    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
+        this.defaultValueConstraintName = defaultValueConstraintName;
+    }
+
     @Override
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
@@ -825,6 +835,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             valueSequenceCurrent = new SequenceCurrentValueFunction(valueSequenceCurrentString);
         }
 
+
+        defaultValueConstraintName = parsedNode.getChildValue(null, "defaultValueConstraintName", String.class);
 
         defaultValue = parsedNode.getChildValue(null, "defaultValue", String.class);
         

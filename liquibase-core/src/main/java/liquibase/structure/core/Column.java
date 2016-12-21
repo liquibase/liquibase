@@ -148,6 +148,18 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
+
+    public String getDefaultValueConstraintName() {
+        return getAttribute("defaultValueConstraintName", String.class);
+    }
+
+    public Column setDefaultValueConstraintName(String defaultValueConstraintName) {
+        setAttribute("defaultValueConstraintName", defaultValueConstraintName);
+
+        return this;
+    }
+
+
     public boolean isAutoIncrement() {
         return getAutoIncrementInformation() != null;
     }

@@ -25,8 +25,12 @@ public class AddDefaultValueGeneratorMSSQL extends AddDefaultValueGenerator {
     @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Object defaultValue = statement.getDefaultValue();
+        String constraintName = statement.getDefaultValueConstraintName();
+        if (constraintName == null) {
+            constraintName = ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
+        }
         return new Sql[] {
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeObjectName(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName()), Column.class) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database) + " FOR " + database.escapeObjectName(statement.getColumnName(), Column.class),
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeObjectName(constraintName, Column.class) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database) + " FOR " + database.escapeObjectName(statement.getColumnName(), Column.class),
                         getAffectedColumn(statement))
         };
     }
