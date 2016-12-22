@@ -558,7 +558,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     for (CachedRow row : rows) {
                         String typeName = row.getString("TYPE_NAME");
-                        if (typeName.equals("nvarchar")) {
+                        if (typeName.equals("nvarchar") || typeName.equals("nchar")) {
                             Integer size = row.getInt("COLUMN_SIZE");
                             if (size > 0) {
                                 row.set("COLUMN_SIZE", size / 2);
