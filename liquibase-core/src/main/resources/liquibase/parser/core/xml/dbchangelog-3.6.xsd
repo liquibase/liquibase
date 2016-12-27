@@ -528,6 +528,7 @@
 			<xsd:attribute name="defaultValueBoolean" type="xsd:string" />
 			<xsd:attribute name="defaultValueComputed" type="xsd:string" />
             <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
+			<xsd:attribute name="defaultValueConstraintName" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
