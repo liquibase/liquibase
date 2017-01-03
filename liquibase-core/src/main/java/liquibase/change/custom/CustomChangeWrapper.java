@@ -239,6 +239,14 @@ public class CustomChangeWrapper extends AbstractChange {
      */
     @Override
     public String getConfirmationMessage() {
+        try {
+            if (!configured) {
+                configureCustomChange();
+            }
+        } catch (CustomChangeException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
         return customChange.getConfirmationMessage();
     }
 
