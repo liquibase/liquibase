@@ -1,5 +1,19 @@
 package liquibase.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.sql.rowset.serial.SerialBlob;
+
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Column;
@@ -95,9 +109,9 @@ public abstract class JdbcUtils {
             }
         }
         if (obj instanceof Blob) {
-            obj = rs.getBytes(index);
+        	obj = rs.getBlob(index);        	
         } else if (obj instanceof Clob) {
-            obj = rs.getString(index);
+        	obj = rs.getClob(index);
         } else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
             obj = rs.getTimestamp(index);
         } else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.DATE")) {

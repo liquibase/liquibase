@@ -17,7 +17,7 @@ abstract class StandardSqlVisitorTest extends Specification {
         when:
         def visitor = createClass()
         def node = new ParsedNode(null, visitor.getSerializedObjectName())
-        def fieldValue = "value for ${field}"
+        def fieldValue = "Standard SQG value for ${field}"
         node.addChild(null, field, fieldValue)
         try {
             visitor.load(node, resourceSupplier.simpleResourceAccessor)

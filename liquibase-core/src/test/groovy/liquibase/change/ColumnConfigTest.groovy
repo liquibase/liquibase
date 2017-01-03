@@ -11,7 +11,16 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.charset.Charset
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 import java.text.ParseException
+
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.io.IOUtils;
 
 public class ColumnConfigTest extends Specification {
 
@@ -233,8 +242,14 @@ public class ColumnConfigTest extends Specification {
         new ColumnConfig().setValueSequenceNext(new SequenceNextValueFunction("seq_name")).getValueObject().toString() == "seq_name"
         new ColumnConfig().setValueBlobFile("asdg").getValueObject() == "asdg"
         new ColumnConfig().setValueClobFile("zxcv").getValueObject() == "zxcv"
+		IOUtils.toByteArray(
+			new ColumnConfig().setValueBlob(
+				new SerialBlob(DatatypeConverter.parseHexBinary(
+					DatatypeConverter.printHexBinary("abcd".getBytes())))).getValueBlob().getBinaryStream()).toString() == "abcd".getBytes().toString()
+		new ColumnConfig().setValueClob(new SerialClob("xyz".toCharArray())).getValueClob().getSubString(1,3) == "xyz";
         new ColumnConfig().setValue("A value").getValueObject() == "A value"
         new ColumnConfig().getValueObject() == null
+
     }
 
     def setDefaultValueNumeric() throws ParseException {
@@ -391,17 +406,24 @@ public class ColumnConfigTest extends Specification {
         new ColumnConfig().setRemarks("yyy").getRemarks() == "yyy"
     }
 
-    def setValueClob() {
+    def setValueClobFile() {
         expect:
         new ColumnConfig().setValueClobFile(null).getValueClobFile() == null
         new ColumnConfig().setValueClobFile("clob_file").getValueClobFile() == "clob_file"
     }
 
-    def setValueBlob() {
+    def setValueBlobFile() {
         expect:
         new ColumnConfig().setValueBlobFile(null).getValueBlobFile() == null
         new ColumnConfig().setValueBlobFile("blob_file").getValueBlobFile() == "blob_file"
     }
+	
+	def setValueBlob() {
+		expect:
+		new ColumnConfig().setValueBlob(null).getValueBlob() == null
+//		IOUtils.toString(new ColumnConfig().setValueBlob(new SerialBlob(DatatypeConverter.printHexBinary(new String("xyz").getBytes(Charset.forName("UTF-8"))))).getValueBlob().getBinaryStream()) == "xyz"
+		new ColumnConfig().setValueBlob(new SerialBlob("xyz".getBytes())).getValueBlob().getBytes(1, 3) == "xyz".getBytes()
+	}
 
     def getFieldSerializationType() {
         expect:
@@ -419,7 +441,7 @@ public class ColumnConfigTest extends Specification {
         def node = new ParsedNode(null, "column")
         def column = new ColumnConfig()
 
-        def testValue = "value for ${field}"
+        def testValue = "GHans value for ${field}"
         if (field in ["defaultValueDate", "valueDate"]) {
             testValue = "2012-03-13 18:52:22.129"
         } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed"]) {
@@ -430,7 +452,13 @@ public class ColumnConfigTest extends Specification {
             testValue = "347.22"
         } else if (field in ["descending"]) {
             testValue = true
-        }
+        } else if (field in ["valueClob"]) {
+			testValue = "xyz"
+        }  else if (field in ["valueBlob"]) {
+			testValue = DatatypeConverter.printHexBinary("abc".getBytes())
+        } else {
+			testValue = "1234";
+		}
         node.addChild(null, field, testValue)
         try {
             column.load(node, resourceSupplier.simpleResourceAccessor)
@@ -439,7 +467,13 @@ public class ColumnConfigTest extends Specification {
         }
 
         then:
-        assert column.getSerializableFieldValue(field).toString() == testValue.toString()
+        if (field in ["valueBlob"]) {
+			assert DatatypeConverter.printHexBinary(IOUtils.toByteArray(((SerialBlob)column.getSerializableFieldValue(field)).getBinaryStream())) == testValue.toString()
+		} else if (field in ["valueClob"]) {
+			assert IOUtils.toString((((SerialClob)column.getSerializableFieldValue(field)).getCharacterStream())) == testValue.toString()
+		}  else {
+			assert column.getSerializableFieldValue(field).toString() == testValue.toString()
+		}
 
         where:
         field << new ColumnConfig().getSerializableFields().findAll({ !it.equals("constraints") })
@@ -454,7 +488,7 @@ public class ColumnConfigTest extends Specification {
 
         def column = new ColumnConfig()
 
-        def testValue = "value for ${field}"
+        def testValue = "this is the value for ${field}"
         if (field in ["unique", "deferrable", "nullable", "deleteCascade", "initiallyDeferred", "primaryKey"]) {
             testValue = "true"
         }

@@ -16,13 +16,19 @@ import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
 
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.*;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.util.*;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
@@ -196,7 +202,33 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     setValueOnNode(node, objectNamespace, objectName, child, serializationType, parentNamespace);
                 }
             }
-        } else {
+        } else if (value instanceof SerialBlob) {
+        	String stringValue = "";
+			try {
+				stringValue = DatatypeConverter.printHexBinary(IOUtils.toByteArray(((SerialBlob)value).getBinaryStream()));
+			} catch (SerialException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	//String stringValue = new String((byte[] )value);
+        	node.setAttribute(qualifyName(objectName, objectNamespace, parentNamespace), stringValue);
+    	} else if (value instanceof SerialClob) {
+        	String stringValue = "";
+			try {
+				stringValue = DatatypeConverter.printHexBinary(IOUtils.toByteArray(((SerialClob)value).getCharacterStream()));
+				stringValue = IOUtils.toString((((SerialClob)value).getCharacterStream()));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	node.setAttribute(qualifyName(objectName, objectNamespace, parentNamespace), stringValue);
+    	} else {
             if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
                 String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
                 node.appendChild(createNode(namespace, objectName, value.toString()));
