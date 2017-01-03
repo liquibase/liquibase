@@ -87,10 +87,9 @@
             <id>oracle</id>
             <dependencies>
                 <dependency>
-                    <groupId>oracle</groupId>
-                    <artifactId>oracle-ojdbc6</artifactId>
-                    <version>12.1.0.1</version>
-                    <scope>test</scope>
+                    <groupId>com.oracle.jdbc</groupId>
+                    <artifactId>ojdbc6</artifactId>
+                    <version>12.1.0.2</version>
                 </dependency>
             </dependencies>
         </profile>
