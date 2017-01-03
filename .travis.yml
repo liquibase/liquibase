@@ -1,3 +1,10 @@
 language: java
 sudo: false
+jdk:
+  - openjdk6
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y rpm
+
 script: mvn clean package
