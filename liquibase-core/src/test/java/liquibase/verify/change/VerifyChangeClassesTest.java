@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 
 public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
-    @Ignore
     @Test
     public void minimumRequiredIsValidSql() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
@@ -86,6 +85,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
         }
     }
 
+    /**
+     * For every combination of database (e.g. Oracle) and change (e.g. DropForeignKeyConstraint),
+     * construct a change object with some example values. For every required parameter, verify that
+     * removing it causes the change object to change its state to "hasErrors".
+     * @throws Exception
+     */
     @Test
     public void lessThanMinimumFails() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
