@@ -200,7 +200,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	protected DataSource dataSource;
 
-	protected final Logger log = LogFactory.getLogger(SpringLiquibase.class.getName());
+	protected final Logger log = LogFactory.getInstance().getLog(SpringLiquibase.class.getName());
 
 	protected String changeLog;
 
@@ -371,11 +371,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-			LogFactory.getLogger().info("Liquibase did not run because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(shouldRunProperty)+" was set to false");
+			LogFactory.getInstance().getLog().info("Liquibase did not run because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(shouldRunProperty)+" was set to false");
 			return;
 		}
 		if (!shouldRun) {
-			LogFactory.getLogger().info("Liquibase did not run because 'shouldRun' " + "property was set to false on " + getBeanName() + " Liquibase Spring bean.");
+			LogFactory.getInstance().getLog().info("Liquibase did not run because 'shouldRun' " + "property was set to false on " + getBeanName() + " Liquibase Spring bean.");
 			return;
 		}
 

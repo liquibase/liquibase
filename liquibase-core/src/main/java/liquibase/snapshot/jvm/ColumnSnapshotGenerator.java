@@ -167,7 +167,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (nullable == DatabaseMetaData.columnNullable) {
                 column.setNullable(true);
             } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-                LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
+                LogFactory.getInstance().getLog().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
                 column.setNullable(true);
             }
         }
@@ -190,7 +190,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         } else if (isAutoincrement.equals("NO")) {
                             column.setAutoIncrementInformation(null);
                         } else if (isAutoincrement.equals("")) {
-                            LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                            LogFactory.getInstance().getLog().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                             column.setAutoIncrementInformation(null);
                         } else {
                             throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement + "'");
@@ -200,16 +200,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         String selectStatement;
                         if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + rawSchemaName + "." + rawTableName + " where 0=1";
-                            LogFactory.getLogger().debug("rawCatalogName : <" + rawCatalogName + ">");
-                            LogFactory.getLogger().debug("rawSchemaName : <" + rawSchemaName + ">");
-                            LogFactory.getLogger().debug("rawTableName : <" + rawTableName + ">");
-                            LogFactory.getLogger().debug("raw selectStatement : <" + selectStatement + ">");
+                            LogFactory.getInstance().getLog().debug("rawCatalogName : <" + rawCatalogName + ">");
+                            LogFactory.getInstance().getLog().debug("rawSchemaName : <" + rawSchemaName + ">");
+                            LogFactory.getInstance().getLog().debug("rawTableName : <" + rawTableName + ">");
+                            LogFactory.getInstance().getLog().debug("raw selectStatement : <" + selectStatement + ">");
 
 
                         } else {
                             selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
                         }
-                        LogFactory.getLogger().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
+                        LogFactory.getInstance().getLog().debug("Checking " + rawTableName + "." + rawCatalogName + " for auto-increment with SQL: '" + selectStatement + "'");
                         Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                         Statement statement = null;
                         ResultSet columnSelectRS = null;
@@ -344,7 +344,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("Error fetching enum values", e);
+                LogFactory.getInstance().getLog().warning("Error fetching enum values", e);
             }
         }
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
@@ -539,7 +539,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 ////        if (table == null) {
 ////            View view = snapshot.getView(tableName);
 ////            if (view == null) {
-////                LogFactory.getLogger().debug("Could not find table or view " + tableName + " for column " + columnName);
+////                LogFactory.getInstance().getLog().debug("Could not find table or view " + tableName + " for column " + columnName);
 ////                return null;
 ////            } else {
 ////                columnInfo.setView(view);

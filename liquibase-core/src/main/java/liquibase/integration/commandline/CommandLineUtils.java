@@ -274,7 +274,7 @@ boolean sql2005OrLater = true;
 
         @Override
         public void statusUpdate(String message) {
-            LogFactory.getLogger().info(message);
+            LogFactory.getInstance().getLog().info(message);
 
         }
 

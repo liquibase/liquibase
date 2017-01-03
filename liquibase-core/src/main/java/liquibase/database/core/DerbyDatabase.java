@@ -26,7 +26,7 @@ import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LogFactory.getInstance().getLog();
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
@@ -149,7 +149,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 } else {
                     url += ";shutdown=true";
                 }
-                LogFactory.getLogger().info("Shutting down derby connection: " + url);
+                LogFactory.getInstance().getLog().info("Shutting down derby connection: " + url);
                 // this cleans up the lock files in the embedded derby database folder
                 ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                 Driver driver = (Driver) contextClassLoader.loadClass(driverName).newInstance();
@@ -205,7 +205,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LogFactory.getInstance().getLog().info("Error getting default schema", e);
         }
         return null;
     }

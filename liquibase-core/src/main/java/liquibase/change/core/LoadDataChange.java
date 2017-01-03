@@ -369,7 +369,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
             if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
-                Logger log = LogFactory.getLogger();
+                Logger log = LogFactory.getInstance().getLog();
                 log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
             } else {

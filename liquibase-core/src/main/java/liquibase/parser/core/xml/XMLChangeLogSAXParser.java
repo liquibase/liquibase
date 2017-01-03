@@ -73,19 +73,19 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
             xmlReader.setErrorHandler(new ErrorHandler() {
                 @Override
                 public void warning(SAXParseException exception) throws SAXException {
-                    LogFactory.getLogger().warning(exception.getMessage());
+                    LogFactory.getInstance().getLog().warning(exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void error(SAXParseException exception) throws SAXException {
-                    LogFactory.getLogger().severe(exception.getMessage());
+                    LogFactory.getInstance().getLog().severe(exception.getMessage());
                     throw exception;
                 }
 
                 @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
-                    LogFactory.getLogger().severe(exception.getMessage());
+                    LogFactory.getInstance().getLog().severe(exception.getMessage());
                     throw exception;
                 }
             });

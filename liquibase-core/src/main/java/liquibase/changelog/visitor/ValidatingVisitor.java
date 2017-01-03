@@ -52,10 +52,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             preconditions.check(database, changeLog, null);
         } catch (PreconditionFailedException e) {
-            LogFactory.getLogger().debug("Precondition Failed: "+e.getMessage(), e);
+            LogFactory.getInstance().getLog().debug("Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            LogFactory.getLogger().debug("Precondition Error: "+e.getMessage(), e);
+            LogFactory.getInstance().getLog().debug("Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -63,7 +63,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     database.rollback();
                 }
             } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("Error rolling back after precondition check", e);
+                LogFactory.getInstance().getLog().warning("Error rolling back after precondition check", e);
             }
         }
     }
@@ -118,7 +118,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
                     if (foundErrors != null && foundErrors.hasErrors()) {
                         if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
-                            LogFactory.getLogger().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                            LogFactory.getInstance().getLog().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             validationErrors.addAll(foundErrors, changeSet);

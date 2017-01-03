@@ -27,7 +27,7 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
         buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
         if (statement.isCascadeConstraints()) {
             if (!database.supportsDropTableCascadeConstraints()) {
-                LogFactory.getLogger().warning("Database does not support drop with cascade");
+                LogFactory.getInstance().getLog().warning("Database does not support drop with cascade");
             } else if (database instanceof OracleDatabase) {
                 buffer.append(" CASCADE CONSTRAINTS");
             } else {

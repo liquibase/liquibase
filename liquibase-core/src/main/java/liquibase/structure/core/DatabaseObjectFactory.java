@@ -64,7 +64,7 @@ public class DatabaseObjectFactory {
                         set.add(clazz);
                     }
                 } catch (Exception e) {
-                    LogFactory.getLogger().info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+                    LogFactory.getInstance().getLog().info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
                 }
             }
 

@@ -38,7 +38,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         } else {
             if (foundRan.getLastCheckSum() == null) {
                 try {
-                    LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
+                    LogFactory.getInstance().getLog().info("Updating NULL md5sum for " + changeSet.toString());
                     replaceChecksum(changeSet);
                 } catch (DatabaseException e) {
                     throw new DatabaseException(e);
@@ -65,7 +65,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
             if (ranChangeSet.getLastCheckSum() == null) {
                 ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
                 if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() && new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
-                    LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
+                    LogFactory.getInstance().getLog().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
                     replaceChecksum(changeSet);
                 }
             }

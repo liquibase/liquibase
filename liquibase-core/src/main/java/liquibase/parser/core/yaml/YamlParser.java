@@ -7,7 +7,7 @@ import liquibase.resource.ResourceAccessor;
 
 public abstract class YamlParser implements LiquibaseParser {
 
-    protected Logger log = LogFactory.getLogger();
+    protected Logger log = LogFactory.getInstance().getLog();
 
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         for (String extension : getSupportedFileExtensions()) {

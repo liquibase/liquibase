@@ -18,7 +18,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     private Database database;
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LogFactory.getInstance().getLog();
     
     private ChangeExecListener execListener;
 

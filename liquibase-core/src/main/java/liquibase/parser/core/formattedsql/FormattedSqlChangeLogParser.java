@@ -42,14 +42,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 return false;
             }
         } catch (IOException e) {
-            LogFactory.getLogger().debug("Exception reading " + changeLogFile, e);
+            LogFactory.getInstance().getLog().debug("Exception reading " + changeLogFile, e);
             return false;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    LogFactory.getLogger().debug("Exception closing " + changeLogFile, e);
+                    LogFactory.getInstance().getLog().debug("Exception closing " + changeLogFile, e);
                 }
             }
         }

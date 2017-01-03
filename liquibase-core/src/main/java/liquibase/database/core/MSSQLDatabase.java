@@ -376,7 +376,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
             } catch (Exception e) {
-                LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
+                LogFactory.getInstance().getLog().warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
         return caseSensitive != null && caseSensitive;
@@ -512,7 +512,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     sendsStringParametersAsUnicode = ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
             } catch (Exception e) {
-                LogFactory.getLogger().warning("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                LogFactory.getInstance().getLog().warning("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -537,7 +537,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
-            LogFactory.getLogger().warning("Could not determine engine edition", e);
+            LogFactory.getInstance().getLog().warning("Could not determine engine edition", e);
         }
         return "Unknown";
     }

@@ -98,7 +98,7 @@ public class Liquibase {
      * @see ResourceAccessor
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
-        log = LogFactory.getLogger();
+        log = LogFactory.getInstance().getLog();
 
         if (changeLogFile != null) {
             this.changeLogFile = changeLogFile.replace('\\', '/');  //convert to standard / if using absolute path on windows
@@ -110,7 +110,7 @@ public class Liquibase {
     }
 
     public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
-        log = LogFactory.getLogger();
+        log = LogFactory.getInstance().getLog();
         this.databaseChangeLog = changeLog;
 
         if (changeLog != null) {

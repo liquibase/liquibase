@@ -35,7 +35,7 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class JdbcExecutor extends AbstractExecutor {
 
-    private Logger log = LogFactory.getLogger();
+    private Logger log = LogFactory.getInstance().getLog();
 
     @Override
     public boolean updatesDatabase() {
@@ -254,7 +254,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        LogFactory.getLogger().debug(message);
+        LogFactory.getInstance().getLog().debug(message);
     }
 
     /**

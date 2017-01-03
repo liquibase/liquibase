@@ -83,7 +83,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 try {
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
-                    LogFactory.getLogger().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    LogFactory.getInstance().getLog().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
                 try {
@@ -91,7 +91,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.setAccessible(true);
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
-                    LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    LogFactory.getInstance().getLog().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
                     ; //cannot set it. That is OK
                 }
 
@@ -112,7 +112,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     }
                 } catch (SQLException e) {
                     String message = "Cannot read from v$parameter: "+e.getMessage();
-                    LogFactory.getLogger().info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
+                    LogFactory.getInstance().getLog().info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
@@ -200,7 +200,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LogFactory.getInstance().getLog().info("Error getting default schema", e);
         }
         return null;
     }

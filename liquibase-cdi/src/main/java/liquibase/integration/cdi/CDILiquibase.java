@@ -72,7 +72,7 @@ import java.util.Map;
 @ApplicationScoped
 public class CDILiquibase implements Extension {
 
-    private Logger log = LogFactory.getLogger(CDILiquibase.class.getName());
+    private Logger log = LogFactory.getInstance().getLog(CDILiquibase.class.getName());
 
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;

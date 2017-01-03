@@ -262,7 +262,7 @@ public class SqlUtil {
             if (stringVal.equals("")) {
                 return stringVal;
             }
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
+            LogFactory.getInstance().getLog().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
             if (strippedSingleQuotes) { //put quotes back
                 return new DatabaseFunction("'"+stringVal+"'");
             }

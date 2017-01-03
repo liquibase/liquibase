@@ -28,7 +28,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private ResourceAccessor resourceAccessor;
     private String basePath;
 
-    private Logger log=LogFactory.getLogger();
+    private Logger log=LogFactory.getInstance().getLog();
 
     public LiquibaseEntityResolver(LiquibaseSerializer serializer) {
         this.serializer = serializer;

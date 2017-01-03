@@ -262,7 +262,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         } catch (Exception e) {
             // TODO: Something?
             e.printStackTrace();
-            LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
+            LogFactory.getInstance().getLog().severe("Failed to get default catalog name from postgres", e);
         }
 
         return searchPaths;

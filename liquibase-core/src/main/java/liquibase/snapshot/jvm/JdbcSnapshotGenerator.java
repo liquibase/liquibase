@@ -105,7 +105,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (this.statusListeners == null) {
             return;
         }
-        LogFactory.getLogger().debug(message);
+        LogFactory.getInstance().getLog().debug(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

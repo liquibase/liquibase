@@ -35,7 +35,7 @@ import liquibase.util.file.FilenameUtils;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-  private Logger log = LogFactory.getLogger();
+  private Logger log = LogFactory.getInstance().getLog();
 
 	protected Database database;
 	private String catalogName;
