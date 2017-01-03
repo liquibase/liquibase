@@ -39,7 +39,7 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, final Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) missingObject;
 
-        CreateViewChange change = new CreateViewChange();
+        CreateViewChange change = createViewChange();
         change.setViewName(view.getName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(view.getSchema().getCatalogName());
@@ -80,5 +80,9 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
 
         return new Change[] { change };
 
+    }
+
+    protected CreateViewChange createViewChange() {
+        return new CreateViewChange();
     }
 }

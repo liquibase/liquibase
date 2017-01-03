@@ -306,6 +306,7 @@
 		<xsd:attribute name="defaultValueComputed" type="xsd:string" />
         <xsd:attribute name="defaultValueSequenceCurrent" type="xsd:string" />
         <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
+		<xsd:attribute name="defaultValueConstraintName" type="xsd:string"/>
 		<xsd:attribute name="autoIncrement" type="booleanExp" />
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
@@ -425,6 +426,7 @@
 		<xsd:attribute name="unique" type="booleanExp" />
         <xsd:attribute name="clustered" type="booleanExp" />
         <xsd:attribute name="tablespace" type="xsd:string" />
+		<xsd:anyAttribute namespace="##other" processContents="lax" />
 	</xsd:attributeGroup>
 
 
@@ -442,7 +444,8 @@
             <xsd:attribute name="forIndexCatalogName" type="xsd:string" />
             <xsd:attribute name="forIndexSchemaName" type="xsd:string" />
             <xsd:attribute name="forIndexName" type="xsd:string" />
-        </xsd:complexType>
+			<xsd:anyAttribute namespace="##other" processContents="lax" />
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="dropPrimaryKey">
@@ -525,6 +528,7 @@
 			<xsd:attribute name="defaultValueBoolean" type="xsd:string" />
 			<xsd:attribute name="defaultValueComputed" type="xsd:string" />
             <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
+			<xsd:attribute name="defaultValueConstraintName" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -920,6 +924,7 @@
 					<xsd:attribute name="viewName" type="xsd:string" use="required" />
 					<xsd:attribute name="replaceIfExists" type="booleanExp" />
                     <xsd:attribute name="fullDefinition" type="booleanExp" />
+					<xsd:anyAttribute namespace="##other" processContents="lax" />
 				</xsd:extension>
 			</xsd:simpleContent>
 		</xsd:complexType>

@@ -235,6 +235,8 @@ public class ParsedNode {
                 return (T) rawValue.toString();
             } else if (type.equals(Integer.class)) {
                 return (T) Integer.valueOf(rawValue.toString());
+            } else if (type.equals(Short.class)) {
+                return (T) Short.valueOf(rawValue.toString());
             } else if (type.equals(Float.class)) {
                 return (T) Float.valueOf(rawValue.toString());
             } else if (type.equals(Double.class)) {

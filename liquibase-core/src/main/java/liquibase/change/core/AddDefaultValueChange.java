@@ -38,6 +38,8 @@ public class AddDefaultValueChange extends AbstractChange {
     private DatabaseFunction defaultValueComputed;
     private SequenceNextValueFunction defaultValueSequenceNext;
 
+    private String defaultValueConstraintName;
+
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validate = new ValidationErrors();
@@ -170,6 +172,14 @@ public class AddDefaultValueChange extends AbstractChange {
 
     public void setDefaultValueSequenceNext(SequenceNextValueFunction defaultValueSequenceNext) {
         this.defaultValueSequenceNext = defaultValueSequenceNext;
+    }
+
+    public String getDefaultValueConstraintName() {
+        return defaultValueConstraintName;
+    }
+
+    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
+        this.defaultValueConstraintName = defaultValueConstraintName;
     }
 
     @Override

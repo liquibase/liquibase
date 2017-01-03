@@ -2,9 +2,10 @@ package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
 import liquibase.command.CommandExecutionException;
-import liquibase.command.DiffCommand;
-import liquibase.command.DiffToChangeLogCommand;
-import liquibase.command.GenerateChangeLogCommand;
+import liquibase.command.CommandFactory;
+import liquibase.command.core.DiffCommand;
+import liquibase.command.core.DiffToChangeLogCommand;
+import liquibase.command.core.GenerateChangeLogCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
@@ -185,7 +186,9 @@ boolean sql2005OrLater = true;
     }
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes, CompareControl.SchemaComparison[] schemaComparisons) throws LiquibaseException {
-        DiffCommand diffCommand = new DiffCommand()
+        DiffCommand diffCommand = (DiffCommand) CommandFactory.getInstance().getCommand("diff");
+
+        diffCommand
                 .setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
@@ -218,7 +221,7 @@ boolean sql2005OrLater = true;
                                          CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
-        DiffToChangeLogCommand command = new DiffToChangeLogCommand();
+        DiffToChangeLogCommand command = (DiffToChangeLogCommand) CommandFactory.getInstance().getCommand("diffChangeLog");
         command.setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setSnapshotTypes(snapshotTypes)
@@ -248,7 +251,7 @@ boolean sql2005OrLater = true;
         CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
-        GenerateChangeLogCommand command = new GenerateChangeLogCommand();
+        GenerateChangeLogCommand command = (GenerateChangeLogCommand) CommandFactory.getInstance().getCommand("generateChangeLog");
 
         command.setReferenceDatabase(originalDatabase)
                 .setSnapshotTypes(snapshotTypes)
