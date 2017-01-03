@@ -410,4 +410,9 @@ public class ChangeParameterMetaData {
         return StringUtils.trimToEmpty(standardDescriptions.get(parameterName));
 
     }
+
+    @Override
+    public String toString() {
+        return (change != null ? change.toString() + "." : "") + getParameterName();
+    }
 }
