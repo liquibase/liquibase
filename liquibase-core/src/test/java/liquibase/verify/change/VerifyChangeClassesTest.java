@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeParameterMetaData;
+import liquibase.change.core.DropPrimaryKeyChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -56,6 +57,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
+                // For every required parameter of the change, fetch an example value.
                 for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
                     ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
                     Object paramValue = param.getExampleValue(database);

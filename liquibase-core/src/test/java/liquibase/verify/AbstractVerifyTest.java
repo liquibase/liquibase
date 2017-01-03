@@ -68,6 +68,10 @@ public class AbstractVerifyTest {
             } else {
                 try {
                     String stateContentString = stateContent.toString();
+                    /* For the purpose of comparison, normalise all line endings to UNIX style (\n)
+                     * instead of Windows (\r\n) */
+                    stateContentString = stateContentString.replaceAll("\r\n", "\n");
+                    existingContent = existingContent.replaceAll("\r\n", "\n");
                     boolean contentsAreEqual = stateContentString.equals(existingContent);
                     assertTrue(String.format("Unexpected difference in %s\nOriginal:\n%s\nNew state:\n%s\n",
                         stateFile.getAbsolutePath(),

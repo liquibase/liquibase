@@ -1,7 +1,5 @@
 -- Database: mssql
 -- Change Parameter: tableName=person
-DECLARE @pkname nvarchar(255)
-DECLARE @sql nvarchar(2048)
-select @pkname=i.name from sysindexes i join sysobjects o ON i.id = o.id join sysobjects pk ON i.name = pk.name AND pk.parent_obj = i.id AND pk.xtype = 'PK' join sysindexkeys ik on i.id = ik.id AND i.indid = ik.indid join syscolumns c ON ik.id = c.id AND ik.colid = c.colid where o.name = 'person'
-set @sql='alter table [person] drop constraint ' + @pkname
-exec(@sql);
+DECLARE @sql [nvarchar](MAX)
+SELECT @sql = N'ALTER TABLE [person] DROP CONSTRAINT ' + QUOTENAME([kc].[name]) FROM [sys].[key_constraints] AS [kc] WHERE [kc].[parent_object_id] = OBJECT_ID(N'[person]') AND [kc].[type] = 'PK'
+EXEC sp_executesql @sql;
