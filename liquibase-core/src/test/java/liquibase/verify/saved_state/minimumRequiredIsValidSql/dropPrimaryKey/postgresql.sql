@@ -1,3 +1,10 @@
 -- Database: postgresql
 -- Change Parameter: tableName=person
-create or replace function __liquibase_drop_pk(tableName text) returns void as $$ declare pkname text; sql text; begin pkname = c.conname from pg_class r, pg_constraint c where r.oid = c.conrelid and contype = 'p' and relname ilike tableName; sql = 'alter table ' || tableName || ' drop constraint ' || pkname; execute sql; end; $$ language plpgsql; select __liquibase_drop_pk('person'); drop function __liquibase_drop_pk(tableName text);;
+DO $$ DECLARE constraint_name varchar;
+BEGIN
+  SELECT tc.CONSTRAINT_NAME into strict constraint_name
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+    WHERE CONSTRAINT_TYPE = 'PRIMARY KEY'
+      AND TABLE_NAME = 'person' AND TABLE_SCHEMA = 'null';
+    EXECUTE 'alter table null.person drop constraint ' || constraint_name;
+END $$;;
