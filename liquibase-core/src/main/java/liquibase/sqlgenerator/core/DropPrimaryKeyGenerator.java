@@ -24,7 +24,8 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
-        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase
+            || database instanceof SybaseDatabase) {
             validationErrors.checkRequiredField("constraintName", dropPrimaryKeyStatement.getConstraintName());
         }
 
