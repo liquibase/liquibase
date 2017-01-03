@@ -57,8 +57,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
+                // Prepare a list of required parameters, plus a few extra for complicated cases.
+                TreeSet<String> requiredParams = new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet());
+                if (changeName.equalsIgnoreCase("dropColumn")) requiredParams.add("columnName");
+
                 // For every required parameter of the change, fetch an example value.
-                for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
+                for (String paramName : requiredParams) {
                     ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
                     Object paramValue = param.getExampleValue(database);
                     String serializedValue;
