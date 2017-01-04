@@ -1,0 +1,7 @@
+machine:
+  java:
+    version: openjdk6
+
+dependencies:
+ override:
+  - mvn install -DskipTests
