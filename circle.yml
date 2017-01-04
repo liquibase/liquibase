@@ -5,3 +5,4 @@ machine:
 dependencies:
  override:
   - mvn install -DskipTests
+  - sudo apt-get install -y rpm
