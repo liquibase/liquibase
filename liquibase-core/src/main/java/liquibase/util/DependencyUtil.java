@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import liquibase.logging.LogFactory;
+
 import java.util.*;
 
 public class DependencyUtil {
@@ -11,6 +13,7 @@ public class DependencyUtil {
         private NodeValueListener<T> listener;
         private List<GraphNode<T>> evaluatedNodes = new ArrayList<GraphNode<T>>();
 
+        private int recursiveSizeCheck = -1;
 
         public DependencyGraph(NodeValueListener<T> listener) {
             this.listener = listener;
@@ -78,7 +81,24 @@ public class DependencyUtil {
                     }
                 }
             }
-            if (nextNodesToDisplay != null) {
+            if (nextNodesToDisplay != null && nextNodesToDisplay.size() > 0) {
+                if (nextNodesToDisplay.size() == recursiveSizeCheck) {
+                    //Recursion is not making progress, heading to a stack overflow exception.
+                    //Probably some cycles in there somewhere, so pull out a node and re-try
+                    GraphNode nodeToRemove = null;
+                    int nodeToRemoveLinks = Integer.MAX_VALUE;
+                    for (GraphNode node : nextNodesToDisplay) {
+                        List links = node.getComingInNodes();
+                        if (links != null && links.size() < nodeToRemoveLinks) {
+                            nodeToRemove = node;
+                            nodeToRemoveLinks = links.size();
+                        }
+                    }
+                    LogFactory.getInstance().getLog().debug("Potential StackOverflowException. Pro-actively removing "+nodeToRemove.value+" with "+nodeToRemoveLinks+" incoming nodes");
+                    nextNodesToDisplay.remove(nodeToRemove);
+                }
+
+                recursiveSizeCheck = nextNodesToDisplay.size();
                 computeDependencies(nextNodesToDisplay);
             }
             // here the recursive call ends
