@@ -1,6 +1,6 @@
 machine:
   java:
-    version: openjdk6
+    version: openjdk7
 
 dependencies:
  override:
