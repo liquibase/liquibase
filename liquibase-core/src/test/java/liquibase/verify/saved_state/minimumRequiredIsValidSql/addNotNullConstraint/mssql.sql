@@ -2,4 +2,4 @@
 -- Change Parameter: columnDataType=int
 -- Change Parameter: columnName=id
 -- Change Parameter: tableName=person
-ALTER TABLE [person] ALTER COLUMN [id] INT NOT NULL;
+ALTER TABLE [person] ALTER COLUMN [id] [int] NOT NULL;
