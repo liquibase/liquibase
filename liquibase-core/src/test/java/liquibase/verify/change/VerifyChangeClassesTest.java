@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
 public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
     @Test
-    public void minimumRequiredIsValidSql() throws Exception {
+    public void compareGeneratedSqlWithExpectedSqlForMinimalChangesets() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
         for (String changeName : changeFactory.getDefinedChanges()) {
             if (changeName.equals("addDefaultValue")) {
