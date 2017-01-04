@@ -305,6 +305,9 @@ public class JdbcExecutor extends AbstractExecutor {
                 }
                 try {
                     stmt.execute(statement);
+
+                    // Loop through to force an exception if there is a RAISERROR.
+                    while(!((!stmt.getMoreResults()) && (stmt.getUpdateCount() == -1))) {}
                 } catch (Throwable e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
