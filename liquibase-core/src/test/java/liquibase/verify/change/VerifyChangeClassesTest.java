@@ -35,7 +35,8 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
             if (changeName.equals("addDefaultValue")) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
             }
-            if (changeName.equals("changeWithNestedTags") || changeName.equals("sampleChange") || changeName.equals("output") ){
+            if (changeName.equals("changeWithNestedTags") || changeName.equals("sampleChange")
+                || changeName.equals("output") || changeName.equals("tagDatabase") ){
                 continue; //not a real change
             }
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
