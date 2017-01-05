@@ -485,22 +485,50 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    /***
+     * Returns true if the String conforms to an ISO 8601 date, e.g. 2016-12-31
+     * @param isoDate
+     * @return
+     */
     protected boolean isDateOnly(final String isoDate) {
-        return isoDate.length() == "yyyy-MM-dd".length();
+        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}$");
     }
 
+    /***
+     * Returns true if the String conforms to an ISO 8601 date
+     * plus a time (hours, minutes, whole seconds and optionally fraction of a second) in UTC, e.g. 2016-12-31T18:43:59
+     * The "T" may be replaced by a space.
+     * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
+     * @param isoDate
+     * @return
+     */
     protected boolean isDateTime(final String isoDate) {
-        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
+        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$");
     }
-    
+
+    /***
+     * Returns true if the String conforms to an ISO 8601 date
+     * plus a timestamp (hours, minutes, seconds and at least one decimal fraction) in UTC,
+     * e.g. 2016-12-31T18:43:59.3 or 2016-12-31T18:43:59.345
+     * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
+     * The "T" may be replaced by a space.
+     * @param isoDate
+     * @return
+     */
     protected boolean isTimestamp(final String isoDate) {
-        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
+        return isoDate.matches("^\\d{4}\\-\\d{2}\\-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+$");
     }
 
+    /***
+     * Returns true if the String conforms to an ISO 8601 time (hours, minutes and whole seconds) in UTC,
+     * e.g. 18:43:59
+     * CAUTION: Does NOT recognize values with a timezone information (...[+-Z]...)
+     * @param isoDate
+     * @return
+     */
     protected boolean isTimeOnly(final String isoDate) {
-        return isoDate.length() == "hh:mm:ss".length();
+        return isoDate.matches("^\\d{2}:\\d{2}:\\d{2}$");
     }
-
 
     /**
      * Returns database-specific line comment string.
@@ -732,7 +760,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
 
     /**
-     * Drops all objects owned by the connected user.
+     * Drops all objects in a specific schema/catalog.
      */
     @Override
     public void dropDatabaseObjects(final CatalogAndSchema schemaToDrop) throws LiquibaseException {
@@ -763,7 +791,18 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
 	        final long changeSetStarted = System.currentTimeMillis();
-	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+            CompareControl.SchemaComparison[] scs = new CompareControl.SchemaComparison[] {
+                new CompareControl.SchemaComparison(
+                    schemaToDrop, schemaToDrop
+                )
+            };
+
+	        CompareControl cc = new CompareControl(scs, snapshot.getSnapshotControl().getTypesToInclude());
+	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
+                    new EmptyDatabaseSnapshot(this),
+                    snapshot,
+	                cc
+            );
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
 	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
