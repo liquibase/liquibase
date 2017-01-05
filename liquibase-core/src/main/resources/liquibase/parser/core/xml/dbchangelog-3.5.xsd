@@ -266,7 +266,7 @@
 
 	<!-- Attributes for changeSet -->
 	<xsd:attributeGroup name="changeSetAttributes">
-		<xsd:attribute name="id" type="xsd:string" use="required" />
+		<xsd:attribute name="id" type="idLength63" use="required" />
 		<xsd:attribute name="author" type="xsd:string" use="required" />
 		<xsd:attribute name="context" type="xsd:string" />
         <xsd:attribute name="labels" type="xsd:string" />
@@ -281,6 +281,12 @@
         <xsd:attribute name="created" type="xsd:string"/>
 		<xsd:attribute name="runOrder" type="xsd:string"/>
 	</xsd:attributeGroup>
+	
+	<xsd:simpleType name="idLength63">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="63" />
+		</xsd:restriction>
+	</xsd:simpleType>
 
 	<!-- Attributes for constraints -->
 	<xsd:attributeGroup name="constraintsAttributes">
