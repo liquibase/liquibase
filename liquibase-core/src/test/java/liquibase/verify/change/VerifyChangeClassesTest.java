@@ -61,6 +61,8 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 // Prepare a list of required parameters, plus a few extra for complicated cases.
                 TreeSet<String> requiredParams = new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet());
                 if (changeName.equalsIgnoreCase("dropColumn")) requiredParams.add("columnName");
+                if (changeName.equalsIgnoreCase("setColumnRemarks")) requiredParams.add("remarks");
+                if (changeName.equalsIgnoreCase("setTableRemarks")) requiredParams.add("remarks");
 
                 // For every required parameter of the change, fetch an example value.
                 for (String paramName : requiredParams) {
