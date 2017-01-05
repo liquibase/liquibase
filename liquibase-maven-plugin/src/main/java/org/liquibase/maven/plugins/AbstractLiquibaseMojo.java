@@ -477,7 +477,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             classpathElements.add(project.getBuild().getOutputDirectory());
             URL urls[] = new URL[classpathElements.size()];
             for (int i = 0; i < classpathElements.size(); ++i) {
-                urls[i] = new File((String) classpathElements.get(i)).toURL();
+                urls[i] = new File((String) classpathElements.get(i)).toURI().toURL();
             }
             return new URLClassLoader(urls, getMavenArtifactClassLoader());
         } catch (Exception e) {

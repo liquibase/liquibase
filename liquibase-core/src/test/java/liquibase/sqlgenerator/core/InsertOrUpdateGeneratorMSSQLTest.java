@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.sql.Sql;
-import static junit.framework.Assert.assertTrue;
-import junit.framework.Assert;
+import static org.junit.Assert.assertTrue;
+import org.junit.Assert;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;

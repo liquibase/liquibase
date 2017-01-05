@@ -47,7 +47,7 @@ import org.springframework.core.io.ResourceLoader;
  * @author ladislav.gazo
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
-	private Logger log = LogFactory.getLogger(MultiTenantSpringLiquibase.class.getName());
+	private Logger log = LogFactory.getInstance().getLog(MultiTenantSpringLiquibase.class.getName());
 	
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;

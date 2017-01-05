@@ -165,7 +165,7 @@ public class LiquibaseTest {
         Database database = mockDatabase;
         String testFunction = "GetMyTime";
 
-        new Liquibase("com/example/test.xml", mockResourceAccessor, database).setCurrentDateTimeFunction(testFunction);
+        new Liquibase("com/example/test.xml", mockResourceAccessor, database).getDatabase().setCurrentDateTimeFunction(testFunction);
         verify(database).setCurrentDateTimeFunction(testFunction);
     }
 

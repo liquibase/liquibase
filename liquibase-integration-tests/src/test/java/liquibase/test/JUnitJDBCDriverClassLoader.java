@@ -75,7 +75,7 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
                 });
 
                 for (File jar : driverJars) {
-                    addTo.add(jar.toURL());
+                    addTo.add(jar.toURI().toURL());
                 }
 
             }

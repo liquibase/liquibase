@@ -58,7 +58,7 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
     	String externalForm = path.toExternalForm();
         if (externalForm.startsWith("file:")) {
             try {
-                externalForm = new File(path.toURI()).getCanonicalFile().toURL().toExternalForm();
+                externalForm = new File(path.toURI()).getCanonicalFile().toURI().toURL().toExternalForm();
             } catch (Throwable e) {
                 //keep original version
             }

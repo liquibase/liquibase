@@ -89,8 +89,8 @@ public class TestContext {
             resourceAccessor = new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
                     //samples1.toURL(),
                     //samples2.toURL(),
-                    new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/target/classes").toURL(),
-                    new File(TestContext.getInstance().findCoreProjectRoot(), "/target/classes").toURL()
+                    new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/target/classes").toURI().toURL(),
+                    new File(TestContext.getInstance().findCoreProjectRoot(), "/target/classes").toURI().toURL()
             }));
         }
 
