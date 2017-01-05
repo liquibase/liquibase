@@ -60,9 +60,22 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 // Prepare a list of required parameters, plus a few extra for complicated cases.
                 TreeSet<String> requiredParams = new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet());
+                /* dropColumn allows either one column or a list of columns; we choose to test with a single column. */
                 if (changeName.equalsIgnoreCase("dropColumn")) requiredParams.add("columnName");
+                /* When testing table and column remarks, do not test with an empty remark. */
                 if (changeName.equalsIgnoreCase("setColumnRemarks")) requiredParams.add("remarks");
                 if (changeName.equalsIgnoreCase("setTableRemarks")) requiredParams.add("remarks");
+                /* ALTER SEQUENCE should change at least one property
+                 * hsqldb/h2 do not support incrementBy. */
+                if (changeName.equalsIgnoreCase("alterSequence")) {
+                    if (database.getShortName().equalsIgnoreCase("h2")) {
+                        requiredParams.add("ordered");
+                    } else if (database.getShortName().equalsIgnoreCase("hsqldb")) {
+                        requiredParams.add("minValue");
+                    } else {
+                        requiredParams.add("incrementBy");
+                    }
+                }
 
                 // For every required parameter of the change, fetch an example value.
                 for (String paramName : requiredParams) {
