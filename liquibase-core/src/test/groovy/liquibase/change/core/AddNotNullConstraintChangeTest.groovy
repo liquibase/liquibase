@@ -15,8 +15,9 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
         def change = new AddNotNullConstraintChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
+        change.setConstraintName("COL_NN");
 
         then:
-        change.getConfirmationMessage() == "Null constraint has been added to TABLE_NAME.COL_HERE"
+        change.getConfirmationMessage() == "NOT NULL constraint \"COL_NN\" has been added to TABLE_NAME.COL_HERE"
     }
 }

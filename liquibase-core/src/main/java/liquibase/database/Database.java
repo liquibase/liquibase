@@ -333,6 +333,8 @@ public interface Database extends PrioritizedService {
 
     boolean supportsPrimaryKeyNames();
 
+    boolean supportsNotNullConstraintNames();
+
     public String getSystemSchema();
 
     public void addReservedWords(Collection<String> words);

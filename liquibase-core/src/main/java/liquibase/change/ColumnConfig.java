@@ -5,6 +5,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.*;
@@ -95,6 +96,18 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
 
         if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
+            Table table = (Table) columnSnapshot.getRelation();
+            List<NotNullConstraint> notNullConstraints = table.getNotNullConstraints();
+            if (notNullConstraints != null) {
+                    for (NotNullConstraint constraint : notNullConstraints) {
+                            if (constraint.getColumnName().equals(getName())) {
+                                    constraints.setNullable(false);
+                                    constraints.setNotNullConstraintName(constraint.getName());
+                                    nonDefaultConstraints = true;
+                                }
+                        }
+                }
+
             if (columnSnapshot.isAutoIncrement()) {
                 setAutoIncrement(true);
                 setStartWith(columnSnapshot.getAutoIncrementInformation().getStartWith());
@@ -103,8 +116,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 setAutoIncrement(false);
             }
 
-
-            Table table = (Table) columnSnapshot.getRelation();
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
                 constraints.setPrimaryKey(true);
@@ -867,6 +878,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setNullable(constraintsNode.getChildValue(null, "nullable", Boolean.class));
+        constraints.setNotNullConstraintName(constraintsNode.getChildValue(null, "notNullConstraintName", String.class));
         constraints.setPrimaryKey(constraintsNode.getChildValue(null, "primaryKey", Boolean.class));
         constraints.setPrimaryKeyName(constraintsNode.getChildValue(null, "primaryKeyName", String.class));
         constraints.setPrimaryKeyTablespace(constraintsNode.getChildValue(null, "primaryKeyTablespace", String.class));

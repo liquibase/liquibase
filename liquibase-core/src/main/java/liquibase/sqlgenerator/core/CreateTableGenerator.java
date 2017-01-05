@@ -8,9 +8,7 @@ import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.*;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.*;
@@ -43,7 +41,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         List<Sql> additionalSql = new ArrayList<Sql>();
     	
         StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
+        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),
+            statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
         
         boolean isSinglePrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
@@ -56,6 +55,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         BigInteger mysqlTableOptionStartWith = null;
 
+        /* We have reached the point after "CREATE TABLE ... (" and will now iterate through the column list. */
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
@@ -141,21 +141,34 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 }
             }
 
-            if (statement.getNotNullColumns().contains(column)) {
-                buffer.append(" NOT NULL");
+            // Do we have a NOT NULL constraint for this column?
+            if (statement.getNotNullColumns().get(column) != null) {
+                if (! database.supportsNotNullConstraintNames()) {
+                    buffer.append(" NOT NULL");
+                } else {
+                    /* Determine if the NOT NULL constraint has a name. */
+                    NotNullConstraint nnConstraintForThisColumn = statement.getNotNullColumns().get(column);
+                    String nncName = StringUtils.trimToNull(nnConstraintForThisColumn.getName());
+                    if (nncName == null) {
+                        buffer.append(" NOT NULL");
+                    } else {
+                        buffer.append(" CONSTRAINT ");
+                        buffer.append(database.escapeConstraintName(nncName));
+                        buffer.append(" NOT NULL");
+                    } // do we have a NN constraint name?
+                } // does the DB support constraint names?
             } else {
                 if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().toLowerCase().contains("timestamp"))) {
                     buffer.append(" NULL");
-                }
-            }
+                } // Do we need to specify NULL explicitly?
+            } // Do we have a NOT NULL constraint for this column?
 
             if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
                 //buffer.append(" PRIMARY KEY");
             }
 
-            if(database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null){
+            if (database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null) {
                 buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
-
             }
 
             if (columnIterator.hasNext()) {
@@ -199,6 +212,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
+
                 buffer.append(",");
             }
         }

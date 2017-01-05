@@ -42,6 +42,10 @@ public class ConstraintsConfigTest extends Specification {
         constraint.isNullable() == null
     }
 
+    def setNotNullConstraintName_string() {
+        expect:
+        new ConstraintsConfig().setNotNullConstraintName("xyz").getNotNullConstraintName() == "xyz"
+    }
 
     def setDeleteCascade() {
         expect:

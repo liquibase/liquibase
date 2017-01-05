@@ -1,5 +1,6 @@
 package liquibase.structure.core;
 
+import liquibase.statement.NotNullConstraint;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class Table extends Relation {
         setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
         setAttribute("indexes", new ArrayList<Index>());
         setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
+        setAttribute("notNullConstraints", new ArrayList<UniqueConstraint>());
     }
 
     public Table(String catalogName, String schemaName, String tableName) {
@@ -39,6 +41,9 @@ public class Table extends Relation {
 
     public List<UniqueConstraint> getUniqueConstraints() {
         return getAttribute("uniqueConstraints", List.class);
+    }
+    public List<NotNullConstraint> getNotNullConstraints() {
+        return getAttribute("notNullConstraints", List.class);
     }
 
     @Override
