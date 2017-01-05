@@ -232,7 +232,7 @@ public class ServiceLocator {
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    logger.info("Can not use "+clazz+" as a Liquibase service because it does not have a no-argument constructor" );
+                    logger.debug("Can not use "+clazz+" as a Liquibase service because it does not have a no-argument constructor" );
                 } catch (NoClassDefFoundError e) {
                     String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage().replace("/", ".") + " is not in the classpath";
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
