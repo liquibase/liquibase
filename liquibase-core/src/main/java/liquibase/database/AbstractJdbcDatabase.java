@@ -1591,4 +1591,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public ValidationErrors validate() {
         return new ValidationErrors();
     }
+
+    @Override
+    public boolean supportsNotNullConstraintNames() {
+        return false;
+    }
 }

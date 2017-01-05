@@ -68,8 +68,8 @@ public class ChangeLogParameters {
             this.set("database.supportsSchemas", database.supportsSchemas());
             this.set("database.supportsSequences", database.supportsSequences());
             this.set("database.supportsTablespaces", database.supportsTablespaces());
+            this.set("database.supportsNotNullConstraintNames", database.supportsNotNullConstraintNames());
         }
-
 
         this.expressionExpander = new ExpressionExpander(this);
         this.currentDatabase = database;

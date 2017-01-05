@@ -96,7 +96,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 }
             }
 
-            if (statement.getNotNullColumns().contains(column)) {
+            if (statement.getNotNullColumns().get(column) != null) {
                 buffer.append(" NOT NULL");
             }
 

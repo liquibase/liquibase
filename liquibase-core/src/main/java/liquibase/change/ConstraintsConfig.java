@@ -13,6 +13,7 @@ import liquibase.util.StringUtils;
 public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean nullable;
+    private String notNullConstraintName;
     private Boolean primaryKey;
     private String primaryKeyName;
     private String primaryKeyTablespace;
@@ -54,6 +55,17 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    /**
+     * Returns the name to use for the NOT NULL constraint. Returns null if not specified
+     */
+    public String getNotNullConstraintName() {
+        return notNullConstraintName;
+    }
+
+    public ConstraintsConfig setNotNullConstraintName(String notNullConstraintName) {
+        this.notNullConstraintName = notNullConstraintName;
+        return this;
+    }
 
     /**
      * Returns true if the column should be part of the primary key. Returns null if unspecified

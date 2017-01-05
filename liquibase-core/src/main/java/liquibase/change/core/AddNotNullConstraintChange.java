@@ -11,6 +11,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -200,7 +201,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     @Override
     public String getConfirmationMessage() {
-        return "Null constraint has been added to " + getTableName() + "." + getColumnName();
+        return "NOT NULL constraint "
+                + (StringUtils.trimToNull(getConstraintName()) != null ? String.format("\"%s\" ", getConstraintName()) : "" )
+                 + "has been added to " + getTableName() + "." + getColumnName();
     }
 
     @Override

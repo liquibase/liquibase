@@ -494,4 +494,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
         return canAccessDbaRecycleBin;
     }
+
+    @Override
+    public boolean supportsNotNullConstraintNames() {
+        return true;
+    }
+
 }
