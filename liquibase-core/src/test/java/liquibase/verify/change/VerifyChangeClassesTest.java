@@ -4,8 +4,10 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeParameterMetaData;
+import liquibase.change.core.DropPrimaryKeyChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
@@ -18,6 +20,7 @@ import liquibase.verify.AbstractVerifyTest;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertFalse;
@@ -25,15 +28,15 @@ import static org.junit.Assert.assertTrue;
 
 public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
-    @Ignore
     @Test
-    public void minimumRequiredIsValidSql() throws Exception {
+    public void compareGeneratedSqlWithExpectedSqlForMinimalChangesets() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
         for (String changeName : changeFactory.getDefinedChanges()) {
             if (changeName.equals("addDefaultValue")) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
             }
-            if (changeName.equals("changeWithNestedTags") || changeName.equals("sampleChange")) {
+            if (changeName.equals("changeWithNestedTags") || changeName.equals("sampleChange")
+                || changeName.equals("output") || changeName.equals("tagDatabase") ){
                 continue; //not a real change
             }
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
@@ -55,7 +58,27 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
-                for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
+                // Prepare a list of required parameters, plus a few extra for complicated cases.
+                TreeSet<String> requiredParams = new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet());
+                /* dropColumn allows either one column or a list of columns; we choose to test with a single column. */
+                if (changeName.equalsIgnoreCase("dropColumn")) requiredParams.add("columnName");
+                /* When testing table and column remarks, do not test with an empty remark. */
+                if (changeName.equalsIgnoreCase("setColumnRemarks")) requiredParams.add("remarks");
+                if (changeName.equalsIgnoreCase("setTableRemarks")) requiredParams.add("remarks");
+                /* ALTER SEQUENCE should change at least one property
+                 * hsqldb/h2 do not support incrementBy. */
+                if (changeName.equalsIgnoreCase("alterSequence")) {
+                    if (database.getShortName().equalsIgnoreCase("h2")) {
+                        requiredParams.add("ordered");
+                    } else if (database.getShortName().equalsIgnoreCase("hsqldb")) {
+                        requiredParams.add("minValue");
+                    } else {
+                        requiredParams.add("incrementBy");
+                    }
+                }
+
+                // For every required parameter of the change, fetch an example value.
+                for (String paramName : requiredParams) {
                     ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
                     Object paramValue = param.getExampleValue(database);
                     String serializedValue;
@@ -67,7 +90,15 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 ValidationErrors errors = change.validate(database);
                 assertFalse("Validation errors for " + changeMetaData.getName() + " on " + database.getShortName() + ": " + errors.toString(), errors.hasErrors());
 
-                SqlStatement[] sqlStatements = change.generateStatements(database);
+                SqlStatement[] sqlStatements = {};
+                try {
+                    sqlStatements = change.generateStatements(database);
+                } catch (UnexpectedLiquibaseException ex) {
+                    if (ex.getCause() instanceof IOException) {
+                        // Do nothing. I/O exceptions at this point come from the example value "my/path/file.sql"
+                        // for the <sql> type change and can be safely ignored.
+                    }
+                }
                 for (SqlStatement statement : sqlStatements) {
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
                     if (sql == null) {
@@ -86,6 +117,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
         }
     }
 
+    /**
+     * For every combination of database (e.g. Oracle) and change (e.g. DropForeignKeyConstraint),
+     * construct a change object with some example values. For every required parameter, verify that
+     * removing it causes the change object to change its state to "hasErrors".
+     * @throws Exception
+     */
     @Test
     public void lessThanMinimumFails() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
