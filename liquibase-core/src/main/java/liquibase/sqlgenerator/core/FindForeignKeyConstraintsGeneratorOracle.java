@@ -49,7 +49,7 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         sb.append("AND BASE.CONSTRAINT_NAME = BCOLS.CONSTRAINT_NAME ");
         sb.append("AND FRGN.OWNER = FCOLS.OWNER ");
         sb.append("AND FRGN.CONSTRAINT_NAME = FCOLS.CONSTRAINT_NAME ");
-        sb.append("AND BASE.TABLE_NAME =  '").append(statement.getBaseTableName().toUpperCase()).append("' ");
+        sb.append("AND BASE.TABLE_NAME =  '").append(statement.getBaseTableName()).append("' ");
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
         sb.append("AND BASE.OWNER = '").append(baseTableSchema.getSchemaName()).append("'");
 
