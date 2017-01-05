@@ -49,7 +49,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
             return null;
         }
 
-        AddUniqueConstraintChange change = new AddUniqueConstraintChange();
+        AddUniqueConstraintChange change = createAddUniqueConstraintChange();
         change.setTableName(uc.getTable().getName());
         if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
             change.setTablespace(uc.getBackingIndex().getTablespace());
@@ -107,5 +107,9 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
         return returnList.toArray(new Change[returnList.size()]);
 
 
+    }
+
+    protected AddUniqueConstraintChange createAddUniqueConstraintChange() {
+        return new AddUniqueConstraintChange();
     }
 }
