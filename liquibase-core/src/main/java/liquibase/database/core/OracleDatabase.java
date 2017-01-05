@@ -241,27 +241,25 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
         if (isDateOnly(isoDate)) {
             StringBuffer val = new StringBuffer();
-            val.append("to_date(");
+            val.append("TO_DATE(");
             val.append(normalLiteral);
             val.append(", 'YYYY-MM-DD')");
             return val.toString();
         } else if (isTimeOnly(isoDate)) {
             StringBuffer val = new StringBuffer();
-            val.append("to_date(");
+            val.append("TO_DATE(");
             val.append(normalLiteral);
             val.append(", 'HH24:MI:SS')");
             return val.toString();
         } else if (isTimestamp(isoDate)) {
             StringBuffer val = new StringBuffer(26);
-            val.append("to_timestamp(");
+            val.append("TO_TIMESTAMP(");
             val.append(normalLiteral);
             val.append(", 'YYYY-MM-DD HH24:MI:SS.FF')");
             return val.toString();
         } else if (isDateTime(isoDate)) {
-            normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf('.')) + "'";
-
             StringBuffer val = new StringBuffer(26);
-            val.append("to_date(");
+            val.append("TO_DATE(");
             val.append(normalLiteral);
             val.append(", 'YYYY-MM-DD HH24:MI:SS')");
             return val.toString();

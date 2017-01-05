@@ -7,7 +7,7 @@
 
     <preConditions>
             <dbms type="postgresql"/>
-            <runningAs username="lbuser"/>
+            <runningAs username="${loginUser}"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">

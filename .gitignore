@@ -22,3 +22,4 @@ derby.log
 
 atlassian-ide-plugin.xml
 _issues
+/liquibase-integration-tests/liquibase

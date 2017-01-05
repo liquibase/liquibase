@@ -49,13 +49,14 @@ public class DatabaseTestContext {
     private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private ResourceAccessor resourceAccessor;
 
-    private DatabaseConnection openConnection(final String url) throws Exception {
+    private DatabaseConnection openConnection(final String url,
+        final String username, final String password) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
             if (connection == null) {
                 return null;
             } else if (connection.getUnderlyingConnection().isClosed()){
-                connectionsByUrl.put(url, openDatabaseConnection(url));
+                connectionsByUrl.put(url, openDatabaseConnection(url, username, password));
             }
             return connectionsByUrl.get(url);
         }
@@ -77,7 +78,7 @@ public class DatabaseTestContext {
             }
         }
 
-        DatabaseConnection connection = openDatabaseConnection(url);
+        DatabaseConnection connection = openDatabaseConnection(url, username,password);
         if (connection == null) {
             return null;
         }
@@ -142,10 +143,8 @@ public class DatabaseTestContext {
         return databaseConnection;
     }
 
-    public DatabaseConnection openDatabaseConnection(String url) throws Exception {
-        String username = getUsername(url);
-        String password = getPassword(url);
-
+    public DatabaseConnection openDatabaseConnection(String url,
+        String username, String password) throws Exception {
 
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
         final Driver driver;
@@ -178,19 +177,6 @@ public class DatabaseTestContext {
         return new JdbcConnection(connection);
     }
 
-    private String getUsername(String url) {
-        if (url.startsWith("jdbc:hsqldb")) {
-            return "sa";
-        }
-        return "lbuser";
-    }
-
-    private String getPassword(String url) {
-        if (url.startsWith("jdbc:hsqldb")) {
-            return "";
-        }
-        return "lbuser";
-    }
 
     public static DatabaseTestContext getInstance() {
         return instance;
@@ -246,7 +232,8 @@ public class DatabaseTestContext {
 //                if (url.indexOf("jtds") >= 0) {
 //                    continue;
 //                }
-                DatabaseConnection connection = openConnection(adaptTestURLWithConfiguredHost(url));
+                DatabaseConnection connection = openConnection(adaptTestURLWithConfiguredHost(url), url.getUsername(), url.getPassword());
+
                 if (connection != null) {
                     availableConnections.add(connection);
                 }
@@ -268,8 +255,8 @@ public class DatabaseTestContext {
         return url.getUrl().replaceAll("localhost", AbstractIntegrationTest.getDatabaseServerHostname(url.getDatabaseManager()));
     }
 
-    public DatabaseConnection getConnection(String url) throws Exception {
-        return openConnection(url);
+    public DatabaseConnection getConnection(String url, String username, String password) throws Exception {
+        return openConnection(url, username, password);
     }
 
     public String getTestUrl(Database database) throws Exception {

@@ -186,7 +186,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "changelog with preconditions can be parsed: preconditionsChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/preconditionsChangeLog.xml"
-        def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def params = new ChangeLogParameters()
+        params.set("loginUser", "testUser")
+        def changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
 
         then:
         changeLog.getLogicalFilePath() == path
@@ -505,7 +507,9 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
     def "tests for particular features and edge conditions part 3 testCasesChangeLog.xml"() throws Exception {
         when:
         def path = "liquibase/parser/core/xml/testCasesChangeLog.xml"
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
+        def params = new ChangeLogParameters()
+        params.set("loginUser", "sa")
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(path, params, new JUnitResourceAccessor());
 
 
         then: "complex preconditions are parsed"
