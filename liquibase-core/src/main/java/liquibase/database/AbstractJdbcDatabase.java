@@ -760,7 +760,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
 
     /**
-     * Drops all objects owned by the connected user.
+     * Drops all objects in a specific schema/catalog.
      */
     @Override
     public void dropDatabaseObjects(final CatalogAndSchema schemaToDrop) throws LiquibaseException {
@@ -791,7 +791,18 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
 	        final long changeSetStarted = System.currentTimeMillis();
-	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+            CompareControl.SchemaComparison[] scs = new CompareControl.SchemaComparison[] {
+                new CompareControl.SchemaComparison(
+                    schemaToDrop, schemaToDrop
+                )
+            };
+
+	        CompareControl cc = new CompareControl(scs, snapshot.getSnapshotControl().getTypesToInclude());
+	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
+                    new EmptyDatabaseSnapshot(this),
+                    snapshot,
+	                cc
+            );
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
 	        LogFactory.getInstance().getLog().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
