@@ -27,7 +27,8 @@ public class NotNullConstraint implements ColumnConstraint {
         return name;
     }
 
-    public void setName(String name) {
+    public NotNullConstraint setName(String name) {
         this.name = name;
+        return this;
     }
 }
