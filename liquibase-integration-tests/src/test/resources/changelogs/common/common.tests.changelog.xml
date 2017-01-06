@@ -4,7 +4,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <property name="table.name" value="paramter_table"/>
@@ -167,6 +167,24 @@
         <createIndex indexName="idx_compoundtest" tableName="compoundIndexTest">
             <column name="firstname"/>
             <column name="lastname"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="indexWithAscDescColumns" author="abuschka">
+        <createTable tableName="indexWithAscDescColumns">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="column1ForAsc" type="varchar(10)"/>
+            <column name="column1ForDesc" type="varchar(10)"/>
+            <column name="column2ForAsc" type="int"/>
+            <column name="column2ForDesc" type="int"/>
+        </createTable>
+        <createIndex indexName="idx_indexWithAscDescColumns" tableName="indexWithAscDescColumns">
+            <column name="column1ForAsc"/>
+            <column name="column1ForDesc" descending="true"/>
+            <column name="column2ForAsc"/>
+            <column name="column2ForDesc" descending="true"/>
         </createIndex>
     </changeSet>
 

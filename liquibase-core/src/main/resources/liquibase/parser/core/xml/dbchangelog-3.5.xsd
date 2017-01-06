@@ -326,15 +326,16 @@
 		<xsd:attribute name="startWith" type="longExp" />
 		<xsd:attribute name="incrementBy" type="longExp" />
 		<xsd:attribute name="remarks" type="xsd:string" />
-        <xsd:attribute name="encoding" type="xsd:string">
-            <xsd:annotation>
-                <xsd:appinfo>
-                    <xsd:documentation>
-                        Used with valueClobFile to specify file encoding explicitly.
-                    </xsd:documentation>
-                </xsd:appinfo>
-            </xsd:annotation>
-        </xsd:attribute>
+		<xsd:attribute name="encoding" type="xsd:string">
+				<xsd:annotation>
+						<xsd:appinfo>
+								<xsd:documentation>
+										Used with valueClobFile to specify file encoding explicitly.
+								</xsd:documentation>
+						</xsd:appinfo>
+				</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="descending" type="booleanExp"/>
 		<xsd:anyAttribute namespace="##other" processContents="lax"/>
 	</xsd:attributeGroup>
 
