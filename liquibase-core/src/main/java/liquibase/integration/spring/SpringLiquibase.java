@@ -254,6 +254,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      */
     private boolean ignoreClasspathPrefix = true;
 
+    private boolean validateOnly = false;
+
+
 	public SpringLiquibase() {
 		super();
 	}
@@ -266,6 +269,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.dropFirst = dropFirst;
 	}
 
+	public boolean isValidateOnly() {
+	    return validateOnly;
+	}
+
+	public void setValidateOnly(boolean validateOnly) {
+	    this.validateOnly = validateOnly;
+	}
+	
 	public void setShouldRun(boolean shouldRun) {
 		this.shouldRun = shouldRun;
 	}
@@ -384,8 +395,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		try {
 			c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
+            
+            if (validateOnly) {
+                if (liquibase.listUnrunChangeSets(new Contexts(contexts), new LabelExpression(getLabels()))
+                        .size() > 0) {
+                    throw new LiquibaseException("Unrun changes found in validate only mode");
+                }                
+            } else {
 			generateRollbackFile(liquibase);
 			performUpdate(liquibase);
+            }
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		} finally {
