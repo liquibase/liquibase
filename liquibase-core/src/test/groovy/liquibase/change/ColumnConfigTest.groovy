@@ -421,7 +421,7 @@ public class ColumnConfigTest extends Specification {
 
         def testValue = "value for ${field}"
         if (field in ["defaultValueDate", "valueDate"]) {
-            testValue = "2012-03-13 18:52:22.129"
+            testValue = "2012-03-13T18:52:22.12"
         } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement", "computed"]) {
             testValue = "true"
         } else if (field in ["startWith", "incrementBy"]) {

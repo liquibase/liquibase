@@ -6,13 +6,23 @@ import liquibase.change.core.AddColumnChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
 public class JsonChangeLogSerializerTest {
+
+    private String origTimeZone =  System.getProperty("user.timezone");
+
+    @Before
+    public void setTimeZoneToUTC() {
+        System.setProperty("user.timezone", "UTC");
+    }
 
     @Test
     public void serialize_changeSet() {
@@ -56,7 +66,7 @@ public class JsonChangeLogSerializerTest {
                 "            },\n" +
                 "            {\n" +
                 "              \"column\": {\n" +
-                "                \"defaultValueDate\": 1970-01-01T00:00:00Z,\n" +
+                "                \"defaultValueDate\": \"1970-01-01T00:00:00\",\n" +
                 "                \"name\": \"col2\"\n" +
                 "              }\n" +
                 "            },\n" +
@@ -72,5 +82,10 @@ public class JsonChangeLogSerializerTest {
                 "    \n" +
                 "  }\n" +
                 "}\n", new JsonChangeLogSerializer().serialize(changeSet, true));
+    }
+
+    @After
+    public void setTimeZoneBackToDefault() {
+        System.setProperty("user.timezone", origTimeZone);
     }
 }
