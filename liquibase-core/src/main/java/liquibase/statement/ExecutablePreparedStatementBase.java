@@ -131,7 +131,10 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             } else {
                 stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
             }
-		} else if (col.getValueBlobFile() != null) {
+		} else if(col.getValueComputed() != null) {
+        log.debug("value is databaseFunction = "+col.getValueComputed());
+		}
+		else if (col.getValueBlobFile() != null) {
         log.debug("value is blob = "+col.getValueBlobFile());
 			try {
 				LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());

@@ -35,7 +35,13 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	        }
 	        sql.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
 	        sql.append(", ");
-	        params.append("?, ");
+	        if (column.getValueComputed() == null)
+	        {
+	            params.append("?, ");
+	        } else
+	        {
+	            params.append(database.generateDatabaseFunctionValue(column.getValueComputed())).append(", ");
+	        }
 	        cols.add(column);
 	    }
 	    sql.deleteCharAt(sql.lastIndexOf(" "));
