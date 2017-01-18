@@ -5,7 +5,10 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -111,8 +114,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         boolean bulkQuery;
         String sql;
 
-        String cacheKey = "uniqueConstraints-"+example.getClass().getSimpleName()+"-"+example.getSchema().toCatalogAndSchema().customize(database).toString();
-        String queryCountKey = "uniqueConstraints-"+example.getClass().getSimpleName()+"-queryCount";
+        String cacheKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-" + example.getSchema().toCatalogAndSchema().customize(database).toString();
+        String queryCountKey = "uniqueConstraints-" + example.getClass().getSimpleName() + "-queryCount";
 
         Map<String, List<Map<String, ?>>> columnCache = (Map<String, List<Map<String, ?>>>) snapshot.getScratchData(cacheKey);
         Integer columnQueryCount = (Integer) snapshot.getScratchData(queryCountKey);
@@ -121,7 +124,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (columnCache == null) {
-            bulkQuery = (database instanceof OracleDatabase) && columnQueryCount > 3;
+            bulkQuery = (database instanceof OracleDatabase || database instanceof MSSQLDatabase) && columnQueryCount > 3;
             snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
 
             if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
@@ -168,11 +171,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                                     "INNER JOIN [sys].[columns] AS [c] " +
                                     "ON [c].[object_id] = [ic].[object_id] " +
                                     "AND [c].[column_id] = [ic].[column_id] " +
-                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                                    "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                                    "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                                    "ORDER BY " +
-                                    "[ic].[key_ordinal]";
+                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' ";
+                    if (!bulkQuery) {
+                        sql += "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' ";
+                    }
+                    sql += "ORDER BY " +
+                            "[ic].[key_ordinal]";
                 } else if (database.getDatabaseMajorVersion() >= 8) {
                     sql =
                             "SELECT " +
@@ -193,11 +198,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                                     "INNER JOIN [dbo].[syscolumns] AS [c] " +
                                     "ON [c].[id] = [ic].[id] " +
                                     "AND [c].[colid] = [ic].[colid] " +
-                                    "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                                    "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                                    "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                                    "ORDER BY " +
-                                    "[ic].[keyno]";
+                                    "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' ";
+                    if (!bulkQuery) {
+                        sql += "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' ";
+                    }
+                    sql += "ORDER BY " +
+                            "[ic].[keyno]";
                 } else {
                     sql =
                             "SELECT " +
@@ -206,11 +213,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                                     "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
                                     "INNER JOIN [INFORMATION_SCHEMA].[KEY_COLUMN_USAGE] AS [KCU] " +
                                     "ON [KCU].[CONSTRAINT_NAME] = [TC].[CONSTRAINT_NAME] " +
-                                    "WHERE [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                                    "AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                                    "AND [TC].[CONSTRAINT_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                                    "ORDER BY " +
-                                    "[KCU].[ORDINAL_POSITION]";
+                                    "WHERE [TC].[CONSTRAINT_SCHEMA] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' ";
+                    if (!bulkQuery) {
+                        sql += "AND [TC].[TABLE_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                "AND [TC].[CONSTRAINT_NAME] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' ";
+                    }
+                    sql += "ORDER BY " +
+                            "[KCU].[ORDINAL_POSITION]";
                 }
             } else if (database instanceof OracleDatabase) {
                 sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name " +
@@ -218,7 +227,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         "where " +
                         (bulkQuery ? "" : "ucc.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "' and ") +
                         "ucc.owner='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
-                        "and ucc.table_name not like 'BIN$%' "+
+                        "and ucc.table_name not like 'BIN$%' " +
                         "order by ucc.position";
             } else if (database instanceof DB2Database) {
                 if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
