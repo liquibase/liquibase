@@ -112,22 +112,17 @@ public class AddAutoIncrementChange extends AbstractChange {
             }
 
 
-            String schemaPrefix;
+            String schemaName;
             if (this.schemaName == null) {
-                schemaPrefix = database.getDefaultSchemaName();
+                schemaName = database.getDefaultSchemaName();
             } else {
-                schemaPrefix = this.schemaName;
-            }
-            if (schemaPrefix == null) {
-                schemaPrefix = "";
-            } else {
-                schemaPrefix = schemaPrefix+".";
+                schemaName = this.schemaName;
             }
 
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
                     new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction(schemaPrefix + sequenceName)),
+                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction(sequenceName, schemaName)),
             };
         }
 

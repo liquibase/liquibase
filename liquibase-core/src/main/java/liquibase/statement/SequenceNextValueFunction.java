@@ -8,11 +8,16 @@ public class SequenceNextValueFunction extends DatabaseFunction {
     private String sequenceSchemaName;
 
     public SequenceNextValueFunction() {
-        this("UNSET");
+        this("UNSET", null);
     }
 
     public SequenceNextValueFunction(String sequenceName) {
+        this(sequenceName, null);
+    }
+
+    public SequenceNextValueFunction(String sequenceName, String schemaName) {
         super(sequenceName);
+        this.sequenceSchemaName = schemaName;
     }
 
     public String getSequenceSchemaName() {
