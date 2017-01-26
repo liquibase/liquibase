@@ -681,7 +681,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     //From select object_definition(object_id('sp_tables'))
                     String sql = "select " +
                             "convert(sysname,db_name()) AS TABLE_QUALIFIER, " +
-                            "convert(sysname,schema_name(o.schema_id)) AS TABLE_OWNER, " +
+                            "convert(sysname,schema_name(o.schema_id)) AS TABLE_SCHEM, " +
                             "convert(sysname,o.name) AS TABLE_NAME, " +
                             "'TABLE' AS TABLE_TYPE, " +
                             "CAST(ep.value as varchar(max)) as REMARKS " +
