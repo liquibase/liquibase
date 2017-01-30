@@ -155,6 +155,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     sql =
                             "SELECT " +
                                     "[kc].[name] AS [CONSTRAINT_NAME], " +
+                                    "s.name AS constraint_container, "+
                                     "[c].[name] AS [COLUMN_NAME], " +
                                     "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
                                     "FROM [sys].[schemas] AS [s] " +
@@ -182,6 +183,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     sql =
                             "SELECT " +
                                     "[kc].[name] AS [CONSTRAINT_NAME], " +
+                                    "object_schema_name(id) AS constraint_container, "+
                                     "[c].[name] AS [COLUMN_NAME], " +
                                     "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
                                     "FROM [dbo].[sysusers] AS [s] " +
