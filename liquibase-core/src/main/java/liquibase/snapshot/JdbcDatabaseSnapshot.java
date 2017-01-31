@@ -691,9 +691,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "o.type in ('U') " +
                             "and has_perms_by_name(quotename(schema_name(o.schema_id)) + '.' + quotename(o.name), 'object', 'select') = 1 " +
                             "and charindex(substring(o.type,1,1),'U') <> 0 " +
-                            "and schema_name(o.schema_id)='"+ownerName+"'";
+                            "and schema_name(o.schema_id)='"+database.escapeStringForDatabase(ownerName)+"'";
                     if (tableName != null) {
-                        sql += "AND o.name='" + tableName + "' ";
+                        sql += " AND o.name='" + database.escapeStringForDatabase(tableName) + "' ";
                     }
                     sql += "order by 4, 1, 2, 3";
 
