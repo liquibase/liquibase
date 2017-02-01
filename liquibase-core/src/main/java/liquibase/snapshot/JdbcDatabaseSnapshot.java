@@ -174,12 +174,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 protected String getMSSQLSql(String jdbcSchemaName) {
                     //comes from select object_definition(object_id('sp_fkeys'))
                     return "select " +
-                            "convert(sysname,db_name()) AS PKTABLE_QUALIFIER, " +
-                            "convert(sysname,schema_name(o1.schema_id)) AS PKTABLE_OWNER, " +
+                            "convert(sysname,db_name()) AS PKTABLE_CAT, " +
+                            "convert(sysname,schema_name(o1.schema_id)) AS PKTABLE_SCHEM, " +
                             "convert(sysname,o1.name) AS PKTABLE_NAME, " +
                             "convert(sysname,c1.name) AS PKCOLUMN_NAME, " +
-                            "convert(sysname,db_name()) AS FKTABLE_QUALIFIER, " +
-                            "convert(sysname,schema_name(o2.schema_id)) AS FKTABLE_OWNER, " +
+                            "convert(sysname,db_name()) AS FKTABLE_CAT, " +
+                            "convert(sysname,schema_name(o2.schema_id)) AS FKTABLE_SCHEM, " +
                             "convert(sysname,o2.name) AS FKTABLE_NAME, " +
                             "convert(sysname,c2.name) AS FKCOLUMN_NAME, " +
                             "isnull(convert(smallint,k.constraint_column_id), convert(smallint,0)) AS KEY_SEQ, " +
