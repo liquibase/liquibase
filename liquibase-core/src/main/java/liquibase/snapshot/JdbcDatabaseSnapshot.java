@@ -1015,6 +1015,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "SELECT " +
                                         "[TC].[CONSTRAINT_NAME], " +
                                         "[TC].[TABLE_NAME], " +
+                                        "[TC].[CONSTRAINT_CATALOG] AS INDEX_CATALOG, "+
+                                        "[TC].[CONSTRAINT_SCHEMA] AS INDEX_SCHEMA, "+
                                         "[IDX].[TYPE_DESC], " +
                                         "[IDX].[name] AS INDEX_NAME " +
                                         "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
