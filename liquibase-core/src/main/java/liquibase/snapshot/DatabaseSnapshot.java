@@ -300,7 +300,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
-                if (object instanceof PrimaryKey && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
+                if ((object instanceof UniqueConstraint || object instanceof PrimaryKey || object instanceof ForeignKey) && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
                     object.setAttribute(field, null);
                 }
             } else if (fieldValue != newFieldValue) {
