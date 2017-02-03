@@ -20,9 +20,23 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
+    private static final Set<String> systemTablesAndViews;
+
+    static {
+    	systemTablesAndViews = new HashSet<String>();
+      systemTablesAndViews.add("SYSCHKCST");
+      systemTablesAndViews.add("SYSCST");
+      systemTablesAndViews.add("SYSCSTCOL");
+      systemTablesAndViews.add("SYSCSTDEP");
+      systemTablesAndViews.add("SYSKEYCST");
+      systemTablesAndViews.add("SYSREFCST");
+    }
+    
     private DataServerType dataServerType;
     
     public static enum DataServerType {
@@ -262,9 +276,10 @@ public class DB2Database extends AbstractJdbcDatabase {
             if (databaseConnection != null && databaseConnection instanceof JdbcConnection) {
                 try {
                     String databaseProductVersion = databaseConnection.getDatabaseProductVersion();
+                    String databaseProductName = databaseConnection.getDatabaseProductName();
                     if (databaseProductVersion.startsWith("SQL")) {
                         this.dataServerType = DataServerType.DB2LUW;
-                    } else if (databaseProductVersion.startsWith("QSQ")) {
+                    } else if (databaseProductVersion.startsWith("QSQ") || databaseProductName.startsWith("DB2 UDB for AS/400")) {
                         this.dataServerType = DataServerType.DB2I;
                     } else if (databaseProductVersion.startsWith("DSN")) {
                         this.dataServerType = DataServerType.DB2Z;
@@ -293,5 +308,10 @@ public class DB2Database extends AbstractJdbcDatabase {
             return true;
         }
         return super.isSystemObject(example);
+    }
+
+   	@Override
+    public Set<String> getSystemViews() {
+        return systemTablesAndViews;
     }
 }
