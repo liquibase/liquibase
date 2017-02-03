@@ -96,13 +96,8 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        if ((driverVersionMajor == 10 && driverVersionMinor >= 6) ||
-                driverVersionMajor >= 11)
-        {
-            return true;
-        } else {
-            return false;
-        }
+        return ((driverVersionMajor == 10 && driverVersionMinor >= 7) ||
+                driverVersionMajor >= 11);
     }
 
     @Override
