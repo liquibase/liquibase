@@ -1,7 +1,5 @@
 package liquibase.io
 
-import liquibase.util.StreamUtil
-import org.apache.log4j.Logger
 import spock.lang.Specification
 import spock.lang.Unroll
 
