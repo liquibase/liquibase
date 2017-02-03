@@ -229,7 +229,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     @Override
     public boolean supportsDropTableCascadeConstraints() {
         try {
-            return this.getDatabaseMajorVersion() >= 10;
+            return this.getDatabaseMajorVersion() > 10;
         } catch (DatabaseException e) {
             return true;
         }
