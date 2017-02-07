@@ -66,7 +66,7 @@ public class StringClauses {
         }
 
         while (generateOne) {
-            key = new BigInteger(50, random).toString(32).substring(0,6);
+            key = StringUtils.leftPad(new BigInteger(50, random).toString(32), 6).replace(" ", "0").substring(0,6);
             generateOne = clauses.containsKey(key);
         }
         return key;

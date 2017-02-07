@@ -296,6 +296,15 @@ public class StringUtils {
         return value + StringUtils.repeat(" ", length - value.length());
     }
 
+    public static String leftPad(String value, int length) {
+        value = StringUtils.trimToEmpty(value);
+        if (value.length() >= length) {
+            return value;
+        }
+
+        return StringUtils.repeat(" ", length - value.length()) + value;
+    }
+
     /**
      * Null-safe check if string is empty.
      *
