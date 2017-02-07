@@ -130,7 +130,7 @@ public class ObjectDifferences {
                     compareToValue = new BigDecimal(compareToValue.toString());
                 }
                 if (referenceValue instanceof Number && referenceValue instanceof Comparable) {
-                    return ((Comparable) referenceValue).compareTo(compareToValue) == 0;
+                    return compareToValue instanceof Number && ((Comparable) referenceValue).compareTo(compareToValue) == 0;
                 } else {
                     return referenceValue.equals(compareToValue);
                 }
