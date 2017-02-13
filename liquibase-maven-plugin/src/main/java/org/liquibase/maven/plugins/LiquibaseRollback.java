@@ -13,7 +13,8 @@ import liquibase.util.ISODateFormat;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * Invokes Liquibase rollbacks on a database.
+ * Invokes Liquibase rollbacks the database to the specified using
+ * pointing attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'
  * @author Peter Murray
  * @goal rollback
  */
