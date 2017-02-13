@@ -11,7 +11,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Qualifier Annontation
+ * Qualifier Annotation
  *
  *  @author Aaron Walker (http://github.com/aaronwalker)
  */

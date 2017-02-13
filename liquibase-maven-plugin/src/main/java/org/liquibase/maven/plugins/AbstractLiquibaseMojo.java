@@ -545,7 +545,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     /**
-     * Parses a properties file and sets the assocaited fields in the plugin.
+     * Parses a properties file and sets the associated fields in the plugin.
      *
      * @param propertiesInputStream The input stream which is the Liquibase properties that
      *                              needs to be parsed.

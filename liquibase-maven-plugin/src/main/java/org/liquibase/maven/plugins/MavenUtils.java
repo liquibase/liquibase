@@ -38,7 +38,7 @@ public class MavenUtils {
                                                    boolean verbose)
           throws MalformedURLException {
     if (verbose) {
-      log.info("Loading artfacts into URLClassLoader");
+      log.info("Loading artifacts into URLClassLoader");
     }
     Set<URI> uris = new HashSet<URI>();
     // Find project dependencies, including the transitive ones.
@@ -55,7 +55,7 @@ public class MavenUtils {
     if (includeArtifact) {
       // If the actual artifact can be resolved, then use that, otherwise use the build
       // directory as that should contain the files for this project that we will need to
-      // run against. It is possible that the build directy could be empty, but we cannot
+      // run against. It is possible that the build directly could be empty, but we cannot
       // directly include the source and resources as the resources may require filtering
       // to replace any placeholders in the resource files.
       Artifact a = project.getArtifact();
@@ -83,7 +83,7 @@ public class MavenUtils {
   /**
    * Adds the artifact file into the set of URLs so it can be used in a URLClassLoader.
    * @param urls The set to add the artifact file URL to.
-   * @param artifact The Artifiact to resolve the file for.
+   * @param artifact The Artifact to resolve the file for.
    * @throws MalformedURLException If there is a problem creating the URL for the file.
    */
   private static void addArtifact(Set<URI> urls,
