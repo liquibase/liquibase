@@ -74,15 +74,9 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	    PreparedStatement stmt = factory.create(sql);
 	
 	    try {
-	        // attach params
-	        int i = 1;  // index starts from 1
-	        for(ColumnConfig col : cols) {
-              log.debug("Applying column parameter = "+i+" for column "+col.getName());
-	            applyColumnParameter(stmt, i, col);
-	            i++;
-	        }
+	        attachParams(cols, stmt);
 	        // trigger execution
-	        stmt.execute();
+	        executePreparedStatement(stmt);
 	    } catch(SQLException e) {
 	        throw new DatabaseException(e);
 	    } finally {
@@ -91,6 +85,19 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
 	        JdbcUtils.closeStatement(stmt);
 	    }
+	}
+
+	protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
+		stmt.execute();
+	}
+
+	protected void attachParams(List<ColumnConfig> cols, PreparedStatement stmt) throws SQLException, DatabaseException {
+		int i = 1;  // index starts from 1
+		for(ColumnConfig col : cols) {
+		  log.debug("Applying column parameter = "+i+" for column "+col.getName());
+		    applyColumnParameter(stmt, i, col);
+		    i++;
+		}
 	}
 
 	protected abstract String generateSql(List<ColumnConfig> cols);

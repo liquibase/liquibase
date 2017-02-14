@@ -1,5 +1,11 @@
 package liquibase.change.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeStatus;
@@ -12,6 +18,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
@@ -20,21 +27,17 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+import liquibase.statement.BatchInsertExecutablePreparedStatement;
+import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertSetStatement;
-import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.BooleanParser;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.*;
 
 
 @DatabaseChange(name = "loadData",
@@ -346,7 +349,17 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             }
 
             if (anyPreparedStatements) {
-                return statements.toArray(new SqlStatement[statements.size()]);
+            	if (database instanceof OracleDatabase) {
+            		return new SqlStatement[] {
+            			new BatchInsertExecutablePreparedStatement(
+            					database, getCatalogName(), getSchemaName(), 
+            					getTableName(), columns, 
+            					getChangeSet(), getResourceAccessor(), 
+            					statements)
+            		};
+            	} else {
+            		return statements.toArray(new SqlStatement[statements.size()]);
+            	}
             } else {
                 InsertSetStatement statementSet = this.createStatementSet(getCatalogName(), getSchemaName(), getTableName());
                 for (SqlStatement stmt : statements) {
