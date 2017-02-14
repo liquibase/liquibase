@@ -4,11 +4,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
+import liquibase.structure.core.Column;
 
 public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<RemoveChangeSetRanStatusStatement> {
 
@@ -24,7 +24,9 @@ public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<Remo
         ChangeSet changeSet = statement.getChangeSet();
 
         return SqlGeneratorFactory.getInstance().generateSql(new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
+                .setWhere(database.escapeObjectName("ID", Column.class) + " = ? " +
+                        "AND " + database.escapeObjectName("AUTHOR", Column.class) + " = ? " +
+                        "AND " + database.escapeObjectName("FILENAME", Column.class) + " = ?")
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
                 , database);
     }
