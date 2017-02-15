@@ -52,7 +52,9 @@ public class FindForeignKeyConstraintsGeneratorDerby extends AbstractSqlGenerato
 		sb.append("JOIN sys.syskeys k ON co2.constraintid = k.constraintid ");
 		sb.append("JOIN sys.sysconglomerates cg2 ON k.conglomerateid = cg2.conglomerateid ");
 		sb.append("WHERE co.type = 'F' ");
-		sb.append("AND sc.schemaname = '").append(schema.getCatalogName()).append("' ");
+		if (schema.getCatalogName() != null) {
+		  sb.append("AND sc.schemaname = '").append(schema.getCatalogName()).append("' ");
+		}
 		sb.append("AND t.tablename = '").append(statement.getBaseTableName()).append("'");
 		return new Sql[] {
 				new UnparsedSql(sb.toString())
