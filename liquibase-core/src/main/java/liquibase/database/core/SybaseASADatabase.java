@@ -7,6 +7,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
@@ -256,5 +257,12 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	@Override
 	public String getJdbcCatalogName(CatalogAndSchema schema) {
 		return "";
+	}
+	
+	@Override
+	public String escapeIndexName(String catalogName, String schemaName, String indexName) {
+		// There is no way of specifying the index owner in the CREATE INDEX statement
+		// Indexes are always owned by the owner of the table or materialized view
+        return escapeObjectName(indexName, Index.class);
 	}
 }
