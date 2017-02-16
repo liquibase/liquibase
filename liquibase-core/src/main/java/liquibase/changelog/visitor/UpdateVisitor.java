@@ -51,6 +51,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
             execType = changeSet.execute(databaseChangeLog, execListener, this.database);
         } catch (MigrationFailedException e) {
             fireRunFailed(changeSet, databaseChangeLog, database, e);
+            this.database.markChangeSetExecStatus(changeSet, ExecType.FAILED);
             throw e;
         }
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
