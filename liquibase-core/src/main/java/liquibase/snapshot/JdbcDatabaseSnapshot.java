@@ -1033,8 +1033,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
                                 "from all_constraints uc " +
-                                "join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner " +
-                                "LEFT JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=ui.table_name " +
+                                "join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner and uc.table_name=ui.table_name " +
+                                "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=ui.table_name " +
                                 "where uc.constraint_type='U' " +
                                 "and uc.owner = '" + jdbcSchemaName + "'" +
                                 "AND d.object_name IS NULL ";
