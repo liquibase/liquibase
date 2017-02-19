@@ -494,7 +494,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
     
     protected boolean isTimestamp(final String isoDate) {
-        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
+        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.F".length();
     }
 
     protected boolean isTimeOnly(final String isoDate) {
@@ -763,7 +763,10 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
 	        final long changeSetStarted = System.currentTimeMillis();
-	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+            CompareControl compareControl = new CompareControl(
+                    new CompareControl.SchemaComparison[] { new CompareControl.SchemaComparison(schemaToDrop, CatalogAndSchema.DEFAULT) },
+                    snapshot.getSnapshotControl().getTypesToInclude());
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, compareControl);
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
 	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 

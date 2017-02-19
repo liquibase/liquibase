@@ -14,8 +14,8 @@
             You can add comments to changeSets.
             They can even be multiple lines if you would like.
             They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
-        </comment>        
-        <createTable tableName="person">
+        </comment>
+        <createTable tableName="person" schemaName="liquibase">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -30,28 +30,28 @@
     </changeSet>
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
-        <addColumn tableName="person">
+        <addColumn tableName="person" schemaName="liquibase">
             <column name="usernae" type="varchar(8)"/>
         </addColumn>
     </changeSet>
     <changeSet id="3" author="nvoxland">
         <comment>Fix misspelled "username" column</comment>
-        <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
+        <renameColumn tableName="person" schemaName="liquibase" oldColumnName="usernae" newColumnName="username"/>
     </changeSet>
     <changeSet id="5" author="nvoxland" context="test">
-        <insert tableName="person">
+        <insert tableName="person" schemaName="liquibase">
             <column name="id" value="1"/>
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="jdoe"/>
         </insert>
-        <insert tableName="person">
+        <insert tableName="person" schemaName="liquibase">
             <column name="id" value="2"/>
             <column name="firstname" value="Jane"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="janedoe"/>
         </insert>
-        <insert tableName="person">
+        <insert tableName="person" schemaName="liquibase">
             <column name="id" value="3"/>
             <column name="firstname" value="Bob"/>
             <column name="lastname" value="Johnson"/>
@@ -60,7 +60,7 @@
     </changeSet>
     <changeSet id="6" author="nvoxland">
         <comment>Don't keep username in the person table</comment>
-        <dropColumn tableName="person" columnName="username"/>
+        <dropColumn tableName="person" schemaName="liquibase" columnName="username"/>
     </changeSet>
     <changeSet id="7" author="nvoxland">
         <createTable tableName="employee">
@@ -100,6 +100,7 @@
         <renameTable oldTableName="employee" newTableName="company"/>
     </changeSet>
     <changeSet id="10" author="nvoxland">
+        <sql>GRANT REFERENCES ON liquibase.person TO public</sql>
         <createTable tableName="testtable">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -120,13 +121,13 @@
         <createIndex indexName="idx_company_name" tableName="company">
             <column name="name"/>
         </createIndex>
-        <createIndex indexName="idx_person_lastname" tableName="person">
+        <createIndex indexName="idx_person_lastname" schemaName="liquibase" tableName="person">
             <column name="lastname"/>
         </createIndex>
     </changeSet>
 
     <changeSet id="13" author="nvoxland">
-        <dropIndex indexName="idx_person_lastname" tableName="person"/>
+        <dropIndex indexName="idx_person_lastname" schemaName="liquibase" tableName="person"/>
     </changeSet>
 
     <changeSet id="14" author="nvoxland">
@@ -167,6 +168,7 @@
 
     <changeSet id="21" author="nvoxland">
         <mergeColumns
+                schemaName="liquibase"
                 tableName="person"
                 column1Name="firstname"
                 joinString=" "
@@ -177,7 +179,7 @@
 
     <changeSet id="22" author="nvoxland">
         <createView viewName="personView">
-            select id, fullname from person
+            select id, fullname from liquibase.person
         </createView>
     </changeSet>
 
@@ -186,13 +188,15 @@
     </changeSet>
 
     <changeSet id="24" author="nvoxland">
-        <addColumn tableName="person">
+        <addColumn schemaName="liquibase" tableName="person">
             <column name="employer_id" type="int"/>
         </addColumn>
     </changeSet>
 
     <changeSet id="25" author="nvoxland">
+        <sql>GRANT REFERENCES ON lbuser.company TO public</sql>
         <addForeignKeyConstraint
+                baseTableSchemaName="liquibase"
                 baseTableName="person" baseColumnNames="employer_id"
                 constraintName="fk_person_employer"
                 referencedTableName="company" referencedColumnNames="id"
@@ -201,7 +205,7 @@
     </changeSet>
 
     <changeSet id="26" author="nvoxland">
-        <dropForeignKeyConstraint baseTableName="person" constraintName="fk_person_employer"/>
+        <dropForeignKeyConstraint baseTableSchemaName="liquibase" baseTableName="person" constraintName="fk_person_employer"/>
     </changeSet>
 
     <changeSet id="27" author="nvoxland">
@@ -294,13 +298,14 @@
 
     <changeSet id="56" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
+            <param name="schemaName" value="liquibase" />
             <param name="tableName" value="person"/>
             <param name="columnName" value="employer_id"/>
             <param name="newValue" value="3"/>
         </customChange>
     </changeSet>
     <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" schemaName="liquibase" tableName="person" columnName="employer_id" newValue="4"/>
     </changeSet>
     <changeSet id="58" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>

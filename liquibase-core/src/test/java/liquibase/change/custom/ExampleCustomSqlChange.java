@@ -12,13 +12,22 @@ import liquibase.structure.core.Table;
 
 public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {
 
+    private String schemaName;
     private String tableName;
     private String columnName;
     private String newValue;
 
-    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
+    @SuppressWarnings("unused")
     private ResourceAccessor resourceAccessor;
 
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
 
     public String getTableName() {
         return tableName;
@@ -47,7 +56,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new RawSqlStatement("update "+database.escapeObjectName(tableName, Table.class)
+                new RawSqlStatement("update "+database.escapeObjectName(null, schemaName, tableName, Table.class)
                         +" set "+database.escapeObjectName(columnName, Column.class)+" = "+newValue)
         };
     }
@@ -55,7 +64,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return new SqlStatement[]{
-                new RawSqlStatement("update "+database.correctObjectName(tableName, Table.class)
+                new RawSqlStatement("update "+database.escapeObjectName(null, schemaName, tableName, Table.class)
                         +" set "+database.escapeObjectName(columnName, Column.class)+" = null")
         };
     }

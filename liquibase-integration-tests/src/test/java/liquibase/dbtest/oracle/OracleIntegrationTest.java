@@ -1,16 +1,23 @@
 package liquibase.dbtest.oracle;
 
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.Liquibase;
-import liquibase.exception.ValidationFailedException;
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.sql.Statement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import org.junit.Test;
+
+import liquibase.CatalogAndSchema;
+import liquibase.Liquibase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.ValidationFailedException;
 
 /**
  * create tablespace liquibase2 datafile 'C:\ORACLEXE\ORADATA\XE\LIQUIBASE2.DBF' SIZE 5M autoextend on next 5M
@@ -25,6 +32,26 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         this.indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
         this.viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
     }
+
+    @Override
+    protected CatalogAndSchema[] getSchemas() {
+        List<CatalogAndSchema> schemas = new ArrayList<CatalogAndSchema>(Arrays.asList(super.getSchemas()));
+        schemas.addAll(Arrays.asList(
+                new CatalogAndSchema(null, "LBCAT2"),
+                new CatalogAndSchema(null, "LIQUIBASE"),
+                new CatalogAndSchema(null, "LIQUIBASEB")
+        ));
+        return schemas.toArray(new CatalogAndSchema[0]);
+    }
+
+    protected CatalogAndSchema[] getSchemasToDrop() throws DatabaseException {
+        List<CatalogAndSchema> schemasToDrop = new ArrayList<CatalogAndSchema>(Arrays.asList(super.getSchemasToDrop()));
+        schemasToDrop.addAll(Arrays.asList(this.getSchemas()));
+        return schemasToDrop.toArray(new CatalogAndSchema[0]);
+    }
+
+
+
 
     @Override
     @Test
@@ -56,7 +83,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
         String owner = indexOwner.getString("owner");
 
-        assertEquals("LIQUIBASEB",owner);
+        assertEquals("LBCAT2",owner);
 
         // check that the automatically rollback now works too
         try {
@@ -95,7 +122,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
         String owner = indexOwner.getString("owner");
 
-        assertEquals("LIQUIBASEB",owner);
+        assertEquals("LBCAT2",owner);
 
         // check that the automatically rollback now works too
         try {
