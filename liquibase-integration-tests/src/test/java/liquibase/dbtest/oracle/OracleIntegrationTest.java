@@ -17,6 +17,7 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 
 /**
@@ -156,6 +157,15 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
             e.printDescriptiveError(System.out);
             throw e;
         }
+    }
+
+    @Test
+    public void batchInsert() throws LiquibaseException, Exception {
+        if (this.getDatabase() == null) {
+            return;
+        }
+
+        createLiquibase("changelogs/oracle/complete/batchInsert.changelog.xml").update(this.contexts);
     }
 
     @Override

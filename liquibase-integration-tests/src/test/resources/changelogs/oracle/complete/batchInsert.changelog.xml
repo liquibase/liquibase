@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"
+	logicalFilePath="changelogs/oracle/complete/indexOnSchema.xml">
+	<preConditions>
+		<dbms type="oracle" />
+	</preConditions>
+
+	<changeSet id="1" author="jesser">
+		<createTable tableName="products">
+			<column name="id" type="int" />
+			<column name="name" type="varchar(50)" />
+			<column name="price" type="number(8,2)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="2" author="jesser">
+		<loadData tableName="products" file="changelogs/oracle/complete/batchInsert.csv">
+			<column name="id" />
+			<column name="name" />
+			<column name="price" />
+		</loadData>
+	</changeSet>
+</databaseChangeLog>

@@ -42,7 +42,7 @@ public class BatchInsertExecutablePreparedStatement extends InsertExecutablePrep
 	protected void attachParams(List<ColumnConfig> cols, PreparedStatement stmt)
 			throws SQLException, DatabaseException {
 		for (InsertExecutablePreparedStatement insertStatement : insertStatements) {
-			attachParams(insertStatement.getColumns(), stmt);
+			super.attachParams(insertStatement.getColumns(), stmt);
 			stmt.addBatch();
 		}
 	}

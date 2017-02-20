@@ -325,7 +325,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     columns.add(valueConfig);
                 }
 
-                if (needsPreparedStatement) {
+                if (needsPreparedStatement || database instanceof OracleDatabase) {
                     anyPreparedStatements = true;
 
                     statements.add(new InsertExecutablePreparedStatement(database, getCatalogName(), getSchemaName(), getTableName(), columns,
