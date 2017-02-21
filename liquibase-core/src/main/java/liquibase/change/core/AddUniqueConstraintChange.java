@@ -253,6 +253,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
+        inverse.setUniqueColumns(getColumnNames());
 
         return new Change[]{
                 inverse,
