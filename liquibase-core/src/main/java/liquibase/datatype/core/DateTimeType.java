@@ -32,6 +32,9 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
+            if (getRawDefinition().toUpperCase().contains("TIME ZONE")) {
+                return new DatabaseDataType(getRawDefinition().replaceFirst("\\(11\\)$", ""));
+            }
             return new DatabaseDataType("TIMESTAMP", getParameters());
         }
 
