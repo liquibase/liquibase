@@ -2,8 +2,10 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.Change;
 import liquibase.change.core.CreateViewChange;
+import liquibase.change.core.SetTableRemarksChange;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
@@ -14,6 +16,10 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ChangedViewChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -80,7 +86,27 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
             change.setFullDefinition(view.getContainsFullDefinition());
         }
 
-        return new Change[]{change};
+        List<Change> changes = new ArrayList<Change>();
+        changes.add(change);
+
+        Difference changedRemarks = differences.getDifference("remarks");
+        if (changedRemarks != null) {
+            SetTableRemarksChange setRemarksChange = new SetTableRemarksChange();
+            if (control.getIncludeCatalog()) {
+                setRemarksChange.setCatalogName(view.getSchema().getCatalogName());
+            }
+            if (control.getIncludeSchema()) {
+                setRemarksChange.setSchemaName(view.getSchema().getName());
+            }
+
+            setRemarksChange.setTableName(view.getName());
+            setRemarksChange.setRemarks(view.getRemarks());
+
+            changes.add(setRemarksChange);
+        }
+
+
+        return changes.toArray(new Change[changes.size()]);
     }
 
     protected CreateViewChange createViewChange() {

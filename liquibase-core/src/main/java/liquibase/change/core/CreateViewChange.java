@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -11,9 +12,11 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
+import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.structure.core.View;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -41,6 +44,7 @@ public class CreateViewChange extends AbstractChange {
 	private String path;
 	private Boolean relativeToChangelogFile;
 	private String encoding = null;
+	private String remarks;
 
 	@DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
@@ -118,6 +122,14 @@ public class CreateViewChange extends AbstractChange {
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
 	}
 
 	@Override
@@ -231,6 +243,13 @@ public class CreateViewChange extends AbstractChange {
 		} else {
 			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, replaceIfExists)
                     .setFullDefinition(fullDefinition));
+		}
+
+		if (database instanceof OracleDatabase && StringUtils.trimToNull(remarks) != null) {
+			SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, viewName, remarks);
+			if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+				statements.add(remarksStatement);
+			}
 		}
 
 		return statements.toArray(new SqlStatement[statements.size()]);

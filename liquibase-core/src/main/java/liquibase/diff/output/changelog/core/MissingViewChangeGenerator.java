@@ -47,6 +47,9 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
         if (control.getIncludeSchema()) {
             change.setSchemaName(view.getSchema().getName());
         }
+        if (view.getRemarks() != null) {
+            change.setRemarks(view.getRemarks());
+        }
         String selectQuery = view.getDefinition();
         boolean fullDefinitionOverridden = false;
         if (selectQuery == null) {
