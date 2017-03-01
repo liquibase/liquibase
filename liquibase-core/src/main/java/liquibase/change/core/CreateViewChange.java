@@ -1,8 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -11,7 +15,13 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +38,11 @@ public class CreateViewChange extends AbstractChange {
 	private Boolean replaceIfExists;
     private Boolean fullDefinition;
 
+	private String path;
+	private Boolean relativeToChangelogFile;
+	private String encoding = null;
 
-    @DatabaseChangeProperty(since = "3.0")
+	@DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }
@@ -82,7 +95,106 @@ public class CreateViewChange extends AbstractChange {
         this.fullDefinition = fullDefinition;
     }
 
-    @Override
+	@DatabaseChangeProperty(description = "Path to file containing view definition", since = "3.6")
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public Boolean getRelativeToChangelogFile() {
+		return relativeToChangelogFile;
+	}
+
+	public void setRelativeToChangelogFile(Boolean relativeToChangelogFile) {
+		this.relativeToChangelogFile = relativeToChangelogFile;
+	}
+
+	public String getEncoding() {
+		return encoding;
+	}
+
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+	@Override
+	public ValidationErrors validate(Database database) {
+		ValidationErrors validate = super.validate(database);
+		if (!validate.hasErrors()) {
+			if (StringUtils.trimToNull(getSelectQuery()) != null && StringUtils.trimToNull(getPath()) != null) {
+				validate.addError("Cannot specify both 'path' and a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+			}
+			if (StringUtils.trimToNull(getSelectQuery()) == null && StringUtils.trimToNull(getPath()) == null) {
+				validate.addError("Cannot specify either 'path' or a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+			}
+
+		}
+		return validate;
+	}
+
+	protected InputStream openSqlStream() throws IOException {
+		if (path == null) {
+			return null;
+		}
+
+		try {
+			return StreamUtil.openStream(getPath(), getRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+		} catch (IOException e) {
+			throw new IOException("<" + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " path=" + path + "> -Unable to read file", e);
+		}
+	}
+
+	/**
+	 * Calculates the checksum based on the contained SQL.
+	 *
+	 * @see liquibase.change.AbstractChange#generateCheckSum()
+	 */
+	@Override
+	public CheckSum generateCheckSum() {
+		if (this.path == null) {
+			return super.generateCheckSum();
+		}
+
+		InputStream stream = null;
+		try {
+			stream = openSqlStream();
+		} catch (IOException e) {
+			throw new UnexpectedLiquibaseException(e);
+		}
+
+		try {
+			String selectQuery = this.selectQuery;
+			if (stream == null && selectQuery == null) {
+				selectQuery = "";
+			}
+
+			String encoding = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+			if (selectQuery != null) {
+				try {
+					stream = new ByteArrayInputStream(selectQuery.getBytes(encoding));
+				} catch (UnsupportedEncodingException e) {
+					throw new AssertionError(encoding+" is not supported by the JVM, this should not happen according to the JavaDoc of the Charset class");
+				}
+			}
+
+			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
+
+			return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException ignore) {
+				}
+			}
+		}
+
+	}
+
+	@Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -96,12 +208,28 @@ public class CreateViewChange extends AbstractChange {
             fullDefinition = this.fullDefinition;
         }
 
+		String selectQuery;
+		String path = getPath();
+		if (path == null) {
+			selectQuery = StringUtils.trimToNull(getSelectQuery());
+		} else {
+			try {
+				InputStream stream = openSqlStream();
+				if (stream == null) {
+					throw new IOException("File does not exist: " + path);
+				}
+				selectQuery = StreamUtil.getStreamContents(stream, encoding);
+			} catch (IOException e) {
+				throw new UnexpectedLiquibaseException(e);
+			}
+		}
+
 		if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
 			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
-			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), false)
+			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, false)
                     .setFullDefinition(fullDefinition));
 		} else {
-			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists)
+			statements.add(createViewStatement(getCatalogName(), getSchemaName(), getViewName(), selectQuery, replaceIfExists)
                     .setFullDefinition(fullDefinition));
 		}
 

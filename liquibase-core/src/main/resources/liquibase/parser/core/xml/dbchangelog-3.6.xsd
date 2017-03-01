@@ -925,6 +925,9 @@
 					<xsd:attribute name="viewName" type="xsd:string" use="required" />
 					<xsd:attribute name="replaceIfExists" type="booleanExp" />
                     <xsd:attribute name="fullDefinition" type="booleanExp" />
+					<xsd:attribute name="path" type="xsd:string" />
+					<xsd:attribute name="encoding" type="xsd:string" />
+					<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
 					<xsd:anyAttribute namespace="##other" processContents="lax" />
 				</xsd:extension>
 			</xsd:simpleContent>
