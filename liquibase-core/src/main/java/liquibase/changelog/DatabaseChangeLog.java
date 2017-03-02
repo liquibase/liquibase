@@ -317,7 +317,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             path = path.replace('\\', '/');
             ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
             try {
-                include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor, includeContexts);
+                include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor, includeContexts, true);
             } catch (LiquibaseException e) {
                 throw new SetupException(e);
             }
@@ -442,14 +442,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             for (String path : resources) {
-                include(path, false, resourceAccessor, includeContexts);
+                include(path, false, resourceAccessor, includeContexts, false);
             }
         } catch (Exception e) {
             throw new SetupException(e);
         }
     }
 
-    public boolean include(String fileName, boolean isRelativePath, ResourceAccessor resourceAccessor, ContextExpression includeContexts) throws LiquibaseException {
+    public boolean include(String fileName, boolean isRelativePath, ResourceAccessor resourceAccessor, ContextExpression includeContexts, boolean logEveryUnknownFileFormat) throws LiquibaseException {
 
         if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
             return false;
@@ -488,7 +488,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
         } catch (UnknownChangelogFormatException e) {
-            if (StringUtils.trimToEmpty(fileName).matches("\\.\\w+$")) {
+            // This matches only an extension, but filename can be a full path, too. Is it right?
+            boolean matchesFileExtension = StringUtils.trimToEmpty(fileName).matches("\\.\\w+$");
+            if (matchesFileExtension || logEveryUnknownFileFormat) {
                 LogFactory.getInstance().getLog().warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             }
             return false;
