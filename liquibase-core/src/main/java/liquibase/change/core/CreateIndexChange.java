@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
@@ -221,5 +222,20 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
         }
         return value;
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.addAll(super.validate(database));
+
+        if (columns != null) {
+            for (ColumnConfig columnConfig : columns) {
+                if (columnConfig.getName() == null) {
+                    validationErrors.addError("column 'name' is required for all columns in an index");
+                }
+            }
+        }
+        return validationErrors;
     }
 }
