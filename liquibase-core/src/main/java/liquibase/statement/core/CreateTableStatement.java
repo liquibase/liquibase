@@ -15,6 +15,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
     private Map<String, LiquibaseDataType> columnTypes = new HashMap<String, LiquibaseDataType>();
     private Map<String, Object> defaultValues = new HashMap<String, Object>();
+    private Map<String, String> defaultValueConstraintNames = new HashMap<String, String>();
     private Map<String, String> columnRemarks = new HashMap<String, String>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
@@ -123,11 +124,19 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return addColumn(columnName,columnType,defaultValue,null,constraints);
 
     }
+
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String remarks, ColumnConstraint... constraints) {
+        return addColumn(columnName, columnType, null, defaultValue, remarks, constraints);
+    }
+
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, String defaultValueConstraintName, Object defaultValue, String remarks, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
             defaultValues.put(columnName, defaultValue);
+        }
+        if (defaultValueConstraintName != null) {
+            defaultValueConstraintNames.put(columnName, defaultValueConstraintName);
         }
         if(remarks != null) {
             this.columnRemarks.put(columnName, remarks);
@@ -170,6 +179,10 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return defaultValues.get(column);
     }
 
+    public String getDefaultValueConstraintName(String column) {
+        return defaultValueConstraintNames.get(column);
+    }
+
     public String getColumnRemarks(String column) {
         return columnRemarks.get(column);
     }
@@ -204,6 +217,10 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public Map<String, Object> getDefaultValues() {
         return defaultValues;
+    }
+
+    public Map<String, String> getDefaultValueConstraintNames() {
+        return defaultValueConstraintNames;
     }
 
 	public void setSchemaName(String schemaName) {

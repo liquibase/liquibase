@@ -21,6 +21,7 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String columnName;
     private String columnType;
     private Object defaultValue;
+    private String defaultValueConstraintName;
     private String remarks;
     private String addAfterColumn;
     private String addBeforeColumn;
@@ -179,4 +180,12 @@ public class AddColumnStatement extends AbstractSqlStatement {
 	public void setAddAtPosition(Integer addAtPosition) {
 		this.addAtPosition = addAtPosition;
 	}
+
+    public String getDefaultValueConstraintName() {
+        return defaultValueConstraintName;
+    }
+
+    public void setDefaultValueConstraintName(String defaultValueConstraintName) {
+        this.defaultValueConstraintName = defaultValueConstraintName;
+    }
 }

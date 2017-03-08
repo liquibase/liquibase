@@ -5,13 +5,19 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
@@ -179,8 +185,25 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
 
+                //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
+                List<Index> stillToAdd = new ArrayList<Index>();
                 for (Index exampleIndex : foundIndexes.values()) {
-                    table.getIndexes().add(exampleIndex);
+                    if (exampleIndex.getClustered() != null && exampleIndex.getClustered()) {
+                        table.getIndexes().add(exampleIndex);
+                    } else {
+                        stillToAdd.add(exampleIndex);
+                    }
+                }
+                for (Index exampleIndex : stillToAdd) {
+                    boolean alreadyAddedSimilar = false;
+                    for (Index index : table.getIndexes()) {
+                        if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index, exampleIndex, null, database)) {
+                            alreadyAddedSimilar = true;
+                        }
+                    }
+                    if (!alreadyAddedSimilar) {
+                        table.getIndexes().add(exampleIndex);
+                    }
                 }
 
             } catch (Exception e) {
@@ -257,6 +280,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (nonUnique == null) {
                     nonUnique = true;
                 }
+
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
                 /*
@@ -300,18 +324,44 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         returnIndex.setClustered(false);
                     }
 
+                    if (database instanceof MSSQLDatabase) {
+                        Boolean recompute = (Boolean) row.get("NO_RECOMPUTE");
+                        if (recompute != null) {
+                            recompute = !recompute;
+                        }
+
+                        returnIndex.setAttribute("padIndex", row.get("IS_PADDED"));
+                        returnIndex.setAttribute("fillFactor", row.get("FILL_FACTOR"));
+                        returnIndex.setAttribute("ignoreDuplicateKeys", row.get("IGNORE_DUP_KEY"));
+                        returnIndex.setAttribute("recomputeStatistics", recompute);
+                        returnIndex.setAttribute("incrementalStatistics", row.get("IS_INCREMENTAL"));
+                        returnIndex.setAttribute("allowRowLocks", row.get("ALLOW_ROW_LOCKS"));
+                        returnIndex.setAttribute("allowPageLocks", row.get("ALLOW_PAGE_LOCKS"));
+                    }
+
                     foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
-                for (int i = returnIndex.getColumns().size(); i < position; i++) {
-                    returnIndex.getColumns().add(null);
-                }
-                if (definition == null) {
-                    String ascOrDesc = row.getString("ASC_OR_DESC");
-                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                    returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                if (database instanceof MSSQLDatabase && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
+                    List<String> includedColumns = returnIndex.getAttribute("includedColumns", List.class);
+                    if (includedColumns == null) {
+                        includedColumns = new ArrayList<String>();
+                        returnIndex.setAttribute("includedColumns", includedColumns);
+                    }
+                    includedColumns.add(columnName);
                 } else {
-                    returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                    if (position != 0) { //if really a column, position is 1-based.
+                        for (int i = returnIndex.getColumns().size(); i < position; i++) {
+                            returnIndex.getColumns().add(null);
+                        }
+                        if (definition == null) {
+                            String ascOrDesc = row.getString("ASC_OR_DESC");
+                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                        } else {
+                            returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
@@ -331,18 +381,31 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
             return index;
         } else {
+            //prefer clustered version of the index
+            List<Index> nonClusteredIndexes = new ArrayList<Index>();
             for (Index index : foundIndexes.values()) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, snapshot.getSchemaComparisons(), database)) {
+                    boolean actuallyMatches = false;
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
-                            return index;
+                            actuallyMatches = true;
                         }
                     } else {
                         if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
-                            return index;
+                            actuallyMatches = true;
+                        }
+                    }
+                    if (actuallyMatches) {
+                        if (index.getClustered() != null && index.getClustered()) {
+                            return finalizeIndex(schema, tableName, index, snapshot);
+                        } else {
+                            nonClusteredIndexes.add(index);
                         }
                     }
                 }
+            }
+            if (nonClusteredIndexes.size() > 0) {
+                return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot);
             }
             return null;
         }
@@ -374,6 +437,18 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //        }
 //        snapshot.removeDatabaseObjects(schema, indexesToRemove.toArray(new Index[indexesToRemove.size()]));
+    }
+
+    protected Index finalizeIndex(Schema schema, String tableName, Index index, DatabaseSnapshot snapshot) {
+        if (index.isUnique() == null || !index.isUnique()) {
+            List<Column> columns = index.getColumns();
+            PrimaryKey tablePK = new PrimaryKey(null, schema.getCatalogName(), schema.getName(), tableName, columns.toArray(new Column[index.getColumns().size()]));
+            if (snapshot.get(tablePK) != null) { //actually is unique since it's the PK
+                index.setUnique(true);
+            }
+        }
+
+        return index;
     }
 
     //METHOD FROM SQLIteDatabaseSnapshotGenerator

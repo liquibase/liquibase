@@ -52,6 +52,10 @@ public class Contexts {
     public boolean add(String context) {
         return this.contexts.add(context.toLowerCase());
     }
+    
+    public boolean remove(String context) {
+      return this.contexts.remove(context.toLowerCase());
+    }
 
     @Override
     public String toString() {

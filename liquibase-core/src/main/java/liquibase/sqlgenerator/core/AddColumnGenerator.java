@@ -230,7 +230,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
                 clause += " " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
             } else {
                 if (database instanceof MSSQLDatabase) {
-                    clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
+                    String constraintName = statement.getDefaultValueConstraintName();
+                    if (constraintName == null) {
+                        constraintName = ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
+                    }
+                    clause += " CONSTRAINT " + constraintName;
                 }
                 if (defaultValue instanceof DatabaseFunction) {
                     clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);

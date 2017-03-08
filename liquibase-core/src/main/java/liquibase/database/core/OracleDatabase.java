@@ -331,6 +331,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
                 return true;
+            } else if (example.getName().startsWith("USLOG$")) { //for update materialized view
+                return true;
             }
         }
 
@@ -412,7 +414,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             userDefinedTypes = new HashSet<String>();
             if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
                 try {
-                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                    try {
+                        userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
+                    } catch (DatabaseException e) { //fall back to USER_TYPES if the user cannot see ALL_TYPES
+                        userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                    }
                 } catch (DatabaseException e) {
                     //ignore error
                 }

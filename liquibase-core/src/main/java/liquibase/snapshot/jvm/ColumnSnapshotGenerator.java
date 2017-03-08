@@ -66,36 +66,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
 
-            // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
-            if (column != null && database instanceof MSSQLDatabase && ((!((MSSQLDatabase) database).isAzureDb() && database.getDatabaseMajorVersion() >= 8) || database.getDatabaseMajorVersion() >= 12)) {
-                String sql;
-                if (database.getDatabaseMajorVersion() >= 9) {
-                    // SQL Server 2005 or later
-                    // https://technet.microsoft.com/en-us/library/ms177541.aspx
-                    sql =
-                            "SELECT CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS] " +
-                                    "FROM [sys].[extended_properties] AS [ep] " +
-                                    "WHERE [ep].[class] = 1 " +
-                                    "AND [ep].[major_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
-                                    "AND [ep].[minor_id] = COLUMNPROPERTY([ep].[major_id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
-                                    "AND [ep].[name] = 'MS_Description'";
-                } else {
-                    // SQL Server 2000
-                    // https://technet.microsoft.com/en-us/library/aa224810%28v=sql.80%29.aspx
-                    sql =
-                            "SELECT CAST([p].[value] AS [ntext]) AS [REMARKS] " +
-                                    "FROM [dbo].[sysproperties] AS [p] " +
-                                    "WHERE [p].[id] = OBJECT_ID(N'" + database.escapeStringForDatabase(database.escapeTableName(schema.getCatalogName(), schema.getName(), relation.getName())) + "') " +
-                                    "AND [p].[smallid] = COLUMNPROPERTY([p].[id], N'" + database.escapeStringForDatabase(column.getName()) + "', 'ColumnId') " +
-                                    "AND [p].[type] = 4 " +
-                                    "AND [p].[name] = 'MS_Description'";
-                }
-
-                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
-                if (remarks != null && remarks.size() > 0) {
-                    column.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
-                }
-            }
             return column;
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -276,7 +246,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());
         }
         column.setDefaultValue(defaultValue);
-
+        column.setDefaultValueConstraintName(columnMetadataResultSet.getString("COLUMN_DEF_NAME"));
 
         return column;
     }
@@ -429,7 +399,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (defaultValue != null && defaultValue instanceof String) {
                 if (defaultValue.equals("(NULL)")) {
-                    columnMetadataResultSet.set("COLUMN_DEF", null);
+                    columnMetadataResultSet.set("COLUMN_DEF", new DatabaseFunction("null"));
                 }
             }
         }

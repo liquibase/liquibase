@@ -77,6 +77,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             } else {
                 statement.addColumn(column.getName(),
                         columnType,
+                        column.getDefaultValueConstraintName(),
                         defaultValue,
                         column.getRemarks());
             }

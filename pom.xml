@@ -278,6 +278,7 @@
 
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.5</version>
                     <configuration>
                         <encoding>UTF-8</encoding>
                     </configuration>
@@ -295,6 +296,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.4.1</version>
                     <executions>
                         <execution>
                             <id>enforce-java</id>

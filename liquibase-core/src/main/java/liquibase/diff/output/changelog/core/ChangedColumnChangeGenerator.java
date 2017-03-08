@@ -245,6 +245,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 } else {
                     change.setDefaultValue(value.toString());
                 }
+                change.setDefaultValueConstraintName(column.getDefaultValueConstraintName());
 
 
                 changes.add(change);

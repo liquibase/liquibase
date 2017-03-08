@@ -10,6 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
 import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
@@ -105,12 +106,12 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     }
 
     public void addConfiguredXml(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(new XMLChangeLogSerializer());
+        changeLogOutputFile.setChangeLogSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("xml"));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
     public void addConfiguredYaml(ChangeLogOutputFile changeLogOutputFile) {
-        changeLogOutputFile.setChangeLogSerializer(new YamlChangeLogSerializer());
+        changeLogOutputFile.setChangeLogSerializer(ChangeLogSerializerFactory.getInstance().getSerializer("yaml"));
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 

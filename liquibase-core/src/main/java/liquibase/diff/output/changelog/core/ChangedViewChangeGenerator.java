@@ -40,7 +40,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, final Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) changedObject;
 
-        CreateViewChange change = new CreateViewChange();
+        CreateViewChange change = createViewChange();
         change.setViewName(view.getName());
         change.setReplaceIfExists(true);
         if (control.getIncludeCatalog()) {
@@ -82,4 +82,9 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
 
         return new Change[]{change};
     }
+
+    protected CreateViewChange createViewChange() {
+        return new CreateViewChange();
+    }
+
 }
