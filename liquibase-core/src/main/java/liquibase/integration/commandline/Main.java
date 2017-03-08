@@ -190,11 +190,11 @@ public class Main {
             main.doMigration();
 
             if ("update".equals(main.command)) {
-                System.err.println("Liquibase Update Successful");
+                System.out.println("Liquibase Update Successful");
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
-                System.err.println("Liquibase Rollback Successful");
+                System.out.println("Liquibase Rollback Successful");
             } else if (!main.command.endsWith("SQL")) {
-                System.err.println("Liquibase '" + main.command + "' Successful");
+                System.out.println("Liquibase '" + main.command + "' Successful");
             }
         } catch (Throwable e) {
             String message = e.getMessage();
@@ -1064,11 +1064,11 @@ public class Main {
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.forceReleaseLock();
-                System.err.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                System.out.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
-                System.err.println("Successfully tagged " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                System.out.println("Successfully tagged " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("tagExists".equalsIgnoreCase(command)) {
                 String tag = commandParams.iterator().next();
@@ -1084,7 +1084,7 @@ public class Main {
                 command.setDatabase(liquibase.getDatabase());
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
 
-                System.err.println(command.execute().print());
+                System.out.println(command.execute().print());
                 return;
             } else if ("status".equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
