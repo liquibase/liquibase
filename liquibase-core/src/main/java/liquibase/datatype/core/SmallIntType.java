@@ -45,6 +45,10 @@ public class SmallIntType extends LiquibaseDataType {
 		return new DatabaseDataType("SMALLINT");
 	    }
         }
+	if ( database instanceof SybaseDatabase )
+	{
+		return new DatabaseDataType("SMALLINT");
+	}
         return super.toDatabaseDataType(database);
     }
 

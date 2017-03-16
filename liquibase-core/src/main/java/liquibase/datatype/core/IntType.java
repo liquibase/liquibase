@@ -49,6 +49,10 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof SQLiteDatabase) {
         	return new DatabaseDataType("INTEGER");
         }
+        if( database instanceof SybaseDatabase )
+        {
+        	return new DatabaseDataType("INT");
+        }
         return super.toDatabaseDataType(database);
 
         //sqllite
