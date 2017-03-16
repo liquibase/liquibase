@@ -249,7 +249,58 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         for (String d : definitionRows) {
         	definition.append(d);
         }
-        return definition.toString();
+        /*CODE START Application Hosting by Juan Carlos Escamilla Mera*/
+        /*delete the words "CREATE VIEW [name_view] as"*/
+        String defUpper=definition.toString().toUpperCase();
+        int findPos=0;
+		if( defUpper.indexOf(" AS ") != -1 )
+		{
+			if( findPos != 0 && findPos > defUpper.indexOf(" AS "))
+			{
+				findPos=defUpper.indexOf(" AS ")+3;
+			}
+			else if ( findPos == 0 )
+			{
+				findPos=defUpper.indexOf(" AS ")+3;
+			}
+		}
+		if( defUpper.indexOf(" AS\n") != -1 )
+		{
+			if( findPos != 0 && findPos > defUpper.indexOf(" AS\n"))
+			{
+				findPos=defUpper.indexOf(" AS\n")+3;
+			}
+			else if ( findPos == 0 )
+			{
+				findPos=defUpper.indexOf(" AS\n")+3;
+			}
+		}
+		if( defUpper.indexOf("\nAS ") != -1 )
+		{
+			if( findPos != 0 && findPos > defUpper.indexOf("\nAS "))
+			{
+				findPos=defUpper.indexOf("\nAS ")+3;
+			}
+			else if ( findPos == 0 )
+			{
+				findPos=defUpper.indexOf("\nAS ")+3;
+			}
+		}
+		if( defUpper.indexOf("\nAS\n") != -1 )
+		{
+			if( findPos != 0 && findPos > defUpper.indexOf("\nAS\n"))
+			{
+				findPos=defUpper.indexOf("\nAS\n")+3;
+			}
+			else if ( findPos == 0 )
+			{
+				findPos=defUpper.indexOf("\nAS\n")+3;
+			}
+		}
+		String definitionView=definition.toString().substring(findPos, definition.toString().length());
+        /*CODE END APH*/
+        //return definition.toString();
+		return definitionView;
 	}
 	
 	/** 
