@@ -25,7 +25,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-        Database database = snapshot.getDatabase();
+    	Database database = snapshot.getDatabase();
         String objectName = example.getName();
         Schema schema = example.getSchema();
 
@@ -40,7 +40,6 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 return null;
             }
-
             if (table != null && database instanceof MSSQLDatabase) {
                 String schemaName;
                 Schema tableSchema = table.getSchema();
@@ -64,6 +63,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     sql = "SELECT CAST(value as varchar) as REMARKS FROM dbo.sysproperties WHERE name='MS_Description' AND id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "') AND smallid = 0";
                 }
+                
 
                 List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
 
@@ -71,8 +71,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
                 }
             }
-
-
+            
             return table;
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -81,7 +80,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Table.class)) {
+    	if (!snapshot.getSnapshotControl().shouldInclude(Table.class)) {
             return;
         }
 
@@ -96,7 +95,6 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 for (CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
                     Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
-
                     schema.addDatabaseObject(tableExample);
                 }
             } catch (SQLException e) {
@@ -108,7 +106,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
-        String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
+    	String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
         String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
         String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));

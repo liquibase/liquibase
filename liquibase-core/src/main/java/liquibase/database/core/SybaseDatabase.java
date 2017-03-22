@@ -353,6 +353,10 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         if (objectName.contains("(")) { //probably a function
             return objectName;
         }
+        if(objectName.startsWith("sybf"))
+        {
+        	return null;
+        }
         return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
     }
 }

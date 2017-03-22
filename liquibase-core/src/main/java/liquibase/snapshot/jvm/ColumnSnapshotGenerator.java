@@ -60,9 +60,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
 
                 if (columnMetadataRs.size() > 0) {
-                    CachedRow data = columnMetadataRs.get(0);
-                    column = readColumn(data, relation, database);
-                    setAutoIncrementDetails(column, database, snapshot);
+                    if( database instanceof SybaseDatabase )
+                    {
+                    	CachedRow data = columnMetadataRs.get(0);
+                    	if( !data.getString("COLUMN_NAME").startsWith("sybfi") )
+                    	{
+                    		column = readColumn(data, relation, database);
+                            setAutoIncrementDetails(column, database, snapshot);
+                    	}
+                    }
+                    else
+                    {
+                    	CachedRow data = columnMetadataRs.get(0);
+                        column = readColumn(data, relation, database);
+                        setAutoIncrementDetails(column, database, snapshot);
+                    }
                 }
             }
 
@@ -74,7 +86,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
+    	if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
         if (foundObject instanceof Relation) {
@@ -104,7 +116,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected void setAutoIncrementDetails(Column column, Database database, DatabaseSnapshot snapshot) {
-        if (column.getAutoIncrementInformation() != null && database instanceof MSSQLDatabase && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+    	if (column.getAutoIncrementInformation() != null && database instanceof MSSQLDatabase && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
             Map<String, Column.AutoIncrementInformation> autoIncrementColumns = (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
                 autoIncrementColumns = new HashMap<String, Column.AutoIncrementInformation>();
@@ -136,7 +148,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Column readColumn(CachedRow columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
-        String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
+    	String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
         String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
@@ -247,12 +259,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         column.setDefaultValue(defaultValue);
         column.setDefaultValueConstraintName(columnMetadataResultSet.getString("COLUMN_DEF_NAME"));
-
         return column;
     }
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
-
         if (database instanceof OracleDatabase) {
             String dataType = columnMetadataResultSet.getString("DATA_TYPE_NAME");
             dataType = dataType.replace("VARCHAR2", "VARCHAR");
@@ -394,7 +404,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
-        if (database instanceof MSSQLDatabase) {
+    	if (database instanceof MSSQLDatabase) {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
             if (defaultValue != null && defaultValue instanceof String) {
