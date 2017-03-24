@@ -97,6 +97,13 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
                     schema.addDatabaseObject(tableExample);
                 }
+                for ( DatabaseObject uno: schema.getDatabaseObjects(Table.class) )
+                {
+                	Table obj = (Table) uno;
+                	System.out.println(obj.getName());
+                	System.out.println(obj.getColumns().size());
+                }
+                System.out.println(schema.getDatabaseObjects(Table.class).size());
             } catch (SQLException e) {
                 throw new DatabaseException(e);
             }

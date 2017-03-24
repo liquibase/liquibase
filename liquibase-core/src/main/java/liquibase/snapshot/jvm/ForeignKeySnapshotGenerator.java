@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
@@ -205,7 +206,13 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 throw new DatabaseException("Unknown constraint type: " + jdbcType);
             }
-        } else {
+        }
+        /*If the database used is Sybase only omit the tags onUpdate and onDelete*/ 
+        else if( database instanceof SybaseDatabase )
+        {
+        	return null;
+        }
+        else {
             if (jdbcType == DatabaseMetaData.importedKeyCascade) {
                 return ForeignKeyConstraintType.importedKeyCascade;
             } else if (jdbcType == DatabaseMetaData.importedKeyNoAction) {

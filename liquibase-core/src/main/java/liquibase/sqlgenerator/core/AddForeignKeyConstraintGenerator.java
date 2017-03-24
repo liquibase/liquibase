@@ -66,7 +66,6 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 			    //TODO don't know if correct
 		    } else if ( database instanceof SybaseDatabase ) {
 		    	//TODO don't know if correct
-		    	System.out.println("*************");
 		    }
 		    else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());

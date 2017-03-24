@@ -347,7 +347,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null) {
+    	if (objectName == null) {
             return null;
         }
         if (objectName.contains("(")) { //probably a function
