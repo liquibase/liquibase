@@ -122,11 +122,11 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {
-        return getAttribute("objects", Map.class);
+    	return getAttribute("objects", Map.class);
     }
 
     public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
-        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
+    	Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
         if (databaseObjects == null) {
             return new ArrayList<DatabaseObjectType>();
         }
@@ -138,12 +138,12 @@ public class Schema extends AbstractDatabaseObject {
             return;
         }
         Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
+        //String obkNul="es nulo";
         if (objects == null) {
             objects = new HashSet<DatabaseObject>();
             this.getObjects().put(databaseObject.getClass(), objects);
         }
         objects.add(databaseObject);
-
     }
 
     @Override

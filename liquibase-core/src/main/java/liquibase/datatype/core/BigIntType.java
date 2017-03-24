@@ -49,6 +49,10 @@ public class BigIntType extends LiquibaseDataType {
                 return new DatabaseDataType("BIGSERIAL");
             }
         }
+        if( database instanceof SybaseDatabase )
+        {
+        	return new DatabaseDataType("BIGINT");
+        }
         return super.toDatabaseDataType(database);
     }
 
