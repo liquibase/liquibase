@@ -30,6 +30,10 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
         this.className = className;
     }
 
+    public void setClass(String className) {
+        this.className = className;
+    }
+
     public ClassLoader getClassLoader() {
         return classLoader;
     }
