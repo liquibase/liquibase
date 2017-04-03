@@ -175,7 +175,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } catch (UnexpectedLiquibaseException e) {
             if (object instanceof ChangeSet && e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
-                throw new UnexpectedLiquibaseException(e.getMessage() + " in changeSet " + ((ChangeSet) object).toString(false));
+                throw new UnexpectedLiquibaseException(e.getMessage() + " in changeSet " + ((ChangeSet) object).toString(false)+". To resolve, remove the invalid character on the database and try again");
             }
             throw e;
         }
@@ -222,7 +222,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     node.setTextContent(checkString(value.toString()));
                 } catch (UnexpectedLiquibaseException e) {
                     if (e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
-                        throw new UnexpectedLiquibaseException(e.getMessage() + " in text of " + node.getTagName());
+                        throw new UnexpectedLiquibaseException(e.getMessage() + " in text of " + node.getTagName()+". To resolve, remove the invalid character on the database and try again");
                     }
                 }
             } else {
@@ -231,7 +231,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     node.setAttribute(attributeName, checkString(value.toString()));
                 } catch (UnexpectedLiquibaseException e) {
                     if (e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
-                        throw new UnexpectedLiquibaseException(e.getMessage() + " on " + node.getTagName()+"."+attributeName);
+                        throw new UnexpectedLiquibaseException(e.getMessage() + " on " + node.getTagName()+"."+attributeName+". To resolve, remove the invalid character on the database and try again");
                     }
                 }
             }
