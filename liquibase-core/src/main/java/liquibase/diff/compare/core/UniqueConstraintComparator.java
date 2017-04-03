@@ -8,6 +8,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
@@ -33,7 +34,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Table table = ((UniqueConstraint) databaseObject).getTable();
+        Relation table = ((UniqueConstraint) databaseObject).getTable();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, chain.getSchemaComparisons(), accordingTo)));
         }

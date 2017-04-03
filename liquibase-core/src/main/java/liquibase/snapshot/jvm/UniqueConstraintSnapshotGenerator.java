@@ -35,7 +35,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
-        Table table = exampleConstraint.getTable();
+        Relation table = exampleConstraint.getTable();
 
         List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
 
@@ -107,7 +107,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database, DatabaseSnapshot snapshot) throws DatabaseException {
-        Table table = example.getTable();
+        Relation table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
 

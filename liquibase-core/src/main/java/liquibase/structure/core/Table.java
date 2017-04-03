@@ -12,8 +12,6 @@ public class Table extends Relation {
 
     public Table() {
         setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
-        setAttribute("indexes", new ArrayList<Index>());
-        setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
     }
 
     public Table(String catalogName, String schemaName, String tableName) {
@@ -31,14 +29,6 @@ public class Table extends Relation {
 
     public List<ForeignKey> getOutgoingForeignKeys() {
         return getAttribute("outgoingForeignKeys", List.class);
-    }
-
-    public List<Index> getIndexes() {
-        return getAttribute("indexes", List.class);
-    }
-
-    public List<UniqueConstraint> getUniqueConstraints() {
-        return getAttribute("uniqueConstraints", List.class);
     }
 
     @Override
