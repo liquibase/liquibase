@@ -141,6 +141,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (foundObject instanceof Table  || foundObject instanceof View) {
+            if (foundObject instanceof View && !addToViews(snapshot.getDatabase())) {
+                return;
+            }
+
             Relation relation = (Relation) foundObject;
             Database database = snapshot.getDatabase();
             Schema schema;
@@ -313,7 +317,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
-                    returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    Relation relation = new Table();
+                    if ("V".equals(row.getString("INTERNAL_OBJECT_TYPE"))) {
+                        relation = new View();
+                    }
+                    returnIndex.setTable(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
 
