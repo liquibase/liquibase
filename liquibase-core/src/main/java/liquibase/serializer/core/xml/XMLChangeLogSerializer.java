@@ -175,7 +175,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } catch (UnexpectedLiquibaseException e) {
             if (object instanceof ChangeSet && e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
-                throw new UnexpectedLiquibaseException(e.getMessage() + " in changeSet " + ((ChangeSet) object).toString(false)+". To resolve, remove the invalid character on the database and try again");
+                throw new UnexpectedLiquibaseException(e.getMessage() + " in changeSet " + ((ChangeSet) object).toString(false) + ". To resolve, remove the invalid character on the database and try again");
             }
             throw e;
         }
@@ -222,7 +222,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     node.setTextContent(checkString(value.toString()));
                 } catch (UnexpectedLiquibaseException e) {
                     if (e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
-                        throw new UnexpectedLiquibaseException(e.getMessage() + " in text of " + node.getTagName()+". To resolve, remove the invalid character on the database and try again");
+                        throw new UnexpectedLiquibaseException(e.getMessage() + " in text of " + node.getTagName() + ". To resolve, remove the invalid character on the database and try again");
                     }
                 }
             } else {
@@ -231,7 +231,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     node.setAttribute(attributeName, checkString(value.toString()));
                 } catch (UnexpectedLiquibaseException e) {
                     if (e.getMessage().startsWith(INVALID_STRING_ENCODING_MESSAGE)) {
-                        throw new UnexpectedLiquibaseException(e.getMessage() + " on " + node.getTagName()+"."+attributeName+". To resolve, remove the invalid character on the database and try again");
+                        throw new UnexpectedLiquibaseException(e.getMessage() + " on " + node.getTagName() + "." + attributeName + ". To resolve, remove the invalid character on the database and try again");
                     }
                 }
             }
@@ -240,6 +240,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     /**
      * Catch any characters that will cause problems when parsing the XML down the road.
+     *
      * @throws UnexpectedLiquibaseException with the message {@link #INVALID_STRING_ENCODING_MESSAGE} if an issue is found.
      */
     protected String checkString(String text) throws UnexpectedLiquibaseException {
@@ -258,10 +259,16 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             } else {
                 codePoint = current;
             }
-            if (!(Character.isISOControl(current) && current != '\n' && current != '\r' && current != '\t') && ((codePoint == 0x9) || (codePoint == 0xA) || (codePoint == 0xD)
-                    || ((codePoint >= 0x20) && (codePoint <= 0xD7FF))
-                    || ((codePoint >= 0xE000) && (codePoint <= 0xFFFD))
-                    || ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF)))) {
+            if (!(Character.isISOControl(current) && current != '\n' && current != '\r' && current != '\t') && (
+                    (codePoint == 0x9)
+                            || (codePoint == 0xA)
+                            || (codePoint == 0xB)
+                            || (codePoint == 0xC)
+                            || (codePoint == 0xD)
+                            || ((codePoint >= 0x20) && (codePoint <= 0xD7FF))
+                            || ((codePoint >= 0xE000) && (codePoint <= 0xFFFD))
+                            || ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF)))
+                    ) {
                 //ok
             } else {
                 throw new UnexpectedLiquibaseException(INVALID_STRING_ENCODING_MESSAGE);
