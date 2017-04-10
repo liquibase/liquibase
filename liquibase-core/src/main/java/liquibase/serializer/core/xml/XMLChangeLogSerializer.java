@@ -264,7 +264,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     || (codePoint == '\t')
                     || (codePoint == 0xB)
                     || (codePoint == 0xC)
-                    || ((codePoint >= 0x20) && (codePoint <= 0xD7FF))
+                    || ((codePoint >= 0x20) && (codePoint <= 0x7E))
+                    || ((codePoint >= 0xA0) && (codePoint <= 0xD7FF))
                     || ((codePoint >= 0xE000) && (codePoint <= 0xFFFD))
                     || ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF))
                     ) {
