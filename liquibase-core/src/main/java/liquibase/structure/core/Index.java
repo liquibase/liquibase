@@ -65,11 +65,11 @@ public class Index extends AbstractDatabaseObject {
         return getTable().getSchema();
     }
 
-    public Table getTable() {
-        return getAttribute("table", Table.class);
+    public Relation getTable() {
+        return getAttribute("table", Relation.class);
     }
 
-    public Index setTable(Table table) {
+    public Index setTable(Relation table) {
         this.setAttribute("table", table);
         return this;
     }

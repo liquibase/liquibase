@@ -182,10 +182,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
         LogFactory.getLogger().severe(errorStreamOut);
         LogFactory.getLogger().info(infoStreamOut);
 
-        throwExceptionIfError(returnCode, errorStreamOut, infoStreamOut);
+        processResult(returnCode, errorStreamOut, infoStreamOut, database);
     }
 
-    protected void throwExceptionIfError(int returnCode, String errorStreamOut, String infoStreamOut) {
+    /**
+     * Called by {@link #executeCommand(Database)} after running the command. Default implementation throws an error if returnCode != 0
+     */
+    protected void processResult(int returnCode, String errorStreamOut, String infoStreamOut, Database database) {
         if (returnCode != 0) {
             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
         }

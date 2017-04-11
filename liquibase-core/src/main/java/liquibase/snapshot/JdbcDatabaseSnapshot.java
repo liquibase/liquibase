@@ -304,17 +304,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "CASE is_unique WHEN 1 then 0 else 1 end as NON_UNIQUE, " +
                                 "object_name(i.object_id) as INDEX_QUALIFIER, " +
                                 "i.name as INDEX_NAME, " +
-                                "case type when 1 then 1 ELSE 3 end as TYPE, " +
+                                "case i.type when 1 then 1 ELSE 3 end as TYPE, " +
                                 "key_ordinal as ORDINAL_POSITION, " +
                                 "COL_NAME(c.object_id,c.column_id) AS COLUMN_NAME, " +
                                 "case is_descending_key when 0 then 'A' else 'D' end as ASC_OR_DESC, " +
                                 "null as CARDINALITY, " +
                                 "null as PAGES, " +
                                 "i.filter_definition as FILTER_CONDITION, " +
-                                "* " +
+                                "o.type AS INTERNAL_OBJECT_TYPE, " +
+                                "i.*, " +
+                                "c.*, " +
+                                "s.* " +
                                 "FROM sys.indexes i " +
                                 "join sys.index_columns c on i.object_id=c.object_id and i.index_id=c.index_id " +
                                 "join sys.stats s on i.object_id=s.object_id and i.name=s.name " +
+                                "join sys.objects o on i.object_id=o.object_id " +
                                 "WHERE object_schema_name(i.object_id)='" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
 
                         if (!bulkFetch && tableName != null) {

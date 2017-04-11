@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
-        super(Index.class, new Class[]{Table.class, ForeignKey.class, UniqueConstraint.class});
+        super(Index.class, new Class[]{Table.class, View.class, ForeignKey.class, UniqueConstraint.class});
     }
 
 
@@ -134,18 +134,21 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //    }
 
-
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (!snapshot.getSnapshotControl().shouldInclude(Index.class)) {
             return;
         }
 
-        if (foundObject instanceof Table) {
-            Table table = (Table) foundObject;
+        if (foundObject instanceof Table  || foundObject instanceof View) {
+            if (foundObject instanceof View && !addToViews(snapshot.getDatabase())) {
+                return;
+            }
+
+            Relation relation = (Relation) foundObject;
             Database database = snapshot.getDatabase();
             Schema schema;
-            schema = table.getSchema();
+            schema = relation.getSchema();
 
 
             List<CachedRow> rs = null;
@@ -153,7 +156,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), null);
+                rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
                 for (CachedRow row : rs) {
                     String indexName = row.getString("INDEX_NAME");
@@ -169,7 +172,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (index == null) {
                         index = new Index();
                         index.setName(indexName);
-                        index.setTable(table);
+                        index.setTable(relation);
 
                         short type = row.getShort("TYPE");
                         if (type == DatabaseMetaData.tableIndexClustered) {
@@ -189,20 +192,20 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 List<Index> stillToAdd = new ArrayList<Index>();
                 for (Index exampleIndex : foundIndexes.values()) {
                     if (exampleIndex.getClustered() != null && exampleIndex.getClustered()) {
-                        table.getIndexes().add(exampleIndex);
+                        relation.getIndexes().add(exampleIndex);
                     } else {
                         stillToAdd.add(exampleIndex);
                     }
                 }
                 for (Index exampleIndex : stillToAdd) {
                     boolean alreadyAddedSimilar = false;
-                    for (Index index : table.getIndexes()) {
+                    for (Index index : relation.getIndexes()) {
                         if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index, exampleIndex, null, database)) {
                             alreadyAddedSimilar = true;
                         }
                     }
                     if (!alreadyAddedSimilar) {
-                        table.getIndexes().add(exampleIndex);
+                        relation.getIndexes().add(exampleIndex);
                     }
                 }
 
@@ -223,13 +226,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        Table exampleTable = ((Index) example).getTable();
+        Relation exampleIndex = ((Index) example).getTable();
 
         String tableName = null;
         Schema schema = null;
-        if (exampleTable != null) {
-            tableName = exampleTable.getName();
-            schema = exampleTable.getSchema();
+        if (exampleIndex != null) {
+            tableName = exampleIndex.getName();
+            schema = exampleIndex.getSchema();
         }
 
         if (schema == null) {
@@ -314,7 +317,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
-                    returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    Relation relation = new Table();
+                    if ("V".equals(row.getString("INTERNAL_OBJECT_TYPE"))) {
+                        relation = new View();
+                    }
+                    returnIndex.setTable(relation.setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
 
@@ -384,7 +391,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             //prefer clustered version of the index
             List<Index> nonClusteredIndexes = new ArrayList<Index>();
             for (Index index : foundIndexes.values()) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, snapshot.getSchemaComparisons(), database)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleIndex, snapshot.getSchemaComparisons(), database)) {
                     boolean actuallyMatches = false;
                     if (database.isCaseSensitive()) {
                         if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
@@ -450,6 +457,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
         return index;
     }
+
+    protected boolean addToViews(Database database) {
+        return database instanceof MSSQLDatabase;
+    }
+
 
     //METHOD FROM SQLIteDatabaseSnapshotGenerator
     //    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
