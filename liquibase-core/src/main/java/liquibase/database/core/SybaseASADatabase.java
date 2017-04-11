@@ -223,6 +223,11 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
+    	return false;
+    }
+    
 	/* (non-Javadoc)
 	 * @see liquibase.database.AbstractJdbcDatabase#getAutoIncrementClause()
 	 */
