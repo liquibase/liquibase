@@ -220,7 +220,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return false;
+        return true;
     }
 
 	/* (non-Javadoc)
