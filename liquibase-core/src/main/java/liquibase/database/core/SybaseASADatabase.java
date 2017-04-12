@@ -6,6 +6,8 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.jvm.SybaseASAConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -256,5 +258,13 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	@Override
 	public String getJdbcCatalogName(CatalogAndSchema schema) {
 		return "";
+	}
+	
+	@Override
+	public void setConnection(DatabaseConnection conn) {
+		DatabaseConnection dbConn = new SybaseASAConnection(
+				((JdbcConnection) conn).getWrappedConnection()
+				);
+		super.setConnection(dbConn);
 	}
 }
