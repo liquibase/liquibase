@@ -333,6 +333,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             } else if (example.getName().startsWith("USLOG$")) { //for update materialized view
                 return true;
+            } else if (example.getName().startsWith("SYS_FBA")) { //for Flashback tables 
+                return true;
             }
         }
 
