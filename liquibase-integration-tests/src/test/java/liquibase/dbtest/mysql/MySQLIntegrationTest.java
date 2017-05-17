@@ -42,6 +42,11 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         super("mysql", "jdbc:mysql://"+ getDatabaseServerHostname("MySQL") +":3306/lbcat");
     }
 
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        return true;
+    }
+
     @Test
     @Override
     public void testRunChangeLog() throws Exception {

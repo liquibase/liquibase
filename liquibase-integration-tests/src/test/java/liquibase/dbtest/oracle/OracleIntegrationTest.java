@@ -28,6 +28,12 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        // Seems unlikely to ever be provided by Travis, as it's not free
+        return false;
+    }
+
+    @Override
     @Test
     public void testRunChangeLog() throws Exception {
         super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.

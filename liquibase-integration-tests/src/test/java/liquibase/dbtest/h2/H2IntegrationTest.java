@@ -26,6 +26,11 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
     }
 
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        return true;
+    }
+
     @Test
     public void diffToPrintStream() throws Exception{
         if (getDatabase() == null) {

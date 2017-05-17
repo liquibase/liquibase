@@ -9,4 +9,9 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
     public HsqlIntegrationTest() throws Exception {
         super("hsqldb", "jdbc:hsqldb:mem:liquibase");
     }
+
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        return true;
+    }
 }

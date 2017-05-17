@@ -61,7 +61,6 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
-
     protected String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
@@ -101,6 +100,13 @@ public abstract class AbstractIntegrationTest {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         }
     }
+
+    /**
+     * @return true if this database is provided by the Travis CI build on GitHub.
+     *
+     * See https://docs.travis-ci.com/user/database-setup/
+     */
+    abstract protected boolean isDatabaseProvidedByTravisCI();
 
     /**
      * Attempt to wipe the database before each test.
@@ -189,6 +195,21 @@ public abstract class AbstractIntegrationTest {
         ExecutorService.getInstance().clearExecutor(database);
         database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
+    }
+
+    @Test
+    public void testDatabaseIsReachableIfRequired() {
+        if (isDatabaseProvidedByTravisCI()) {
+            assertNotNull(
+                    "This integration test is expected to pass on Travis CI.\n" +
+                            "If you are running on a dev machine and do not have the required\n" +
+                            "database installed, you may choose to ignore this failed test.\n" +
+                            "To run this test on a dev machine, you will need to install the corresponding\n" +
+                            "database and configure liquibase.integrationtest.local.properties",
+                    getDatabase());
+        } else {
+            assumeNotNull(this.getDatabase());
+        }
     }
 
     @Test
