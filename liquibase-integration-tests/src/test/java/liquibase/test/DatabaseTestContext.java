@@ -9,6 +9,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
+import org.junit.internal.AssumptionViolatedException;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -152,8 +153,8 @@ public class DatabaseTestContext {
         try {
             driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
         } catch (Exception e) {
-            System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
-            return null; //could not connect
+            throw new AssumptionViolatedException(
+                "Could not connect to " + url + ": Will not test against.  " + e.getMessage());
         }
 
         Properties info = new Properties();
@@ -168,8 +169,8 @@ public class DatabaseTestContext {
         try {
             connection = driver.connect(url, info);
         } catch (SQLException e) {
-            System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
-            return null; //could not connect
+            throw new AssumptionViolatedException(
+                "Could not connect to " + url + ": Will not test against.  " + e.getMessage());
         }
         if (connection == null) {
             throw new DatabaseException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
