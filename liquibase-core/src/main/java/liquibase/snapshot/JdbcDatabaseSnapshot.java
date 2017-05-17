@@ -362,7 +362,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
-                        return super.shouldBulkSelect(schemaKey, resultSetCache);
+                        return JdbcDatabaseSnapshot.this.getAllCatalogsStringScratchData() != null || (tableName == null && indexName == null) || super.shouldBulkSelect(schemaKey, resultSetCache);
                     }
                     return false;
                 }
@@ -641,6 +641,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return getResultSetCache("getTables").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                    return table == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                }
+
+                @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
                 }
@@ -656,7 +661,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     if (database instanceof OracleDatabase) {
                         return queryOracle(catalogAndSchema, table);
-                    }   else if (database instanceof MSSQLDatabase) {
+                    } else if (database instanceof MSSQLDatabase) {
                         return queryMssql(catalogAndSchema, table);
                     }
 
@@ -696,7 +701,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "o.type in ('U') " +
                             "and has_perms_by_name(quotename(schema_name(o.schema_id)) + '.' + quotename(o.name), 'object', 'select') = 1 " +
                             "and charindex(substring(o.type,1,1),'U') <> 0 " +
-                            "and schema_name(o.schema_id)='"+database.escapeStringForDatabase(ownerName)+"'";
+                            "and schema_name(o.schema_id)='" + database.escapeStringForDatabase(ownerName) + "'";
                     if (tableName != null) {
                         sql += " AND o.name='" + database.escapeStringForDatabase(tableName) + "' ";
                     }
@@ -710,8 +715,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.TABLE_NAME as TABLE_NAME, a.TEMPORARY as TEMPORARY, a.DURATION as DURATION, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS " +
                             "from ALL_TABLES a " +
-                            "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner " +
-                            "WHERE a.OWNER='" + ownerName + "'";
+                            "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner ";
+                    String allCatalogsString = getAllCatalogsStringScratchData();
+//                    if (allCatalogsString == null) {
+                        sql += "WHERE a.OWNER='" + ownerName + "'";
+//                    } else {
+//                        sql += "WHERE a.OWNER IN ('"+ownerName+"', " + allCatalogsString + ")";
+//                    }
                     if (tableName != null) {
                         sql += " AND a.TABLE_NAME='" + tableName + "'";
                     }
@@ -724,6 +734,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getViews(final String catalogName, final String schemaName, final String view) throws SQLException, DatabaseException {
             return getResultSetCache("getViews").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
+                @Override
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                    return view == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                }
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
@@ -955,7 +969,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
-                        return super.shouldBulkSelect(schemaKey, resultSetCache);
+                        return getAllCatalogsStringScratchData() != null || table == null || super.shouldBulkSelect(schemaKey, resultSetCache);
                     } else {
                         return false;
                     }
@@ -965,6 +979,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         public List<CachedRow> getUniqueConstraints(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
             return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
+
+                @Override
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+                    return tableName == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                }
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
@@ -1020,8 +1039,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "SELECT " +
                                         "[TC].[CONSTRAINT_NAME], " +
                                         "[TC].[TABLE_NAME], " +
-                                        "[TC].[CONSTRAINT_CATALOG] AS INDEX_CATALOG, "+
-                                        "[TC].[CONSTRAINT_SCHEMA] AS INDEX_SCHEMA, "+
+                                        "[TC].[CONSTRAINT_CATALOG] AS INDEX_CATALOG, " +
+                                        "[TC].[CONSTRAINT_SCHEMA] AS INDEX_SCHEMA, " +
                                         "[IDX].[TYPE_DESC], " +
                                         "[IDX].[name] AS INDEX_NAME " +
                                         "FROM [INFORMATION_SCHEMA].[TABLE_CONSTRAINTS] AS [TC] " +
@@ -1120,6 +1139,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
         }
+    }
+
+    private String getAllCatalogsStringScratchData() {
+        return (String) JdbcDatabaseSnapshot.this.getScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY);
     }
 
 }
