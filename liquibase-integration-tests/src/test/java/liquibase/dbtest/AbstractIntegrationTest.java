@@ -101,6 +101,9 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    /**
+     * Attempt to wipe the database before each test.
+     */
     @Before
     public void setUp() throws Exception {
 
@@ -128,6 +131,7 @@ public abstract class AbstractIntegrationTest {
             SnapshotGeneratorFactory.resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+            database.dropDatabaseObjects(new CatalogAndSchema(null, "lbcat2"));
 
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
