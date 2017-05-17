@@ -153,8 +153,8 @@ public class DatabaseTestContext {
         try {
             driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
         } catch (Exception e) {
-            throw new AssumptionViolatedException(
-                "Could not connect to " + url + ": Will not test against.  " + e.getMessage());
+            System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
+            return null; //could not connect
         }
 
         Properties info = new Properties();
@@ -169,8 +169,8 @@ public class DatabaseTestContext {
         try {
             connection = driver.connect(url, info);
         } catch (SQLException e) {
-            throw new AssumptionViolatedException(
-                "Could not connect to " + url + ": Will not test against.  " + e.getMessage());
+            System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
+            return null; //could not connect
         }
         if (connection == null) {
             throw new DatabaseException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");

@@ -28,6 +28,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
     @Override
     protected boolean isDatabaseProvidedByTravisCI() {
+        // H2 is an in-process database
         return true;
     }
 

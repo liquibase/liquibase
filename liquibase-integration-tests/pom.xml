@@ -94,33 +94,42 @@
                 </dependency>
             </dependencies>
         </profile>
-        <profile>
-            <id>buildServer</id>
-            <activation>
-                <property>
-                    <name>env.liquibase.buildserver</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <!--<properties>-->
-            <!--<liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>-->
-            <!--</properties>-->
-        </profile>
     </profiles>
     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <systemProperties>
-                        <property>
-                            <name>liquibase.defaultlogger.level</name>
-                            <value>debug</value>
-                        </property>
-                    </systemProperties>
                     <excludes>
                         <exclude>**/*.java</exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.20</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>liquibase.defaultlogger.level</name>
+                            <value>warning</value>
+                        </property>
+                    </systemProperties>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/IT*.java</include>
+                        <include>**/*IT.java</include>
+                        <include>**/*ITCase.java</include>
+                    </includes>
                 </configuration>
             </plugin>
 
