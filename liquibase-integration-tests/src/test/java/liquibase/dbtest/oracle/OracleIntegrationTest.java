@@ -7,6 +7,7 @@ import liquibase.exception.ValidationFailedException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNotNull;
 
 import java.sql.Statement;
 import java.sql.ResultSet;
@@ -34,9 +35,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void indexCreatedOnCorrectSchema() throws Exception {
-         if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(this.indexOnSchemaChangeLog);
         clearDatabase(liquibase);
@@ -73,9 +72,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void viewCreatedOnCorrectSchema() throws Exception {
-         if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(this.viewOnSchemaChangeLog);
         clearDatabase(liquibase);
@@ -108,9 +105,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void smartDataLoad() throws Exception {
-        if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
         clearDatabase(liquibase);

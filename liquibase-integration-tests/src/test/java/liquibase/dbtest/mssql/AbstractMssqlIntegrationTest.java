@@ -7,6 +7,8 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.exception.ValidationFailedException;
 import org.junit.Test;
 
+import static org.junit.Assume.assumeNotNull;
+
 /**
  *
  * @author lujop
@@ -24,9 +26,7 @@ public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTe
 
     @Test
     public void smartDataLoad() throws Exception {
-        if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
         clearDatabase(liquibase);
         try {
