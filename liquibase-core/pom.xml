@@ -3,19 +3,19 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>liquibase-core</artifactId>
-  <name>Liquibase Core</name>
+  <artifactId>dbmanul-core</artifactId>
+  <name>DB-Manul Core</name>
   <packaging>jar</packaging>
 
     <parent>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-parent</artifactId>
-        <version>3.6.0-SNAPSHOT</version>
+        <groupId>org.dbmanul</groupId>
+        <artifactId>dbmanul-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
     <properties>
-        <bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.6.0-SNP</project.version>
+        <bundle.namespace>dbmanul.*</bundle.namespace>
+        <project.version>${project.version}-SNP</project.version>
     </properties>
 
   <dependencies>
@@ -115,7 +115,7 @@
 
 
   <build>
-    <finalName>liquibase-${project.version}</finalName>
+    <finalName>dbmanul-${project.version}</finalName>
 
     <resources>
       <resource>
@@ -150,7 +150,7 @@
           </excludes>
           <systemProperties>
             <property>
-              <name>liquibase.defaultlogger.level</name>
+              <name>dbmanul.defaultlogger.level</name>
               <value>severe</value>
             </property>
           </systemProperties>
@@ -181,7 +181,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>org.liquibase.core</Bundle-SymbolicName>
+            <Bundle-SymbolicName>org.dbmanul.core</Bundle-SymbolicName>
             <Import-Package>
               javax.servlet.*;version="[2.6,4)";resolution:=optional,
               javax.sql.*,

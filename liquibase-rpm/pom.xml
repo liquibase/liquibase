@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.liquibase</groupId>
-    <artifactId>liquibase-rpm</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
+    <groupId>org.dbmanul</groupId>
+    <artifactId>dbmanul-rpm</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <url>http://www.liquibase.org/</url>
+    <url>http://www.dbmanul.org/</url>
 
-    <name>Liquibase RPM Packager</name>
-    <description>Liquibase is an open source database-independent library for tracking, managing and applying database schema changes. It was started in 2006 to allow easier tracking of database changes, especially in an agile software development environment.</description>
+    <name>DB-Manul RPM Packager</name>
+    <description>DB-Manul is a change management system for databases built on the work of Liquibase (http://www.liquibase.org).</description>
     <organization>
-        <name>Liquibase.org</name>
-        <url>http://www.liquibase.org</url>
+        <name>dbmanul.org</name>
+        <url>http://www.dbmanul.org</url>
     </organization>
     
     <licenses>
@@ -43,9 +43,9 @@
             <organization>Github</organization>
             <organizationUrl>https://github.com/adriens/liquibase</organizationUrl>
             <roles>
-                <role>Developer</role>
-                <role>Projet creator</role>
-                <role>Test</role>
+                <role>Developer (Liquibase)</role>
+                <role>Projet creator (Liquibase)</role>
+                <role>Test (Liquibase)</role>
             </roles>
             <timezone>+11</timezone>
             <url>https://github.com/adriens</url>
@@ -54,8 +54,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>org.dbmanul</groupId>
+            <artifactId>dbmanul-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -105,13 +105,15 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
 
-            <!-- Get back liquibase binaries from repo -->
+            <!-- Get back dbmanul binaries from repo -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -124,8 +126,8 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>org.liquibase</includeGroupIds>
-                            <includeArtifactIds>liquibase-core</includeArtifactIds>
+                            <includeGroupIds>org.dbmanul</includeGroupIds>
+                            <includeArtifactIds>dbmanul-core</includeArtifactIds>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
@@ -138,11 +140,11 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.liquibase</groupId>
-                                    <artifactId>liquibase-core</artifactId>
+                                    <groupId>org.dbmanul</groupId>
+                                    <artifactId>dbmanul-core</artifactId>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <destFileName>liquibase.jar</destFileName>
+                                    <destFileName>dbmanul.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.yaml</groupId>
@@ -175,13 +177,13 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <name>liquibase</name>
+                    <name>dbmanul</name>
                     <license>Apache License, Version 2.0</license>
                     <sourceEncoding>UTF-8</sourceEncoding>
                     <distribution>N/A</distribution>
                     <group>Applications/Databases</group>
                     <icon>src/main/resources/icon.xpm</icon>
-                    <packager>Liquibase</packager>
+                    <packager>dbmanul.org</packager>
                     <prefix>/usr/local</prefix>
                     <changelogFile>src/changelog</changelogFile>
                     <projversion>${project.version}</projversion>
@@ -189,20 +191,20 @@
 
                     <mappings>
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}</directory>
+                            <directory>/opt/dbmanul-${project.version}</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
-                                    <location>${project.build.directory}/liquibase.jar</location>
+                                    <location>${project.build.directory}/dbmanul.jar</location>
                                 </source>
                             </sources>
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/lib</directory>
+                            <directory>/opt/dbmanul-${project.version}/lib</directory>
                             
                             <dependency>
                                 <includes>
@@ -210,20 +212,20 @@
                                     <include>org.postgresql:postgresql</include>
                                 </includes>
                                 <excludes>
-                                    <exclude>org.liquibase:liquibase-rpm</exclude>
+                                    <exclude>org.dbmanul:dbmanul-rpm</exclude>
                                 </excludes>
                             </dependency>
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/man</directory>
+                            <directory>/opt/dbmanul-${project.version}/man</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
-                                    <location>src/main/resources/liquibase.1</location>
+                                    <location>src/main/resources/dbmanul.1</location>
                                 </source>
                                 <source>
                                     <location>src/main/resources/install-man.sh</location>
@@ -232,24 +234,24 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}</directory>
+                            <directory>/opt/dbmanul-${project.version}</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
-                                    <location>src/main/resources/liquibase</location>
+                                    <location>src/main/resources/dbmanul</location>
                                 </source>
                             </sources>
                         </mapping>
 
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}</directory>
+                            <directory>/opt/dbmanul-${project.version}</directory>
                             <configuration>true</configuration>
                             <filemode>444</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
                                     <location>${project.build.directory}/dist/LICENSE.txt</location>
@@ -257,14 +259,14 @@
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}</directory>
+                            <directory>/opt/dbmanul-${project.version}</directory>
                             <configuration>true</configuration>
                             <filemode>444</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
-                                    <location>${project.build.directory}/dist/liquibase.spec</location>
+                                    <location>${project.build.directory}/dist/dbmanul.spec</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -273,31 +275,31 @@
                             <directory>/usr/bin</directory>
                             <sources>
                                 <softlinkSource>
-                                    <location>/opt/liquibase-${project.version}/liquibase</location>
+                                    <location>/opt/dbmanul-${project.version}/dbmanul</location>
                                 </softlinkSource>
                             </sources>
                         </mapping>
                         
                         <!-- Liquibase sdk mappings -->
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
-                                    <location>${project.build.directory}/dist/sdk/liquibase-sdk.sh</location>
+                                    <location>${project.build.directory}/dist/sdk/dbmanul-sdk.sh</location>
                                 </source>
                             </sources>
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/vagrant</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/vagrant</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
                                     <location>${project.build.directory}/dist/sdk/vagrant/</location>
@@ -309,11 +311,11 @@
                         </mapping>
 
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/vagrant/install-files</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/vagrant/install-files</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
                                     <location>${project.build.directory}/dist/sdk/vagrant/install-files/README.txt</location>
@@ -322,30 +324,30 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/workspace</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/workspace</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
-                                    <location>${project.build.directory}/dist/sdk/workspace/liquibase.derby.properties</location>
+                                    <location>${project.build.directory}/dist/sdk/workspace/dbmanul.derby.properties</location>
                                 </source>
                                 <source>
-                                    <location>${project.build.directory}/dist/sdk/workspace/liquibase.h2.properties</location>
+                                    <location>${project.build.directory}/dist/sdk/workspace/dbmanul.h2.properties</location>
                                 </source>
                                 <source>
-                                    <location>${project.build.directory}/dist/sdk/workspace/liquibase.hsql.properties</location>
+                                    <location>${project.build.directory}/dist/sdk/workspace/dbmanul.hsql.properties</location>
                                 </source>
                             </sources>
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/workspace/changelog/com/example</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/workspace/changelog/com/example</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
                                     <location>${project.build.directory}/dist/sdk/workspace/changelog/com/example/changelog.xml</location>
@@ -354,11 +356,11 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/workspace/changelog/com/example/features</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/workspace/changelog/com/example/features</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
                                     <location>${project.build.directory}/dist/sdk/workspace/changelog/com/example/features/employees.xml</location>
@@ -370,11 +372,11 @@
                         </mapping>
 
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/workspace/changelog/com/example/versions</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/workspace/changelog/com/example/versions</directory>
                             <configuration>true</configuration>
                             <filemode>555</filemode>
-                            <username>liquibase</username>
-                            <groupname>liquibase</groupname>
+                            <username>dbmanul</username>
+                            <groupname>dbmanul</groupname>
                             <sources>
                                 <source>
                                     <location>${project.build.directory}/dist/sdk/workspace/changelog/com/example/versions/v1.yaml</location>
@@ -385,9 +387,9 @@
                             </sources>
                         </mapping>
                         
-                        <!-- Put jars required by liquibase-sdk -->
+                        <!-- Put jars required by dbmanul-sdk -->
                         <mapping>
-                            <directory>/opt/liquibase-${project.version}/sdk/lib-sdk</directory>
+                            <directory>/opt/dbmanul-${project.version}/sdk/lib-sdk</directory>
                             <dependency>
                                 <includes>
                                     <include>commons-cli:commons-cli</include>
@@ -395,7 +397,7 @@
                                     <include>junit:junit</include>
                                 </includes>
                                 <excludes>
-                                    <exclude>org.liquibase:liquibase-rpm</exclude>
+                                    <exclude>org.dbmanul:dbmanul-rpm</exclude>
                                 </excludes>
                             </dependency>
                         </mapping>
@@ -405,22 +407,22 @@
                             <directory>/usr/bin</directory>
                             <sources>
                                 <softlinkSource>
-                                    <destination>liquibase-sdk</destination>
-                                    <location>/opt/liquibase-${project.version}/sdk/liquibase-sdk.sh</location>
+                                    <destination>dbmanul-sdk</destination>
+                                    <location>/opt/dbmanul-${project.version}/sdk/dbmanul-sdk.sh</location>
                                 </softlinkSource>
                             </sources>
                         </mapping>
                     </mappings>
                     
                     <preinstallScriptlet>
-                        <script>echo "Installing liquibase ..."</script>
+                        <script>echo "Installing DB-Manul ..."</script>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <script>/opt/liquibase-${project.version}/man/install-man.sh</script>
+                        <script>/opt/dbmanul-${project.version}/man/install-man.sh</script>
                     </postinstallScriptlet>
                     
                     <postremoveScriptlet>
-                        <script>rm -rf /usr/man/man1/liquibase.1.gz /opt/liquibase-${project.version}</script>
+                        <script>rm -rf /usr/man/man1/dbmanul.1.gz /opt/dbmanul-${project.version}</script>
                     </postremoveScriptlet>
                 </configuration>
             </plugin>
@@ -438,7 +440,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.9</version>
             </plugin>
       
             <plugin>

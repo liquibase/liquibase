@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>liquibase-integration-tests</artifactId>
-    <name>Liquibase Integration Tests</name>
+    <artifactId>dbmanul-integration-tests</artifactId>
+    <name>DB-Manul Integration Tests</name>
 
     <parent>
-        <artifactId>liquibase-parent</artifactId>
-        <groupId>org.liquibase</groupId>
-        <version>3.6.0-SNAPSHOT</version>
+        <artifactId>dbmanul-parent</artifactId>
+        <groupId>org.dbmanul</groupId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -31,13 +31,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>org.dbmanul</groupId>
+            <artifactId>dbmanul-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>org.dbmanul</groupId>
+            <artifactId>dbmanul-core</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
@@ -97,7 +97,7 @@
             <id>buildServer</id>
             <activation>
                 <property>
-                    <name>env.liquibase.buildserver</name>
+                    <name>env.dbmanul.buildserver</name>
                     <value>true</value>
                 </property>
             </activation>
@@ -113,7 +113,7 @@
                 <configuration>
                     <systemProperties>
                         <property>
-                            <name>liquibase.defaultlogger.level</name>
+                            <name>dbmanul.defaultlogger.level</name>
                             <value>debug</value>
                         </property>
                     </systemProperties>
@@ -138,6 +138,40 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.20</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.*</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/asany/*</exclude>
+                        <exclude>**/cache/*</exclude>
+                        <exclude>**/derby/*</exclude>
+                        <exclude>**/firebird/*</exclude>
+                        <exclude>**/h2/*</exclude>
+                        <exclude>**/hsqldb/*</exclude>
+                        <exclude>**/informix/*</exclude>
+                        <exclude>**/mssql/*</exclude>
+                        <exclude>**/mysql/*</exclude>
+                        <exclude>**/oracle/*</exclude>
+                        <exclude>**/pgsql/*</exclude>
+                        <exclude>**/sybase/*</exclude>
+                        <exclude>**/sqlite/*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 

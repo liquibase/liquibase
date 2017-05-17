@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.liquibase</groupId>
-    <artifactId>liquibase-parent</artifactId>
-    <version>3.6.0-SNAPSHOT</version>
+    <groupId>org.dbmanul</groupId>
+    <artifactId>dbmanul-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Liquibase Parent Configuration</name>
-    <description>Liquibase is a tool for managing and executing database changes.</description>
-    <url>http://www.liquibase.org</url>
+    <name>DB-Manul Parent Configuration</name>
+    <description>A change management system for databases based on Liquibase</description>
+    <url>http://www.dbmanul.org</url>
 
     <organization>
-        <name>Liquibase.org</name>
-        <url>http://www.liquibase.org</url>
+        <name>dbmanul.org</name>
+        <url>http://www.dbmanul.org</url>
     </organization>
 
     <licenses>
@@ -24,28 +24,28 @@
     </licenses>
 
     <issueManagement>
-        <url>http://liquibase.jira.com/browse/CORE</url>
+        <url>https://github.com/dbmanul/dbmanul/issues</url>
     </issueManagement>
 
     <scm>
-        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
-        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
-        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+        <connection>scm:git:git@github.com:dbmanul/dbmanul.git</connection>
+        <url>scm:git:git@github.com:dbmanul/dbmanul.git</url>
+        <developerConnection>scm:git:git@github.com:dbmanul/dbmanul.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
     <developers>
         <developer>
-            <id>nvoxland</id>
-            <name>Nathan Voxland</name>
-            <email>nathan@voxland.net</email>
-            <url>http://nathan.voxland.net</url>
-            <organizationUrl>http://nathan.voxland.net/</organizationUrl>
+            <id>abuschka</id>
+            <name>Andreas Buschka</name>
+            <email>andreas.buschka@dbmanul.org</email>
+            <url>http://dbmanul.org</url>
+            <organizationUrl>http://dbmanul.org</organizationUrl>
             <roles>
                 <role>architect</role>
                 <role>developer</role>
             </roles>
-            <timezone>-6</timezone>
+            <timezone>Europe/Berlin</timezone>
         </developer>
     </developers>
 
@@ -53,6 +53,7 @@
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <modules>
@@ -263,6 +264,9 @@
                         <optimize>true</optimize>
                         <debug>true</debug>
                         <encoding>${project.build.sourceEncoding}</encoding>
+                        <!-- Workaround for a bug in maven-compiler-plugin 3.1 which causes all files to always
+                             recompile, making the build _slower_ than faster. -->
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
                     </configuration>
                 </plugin>
 
@@ -295,6 +299,21 @@
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <version>2.20</version>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>1.4.1</version>
                     <executions>
@@ -307,7 +326,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>1.6</version>
+                                        <version>1.7</version>
                                     </requireJavaVersion>
                                 </rules>
                             </configuration>
@@ -483,7 +502,7 @@
                 </os>
             </activation>
             <modules>
-                <module>liquibase-debian</module>
+                <module>dbmanul-debian</module>
             </modules>
         </profile>
 
@@ -496,7 +515,7 @@
                 </os>
             </activation>
             <modules>
-                <module>liquibase-rpm</module>
+                <module>dbmanul-rpm</module>
             </modules>
         </profile>
 

@@ -12,7 +12,7 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>liquibase-maven-plugin</artifactId>
+        <artifactId>dbmanul-maven-plugin</artifactId>
         <configuration>
           <verbose>true</verbose>
           <logging>debug</logging>

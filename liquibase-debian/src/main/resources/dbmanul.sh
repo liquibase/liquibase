@@ -1,11 +1,11 @@
-_liquibase() 
+_dbmanul()
 {
     local cur prev opts
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    # Liquibase options, has to be improved to be more context aware
+    # DB-Manul options, has to be improved to be more context aware
     opts="
 update
 updateSQL
@@ -84,4 +84,4 @@ dropAll
     fi
     return 0
 }
-complete -o nospace -F _liquibase liquibase
+complete -o nospace -F _dbmanul dbmanul

@@ -6,8 +6,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-plugin</artifactId>
+        <groupId>org.dbmanul</groupId>
+        <artifactId>dbmanul-plugin</artifactId>
         <configuration>
           <verbose>true</verbose>
           <changeLogFile>org/liquibase/changelog.xml</changeLogFile>
