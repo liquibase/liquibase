@@ -2,6 +2,7 @@ package liquibase.dbtest.mssql;
 
 import java.util.Date;
 import liquibase.Liquibase;
+import liquibase.database.Database;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.MigrationFailedException;
 import liquibase.exception.ValidationFailedException;
@@ -13,8 +14,8 @@ import org.junit.Test;
  */
 public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTest{
 
-    public AbstractMssqlIntegrationTest(String changelogDir, String url) throws Exception {
-        super(changelogDir, url);
+    public AbstractMssqlIntegrationTest(String changelogDir, Database dbms) throws Exception {
+        super(changelogDir, dbms);
     }
 
     @Override

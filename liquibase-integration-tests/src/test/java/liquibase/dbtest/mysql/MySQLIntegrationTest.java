@@ -1,6 +1,7 @@
 package liquibase.dbtest.mysql;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -10,6 +11,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.test.DatabaseTestURL;
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -22,7 +24,7 @@ import static junit.framework.Assert.assertTrue;
 public class MySQLIntegrationTest extends AbstractIntegrationTest {
 
     public MySQLIntegrationTest() throws Exception {
-        super("mysql", "jdbc:mysql://"+ getDatabaseServerHostname("MySQL") +":3306/lbcat");
+        super("mysql", DatabaseFactory.getInstance().getDatabase("mysql"));
     }
 
     @Test

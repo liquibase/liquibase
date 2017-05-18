@@ -2,6 +2,7 @@ package liquibase.dbtest.mssql;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
@@ -31,7 +32,7 @@ import static org.junit.Assert.assertFalse;
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     public MssqlIntegrationTest() throws Exception {
-        super("Mssql", "jdbc:sqlserver://"+ getDatabaseServerHostname("Mssql") +":1433;databaseName=liquibase");
+        super("Mssql", DatabaseFactory.getInstance().getDatabase("mssql"));
     }
 
     @Override

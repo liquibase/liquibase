@@ -326,6 +326,7 @@
               <unicodeInput>true</unicodeInput>
             </configuration>
           </execution>
+
         </executions>
       </plugin>
     </plugins>

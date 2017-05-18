@@ -1,12 +1,13 @@
 package liquibase.dbtest.derby;
 
+import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 
 public class DerbyIntegrationTest extends AbstractIntegrationTest {
 
     
     public DerbyIntegrationTest() throws Exception {
-        super("derby", "jdbc:derby:liquibase;create=true");
+        super("derby", DatabaseFactory.getInstance().getDatabase("derby"));
     }
 
     @Override

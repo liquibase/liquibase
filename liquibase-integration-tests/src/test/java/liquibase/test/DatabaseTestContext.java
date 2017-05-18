@@ -23,6 +23,8 @@ public class DatabaseTestContext {
     private Set<DatabaseConnection> availableConnections;
 
     private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
+    /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
+    /*
             new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
             new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
             new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
@@ -38,6 +40,7 @@ public class DatabaseTestContext {
             new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
             new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
             new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
+            */
     };
 
 
@@ -232,7 +235,7 @@ public class DatabaseTestContext {
 //                if (url.indexOf("jtds") >= 0) {
 //                    continue;
 //                }
-                DatabaseConnection connection = openConnection(adaptTestURLWithConfiguredHost(url), url.getUsername(), url.getPassword());
+                DatabaseConnection connection = openConnection(url.getUrl(), url.getUsername(), url.getPassword());
 
                 if (connection != null) {
                     availableConnections.add(connection);
@@ -251,17 +254,13 @@ public class DatabaseTestContext {
         return availableConnections;
     }
 
-    protected String adaptTestURLWithConfiguredHost(DatabaseTestURL url) throws Exception {
-        return url.getUrl().replaceAll("localhost", AbstractIntegrationTest.getDatabaseServerHostname(url.getDatabaseManager()));
-    }
-
     public DatabaseConnection getConnection(String url, String username, String password) throws Exception {
         return openConnection(url, username, password);
     }
 
     public String getTestUrl(Database database) throws Exception {
         for (DatabaseTestURL turl : getTestUrls()) {
-            String url=adaptTestURLWithConfiguredHost(turl);
+            String url=turl.getUrl();
             if (database.getDefaultDriver(url) != null) {
                 return url;
             }

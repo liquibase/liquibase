@@ -60,8 +60,6 @@ import static org.junit.Assert.assertFalse;
  * at liquibase world headquarters.  Feel free to change the return value, but don't check it in.  We are going to improve the config of this at some point.
  */
 public abstract class AbstractIntegrationTest {
-
-
     protected String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
@@ -74,11 +72,11 @@ public abstract class AbstractIntegrationTest {
 
     protected String contexts = "test, context-b";
     private Database database;
-    private String url;
+    private String jdbcUrl;
     protected String username;
     protected String password;
 
-    protected AbstractIntegrationTest(String changelogDir, String url) throws Exception {
+    protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         LogFactory.getInstance().setDefaultLoggingLevel("info");
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -91,12 +89,41 @@ public abstract class AbstractIntegrationTest {
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
 
-        this.url = url;
-
         // Set default username and password to lbuser/lbuser,
         // except for hsqldb, which needs sa/<empty password>
-        this.setUsername((url.startsWith("jdbc:hsqldb") ? "sa" : "lbuser"));
-        this.setPassword((url.startsWith("jdbc:hsqldb") ? "" : "lbuser"));
+        this.setUsername( dbms.getShortName().equalsIgnoreCase("hsqldb") ? "sa" : "lbuser");
+        this.setPassword( dbms.getShortName().equalsIgnoreCase("hsqldb") ? "" : "lbuser");
+
+        // Get the integration test properties for both global settings and (if applicable) local overrides.
+        Properties integrationTestProperties;
+        integrationTestProperties = new Properties();
+        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+        InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+        if(localProperties!=null)
+            integrationTestProperties.load(localProperties);
+
+        // Hostname for the DB server
+        String host = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".hostname");
+        if(host==null)
+            host=integrationTestProperties.getProperty("integration.test.hostname");
+        // Login username
+        String username = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".username");
+        if(username==null)
+            host=integrationTestProperties.getProperty("integration.test.username");
+        this.setUsername(username);
+
+        // Login password
+        String password = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".password");
+        if(username==null)
+            host=integrationTestProperties.getProperty("integration.test.password");
+        this.setPassword(password);
+
+        // JDBC URL (no global default so all databases!)
+        String url = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".url");
+        if ( (url==null) || (url.length()) == 0) {
+            throw new LiquibaseException("No JDBC URL found for integration test of database type " + dbms.getShortName());
+        }
+        this.setJdbcUrl(url);
 
         ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
     }
@@ -116,7 +143,7 @@ public abstract class AbstractIntegrationTest {
     @Before
     public void setUp() throws Exception {
 
-        openConnection(url, getUsername(), getPassword());
+        openConnection(getJdbcUrl(), getUsername(), getPassword());
 
         if (database != null) {
             if (!database.getConnection().getAutoCommit()) {
@@ -608,7 +635,7 @@ public abstract class AbstractIntegrationTest {
         }
         database.commit();
 
-        DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url, username, password);
+        DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(getJdbcUrl(), username, password);
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         database.setDefaultSchemaName("lbcat2");
         liquibase = createLiquibase(tempFile.getName());
@@ -726,7 +753,7 @@ public abstract class AbstractIntegrationTest {
 //
 //        runCompleteChangeLog();
 //
-//        DatabaseConnection connection2 = TestContext.getWriteExecutor().getConnection(url);
+//        DatabaseConnection connection2 = TestContext.getWriteExecutor().getConnection(jdbcUrl);
 //
 //        Database database2 = DatabaseFactory.getWriteExecutor().findCorrectDatabaseImplementation(connection2);
 //
@@ -1012,25 +1039,6 @@ public abstract class AbstractIntegrationTest {
 //       liquibase.update(contexts);
 //   }
 
-
-    public static String getDatabaseServerHostname(String databaseManager)  {
-        try {
-            Properties integrationTestProperties;
-            integrationTestProperties = new Properties();
-            integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-            InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
-            if(localProperties!=null)
-                integrationTestProperties.load(localProperties);
-
-            String host=integrationTestProperties.getProperty("integration.test."+databaseManager+".hostname");
-            if(host==null)
-                host=integrationTestProperties.getProperty("integration.test.hostname");
-            return host;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static DatabaseTestURL getDatabaseTestURL(String databaseManager)  {
         try {
             Properties integrationTestProperties;
@@ -1040,7 +1048,7 @@ public abstract class AbstractIntegrationTest {
             if(localProperties!=null)
                 integrationTestProperties.load(localProperties);
 
-            String url=integrationTestProperties.getProperty("integration.test."+databaseManager+".url");
+            String url=integrationTestProperties.getProperty("integration.test."+databaseManager+".jdbcUrl");
             if (url==null)
                 return null;
 
@@ -1089,5 +1097,13 @@ public abstract class AbstractIntegrationTest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    protected String getJdbcUrl() {
+        return jdbcUrl;
+    }
+
+    protected void setJdbcUrl(String jdbcUrl) {
+        this.jdbcUrl = jdbcUrl;
     }
 }

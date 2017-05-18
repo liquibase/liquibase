@@ -1,6 +1,7 @@
 package liquibase.dbtest.h2;
 
 import liquibase.Liquibase;
+import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -18,7 +19,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     private final String dbmsExcludeChangelog;
 
     public H2IntegrationTest() throws Exception {
-        super("h2", "jdbc:h2:mem:liquibase");
+        super("h2", DatabaseFactory.getInstance().getDatabase("firebird"));
         this.changeSpecifyDbmsChangeLog = "changelogs/h2/complete/change.specify.dbms.changelog.xml";
         this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
     }
