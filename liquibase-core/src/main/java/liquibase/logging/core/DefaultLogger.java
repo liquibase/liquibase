@@ -2,6 +2,7 @@ package liquibase.logging.core;
 
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.InternalException;
 import liquibase.logging.LogLevel;
 import liquibase.util.StringUtils;
 
@@ -14,7 +15,8 @@ import java.util.Date;
 public class DefaultLogger extends AbstractLogger {
 
     private String name = "liquibase";
-    private PrintStream err = System.err;
+    private PrintStream stderr = System.err;
+    private PrintStream stdout = System.out;
 
     public DefaultLogger() {
     }
@@ -51,7 +53,7 @@ public class DefaultLogger extends AbstractLogger {
                         throw new RuntimeException("Could not create logFile "+log.getAbsolutePath());
                     }
                 }
-                err = new PrintStream(log, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                stderr = new PrintStream(log, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -59,34 +61,53 @@ public class DefaultLogger extends AbstractLogger {
     }
 
     public void closeLogFile() {
-        if (err.equals(System.err) || err.equals(System.out)) {
+        if (stderr.equals(System.err) || stderr.equals(System.out)) {
             return;
         }
-        err.flush();
-        err.close();
-        err = System.err;
+        stderr.flush();
+        stderr.close();
+        stderr = System.err;
     }
 
     @Override
-    public void severe(String message) {
+    public void severe(String message)  {
         if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
             print(LogLevel.SEVERE, message);
         }
     }
 
-    protected void print(LogLevel logLevel, String message) {
+    protected void print(LogLevel logLevel, String message) throws InternalException {
         if (StringUtils.trimToNull(message) == null) {
             return;
         }
 
-        err.println(logLevel + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ": " + name + ": " + buildMessage(message));
+        String outputString = String.format("[%s] %s",
+                logLevel,
+                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ": " + name + ": " + buildMessage(message)
+        );
+        switch (logLevel) {
+            case DEBUG:
+                stdout.println(outputString);
+                break;
+            case INFO:
+                stdout.println(outputString);
+                break;
+            case SEVERE:
+                stderr.println(outputString);
+                break;
+            case WARNING:
+                stderr.println(outputString);
+                break;
+            default:
+                throw new InternalException("Encountered an unknown log level: " + logLevel.toString());
+        }
     }
 
     @Override
     public void severe(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
             print(LogLevel.SEVERE, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stderr);
         }
     }
 
@@ -101,7 +122,7 @@ public class DefaultLogger extends AbstractLogger {
     public void warning(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.WARNING) <=0) {
             print(LogLevel.WARNING, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stderr);
         }
     }
 
@@ -116,7 +137,7 @@ public class DefaultLogger extends AbstractLogger {
     public void info(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
             print(LogLevel.INFO, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stderr);
         }
     }
 
@@ -131,7 +152,7 @@ public class DefaultLogger extends AbstractLogger {
     public void debug(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.DEBUG) <=0) {
             print(LogLevel.DEBUG, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stderr);
         }
 
     }
