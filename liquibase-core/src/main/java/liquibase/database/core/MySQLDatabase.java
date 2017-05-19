@@ -72,7 +72,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
+        // If it looks like a MySQL, swims like a MySQL and quacks like a MySQL,
+        // it may still not be a MySQL, but a MariaDB.
+        return (
+                (PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName()))
+                && (! conn.getDatabaseProductVersion().toLowerCase().contains("mariadb"))
+        );
     }
 
     @Override
