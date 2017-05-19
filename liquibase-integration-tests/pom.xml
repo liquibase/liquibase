@@ -84,7 +84,13 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>6.0.6</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -161,6 +167,7 @@
                         <exclude>**/h2/*</exclude>
                         <exclude>**/hsqldb/*</exclude>
                         <exclude>**/informix/*</exclude>
+                        <exclude>**/mariadb/*</exclude>
                         <exclude>**/mssql/*</exclude>
                         <exclude>**/mysql/*</exclude>
                         <exclude>**/oracle/*</exclude>
