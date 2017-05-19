@@ -1,7 +1,7 @@
 package liquibase.exception;
 
 /**
- * Created by admin on 19.05.2017.
+ * Exception to throw if a self-check for internal software errors fails.
  */
 public class InternalException extends RuntimeException {
 
