@@ -30,7 +30,8 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -1497,8 +1498,14 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             String sequenceSchemaName = ((SequenceCurrentValueFunction) databaseFunction).getSequenceSchemaName();
             String sequenceName = databaseFunction.getValue();
-            if (!sequenceCurrentValueFunction.contains("'")) {
-                sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
+            sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
+
+            if (sequenceCurrentValueFunction.contains("'")) {
+                /* For PostgreSQL, the quotes around dangerous identifiers (e.g. mixed-case) need to stay in place,
+                 * or else PostgreSQL will not be able to find the sequence. */
+                if (! (this instanceof PostgresDatabase)) {
+                    sequenceName = sequenceName.replace("\"", "");
+                }
             }
             return String.format(sequenceCurrentValueFunction, sequenceName);
         } else {
