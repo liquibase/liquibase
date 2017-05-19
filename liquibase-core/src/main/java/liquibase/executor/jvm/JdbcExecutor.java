@@ -32,7 +32,6 @@ import java.util.Map;
  * <br><br>
  * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
  */
-@SuppressWarnings({"unchecked"})
 public class JdbcExecutor extends AbstractExecutor {
 
     private Logger log = LogFactory.getInstance().getLog();
@@ -196,7 +195,6 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        //noinspection unchecked
         return (List<Map<String, ?>>) query(sql, getColumnMapRowMapper(), sqlVisitors);
     }
 
@@ -347,7 +345,11 @@ public class JdbcExecutor extends AbstractExecutor {
                 return rse.extractData(rsToUse);
             }
             finally {
-                JdbcUtils.closeResultSet(rs);
+                if (rs != null) {
+                    if (!rs.isClosed()) {
+                        JdbcUtils.closeResultSet(rs);
+                    }
+                }
             }
         }
 
