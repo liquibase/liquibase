@@ -2,23 +2,20 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
 import liquibase.datatype.core.CharType;
-import liquibase.datatype.core.NumberType;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Schema;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
-
-import javax.management.Query;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
@@ -66,9 +63,23 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
     @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Object defaultValue = statement.getDefaultValue();
-        return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database),
-                        getAffectedColumn(statement))
+        return new Sql[] {
+                new UnparsedSql("ALTER TABLE "
+                        + database.escapeTableName(
+                                statement.getCatalogName(),
+                                statement.getSchemaName(),
+                                statement.getTableName() )
+                        + " ALTER COLUMN  "
+                        + database.escapeColumnName(
+                                statement.getCatalogName(),
+                                statement.getSchemaName(),
+                                statement.getTableName(),
+                                statement.getColumnName()
+                        ) + " SET DEFAULT "
+                        + DataTypeFactory.getInstance()
+                            .fromObject(defaultValue, database)
+                            .objectToSql(defaultValue, database),
+                    getAffectedColumn(statement) )
         };
     }
 
