@@ -11,7 +11,7 @@
         <configuration>
           <verbose>true</verbose>
           <changeLogFile>org/liquibase/changelog.xml</changeLogFile>
-          <driver>com.mysql.jdbc.Driver</driver>
+          <driver>com.mysql.cj.jdbc.Driver</driver>
           <url>jdbc:mysql://localhost/eformat</url>
           <username>root</username>
           <outputDefaultCatalog>false</outputDefaultCatalog>
