@@ -3,9 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -304,7 +302,7 @@
 
     <changeSet id="standardTypes-test" author="nvoxland">
         <createTable tableName="standardTypesTest">
-            <column name="timestampColumn" type="java.sql.Types.TIMESTAMP"/>
+            <column name="timestampColumn" type="java.sql.Types.TIMESTAMP" />
             <column name="varcharColumn" type="java.sql.Types.VARCHAR(255)"/>
             <column name="blobColumn" type="java.sql.Types.BLOB"/>
             <column name="booleanColumn" type="java.sql.Types.BOOLEAN"/>
@@ -1114,4 +1112,13 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="timestamp_column_precision" author="abuschka">
+        <comment>Test if we (and the JDBC driver) correctly fetch the number of fractional positions
+            in a TIMESTAMP column for databases that support it.</comment>
+        <createTable tableName="test_timestamp_fractions">
+            <column name="timestampColumnDefault" type="timestamp" />
+            <column name="timestampColumnPrec3" type="timestamp(3)" />
+            <column name="timestampColumnPrec6" type="timestamp(6)" />
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
