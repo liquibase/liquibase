@@ -470,7 +470,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, null));
+                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, SQL_FILTER_MATCH_ALL));
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
                             return new ArrayList<CachedRow>();
@@ -491,7 +491,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null));
+                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) {
                             return new ArrayList<CachedRow>();
