@@ -1481,7 +1481,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             sequenceName = escapeObjectName(null, sequenceSchemaName, sequenceName, Sequence.class);
             if (sequenceNextValueFunction.contains("'")) {
-                sequenceName = sequenceName.replace("\"", "");
+                /* For PostgreSQL, the quotes around dangerous identifiers (e.g. mixed-case) need to stay in place,
+                 * or else PostgreSQL will not be able to find the sequence. */
+                if (! (this instanceof PostgresDatabase)) {
+                    sequenceName = sequenceName.replace("\"", "");
+                }
             }
 
             return String.format(sequenceNextValueFunction, sequenceName);
