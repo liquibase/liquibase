@@ -37,20 +37,13 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
 
             addUrlsFromPath(urls,  "jdbc-drivers/all");
 
-            //Add drivers by Java version. Only jars from the biggest matching version are taken
-            if(SystemUtils.isJavaVersionAtLeast(1.6f)) {
-                addUrlsFromPath(urls,  "jdbc-drivers/byJavaVersion/1.6");
-            } else if(SystemUtils.isJavaVersionAtLeast(1.5f)) {
-                addUrlsFromPath(urls,  "jdbc-drivers/byJavaVersion/1.5");
-            }
-
             return urls.toArray(new URL[urls.size()]);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void addUrlsFromPath(List<URL> addTo,String path) throws Exception{
+    private static void addUrlsFromPath(List<URL> addTo,String path) throws Exception {
             File thisClassFile = new File(new URI(Thread.currentThread().getContextClassLoader().getResource("liquibase/test/JUnitJDBCDriverClassLoader.class")
                     .toExternalForm()));
             File jdbcLib = new File(thisClassFile.getParentFile().getParentFile().getParentFile(),path);

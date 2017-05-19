@@ -50,9 +50,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     public class CachingDatabaseMetaData {
-
         private DatabaseMetaData databaseMetaData;
         private Database database;
+        private final String SQL_FILTER_MATCH_ALL = "%";
 
         public CachingDatabaseMetaData(Database database, DatabaseMetaData metaData) {
             this.databaseMetaData = metaData;
@@ -690,7 +690,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, table, new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, schema,
+                            (table == null ? SQL_FILTER_MATCH_ALL : table), new String[]{"TABLE"}));
                 }
 
                 @Override
@@ -703,7 +704,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, null, new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"TABLE"}));
                 }
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
@@ -748,7 +749,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, view, new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, schema,
+                            (view == null ? SQL_FILTER_MATCH_ALL : view), new String[]{"VIEW"}));
                 }
 
 
@@ -762,7 +764,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, null, new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
                 }
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
