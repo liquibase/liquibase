@@ -79,11 +79,4 @@ public class LogFactory {
     public void setDefaultLoggingLevel(LogLevel defaultLoggingLevel) {
         this.defaultLoggingLevel = defaultLoggingLevel.name();
     }
-
-    /**
-     * @deprecated Use non-static {@link #setDefaultLoggingLevel(String)} method
-     */
-    public static void setLoggingLevel(String defaultLoggingLevel) {
-        getInstance().defaultLoggingLevel = defaultLoggingLevel;
-    }
 }
