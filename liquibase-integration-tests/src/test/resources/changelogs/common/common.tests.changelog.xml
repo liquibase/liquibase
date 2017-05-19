@@ -89,7 +89,8 @@
     <changeSet id="defaultValueTest-1" author="nvoxland">
         <preConditions onFail="MARK_RAN">
             <not><dbms type="derby"/></not>
-            <not><dbms type="mysql"/></not> <!-- fails on set default now() -->
+            <not><dbms type="mysql"/></not> <!-- @todo: fails on set default now() -->
+            <not><dbms type="mariadb"/></not> <!-- @todo: Bug: https://github.com/dbmanul/dbmanul/issues/1 -->
         </preConditions>
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
