@@ -3,7 +3,6 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -14,8 +13,6 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigInteger;
 
 /**
@@ -118,16 +115,15 @@ public class AddAutoIncrementChange extends AbstractChange {
             } else {
                 schemaPrefix = this.schemaName;
             }
-            if (schemaPrefix == null) {
-                schemaPrefix = "";
-            } else {
-                schemaPrefix = schemaPrefix+".";
-            }
+
+            SequenceNextValueFunction nvf = new SequenceNextValueFunction(sequenceName);
+            nvf.setSequenceSchemaName(schemaPrefix);
 
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, this.schemaName, sequenceName),
                     new SetNullableStatement(catalogName, this.schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction(schemaPrefix + sequenceName)),
+                    new AddDefaultValueStatement(catalogName, this.schemaName, getTableName(), getColumnName(), getColumnDataType(),
+                            nvf)
             };
         }
 
