@@ -36,11 +36,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.*;
-import liquibase.test.DatabaseTestContext;
-import liquibase.test.DatabaseTestURL;
-import liquibase.test.DiffResultAssert;
-import liquibase.test.JUnitResourceAccessor;
-import liquibase.test.TestContext;
+import liquibase.test.*;
 import liquibase.util.RegexMatcher;
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +48,6 @@ import java.sql.Statement;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -331,9 +326,17 @@ public abstract class AbstractIntegrationTest {
         try {
             Statement statement = null;
             try {
-                statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
-                database.commit();
+                // only drop the DATABASECHANGELOG table if it really exists.
+                if (SnapshotGeneratorFactory.getInstance().has(
+                    new Table()
+                        .setName(database.getDatabaseChangeLogTableName())
+                        .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
+                        database))
+                {
+                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                    database.commit();
+                }
             } catch (Exception e) {
                 System.out.println("Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
@@ -343,10 +346,18 @@ public abstract class AbstractIntegrationTest {
                     statement.close();
                 }
             }
+
+            // Now drop the DATABASECHANGELOGLOCK table (if it exists)
             try {
-                statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-                database.commit();
+                if (SnapshotGeneratorFactory.getInstance().has(
+                        new Table()
+                                .setName(database.getDatabaseChangeLogLockTableName())
+                                .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
+                        database)) {
+                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                    database.commit();
+                }
             } catch (Exception e) {
                 System.out.println("Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();

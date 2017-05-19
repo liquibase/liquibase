@@ -12,7 +12,6 @@ import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.*;
@@ -28,7 +27,6 @@ public class DatabaseFactory {
         try {
             Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
-            //noinspection unchecked
             for (Class<? extends Database> clazz : classes) {
                 try {
                     register(clazz.getConstructor().newInstance());
