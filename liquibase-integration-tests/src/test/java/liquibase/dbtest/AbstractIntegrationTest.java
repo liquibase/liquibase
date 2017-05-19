@@ -106,16 +106,17 @@ public abstract class AbstractIntegrationTest {
         String host = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".hostname");
         if(host==null)
             host=integrationTestProperties.getProperty("integration.test.hostname");
+
         // Login username
         String username = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".username");
         if(username==null)
-            host=integrationTestProperties.getProperty("integration.test.username");
+            username=integrationTestProperties.getProperty("integration.test.username");
         this.setUsername(username);
 
         // Login password
         String password = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".password");
-        if(username==null)
-            host=integrationTestProperties.getProperty("integration.test.password");
+        if(password==null)
+            password=integrationTestProperties.getProperty("integration.test.password");
         this.setPassword(password);
 
         // JDBC URL (no global default so all databases!)
@@ -138,7 +139,7 @@ public abstract class AbstractIntegrationTest {
 
     /**
      * Clear all test schemas between each test
-     * @throws Exception
+     * @throws Exception If an unhandld exception occurs during test setup
      */
     @Before
     public void setUp() throws Exception {
@@ -178,14 +179,14 @@ public abstract class AbstractIntegrationTest {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
                     database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 } else if (database.supportsCatalogs()) {
-                    /**
+                    /*
                      * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
                      * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
                      * Liquibase ChangeSet. In this case, AbstractJdbcDatabase.escapeObjectName assumes the author
                      * was intending to write "catalog=..." and transparently rewrites the expression.
                      * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
                      * are doing a thorough cleanup.
-                      */
+                     */
                     database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null));
                     database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_SCHEMA, null));
                     database.dropDatabaseObjects(new CatalogAndSchema("LBCAT2", null));
@@ -193,7 +194,6 @@ public abstract class AbstractIntegrationTest {
             }
             database.commit();
             SnapshotGeneratorFactory.resetAll();
-
         }
     }
 
