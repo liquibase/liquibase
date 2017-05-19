@@ -97,11 +97,6 @@ public abstract class AbstractIntegrationTest {
         if(localProperties!=null)
             integrationTestProperties.load(localProperties);
 
-        // Hostname for the DB server
-        String host = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".hostname");
-        if(host==null)
-            host=integrationTestProperties.getProperty("integration.test.hostname");
-
         // Login username
         String username = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".username");
         if(username==null)
