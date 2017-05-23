@@ -24,9 +24,9 @@
                 <version>${project.version}</version>
 				<dependencies>
 			        <dependency>
-  			          <groupId>hsqldb</groupId>
-			            <artifactId>hsqldb</artifactId>
-			            <version>1.8.0.7</version>
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>2.4.0</version>
 			        </dependency>
 				</dependencies>
                 <configuration>
