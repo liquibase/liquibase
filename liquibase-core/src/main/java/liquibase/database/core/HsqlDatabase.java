@@ -12,13 +12,9 @@ import java.math.BigInteger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER;
 
 public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String START_CONCAT = "CONCAT(";
@@ -27,7 +23,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
     static {
         Map<String, HashSet<String>> tempMap = new HashMap<String, HashSet<String>>();
-        tempMap.put("datetime", new HashSet<String>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW")));
+        tempMap.put("datetime", new HashSet<String>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW", CURRENT_DATE_TIME_PLACE_HOLDER)));
         SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP = Collections.unmodifiableMap(tempMap);
     }
     private Boolean oracleSyntax;
@@ -89,7 +85,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
      */
     public static boolean supportsDefaultValueComputed(String columnType, String defaultValue){
     	HashSet<String> possibleComputedValues = SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP.get(columnType);
-    	return (possibleComputedValues!=null) && possibleComputedValues.contains(defaultValue);
+    	return (possibleComputedValues!=null) && possibleComputedValues.contains(defaultValue.toLowerCase());
     }
 
     @Override

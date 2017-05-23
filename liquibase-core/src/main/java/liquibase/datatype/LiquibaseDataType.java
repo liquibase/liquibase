@@ -201,6 +201,14 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return toString().hashCode();
     }
 
+    /**
+     * Determines if the given function name refers to the function that returns the current
+     * time and date for a specific DBMS. Also returns true if the name returns the Liquibase wildcard
+     * CURRENT_DATE_TIME_PLACE_HOLDER, which will later be translated into the appropriate function.
+     * @param string The database function name to test
+     * @param database A database object to test against
+     * @return see above
+     */
     protected boolean isCurrentDateTimeFunction(String string, Database database) {
         return string.toLowerCase().startsWith("current_timestamp")
                 || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
