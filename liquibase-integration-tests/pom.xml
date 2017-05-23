@@ -171,7 +171,6 @@
                         <exclude>**/derby/*</exclude>
                         <exclude>**/firebird/*</exclude>
                         <exclude>**/h2/*</exclude>
-                        <exclude>**/hsqldb/*</exclude>
                         <exclude>**/informix/*</exclude>
                         <exclude>**/mariadb/*</exclude>
                         <exclude>**/mssql/*</exclude>
