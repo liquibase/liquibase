@@ -1,8 +1,8 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -330,6 +330,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         configureFieldsAndValues(fileOpener);
 
         LogFactory.getInstance().setDefaultLoggingLevel(logging);
+        getLog().info(CommandLineUtils.getBanner());
 
         // Displays the settings for the Mojo depending of verbosity mode.
         displayMojoSettings();

@@ -13,7 +13,9 @@ import liquibase.database.core.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.InternalException;
+import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -25,8 +27,14 @@ import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.IOException;
+import java.net.URL;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 /**
  * Common Utility methods used in the CommandLine application and the Maven plugin.
@@ -268,6 +276,37 @@ boolean sql2005OrLater = true;
             throw new LiquibaseException(e);
         }
 
+    }
+
+    public static String getBanner() {
+        String myVersion = "";
+        String buildTimeString = "";
+
+        Class clazz = CommandLineUtils.class;
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (classPath.startsWith("jar")) {
+            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
+                    "/META-INF/MANIFEST.MF";
+            Manifest manifest = null;
+            try {
+                manifest = new Manifest(new URL(manifestPath).openStream());
+            } catch (IOException e) {
+                throw new InternalException("Cannot open a URL to the manifest of our own JAR file.");
+            }
+            Attributes attr = manifest.getMainAttributes();
+            myVersion = attr.getValue("Bundle-Version");
+            buildTimeString = attr.getValue("Build-Time");
+        }
+        StringBuffer banner = new StringBuffer();
+
+        banner.append(String.format(
+            "Starting DB-Manul at %s", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS).format(RFC_1123_DATE_TIME)
+        ));
+        if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
+            banner.append(String.format(" (version %s built at %s)", myVersion, buildTimeString));
+        }
+        return banner.toString();
     }
 
     private static class OutDiffStatusListener implements DiffStatusListener {

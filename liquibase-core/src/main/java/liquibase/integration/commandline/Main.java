@@ -6,12 +6,13 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.command.CommandFactory;
 import liquibase.command.core.DropAllCommand;
 import liquibase.command.core.ExecuteSqlCommand;
 import liquibase.command.core.SnapshotCommand;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -31,7 +32,6 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.changelog.visitor.ChangeExecListener;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -123,6 +123,8 @@ public class Main {
 //            }
 
             Main main = new Main();
+            System.out.println(CommandLineUtils.getBanner());
+
             if (args.length == 1 && "--help".equals(args[0])) {
                 main.printHelp(System.err);
                 return;
@@ -502,9 +504,8 @@ public class Main {
         stream.println();
     }
 
-
     protected void printHelp(PrintStream stream) {
-        stream.println("Usage: java -jar liquibase.jar [options] [command]");
+        stream.println("Usage: java -jar dbmanul.jar [options] [command]");
         stream.println("");
         stream.println("Standard Commands:");
         stream.println(" update                         Updates database to current version");
