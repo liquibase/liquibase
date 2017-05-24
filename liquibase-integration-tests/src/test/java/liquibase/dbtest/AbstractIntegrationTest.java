@@ -72,7 +72,7 @@ public abstract class AbstractIntegrationTest {
     protected String password;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
-        LogFactory.getInstance().setDefaultLoggingLevel("info");
+        LogFactory.getInstance().getLog().setLogLevel("info");
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
