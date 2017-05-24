@@ -1,20 +1,19 @@
 package liquibase.datatype.core;
 
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.statement.DatabaseFunction;
-import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 
 @DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
@@ -228,6 +227,11 @@ public class DateTimeType extends LiquibaseDataType {
 
             if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+', 'YYYY\\-MM\\-DD HH24:MI:SS'\\)")) {
                 dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:s");
+                value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
+            }
+
+            if (database instanceof HsqlDatabase && value.matches("TIMESTAMP'\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+(?:\\.\\d+)?'")) {
+                dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:s.S");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }
 
