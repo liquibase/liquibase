@@ -76,6 +76,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return database instanceof OracleDatabase;
+                }
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("FKTABLE_SCHEM");
+                }
+
+                @Override
                 public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
@@ -145,9 +155,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "INNER JOIN all_cons_columns fc " +
                                 "ON fc.owner = f.owner " +
                                 "AND fc.constraint_name = f.constraint_name " +
-                                "AND fc.position = pc.position " +
-                                "WHERE f.owner = '" + jdbcSchemaName + "' " +
-                                "AND p.constraint_type in ('P', 'U') " +
+                                "AND fc.position = pc.position ";
+                        if (getAllCatalogsStringScratchData() == null) {
+                            sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
+                        } else {
+                            sql += "WHERE f.owner IN ('"+jdbcSchemaName+"', " + getAllCatalogsStringScratchData() + ") ";
+                        }
+                        sql += "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R' " +
                                 "AND p.table_name NOT LIKE 'BIN$%' " +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
@@ -257,6 +271,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return getAllCatalogsStringScratchData() != null && database instanceof OracleDatabase;
+                }
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("TABLE_SCHEM");
+                }
+
+                @Override
                 public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
 
@@ -269,6 +293,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "SELECT " +
                                         "c.INDEX_NAME, " +
                                         "3 AS TYPE, " +
+                                        "c.TABLE_OWNER AS TABLE_SCHEM, " +
                                         "c.TABLE_NAME, " +
                                         "c.COLUMN_NAME, " +
                                         "c.COLUMN_POSITION AS ORDINAL_POSITION, " +
@@ -278,9 +303,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "FROM ALL_IND_COLUMNS c " +
                                         "JOIN ALL_INDEXES i ON i.owner=c.index_owner AND i.index_name = c.index_name and i.table_owner = c.table_owner " +
                                         "LEFT OUTER JOIN all_ind_expressions e ON e.index_owner=c.index_owner AND e.index_name = c.index_name AND e.column_position = c.column_position   " +
-                                        "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=c.table_name " +
-                                        "WHERE c.TABLE_OWNER = '" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' " +
-                                        "AND i.OWNER = c.TABLE_OWNER " +
+                                        "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=c.table_name ";
+                        if (!bulkFetch || getAllCatalogsStringScratchData() == null) {
+                            sql += "WHERE c.TABLE_OWNER = '" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' ";
+                        } else {
+                            sql += "WHERE c.TABLE_OWNER IN ('"+database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class)+"', " + getAllCatalogsStringScratchData()+ ")";
+                        }
+                        sql += "AND i.OWNER = c.TABLE_OWNER " +
                                         "AND d.object_name IS NULL ";
 
 
@@ -412,6 +441,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return true;
+                }
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("TABLE_SCHEM");
+                }
+
+                @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
                         return false;
@@ -489,8 +528,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "CHAR_COL_DECL_LENGTH, CHAR_LENGTH, " +
                             "CHAR_USED, VIRTUAL_COLUMN " +
                             "FROM ALL_TAB_COLS c " +
-                            "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) " +
-                            "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
+                            "JOIN ALL_COL_COMMENTS cc USING ( OWNER, TABLE_NAME, COLUMN_NAME ) ";
+
+                    if (!bulk || getAllCatalogsStringScratchData() == null) {
+                        sql += "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
+                    } else {
+                        sql += "WHERE OWNER IN ('"+ ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"', " + getAllCatalogsStringScratchData()+ ") AND hidden_column='NO'";
+                    }
+
                     if (!bulk) {
                         if (tableName != null) {
                             sql += " AND TABLE_NAME='" + database.escapeStringForDatabase(tableName) + "'";
@@ -499,6 +544,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND COLUMN_NAME='" + database.escapeStringForDatabase(columnName) + "'";
                         }
                     }
+                    sql += " AND "+ ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
                     return this.executeAndExtract(sql, database);
@@ -642,7 +688,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    return table == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                    return table == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
                 @Override
@@ -653,6 +699,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, table);
+                }
+
+                @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return database instanceof OracleDatabase;
+                }
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("TABLE_SCHEM");
                 }
 
                 @Override
@@ -717,11 +773,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "from ALL_TABLES a " +
                             "join ALL_TAB_COMMENTS c on a.TABLE_NAME=c.table_name and a.owner=c.owner ";
                     String allCatalogsString = getAllCatalogsStringScratchData();
-//                    if (allCatalogsString == null) {
+                    if (tableName != null || allCatalogsString == null) {
                         sql += "WHERE a.OWNER='" + ownerName + "'";
-//                    } else {
-//                        sql += "WHERE a.OWNER IN ('"+ownerName+"', " + allCatalogsString + ")";
-//                    }
+                    } else {
+                        sql += "WHERE a.OWNER IN ('"+ownerName+"', " + allCatalogsString + ")";
+                    }
                     if (tableName != null) {
                         sql += " AND a.TABLE_NAME='" + tableName + "'";
                     }
@@ -736,7 +792,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    return view == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                    return view == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                 }
 
                 @Override
@@ -748,6 +804,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, view);
+                }
+
+                @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return true;
+                }
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("TABLE_SCHEM");
                 }
 
 
@@ -778,20 +844,23 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return extract(databaseMetaData.getTables(catalog, schema, null, new String[]{"VIEW"}));
                 }
 
-                private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
-                    String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
+                private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
 
                     String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS, TEXT as OBJECT_BODY";
                     if (database.getDatabaseMajorVersion() > 10) {
                         sql += ", EDITIONING_VIEW";
                     }
                     sql += " from ALL_VIEWS a " +
-                            "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner " +
-                            "WHERE a.OWNER='" + ownerName + "'";
+                            "join ALL_TAB_COMMENTS c on a.VIEW_NAME=c.table_name and a.owner=c.owner ";
+                    if (viewName != null || getAllCatalogsStringScratchData() == null) {
+                        sql += "WHERE a.OWNER='" + ownerName + "'";
+                    } else {
+                        sql += "WHERE a.OWNER IN ('"+ownerName+"', " + getAllCatalogsStringScratchData() + ")";
+                    }
                     if (viewName != null) {
                         sql += " AND a.VIEW_NAME='" + viewName + "'";
                     }
-                    sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner='" + ownerName + "')";
+                    sql += " AND a.VIEW_NAME not in (select mv.name from all_registered_mviews mv where mv.owner=a.owner)";
 
                     return executeAndExtract(sql, database);
                 }
@@ -809,6 +878,17 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, table);
+                }
+
+                @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return database instanceof OracleDatabase;
+                }
+
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("TABLE_SCHEM");
                 }
 
                 @Override
@@ -941,17 +1021,22 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         warnAboutDbaRecycleBin();
                         try {
-                            return executeAndExtract("SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM " +
+                            String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq,c.constraint_name AS pk_name FROM " +
                                     "all_cons_columns c, " +
                                     "all_constraints k " +
                                     "LEFT JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=k.table_name " +
                                     "WHERE k.constraint_type = 'P' " +
-                                    "AND d.object_name IS NULL " +
-                                    "AND k.owner='" + catalogAndSchema.getCatalogName() + "' " +
-                                    "AND k.constraint_name = c.constraint_name " +
+                                    "AND d.object_name IS NULL ";
+                            if (getAllCatalogsStringScratchData() == null) {
+                                sql += "AND k.owner='" + catalogAndSchema.getCatalogName() + "' ";
+                            } else {
+                                sql += "AND k.owner IN ('"+catalogAndSchema.getCatalogName()+"', " + getAllCatalogsStringScratchData()+ ")";
+                            }
+                            sql += "AND k.constraint_name = c.constraint_name " +
                                     "AND k.table_name = c.table_name " +
                                     "AND k.owner = c.owner " +
-                                    "ORDER BY column_name", database);
+                                    "ORDER BY column_name";
+                            return executeAndExtract(sql, database);
                         } catch (DatabaseException e) {
                             throw new SQLException(e);
                         }
@@ -969,7 +1054,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
-                        return getAllCatalogsStringScratchData() != null || table == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                        return table == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
                     } else {
                         return false;
                     }
@@ -982,7 +1067,17 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    return tableName == null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                    return tableName == null || getAllCatalogsStringScratchData() != null || super.shouldBulkSelect(schemaKey, resultSetCache);
+                }
+
+                @Override
+                public boolean bulkReturnsAllSchemas() {
+                    return database instanceof OracleDatabase;
+                }
+
+                @Override
+                public String getSchemaKey(CachedRow row) {
+                    return row.getString("CONSTRAINT_SCHEM");
                 }
 
                 @Override
@@ -1054,13 +1149,17 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     } else if (database instanceof OracleDatabase) {
                         warnAboutDbaRecycleBin();
 
-                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
+                        sql = "select uc.owner AS CONSTRAINT_SCHEM, uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name, ui.index_name, ui.owner as INDEX_CATALOG " +
                                 "from all_constraints uc " +
                                 "join all_indexes ui on uc.index_name = ui.index_name and uc.owner=ui.table_owner and uc.table_name=ui.table_name " +
                                 "LEFT OUTER JOIN " + (((OracleDatabase) database).canAccessDbaRecycleBin() ? "dba_recyclebin" : "user_recyclebin") + " d ON d.object_name=ui.table_name " +
-                                "where uc.constraint_type='U' " +
-                                "and uc.owner = '" + jdbcSchemaName + "'" +
-                                "AND d.object_name IS NULL ";
+                                "where uc.constraint_type='U' ";
+                        if (tableName != null || getAllCatalogsStringScratchData() == null) {
+                            sql += "and uc.owner = '" + jdbcSchemaName + "'";
+                        } else {
+                            sql += "and uc.owner IN ('"+jdbcSchemaName+"', " + getAllCatalogsStringScratchData()+ ")";
+                        }
+                        sql += "AND d.object_name IS NULL ";
 
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + tableName + "'";

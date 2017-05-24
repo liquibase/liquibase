@@ -80,7 +80,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 for (Catalog catalog : catalogs) {
                     quotedCatalogs.add("'" + catalog.getName() + "'");
                 }
-                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", "));
+                this.setScratchData(ALL_CATALOGS_STRING_SCRATCH_KEY, StringUtils.join(quotedCatalogs, ", ").toUpperCase());
             }
 
 
@@ -336,6 +336,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 return fieldValue;
             }
 
+//            System.out.println("replaceObject "+fieldValue);
             if (isWrongSchema(((DatabaseObject) fieldValue))) {
                 DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
                 if (savedFieldValue == null) {
