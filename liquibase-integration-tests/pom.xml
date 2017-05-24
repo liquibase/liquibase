@@ -98,6 +98,12 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -167,15 +173,10 @@
                     </includes>
                     <excludes>
                         <exclude>**/asany/*</exclude>
-                        <exclude>**/cache/*</exclude>
-                        <exclude>**/derby/*</exclude>
                         <exclude>**/firebird/*</exclude>
-                        <exclude>**/h2/*</exclude>
                         <exclude>**/informix/*</exclude>
-                        <exclude>**/mariadb/*</exclude>
                         <exclude>**/mssql/*</exclude>
                         <exclude>**/mysql/*</exclude>
-                        <exclude>**/oracle/*</exclude>
                         <exclude>**/pgsql/*</exclude>
                         <exclude>**/sybase/*</exclude>
                         <exclude>**/sqlite/*</exclude>
