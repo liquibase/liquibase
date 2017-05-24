@@ -133,8 +133,11 @@ public abstract class AbstractIntegrationTest {
      */
     @Before
     public void setUp() throws Exception {
-
+        // Try to get a connection to the DBMS (or start the embedded DBMS types)
         openConnection(getJdbcUrl(), getUsername(), getPassword());
+
+        // Do not count the test as successful if we skip it because of a failed login. Count it as skipped instead.
+        org.junit.Assume.assumeTrue(database != null);
 
         if (database != null) {
             if (!database.getConnection().getAutoCommit()) {
