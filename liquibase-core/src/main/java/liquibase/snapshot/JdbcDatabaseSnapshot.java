@@ -442,7 +442,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public boolean bulkReturnsAllSchemas() {
-                    return true;
+                    return database instanceof OracleDatabase;
                 }
 
                 @Override
@@ -808,7 +808,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public boolean bulkReturnsAllSchemas() {
-                    return true;
+                    return database instanceof OracleDatabase;
                 }
 
                 @Override
