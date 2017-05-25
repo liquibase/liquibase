@@ -1,25 +1,24 @@
 package liquibase.change;
 
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.*;
-
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.structure.DatabaseObject;
-import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 import liquibase.util.beans.PropertyUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is purely for convenience but recommended.
@@ -350,17 +349,22 @@ public abstract class AbstractChange implements Change {
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
 
+        // Record an error if a parameter is not set, but that parameter is required by database.
         for (ChangeParameterMetaData param : ChangeFactory.getInstance().getChangeMetaData(this).getParameters().values()) {
             if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
                 changeValidationErrors.addError(param.getParameterName() + " is required for " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " on " + database.getShortName());
             }
         }
+
+        // We cannot proceed to the next validation if we have missing parameters
         if (changeValidationErrors.hasErrors()) {
             return changeValidationErrors;
         }
 
+        // Record warnings if statements are unsupported on database
         if (!generateStatementsVolatile(database)) {
-			String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName() + " is not supported on " + database.getShortName();
+			String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName()
+                    + " is not supported on " + database.getShortName();
 			boolean sawUnsupportedError = false;
 
 			SqlStatement[] statements = generateStatements(database);
