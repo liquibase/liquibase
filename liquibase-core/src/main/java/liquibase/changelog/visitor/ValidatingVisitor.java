@@ -7,18 +7,13 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.logging.LogFactory;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
@@ -95,7 +90,6 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private String normalizePath(String filePath) {
         return filePath.replaceFirst("^classpath:", "");
     }
-        
 
         @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
@@ -118,7 +112,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
                     if (foundErrors != null && foundErrors.hasErrors()) {
                         if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
-                            LogFactory.getInstance().getLog().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                            LogFactory.getInstance().getLog().info(
+                                    "Skipping changeSet "+changeSet+" due to validation error(s): " +
+                                            StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                         } else {
                             validationErrors.addAll(foundErrors, changeSet);
@@ -138,14 +134,15 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-
+        // Did we already see this ChangeSet?
         String changeSetString = changeSet.toString(false);
         if (seenChangeSets.contains(changeSetString)) {
             duplicateChangeSets.add(changeSet);
+            return;
         } else {
             seenChangeSets.add(changeSetString);
         }
-    }
+    } // public void visit(...)
 
     public List<String> getInvalidMD5Sums() {
         return invalidMD5Sums;
