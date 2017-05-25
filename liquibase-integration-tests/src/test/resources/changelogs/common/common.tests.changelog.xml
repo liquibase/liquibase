@@ -169,7 +169,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="indexWithAscDescColumns" author="abuschka">
+    <changeSet id="indexWithAscDescColumns" author="abuschka" dbms="!firebird">
         <createTable tableName="indexWithAscDescColumns">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
