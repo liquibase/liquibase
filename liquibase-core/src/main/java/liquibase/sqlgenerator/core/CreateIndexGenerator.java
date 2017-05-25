@@ -21,7 +21,8 @@ import java.util.List;
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
     @Override
-    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database,
+                                     SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
         validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
@@ -32,10 +33,13 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     }
 
     @Override
-    public Warnings warn(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Warnings warn(CreateIndexStatement createIndexStatement, Database database,
+                         SqlGeneratorChain sqlGeneratorChain) {
 
         Warnings warnings = super.warn(createIndexStatement, database, sqlGeneratorChain);
-        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof DB2Database || database instanceof PostgresDatabase || database instanceof MockDatabase)) {
+        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase
+                || database instanceof DB2Database || database instanceof PostgresDatabase
+                || database instanceof MockDatabase)) {
             if (createIndexStatement.isClustered() != null && createIndexStatement.isClustered()) {
                 warnings.addWarning("Creating clustered index not supported with "+database);
             }
@@ -44,14 +48,28 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         return warnings;
     }
 
-    @Override
-    public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
+    /**
+     * Generate a CREATE INDEX SQL statement for SQL-compliant databases.
+     * @param statement A CreateIndexStatement with the desired properties of the SQL to be generated
+     * @param database The DBMS for whose SQL dialect the statement is to be made
+     * @param sqlGeneratorChain @todo ???
+     * @return An array of Sql objects containing the generated SQL statement(s).
+     */
+    @Override
+    public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain)
+    {
 	    if (database instanceof OracleDatabase) {
-		    // Oracle don't create index when creates foreignKey
-		    // It means that all indexes associated with foreignKey should be created manualy
+		    /*
+		     * Oracle automatically creates indexes for PRIMARY KEY and UNIQUE constraints, but does not do so
+	         * for FOREIGN KEY constraints, though it is highly recommended to do to avoid potentially severe
+	         *  performance problems when deleting rows from the parent table or changing the key column(s) in the
+	         *  parent table.
+		      */
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
+		    if (associatedWith != null &&
+                    (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)
+                    )) {
 			    return new Sql[0];
 		    }
 	    } else {
