@@ -73,11 +73,7 @@ class ResultSetCache {
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (bulkQueried && resultSetExtractor.bulkReturnsAllSchemas()) {
-                        String rowSchema = resultSetExtractor.getSchemaKey(row);
-                        if (rowSchema == null) {
-                            System.out.println("null row schema");
-                        }
-                        rowSchema = rowSchema.toLowerCase();
+                        String rowSchema = resultSetExtractor.getSchemaKey(row).toLowerCase();
                         cache = cacheBySchema.get(rowSchema);
                         if (cache == null) {
                             cache = new HashMap<String, List<CachedRow>>();
@@ -91,7 +87,9 @@ class ResultSetCache {
                 }
             }
 
-            cache = cacheBySchema.get(schemaKey);
+            if (bulkQueried) {
+                cache = cacheBySchema.get(schemaKey);
+            }
             List<CachedRow> returnList = cache.get(wantedKey);
             if (returnList == null) {
                 returnList = new ArrayList<CachedRow>();
