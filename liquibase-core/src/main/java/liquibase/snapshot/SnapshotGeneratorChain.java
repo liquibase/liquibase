@@ -65,7 +65,7 @@ public class SnapshotGeneratorChain {
 
         SnapshotGenerator next = snapshotGenerators.next();
         for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
-            if (removedGenerator.isAssignableFrom(next.getClass())) {
+            if (removedGenerator.equals(next.getClass())) {
                 return getNextValidGenerator();
             }
         }
