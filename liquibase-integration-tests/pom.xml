@@ -114,12 +114,17 @@
 
     <profiles>
         <profile>
+            <!-- The Oracle RDBMS JDBC driver is only available under a proprietary license from the Oracle
+                 Maven repository. You have to register and accept a license agreement to gain access. The procedure
+                 is described at
+                 http://docs.oracle.com/middleware/1213/core/MAVEN/config_maven_repo.htm#MAVEN9012
+            -->
             <id>oracle</id>
             <dependencies>
                 <dependency>
                     <groupId>com.oracle.jdbc</groupId>
-                    <artifactId>ojdbc6</artifactId>
-                    <version>12.1.0.2</version>
+                    <artifactId>ojdbc8</artifactId>
+                    <version>12.2.0.1</version>
                 </dependency>
             </dependencies>
         </profile>
