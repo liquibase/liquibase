@@ -120,8 +120,7 @@
                                     </mapper>
                                 </data>
                                 <data>
-                                    <!--<src>${project.build.directory}/ddbmanulbase</src>-->
-                                    <src>src/main/resources/liquibase</src>
+                                    <src>src/main/resources/dbmanul</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
@@ -135,22 +134,22 @@
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}</prefix>
                                     </mapper>
                                 </data>
                                 <data>
-                                    <src>${project.build.directory}/dist/liquibase.spec</src>
+                                    <src>${project.build.directory}/dist/dbmanul.spec</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}</prefix>
                                     </mapper>
                                 </data>
                                 <data>
                                     <type>link</type>
-                                    <linkName>/usr/bin/liquibase</linkName>
-                                    <linkTarget>../lib/liquibase-${project.version}/liquibase</linkTarget>  
+                                    <linkName>/usr/bin/dbmanul</linkName>
+                                    <linkTarget>../lib/dbmanul-${project.version}/dbmanul</linkTarget>  
                                     <symlink>true</symlink>
                                 </data>
 			    
@@ -163,7 +162,7 @@
                                     <mapper>
                                         <type>perm</type>
                                         <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}/lib</prefix>
+                                        <prefix>/usr/lib/dbmanul-${project.version}/lib</prefix>
                                     </mapper>
                                 </data>
                                 <!-- Now, add bash auto-completion file to make life easier
@@ -172,7 +171,7 @@
                                 -->
                                 <data>
                                     <!--<src>${project.build.directory}/ddbmanulbase</src>-->
-                                    <src>src/main/resources/liquibase.sh</src>
+                                    <src>src/main/resources/dbmanul.sh</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>

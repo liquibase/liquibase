@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
     <url>http://www.dbmanul.org/</url>
 
-    <name>DB-Manul RPM Packager</name>
+    <name>DB-Manul RPM Package</name>
     <description>DB-Manul is a change management system for databases built on the work of Liquibase (http://www.liquibase.org).</description>
     <organization>
         <name>dbmanul.org</name>
@@ -23,12 +23,13 @@
     
     <properties>
         <!-- Liquibase core dependencies and required jars versions -->
+        <!-- @todo Move this to the parent POM! -->
         <snakeyaml.version>1.17</snakeyaml.version>
-        <postgresql.version>9.3-1101-jdbc41</postgresql.version>
+        <postgresql.version>42.1.1</postgresql.version>
         
         <!-- Liquibase SDK sdk/lib-sdk required libraries versions -->
+        <!-- @todo Move these to the parent POM! -->
         <snakeyaml.version>1.17</snakeyaml.version>
-        <postgresql.version>9.3-1101-jdbc41</postgresql.version>
         <commons-cli.version>1.2</commons-cli.version>
         <hamcrest-core.version>1.3</hamcrest-core.version>
         <javax.servlet.version>3.0.0.v201112011016</javax.servlet.version>
@@ -167,7 +168,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rpm-maven-plugin</artifactId>
-                <version>2.1-alpha-4</version>
+                <version>2.1.5</version>
                 <executions>
                     <execution>
                         <id>generate-rpm</id>
