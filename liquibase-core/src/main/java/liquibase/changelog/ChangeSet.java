@@ -149,7 +149,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private ValidationFailOption onValidationFail = ValidationFailOption.HALT;
 
     /**
-     * Stores if validation failed on this chhangeSet
+     * Stores if validation failed on this ChangeSet
      */
     private boolean validationFailed;
 
@@ -467,7 +467,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      *
      * @return should change set be marked as ran
      */
-    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database) throws MigrationFailedException {
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database)
+            throws MigrationFailedException {
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
