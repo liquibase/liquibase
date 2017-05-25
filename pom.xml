@@ -522,17 +522,17 @@
     <profiles>
         <profile>
             <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
+
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <keyname>${dbmanul.gpg.keyname}</keyname>
+                            <passphraseServerId>${dbmanul.gpg.keyname}</passphraseServerId>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
