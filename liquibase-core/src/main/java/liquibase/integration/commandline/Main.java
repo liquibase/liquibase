@@ -1322,7 +1322,7 @@ public class Main {
                 FileOutputStream fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
-                System.err.printf("Could not create output file %s\n", outputFile);
+                System.err.printf("Could not create output file %s%n", outputFile);
                 throw e;
             }
         } else {
