@@ -326,6 +326,15 @@ public class JdbcExecutor extends AbstractExecutor {
         }
 
 
+        /**
+         * 1. Applies all SqlVisitor to the stmt
+         * 2. Executes the (possibly modified) stmt
+         * 3. Reads all data from the java.sql.ResultSet into an Object and returns the Object.
+         * @param stmt A JDBC Statement that is expected to return a ResultSet (e.g. SELECT)
+         * @return An object representing all data from the result set.
+         * @throws SQLException If an error occurs during SQL processing
+         * @throws DatabaseException If an error occurs in the DBMS-specific program code
+         */
         @Override
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             ResultSet rs = null;

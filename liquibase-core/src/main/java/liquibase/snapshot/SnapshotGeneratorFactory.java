@@ -6,19 +6,14 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.parser.SnapshotParser;
-import liquibase.parser.SnapshotParserFactory;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class SnapshotGeneratorFactory {
@@ -79,6 +74,10 @@ public class SnapshotGeneratorFactory {
     protected SortedSet<SnapshotGenerator> getGenerators(Class<? extends DatabaseObject> generatorClass, Database database) {
         SortedSet<SnapshotGenerator> validGenerators = new TreeSet<SnapshotGenerator>(new SnapshotGeneratorComparator(generatorClass, database));
 
+        /*
+         * Query all SnapshotGenerators if they consider themselves applicable for the generatorClass (e.g. a Table)
+         * for a specific Database (e.g. MSSQL, Oracle, Postgres...)
+         */
         for (SnapshotGenerator generator : generators) {
             if (generator.getPriority(generatorClass, database) > 0) {
                 validGenerators.add(generator);
@@ -88,24 +87,47 @@ public class SnapshotGeneratorFactory {
     }
 
 
+    /**
+     * Checks if a specific object is present in a database
+     * @param example The DatabaseObject to check for existence
+     * @param database The DBMS in which the object might exist
+     * @return true if object existence can be confirmed, false otherweise
+     * @throws DatabaseException If a problem occurs in the DBMS-specific code
+     * @throws InvalidExampleException If the object cannot be checked properly, e.g. if the object name is ambiguous
+     */
     public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        // @todo I have seen duplicates in types - maybe convert the List into a Set? Need to understand it more thoroughly.
         List<Class<? extends DatabaseObject>> types = new ArrayList<Class<? extends DatabaseObject>>(getContainerTypes(example.getClass(), database));
         types.add(example.getClass());
 
-        //workaround for common check for databasechangelog/lock table to not snapshot the whole database like we have to in order to handle case issues
-        if (example instanceof Table && (example.getName().equals(database.getDatabaseChangeLogTableName()) || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
+        /*
+         * Does the query concern the DATABASECHANGELOG / DATABASECHANGELOGLOCK table? If so, we do a quick & dirty
+         * SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
+         */
+        // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
+        if (example instanceof Table &&
+                (example.getName().equals(database.getDatabaseChangeLogTableName())
+                        || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
-                ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeObjectName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), example.getName(), Table.class)));
+                ExecutorService.getInstance().getExecutor(database).queryForInt(
+                        new RawSqlStatement("SELECT COUNT(*) FROM " +
+                                database.escapeObjectName(database.getLiquibaseCatalogName(),
+                                        database.getLiquibaseSchemaName(), example.getName(), Table.class)));
                 return true;
             } catch (DatabaseException e) {
-                if (database instanceof PostgresDatabase) { //throws "current transaction is aborted" unless we roll back the connection
+                if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
                     database.rollback();
                 }
                 return false;
             }
         }
 
-        if (createSnapshot(example, database, new SnapshotControl(database, false, types.toArray(new Class[types.size()]))) != null) {
+        /*
+          * If the query is about another object, try to create a snapshot of the of the object (or used the cached
+          * snapshot. If that works, we count that as confirmation of existence.
+          */
+        if (createSnapshot(example, database,
+                new SnapshotControl(database, false, types.toArray(new Class[types.size()]))) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;
@@ -154,7 +176,8 @@ public class SnapshotGeneratorFactory {
         return createSnapshot(example, database, new SnapshotControl(database));
     }
 
-    public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+    public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl)
+            throws DatabaseException, InvalidExampleException {
         DatabaseSnapshot snapshot = createSnapshot(new DatabaseObject[]{example}, database, snapshotControl);
         return snapshot.get(example);
     }
@@ -205,15 +228,24 @@ public class SnapshotGeneratorFactory {
         return returnSet;
     }
 
-    private void getContainerTypes(Class<? extends DatabaseObject> type, Database database, Set<Class<? extends DatabaseObject>>  returnSet) {
+    private void getContainerTypes(Class<? extends DatabaseObject> type, Database database,
+                                   Set<Class<? extends DatabaseObject>>  returnSet) {
+        Class<? extends DatabaseObject>[] addsTo;
+
+        // Have we already seen this type?
         if (!returnSet.add(type)) {
             return;
         }
+
+        // Get a list of the SnapshotGenerators that are in charge of snapshotting
+        // object type "type" in the DBMS "database"
         SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
+
         if (generators != null && generators.size() > 0) {
             SnapshotGenerator generator = generators.iterator().next();
-            if (generator.addsTo() != null) {
-                for (Class<? extends DatabaseObject> newType : generator.addsTo()) {
+            addsTo = generator.addsTo();
+            if (addsTo != null) {
+                for (Class<? extends DatabaseObject> newType : addsTo) {
                     returnSet.add(newType);
                     getContainerTypes(newType, database, returnSet);
                 }
