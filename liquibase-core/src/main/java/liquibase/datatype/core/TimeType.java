@@ -1,12 +1,11 @@
 package liquibase.datatype.core;
 
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
-import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 import java.text.DateFormat;
@@ -25,13 +24,6 @@ public class TimeType  extends LiquibaseDataType {
         }
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            try {
-                if (database.getDatabaseMajorVersion() <= 9) {
-                    return new DatabaseDataType(database.escapeDataTypeName("datetime"));
-                }
-            } catch (DatabaseException e) {
-                //assume greater than sql 2008 and TIME will work
-            }
             if (parameters.length == 0) {
                 parameters = new Object[] { 7 };
             } else if (parameters.length > 2) {

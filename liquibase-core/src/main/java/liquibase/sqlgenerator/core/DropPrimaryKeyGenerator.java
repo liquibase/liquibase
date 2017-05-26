@@ -2,15 +2,14 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
@@ -38,31 +37,13 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         if (database instanceof MSSQLDatabase) {
             String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
             if (statement.getConstraintName() == null) {
-                boolean sql2005OrLater = true;
-                try {
-                    sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-                } catch (DatabaseException e) {
-                    // Assume SQL Server 2005 or later
-                }
-                if (sql2005OrLater) {
-                    // SQL Server 2005 or later
-                    sql =
-                            "DECLARE @sql [nvarchar](MAX)\r\n" +
-                            "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
-                            "FROM [sys].[key_constraints] AS [kc] " +
-                            "WHERE [kc].[parent_object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                            "AND [kc].[type] = 'PK'\r\n" +
-                            "EXEC sp_executesql @sql";
-                } else {
-                    // SQL Server 2000
-                    sql =
-                            "DECLARE @sql [nvarchar](4000)\r\n" +
-                            "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
-                            "FROM [dbo].[sysobjects] AS [kc] " +
-                            "WHERE [kc].[parent_obj] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
-                            "AND [kc].[xtype] = 'PK'\r\n" +
-                            "EXEC sp_executesql @sql";
-                }
+                sql =
+                        "DECLARE @sql [nvarchar](MAX)\r\n" +
+                        "SELECT @sql = N'ALTER TABLE " + database.escapeStringForDatabase(escapedTableName) + " DROP CONSTRAINT ' + QUOTENAME([kc].[name]) " +
+                        "FROM [sys].[key_constraints] AS [kc] " +
+                        "WHERE [kc].[parent_object_id] = OBJECT_ID(N'" + database.escapeStringForDatabase(escapedTableName) +  "') " +
+                        "AND [kc].[type] = 'PK'\r\n" +
+                        "EXEC sp_executesql @sql";
             } else {
                 sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
             }

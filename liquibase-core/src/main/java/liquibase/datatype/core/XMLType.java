@@ -37,12 +37,6 @@ public class XMLType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MSSQLDatabase) {
-            try {
-                if (database.getDatabaseMajorVersion() <= 8) { // 2000 or earlier
-                    return new DatabaseDataType(database.escapeDataTypeName("ntext"));
-                }
-            } catch (DatabaseException ignore) { } // assuming it is a newer version
-
             Object[] parameters = getParameters();
             if (parameters.length > 1) {
               parameters = new Object[] { parameters[0] };

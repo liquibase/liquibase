@@ -412,11 +412,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     ResultSet resultSet = null;
                     try {
                         String sql;
-                        if (database.getDatabaseMajorVersion() >=9) {
-                            sql = "select name from sys.types where is_user_defined=1";
-                        } else {
-                            sql = "SELECT * FROM SysTypes WHERE xusertype > 256";
-                        }
+                        sql = "select name from sys.types where is_user_defined=1";
 
                         stmt = ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement();
                         resultSet = stmt.executeQuery(sql);
@@ -610,8 +606,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                     // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
-                    if (((!((MSSQLDatabase) database).isAzureDb() && database.getDatabaseMajorVersion() >= 8) || database.getDatabaseMajorVersion() >= 12)) {
-                        if (database.getDatabaseMajorVersion() >= 9) {
+                    if (
+                            (!((MSSQLDatabase) database).isAzureDb()) // Either NOT AzureDB (=SQL Server 2008 or higher)
+                            || database.getDatabaseMajorVersion() >= 12)  { // or at least AzureDB v12
                             // SQL Server 2005 or later
                             // https://technet.microsoft.com/en-us/library/ms177541.aspx
                             sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS], ");
@@ -619,15 +616,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     "AND [ep].[major_id] = c.object_id " +
                                     "AND [ep].[minor_id] = column_id " +
                                     "AND [ep].[name] = 'MS_Description' ");
-                        } else {
-                            // SQL Server 2000
-                            // https://technet.microsoft.com/en-us/library/aa224810%28v=sql.80%29.aspx
-                            sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "CAST([p].[value] AS [ntext]) AS [REMARKS], ");
-                            sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "left outer join [dbo].[sysproperties] AS [p] ON [p].[id] = c.object_id " +
-                                            "AND [p].[smallid] = column_id " +
-                                            "AND [p].[type] = 4 " +
-                                            "AND [p].[name] = 'MS_Description' ");
-                        }
                     } else {
                         sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "");
                         sql = sql.replace("{REMARKS_JOIN_PLACEHOLDER}", "");
@@ -828,68 +816,37 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 private List<CachedRow> getPkInfo(String schemaName, CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
                     List<CachedRow> pkInfo;
-                    if (database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 8) {
+                    if (database instanceof MSSQLDatabase) {
                         String sql;
-                        if (database.getDatabaseMajorVersion() >= 9) {
-                            sql =
-                                    "SELECT " +
-                                            "DB_NAME() AS [TABLE_CAT], " +
-                                            "[s].[name] AS [TABLE_SCHEM], " +
-                                            "[t].[name] AS [TABLE_NAME], " +
-                                            "[c].[name] AS [COLUMN_NAME], " +
-                                            "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC], " +
-                                            "[ic].[key_ordinal] AS [KEY_SEQ], " +
-                                            "[kc].[name] AS [PK_NAME] " +
-                                            "FROM [sys].[schemas] AS [s] " +
-                                            "INNER JOIN [sys].[tables] AS [t] " +
-                                            "ON [t].[schema_id] = [s].[schema_id] " +
-                                            "INNER JOIN [sys].[key_constraints] AS [kc] " +
-                                            "ON [kc].[parent_object_id] = [t].[object_id] " +
-                                            "INNER JOIN [sys].[indexes] AS [i] " +
-                                            "ON [i].[object_id] = [kc].[parent_object_id] " +
-                                            "AND [i].[index_id] = [kc].[unique_index_id] " +
-                                            "INNER JOIN [sys].[index_columns] AS [ic] " +
-                                            "ON [ic].[object_id] = [i].[object_id] " +
-                                            "AND [ic].[index_id] = [i].[index_id] " +
-                                            "INNER JOIN [sys].[columns] AS [c] " +
-                                            "ON [c].[object_id] = [ic].[object_id] " +
-                                            "AND [c].[column_id] = [ic].[column_id] " +
-                                            "WHERE [s].[name] = N'" + database.escapeStringForDatabase(catalogAndSchema.getSchemaName()) + "' " + // The schema name was corrected in the customized CatalogAndSchema
-                                            "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
-                                            "AND [kc].[type] = 'PK' " +
-                                            "AND [ic].[key_ordinal] > 0 " +
-                                            "ORDER BY " +
-                                            "[ic].[key_ordinal]";
-                        } else {
-                            sql =
-                                    "SELECT " +
-                                            "DB_NAME() AS [TABLE_CAT], " +
-                                            "[s].[name] AS [TABLE_SCHEM], " +
-                                            "[t].[name] AS [TABLE_NAME], " +
-                                            "[c].[name] AS [COLUMN_NAME], " +
-                                            "CASE INDEXKEY_PROPERTY([ic].[id], [ic].[indid], [ic].[keyno], 'IsDescending') WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC], " +
-                                            "[ic].[keyno] AS [KEY_SEQ], " +
-                                            "[kc].[name] AS [PK_NAME] " +
-                                            "FROM [dbo].[sysusers] AS [s] " +
-                                            "INNER JOIN [dbo].[sysobjects] AS [t] " +
-                                            "ON [t].[uid] = [s].[uid] " +
-                                            "INNER JOIN [dbo].[sysobjects] AS [kc] " +
-                                            "ON [kc].[parent_obj] = [t].[id] " +
-                                            "INNER JOIN [dbo].[sysindexes] AS [i] " +
-                                            "ON [i].[id] = [kc].[parent_obj] " +
-                                            "AND [i].[name] = [kc].[name] " +
-                                            "INNER JOIN [dbo].[sysindexkeys] AS [ic] " +
-                                            "ON [ic].[id] = [i].[id] " +
-                                            "AND [ic].[indid] = [i].[indid] " +
-                                            "INNER JOIN [dbo].[syscolumns] AS [c] " +
-                                            "ON [c].[id] = [ic].[id] " +
-                                            "AND [c].[colid] = [ic].[colid] " +
-                                            "WHERE [s].[name] =  N'" + database.escapeStringForDatabase(catalogAndSchema.getSchemaName()) + "' " + // The schema name was corrected in the customized CatalogAndSchema
-                                            "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
-                                            "AND [kc].[xtype] = 'PK' " +
-                                            "ORDER BY " +
-                                            "[ic].[keyno]";
-                        }
+                        sql =
+                                "SELECT " +
+                                        "DB_NAME() AS [TABLE_CAT], " +
+                                        "[s].[name] AS [TABLE_SCHEM], " +
+                                        "[t].[name] AS [TABLE_NAME], " +
+                                        "[c].[name] AS [COLUMN_NAME], " +
+                                        "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC], " +
+                                        "[ic].[key_ordinal] AS [KEY_SEQ], " +
+                                        "[kc].[name] AS [PK_NAME] " +
+                                        "FROM [sys].[schemas] AS [s] " +
+                                        "INNER JOIN [sys].[tables] AS [t] " +
+                                        "ON [t].[schema_id] = [s].[schema_id] " +
+                                        "INNER JOIN [sys].[key_constraints] AS [kc] " +
+                                        "ON [kc].[parent_object_id] = [t].[object_id] " +
+                                        "INNER JOIN [sys].[indexes] AS [i] " +
+                                        "ON [i].[object_id] = [kc].[parent_object_id] " +
+                                        "AND [i].[index_id] = [kc].[unique_index_id] " +
+                                        "INNER JOIN [sys].[index_columns] AS [ic] " +
+                                        "ON [ic].[object_id] = [i].[object_id] " +
+                                        "AND [ic].[index_id] = [i].[index_id] " +
+                                        "INNER JOIN [sys].[columns] AS [c] " +
+                                        "ON [c].[object_id] = [ic].[object_id] " +
+                                        "AND [c].[column_id] = [ic].[column_id] " +
+                                        "WHERE [s].[name] = N'" + database.escapeStringForDatabase(catalogAndSchema.getSchemaName()) + "' " + // The schema name was corrected in the customized CatalogAndSchema
+                                        "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(tableName, Table.class)) + "' " +
+                                        "AND [kc].[type] = 'PK' " +
+                                        "AND [ic].[key_ordinal] > 0 " +
+                                        "ORDER BY " +
+                                        "[ic].[key_ordinal]";
                         pkInfo = executeAndExtract(sql, database);
                     } else {
                         if (database instanceof OracleDatabase) {

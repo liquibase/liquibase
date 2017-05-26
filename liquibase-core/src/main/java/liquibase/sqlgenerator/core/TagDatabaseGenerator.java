@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -78,14 +77,6 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             String filenameColumnEscaped = database.escapeObjectName("FILENAME", Column.class);
 
             String topClause = "TOP (1)";
-            try {
-                if (database.getDatabaseMajorVersion() < 10) {
-                    // SQL Server 2005 or earlier
-                    topClause = "TOP 1";
-                }
-            } catch (DatabaseException ignored) {
-                // assume SQL Server 2008 or later
-            }
 
             return new Sql[] {
                     new UnparsedSql(

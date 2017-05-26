@@ -31,6 +31,11 @@ import java.util.regex.Pattern;
 public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     public static final int SQL_SERVER_2008_MAJOR_VERSION = 10;
+    public static final int SQL_SERVER_2012_MAJOR_VERSION = 11;
+    public static final int SQL_SERVER_2014_MAJOR_VERSION = 12;
+    public static final int SQL_SERVER_2016_MAJOR_VERSION = 13;
+    public static final int SQL_SERVER_2017_MAJOR_VERSION = 14;
+
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -126,14 +131,17 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String databaseProductName = conn.getDatabaseProductName();
         int majorVersion = conn.getDatabaseMajorVersion();
-        if (majorVersion <= SQL_SERVER_2008_MAJOR_VERSION) {
+        boolean isRealSqlServerConnection = PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
+                || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
+
+        if (isRealSqlServerConnection && majorVersion <= SQL_SERVER_2008_MAJOR_VERSION) {
             LogFactory.getInstance().getLog().warning(
                 String.format("Your SQL Server major version (%d) seems to indicate that your software is older than " +
-                 "SQL Server 2008. Unfortunately, this is not supported, and this connection cannot be used."));
+                 "SQL Server 2008. Unfortunately, this is not supported, and this connection cannot be used.",
+                 majorVersion));
             return false;
         }
-        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
-                || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
+        return isRealSqlServerConnection;
     }
 
     @Override

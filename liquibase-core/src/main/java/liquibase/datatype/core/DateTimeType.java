@@ -45,12 +45,6 @@ public class DateTimeType extends LiquibaseDataType {
                     || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
                     || originalDefinition.matches("\\[datetime2\\]\\s*\\(.+")) {
 
-                try {
-                    if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
-                        return new DatabaseDataType(database.escapeDataTypeName("datetime"));
-                    }
-                } catch (DatabaseException ignore) { } //assuming it is a newer version
-
                 if (parameters.length == 0) {
                     parameters = new Object[] { 7 };
                 } else if (parameters.length > 1) {
