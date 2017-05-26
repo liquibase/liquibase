@@ -6,7 +6,10 @@ import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -86,7 +89,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             Set<String> seenConstraints = new HashSet<String>();
 
             for (CachedRow constraint : metadata) {
-                UniqueConstraint uq = new UniqueConstraint().setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
+                UniqueConstraint uq = new UniqueConstraint()
+                        .setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
                 if (constraint.containsColumn("INDEX_NAME")) {
                     uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getName()));
                 }
@@ -279,10 +283,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
             } else if (database instanceof FirebirdDatabase) {
-                sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
+                // Careful! FIELD_NAME and INDEX_NAME in RDB$INDEX_SEGMENTS are CHAR, not VARCHAR columns.
+                sql = "SELECT TRIM(RDB$INDEX_SEGMENTS.RDB$FIELD_NAME) AS column_name " +
                         "FROM RDB$INDEX_SEGMENTS " +
                         "LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME " +
-                        "WHERE UPPER(RDB$INDICES.RDB$INDEX_NAME)='" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                        "WHERE UPPER(TRIM(RDB$INDICES.RDB$INDEX_NAME))='" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
                         "ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION";
             } else if (database instanceof SybaseASADatabase) {
                 sql = "select sysconstraint.constraint_name, syscolumn.column_name " +
