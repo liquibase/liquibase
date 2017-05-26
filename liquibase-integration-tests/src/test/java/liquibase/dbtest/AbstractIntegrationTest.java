@@ -84,11 +84,6 @@ public abstract class AbstractIntegrationTest {
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
 
-        // Set default username and password to lbuser/lbuser,
-        // except for hsqldb, which needs sa/<empty password>
-        this.setUsername( dbms.getShortName().equalsIgnoreCase("hsqldb") ? "sa" : "lbuser");
-        this.setPassword( dbms.getShortName().equalsIgnoreCase("hsqldb") ? "" : "lbuser");
-
         // Get the integration test properties for both global settings and (if applicable) local overrides.
         Properties integrationTestProperties;
         integrationTestProperties = new Properties();
