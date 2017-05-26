@@ -63,7 +63,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return databaseMetaData;
         }
 
-        public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
+        public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName,
+                                              final String fkName) throws DatabaseException {
             return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
                 @Override
@@ -1063,13 +1064,18 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             }
                         }
                     } else if (database instanceof FirebirdDatabase) {
-                        sql = "SELECT RDB$INDICES.RDB$INDEX_NAME AS CONSTRAINT_NAME, RDB$INDICES.RDB$RELATION_NAME AS TABLE_NAME FROM RDB$INDICES "
-                                + "LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDICES.RDB$INDEX_NAME "
+                        sql = "SELECT TRIM(RDB$INDICES.RDB$INDEX_NAME) AS CONSTRAINT_NAME, " +
+                                "TRIM(RDB$INDICES.RDB$RELATION_NAME) AS TABLE_NAME " +
+                                "FROM RDB$INDICES "
+                                + "LEFT JOIN RDB$RELATION_CONSTRAINTS "
+                                + "ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDICES.RDB$INDEX_NAME "
                                 + "WHERE RDB$INDICES.RDB$UNIQUE_FLAG IS NOT NULL "
-                                + "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "
+                                + "AND ("
+                                + "RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE IS NULL "
+                                + "OR TRIM(RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE)='UNIQUE') "
                                 + "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
                         if (tableName != null) {
-                            sql += " AND RDB$INDICES.RDB$RELATION_NAME='" + tableName + "'";
+                            sql += " AND TRIM(RDB$INDICES.RDB$RELATION_NAME)='" + tableName + "'";
                         }
                     } else if (database instanceof DerbyDatabase) {
                         sql = "select c.constraintname as CONSTRAINT_NAME, tablename AS TABLE_NAME "
