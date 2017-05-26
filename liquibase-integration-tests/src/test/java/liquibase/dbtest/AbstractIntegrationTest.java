@@ -854,6 +854,12 @@ public abstract class AbstractIntegrationTest {
     }
 
 
+    /**
+     * Create an SQL script from a change set which inserts data from CSV files. The first CSV file is encoded in
+     * UTF-8, the second is encoded in Latin-1. The test is successful if the CSV data is converted into correct
+     * INSERT INTO statements in the final generated SQL file.
+     * @throws Exception
+     */
     @Test
     public void testEncodingUpdating2SQL() throws Exception {
         if (database == null) {
@@ -867,10 +873,10 @@ public abstract class AbstractIntegrationTest {
         assertTrue("Update to SQL preserves encoding",
             new RegexMatcher(writer.toString(), new String[] {
                 //For the UTF-8 encoded cvs
-                "^.*INSERT.*VALUES.*àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü.*$",
+                "^.*INSERT.*VALUES.*àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü.*?\\)",
                 "çñ®",
                 //For the latin1 one
-                "^.*INSERT.*VALUES.*àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü.*$",
+                "^.*INSERT.*VALUES.*àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü.*?\\)",
                 "çñ®"
             }).allMatchedInSequentialOrder());
     }
