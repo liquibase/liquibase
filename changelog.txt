@@ -1,7 +1,115 @@
-Liquibase Core Changelog
-===========================================
+DB-Manul (based on Liquibase) Changelog
+=======================================
 
-Changes in version 3.5.2 (2016.09.21)
+Changes in DB-Manul 0.1:
+
+Bug fixes:
+==========
+Bug identifiers starting with "CORE-" refer to entries in the Liquibase bug database
+(https://liquibase.jira.com/projects/CORE/issues). Bug identifiers without a prefix refer to the DB-Manul
+bug list (currently at https://github.com/dbmanul/dbmanul/issues).
+
+Most/all supported databases:
+- When creating a Index using the <createIndex> change type, the sort order for the columns was ignored. This was
+  fixed. However, Firebird SQL only supports indexes with all columns ordered either ascending or descending; when
+  trying to mix, DB-Manul will echo an error message.
+
+Oracle Database-specific:
+- In some situations, valid TIMESTAMP and DATE literals were not recognized. This was fixed in commit
+  #c307b0795a01086a60e89026a548745c54c1a79e and affected at least Oracle DB.
+
+PostgreSQL-specific:
+- When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
+  This was fixed by commit #88f76fc67f10f17e02cd2909fea876ff904777c4
+
+HyperSQL-specific:
+- The Liquibase macro current_datetime for a column default (replaced by the DBMS-specific function for getting the
+  current date and/or time) did not work in HyperSQL. This was fixed in commit #23ef71b3a2c6ef872d7c27ef55f67cf4cc1b65ee
+- When snapshotting a HyperSQL column of the TIMESTAMP type that had a literal (e.g. TIMESTAMP'2017-05-27 18:34:45')
+  as default value, incorrect SQL was generated. This was fixed in commit #8148b5bca5f6905c6b1bfa4617ffd4a7b202cca1.
+
+Firebird SQL-specific:
+- Fixed various problems in snapshotting Firebird databases. The root cause was that the data dictionary views (RDB$)
+  in Firebird show identifiers (like table/column/index/... names) in CHAR columns, and these are right-padded with
+  spaces. This caused various comparisons to fail and, as a consequence, invalid snapshot change sets and/or SQL
+  was generated.
+
+Microsoft SQL Server-specific:
+- When snapshotting a SQL Server database, invalid "[]." prefixes that appear in front of identifiers could be generated
+  due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
+  commit #cabacfe3593324f5223e53496d80c894f48abfa2
+
+New features
+============
+
+- Oracle support names for NOT NULL constraints. If you want to name yours, these names can now be specified when
+  creating them using the new attribute notNullConstraintName.
+
+    <changeSet id="notNullConstraintNamingTest" author="abuschka">
+        <createTable tableName="NOTNULL_NAMING_TEST">
+            <column name="id" type="int"/>
+            <column name="testcol" type="varchar2(50 char)">
+                <constraints nullable="false" notNullConstraintName="NN_NAMING_TEST_TESTCOL_NN" />
+            </column>
+            <column name="testcol2" type="int" />
+        </createTable>
+        <addNotNullConstraint tableName="NOTNULL_NAMING_TEST" columnName="testcol2" constraintName="NN_NAMING_TEST_TESTCOL2_NN" />
+    </changeSet>
+
+- Logging only outputs errors and warnings to STDERR now; regular messages are printed to STDOUT. This should make
+  log files more readable.
+
+Incompatibilities
+=================
+
+Microsoft SQL Server:
+- Microsoft SQL Server versions before SQL Server 2008 are not supported anymore and DB-Manul will refuse to connect
+  to old instances. Also, SQL Server <2008 is now (2017-05-26) completely desupported by Microsoft.
+
+- When snapshotting a Microsoft SQL Server database or using the generic data type names in change sets, DB-Manul will
+  map the deprecated column types text, ntext and image into varchar(max), nvarchar(max) and varbinary(max) column
+  types according to the recommendations at
+  https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
+  (commit #cf667c6945a5902c54030146ca6929541b7d10f1)
+
+- Change sets targeted at MySQL/MariaDB and MS SQL Server must now specify tableName in dropIndex changes
+  (although ommitting this was allowed before, it produced syntax errors in the generated SQL)
+
+- Because DB-Manul is now based in JDK 8, you must upgrade your JDBC driver to version 6.1.0.jre8 or newer.
+
+MySQL and MariaDB:
+- Because MySQL and MariaDB start to diverge (currently only in relatively minor details, but this is expected to
+        become worse over time), DB-Manul treats them as two completely separate DBMS. As a consequence, you will
+        need to use the MariaDB JDBC driver when connecting to a MariaDB server, and the MySQL JDBC driver when
+        connecting to a MySQL server. You can have both JDBC drivers in the classpath and DB-Manul will use the
+        right one as long as your JDBC URL is configured correctly.
+
+- Change sets targeted at MySQL/MariaDB and MS SQL Server must now specify tableName in dropIndex changes
+  (although ommitting this was allowed before, it produced syntax errors in the generated SQL)
+
+- Because DB-Manul is now based in JDK 8, you must upgrade your MariaDB JDBC driver to version 2.0.1 and/or
+  your MySQL J-Connector to version 6.0.6 or higher.
+
+Oracle Database:
+- Because DB-Manul is now based in JDK 8, you must upgrade your Oracle JDBC thin client to at least version 12.2.0.1.
+  Even if you are using this new version, you can connect to any Oracle RDBMS instance that is currently under support
+  by Oracle Corporation, i.e. Release 11gR2 or newer. Server version 11.2.0.4 has been tested, 11.2.0.1 could work in
+  theory, but has not been tested and is not a recommended configuration.
+
+Firebird SQL:
+- Because DB-Manul is now based in JDK 8, you must upgrade your Firebird SQL JDBC driver "Jaybird" to version 3.0.0
+  or newer. CAUTION: You will most likely need to modify your JDBC connection string due to new requirements by the
+  driver (e.g. declaration of character sets)
+
+PostgreSQL:
+- Because DB-Manul is now based in JDK 8, you must upgrade your PostgreSQL JDBC driver to version 42.1.1 or newer.
+
+Apache Derby:
+- Because DB-Manul is now based in JDK 8, you must upgrade your Apache Derby JDBC driver to version 10.13.1.1 or newer.
+
+------------ DB-Manul forked between version 3.5.3 and Liquibase 3.6.0
+
+Changes in Liquibase version 3.5.2 (2016.09.21)
 
 -  [CORE-1863] - PostgreSQL blob is mapped to bytea instead of oid
 -  [CORE-2693] - Postgresql dropAll with serial columns fails because tables are dropped then sequences which no longer exist
