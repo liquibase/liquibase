@@ -7,7 +7,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
@@ -42,9 +41,13 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text")) {
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("text"));
-                type.addAdditionalInformation(getAdditionalInformation());
+            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text")
+                    || originalDefinition.toLowerCase().startsWith("[text]")) {
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
+                // If there is additional specification after ntext (e.g.  COLLATE), import that.
+                String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
+                type.addAdditionalInformation("(max)"
+                        + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
         }
@@ -54,42 +57,30 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");
         } else if (database instanceof MSSQLDatabase) {
-            if (originalDefinition.equalsIgnoreCase("text")
-                    || originalDefinition.equals("[text]")
-                    || originalDefinition.matches("(?i)text .+")
-                    || originalDefinition.matches("\\[text\\] .+")) {
-
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("text"));
-                type.addAdditionalInformation(getAdditionalInformation());
+            if (originalDefinition.matches("^(?i)\\[?text\\]?.*")) {
+                // The SQL Server datatype "text" is deprecated and should be replaced with VARCHAR(MAX).
+                // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
+                // If there is additional specification after ntext (e.g.  COLLATE), import that.
+                String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
+                type.addAdditionalInformation("(max)"
+                        + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
             if (originalDefinition.toLowerCase().startsWith("ntext")
                     || originalDefinition.toLowerCase().startsWith("[ntext]")) {
-
-                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("ntext"));
-                type.addAdditionalInformation(getAdditionalInformation());
+                // The SQL Server datatype "ntext" is deprecated and should be replaced with NVARCHAR(MAX).
+                // See: https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
+                DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"));
+                // If there is additional specification after ntext (e.g.  COLLATE), import that.
+                String originalExtraInfo = originalDefinition.replaceFirst("^\\[?ntext\\]?\\s*", "");
+                type.addAdditionalInformation("(max)"
+                    + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
             if (originalDefinition.equalsIgnoreCase("nclob")) {
-                try {
-                    if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                        DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("ntext"));
-                        type.addAdditionalInformation(getAdditionalInformation());
-                        return type;
-                    }
-                } catch (DatabaseException ignore) {
-                } //assuming it is a newer version
-
                 return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
             }
-            try {
-                if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                    DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("text"));
-                    type.addAdditionalInformation(getAdditionalInformation());
-                    return type;
-                }
-            } catch (DatabaseException ignore) {
-            } //assuming it is a newer version
 
             return new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
         } else if (database instanceof MySQLDatabase) {

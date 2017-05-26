@@ -1,22 +1,23 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
+import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashSet;
@@ -24,13 +25,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import liquibase.logging.LogFactory;
-
 /**
  * Encapsulates MS-SQL database support.
  */
 public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
+    public static final int SQL_SERVER_2008_MAJOR_VERSION = 10;
+    public static final int SQL_SERVER_2012_MAJOR_VERSION = 11;
+    public static final int SQL_SERVER_2014_MAJOR_VERSION = 12;
+    public static final int SQL_SERVER_2016_MAJOR_VERSION = 13;
+    public static final int SQL_SERVER_2017_MAJOR_VERSION = 14;
+
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -125,8 +130,18 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String databaseProductName = conn.getDatabaseProductName();
-        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
+        int majorVersion = conn.getDatabaseMajorVersion();
+        boolean isRealSqlServerConnection = PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
+
+        if (isRealSqlServerConnection && majorVersion <= SQL_SERVER_2008_MAJOR_VERSION) {
+            LogFactory.getInstance().getLog().warning(
+                String.format("Your SQL Server major version (%d) seems to indicate that your software is older than " +
+                 "SQL Server 2008. Unfortunately, this is not supported, and this connection cannot be used.",
+                 majorVersion));
+            return false;
+        }
+        return isRealSqlServerConnection;
     }
 
     @Override
@@ -319,7 +334,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         selectOnly = selectOnly.trim();
 
 
-        /**handle views that end up as '(select XYZ FROM ABC);' */
+        // handle views that end up as '(select XYZ FROM ABC);'
         if (selectOnly.startsWith("(") && (selectOnly.endsWith(")") || selectOnly.endsWith(");"))) {
             selectOnly = selectOnly.replaceFirst("^\\(", "");
             selectOnly = selectOnly.replaceFirst("\\);?$", "");
@@ -344,10 +359,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
             String name = this.escapeObjectName(objectName, objectType);
-            if (schemaName == null) {
+            if (StringUtils.isEmpty(schemaName)) {
                 schemaName = this.getDefaultSchemaName();
             }
-            if (schemaName != null) {
+            if (! StringUtils.isEmpty(schemaName)) {
                 name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;

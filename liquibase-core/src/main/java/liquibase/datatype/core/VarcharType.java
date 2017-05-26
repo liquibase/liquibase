@@ -1,14 +1,13 @@
 package liquibase.datatype.core;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
+
+import java.math.BigInteger;
+import java.util.Arrays;
 
 @DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
@@ -30,12 +29,6 @@ public class VarcharType extends CharType {
                 String param1 = parameters[0].toString();
                 if (!param1.matches("\\d+")
                         || new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0) {
-
-                    try {
-                        if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                            return new DatabaseDataType(database.escapeDataTypeName("varchar"), "8000");
-                        }
-                    } catch (DatabaseException ignore) { } //assuming it is a newer version
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"), "MAX");
                     type.addAdditionalInformation(getAdditionalInformation());

@@ -104,7 +104,8 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             String searchSchema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(fkTable.getSchema());
             String searchTableName = database.correctObjectName(fkTable.getName(), Table.class);
 
-            importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getForeignKeys(searchCatalog, searchSchema, searchTableName, example.getName());
+            importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getForeignKeys(searchCatalog,
+                    searchSchema, searchTableName, example.getName());
             ForeignKey foreignKey = null;
             for (CachedRow row : importedKeyMetadataResultSet) {
                 String fk_name = cleanNameFromDatabase(row.getString("FK_NAME"), database);
@@ -173,6 +174,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 if (database.createsIndexesForForeignKeys()) {
                     Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
                     exampleIndex.getColumns().addAll(foreignKey.getForeignKeyColumns());
+                    exampleIndex.addAssociatedWith(Index.MARK_FOREIGN_KEY);
                     foreignKey.setBackingIndex(exampleIndex);
                 }
             }

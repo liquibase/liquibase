@@ -88,8 +88,8 @@ public class DataTypeFactoryTest extends Specification {
         "nchar(4000)"                                        | new MSSQLDatabase()   | "[nchar](4000)"                                      | NCharType     | false
         "[nchar](4000)"                                      | new MSSQLDatabase()   | "[nchar](4000)"                                      | NCharType     | false
         "nclob"                                              | new MSSQLDatabase()   | "[nvarchar](MAX)"                                    | ClobType      | false
-        "ntext"                                              | new MSSQLDatabase()   | "[ntext]"                                            | ClobType      | false
-        "[ntext]"                                            | new MSSQLDatabase()   | "[ntext]"                                            | ClobType      | false
+        "ntext"                                              | new MSSQLDatabase()   | "[nvarchar] (max)"                                   | ClobType      | false
+        "[ntext]"                                            | new MSSQLDatabase()   | "[nvarchar] (max)"                                   | ClobType      | false
         "number"                                             | new MSSQLDatabase()   | "[numeric](18, 0)"                                   | NumberType    | false
         "numeric"                                            | new MSSQLDatabase()   | "[numeric](18, 0)"                                   | NumberType    | false
         "[numeric]"                                          | new MSSQLDatabase()   | "[numeric](18, 0)"                                   | NumberType    | false
@@ -114,8 +114,8 @@ public class DataTypeFactoryTest extends Specification {
         "sql_variant"                                        | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
         "[sql_variant]"                                      | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
         "sql_variant(5, 6)"                                  | new MSSQLDatabase()   | "[sql_variant]"                                      | UnknownType   | false
-        "text"                                               | new MSSQLDatabase()   | "[text]"                                             | ClobType      | false
-        "[text]"                                             | new MSSQLDatabase()   | "[text]"                                             | ClobType      | false
+        "text"                                               | new MSSQLDatabase()   | "[varchar] (max)"                                    | ClobType      | false
+        "[text]"                                             | new MSSQLDatabase()   | "[varchar] (max)"                                    | ClobType      | false
         "time"                                               | new MSSQLDatabase()   | "[time](7)"                                          | TimeType      | false
         "[time]"                                             | new MSSQLDatabase()   | "[time](7)"                                          | TimeType      | false
         "time(6)"                                            | new MSSQLDatabase()   | "[time](6)"                                          | TimeType      | false
@@ -162,16 +162,16 @@ public class DataTypeFactoryTest extends Specification {
         "[nchar] COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[nchar](1) COLLATE Latin1_General_BIN"              | NCharType     | false
         "nchar(255) COLLATE Latin1_General_BIN"              | new MSSQLDatabase()   | "[nchar](255) COLLATE Latin1_General_BIN"            | NCharType     | false
         "[nchar](255) COLLATE Latin1_General_BIN"            | new MSSQLDatabase()   | "[nchar](255) COLLATE Latin1_General_BIN"            | NCharType     | false
-        "ntext COLLATE Latin1_General_BIN"                   | new MSSQLDatabase()   | "[ntext] COLLATE Latin1_General_BIN"                 | ClobType      | false
-        "[ntext] COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[ntext] COLLATE Latin1_General_BIN"                 | ClobType      | false
+        "ntext COLLATE Latin1_General_BIN"                   | new MSSQLDatabase()   | "[nvarchar] (max) COLLATE Latin1_General_BIN"        | ClobType      | false
+        "[ntext] COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[nvarchar] (max) COLLATE Latin1_General_BIN"        | ClobType      | false
         "nvarchar COLLATE Latin1_General_BIN"                | new MSSQLDatabase()   | "[nvarchar](1) COLLATE Latin1_General_BIN"           | NVarcharType  | false
         "[nvarchar] COLLATE Latin1_General_BIN"              | new MSSQLDatabase()   | "[nvarchar](1) COLLATE Latin1_General_BIN"           | NVarcharType  | false
         "nvarchar(255) COLLATE Latin1_General_BIN"           | new MSSQLDatabase()   | "[nvarchar](255) COLLATE Latin1_General_BIN"         | NVarcharType  | false
         "[nvarchar](255) COLLATE Latin1_General_BIN"         | new MSSQLDatabase()   | "[nvarchar](255) COLLATE Latin1_General_BIN"         | NVarcharType  | false
         "nvarchar(MAX) COLLATE Latin1_General_BIN"           | new MSSQLDatabase()   | "[nvarchar](MAX) COLLATE Latin1_General_BIN"         | NVarcharType  | false
         "[nvarchar](MAX) COLLATE Latin1_General_BIN"         | new MSSQLDatabase()   | "[nvarchar](MAX) COLLATE Latin1_General_BIN"         | NVarcharType  | false
-        "text COLLATE Latin1_General_BIN"                    | new MSSQLDatabase()   | "[text] COLLATE Latin1_General_BIN"                  | ClobType      | false
-        "[text] COLLATE Latin1_General_BIN"                  | new MSSQLDatabase()   | "[text] COLLATE Latin1_General_BIN"                  | ClobType      | false
+        "text COLLATE Latin1_General_BIN"                    | new MSSQLDatabase()   | "[varchar] (max) COLLATE Latin1_General_BIN"         | ClobType      | false
+        "[text] COLLATE Latin1_General_BIN"                  | new MSSQLDatabase()   | "[varchar] (max) COLLATE Latin1_General_BIN"         | ClobType      | false
         "varchar COLLATE Latin1_General_BIN"                 | new MSSQLDatabase()   | "[varchar](1) COLLATE Latin1_General_BIN"            | VarcharType   | false
         "[varchar] COLLATE Latin1_General_BIN"               | new MSSQLDatabase()   | "[varchar](1) COLLATE Latin1_General_BIN"            | VarcharType   | false
         "varchar(255) COLLATE Latin1_General_BIN"            | new MSSQLDatabase()   | "[varchar](255) COLLATE Latin1_General_BIN"          | VarcharType   | false

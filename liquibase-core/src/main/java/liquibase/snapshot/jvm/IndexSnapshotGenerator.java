@@ -213,10 +213,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //        if (foundObject instanceof PrimaryKey) {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
-        if (foundObject instanceof UniqueConstraint && ((UniqueConstraint) foundObject).getBackingIndex() == null && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+        if (foundObject instanceof UniqueConstraint && ((UniqueConstraint) foundObject).getBackingIndex() == null
+                && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
             Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
+        }
+        if (foundObject instanceof ForeignKey && ((ForeignKey) foundObject).getBackingIndex() == null) {
+            Index exampleIndex = new Index().setTable(((ForeignKey) foundObject).getForeignKeyTable());
+            exampleIndex.getColumns().addAll(((ForeignKey) foundObject).getForeignKeyColumns());
+            ((ForeignKey) foundObject).setBackingIndex(exampleIndex);
         }
     }
 

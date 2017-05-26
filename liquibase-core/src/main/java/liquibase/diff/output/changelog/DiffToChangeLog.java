@@ -21,13 +21,10 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
-import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
 import liquibase.util.DependencyUtil;
 import liquibase.util.StringUtils;
 
@@ -356,7 +353,7 @@ public class DiffToChangeLog {
 
                 graph.add(bName, tabName);
             }
-        } else if (database instanceof MSSQLDatabase && database.getDatabaseMajorVersion() >= 9) {
+        } else if (database instanceof MSSQLDatabase) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             String sql = "select object_schema_name(referencing_id) as referencing_schema_name, object_name(referencing_id) as referencing_name, object_name(referenced_id) as referenced_name, object_schema_name(referenced_id) as referenced_schema_name  from sys.sql_expression_dependencies depz where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
                         @Override

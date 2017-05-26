@@ -1,14 +1,13 @@
 package liquibase.datatype.core;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
+
+import java.math.BigInteger;
+import java.util.Arrays;
 
 @DataTypeInfo(name="nvarchar", aliases = {"java.sql.Types.NVARCHAR", "nvarchar2", "national"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NVarcharType extends CharType {
@@ -33,14 +32,6 @@ public class NVarcharType extends CharType {
                 String param1 = parameters[0].toString();
                 if (!param1.matches("\\d+")
                         || new BigInteger(param1).compareTo(BigInteger.valueOf(4000L)) > 0) {
-
-                    try {
-                        if (database.getDatabaseMajorVersion() <= 8) { //2000 or earlier
-                            DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "4000");
-                            type.addAdditionalInformation(getAdditionalInformation());
-                            return type;
-                        }
-                    } catch (DatabaseException ignore) { } //assuming it is a newer version
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
                     type.addAdditionalInformation(getAdditionalInformation());

@@ -156,13 +156,7 @@ public class CommandLineUtils {
                 }
                 ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA="+database.escapeObjectName(schema, Schema.class)));
             } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
-boolean sql2005OrLater = true;
-                    try {
-                        sql2005OrLater = database.getDatabaseMajorVersion() >= 9;
-                    } catch (DatabaseException e) {
-                        // Assume SQL Server 2005 or later
-                    }
-                    if (sql2005OrLater && username != null) {
+                    if (username != null) {
                         ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
                                 "IF USER_NAME() <> N'dbo'\r\n" +
                                 "BEGIN\r\n" +

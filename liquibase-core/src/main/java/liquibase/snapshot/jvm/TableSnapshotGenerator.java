@@ -12,7 +12,8 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.sql.SQLException;
@@ -51,20 +52,19 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 String sql;
-                if (database.getDatabaseMajorVersion() >=9 ) {
-                    sql = "SELECT" +
-                            " CAST(value as varchar(max)) as REMARKS" +
-                            " FROM" +
-                            " sys.extended_properties" +
-                            " WHERE" +
-                            " name='MS_Description'" +
-                            " AND major_id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "')" +
-                            " AND" +
-                            " minor_id = 0";
-                } else {
-                    sql = "SELECT CAST(value as varchar) as REMARKS FROM dbo.sysproperties WHERE name='MS_Description' AND id = OBJECT_ID('" + database.escapeStringForDatabase(database.escapeTableName(null, schemaName, table.getName())) + "') AND smallid = 0";
-                }
-
+                sql = "SELECT" +
+                        " CAST(value as varchar(max)) as REMARKS" +
+                        " FROM" +
+                        " sys.extended_properties" +
+                        " WHERE" +
+                        " name='MS_Description'" +
+                        " AND major_id = OBJECT_ID('" +
+                        database.escapeStringForDatabase(
+                            database.escapeTableName(null, schemaName, table.getName())
+                        ) +
+                        "')" +
+                        " AND" +
+                        " minor_id = 0";
                 List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
 
                 if (remarks != null && remarks.size() > 0) {

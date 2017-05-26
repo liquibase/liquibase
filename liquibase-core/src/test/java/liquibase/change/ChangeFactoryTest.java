@@ -1,14 +1,5 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.TreeSet;
-
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
@@ -21,6 +12,10 @@ import liquibase.statement.core.CreateSequenceStatement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.TreeSet;
+
+import static org.junit.Assert.*;
 
 public class ChangeFactoryTest {
 
@@ -41,14 +36,14 @@ public class ChangeFactoryTest {
 		MSSQLDatabase database10 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
-                return 10;
+                return SQL_SERVER_2008_MAJOR_VERSION;
             }
 		};
 
         MSSQLDatabase database11 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
-                return 11;
+                return SQL_SERVER_2012_MAJOR_VERSION;
             }
         };
 
