@@ -1,7 +1,5 @@
 package liquibase.structure.core;
 
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -204,19 +202,23 @@ public class Index extends AbstractDatabaseObject {
         return this.compareTo(obj) == 0;
     }
 
+    /**
+     * (Try to) provide a human-readable name for the index.
+     * @return A (hopefully) human-readable name
+     */
     @Override
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(getName());
+        stringBuffer.append( (getName() == null) ? "(unnamed index)" : getName());
         if (this.isUnique() != null && this.isUnique()) {
-            stringBuffer.append(" unique ");
+            stringBuffer.append(" UNIQUE ");
         }
         if (getTable() != null && getColumns() != null) {
             String tableName = getTable().getName();
             if (getTable().getSchema() != null && getTable().getSchema().getName() != null) {
                 tableName = getTable().getSchema().getName()+"."+tableName;
             }
-            stringBuffer.append(" on ").append(tableName);
+            stringBuffer.append(" ON ").append(tableName);
             if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
                 for (Column column : getColumns()) {
