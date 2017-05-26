@@ -129,7 +129,7 @@ public class Main {
                 main.printHelp(System.err);
                 return;
             } else if (args.length == 1 && "--version".equals(args[0])) {
-                System.err.println("Liquibase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
+                System.err.println("DB-Manul Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
                 return;
             }
 

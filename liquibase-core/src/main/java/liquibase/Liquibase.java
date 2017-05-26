@@ -1,16 +1,5 @@
 package liquibase;
 
-import java.io.*;
-import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.change.CheckSum;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
@@ -18,7 +7,6 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.command.CommandExecutionException;
 import liquibase.command.CommandFactory;
-import liquibase.command.LiquibaseCommand;
 import liquibase.command.core.DropAllCommand;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -57,6 +45,11 @@ import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.text.DateFormat;
+import java.util.*;
 
 /**
  * Primary facade class for interacting with Liquibase.
@@ -442,7 +435,7 @@ public class Liquibase {
         if (connection != null) {
             executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
         }
-        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
+        executor.comment("DB-Manul version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
 
         if (database instanceof OracleDatabase) {
