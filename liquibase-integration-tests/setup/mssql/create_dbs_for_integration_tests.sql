@@ -8,21 +8,17 @@
  *
  * WARNING: You will probably want to adjust the path for the data files in the following script.
  */
-USE [master]
-GO
-CREATE LOGIN [lbuser] WITH PASSWORD=N'lbuser', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
-GO
+
 CREATE DATABASE [liquibase]
  ON  PRIMARY 
 ( NAME = N'liquibase', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase.mdf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
  LOG ON 
 ( NAME = N'liquibase_log', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase_log.ldf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
 GO
+
 ALTER DATABASE [liquibase] SET COMPATIBILITY_LEVEL = 100
 GO
 
-USE [liquibase]
-GO
 USE [liquibase]
 GO
 IF NOT EXISTS (SELECT name FROM sys.filegroups WHERE is_default=1 AND name = N'PRIMARY') ALTER DATABASE [liquibase] MODIFY FILEGROUP [PRIMARY] DEFAULT
@@ -30,7 +26,8 @@ GO
 
 USE [master]
 GO
-ALTER LOGIN [lbuser] WITH DEFAULT_DATABASE=[liquibase], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+
+CREATE LOGIN [lbuser] WITH PASSWORD=N'lbuser', DEFAULT_DATABASE=[liquibase], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
 GO
 USE [liquibase]
 GO
@@ -39,4 +36,15 @@ GO
 USE [liquibase]
 GO
 ALTER ROLE [db_owner] ADD MEMBER [lbuser]
+GO
+
+
+USE [master]
+GO
+ALTER DATABASE [liquibase] ADD FILEGROUP [liquibase2]
+GO
+
+USE [liquibase]
+GO
+CREATE SCHEMA [lbcat2] AUTHORIZATION [dbo]
 GO
