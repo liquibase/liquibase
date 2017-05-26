@@ -103,6 +103,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
         }
     }
 
+    public void setOnFail(FailOption onFail) {
+        this.onFail = onFail;
+    }
+
     public ErrorOption getOnError() {
         return onError;
     }
@@ -123,6 +127,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
             throw new RuntimeException("Unknown onError attribute value '"+onError+"'.  Possible values: " + StringUtils.join(possibleOptions, ", "));
         }
+    }
+
+    public void setOnError(ErrorOption onError) {
+        this.onError = onError;
     }
 
     public OnSqlOutputOption getOnSqlOutput() {
