@@ -93,10 +93,6 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
 
     protected abstract void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        return null;  //To change body of implemented methods use File | Settings | File Templates.
-//    }
-
     public void addStatusListener(DiffStatusListener listener) {
         statusListeners.add(listener);
     }
