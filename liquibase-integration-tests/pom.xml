@@ -116,6 +116,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -183,16 +188,6 @@
                     <includes>
                         <include>**/*Test.*</include>
                     </includes>
-                    <excludes>
-                        <exclude>**/asany/*</exclude>
-                        <exclude>**/firebird/*</exclude>
-                        <exclude>**/informix/*</exclude>
-                        <exclude>**/mssql/*</exclude>
-                        <exclude>**/mysql/*</exclude>
-                        <exclude>**/pgsql/*</exclude>
-                        <exclude>**/sybase/*</exclude>
-                        <exclude>**/sqlite/*</exclude>
-                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
