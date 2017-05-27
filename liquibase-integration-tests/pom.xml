@@ -141,6 +141,29 @@
             </dependencies>
         </profile>
         <profile>
+            <!-- IBM DB2 drivers are not available at all in Maven repositories (due to their proprietary nature
+                 and IBM not having a Maven repository that would contain these artifacts. The only way to get
+                 these drivers is to extract the file db2jcc4.jar from a licensed software installation and
+                 manually install them in your local (per-user) maven repository like this (you will need to replace
+                 the path to the JAR and the actual version number of the JDBC driver!):
+
+                 mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
+                    -Dfile=d:\IBM\SQLLIB\java\db2jcc4.jar -DgroupId=com.ibm.db2.jcc -DartifactId=db2jcc4 \
+                    -Dversion=4.22.29
+
+                 After that, adjust the driver version number in the following <dependency> tag.
+             -->
+            <id>db2</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ibm.db2.jcc</groupId>
+                    <artifactId>db2jcc4</artifactId>
+                    <version>4.22.29</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>buildServer</id>
             <activation>
                 <property>
