@@ -88,48 +88,6 @@ public class DropDefaultValueChange extends AbstractChange {
         }
 
     }
-    
-//    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-//
-//    	// SQLite does not support this ALTER TABLE operation until now.
-//		// For more information see: http://www.sqlite.org/omitted.html.
-//		// This is a small work around...
-//
-//    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-//
-//		// define alter table logic
-//		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-//			public ColumnConfig[] getColumnsToAdd() {
-//				return new ColumnConfig[0];
-//			}
-//			public boolean copyThisColumn(ColumnConfig column) {
-//				return true;
-//			}
-//			public boolean createThisColumn(ColumnConfig column) {
-//				if (column.getName().equals(getColumnName())) {
-//					column.setDefaultValue(null);
-//					column.setDefaultValueBoolean(null);
-//					column.setDefaultValueDate((Date)null);
-//					column.setDefaultValueNumeric((Number)null);
-//				}
-//				return true;
-//			}
-//			public boolean createThisIndex(Index index) {
-//				return true;
-//			}
-//		};
-//
-//    	try {
-//    		// alter table
-//			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-//					rename_alter_visitor,
-//					database,getCatalogName(), getSchemaName(),getTableName()));
-//    	} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//    	return statements.toArray(new SqlStatement[statements.size()]);
-//    }
 
     @Override
     public String getConfirmationMessage() {
