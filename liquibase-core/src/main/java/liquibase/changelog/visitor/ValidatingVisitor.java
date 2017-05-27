@@ -110,15 +110,17 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 try {                
                     ValidationErrors foundErrors = change.validate(database);
 
-                    if (foundErrors != null && foundErrors.hasErrors()) {
-                        if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
+                    if (foundErrors != null && foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN))) {
                             LogFactory.getInstance().getLog().info(
-                                    "Skipping changeSet "+changeSet+" due to validation error(s): " +
+                                    "Skipping change set " + changeSet + " due to validation error(s): " +
                                             StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
-                        } else {
-                            validationErrors.addAll(foundErrors, changeSet);
-                        }
+                    } else {
+                        if (!foundErrors.getWarningMessages().isEmpty())
+                            LogFactory.getInstance().getLog().warning(
+                                    "Change set " + changeSet + ": " +
+                                            StringUtils.join(foundErrors.getWarningMessages(), ", "));
+                        validationErrors.addAll(foundErrors, changeSet);
                     }
                 } catch (Throwable e) {
                     changeValidationExceptions.add(e);

@@ -1,7 +1,7 @@
 package liquibase.exception;
 
-import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
+import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -74,6 +74,9 @@ public class ValidationErrors {
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {
         for (String message : validationErrors.getErrorMessages()) {
             this.errorMessages.add(message+", "+changeSet);
+        }
+        for (String message : validationErrors.getWarningMessages()) {
+            this.warningMessages.add(message+", "+changeSet);
         }
     }
 
