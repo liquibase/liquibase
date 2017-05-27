@@ -2,6 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
@@ -97,5 +99,17 @@ public class DropDefaultValueChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors vErrors = super.validate(database);
+        if (database instanceof DB2Database
+                && ((DB2Database) database).getDataServerType() != DB2Database.DataServerType.DB2LUW ) {
+            vErrors.addWarning("Due to lack of SQL PL support in DB2 flavours other than LUW, " +
+                    "it is not possible to prevent SQL errors (e.g. during change log rollbacks) " +
+                    "if the column does not have a DEFAULT value the moment DROP DEFAULT gets executed.");
+        }
+        return vErrors;
     }
 }
