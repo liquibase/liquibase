@@ -14,8 +14,8 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.InternalException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -286,7 +286,7 @@ public class CommandLineUtils {
             try {
                 manifest = new Manifest(new URL(manifestPath).openStream());
             } catch (IOException e) {
-                throw new InternalException("Cannot open a URL to the manifest of our own JAR file.");
+                throw new UnexpectedLiquibaseException("Cannot open a URL to the manifest of our own JAR file.");
             }
             Attributes attr = manifest.getMainAttributes();
             myVersion = attr.getValue("Bundle-Version");

@@ -2,7 +2,7 @@ package liquibase.logging.core;
 
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.InternalException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogLevel;
 import liquibase.util.StringUtils;
 
@@ -12,12 +12,20 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
 
+/**
+ * The default logger for this software. The general output format created by this logger is:
+ * [log level] date/time: liquibase: DatabaseChangeLog name:ChangeSet name: message.
+ * DEBUG/INFO message are printer to STDOUT and WARNING/SEVERE messages are printed to STDERR.
+ */
 public class DefaultLogger extends AbstractLogger {
 
     private String name = "liquibase";
     private PrintStream stderr = System.err;
     private PrintStream stdout = System.out;
 
+    /**
+     * default constructor
+     */
     public DefaultLogger() {
     }
 
@@ -60,6 +68,7 @@ public class DefaultLogger extends AbstractLogger {
         }
     }
 
+    @Override
     public void closeLogFile() {
         if (stderr.equals(System.err) || stderr.equals(System.out)) {
             return;
@@ -76,7 +85,16 @@ public class DefaultLogger extends AbstractLogger {
         }
     }
 
-    protected void print(LogLevel logLevel, String message) throws InternalException {
+    /**
+     * Outputs a message in the format
+     * [log level] date/time: liquibase: DatabaseChangeLog name:ChangeSet name: message
+     * DEBUG/INFO message are printer to STDOUT and WARNING/SEVERE messages are printed to STDERR.
+     *
+     * @param logLevel desired log level
+     * @param message the message describing the event
+     * @throws UnexpectedLiquibaseException if an internal software error occurs
+     */
+    protected void print(LogLevel logLevel, String message) throws UnexpectedLiquibaseException {
         if (StringUtils.trimToNull(message) == null) {
             return;
         }
@@ -99,7 +117,7 @@ public class DefaultLogger extends AbstractLogger {
                 stderr.println(outputString);
                 break;
             default:
-                throw new InternalException("Encountered an unknown log level: " + logLevel.toString());
+                throw new UnexpectedLiquibaseException("Encountered an unknown log level: " + logLevel.toString());
         }
     }
 
