@@ -22,12 +22,13 @@ Full support (DBMS-specific integration tests work, Software should be usable fo
 Mostly working:
 - Firebird (Snapshot integration test fails, probably bug in Snapshotting functionality present). Rregular change sets seem to work fine.
 - PostgreSQL 9.6 Some problems with snapshotting and when using multiple schemas
-- MariaDB: Problems with default values for DATE columns, snapshot problems (constraints seem to be snapshotted as deferrable, which is a functionality not present in MySQL/MariaDB AFAIK).
+- MySQL/MariaDB: Problems with default values for DATE columns, snapshot problems (constraints seem to be snapshotted
+ as deferrable, which is a functionality not present in MySQL/MariaDB AFAIK).
 - MSSQL Server 2016 (Express): Minor problems in snapshotting (changed column order), some problems with default values relating to DATE/DATETIME etc. columns
+- Oracle Database: one integration tests in the snapshotting area fails
 
 Unstable:
 - H2 (integration test crashes VM with current JDBC driver, multiple failing integration tests)
-- Oracle Database: some integration tests fail, no multi-tenant support implemented yet
 
 Untested/Work not started yet:
 - Sybase AS Anywhere
@@ -36,7 +37,6 @@ Untested/Work not started yet:
 - Microsoft SQL Server (in case-sensitive mode)
 - Microsoft SQL Server (via JTDS driver)
 - SQLite
-- MySQL
 - Determe the oldest supported versions of the RDBMSs, procure them, and test compatibility 
 
 Functionally beyond regular changesets:
