@@ -942,7 +942,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String catalogName, String schemaName, final String objectName,
+                                   final Class<? extends DatabaseObject> objectType) {
 //        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
 //        catalogName = catalogAndSchema.getCatalogName();
 //        schemaName = catalogAndSchema.getSchemaName();
