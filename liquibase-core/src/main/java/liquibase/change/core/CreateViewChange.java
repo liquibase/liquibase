@@ -140,7 +140,10 @@ public class CreateViewChange extends AbstractChange {
 				validate.addError("Cannot specify both 'path' and a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
 			}
 			if (StringUtils.trimToNull(getSelectQuery()) == null && StringUtils.trimToNull(getPath()) == null) {
-				validate.addError("Cannot specify either 'path' or a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
+				validate.addError("For a createView change, you must specify either 'path' or a nested view " +
+						"definition in " +
+						"" + ChangeFactory
+						.getInstance().getChangeMetaData(this).getName());
 			}
 
 		}
