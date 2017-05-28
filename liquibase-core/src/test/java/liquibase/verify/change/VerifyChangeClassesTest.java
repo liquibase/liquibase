@@ -58,13 +58,15 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
-                // Prepare a list of required parameters, plus a few extra for complicated cases.
+                // Prepare a list of required parameters, plus a few extra for complicated cases (e.g. where at least
+                // one of two parameters in a group is required.
                 TreeSet<String> requiredParams = new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet());
                 /* dropColumn allows either one column or a list of columns; we choose to test with a single column. */
                 if (changeName.equalsIgnoreCase("dropColumn")) requiredParams.add("columnName");
                 /* When testing table and column remarks, do not test with an empty remark. */
                 if (changeName.equalsIgnoreCase("setColumnRemarks")) requiredParams.add("remarks");
                 if (changeName.equalsIgnoreCase("setTableRemarks")) requiredParams.add("remarks");
+                if (changeName.equalsIgnoreCase("createView")) requiredParams.add("selectQuery");
                 /* ALTER SEQUENCE should change at least one property
                  * hsqldb/h2 do not support incrementBy. */
                 if (changeName.equalsIgnoreCase("alterSequence")) {
@@ -88,7 +90,8 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 }
 
                 ValidationErrors errors = change.validate(database);
-                assertFalse("Validation errors for " + changeMetaData.getName() + " on " + database.getShortName() + ": " + errors.toString(), errors.hasErrors());
+                assertFalse("Validation errors for " + changeMetaData.getName() + " on "
+                        + database.getShortName() + ": " + errors.toString(), errors.hasErrors());
 
                 SqlStatement[] sqlStatements = {};
                 try {
