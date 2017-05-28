@@ -1,19 +1,11 @@
 package liquibase.dbtest.oracle;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.Liquibase;
+import liquibase.database.DatabaseFactory;
+import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.ValidationFailedException;
-import liquibase.test.DatabaseTest;
-import liquibase.test.DatabaseTestURL;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import java.sql.Statement;
-import java.sql.ResultSet;
 import java.util.Date;
 
 /**
@@ -25,7 +17,8 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         super("oracle", DatabaseFactory.getInstance().getDatabase("oracle"));
         // Respect a user-defined location for sqlnet.ora, tnsnames.ora etc. stored in the environment
         // variable TNS_ADMIN. This allowes the use of TNSNAMES.
-        System.setProperty("oracle.net.tns_admin",System.getenv("TNS_ADMIN"));
+        if (System.getenv("TNS_ADMIN") != null)
+            System.setProperty("oracle.net.tns_admin",System.getenv("TNS_ADMIN"));
     }
 
     @Override
