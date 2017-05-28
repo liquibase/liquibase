@@ -220,8 +220,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "order by 5, 6, 7, 9, 8";
                 }
 
-                protected String getDB2Sql(String jdbcSchemaName) {
-                    return "SELECT  " +
+                protected String getDB2Sql(String jdbcSchemaName, String jdbcTableName) {
+                    String sql;
+                    sql = "SELECT  " +
                             "  pk_col.tabschema AS pktable_cat,  " +
                             "  pk_col.tabname as pktable_name,  " +
                             "  pk_col.colname as pkcolumn_name, " +
@@ -240,9 +241,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
                             "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
                             "and pk_col.colseq=fk_col.colseq ";
-                    if (jdbcTableName != null) {
-                        sql += "and fk_col.tabname='" + jdbcTableName + "'";
-                    }
+
+                        if (jdbcTableName != null) {
+                            sql += "and fk_col.tabname='" + jdbcTableName + "'";
+                        }
                     sql += "ORDER BY fk_col.colseq";
                     return sql;
                 }
