@@ -6,24 +6,26 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.structure.core.Index;
 
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Support for SAP (formely: Siebel) AS (Adapter Server) Anywhere embedded/mobile database.
+ *
  * @author otaranenko
  *
  */
 public class SybaseASADatabase extends AbstractJdbcDatabase {
 
-    private static final Set<String> systemTablesAndViews;
+	private static final Set<String> systemTablesAndViews;
 
-    static {
-    	systemTablesAndViews = new HashSet<String>();
+	static {
+		systemTablesAndViews = new HashSet<String>();
 		systemTablesAndViews.add("dummy");
 		systemTablesAndViews.add("sysarticle");
 		systemTablesAndViews.add("sysarticlecol");
@@ -115,49 +117,49 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 		systemTablesAndViews.add("sysuserperms");
 		systemTablesAndViews.add("sysusertype");
 		systemTablesAndViews.add("sysviews");
-    }
-	
+	}
+
 	/**
-	 * 
+	 *
 	 */
 	public SybaseASADatabase() {
 		super();
-        super.setCurrentDateTimeFunction("now()");
+		super.setCurrentDateTimeFunction("now()");
 	}
 
-    @Override
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-    
+	@Override
+	public int getPriority() {
+		return PRIORITY_DEFAULT;
+	}
+
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#getDefaultDriver(java.lang.String)
 	 */
 	@Override
-    public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sybase")) {
-            return "com.sybase.jdbc3.jdbc.SybDriver";
-        } else {
-            return null;
-        }
+	public String getDefaultDriver(String url) {
+		if (url.startsWith("jdbc:sybase")) {
+			return "com.sybase.jdbc4.jdbc.SybDriver";
+		} else {
+			return null;
+		}
 	}
 
-    @Override
-    public Integer getDefaultPort() {
-        return 2638;
-    }
+	@Override
+	public Integer getDefaultPort() {
+		return 2638;
+	}
 
-    @Override
-    protected String getDefaultDatabaseProductName() {
-        return "Sybase Anywhere";
-    }
+	@Override
+	protected String getDefaultDatabaseProductName() {
+		return "Sybase Anywhere";
+	}
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
     * @see liquibase.database.Database#getShortName()
     */
 	@Override
-    public String getShortName() {
-		
+	public String getShortName() {
+
 		return "asany";
 	}
 
@@ -165,29 +167,29 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	 * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
 	 */
 	@Override
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
+	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
 		return "Adaptive Server Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
-        || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
-        || "Adaptive Server IQ".equalsIgnoreCase(conn.getDatabaseProductName())
-		|| "Sybase IQ".equalsIgnoreCase(conn.getDatabaseProductName());
+				|| "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
+				|| "Adaptive Server IQ".equalsIgnoreCase(conn.getDatabaseProductName())
+				|| "Sybase IQ".equalsIgnoreCase(conn.getDatabaseProductName());
 	}
 
 	@Override
 	public String getDefaultCatalogName() {
-        try {
-            DatabaseConnection connection = getConnection();
-            if (connection == null) {
-                return null;
-            }
-            return connection.getCatalog();
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
+		try {
+			DatabaseConnection connection = getConnection();
+			if (connection == null) {
+				return null;
+			}
+			return connection.getCatalog();
+		} catch (DatabaseException e) {
+			throw new UnexpectedLiquibaseException(e);
+		}
+	}
 
-    @Override
-    protected String getConnectionSchemaName() {
-        return "DBA";
+	@Override
+	protected String getConnectionSchemaName() {
+		return "DBA";
 	}
 
 	@Override
@@ -201,27 +203,32 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	 * @see liquibase.database.Database#supportsInitiallyDeferrableColumns()
 	 */
 	@Override
-    public boolean supportsInitiallyDeferrableColumns() {
+	public boolean supportsInitiallyDeferrableColumns() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsDropTableCascadeConstraints() {
 		return false;
 	}
 
 	/* (non-Javadoc)
-	 * @see liquibase.database.Database#supportsTablespaces()
-	 */
+         * @see liquibase.database.Database#supportsTablespaces()
+         */
 	@Override
-    public boolean supportsTablespaces() {
+	public boolean supportsTablespaces() {
 		return true;
 	}
 
 	@Override
-    public Set<String> getSystemViews() {
-        return systemTablesAndViews;
-    }
+	public Set<String> getSystemViews() {
+		return systemTablesAndViews;
+	}
 
-    @Override
-    public boolean supportsSequences() {
-        return false;
-    }
+	@Override
+	public boolean supportsSequences() {
+		return false;
+	}
 
 	/* (non-Javadoc)
 	 * @see liquibase.database.AbstractJdbcDatabase#getAutoIncrementClause()
@@ -230,31 +237,44 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	protected String getAutoIncrementClause() {
 		return "DEFAULT AUTOINCREMENT";
 	}
-	
+
 	@Override
 	protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
 		// not supported
 		return false;
 	}
-	
+
 	@Override
 	protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
 		// not supported
 		return false;
 	}
-	
+
 	@Override
 	public void setAutoCommit(boolean b) throws DatabaseException {
 		// workaround for strange Sybase bug.
 		// In some circumstances tds-driver thrown exception 
 		// JZ016: The AutoCommit option is already set to false.
-    	if (b || super.isAutoCommit()) {
-    		super.setAutoCommit(b);
-        }
+		if (b || super.isAutoCommit()) {
+			super.setAutoCommit(b);
+		}
 	}
 
 	@Override
 	public String getJdbcCatalogName(CatalogAndSchema schema) {
 		return "";
 	}
+
+	@Override
+	public String escapeIndexName(String catalogName, String schemaName, String indexName) {
+		/*
+		 * https://help.sap.com/viewer/40c01c3500744c85a02db71276495de5/17.0/en-US/816be9016ce210148874e67c83ca6c67.html
+		 * "There is no way of specifying the index owner in the CREATE INDEX statement. Indexes are always owned by
+		 * the owner of the table or materialized view."
+		 *
+		 * As a consequence, we will always remove the index owner.
+		 */
+		return escapeObjectName(indexName, Index.class);
+	}
 }
+
