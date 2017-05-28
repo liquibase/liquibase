@@ -4,7 +4,7 @@ import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.logging.core.DefaultLogger;
+import liquibase.logging.core.TreeStyleLogger;
 import liquibase.osgi.OSGiPackageScanClassResolver;
 import liquibase.osgi.OSGiResourceAccessor;
 import liquibase.osgi.OSGiUtil;
@@ -53,7 +53,7 @@ public class ServiceLocator {
 
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
-    private Logger logger = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
+    private Logger logger = new TreeStyleLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
     private PackageScanClassResolver classResolver;
 
     protected ServiceLocator() {

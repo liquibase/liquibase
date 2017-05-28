@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -297,7 +298,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (database instanceof InformixDatabase
                         && type != DatabaseMetaData.tableIndexStatistic
                         && position == 0) {
-                    System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
+                    LogFactory.getInstance().getLog().debug(this.getClass().getName() + ": corrected position to " + ++position);
                 }
                 String definition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
                 if (definition != null) {

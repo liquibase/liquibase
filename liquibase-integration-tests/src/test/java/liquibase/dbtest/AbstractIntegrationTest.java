@@ -249,7 +249,7 @@ public abstract class AbstractIntegrationTest {
         try {
             liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {
-            e.printDescriptiveError(System.out);
+            e.printDescriptiveError(System.err);
             throw e;
         }
     }
@@ -331,7 +331,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (Exception e) {
-                System.out.println("Probably expected error dropping databasechangelog table");
+                LogFactory.getInstance().getLog().warning("Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -352,7 +352,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (Exception e) {
-                System.out.println("Probably expected error dropping databasechangeloglock table");
+                LogFactory.getInstance().getLog().warning("Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -575,7 +575,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             liquibase = createLiquibase(tempFile.getName());
-            System.out.println("updating from "+tempFile.getCanonicalPath());
+            LogFactory.getInstance().getLog().info("updating from "+tempFile.getCanonicalPath());
             try {
                 liquibase.update(this.contexts);
             } catch (LiquibaseException e) {

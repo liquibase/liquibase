@@ -4,11 +4,11 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeParameterMetaData;
-import liquibase.change.core.DropPrimaryKeyChange;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.logging.LogFactory;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;
@@ -102,7 +102,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 for (SqlStatement statement : sqlStatements) {
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
                     if (sql == null) {
-                        System.out.println("Null sql for " + statement + " on " + database.getShortName());
+                        LogFactory.getInstance().getLog().severe("Null sql for " + statement + " on " + database.getShortName());
                     } else {
                         for (Sql line : sql) {
                             String sqlLine = line.toSql();
