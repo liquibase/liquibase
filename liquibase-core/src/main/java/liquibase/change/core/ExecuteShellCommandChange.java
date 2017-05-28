@@ -176,9 +176,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
             ;
         }
 
-        LogFactory.getInstance().getLog().severe(errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-        LogFactory.getInstance().getLog().info(inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+        String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+        String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
+        LogFactory.getLogger().severe(errorStreamOut);
+        LogFactory.getLogger().info(infoStreamOut);
+
+        throwExceptionIfError(returnCode, errorStreamOut, infoStreamOut);
+    }
+
+    protected void throwExceptionIfError(int returnCode, String errorStreamOut, String infoStreamOut) {
         if (returnCode != 0) {
             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
         }

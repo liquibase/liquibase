@@ -92,7 +92,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 UniqueConstraint uq = new UniqueConstraint()
                         .setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
                 if (constraint.containsColumn("INDEX_NAME")) {
-                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), null, table.getName()));
+                    uq.setBackingIndex(new Index((String) constraint.get("INDEX_NAME"), (String) constraint.get("INDEX_CATALOG"), (String) constraint.get("INDEX_SCHEMA"), table.getName()));
                 }
                 if ("CLUSTERED".equals(constraint.get("TYPE_DESC"))) {
                     uq.setClustered(true);
@@ -126,7 +126,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (columnCache == null) {
-            bulkQuery = (database instanceof OracleDatabase) && columnQueryCount > 3;
+            bulkQuery = (database instanceof OracleDatabase || database instanceof MSSQLDatabase) && columnQueryCount > 3;
             snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
 
             if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
@@ -156,6 +156,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 sql =
                         "SELECT " +
                                 "[kc].[name] AS [CONSTRAINT_NAME], " +
+                                    "s.name AS constraint_container, "+
                                 "[c].[name] AS [COLUMN_NAME], " +
                                 "CASE [ic].[is_descending_key] WHEN 0 THEN N'A' WHEN 1 THEN N'D' END AS [ASC_OR_DESC] " +
                                 "FROM [sys].[schemas] AS [s] " +
@@ -172,11 +173,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                                 "INNER JOIN [sys].[columns] AS [c] " +
                                 "ON [c].[object_id] = [ic].[object_id] " +
                                 "AND [c].[column_id] = [ic].[column_id] " +
-                                "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' " +
-                                "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
-                                "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' " +
-                                "ORDER BY " +
-                                "[ic].[key_ordinal]";
+                                    "WHERE [s].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(schema.getName(), Schema.class)) + "' ";
+                    if (!bulkQuery) {
+                        sql += "AND [t].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(example.getTable().getName(), Table.class)) + "' " +
+                                "AND [kc].[name] = N'" + database.escapeStringForDatabase(database.correctObjectName(name, UniqueConstraint.class)) + "' ";
+                    }
+                    sql += "ORDER BY " +
+                            "[ic].[key_ordinal]";
             } else if (database instanceof OracleDatabase) {
                 sql = "select ucc.owner as constraint_container, ucc.constraint_name as constraint_name, ucc.column_name " +
                         "from all_cons_columns ucc " +

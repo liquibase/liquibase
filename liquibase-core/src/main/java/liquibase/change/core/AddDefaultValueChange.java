@@ -209,8 +209,11 @@ public class AddDefaultValueChange extends AbstractChange {
             ((SequenceNextValueFunction) defaultValue).setSequenceSchemaName(this.getSchemaName());
         }
 
+        AddDefaultValueStatement statement = new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue);
+        statement.setDefaultValueConstraintName(this.getDefaultValueConstraintName());
+
         return new SqlStatement[]{
-                new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
+                statement
         };
     }
 

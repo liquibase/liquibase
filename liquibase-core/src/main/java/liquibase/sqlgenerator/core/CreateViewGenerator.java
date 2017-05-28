@@ -28,7 +28,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
-        validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
 
         if (createViewStatement.isReplaceIfExists()) {
             validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, DB2Database.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);

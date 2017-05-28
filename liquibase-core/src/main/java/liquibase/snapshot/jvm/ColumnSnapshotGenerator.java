@@ -16,6 +16,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.ObjectUtil;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 
@@ -153,6 +154,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setRemarks(remarks);
         column.setOrder(position);
 
+        if (columnMetadataResultSet.get("IS_FILESTREAM") != null && (Boolean) columnMetadataResultSet.get("IS_FILESTREAM"))  {
+            column.setAttribute("fileStream", true);
+        }
+        if (columnMetadataResultSet.get("IS_ROWGUIDCOL") != null && (Boolean) columnMetadataResultSet.get("IS_ROWGUIDCOL"))  {
+            column.setAttribute("rowGuid", true);
+        }
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");
             if (nullable.equals("Y")) {

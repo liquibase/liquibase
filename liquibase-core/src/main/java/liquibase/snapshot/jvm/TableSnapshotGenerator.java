@@ -42,37 +42,6 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 return null;
             }
 
-            if (table != null && database instanceof MSSQLDatabase) {
-                String schemaName;
-                Schema tableSchema = table.getSchema();
-                if (tableSchema == null) {
-                    schemaName = database.getDefaultSchemaName();
-                } else {
-                    schemaName = tableSchema.getName();
-                }
-
-                String sql;
-                sql = "SELECT" +
-                        " CAST(value as varchar(max)) as REMARKS" +
-                        " FROM" +
-                        " sys.extended_properties" +
-                        " WHERE" +
-                        " name='MS_Description'" +
-                        " AND major_id = OBJECT_ID('" +
-                        database.escapeStringForDatabase(
-                            database.escapeTableName(null, schemaName, table.getName())
-                        ) +
-                        "')" +
-                        " AND" +
-                        " minor_id = 0";
-                List<String> remarks = ExecutorService.getInstance().getExecutor(snapshot.getDatabase()).queryForList(new RawSqlStatement(sql), String.class);
-
-                if (remarks != null && remarks.size() > 0) {
-                    table.setRemarks(StringUtils.trimToNull(remarks.iterator().next()));
-                }
-            }
-
-
             return table;
         } catch (SQLException e) {
             throw new DatabaseException(e);

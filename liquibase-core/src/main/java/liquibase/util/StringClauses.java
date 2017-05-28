@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -16,6 +17,7 @@ public class StringClauses {
     private final String start;
     private final String end;
     private LinkedHashMap<String, Object> clauses = new LinkedHashMap<String, Object>();
+    private final Random random = new Random();
 
     /**
      * Creates a new StringClause with no start or end strings and a space separator.
@@ -64,7 +66,7 @@ public class StringClauses {
         }
 
         while (generateOne) {
-            key = UUID.randomUUID().toString().replace("-", "").substring(0,6);
+            key = StringUtils.leftPad(new BigInteger(50, random).toString(32), 6).replace(" ", "0").substring(0,6);
             generateOne = clauses.containsKey(key);
         }
         return key;

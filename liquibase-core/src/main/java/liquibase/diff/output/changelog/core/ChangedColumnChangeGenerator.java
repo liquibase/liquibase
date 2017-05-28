@@ -4,6 +4,7 @@ import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.core.*;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
@@ -188,6 +189,15 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 changes.add(renameColumnChange);
 
             } else {
+                if (comparisonDatabase instanceof MSSQLDatabase && column.getDefaultValue() != null) { //have to drop the default value, will be added back with the "data type changed" logic.
+                    DropDefaultValueChange dropDefaultValueChange = new DropDefaultValueChange();
+                    dropDefaultValueChange.setCatalogName(catalogName);
+                    dropDefaultValueChange.setSchemaName(schemaName);
+                    dropDefaultValueChange.setTableName(tableName);
+                    dropDefaultValueChange.setColumnName(column.getName());
+                    changes.add(dropDefaultValueChange);
+                }
+
                 ModifyDataTypeChange change = new ModifyDataTypeChange();
                 change.setCatalogName(catalogName);
                 change.setSchemaName(schemaName);

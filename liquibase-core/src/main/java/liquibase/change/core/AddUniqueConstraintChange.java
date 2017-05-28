@@ -169,7 +169,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
             clustered = getClustered();
         }
 
-        AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
+        AddUniqueConstraintStatement statement = createAddUniqueConstraintStatement();
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
@@ -181,6 +181,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
         statement.setForIndexCatalogName(getForIndexCatalogName());
 
         return new SqlStatement[] { statement };
+    }
+
+    protected AddUniqueConstraintStatement createAddUniqueConstraintStatement() {
+        return new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
     }
 
 
