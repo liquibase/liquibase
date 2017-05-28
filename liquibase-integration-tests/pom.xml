@@ -164,6 +164,34 @@
             </dependencies>
         </profile>
         <profile>
+            <!-- SAP (formerly: Sybase) j/Connect drivers are not available at all in Maven repositories (due to their
+            proprietary nature
+                 and IBM not having a Maven repository that would contain these artifacts. The only way to get
+                 these drivers is to extract the file jconn4.jar from a licensed software installation and
+                 manually install them in your local (per-user) maven repository like this (you will need to replace
+                 the path to the JAR and the actual version number of the JDBC driver!):
+
+                 mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
+                    -Dfile=D:\sap\jConnect-16_0\classes\jconn4.jar -DgroupId=com.sybase.jdbc4.utils \
+                    -DartifactId=jconnect -Dversion=16.0.SP02.PL05
+
+                One possible download source is the "SAP Store" at https://store.sap.com where you can search for the
+                term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for €0.00.
+
+                 After that, adjust the driver version number in the following <dependency> tag.
+             -->
+            <id>sap-jconnect</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sybase.jdbc4.utils</groupId>
+                    <artifactId>jconnect</artifactId>
+                    <version>16.0.SP02.PL05</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <profile>
             <id>buildServer</id>
             <activation>
                 <property>

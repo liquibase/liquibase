@@ -3,15 +3,14 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
@@ -124,8 +123,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sybase")) {
-            return "com.sybase.jdbc3.jdbc.SybDriver";
+        if (url.startsWith("jdbc:xsybase")) {
+            return "com.sybase.jdbc4.jdbc.SybDriver";
         } else if (url.startsWith("jdbc:jtds:sybase")) {
             return "net.sourceforge.jtds.jdbc.Driver";
         }

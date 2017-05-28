@@ -6,11 +6,14 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.core.Index;
 
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -189,7 +192,15 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 
 	@Override
 	protected String getConnectionSchemaName() {
-		return "DBA";
+		try {
+			Connection connection = ((JdbcConnection)getConnection()).getWrappedConnection();
+			if (connection == null) {
+				return null;
+			}
+			return connection.getMetaData().getUserName();
+		} catch (SQLException e) {
+			throw new UnexpectedLiquibaseException(e);
+		}
 	}
 
 	@Override
