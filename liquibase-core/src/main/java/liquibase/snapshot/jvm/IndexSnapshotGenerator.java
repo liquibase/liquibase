@@ -192,14 +192,39 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 }
 
-                if (type == DatabaseMetaData.tableIndexStatistic) {
-                    continue;
-                }
-
                 if (columnName == null && definition == null) {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
+
+                if (type == DatabaseMetaData.tableIndexStatistic) {
+                    continue;
+                }
+
+                /*
+                 * In Oracle database, ALL_IND_COLUMNS/ALL_IND_EXPRESSIONS (the views from which we bulk-fetch the
+                 * column definitions for a given index) can show a strange behaviour if an index column consists of
+                 * a regular table column, but its sort order is DESC(ending). In this case, we get something like
+                 * this (example values):
+                 * ALL_IND_COLUMNS.COLUMN_NAME=SYS_NC00006$
+                 * ALL_IND_EXPRESSIONS.COLUMN_EXPRESSIONS="COLUMN1FORDESC"
+                 * Note that the quote characters (") are part the actual column value!
+                 * Our strategy here is: If the expression would be a valid Oracle identifier, and it is not an Oracle
+                 * function name, then we assume it is the name of a regular column.
+                 */
+                if (database instanceof OracleDatabase
+                    && definition != null
+                    && columnName != null)
+                {
+                    String potentialColumnExpression = definition.replaceFirst("^\"?(.*?)\"?$", "$1");
+                    OracleDatabase oracle = (OracleDatabase)database;
+                    if (oracle.isValidOracleIdentifier(potentialColumnExpression, Index.class)
+                        && (!oracle.isFunction(potentialColumnExpression))) {
+                        columnName = potentialColumnExpression;
+                        definition = null;
+                    }
+                }
+
                 Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
