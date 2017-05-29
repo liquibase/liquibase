@@ -20,7 +20,7 @@ public class TimeType  extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof InformixDatabase) {
-            return new DatabaseDataType("INTERVAL HOUR TO FRACTION", 5);
+            return new DatabaseDataType("DATETIME HOUR TO FRACTION", 5);
         }
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
