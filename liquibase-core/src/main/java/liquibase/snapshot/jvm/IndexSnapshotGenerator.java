@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -174,16 +173,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
                 short position = row.getShort("ORDINAL_POSITION");
-                /*
-                * TODO maybe bug in jdbc driver? Need to investigate.
-                * If this "if" is commented out ArrayOutOfBoundsException is thrown
-                * because it tries to access an element -1 of a List (position-1)
-                */
-                if (database instanceof InformixDatabase
-                        && type != DatabaseMetaData.tableIndexStatistic
-                        && position == 0) {
-                    LogFactory.getInstance().getLog().debug(this.getClass().getName() + ": corrected position to " + ++position);
-                }
 
                 String definition = StringUtils.trimToNull(row.getString("FILTER_CONDITION"));
                 if (definition != null) {
@@ -225,6 +214,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 }
 
+                // Have we already seen/found this index? If not, let's read its properties!
                 Index returnIndex = foundIndexes.get(correctedIndexName);
                 if (returnIndex == null) {
                     returnIndex = new Index();
@@ -265,15 +255,30 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     includedColumns.add(columnName);
                 } else {
                     if (position != 0) { //if really a column, position is 1-based.
+
+                        /*
+                         * TODO: It seems the original author was not completely sure that the columns/expressions
+                         * that make up this index would arrive in order, i.e. they thought it could happen that we
+                         * get the (example) 4 columns in the order 3,4,1,2. So, instead of doing a simple add to the
+                         * collection, they chose this: First, make sure that an (empty) element of "position-1" exists
+                         * in the getColumns() array (add nulls until this is the case). After that, we can safely
+                         * replace the "position-1"th element. I am not sure if this really necessary, but it might
+                         * improve stability, so I leave it in place for the moment.
+                         */
                         for (int i = returnIndex.getColumns().size(); i < position; i++) {
                             returnIndex.getColumns().add(null);
                         }
+
+                        // Is this column a simple column (definition == null)
+                        // or is it a computed expression (definition != null)
                         if (definition == null) {
                             String ascOrDesc = row.getString("ASC_OR_DESC");
                             Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                            returnIndex.getColumns().set(position - 1, new Column(columnName)
+                                    .setDescending(descending).setRelation(returnIndex.getTable()));
                         } else {
-                            returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
+                            returnIndex.getColumns().set(position - 1, new Column()
+                                    .setRelation(returnIndex.getTable()).setName(definition, true));
                         }
                     }
                 }
@@ -283,16 +288,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (exampleName != null) {
-            Index index = null;
-
-            // If we are informix then must alter the lookup if we get here
-            // Wont get here now though due to the continue for generated indexes above
-            if (database instanceof InformixDatabase) {
-                index = foundIndexes.get("_generated_index_" + exampleName.substring(1));
-            } else {
-                index = foundIndexes.get(exampleName);
-            }
-
+            Index index = foundIndexes.get(exampleName);
             return index;
         } else {
             //prefer clustered version of the index
