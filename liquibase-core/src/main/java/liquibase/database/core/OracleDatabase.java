@@ -10,11 +10,16 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.statement.*;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -34,13 +39,16 @@ import java.util.regex.Pattern;
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "oracle";
-
+    protected final int SHORT_IDENTIFIERS_LENGTH = 30;
+    protected final int LONG_IDENTIFIERS_LEGNTH = 128;
+    protected final int ORACLE_12C_MAJOR_VERSION = 12;
 
     private Set<String> reservedWords = new HashSet<String>();
     private Set<String> userDefinedTypes = null;
 
     private Boolean canAccessDbaRecycleBin;
     private Integer databaseMajorVersion;
+    private Integer databaseMinorVersion;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -65,11 +73,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         Connection sqlConn = null;
         if (!(conn instanceof OfflineConnection)) {
             try {
-                /**
+                /*
                  * Don't try to call getWrappedConnection if the conn instance is
                  * is not a JdbcConnection. This happens for OfflineConnection.
-                 * @see <a href="https://liquibase.jira.com/browse/CORE-2192">CORE-2192</a>
-                 **/
+                 * see https://liquibase.jira.com/browse/CORE-2192
+                 */
                 if (conn instanceof JdbcConnection) {
                     Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
                     wrappedConn.setAccessible(true);
@@ -105,9 +113,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                         compatibleVersion = resultSet.getString("value");
                     }
                     if (compatibleVersion != null) {
-                        Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\..*").matcher(compatibleVersion);
+                        Matcher majorVersionMatcher = Pattern.compile("(\\d+)\\.(\\d+)\\..*").matcher(compatibleVersion);
                         if (majorVersionMatcher.matches()) {
                             this.databaseMajorVersion = Integer.valueOf(majorVersionMatcher.group(1));
+                            this.databaseMinorVersion = Integer.valueOf(majorVersionMatcher.group(2));
                         }
                     }
                 } catch (SQLException e) {
@@ -140,6 +149,15 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return super.getDatabaseMajorVersion();
         } else {
             return databaseMajorVersion;
+        }
+    }
+
+    @Override
+    public int getDatabaseMinorVersion() throws DatabaseException {
+        if (databaseMinorVersion == null) {
+            return super.getDatabaseMinorVersion();
+        } else {
+            return databaseMinorVersion;
         }
     }
 
@@ -185,7 +203,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     /**
      * Oracle supports catalogs in liquibase terms
      *
-     * @return
+     * @return false
      */
     @Override
     public boolean supportsSchemas() {
@@ -224,16 +242,18 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     /**
-     * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
-     * <p/>
-     * Convert an ISO8601 date string to one of the following results:
+     * <p>Returns an Oracle date literal with the same value as a string formatted using ISO 8601.</p>
+     *
+     * <p>Convert an ISO8601 date string to one of the following results:
      * to_date('1995-05-23', 'YYYY-MM-DD')
-     * to_date('1995-05-23 09:23:59', 'YYYY-MM-DD HH24:MI:SS')
-     * <p/>
-     * Implementation restriction:
-     * Currently, only the following subsets of ISO8601 are supported:
-     * YYYY-MM-DD
-     * YYYY-MM-DDThh:mm:ss
+     * to_date('1995-05-23 09:23:59', 'YYYY-MM-DD HH24:MI:SS')</p>
+     *
+     * Implementation restriction:<br>
+     * Currently, only the following subsets of ISO8601 are supported:<br>
+     * <ul>
+     * <li>YYYY-MM-DD</li>
+     * <li>YYYY-MM-DDThh:mm:ss</li>
+     * </ul>
      */
     @Override
     public String getDateLiteral(String isoDate) {
@@ -498,6 +518,48 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsNotNullConstraintNames() {
         return true;
+    }
+
+    /** Tests if the given String would be a valid identifier in Oracle DBMS. In Oracle, a valid identifier has
+     * the following form (case-insensitive comparison):
+     * 1st character: A-Z
+     * 2..n characters: A-Z0-9$_#
+     * The maximum length of an identifier differs by Oracle version and object type.
+     */
+    public boolean isValidOracleIdentifier(String identifier, Class<? extends DatabaseObject> type) {
+        if (identifier == null || identifier.length() < 1)
+            return false;
+
+        if (!identifier.matches("^(i?)[A-Z][A-Z0-9\\$\\_\\#]*$"))
+            return false;
+
+        /*
+         * @todo It seems we currently do not have a class for tablespace identifiers, and all other classes
+         * we do know seem to be supported as 12cR2 long identifiers, so:
+         */
+        return (identifier.length() <= LONG_IDENTIFIERS_LEGNTH);
+    }
+
+    /**
+     * Returns the maximum number of bytes (NOT: characters) for an identifier. For Oracle <=12c Release 20, this
+     * is 30 bytes, and starting from 12cR2, up to 128 (except for tablespaces, PDB names and some other rather rare
+     * object types).
+     * @return the maximum length of an object identifier, in bytes
+     */
+    public int getIdentifierMaximumLength() {
+        try {
+            if (getDatabaseMajorVersion() < ORACLE_12C_MAJOR_VERSION) {
+                return SHORT_IDENTIFIERS_LENGTH;
+            }
+            else if (getDatabaseMajorVersion() == ORACLE_12C_MAJOR_VERSION && getDatabaseMinorVersion() <= 1) {
+                return SHORT_IDENTIFIERS_LENGTH;
+            } else {
+                return LONG_IDENTIFIERS_LEGNTH;
+            }
+        } catch (DatabaseException ex) {
+            throw new UnexpectedLiquibaseException("Cannot determine the Oracle database version number", ex);
+        }
+
     }
 
 }
