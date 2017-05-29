@@ -208,8 +208,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                  * this (example values):
                  * ALL_IND_COLUMNS.COLUMN_NAME=SYS_NC00006$
                  * ALL_IND_EXPRESSIONS.COLUMN_EXPRESSIONS="COLUMN1FORDESC"
-                 * Note that the quote characters (") are part the actual column value!
-                 * Our strategy here is: If the expression would be a valid Oracle identifier, and it is not an Oracle
+                 * Note that the quote characters (") are part of the actual column value!
+                 * Our strategy here is: If the expression would be a valid Oracle identifier, but not a valid Oracle
                  * function name, then we assume it is the name of a regular column.
                  */
                 if (database instanceof OracleDatabase
