@@ -3,6 +3,8 @@ Create Database statement:
 CREATE DATABASE 'D:\asany\DBs\liquibase.db' LOG ON 'liquibase.log' COLLATION '1252LATIN1' NCHAR COLLATION 'UCA' DBA
 USER 'dba' DBA PASSWORD 'liquibase';
 
+CREATE DBSPACE "liquibase2" AS 'D:\\asany\\DBs\\liquibase2_dbspace.dbs';
+
 Alternatively (dbinit is a command line tool):
 dbinit -z "1252LATIN1" -zn "UCA" -dba "dba","liquibase" -t "liquibase.log" "D:\asany\DBs\liquibase.db"
 
