@@ -163,10 +163,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 } // Do we need to specify NULL explicitly?
             } // Do we have a NOT NULL constraint for this column?
 
-            if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
-                //buffer.append(" PRIMARY KEY");
-            }
-
             if (database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null) {
                 buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
             }
@@ -279,7 +275,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 //        }
 //    }
 
-
+        /*
+         * Here, the list of columns and constraints in the form
+         * ( column1, ..., columnN, constraint1, ..., constraintN,
+         * ends. We cannot leave an expression like ", )", so we remove the last comma.
+         */
         String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
 
         if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
