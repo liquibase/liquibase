@@ -1,12 +1,5 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -19,10 +12,17 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 public class InformixDatabase extends AbstractJdbcDatabase {
 
 	private static final String PRODUCT_NAME = "Informix Dynamic Server";
-    private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
+    private static final String TIME_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 
 	private final Set<String> systemTablesAndViews = new HashSet<String>();
@@ -191,7 +191,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
     public String getDateLiteral(final String isoDate) {
         if (isTimeOnly(isoDate)) {
-            return "INTERVAL (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + INTERVAL_FIELD_QUALIFIER;
+            return "DATETIME (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + TIME_FIELD_QUALIFIER;
         } else if (isDateOnly(isoDate)){
         	return super.getDateLiteral(isoDate);
         } else {
