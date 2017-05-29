@@ -1,0 +1,11 @@
+
+This text file is mainly a lookup help for DB-Manul developers to quickly see if a bug in the upstream Liquibase
+project might have already be fixed in DB-Manul (either by a DB-Manul-specific fix or because the bug fixes has
+been merged from upstream).
+
+There is no automatic sorting mechanism for this file. Please keep it tidy and sorted ascending by Liquibase bug id
+to maximise its usefulness. Thank you.
+
+[Liquibase bug id] [DB-Manul bug id] [if fixed, commit#]                      [short bug description]
+=====================================================================================================================
+[CORE-1775]        none              e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key
