@@ -15,9 +15,10 @@ General functionality/unit tests: OK
 Database support:
 
 Full support (DBMS-specific integration tests work, Software should be usable for everyday tasks):
-- IBM DB2 LUW Express v10.6 
+- IBM DB2 LUW Express (currently confirmed versions: v10.6) 
 - Apache Derby
 - HyperSQL
+- Oracle Database (currently confirmed versions: 12.1.0.2 and 12.2.0.1, more to come)
 
 Mostly working:
 - Firebird (Snapshot integration test fails, probably bug in Snapshotting functionality present). Rregular change sets seem to work fine.
@@ -25,15 +26,14 @@ Mostly working:
 - MySQL/MariaDB: Problems with default values for DATE columns, snapshot problems (constraints seem to be snapshotted
  as deferrable, which is a functionality not present in MySQL/MariaDB AFAIK).
 - MSSQL Server 2016 (Express): Minor problems in snapshotting (changed column order), some problems with default values relating to DATE/DATETIME etc. columns
-- Oracle Database: one integration tests in the snapshotting area fails
 
 Unstable:
 - H2 (integration test crashes VM with current JDBC driver, multiple failing integration tests)
+- Sybase AS Anywhere (work started, but several SQL generators are broken; needs considerable work to get it back again)
+- IBM Informix (work started, but several SQL generators are broken; needs considerable work to get it back again)
 
 Untested/Work not started yet:
-- Sybase AS Anywhere
 - Sybase AS
-- IBM Informix
 - Microsoft SQL Server (in case-sensitive mode)
 - Microsoft SQL Server (via JTDS driver)
 - SQLite
