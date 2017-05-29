@@ -352,9 +352,7 @@ public class JdbcExecutor extends AbstractExecutor {
             }
             finally {
                 if (rs != null) {
-                    if (!rs.isClosed()) {
                         JdbcUtils.closeResultSet(rs);
-                    }
                 }
             }
         }
