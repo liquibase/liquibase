@@ -59,7 +59,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             this.database = database;
         }
 
-        public DatabaseMetaData getDatabaseMetaData() {
+        public java.sql.DatabaseMetaData getDatabaseMetaData() {
             return databaseMetaData;
         }
 
@@ -118,6 +118,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
 
+                /**
+                 * Performance-optimised queries for DBMSs where a series of single lookups (via JDBC's
+                 * @return
+                 * @throws SQLException
+                 * @throws DatabaseException
+                 */
                 @Override
                 public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     if (database instanceof OracleDatabase) {
@@ -404,8 +410,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         returnList.addAll(executeAndExtract(sql, database));
 
                     } else {
+                        /*
+                         * If we do not know in which table to look for the index, things get a little bit ugly.
+                         * First, we get a collection of all tables within the catalogAndSchema, then iterate through
+                          * them until we (hopefully) find the index we are looking for.
+                         */
                         List<String> tables = new ArrayList<String>();
                         if (tableName == null) {
+                            // Build a list of all candidate tables in the catalog/schema that might contain the index
                             for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null)) {
                                 tables.add(row.getString("TABLE_NAME"));
                             }
@@ -413,8 +425,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             tables.add(tableName);
                         }
 
+                        // Iterate through all the candidate tables and try to find the index.
                         for (String tableName : tables) {
-                            ResultSet rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, false, true);
+                            ResultSet rs = databaseMetaData.getIndexInfo(
+                                    ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
+                                    ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
+                                    tableName,
+                                    false,
+                                    true);
                             List<CachedRow> rows = extract(rs, (database instanceof InformixDatabase));
                             returnList.addAll(rows);
                         }
