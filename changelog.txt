@@ -118,6 +118,24 @@ DB-Manul 0.1:
       in the first place (i.e. there is nothing to do). This makes the behaviour consistent with other RDBMSs that do not
       care if the column had a default value (commit b24e88ac3cae362ee23be372e4ed8f66589e0ec2)
 
+    Informix SQL:
+      If you have used the abstract data type TIME in your change sets, please be aware that DB-Manul will not use the
+      INTERVAL type any more, because it is the wrong data type for the intended purpose: an interval can be seen
+      as an expression of a duration, but the intention of the TIME data type is to express a fixed point in time
+      (hh:mm:ss.fffff) within a calendar day.
+
+      Because using DATETIME instead of INTERVAL can have implications on your application (due to semantic
+      differences), please test your application behaviour thoroughly after switching to DB-Manul.
+
+      If you do not want this change, an alternative would be to replace the generic TIME datatype in your change sets
+      with the native INTERVAL HOUR TO FRACTION(5). This will ensure the DB-Manul will not try to change the data type.
+
+      Abstract datatype     Liquibase 3.6.0 uses this      DB-Manul uses this
+      ================================================================================================
+      DATE                  DATE                           (same)
+      DATETIME              DATETIME YEAR TO FRACTION(5)   (same)
+      TIME                  INTERVAL HOUR TO FRACTION(5)   DATETIME HOUR TO FRACTION(5)
+
 ------------ DB-Manul forked between version 3.5.3 and Liquibase 3.6.0
 
 Changes in Liquibase version 3.5.2 (2016.09.21)
