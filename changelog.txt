@@ -43,6 +43,10 @@ DB-Manul 0.1:
       due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
       commit cabacfe3593324f5223e53496d80c894f48abfa2
 
+    IBM Informix-specific:
+    - Fixed an issue where PRIMARY KEYs might not get generated. This problem might be related to upstream bug
+      "[CORE-1775] Informix error when creating primary key"
+
     New features
     ============
 
