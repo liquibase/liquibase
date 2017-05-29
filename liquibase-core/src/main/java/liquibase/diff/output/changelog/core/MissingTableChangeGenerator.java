@@ -51,10 +51,6 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
         PrimaryKey primaryKey = missingTable.getPrimaryKey();
 
-//        if (control.diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema().toCatalogAndSchema(), missingTable.getName())) {
-//            continue;
-//        }
-
         CreateTableChange change = createCreateTableChange();
         change.setTableName(missingTable.getName());
         if (control.getIncludeCatalog()) {

@@ -34,7 +34,7 @@ public class UpdateStatement extends AbstractSqlStatement {
     }
 
     public UpdateStatement addNewColumnValue(String columnName, Object newValue) {
-        newColumnValues.put(columnName, newValue);
+            newColumnValues.put(columnName, newValue);
 
         return this;
     }

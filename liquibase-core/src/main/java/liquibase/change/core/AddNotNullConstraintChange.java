@@ -5,12 +5,12 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -96,12 +96,6 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-
-////        if (database instanceof SQLiteDatabase) {
-//    		// return special statements for SQLite databases
-//    		return generateStatementsForSQLiteDatabase(database);
-//        }
-
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         if (defaultNullValue != null) {

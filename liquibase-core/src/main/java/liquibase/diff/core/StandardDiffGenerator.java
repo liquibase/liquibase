@@ -73,12 +73,13 @@ public class StandardDiffGenerator implements DiffGenerator {
         if (schemaComparisons != null) {
             for (CompareControl.SchemaComparison schemaComparison : schemaComparisons) {
                 for (T referenceObject : referenceSnapshot.get(type)) {
-                    //                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
-                    //                    continue;
-                    //                }
                     Schema referenceObjectSchema = referenceObject.getSchema();
                     if (referenceObjectSchema != null && referenceObjectSchema.getName() != null) { //don't filter out null-named schemas. May actually be catalog-level objects that should be included
-                        if (!StringUtils.trimToEmpty(referenceObjectSchema.toCatalogAndSchema().standardize(referenceDatabase).getSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(schemaComparison.getReferenceSchema().standardize(referenceDatabase).getSchemaName()))) {
+                        if (!StringUtils.trimToEmpty(
+                            referenceObjectSchema.toCatalogAndSchema().standardize(referenceDatabase).getSchemaName())
+                            .equalsIgnoreCase(
+                                StringUtils.trimToEmpty(schemaComparison.getReferenceSchema()
+                                .standardize(referenceDatabase).getSchemaName()))) {
                             continue;
                         }
                     }
@@ -94,9 +95,6 @@ public class StandardDiffGenerator implements DiffGenerator {
                 }
                 //
                 for (T comparisonObject : comparisonSnapshot.get(type)) {
-                    //                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
-                    //                    continue;
-                    //                }
                     Schema comparisonObjectSchema = comparisonObject.getSchema();
                     if (comparisonObjectSchema != null) {
                         String comparisonObjectSchemaName = StringUtils.trimToEmpty(comparisonObjectSchema.toCatalogAndSchema().standardize(comparisonDatabase).getSchemaName());
