@@ -222,7 +222,12 @@ public class Index extends AbstractDatabaseObject {
             if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
                 for (Column column : getColumns()) {
-                    stringBuffer.append(column.toString(false)).append(", ");
+                    if (column == null)
+                        // 0th entry of an index column list might be null if index only has
+                        // regular columns!
+                        stringBuffer.append("(null), ");
+                    else
+                        stringBuffer.append(column.toString(false)).append(", ");
                 }
                 stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
                 stringBuffer.append(")");
