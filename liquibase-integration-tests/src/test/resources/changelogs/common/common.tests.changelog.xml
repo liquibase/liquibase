@@ -246,10 +246,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <!--<createIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">-->
-            <!--<column name="id"/>-->
-        <!--</createIndex>-->
-        <!--<dropIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE"/>-->
+
         <addPrimaryKey tableName="TABLESPACE_TEST_TABLE" columnNames="id" constraintName="pk_tablespacetest"
                        tablespace="liquibase2"/>
         <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern"
@@ -465,18 +462,6 @@
             </column>
         </createTable>
     </changeSet>
-    <!--changeSet id="addColumnNamedPK" author="nvoxland">
-        <createTable tableName="addColumnNamedPK">
-            <column name="id" type="int">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <addColumn tableName="addColumnNamedPK">
-            <column name="pk" type="int">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_pktest2"/>
-            </column>
-        </addColumn>
-    </changeSet-->
 
     <changeSet id="tableWithRemarks" author="nvoxland">
         <createTable tableName="tableWithRemarks" remarks="some test remarks">
@@ -640,23 +625,6 @@
         </preConditions>
     </changeSet>
 
-    <!--<changeSet id="primaryKeyPrecondition" author="nvoxland">-->
-        <!--<preConditions>-->
-            <!--<primaryKeyExists primaryKeyName="pk_pktest1"/>-->
-        <!--</preConditions>-->
-    <!--</changeSet>-->
-
-
-    <!--<changeSet id="viewsetup" author="nvoxland">-->
-        <!--<sql>create view csvview as select * from csvdata</sql>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="viewPrecondition" author="nvoxland">-->
-        <!--<preConditions>-->
-            <!--<viewExists viewName="csvview"/>-->
-        <!--</preConditions>-->
-    <!--</changeSet>-->
-
     <changeSet id="replaceSqlTest" author="nvoxland">
         <createTable tableName="replaceTest">
             <column name="id" type="int"/>
@@ -672,10 +640,6 @@
             <append value=" engine innodb"/>
         </modifySql>
     </changeSet>
-
-    <!--<changeSet id="stopTest" author="nvoxland">-->
-        <!--<stop>Testing the stop command</stop>-->
-    <!--</changeSet>-->
 
     <includeAll path="changelogs/common/pathincluded/"/>
 
@@ -819,40 +783,8 @@
             <column name="col2" type="java.sql.Types.NVARCHAR(10)"/>
         </createTable>
     </changeSet>
-    <!--<changeSet id="modColTest" author="nvoxland">-->
-        <!--<ext:modifyColumn tableName="datatable">-->
-            <!--<column name="col" type="varchar(300)"/>-->
-        <!--</ext:modifyColumn>-->
-    <!--</changeSet>-->
 
     <include file="changelogs/common/sqlstyle/formatted.changelog.sql"/>
-
-    <!-- databases have too many limitations on modifying primary key columns to successfully test -->
-    <!--<changeSet id="ai1" author="lujop">-->
-        <!--<createTable tableName="autoIncrementPreserving">-->
-            <!--<column name="id" type="int">-->
-                <!--<constraints primaryKey="true" nullable="false"/>-->
-            <!--</column>-->
-            <!--<column name="description" type="varchar(50)"/>-->
-        <!--</createTable>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="ai2" author="lujop">-->
-        <!--<modifyDataType tableName="autoIncrementPreserving" columnName="id" newDataType="bigint"/>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="ai3" author="lujop">-->
-        <!--<insert tableName="autoIncrementPreserving" >-->
-             <!--&lt;!&ndash;If we can add with only description is that autoincrement is preserved in last modifyType&ndash;&gt;-->
-            <!--<column name="description" value="prova"/>-->
-        <!--</insert>-->
-    <!--</changeSet>-->
-
-    <!--<changeSet id="executeComandTest" author="nvoxland">-->
-        <!--<executeCommand executable="/cygwin/bin/echo.exe">-->
-            <!--<arg value="hello from cygwin"/>-->
-        <!--</executeCommand>-->
-    <!--</changeSet>-->
 
     <changeSet id="commentTest2" author="nvoxland">
         <sql>
