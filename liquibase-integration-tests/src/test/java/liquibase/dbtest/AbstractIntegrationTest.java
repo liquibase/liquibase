@@ -72,8 +72,6 @@ public abstract class AbstractIntegrationTest {
     protected String password;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
-        LogFactory.getInstance().getLog().setLogLevel("info");
-
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
@@ -203,11 +201,8 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
             database.setOutputDefaultCatalog(true);
             database.setOutputDefaultSchema(true);
-//            database.close();
         }
-//        ServiceLocator.resetInternalState();
         SnapshotGeneratorFactory.resetAll();
-//        DatabaseFactory.resetInternalState();
     }
 
     protected boolean shouldRollBack() {
@@ -440,8 +435,6 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.rollback(new Date(0), this.contexts, writer);
-
-//        System.out.println("Rollback SQL for "+driverName+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+writer.toString());
     }
 
     @Test
@@ -457,8 +450,6 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.futureRollbackSQL(new Contexts(this.contexts), new LabelExpression(), writer);
-
-//        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
 
     @Test
@@ -551,8 +542,6 @@ public abstract class AbstractIntegrationTest {
                 e.printDescriptiveError(System.out);
                 throw e;
             }
-
-//            tempFile.deleteOnExit();
 
             DatabaseSnapshot migratedSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
@@ -744,52 +733,6 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
     }
 
-
-//    @Test
-//    public void testRerunChangeLogOnDifferentSchema() throws Exception {
-//        if (database == null) {
-//            return;
-//        }
-//
-//        if (!database.supportsSchemas()) {
-//            return;
-//        }
-//
-//        runCompleteChangeLog();
-//
-//        DatabaseConnection connection2 = TestContext.getWriteExecutor().getConnection(jdbcUrl);
-//
-//        Database database2 = DatabaseFactory.getWriteExecutor().findCorrectDatabaseImplementation(connection2);
-//
-//        database2.setDefaultSchemaName("liquibaseb");
-//
-//        { //this is ugly, but is a special case specific to this test
-//            Field changeLogTableExistsField = AbstractJdbcDatabase.class.getDeclaredField("changeLogTableExists");
-//            changeLogTableExistsField.setAccessible(true);
-//            changeLogTableExistsField.set(database2, false);
-//
-//            Field changeLogCreateAttemptedField = AbstractJdbcDatabase.class.getDeclaredField("changeLogCreateAttempted");
-//            changeLogCreateAttemptedField.setAccessible(true);
-//            changeLogCreateAttemptedField.set(database2, false);
-//
-//            Field changeLogLockTableExistsField = AbstractJdbcDatabase.class.getDeclaredField("changeLogLockTableExists");
-//            changeLogLockTableExistsField.setAccessible(true);
-//            changeLogLockTableExistsField.set(database2, false);
-//
-//            Field changeLogLockCreateAttemptedField = AbstractJdbcDatabase.class.getDeclaredField("changeLogLockCreateAttempted");
-//            changeLogLockCreateAttemptedField.setAccessible(true);
-//            changeLogLockCreateAttemptedField.set(database2, false);
-//
-//        }
-//        database2.checkDatabaseChangeLogTable();
-//        database2.dropDatabaseObjects(database2.getDefaultSchemaName());
-//        dropDatabaseChangeLogTable(database2.getDefaultSchemaName(), database2);
-//
-//        JUnitResourceAccessor resourceAccessor = new JUnitResourceAccessor();
-//        Liquibase liquibase = new Liquibase(completeChangeLog, resourceAccessor, database2);
-//        liquibase.update(this.contexts);
-//    }
-
     private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
         try {
             ExecutorService.getInstance().getExecutor(database).execute(
@@ -875,55 +818,6 @@ public abstract class AbstractIntegrationTest {
                 "çñ®"
             }).allMatchedInSequentialOrder());
     }
-
-//    @Test
-//    public void testEncondingUpdatingDatabase() throws Exception {
-//        if (database == null) {
-//            return;
-//        }
-//        
-//        // First import some data from utf8 encoded csv
-//        // and create a snapshot
-//        Liquibase liquibase = createLiquibase("changelogs/common/encoding.utf8.changelog.xml");
-//        liquibase.update(this.contexts);
-//        DatabaseSnapshot utf8Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-//
-//        clearDatabase(liquibase);
-//
-//        // Second import some data from latin1 encoded csv
-//        // and create a snapshot
-//        liquibase = createLiquibase("changelogs/common/encoding.latin1.changelog.xml");
-//        liquibase.update(this.contexts);
-//        DatabaseSnapshot iso88951Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-//
-//        //TODO: We need better data diff support to be able to do that
-//        //Diff diff = new Diff(utf8Snapshot,iso88951Snapshot);
-//        //diff.setDiffData(true);
-//        //assertFalse("There are no differences setting the same data in utf-8 and iso-8895-1 "
-//        //        ,diff.compare().areEqual());
-//
-//        //For now we do an approach reading diff data
-//        DiffResult[] diffGenerators =new DiffResult[2];
-//        diffGenerators[0]= DiffGeneratorFactory(utf8Snapshot,iso88951Snapshot);
-//        diffGenerators[0].setDiffData(true);
-//        diffGenerators[1]= new DiffGeneratorFactory(iso88951Snapshot,utf8Snapshot);
-//        diffGenerators[1].setDiffData(true);
-//        for(DiffGeneratorFactory diffGenerator : diffGenerators) {
-//            File tempFile = File.createTempFile("liquibase-test", ".xml");
-//            tempFile.deleteOnExit();
-//            FileOutputStream output=new FileOutputStream(tempFile);
-//            diffGenerator.compare().print(new PrintStream(output,false,"UTF-8"),database);
-//            output.close();
-//            String diffOutput=StreamUtil.getStreamContents(new FileInputStream(tempFile),"UTF-8");
-//            assertTrue("Update to SQL preserves encoding",
-//                new RegexMatcher(diffOutput, new String[] {
-//                    //For the UTF-8 encoded cvs
-//                    "value=\"àèìòùáéíóúÀÈÌÒÙÁÉÍÓÚâêîôûäëïöü\"",
-//                    "value=\"çñ®\""
-//                }).allMatchedInSequentialOrder());
-//        }
-//
-//    }
 
     /**
      * Test that diff is capable to detect foreign keys to external schemas that doesn't appear in the changelog
@@ -1011,13 +905,10 @@ public abstract class AbstractIntegrationTest {
         String outputResult = output.getBuffer().toString();
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
-//        System.out.println(outputResult);
         CharSequence expected = "CREATE TABLE "+getDatabase().escapeTableName(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains(expected));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains(expected));
         assertFalse("the scheame name '"+schemaName+"' should be ignored\n\n"+outputResult, outputResult.contains(schemaName+"."));
-//        System.out.println("expected    : " + expected);
-//        System.out.println("outputResult: " + outputResult);
     }
 
     @Test
@@ -1034,20 +925,6 @@ public abstract class AbstractIntegrationTest {
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
         assertEquals(0, changeSets.size());
     }
-
-//   @Test
-//   public void testXMLInclude() throws Exception{
-//       if (database == null) {
-//            return;
-//       }
-//       //Test external entity with a standard class loaded resource
-//       Liquibase liquibase = createLiquibase(externalEntityChangeLog);
-//       liquibase.update(contexts);
-//
-//       //Test with a packaged one
-//       liquibase = createLiquibase(externalEntityChangeLog2);
-//       liquibase.update(contexts);
-//   }
 
     public static DatabaseTestURL getDatabaseTestURL(String databaseManager)  {
         try {
