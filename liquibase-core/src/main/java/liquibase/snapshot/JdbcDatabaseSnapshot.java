@@ -120,9 +120,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 /**
                  * Performance-optimised queries for DBMSs where a series of single lookups (via JDBC's
-                 * @return
-                 * @throws SQLException
-                 * @throws DatabaseException
+                 * getImportedKeys() ) yields no acceptable performance. It should return all the columns that are
+                 * returned by getImportedKeys() and may return additional columns with DBMS-specific information.
+                 *
+                 * @return a list of rows representing the result of the DBMS-specific metadata query.
+                 * @throws SQLException an SQL exception returned by the JDBC driver
+                 * @throws DatabaseException any other problem in the DBMS-related program code
                  */
                 @Override
                 public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
