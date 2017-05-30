@@ -156,14 +156,16 @@ public abstract class AbstractIntegrationTest {
             SnapshotGeneratorFactory.resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+    
+            SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
             }
-
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
-                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                    if (factory.has(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA), database))
+                        database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 } else if (database.supportsCatalogs()) {
                     /*
                      * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
@@ -173,9 +175,20 @@ public abstract class AbstractIntegrationTest {
                      * For us, this means that we have to wipe both ALT_SCHEMA and ALT_CATALOG to be sure we
                      * are doing a thorough cleanup.
                      */
-                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null));
-                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_SCHEMA, null));
-                    database.dropDatabaseObjects(new CatalogAndSchema("LBCAT2", null));
+                    CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[] {
+                            new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
+                            new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
+                            new CatalogAndSchema("LBCAT2", null)
+                    };
+                    for (CatalogAndSchema location: alternativeLocations) {
+                        boolean catalogPresent = factory.has(new Catalog(location.getCatalogName()), database);
+                        if (catalogPresent)
+                            database.dropDatabaseObjects(new CatalogAndSchema(location.getCatalogName(), null));
+
+                        boolean schemaPresent = factory.has(new Schema(location.getCatalogName(), location.getSchemaName()), database);
+                        if (schemaPresent)
+                            database.dropDatabaseObjects(location);
+                    }
                 }
             }
             database.commit();
