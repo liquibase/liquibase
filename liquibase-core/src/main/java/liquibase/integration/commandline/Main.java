@@ -114,7 +114,7 @@ public class Main {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
 
             if (!globalConfiguration.getShouldRun()) {
-                System.err.println("Liquibase did not run because '" + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
+                System.err.println("DB-Manul did not run because '" + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
                 return;
             }
 
@@ -192,11 +192,11 @@ public class Main {
             main.doMigration();
 
             if ("update".equals(main.command)) {
-                System.err.println("Liquibase Update Successful");
+                System.err.println("DB-Manul Update Successful");
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
-                System.err.println("Liquibase Rollback Successful");
+                System.err.println("DB-Manul Rollback Successful");
             } else if (!main.command.endsWith("SQL")) {
-                System.err.println("Liquibase '" + main.command + "' Successful");
+                System.err.println("DB-Manul '" + main.command + "' Successful");
             }
         } catch (Throwable e) {
             String message = e.getMessage();
@@ -212,14 +212,14 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    System.err.println("Unexpected error running Liquibase: " + message + "\n");
+                    System.err.println("Unexpected error running DB-Manul: " + message + "\n");
                     LogFactory.getInstance().getLog().severe(message, e);
                     System.err.println(generateLogLevelWarningMessage());
                 }
             } catch (Exception e1) {
                 e.printStackTrace();
             }
-            throw new LiquibaseException("Unexpected error running Liquibase: " + message, e);
+            throw new LiquibaseException("Unexpected error running DB-Manul: " + message, e);
         }
     }
 
@@ -593,7 +593,7 @@ public class Main {
         stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
         stream.println(" --password=<value>                         Database password. If values");
-        stream.println("                                            is PROMPT, Liquibase will");
+        stream.println("                                            is PROMPT, DB-Manul will");
         stream.println("                                            prompt for a password");
         stream.println(" --url=<value>                              Database URL");
         stream.println("");
@@ -625,15 +625,15 @@ public class Main {
         stream.println("                                            liquibase tables");
         stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
         stream.println("                                            liquibase tables");
-        stream.println(" --databaseChangeLogTableName=<name>        The name of the Liquibase ChangeLog");
+        stream.println(" --databaseChangeLogTableName=<name>        The name of the DB-Manul ChangeLog");
         stream.println("                                            table (default: DATABASECHANGELOG)");
-        stream.println(" --databaseChangeLogLockTableName=<name>    The name of the Liquibase ChangeLog");
+        stream.println(" --databaseChangeLogLockTableName=<name>    The name of the DB-Manul ChangeLog");
         stream.println("                                            Lock table");
         stream.println("                                            (default: DATABASECHANGELOGLOCK)");
         stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
         stream.println("                                            liquibase tables");
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
-        stream.println("                                            in the Liquibase classpath");
+        stream.println("                                            in the DB-Manul classpath");
         stream.println("                                            (default: true)");
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
@@ -660,7 +660,7 @@ public class Main {
         stream.println("Required Diff Parameters:");
         stream.println(" --referenceUsername=<value>                Reference Database username");
         stream.println(" --referencePassword=<value>                Reference Database password. If");
-        stream.println("                                            value is PROMPT, Liquibase will");
+        stream.println("                                            value is PROMPT, DB-Manul will");
         stream.println("                                            prompt for a password");
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");

@@ -227,7 +227,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
                 throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your getDatabase().\n\n" +
-                        "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
+                        "Please construct it manually using the following SQL as a base and re-run DB-Manul:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.

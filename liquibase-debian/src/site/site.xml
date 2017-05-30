@@ -14,7 +14,7 @@
       <item name="Bug Tracking" href="https://github.com/dbmanul/dbmanul/issues"/>
     </links>
 
-    <menu name="Liquibase Debian Package">
+    <menu name="DB-Manul Debian Package">
       <item name="Introduction" href="dbmanul-debian-faq.html"/>
     </menu>
    

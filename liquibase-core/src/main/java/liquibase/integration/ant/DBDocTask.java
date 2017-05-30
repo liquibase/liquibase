@@ -33,7 +33,8 @@ public class DBDocTask extends BaseLiquibaseTask {
                 liquibase.generateDocumentation(outputDirectory.toString());
             }
         } catch (LiquibaseException e) {
-            throw new BuildException("Liquibase encountered an error while creating database documentation. " + e.toString(), e);
+            throw new BuildException("DB-Manul encountered an error while creating database documentation. " + e
+            .toString(), e);
         }
     }
 

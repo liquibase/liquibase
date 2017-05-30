@@ -33,7 +33,9 @@ import java.util.List;
  * Executes a given shell executable.
  */
 @DatabaseChange(name = "executeCommand",
-        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using LiquiBase commands such as migrateSQL may not work as expected. Therefore, if at all possible use refactorings that generate SQL.",
+        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using " +
+         "DB-Manul commands such as migrateSQL may not work as expected. Therefore, if at all possible use " +
+          "refactorings that generate SQL.",
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
