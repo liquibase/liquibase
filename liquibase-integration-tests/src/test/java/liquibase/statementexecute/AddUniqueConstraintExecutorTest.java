@@ -1,27 +1,26 @@
 package liquibase.statementexecute;
 
 import liquibase.change.ColumnConfig;
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.ColumnConstraint;
-import liquibase.test.DatabaseTestContext;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-
-import java.util.List;
-import java.util.ArrayList;
-
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.test.DatabaseTestContext;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 
     protected static final String TABLE_NAME = "AddUQTest";
     protected static final String COLUMN_NAME = "colToMakeUQ";
     protected static final String CONSTRAINT_NAME = "UQ_TEST";
-    protected static final String TABLESPACE_NAME = "LB_TABLESPACE";
+    protected static final String TABLESPACE_NAME = "LIQUIBASE2";
 
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
@@ -146,7 +145,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 	public void execute_withTablespace() throws Exception {
 		statementUnderTest = new AddUniqueConstraintStatement(null, null, TABLE_NAME, new ColumnConfig[] { new ColumnConfig().setName(COLUMN_NAME)}, CONSTRAINT_NAME).setTablespace(TABLESPACE_NAME);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class, SybaseDatabase.class);
-        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
+        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq]) on liquibase2", MSSQLDatabase.class);
         assertCorrect("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
         assertCorrect("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\") USING INDEX TABLESPACE " + TABLESPACE_NAME, PostgresDatabase.class);
         assertCorrect("alter table adduqtest add constraint uq_test unique (coltomakeuq)", MySQLDatabase.class);
