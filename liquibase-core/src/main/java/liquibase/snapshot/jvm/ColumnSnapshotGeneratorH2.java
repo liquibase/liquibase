@@ -10,7 +10,7 @@ import liquibase.structure.core.Column;
 
 import java.sql.SQLException;
 
-public class H2ColumnSnapshotGenerator extends ColumnSnapshotGenerator {
+public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Column.class.isAssignableFrom(objectType) && database instanceof H2Database) {
