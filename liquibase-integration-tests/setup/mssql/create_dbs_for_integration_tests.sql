@@ -23,6 +23,10 @@ USE [liquibase]
 GO
 IF NOT EXISTS (SELECT name FROM sys.filegroups WHERE is_default=1 AND name = N'PRIMARY') ALTER DATABASE [liquibase] MODIFY FILEGROUP [PRIMARY] DEFAULT
 GO
+ALTER DATABASE [liquibase] ADD FILEGROUP [liquibase2]
+GO
+ALTER DATABASE [liquibase] ADD FILE ( NAME = N'liquibase2', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibase2.ndf' , SIZE = 8192KB , FILEGROWTH = 65536KB ) TO FILEGROUP [liquibase2]
+GO
 
 USE [master]
 GO
@@ -36,12 +40,6 @@ GO
 USE [liquibase]
 GO
 ALTER ROLE [db_owner] ADD MEMBER [lbuser]
-GO
-
-
-USE [master]
-GO
-ALTER DATABASE [liquibase] ADD FILEGROUP [liquibase2]
 GO
 
 USE [liquibase]
