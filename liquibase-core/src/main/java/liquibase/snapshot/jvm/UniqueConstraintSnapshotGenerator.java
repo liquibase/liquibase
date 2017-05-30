@@ -262,6 +262,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (database instanceof InformixDatabase) {
                 sql = getUniqueConstraintsSqlInformix(database, schema, name);
             } else {
+                // If we do not have a specific handler for the RDBMS, we assume that the database has an
+                // INFORMATION_SCHEMA we can use. This is a last-resort measure and might fail.
                 String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
                 String schemaName = database.correctObjectName(schema.getName(), Schema.class);
                 String constraintName = database.correctObjectName(name, UniqueConstraint.class);
@@ -318,7 +320,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
      * @param database A database object of the InformixDatabase type
      * @param schema Name of the schema to examine (or null for all)
      * @param name Name of the constraint to examine (or null for all)
-     * @return A frightfully lengthy SQL statement that fetches the constraint names and colums
+     * @return A lengthy SQL statement that fetches the constraint names and columns
      */
     private String getUniqueConstraintsSqlInformix(InformixDatabase database, Schema schema, String name) {
         StringBuffer sqlBuf = new StringBuffer();
