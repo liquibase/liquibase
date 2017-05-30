@@ -126,8 +126,11 @@ public class SnapshotGeneratorFactory {
           * If the query is about another object, try to create a snapshot of the of the object (or used the cached
           * snapshot. If that works, we count that as confirmation of existence.
           */
-        if (createSnapshot(example, database,
-                new SnapshotControl(database, false, types.toArray(new Class[types.size()]))) != null) {
+          
+        SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[types.size()])));
+        snapshotControl.setWarnIfObjectNotFound(false);
+        
+        if (createSnapshot(example, database,snapshotControl) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;
@@ -136,7 +139,10 @@ public class SnapshotGeneratorFactory {
         } else {
             catalogAndSchema = example.getSchema().toCatalogAndSchema();
         }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, false, example.getClass()));
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database,
+            new SnapshotControl(database, false, example.getClass()).setWarnIfObjectNotFound(false)
+        );
+        
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;

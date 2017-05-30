@@ -11,15 +11,30 @@ import liquibase.structure.core.DatabaseObjectFactory;
 
 import java.util.*;
 
+/**
+ * Allows the class user to influence various aspects of the database object snapshot generation, e.g.
+ * what types of database objects they want.
+ */
 public class SnapshotControl implements LiquibaseSerializable {
 
     private Set<Class<? extends DatabaseObject>> types;
     private SnapshotListener snapshotListener;
-
+    private boolean warnIfObjectNotFound = true;
+    
+    
+    /**
+     * Create a SnapshotControl for a given database and mark the database's standard types for inclusion.
+     * @param database the DBMS for which snapshots should be generated
+     */
     public SnapshotControl(Database database) {
         setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
     }
-
+    
+    /**
+     * Create a Snapshot control for a given database, but explicitly set the object types to be included in snapshots.
+     * @param database the DBMS for which snapshots should be generated
+     * @param types the list of object types to be included in the snapshot
+     */
     public SnapshotControl(Database database, Class<? extends DatabaseObject>... types) {
         this(database, true, types);
     }
@@ -35,7 +50,12 @@ public class SnapshotControl implements LiquibaseSerializable {
             }
         }
     }
-
+    
+    /**
+     * Create a Snapshot control for a given database, but explicitly set the object types to be included in snapshots.
+     * @param database the DBMS for which snapshots should be generated
+     * @param types the list of object types to be included in the snapshot, separated by commas
+     */
     public SnapshotControl(Database database, String types) {
         setTypes(DatabaseObjectFactory.getInstance().parseTypes(types), database);
     }
@@ -96,7 +116,13 @@ public class SnapshotControl implements LiquibaseSerializable {
             addType(type, database);
         }
     }
-
+    
+    /**
+     * Adds a new DatabaseObject type to the list of object types to be included in snapshots.
+     * @param type The type to be added
+     * @param database The database to check for any dependent types that need to be included as well
+     * @return true if the type was added to the list, false if it was already present.
+     */
     public boolean addType(Class<? extends DatabaseObject> type, Database database) {
         boolean added = this.types.add(type);
         if (added) {
@@ -104,15 +130,22 @@ public class SnapshotControl implements LiquibaseSerializable {
                 addType(container, database);
             }
         }
-
         return added;
-
     }
-
+    
+    /**
+     * Return the types to be included in snapshots
+     * @return the set of currently registered types
+     */
     public Set<Class<? extends DatabaseObject>> getTypesToInclude() {
         return types;
     }
-
+    
+    /**
+     * Queries the currently registered list of types to be included and returns true if the given type is in that list
+     * @param type the DatabaseObject type to be checked
+     * @return true if that type is registered for inclusion, false if not
+     */
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
         return types.contains(type);
     }
@@ -125,6 +158,23 @@ public class SnapshotControl implements LiquibaseSerializable {
     @Override
     public ParsedNode serialize() {
         throw new RuntimeException("TODO");
+    }
+    
+    /**
+     * Returns if the code should log a LogLevel.WARNING message if the object to be snapshotted could not be found.
+     * @return true if WARNINGs should be emitted (default), false if not.
+     */
+    public boolean isWarnIfObjectNotFound() {
+        return warnIfObjectNotFound;
+    }
+    
+    /**
+     * Configures the code to log a LogLevel.WARNING message if the object to be snapshotted could not be found.
+     * @param warnIfObjectNotFound true if a warning should emitted (default value), false if not.
+     */
+    public SnapshotControl setWarnIfObjectNotFound(boolean warnIfObjectNotFound) {
+        this.warnIfObjectNotFound = warnIfObjectNotFound;
+        return this;
     }
 
 }

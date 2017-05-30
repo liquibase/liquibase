@@ -7,6 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
@@ -17,7 +18,6 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 
@@ -41,7 +41,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private CompareControl.SchemaComparison[] schemaComparisons;
 
     private Map<String, Object> metadata = new HashMap<String, Object>();
-
+    
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
         allFound = new DatabaseObjectCollection(database);
@@ -262,10 +262,12 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             collection.add(example);
 
             if (example instanceof Schema) {
-                LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
+                if (snapshotControl.isWarnIfObjectNotFound())
+                    LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
-                LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
+                if (snapshotControl.isWarnIfObjectNotFound())
+                    LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {
