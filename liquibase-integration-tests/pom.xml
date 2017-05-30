@@ -211,8 +211,8 @@
                 <configuration>
                     <systemProperties>
                         <property>
-                            <name>dbmanul.defaultlogger.level</name>
-                            <value>debug</value>
+                            <name>liquibase.defaultlogger.level</name>
+                            <value>WARNING</value>
                         </property>
                     </systemProperties>
                     <excludes>
@@ -245,6 +245,12 @@
                     <includes>
                         <include>**/*Test.*</include>
                     </includes>
+                    <systemProperties>
+                        <property>
+                            <name>liquibase.defaultlogger.level</name>
+                            <value>WARNING</value>
+                        </property>
+                    </systemProperties>
                 </configuration>
                 <executions>
                     <execution>
