@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -13,7 +14,11 @@ import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
@@ -119,4 +124,43 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         }
         return objectName;
     }
+    
+    /**
+     * Fetches an array of Strings with the catalog names in the database.
+     * @param database The database from which to get the schema names
+     * @return An array of catalog name Strings (May be an empty array)
+     * @throws SQLException propagated java.sql.SQLException
+     * @throws DatabaseException if a different problem occurs during the DBMS-specific code
+     */
+    protected String[] getDatabaseCatalogNames(Database database) throws SQLException, DatabaseException {
+        List<String> returnList = new ArrayList<String>();
+        
+        ResultSet catalogs = null;
+        
+        try {
+            if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
+                catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
+            } else {
+                catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getCatalogs();
+            }
+            while (catalogs.next()) {
+                if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
+                    returnList.add(catalogs.getString("TABLE_SCHEM"));
+                } else {
+                    returnList.add(catalogs.getString("TABLE_CAT"));
+                }
+            }
+        } finally {
+            if (catalogs != null) {
+                try {
+                    catalogs.close();
+                } catch (SQLException ignore) {
+                
+                }
+            }
+            
+        }
+        return returnList.toArray(new String[returnList.size()]);
+    }
+    
 }
