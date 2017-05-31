@@ -2,8 +2,6 @@ package liquibase.snapshot;
 
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
 
 import java.util.*;
 
@@ -65,7 +63,7 @@ public class SnapshotGeneratorChain {
 
         SnapshotGenerator next = snapshotGenerators.next();
         for (Class<? extends SnapshotGenerator> removedGenerator : replacedGenerators) {
-            if (removedGenerator.isAssignableFrom(next.getClass())) {
+            if (next.getClass().equals(removedGenerator)) {
                 return getNextValidGenerator();
             }
         }
