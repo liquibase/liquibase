@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -9,7 +10,7 @@ import java.util.regex.Pattern;
 public class StringUtils {
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
-
+    private static final SecureRandom rnd = new SecureRandom();
 
     public static String trimToEmpty(String string) {
         if (string == null) {
@@ -367,4 +368,17 @@ public class StringUtils {
         return string;
     }
 
+    /**
+     * Produce a random identifer of the given length, consisting only of uppercase letters.
+     * @param len desired length of the string
+     * @return an identifier of the desired length
+     */
+    public static String randomIdentifer( int len ){
+        final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder sb = new StringBuilder( len );
+        for (int i = 0; i < len; i++)
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
 }

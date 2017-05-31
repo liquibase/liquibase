@@ -1,23 +1,34 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-import java.util.*;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.StringUtils;
+
+import java.math.BigInteger;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Encapsulates MySQL database support.
  */
 public class MySQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "MySQL";
+    private Boolean hasJdbcConstraintDeferrableBug;
 
     private static Set<String> reservedWords = new HashSet();
 
@@ -26,6 +37,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         // objects in mysql are always case sensitive
         super.quotingStartCharacter ="`";
         super.quotingEndCharacter="`";
+        setHasJdbcConstraintDeferrableBug(null);
     }
 
     @Override
@@ -472,4 +484,79 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "XOR",
                 "YEAR_MONTH",
                 "ZEROFILL"));
-    }}
+    }
+
+    /**
+     * Tests if this MySQL / MariaDB database has a bug where the JDBC driver returns constraints as
+     * DEFERRABLE INITIAL IMMEDIATE even though neither MySQL nor MariaDB support DEFERRABLE CONSTRAINTs at all.
+     * We need to know about this because this could lead to errors in database snapshots.
+     * @return true if this database is affected, false if not, null if we cannot tell (e.g. OfflineConnection)
+     */
+    public Boolean hasBugJdbcConstraintsDeferrable() {
+        if (getConnection() instanceof OfflineConnection)
+            return null;
+        if (getHasJdbcConstraintDeferrableBug() != null)  // cached value
+            return getHasJdbcConstraintDeferrableBug();
+
+        String randomIdentifier = "TMP_" + StringUtils.randomIdentifer(16);
+        try
+        {
+            // Get the real connection and metadata reference
+            java.sql.Connection conn = ((JdbcConnection) getConnection()).getUnderlyingConnection();
+            java.sql.DatabaseMetaData metaData = conn.getMetaData();
+            String sql = "CREATE TABLE " + randomIdentifier + " (\n" +
+                    "  id INT PRIMARY KEY,\n" +
+                    "  self_ref INT NOT NULL,\n" +
+                    "  CONSTRAINT c_self_ref FOREIGN KEY(self_ref) REFERENCES " + randomIdentifier + "(id)\n" +
+                    ")";
+            ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement(sql));
+
+            try (
+                ResultSet rs = metaData.getImportedKeys(getDefaultCatalogName(), getDefaultSchemaName(), randomIdentifier)
+            ) {
+                if (!rs.next()) {
+                    throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug: " +
+                            "could not retrieve JDBC metadata information for temporary table '" +
+                            randomIdentifier + "'");
+                }
+                if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
+                    setHasJdbcConstraintDeferrableBug(true);
+                    LogFactory.getInstance().getLog().warning("Your MySQL/MariaDB database JDBC driver might have " +
+                            "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
+                            "support this feature. A workaround for this problem will be used. Please check with " +
+                            "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
+                } else {
+                    setHasJdbcConstraintDeferrableBug(false);
+                }
+            }
+
+        } catch (DatabaseException|SQLException e) {
+            throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
+        } finally {
+            try {
+                ExecutorService.getInstance().reset();
+                ExecutorService.getInstance().getExecutor(this).execute(
+                        new RawSqlStatement("DROP TABLE " + randomIdentifier));
+            } catch (DatabaseException e) {
+                throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug. " +
+                        "Could not drop the temporary test table " + randomIdentifier + ". You will need to remove it " +
+                        "manually. Sorry.", e);
+            }
+        }
+
+        return getHasJdbcConstraintDeferrableBug();
+    }
+
+    /**
+     * returns true if the JDBC drivers suffers from a bug where constraints are reported as DEFERRABLE, even though
+     * MySQL/MariaDB do not support this feature.
+     * @return true if the JDBC is probably affected, false if not.
+     */
+    protected Boolean getHasJdbcConstraintDeferrableBug() {
+        return hasJdbcConstraintDeferrableBug;
+    }
+
+    protected void setHasJdbcConstraintDeferrableBug(Boolean hasJdbcConstraintDeferrableBug) {
+        this.hasJdbcConstraintDeferrableBug = hasJdbcConstraintDeferrableBug;
+    }
+}
