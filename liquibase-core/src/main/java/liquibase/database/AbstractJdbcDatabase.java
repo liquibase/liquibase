@@ -47,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
-
 /**
  * AbstractJdbcDatabase is extended by all supported databases as a facade to the underlying database.
  * The physical connection can be retrieved from the AbstractJdbcDatabase implementation, as well as any
@@ -158,9 +157,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.connection.attached(this);
     }
 
-    /**
-     * Auto-commit mode to run in
-     */
     @Override
     public boolean getAutoCommitMode() {
         return !supportsDDLInTransaction();
@@ -172,16 +168,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /**
-     * By default databases should support DDL within a transaction.
+     * Determines if the database supports DDL within a transaction or not.
+     *
+     * @return True if the database supports DDL within a transaction, otherwise false.
      */
+    // TODO this might be a dangerous default value. I would rather make this an abstract method and have every
+    // implementation specify it explicitly.
     @Override
     public boolean supportsDDLInTransaction() {
         return true;
     }
 
-    /**
-     * Returns the name of the database product according to the underlying database.
-     */
     @Override
     public String getDatabaseProductName() {
         if (connection == null) {
@@ -257,17 +254,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         return connection.getCatalog();
     }
 
-    /**
-     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
-     */
     public CatalogAndSchema correctSchema(final String catalog, final String schema) {
         return new CatalogAndSchema(catalog, schema).standardize(this);
     }
 
     @Override
-    /**
-     * @deprecated Use {@link liquibase.CatalogAndSchema#standardize(Database)}) or {@link liquibase.CatalogAndSchema#customize(Database)}
-     */
     public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
@@ -424,14 +415,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
             return "'" + isoDate + "'";
         } else if (isDateTime(isoDate)) {
-//            StringBuffer val = new StringBuffer();
-//            val.append("'");
-//            val.append(isoDate.substring(0, 10));
-//            val.append(" ");
-////noinspection MagicNumber
-//            val.append(isoDate.substring(11));
-//            val.append("'");
-//            return val.toString();
             return "'" + isoDate.replace('T', ' ') + "'";
         } else {
             return "BAD_DATE_FORMAT:" + isoDate;
@@ -539,9 +522,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return "--";
     }
 
-    /**
-     * Returns database-specific auto-increment DDL clause.
-     */
+
     @Override
     public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
         if (!supportsAutoIncrement()) {
@@ -616,9 +597,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
-    /**
-     * @see liquibase.database.Database#getDatabaseChangeLogTableName()
-     */
     @Override
     public String getDatabaseChangeLogTableName() {
         if (databaseChangeLogTableName != null) {
@@ -628,9 +606,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogTableName();
     }
 
-    /**
-     * @see liquibase.database.Database#getDatabaseChangeLogLockTableName()
-     */
     @Override
     public String getDatabaseChangeLogLockTableName() {
         if (databaseChangeLogLockTableName != null) {
@@ -640,9 +615,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockTableName();
     }
 
-    /**
-     * @see liquibase.database.Database#getLiquibaseTablespaceName()
-     */
     @Override
     public String getLiquibaseTablespaceName() {
         if (liquibaseTablespaceName != null) {
@@ -652,25 +624,16 @@ public abstract class AbstractJdbcDatabase implements Database {
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getLiquibaseTablespaceName();
     }
 
-    /**
-     * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
-     */
     @Override
     public void setDatabaseChangeLogTableName(final String tableName) {
         this.databaseChangeLogTableName = tableName;
     }
 
-    /**
-     * @see liquibase.database.Database#setDatabaseChangeLogLockTableName(java.lang.String)
-     */
     @Override
     public void setDatabaseChangeLogLockTableName(final String tableName) {
         this.databaseChangeLogLockTableName = tableName;
     }
 
-    /**
-     * @see liquibase.database.Database#setLiquibaseTablespaceName(java.lang.String)
-     */
     @Override
     public void setLiquibaseTablespaceName(final String tablespace) {
         this.liquibaseTablespaceName = tablespace;
@@ -758,11 +721,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return startsWithNumberPattern.matcher(objectName).matches();
     }
 
-// ------- DATABASE OBJECT DROPPING METHODS ---- //
-
-    /**
-     * Drops all objects in a specific schema/catalog.
-     */
     @Override
     public void dropDatabaseObjects(final CatalogAndSchema schemaToDrop) throws LiquibaseException {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
@@ -903,9 +861,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
-    /**
-     * Tags the database changelog with the given string.
-     */
     @Override
     public void tag(final String tagString) throws DatabaseException {
         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tag(tagString);
@@ -944,10 +899,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String catalogName, String schemaName, final String objectName,
                                    final Class<? extends DatabaseObject> objectType) {
-//        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
-//        catalogName = catalogAndSchema.getCatalogName();
-//        schemaName = catalogAndSchema.getSchemaName();
-
         if (supportsSchemas()) {
             catalogName = StringUtils.trimToNull(catalogName);
             schemaName = StringUtils.trimToNull(schemaName);
@@ -1072,11 +1023,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return escapeObjectName(columnName, Column.class);
     }
 
-    /**
-     * Similar to {@link #escapeColumnName(String, String, String, String)} but allows control over whether function-like names should be left unquoted.
-     *
-     * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
-     */
+
     @Override
     public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
@@ -1144,9 +1091,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return escapeObjectName(catalogName, schemaName, viewName, View.class);
     }
 
-    /**
-     * Returns the run status for the given ChangeSet
-     */
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRunStatus(changeSet);
@@ -1157,9 +1101,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
     }
 
-    /**
-     * Returns the ChangeSets that have been run against the current database.
-     */
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
         return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
@@ -1170,10 +1111,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanDate(changeSet);
     }
 
-    /**
-     * After the change set has been ran against the database this method will update the change log table
-     * with the information.
-     */
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).setExecType(changeSet, execType);
@@ -1275,7 +1212,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /**
-     * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
+     * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we
+     * don't know it's safe to run the update.
      *
      * @throws liquibase.exception.DatabaseException
      *
@@ -1300,13 +1238,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         execute(statements, sqlVisitors);
     }
 
-    /*
-     * Executes the statements passed
-     *
-     * @param statements an array containing the SQL statements to be issued
-     * @param sqlVisitors a list of {@link SqlVisitor} objects to be applied to the executed statements
-     * @throws DatabaseException if there were problems issuing the statements
-     */
     @Override
     public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
