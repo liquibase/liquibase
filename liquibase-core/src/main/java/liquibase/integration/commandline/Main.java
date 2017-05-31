@@ -64,6 +64,7 @@ public class Main {
     protected String databaseChangeLogLockTableName;
     protected String defaultCatalogName;
     protected String changeLogFile;
+    protected String overwriteOutputFile;
     protected String classpath;
     protected String contexts;
     protected String labels;
@@ -635,6 +636,7 @@ public class Main {
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
         stream.println("                                            in the DB-Manul classpath");
         stream.println("                                            (default: true)");
+        stream.println(" --overwriteOutputFile=true                 Force overwriting generated changelog/SQL files");
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");
@@ -1007,8 +1009,15 @@ public class Main {
                 // Liquibase's attempt to append doesn't work properly. Just
                 // fail the build if the file already exists.
                 File file = new File(changeLogFile);
-                if (file.exists()) {
+                if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
                     throw new LiquibaseException("ChangeLogFile " + changeLogFile + " already exists!");
+                } else {
+                    try {
+                        file.delete();
+                    } catch (Exception e) {
+                        throw new LiquibaseException("Attempt to delete the file " + changeLogFile + " already " +
+                         "failed. Cannot continue.", e);
+                    }
                 }
 
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalTargetSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
