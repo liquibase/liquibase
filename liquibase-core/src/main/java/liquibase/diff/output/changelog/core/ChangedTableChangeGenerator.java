@@ -9,7 +9,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
-import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
@@ -48,10 +48,18 @@ public class ChangedTableChangeGenerator extends AbstractChangeGenerator impleme
 
             change.setTableName(table.getName());
             change.setRemarks(table.getRemarks());
-
+            
             return new Change[] {
                     change
             };
+        }
+
+        Difference changedTablespace = differences.getDifference("tablespace");
+        
+        if (changedTablespace != null) {
+            // TODO: Implement moveTableToDifferentTablespace change type!
+            LogFactory.getInstance().getLog().warning("A change of the tablespace was detected, however, the change " +
+             "type to move a table from tablespace A to tablespace B has not been implemented yet. Sorry.");
         }
 
         return null;

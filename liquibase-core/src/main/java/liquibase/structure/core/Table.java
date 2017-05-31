@@ -4,9 +4,7 @@ import liquibase.statement.NotNullConstraint;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Table extends Relation {
 
@@ -74,6 +72,15 @@ public class Table extends Relation {
     @Override
     public Table setName(String name) {
         return (Table) super.setName(name);
+    }
+    
+    public String getTablespace() {
+        return getAttribute("tablespace",String.class);
+    }
+    
+    public Table setTablespace(String tablespace) {
+        setAttribute("tablespace", tablespace);
+        return this;
     }
 
 }

@@ -5,9 +5,8 @@ import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.*;
-import liquibase.parser.core.ParsedNode;
-import liquibase.resource.ResourceAccessor;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -19,7 +18,6 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -141,7 +139,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(), getRemarks());
     }
 
     @Override

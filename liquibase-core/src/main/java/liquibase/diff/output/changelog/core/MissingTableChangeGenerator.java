@@ -62,6 +62,9 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         if (missingTable.getRemarks() != null) {
             change.setRemarks(missingTable.getRemarks());
         }
+        if (missingTable.getTablespace() != null && comparisonDatabase.supportsTablespaces()) {
+            change.setTablespace(missingTable.getTablespace());
+        }
 
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
