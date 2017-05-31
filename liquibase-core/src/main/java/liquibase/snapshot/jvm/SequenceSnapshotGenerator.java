@@ -19,6 +19,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Snapshot generator for a SEQUENCE object in a JDBC-accessible database
+ */
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public SequenceSnapshotGenerator() {
@@ -155,7 +158,29 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof InformixDatabase) {
             return "SELECT tabname AS SEQUENCE_NAME FROM systables t, syssequences s WHERE s.tabid = t.tabid AND t.owner = '" + schema.getName() + "'";
         } else if (database instanceof OracleDatabase) {
-            return "SELECT SEQUENCE_NAME AS SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE, ORDER_FLAG AS IS_ORDERED, LAST_NUMBER as START_VALUE, CACHE_SIZE FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
+            /*
+             * Return an SQL statement that only returns the non-default values so the output changeLog is cleaner
+             * and less polluted with unnecessary values.
+             * The the following pages for the defaults (consistent for all supported releases ATM):
+             * 12cR2: http://docs.oracle.com/database/122/SQLRF/CREATE-SEQUENCE.htm
+             * 12cR1: http://docs.oracle.com/database/121/SQLRF/statements_6017.htm
+             * 11gR2: http://docs.oracle.com/cd/E11882_01/server.112/e41084/statements_6015.htm
+             */
+            return "SELECT sequence_name, \n" +
+                    "CASE WHEN increment_by > 0 \n" +
+                    "     THEN CASE WHEN min_value=1 THEN NULL ELSE min_value END\n" +
+                    "     ELSE CASE WHEN min_value=(-999999999999999999999999999) THEN NULL else min_value END\n" +
+                    "END AS min_value, \n" +
+                    "CASE WHEN increment_by > 0 \n" +
+                    "     THEN CASE WHEN max_value=999999999999999999999999999 THEN NULL ELSE max_value END\n" +
+                    "     ELSE CASE WHEN max_value=last_number THEN NULL else max_value END \n" +
+                    "END  AS max_value, \n" +
+                    "CASE WHEN increment_by = 1 THEN NULL ELSE increment_by END AS increment_by, \n" +
+                    "CASE WHEN cycle_flag = 'N' THEN NULL ELSE cycle_flag END AS will_cycle, \n" +
+                    "CASE WHEN order_flag = 'N' THEN NULL ELSE order_flag END AS is_ordered, \n" +
+                    "LAST_NUMBER as START_VALUE, \n" +
+                    "CASE WHEN cache_size = 20 THEN NULL ELSE cache_size END AS cache_size \n" +
+                    "FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
         } else if (database instanceof PostgresDatabase) {
             return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
                     "join pg_namespace on c.relnamespace = pg_namespace.oid "+
