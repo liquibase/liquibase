@@ -122,6 +122,8 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(final DatabaseConnection connection) {
+		// TODO Verify connection requirement: DB_LOCALE is a Unicode locale
+		// TODO Verify connection requirement: GL_DATE is set to GL_DATE=%iY-%m-%d
         super.setConnection(connection);
         if (!(connection instanceof OfflineConnection)) {
             try {

@@ -131,7 +131,7 @@ DB-Manul 0.1:
       care if the column had a default value (commit b24e88ac3cae362ee23be372e4ed8f66589e0ec2)
 
     Informix SQL:
-      If you have used the abstract data type TIME in your change sets, please be aware that DB-Manul will not use the
+      - If you have used the abstract data type TIME in your change sets, please be aware that DB-Manul will not use the
       INTERVAL type any more, because it is the wrong data type for the intended purpose: an interval can be seen
       as an expression of a duration, but the intention of the TIME data type is to express a fixed point in time
       (hh:mm:ss.fffff) within a calendar day.
@@ -148,13 +148,18 @@ DB-Manul 0.1:
       DATETIME              DATETIME YEAR TO FRACTION(5)   (same)
       TIME                  INTERVAL HOUR TO FRACTION(5)   DATETIME HOUR TO FRACTION(5)
 
-    Known Bugs
-    ==========
+      - To avoid data corruption of non-ASCII characters, DB-Manul requires a Unicode-enabled DB_LOCALE, either as
+        environment variable or in the connection string.
+      - Because there seems to be no locale-independent way of expressing a DATE default value for a DATE column,
+        DB-Manul requires the GL_DATE variable to be set to %iY-%m-%d
 
-    MariaDB and MySQL:
-    - When snapshotting a MariaDB schema, constraints are incorrectly snapshotted as "deferrable", which
-      cannot be correct since neither MySQL nor MariaDB seem to have this feature. This is possible due to a
-      bug in the JDBC driver.
+      Example for a working JDBC connection string:
+      Assuming your Informix SQL server runs on localhost, port 9090. The informix database name is "liquibase".
+      The database is created with Unicode awareness. The instance name of your Informix server is "ol_informix1210".
+      In this case, the following connection string should work (other language/territory locales than "en_us" should
+      work as well, as look as the locale as a whole is a Unicode locale).
+
+      jdbc:informix-sqli://localhost:9090/liquibase:informixserver=ol_informix1210;DB_LOCALE=en_us.utf8;GL_DATE=%iY-%m-%d
 
 ------------ DB-Manul forked between version 3.5.3 and Liquibase 3.6.0
 
