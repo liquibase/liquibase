@@ -17,7 +17,6 @@ import liquibase.util.StringUtils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
@@ -33,11 +32,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
-    	if (database instanceof InformixDatabase) {
-    		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
-    		return gen.generateSql(statement, database, sqlGeneratorChain);
-    	}
-
         List<Sql> additionalSql = new ArrayList<Sql>();
     	
         StringBuffer buffer = new StringBuffer();
@@ -51,7 +45,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         boolean isPrimaryKeyAutoIncrement = false;
         
         Iterator<String> columnIterator = statement.getColumns().iterator();
-        List<String> primaryKeyColumns = new LinkedList<String>();
 
         BigInteger mysqlTableOptionStartWith = null;
 
@@ -77,11 +70,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     && statement.getPrimaryKeyConstraint().getColumns().contains(column);
             isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement
                     || isPrimaryKeyColumn && isAutoIncrementColumn;
-            
-            if (isPrimaryKeyColumn) {
-            	primaryKeyColumns.add(column);
-            }
-            
+
             if ((database instanceof SQLiteDatabase) &&
                     isSinglePrimaryKeyColumn &&
                     isPrimaryKeyColumn &&
@@ -176,14 +165,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         if (!( (database instanceof SQLiteDatabase) &&
                 isSinglePrimaryKeyColumn &&
-                isPrimaryKeyAutoIncrement) &&
-
-                !((database instanceof InformixDatabase) &&
-                isSinglePrimaryKeyColumn
-                )) {
-            // ...skip this code block for sqlite if a single column primary key
-            // with an autoincrement constraint exists.
-            // This constraint is added after the column type.
+                isPrimaryKeyAutoIncrement) ) {
 
             if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
                 if (database.supportsPrimaryKeyNames()) {
@@ -256,24 +238,15 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
         for (UniqueConstraint uniqueConstraint : statement.getUniqueConstraints()) {
-            if (uniqueConstraint.getConstraintName() != null && !constraintNameAfterUnique(database)) {
+            if (uniqueConstraint.getConstraintName() != null) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
-            if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
-                buffer.append(" CONSTRAINT ");
-                buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
-            }
             buffer.append(",");
         }
-
-//        if (constraints != null && constraints.getCheckConstraint() != null) {
-//            buffer.append(constraints.getCheckConstraint()).append(" ");
-//        }
-//    }
 
         /*
          * Here, the list of columns and constraints in the form
@@ -286,17 +259,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         	LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
         	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
-
-
-//        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
-//            if (database instanceof MSSQLDatabase) {
-//                buffer.append(" ON ").append(tablespace);
-//            } else if (database instanceof DB2Database) {
-//                buffer.append(" IN ").append(tablespace);
-//            } else {
-//                buffer.append(" TABLESPACE ").append(tablespace);
-//            }
-//        }
 
         if (statement.getTablespace() != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
@@ -317,10 +279,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
     protected Relation getAffectedTable(CreateTableStatement statement) {
         return new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
-    }
-
-    private boolean constraintNameAfterUnique(Database database) {
-        return database instanceof InformixDatabase;
     }
 
 }
