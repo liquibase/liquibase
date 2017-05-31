@@ -126,10 +126,11 @@ public class Main {
             System.out.println(CommandLineUtils.getBanner());
 
             if (args.length == 1 && "--help".equals(args[0])) {
-                main.printHelp(System.err);
+                main.printHelp(System.out);
                 return;
             } else if (args.length == 1 && "--version".equals(args[0])) {
-                System.err.println("DB-Manul Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
+                System.out.println("DB-Manul Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator
+                ());
                 return;
             }
 
@@ -493,7 +494,6 @@ public class Main {
             stream.println("  " + message);
         }
         stream.println();
-        printHelp(stream);
     }
 
     protected void printWarning(List<String> warningMessages, PrintStream stream) {
@@ -706,7 +706,7 @@ public class Main {
         stream.println("'liquibase.properties' that is read from the current working directory.");
         stream.println("");
         stream.println("Full documentation is available at");
-        stream.println("http://www.liquibase.org/documentation/command_line.html");
+        stream.println("http://www.dbmanul.org");
         stream.println("");
     }
 
