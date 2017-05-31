@@ -1059,7 +1059,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     Database database = JdbcDatabaseSnapshot.this.getDatabase();
                     String sql;
-                    if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
+                    if (database instanceof MySQLDatabase || database instanceof HsqlDatabase || database instanceof
+                        MariaDBDatabase) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".table_constraints "
                                 + "where constraint_schema='" + jdbcCatalogName + "' "

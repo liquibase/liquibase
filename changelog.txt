@@ -148,6 +148,14 @@ DB-Manul 0.1:
       DATETIME              DATETIME YEAR TO FRACTION(5)   (same)
       TIME                  INTERVAL HOUR TO FRACTION(5)   DATETIME HOUR TO FRACTION(5)
 
+    Known Bugs
+    ==========
+
+    MariaDB and MySQL:
+    - When snapshotting a MariaDB schema, constraints are incorrectly snapshotted as "deferrable", which
+      cannot be correct since neither MySQL nor MariaDB seem to have this feature. This is possible due to a
+      bug in the JDBC driver.
+
 ------------ DB-Manul forked between version 3.5.3 and Liquibase 3.6.0
 
 Changes in Liquibase version 3.5.2 (2016.09.21)

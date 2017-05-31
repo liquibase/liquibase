@@ -12,7 +12,6 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.util.HashSet;
@@ -156,6 +155,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(row.getInt("DELETE_RULE"), database);
                 foreignKey.setDeleteRule(deleteRule);
                 short deferrability = row.getShort("DEFERRABILITY");
+                
+                // TODO MariaDB's JDBC driver (and probably MySQL's, too) is bugged, always returns
+                // importedKeyInitiallyDeferred, leading to problems in validation later (both RDBMS do not actually
+                // seem to support DEFERRED CONSTRAINTs). I must either get a fix from
+                // MariaDB (https://jira.mariadb.org/browse/CONJ-483) or need to implement a workaround.
+                
                 // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
                 // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
                 if (deferrability == 0 || deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
