@@ -5,12 +5,12 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -54,6 +54,9 @@ public interface Database extends PrioritizedService {
      */
     boolean supportsDDLInTransaction();
 
+    /**
+     * Returns the name of the database product according to the underlying database.
+     */
     String getDatabaseProductName();
 
     String getDatabaseProductVersion() throws DatabaseException;
@@ -110,6 +113,9 @@ public interface Database extends PrioritizedService {
 
     String getLineComment();
 
+    /**
+     * Returns database-specific auto-increment DDL clause.
+     */
     String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
 
     String getDatabaseChangeLogTableName();
@@ -141,8 +147,16 @@ public interface Database extends PrioritizedService {
 
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
+
+    /**
+     * Drops all objects in a specific schema/catalog.
+     */
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
 
+
+    /**
+     * Tags the database changelog with the given string.
+     */
     void tag(String tagString) throws DatabaseException;
 
     boolean doesTagExist(String tag) throws DatabaseException;
@@ -180,6 +194,11 @@ public interface Database extends PrioritizedService {
      */
     String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName);
 
+    /**
+     * Similar to {@link #escapeColumnName(String, String, String, String)} but allows control over whether function-like names should be left unquoted.
+     *
+     * @deprecated Know if you should quote the name or not, and use {@link #escapeColumnName(String, String, String, String)} which will quote things that look like functions, or leave it along as you see fit. Don't rely on this function guessing.
+     */
     String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions);
 
     /**
@@ -207,12 +226,22 @@ public interface Database extends PrioritizedService {
 
     String escapeViewName(String catalogName, String schemaName, String viewName);
 
+    /**
+     * Returns the run status for the given ChangeSet
+     */
     ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
+    /**
+     * After the change set has been ran against the database this method will update the change log table
+     * with the information.
+     */
     void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
 
+    /**
+     * Returns the ChangeSets that have been run against the current database.
+     */
     List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
 
     Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
@@ -237,8 +266,9 @@ public interface Database extends PrioritizedService {
 
     boolean isSafeToRunUpdate() throws DatabaseException;
 
-    void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException;/*
+    void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
+    /*
      * Executes the statements passed as argument to a target {@link Database}
      *
      * @param statements an array containing the SQL statements to be issued
@@ -323,8 +353,23 @@ public interface Database extends PrioritizedService {
 
 	boolean getOutputDefaultSchema();
 
+    /**
+     * If the database supports schemas, test if a given combination of catalog and schema name equals to the default
+     * catalog and schema of the current logged in user.
+     * @param catalog catalog name to be tested
+     * @param schema schema name to be tested
+     * @return if the database supports catalogs: true if it is the default schema, false if not. If it does not
+     * support schemas, the behaviour of this method is undefined (please call supportsSchemas first!)
+     */
     boolean isDefaultSchema(String catalog, String schema);
 
+    /**
+     * If the database supports catalogs, test if a given catalog name equals to the default catalog of the current
+     * logged in user.
+     * @param catalog catalog name to be tested
+     * @return if the database supports catalogs: true if it is the default catalog, false if not. If it does not
+     * support catalogs, the behaviour of this method is undefined (please call supportsCatalog first!)
+     */
     boolean isDefaultCatalog(String catalog);
 
     boolean getOutputDefaultCatalog();
@@ -333,6 +378,11 @@ public interface Database extends PrioritizedService {
 
     boolean supportsPrimaryKeyNames();
 
+    /**
+     * Does this database treat NOT NULL as an own kind of CONSTRAINT (in addition of simply being a column property)?
+     * This will affect the CONSTRAINT clause SQL generators.
+     * @return true if the database supports naming NOT NULL constraints, false if not.
+     */
     boolean supportsNotNullConstraintNames();
 
     public String getSystemSchema();
@@ -346,5 +396,6 @@ public interface Database extends PrioritizedService {
     String unescapeDataTypeString(String dataTypeString);
 
     ValidationErrors validate();
+
 }
 
