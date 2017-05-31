@@ -4,19 +4,20 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
-import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.ObjectUtil;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 
@@ -269,14 +270,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
-//                if (type.getColumnSize() == null) {
-//                    type.setColumnSize(38);
-//                }
-                type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
-//                if (type.getDecimalDigits() == null) {
-//                    type.setDecimalDigits(0);
-//                }
-//            type.setRadix(10);
+                Integer dataScale = columnMetadataResultSet.getInt("DATA_SCALE");
+                if ((dataScale != null) && (!dataScale.equals(0)))
+                    type.setDecimalDigits(dataScale);
             } else {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
 
