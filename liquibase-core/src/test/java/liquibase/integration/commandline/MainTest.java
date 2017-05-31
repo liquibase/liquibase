@@ -1,31 +1,23 @@
 package liquibase.integration.commandline;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.exception.CommandLineParsingException;
+import liquibase.util.StringUtils;
+import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Properties;
 
-import liquibase.exception.CommandLineParsingException;
-import liquibase.util.StringUtils;
-
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
  * Tests for {@link Main}
  */
 public class MainTest {
-
+    
     @Test
     public void migrateWithAllParameters() throws Exception {
         String[] args = new String[]{
@@ -425,6 +417,8 @@ public class MainTest {
 
     @Test
     public void printHelp() throws Exception {
+        final int MAXIMUM_LENGTH = 80;
+    
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Main cli = new Main();
         cli.printHelp(new PrintStream(stream));
@@ -432,9 +426,8 @@ public class MainTest {
         BufferedReader reader = new BufferedReader(new StringReader(new String(stream.toByteArray())));
         String line;
         while ((line = reader.readLine()) != null) {
-            //noinspection MagicNumber
-            if (line.length() > 80) {
-                fail("'" + line + "' is longer than 80 chars");
+            if (line.length() > MAXIMUM_LENGTH) {
+                fail("'" + line + String.format("' is longer than &d chars", MAXIMUM_LENGTH));
             }
         }
     }

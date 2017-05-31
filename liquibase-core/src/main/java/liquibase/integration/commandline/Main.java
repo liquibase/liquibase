@@ -636,7 +636,8 @@ public class Main {
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
         stream.println("                                            in the DB-Manul classpath");
         stream.println("                                            (default: true)");
-        stream.println(" --overwriteOutputFile=true                 Force overwriting generated changelog/SQL files");
+        stream.println(" --overwriteOutputFile=true                 Force overwriting generated ");
+        stream.println("                                            changelog/SQL files");
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");

@@ -50,6 +50,16 @@ DB-Manul 0.1:
     New features
     ============
 
+    All supported databases:
+    - Completely new logging system during ChangeSet processing, produces (hopefully) better human-readable output.
+
+    - Logging only outputs errors and warnings to STDERR now; regular messages are printed to STDOUT. This should make
+      log files more readable.
+
+    - When snapshotting a schema, a new command line parameter --overwriteOutputFile=true allows overwriting the
+      target output file if the user really wants to (e.g. for scripting).
+
+    Oracle Database:
     - Oracle support names for NOT NULL constraints. If you want to name yours, these names can now be specified when
       creating them using the new attribute notNullConstraintName.
 
@@ -64,10 +74,8 @@ DB-Manul 0.1:
             <addNotNullConstraint tableName="NOTNULL_NAMING_TEST" columnName="testcol2" constraintName="NN_NAMING_TEST_TESTCOL2_NN" />
         </changeSet>
 
-    - Completely new logging system during ChangeSet processing, produces (hopefully) better human-readable output.
-
-    - Logging only outputs errors and warnings to STDERR now; regular messages are printed to STDOUT. This should make
-      log files more readable.
+    - Snapshotting an Oracle schema now extract the TABLESPACE property of each table (if it is not the default
+      tablespace for the connecting user).
 
     Incompatibilities
     =================
