@@ -89,7 +89,6 @@
                 <optional>true</optional>
             </dependency>
 
-
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-plugin-api</artifactId>
@@ -306,7 +305,6 @@
                 <version>6.1.0.jre8</version>
             </dependency>
         </dependencies>
-
     </dependencyManagement>
 
     <build>
@@ -386,6 +384,13 @@
                                     <requireJavaVersion>
                                         <version>1.7</version>
                                     </requireJavaVersion>
+                                    <!-- Avoid the M.A.D. Gadget vulnerability in certain Apache commons-collections versions -->
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <exclude>commons-collections:commons-collections:[3.0,3.2.1]</exclude>
+                                            <exclude>commons-collections:commons-collections:4.0</exclude>
+                                        </excludes>
+                                    </bannedDependencies>
                                 </rules>
                             </configuration>
                         </execution>
@@ -509,7 +514,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
     </build>
 
     <distributionManagement>
@@ -528,7 +532,6 @@
     <profiles>
         <profile>
             <id>release-sign-artifacts</id>
-
             <build>
                 <plugins>
                     <plugin>
@@ -549,7 +552,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
@@ -565,7 +567,6 @@
                 <module>dbmanul-debian</module>
             </modules>
         </profile>
-
 
         <profile>
             <id>rpm</id>
@@ -600,7 +601,6 @@
 
         <profile>
             <id>pre-release-activities</id>
-
             <build>
                 <plugins>
                     <!-- Search for and report dependencies that have known security vulnerabilities.
@@ -622,5 +622,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>
