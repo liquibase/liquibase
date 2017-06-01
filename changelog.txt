@@ -26,7 +26,8 @@ DB-Manul 0.1:
     - When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
       This was fixed by commit 88f76fc67f10f17e02cd2909fea876ff904777c4
     - When snapshotting a PostgreSQL schema with a column of type "oid", the data type was wrongly snapshotted as
-      "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid".
+      "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid"
+      (commit a96e3c84785f693d25063538257cc0c8cf0deced)
 
     HyperSQL-specific:
     - The Liquibase macro current_datetime for a column default (replaced by the DBMS-specific function for getting the
@@ -89,6 +90,19 @@ DB-Manul 0.1:
       default. However, if not desired, these options can be switched off using the command line parameters
       --includeCatalog=false, --includeSchema=false and/or --includeTablespace=false.
 
+    DBMS support policy:
+    Unfortunately, supporting very old versions of DBMS is extremely difficult because of these factors:
+    1. The difficulty in obtaining old software versions (esp. of commercial RDBMS)
+    2. The difficulty in setting up an effective integration test environment to the dependencies that are increasingly
+       harder to satisfy.
+    3. The difficulty in keeping the program code readable - the more "if feature X is not supported in version Y yet,
+       we have to to use workaround Z" clauses there are, the higher the risks of bugs.
+
+    Due to this, please understand that the general policy is to support only DBMS which are not completely EOL yet
+    (e.g. for Oracle Database, we try to support all versions that at least still have Extended Support). DB-Manul
+    will refuse to connect to unsupported software versions to prevent schema corruption from SQL statement that have
+    adverse effects in old software versions.
+
     Microsoft SQL Server:
     - Microsoft SQL Server versions before SQL Server 2008 are not supported anymore and DB-Manul will refuse to connect
       to old instances. Also, SQL Server <2008 is now (2017-05-26) completely desupported by Microsoft.
@@ -130,6 +144,8 @@ DB-Manul 0.1:
 
     PostgreSQL:
     - Because DB-Manul is now based in JDK 8, you must upgrade your PostgreSQL JDBC driver to version 42.1.1 or newer.
+    - PostgreSQL versions below 9.2 are desupported by postgresql.org (https://www.postgresql.org/support/versioning/).
+      DB-Manul will refuse to connect to versions below 9.2.
 
     Apache Derby:
     - Because DB-Manul is now based in JDK 8, you must upgrade your Apache Derby JDBC driver to version 10.13.1.1 or newer.
