@@ -25,6 +25,8 @@ DB-Manul 0.1:
     PostgreSQL-specific:
     - When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
       This was fixed by commit 88f76fc67f10f17e02cd2909fea876ff904777c4
+    - When snapshotting a PostgreSQL schema with a column of type "oid", the data type was wrongly snapshotted as
+      "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid".
 
     HyperSQL-specific:
     - The Liquibase macro current_datetime for a column default (replaced by the DBMS-specific function for getting the
