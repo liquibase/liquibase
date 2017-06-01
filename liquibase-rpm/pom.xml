@@ -22,6 +22,9 @@
     </licenses>
     
     <properties>
+        <!-- No longer needed when parent POM is included -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <!-- Liquibase core dependencies and required jars versions -->
         <!-- @todo Move this to the parent POM! -->
         <snakeyaml.version>1.17</snakeyaml.version>
