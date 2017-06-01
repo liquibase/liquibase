@@ -1,29 +1,24 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.ValidationErrors;
-import liquibase.logging.Logger;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -44,7 +39,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 "PLACING", "PRIMARY", "REFERENCES", "RETURNING", "RIGHT", "SELECT", "SESSION_USER", "SIMILAR", "SOME", "SYMMETRIC", "TABLE", "THEN", "TO", "TRAILING", "TRUE", "UNION", "UNIQUE", "USER", "USING", "VARIADIC", "VERBOSE", "WHEN", "WHERE", "WINDOW", "WITH"));
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
-        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial", "serial", "bytea", "timestamptz", "text"));
+        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "bigserial",
+                "serial", "oid", "bytea", "timestamptz", "text"));
         super.unquotedObjectsAreUppercased=false;
     }
 
@@ -137,26 +133,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         }
 
     }
-
-    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
-//        try {
-//            if (schema == null) {
-//                schema = getConnectionUsername();
-//            }
-//            new Executor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
-//
-//            getConnection().commit();
-//
-//            changeLogTableExists = false;
-//            changeLogLockTableExists = false;
-//            changeLogCreateAttempted = false;
-//            changeLogLockCreateAttempted = false;
-//
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        }
-//    }
-
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {

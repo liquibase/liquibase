@@ -79,6 +79,10 @@ public class BlobType extends LiquibaseDataType {
         }
         if (database instanceof PostgresDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+                // There are two ways of handling byte arrays ("BLOBs") in pgsql. For consistency with Hibernate ORM
+                // (see upstream bug https://liquibase.jira.com/browse/CORE-1863) we choose the oid variant.
+                // For a more thorough discussion of the two alternatives, see:
+                // https://stackoverflow.com/questions/3677380/proper-hibernate-annotation-for-byte
                 return new DatabaseDataType("OID");
             }
 
