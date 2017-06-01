@@ -105,8 +105,8 @@ DB-Manul 0.1:
     - Change sets targeted at MySQL/MariaDB and MS SQL Server must now specify tableName in dropIndex changes
       (although ommitting this was allowed before, it produced syntax errors in the generated SQL)
 
-    - Because DB-Manul is now based in JDK 8, you must upgrade your MariaDB JDBC driver to version 2.0.1 and/or
-      your MySQL J-Connector to version 6.0.6 or higher.
+    - Because DB-Manul is now based in JDK 8, you must upgrade your MariaDB JDBC driver to version 2.0.2 (includes an
+      important bugfix regarding CONSTRAINT metadata) and/or your MySQL J-Connector to version 6.0.6 or higher.
 
     Oracle Database:
     - Because DB-Manul is now based in JDK 8, you must upgrade your Oracle JDBC thin client to at least version 12.2.0.1.
