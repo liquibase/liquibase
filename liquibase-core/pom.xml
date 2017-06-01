@@ -147,14 +147,14 @@
               <goal>run</goal>
             </goals>
             <configuration>
-              <tasks>
+              <target>
                 <!-- Safety -->
                 <mkdir dir="${project.build.directory}"/>
                 <tstamp>
                   <format property="last.updated" pattern="yyyy-MM-dd hh:mm:ss"/>
                 </tstamp>
                 <echo file="${basedir}/target/filter.properties" message="build.time=${last.updated}"/>
-              </tasks>
+              </target>
             </configuration>
           </execution>
         </executions>
