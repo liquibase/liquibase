@@ -18,10 +18,13 @@ import java.text.SimpleDateFormat;
 @DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
+    public static final int PRACITCALLY_INFINITE_FRACTIONAL_DIGITS = 99;
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-        boolean allowFractional = supportsFractionalDigits(database);
+        int maxFractionalDigits = getMaxSupportedFractionalDigits(database);
+
         if (database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
                 || database instanceof H2Database
@@ -97,7 +100,7 @@ public class DateTimeType extends LiquibaseDataType {
             String rawDefinition = originalDefinition.toLowerCase();
             Object[] params = getParameters();
             if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
-                if (params.length == 0 || !allowFractional) {
+                if (params.length == 0 ) {
                     return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
                 } else {
                     Object param = params[0];
@@ -107,7 +110,7 @@ public class DateTimeType extends LiquibaseDataType {
                     return new DatabaseDataType("TIMESTAMP(" + param + ") WITH TIME ZONE");
                 }
             } else {
-                if (params.length == 0 || !allowFractional) {
+                if (params.length == 0 ) {
                     return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
                 } else {
                     Object param = params[0];
@@ -123,7 +126,7 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            if (getParameters().length == 0 || !allowFractional) {
+            if (getParameters().length == 0 || (maxFractionalDigits == 0)) {
                 // fast out...
                 return new DatabaseDataType(getName());
             }
@@ -143,13 +146,22 @@ public class DateTimeType extends LiquibaseDataType {
         return new DatabaseDataType(getName());
     }
 
-    protected boolean supportsFractionalDigits(Database database) {
+    /**
+     * Determines the maximum precision (number of fractional digits) for TIMESTAMP columns for the given database.
+     * Might not always be able to give an exact answer since, for some DBMS, it depends on the actual software version
+     * if fractional digits are supported. A warning will be logged in this case.
+     * @param database The DBMS to test
+     * @return the number of allowed fractional digits for TIMESTAMP columns. May return 0.
+     */
+    protected int getMaxSupportedFractionalDigits(Database database) {
+        int maximumDigits = 0;
+
         if (database.getConnection() == null) {
             // if no connection is there we cannot do anything...
             LogFactory.getInstance().getLog().warning(
                     "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
-            return true;
+            return PRACITCALLY_INFINITE_FRACTIONAL_DIGITS;
         }
 
         try {
@@ -162,19 +174,26 @@ public class DateTimeType extends LiquibaseDataType {
                 patch = ((MySQLDatabase) database).getDatabasePatchVersion();
 
                 // MySQL 5.6.4 introduced fractional support...
+                // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
                 minimumVersion = "5.6.4";
+                maximumDigits = 6;
             } else if (PostgresDatabase.class.isInstance(database)) {
                 // PostgreSQL 7.2 introduced fractional support...
+                // https://www.postgresql.org/docs/9.2/static/datatype-datetime.html
                 minimumVersion = "7.2";
+                maximumDigits = 6;
             }
 
-            return isMinimumVersion(minimumVersion, major, minor, patch);
+            if (isMinimumVersion(minimumVersion, major, minor, patch))
+                return maximumDigits;
+            else
+                return 0;
         } catch (DatabaseException x) {
             LogFactory.getInstance().getLog().warning(
                     "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
-            return false;
+            return 0;
         }
     }
 
