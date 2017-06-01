@@ -2,7 +2,7 @@ options {
   STATIC = false;
   IGNORE_CASE=true;
   UNICODE_INPUT=true;
-  JAVA_UNICODE_ESCAPE=true;
+  JAVA_UNICODE_ESCAPE=false;
   DEBUG_PARSER=false;
 }
 
