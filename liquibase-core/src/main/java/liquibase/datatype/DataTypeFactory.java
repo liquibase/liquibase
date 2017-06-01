@@ -86,14 +86,13 @@ public class DataTypeFactory {
         registry.remove(name.toLowerCase());
     }
 
-//    public Map<String, SortedSet<Class<? extends LiquibaseDataType>>> getRegistry() {
-//        return registry;
-//    }
-
-//    public LiquibaseDataType fromDescription(String dataTypeDefinition) {
-//        return fromDescription(dataTypeDefinition, null);
-//    }
-
+    /**
+     * Translates a database-specific type name (e.g. VARCHAR2(255 BYTE) from Oracle) into a proper Liquibase
+     * data type (e.g. varchar(255) )
+     * @param dataTypeDefinition
+     * @param database
+     * @return
+     */
     public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;
         if (dataTypeName.matches(".+\\(.*\\).*")) {
@@ -160,7 +159,8 @@ public class DataTypeFactory {
             } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
         }
         if ((database != null) && !liquibaseDataType.supports(database)) {
-            throw new UnexpectedLiquibaseException("Could not find type for "+liquibaseDataType.toString()+" for databaes "+database.getShortName());
+            throw new UnexpectedLiquibaseException("Could not find type for "+liquibaseDataType.toString() +
+                    " for DBMS "+database.getShortName());
         }
         if (liquibaseDataType == null) {
             liquibaseDataType = new UnknownType(dataTypeName);
@@ -168,13 +168,19 @@ public class DataTypeFactory {
         }
         liquibaseDataType.setAdditionalInformation(additionalInfo);
 
+        // Does the type string have the form "some_data_type(additional,info,separated,by,commas)"?
+        // If so, process these as additional data type parameters.
         if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
+            // Cut out the part between the first ()
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");
             String[] params = paramStrings.split(",");
+
             for (String param : params) {
                 param = StringUtils.trimToNull(param);
                 if (param != null) {
                     if (liquibaseDataType instanceof CharType && !(database instanceof OracleDatabase)) {
+                        // TODO this might lead to wrong snapshot results in Oracle Database, because it assumes
+                        // NLS_LENGTH_SEMANTICS=BYTE. If NLS_LENGTH_SEMANTICS=CHAR, we need to trim " CHAR" instead.
                         param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle, not sure what else supports it
                     }
                     liquibaseDataType.addParameter(param);

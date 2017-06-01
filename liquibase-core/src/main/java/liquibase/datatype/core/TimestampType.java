@@ -72,7 +72,7 @@ public class TimestampType extends DateTimeType {
             if (maxFractionalDigits < fractionalDigits) {
                 LogFactory.getInstance().getLog().warning(String.format(
                         "A timestamp datatype with %d fractional digits was requested, but the DBMS %s only supports " +
-                                "%d digits. Because of this, the number of digits was adjusted to %d.",
+                                "%d digits. Because of this, the number of digits was reduced to %d.",
                         fractionalDigits, database.getDatabaseProductName(), maxFractionalDigits, maxFractionalDigits)
                 );
                 fractionalDigits = maxFractionalDigits;

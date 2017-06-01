@@ -77,6 +77,11 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return maxParameters;
     }
 
+    /**
+     * Returns an array with the parameters to the data type, e.g. NUMBER(10, 2) would return
+     * an array with the items 10 and 2.
+     * @return An array with the parameters. May contain 0 items.
+     */
     public Object[] getParameters() {
         return parameters.toArray();
     }
