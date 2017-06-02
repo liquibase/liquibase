@@ -48,7 +48,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the unique constraint on")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation",
+        description = "Name of the table to create the unique constraint on")
     public String getTableName() {
         return tableName;
     }
@@ -58,7 +59,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column", description =
-            "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
+        "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
     }
@@ -144,12 +145,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-
-//todo    	if (database instanceof SQLiteDatabase) {
-//    		// return special statements for SQLite databases
-//    		return generateStatementsForSQLiteDatabase(database);
-//        }
-
         boolean deferrable = false;
         if (getDeferrable() != null) {
             deferrable = getDeferrable();
@@ -159,6 +154,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         if (getInitiallyDeferred() != null) {
             initiallyDeferred = getInitiallyDeferred();
         }
+        
         boolean disabled = false;
         if (getDisabled() != null) {
             disabled = getDisabled();
@@ -184,7 +180,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     protected AddUniqueConstraintStatement createAddUniqueConstraintStatement() {
-        return new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
+        return new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(),
+            ColumnConfig.arrayFromNames(getColumnNames()), getConstraintName());
     }
 
 
@@ -192,7 +189,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
         try {
-            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), Column.arrayFromNames(getColumnNames()));
+            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(),
+                getTableName(), Column.arrayFromNames(getColumnNames()));
 
             UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             result.assertComplete(snapshot != null, "Unique constraint does not exist");
@@ -203,48 +201,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
             return result.unknown(e);
         }
     }
-
-//    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-//
-//    	// SQLite does not support this ALTER TABLE operation until now.
-//		// For more information see: http://www.sqlite.org/omitted.html.
-//		// This is a small work around...
-//
-//    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-//
-//		// define alter table logic
-//		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-//			public ColumnConfig[] getColumnsToAdd() {
-//				return new ColumnConfig[0];
-//			}
-//			public boolean copyThisColumn(ColumnConfig column) {
-//				return true;
-//			}
-//			public boolean createThisColumn(ColumnConfig column) {
-//				String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
-//				for (String split_column:split_columns) {
-//					if (column.getName().equals(split_column)) {
-//    					column.getConstraints().setUnique(true);
-//    				}
-//				}
-//				return true;
-//			}
-//			public boolean createThisIndex(Index index) {
-//				return true;
-//			}
-//		};
-//
-//    	try {
-//    		// alter table
-//			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-//					rename_alter_visitor,
-//					database,getCatalogName(), getSchemaName(),getTableName()));
-//    	} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//    	return statements.toArray(new SqlStatement[statements.size()]);
-//    }
 
     @Override
     public String getConfirmationMessage() {

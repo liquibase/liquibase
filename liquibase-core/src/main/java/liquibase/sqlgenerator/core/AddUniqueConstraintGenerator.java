@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Column;
@@ -70,6 +69,15 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             }
         }
 
+        boolean isInUsingIndexClause = false;
+    
+        if (statement.getForIndexName() != null) {
+            sql += " USING INDEX ";
+            sql += database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(),
+                statement.getForIndexName(), Index.class);
+            isInUsingIndexClause = true;
+        }
+    
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + statement.getTablespace();
@@ -77,13 +85,22 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                     || database instanceof SybaseASADatabase
                     || database instanceof InformixDatabase) {
                 ; //not supported
+            } else if (database instanceof OracleDatabase) {
+                /*
+                 * In Oracle, you can use only exactly one of these clauses:
+                 * 1. USING INDEX (identifier)
+                 * 2. USING INDEX (index attributes) <-- Note that NO identifier is allowed in this form!
+                 * 3. USING INDEX (CREATE INDEX (identifier) TABLESPACE (tablespace) (further attributes...) )
+                 * However, if an index name _is_ present, we can assume that CreateIndexGenerator picked it up before
+                 * this generator is called, so we really only need the second form at this point.
+                */
+                if (statement.getForIndexName() == null)
+                    sql += " USING INDEX TABLESPACE " + statement.getTablespace();
             } else {
-                sql += " USING INDEX TABLESPACE " + statement.getTablespace();
+                if (!isInUsingIndexClause)
+                    sql += " USING INDEX";
+                sql += " TABLESPACE " + statement.getTablespace();
             }
-        }
-
-        if (statement.getForIndexName() != null) {
-            sql += " USING INDEX " + database.escapeObjectName(statement.getForIndexCatalogName(), statement.getForIndexSchemaName(), statement.getForIndexName(), Index.class);
         }
 
         return new Sql[]{
