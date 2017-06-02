@@ -57,7 +57,7 @@ public class StringUtils {
                 previousDelimiter = true;
             } else {
                 if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
-                    if (!currentString.toString().equals("") || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
+                    if (currentString.length() > 0 || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
