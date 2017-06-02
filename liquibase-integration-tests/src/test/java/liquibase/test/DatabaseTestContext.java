@@ -1,27 +1,27 @@
 package liquibase.test;
 
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.DB2Database;
-import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.sdk.database.MockDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 
-import java.util.*;
-import java.sql.SQLException;
-import java.sql.Driver;
 import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.util.*;
 
 public class DatabaseTestContext {
+    public static final String ALT_CATALOG = "LIQUIBASEC";
+    public static final String ALT_SCHEMA = "LIQUIBASEB";
+    public static final String ALT_TABLESPACE = "LIQUIBASE2";
+    private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private static DatabaseTestContext instance = new DatabaseTestContext();
-    
-    private Set<Database> availableDatabases = new HashSet<Database>();
-    private Set<Database> allDatabases;
-    private Set<DatabaseConnection> availableConnections;
-
     private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
     /* @todo Extract all remaining connection string examples into liquibase.integrationtest.properties, then delete this code block. */
     /*
@@ -42,18 +42,22 @@ public class DatabaseTestContext {
             new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
             */
     };
-
-
+    private Set<Database> availableDatabases = new HashSet<Database>();
+    private Set<Database> allDatabases;
+    private Set<DatabaseConnection> availableConnections;
     private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
-    public static final String ALT_CATALOG = "LIQUIBASEC";
-    public static final String ALT_SCHEMA = "LIQUIBASEB";
-    public static final String ALT_TABLESPACE = "LIQUIBASE2";
-    private static final String TEST_DATABASES_PROPERTY = "test.databases";
     private ResourceAccessor resourceAccessor;
 
-    private DatabaseConnection openConnection(final String url,
+    public static DatabaseTestContext getInstance() {
+        return instance;
+    }
+
+    private DatabaseConnection openConnection(final String givenUrl,
         final String username, final String password) throws Exception {
+        // Insert the temp dir path
+        String url = givenUrl.replace("'***TEMPDIR***", System.getProperty("java.io.tmpdir"));
+
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
             if (connection == null) {
@@ -106,7 +110,7 @@ public class DatabaseTestContext {
             }
         } catch (SQLException e) {
 //            e.printStackTrace();
-            ; //schema already exists
+            //schema already exists
         } finally {
             try {
                 databaseConnection.rollback();
@@ -131,7 +135,6 @@ public class DatabaseTestContext {
                             ((JdbcConnection) databaseConnection).getUnderlyingConnection().rollback();
                         }
                     } catch (SQLException e) {
-                        ;
                     }
 
 
@@ -179,12 +182,6 @@ public class DatabaseTestContext {
 
         return new JdbcConnection(connection);
     }
-
-
-    public static DatabaseTestContext getInstance() {
-        return instance;
-    }
-
 
     public DatabaseTestURL[] getTestUrls() {
         return DEFAULT_TEST_DATABASES;
