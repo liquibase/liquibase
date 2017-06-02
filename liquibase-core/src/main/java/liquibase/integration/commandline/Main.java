@@ -683,10 +683,13 @@ public class Main {
         stream.println("                                            instead of the real names.");
         stream.println(" --includeCatalog=<true|false>              If true, the catalog will be");
         stream.println("                                            included in generated changeSets");
-        stream.println("                                            Defaults to false");
+        stream.println("                                            Defaults to true");
         stream.println(" --includeSchema=<true|false>               If true, the schema will be");
         stream.println("                                            included in generated changeSets");
-        stream.println("                                            Defaults to false");
+        stream.println("                                            Defaults to true");
+        stream.println(" --includeTablespace=<true|false>           If true, the tablespace of tables");
+        stream.println("                                            and indexes will be included.");
+        stream.println("                                            Defaults to true");
         stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name");
         stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
         stream.println("                                            directory");
@@ -975,7 +978,7 @@ public class Main {
 
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
             boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
-            boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
+            boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "true"));
             String excludeObjects = StringUtils.trimToNull(getCommandParam("excludeObjects", null));
             String includeObjects = StringUtils.trimToNull(getCommandParam("includeObjects", null));
             DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);

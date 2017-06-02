@@ -82,6 +82,13 @@ DB-Manul 0.1:
     Incompatibilities
     =================
 
+    All supported databases:
+    - In contrast to Liquibase, DB-Manul tries to include as much meta data in the diff changelogs as possible, and
+      will include catalog and schema names for all objects (unless they are the default catalog and/or
+      schema of the database user making the snapshot). For tables and indexes, tablespace names are included by
+      default. However, if not desired, these options can be switched off using the command line parameters
+      --includeCatalog=false, --includeSchema=false and/or --includeTablespace=false.
+
     Microsoft SQL Server:
     - Microsoft SQL Server versions before SQL Server 2008 are not supported anymore and DB-Manul will refuse to connect
       to old instances. Also, SQL Server <2008 is now (2017-05-26) completely desupported by Microsoft.
