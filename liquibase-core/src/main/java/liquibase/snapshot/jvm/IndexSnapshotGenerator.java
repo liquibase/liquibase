@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Analyses the properties of a database index and creates an object representation ("snapshot").
+ */
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
         super(Index.class, new Class[]{Table.class, ForeignKey.class, UniqueConstraint.class});
@@ -221,6 +224,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
+                    
+                    String tablespaceName = row.getString("TABLESPACE_NAME");
+                    if (tablespaceName != null && database.supportsTablespaces()) {
+                        returnIndex.setTablespace(tablespaceName);
+                    }
 
                     if (type == DatabaseMetaData.tableIndexClustered) {
                         returnIndex.setClustered(true);

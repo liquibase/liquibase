@@ -50,10 +50,14 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
 
     /**
-     * Generate a CREATE INDEX SQL statement for SQL-compliant databases.
+     * Generate a CREATE INDEX SQL statement.
+     * Here, we are walking on thin ice, because the SQL Foundation standard (ISO/IEC 9075-2) does not concern itself
+     * with indexes at all and leaves them as an implementation-specific detail at the discretion of each RDBMS vendor.
+     * However, there is some common ground to most RDBMS, and we try to make an educated guess on how a CREATE INDEX
+     * statement might look like if we have no specific handler for the DBMS.
      * @param statement A CreateIndexStatement with the desired properties of the SQL to be generated
      * @param database The DBMS for whose SQL dialect the statement is to be made
-     * @param sqlGeneratorChain @todo ???
+     * @param sqlGeneratorChain The other SQL generators in the same chain (but this method is not interested in them)
      * @return An array of Sql objects containing the generated SQL statement(s).
      */
     @Override
