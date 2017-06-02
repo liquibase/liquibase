@@ -1,0 +1,13 @@
+
+This text file is mainly a lookup help for DB-Manul developers to quickly check if a certain upstream pull request
+has already been merged into DB-Manul.
+
+There is no automatic sorting mechanism for this file. Please keep it tidy and sorted descending by Liquibase pull
+request number (pr#) to maximise its usefulness. Thank you.
+
+[pr#] | [merge status] [description]
+(2nd line):            [if not going to be merged: reason]
+=======================================================================================================================
+676     NO             CORE-3063 integration tests that cannot connect should be Ignored not Passed
+                       -> Already fixed in DB-Manul
+670     MERGED         CORE-3050 Do not build string to check StringBuilder is empty
