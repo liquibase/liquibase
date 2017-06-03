@@ -7,4 +7,10 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y rpm
 
-script: mvn clean package
+services:
+  - mysql
+
+before_script:
+  - mysql -uroot < liquibase-integration-tests/src/test/resources/travis-ci/mysql-setup.sql
+
+script: mvn clean verify

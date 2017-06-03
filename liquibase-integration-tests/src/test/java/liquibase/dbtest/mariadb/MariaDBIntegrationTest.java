@@ -22,6 +22,11 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
         super("mariadb", DatabaseFactory.getInstance().getDatabase("mariadb"));
     }
 
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        return true;
+    }
+
     @Test
     @Override
     public void testRunChangeLog() throws Exception {

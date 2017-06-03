@@ -1,12 +1,14 @@
 package liquibase.dbtest.mssql;
 
-import java.util.Date;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.MigrationFailedException;
 import liquibase.exception.ValidationFailedException;
 import org.junit.Test;
+
+import java.util.Date;
+
+import static org.junit.Assume.assumeNotNull;
 
 /**
  *
@@ -19,15 +21,19 @@ public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTe
     }
 
     @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        // Seems unlikely to ever be provided by Travis, as it's not free
+        return false;
+    }
+
+    @Override
     protected boolean shouldRollBack() {
         return false;
     }
 
     @Test
     public void smartDataLoad() throws Exception {
-        if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
         clearDatabase(liquibase);
         try {

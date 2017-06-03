@@ -8,11 +8,16 @@ import java.sql.SQLException;
 
 public class DerbyIntegrationTest extends AbstractIntegrationTest {
 
-
     public static final String DERBY_SQLSTATE_OBJECT_ALREADY_EXISTS = "X0Y68";
 
     public DerbyIntegrationTest() throws Exception {
         super("derby", DatabaseFactory.getInstance().getDatabase("derby"));
+    }
+
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        // Derby is an in-process database
+        return true;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class DerbyIntegrationTest extends AbstractIntegrationTest {
             );
         } catch (SQLException e) {
             if (e.getSQLState().equals(DERBY_SQLSTATE_OBJECT_ALREADY_EXISTS)) {
-                ; // do nothing
+                // do nothing
             }
         }
         ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(

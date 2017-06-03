@@ -750,18 +750,17 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
 	        final long changeSetStarted = System.currentTimeMillis();
-            CompareControl.SchemaComparison[] scs = new CompareControl.SchemaComparison[] {
-                new CompareControl.SchemaComparison(
-                    schemaToDrop, schemaToDrop
-                )
-            };
-
-	        CompareControl cc = new CompareControl(scs, snapshot.getSnapshotControl().getTypesToInclude());
-	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
-                    new EmptyDatabaseSnapshot(this),
+            CompareControl compareControl = new CompareControl(
+                    new CompareControl.SchemaComparison[] {
+                            new CompareControl.SchemaComparison(
+                                    CatalogAndSchema.DEFAULT,
+                                    schemaToDrop)},
+                    snapshot.getSnapshotControl().getTypesToInclude());
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
+	                new EmptyDatabaseSnapshot(this),
                     snapshot,
-	                cc
-            );
+                    compareControl);
+
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
 	        LogFactory.getInstance().getLog().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
@@ -823,11 +822,8 @@ public abstract class AbstractJdbcDatabase implements Database {
             return true;
         }
 
-        if (example instanceof View && getSystemViews().contains(example.getName())) {
-            return true;
-        }
+        return example instanceof View && getSystemViews().contains(example.getName());
 
-        return false;
     }
 
     public boolean isSystemView(CatalogAndSchema schema, final String viewName) {
@@ -847,10 +843,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()).setSchema(liquibaseSchema), null, this)) {
                 return true;
             }
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()).setSchema(liquibaseSchema), null, this)) {
-                return true;
-            }
-            return false;
+            return DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()).setSchema(liquibaseSchema), null, this);
         } else if (object instanceof Column) {
             return isLiquibaseObject(((Column) object).getRelation());
         } else if (object instanceof Index) {
@@ -884,7 +877,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -1259,7 +1252,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1269,18 +1262,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
+    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         execute(statements, filterRollbackVisitors(sqlVisitors));
     }
     
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {        
+    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         final SqlStatement[] statements = change.generateRollbackStatements(this);
         executeRollbackStatements(statements, sqlVisitors);
     }
 
     @Override
-    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
