@@ -17,6 +17,12 @@
 		<url>http://www.dbmanul.org</url>
 	</organization>
 
+	<parent>
+		<groupId>org.dbmanul</groupId>
+		<artifactId>dbmanul-parent</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+
 	<licenses>
 		<license>
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
@@ -173,7 +179,6 @@
 				<configuration>
 					<name>dbmanul</name>
 					<license>Apache License, Version 2.0</license>
-					<sourceEncoding>UTF-8</sourceEncoding>
 					<distribution>N/A</distribution>
 					<group>Applications/Databases</group>
 					<icon>src/main/resources/icon.xpm</icon>
