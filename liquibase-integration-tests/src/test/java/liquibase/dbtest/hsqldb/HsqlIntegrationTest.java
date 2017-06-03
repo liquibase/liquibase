@@ -15,6 +15,13 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        // Hsqldb is an in-process database
+        return true;
+    }
+
+
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         try {
@@ -24,7 +31,7 @@ public class HsqlIntegrationTest extends AbstractIntegrationTest {
             );
         } catch (SQLSyntaxErrorException e) {
             if (e.getSQLState().equals(OBJECT_ALREADY_EXISTS)) {
-                ; // do nothing
+                // do nothing
             }
         }
         getDatabase().commit();

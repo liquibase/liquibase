@@ -183,7 +183,7 @@
 							-DartifactId=jconnect -Dversion=16.0.SP02.PL05
 
 					One possible download source is the "SAP Store" at https://store.sap.com where you can search for the
-					term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for â‚¬0.00.
+					term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for €0.00.
 
 					 After that, adjust the driver version number in the following <dependency> tag.
 			 -->
@@ -198,18 +198,6 @@
 			</dependencies>
 		</profile>
 
-		<profile>
-			<id>buildServer</id>
-			<activation>
-				<property>
-					<name>env.dbmanul.buildserver</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<!--<properties>-->
-			<!--<liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>-->
-			<!--</properties>-->
-		</profile>
 	</profiles>
 	<build>
 		<plugins>
@@ -222,9 +210,36 @@
 							<value>WARNING</value>
 						</property>
 					</systemProperties>
-					<excludes>
-						<exclude>**/*.java</exclude>
-					</excludes>
+                    <excludes>
+                        <exclude>**/*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.20</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+					<systemProperties>
+						<property>
+							<name>liquibase.defaultlogger.level</name>
+							<value>WARNING</value>
+						</property>
+					</systemProperties>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/IT*.java</include>
+                        <include>**/*IT.java</include>
+                        <include>**/*ITCase.java</include>
+                    </includes>
 				</configuration>
 			</plugin>
 
@@ -243,31 +258,6 @@
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.20</version>
-				<configuration>
-					<includes>
-						<include>**/*Test.*</include>
-					</includes>
-					<systemProperties>
-						<property>
-							<name>liquibase.defaultlogger.level</name>
-							<value>WARNING</value>
-						</property>
-					</systemProperties>
-				</configuration>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 

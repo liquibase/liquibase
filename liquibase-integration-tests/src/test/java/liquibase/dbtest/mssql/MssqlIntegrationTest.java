@@ -18,6 +18,7 @@ import java.util.Date;
 
 import static junit.framework.Assert.*;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeNotNull;
 
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
@@ -32,9 +33,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     @Test
     public void defaultValuesTests() throws Exception {
-        if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/default.values.xml");
         liquibase.update((String) null);
@@ -72,9 +71,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     @Test
     public void dataTypesTest() throws Exception {
-        if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.types.xml");
         liquibase.update((String) null);
@@ -129,9 +126,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     @Test
     public void dataTypeParamsTest() throws Exception {
-        if (this.getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.type.params.xml");
         liquibase.update((String) null);

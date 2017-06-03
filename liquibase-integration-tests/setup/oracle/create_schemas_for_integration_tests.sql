@@ -62,6 +62,7 @@ GRANT ALTER ANY INDEX to liquibase;
 GRANT ALTER ANY MATERIALIZED VIEW to liquibase;
 
 GRANT DROP ANY TABLE to liquibase;
+GRANT DROP ANY VIEW to liquibase;
 GRANT DROP ANY INDEX to liquibase;
 GRANT DROP ANY MATERIALIZED VIEW to liquibase;
 

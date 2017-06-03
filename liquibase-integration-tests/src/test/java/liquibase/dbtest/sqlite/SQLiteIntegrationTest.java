@@ -11,7 +11,12 @@ import java.util.Date;
 
 public class SQLiteIntegrationTest extends AbstractIntegrationTest {
 
-	public SQLiteIntegrationTest() throws Exception {
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        return true;
+    }
+
+    public SQLiteIntegrationTest() throws Exception {
         super("sqlite", DatabaseFactory.getInstance().getDatabase("sqlite"));
         File f = new File("sqlite");
         try {

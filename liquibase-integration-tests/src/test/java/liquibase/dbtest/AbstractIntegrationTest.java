@@ -48,6 +48,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeNotNull;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -55,6 +56,7 @@ import static org.junit.Assert.*;
  * at liquibase world headquarters.  Feel free to change the return value, but don't check it in.  We are going to improve the config of this at some point.
  */
 public abstract class AbstractIntegrationTest {
+
     protected String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
@@ -121,8 +123,14 @@ public abstract class AbstractIntegrationTest {
     }
 
     /**
-     * Clear all test schemas between each test
-     * @throws Exception If an unhandld exception occurs during test setup
+     * @return true if this database is provided by the Travis CI build on GitHub.
+     *
+     * See https://docs.travis-ci.com/user/database-setup/
+     */
+    abstract protected boolean isDatabaseProvidedByTravisCI();
+
+    /**
+     * Attempt to wipe the database before each test.
      */
     @Before
     public void setUp() throws Exception {
@@ -156,11 +164,10 @@ public abstract class AbstractIntegrationTest {
             SnapshotGeneratorFactory.resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
             database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
-    
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
+                database.dropDatabaseObjects(new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA));
             }
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
@@ -234,10 +241,23 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void testRunChangeLog() throws Exception {
-        if (database == null) {
-            return;
+    public void testDatabaseIsReachableIfRequired() {
+        if (isDatabaseProvidedByTravisCI()) {
+            assertNotNull(
+                    "This integration test is expected to pass on Travis CI.\n" +
+                            "If you are running on a dev machine and do not have the required\n" +
+                            "database installed, you may choose to ignore this failed test.\n" +
+                            "To run this test on a dev machine, you will need to install the corresponding\n" +
+                            "database and configure liquibase.integrationtest.local.properties",
+                    getDatabase());
+        } else {
+            assumeNotNull(this.getDatabase());
         }
+    }
+
+    @Test
+    public void testRunChangeLog() throws Exception {
+        assumeNotNull(this.getDatabase());
 
         runCompleteChangeLog();
     }
@@ -271,9 +291,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void runUpdateOnOldChangelogTableFormat() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
 
@@ -297,9 +315,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testOutputChangeLog() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         StringWriter output = new StringWriter();
         Liquibase liquibase = createLiquibase(completeChangeLog);
@@ -378,9 +394,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testUpdateTwice() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
@@ -393,9 +407,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testUpdateClearUpdate() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
@@ -412,9 +424,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testRollbackableChangeLog() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
         clearDatabase(liquibase);
@@ -434,9 +444,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
         clearDatabase(liquibase);
@@ -452,9 +460,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         StringWriter writer = new StringWriter();
 
@@ -467,9 +473,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testTag() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
@@ -483,9 +487,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testDiff() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         runCompleteChangeLog();
 
@@ -504,9 +506,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testRerunDiffChangeLog() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         for (int run=0; run < 2; run++) { //run once outputting data as insert, once as csv
             boolean outputCsv = run == 1;
@@ -592,9 +592,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testRerunDiffChangeLogAltSchema() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         if (!database.supportsSchemas()) {
             return;
         }
@@ -665,9 +663,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testClearChecksums() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
@@ -684,9 +680,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testTagEmptyDatabase() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase(liquibase);
@@ -704,9 +698,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testUnrunChangeSetsEmptyDatabase() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -722,9 +714,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testAbsolutePathChangeLog() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
 
         Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
@@ -752,15 +742,13 @@ public abstract class AbstractIntegrationTest {
                 new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false)
             );
         } catch (DatabaseException e) {
-            ; //ok
+            //ok
         }
     }
 
     @Test
     public void testRollbackToChange() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
         liquibase.dropAll(getSchemasToDrop());
@@ -782,9 +770,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testDbDoc() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         liquibase.dropAll(getSchemasToDrop());
@@ -813,9 +799,7 @@ public abstract class AbstractIntegrationTest {
      */
     @Test
     public void testEncodingUpdating2SQL() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(encodingChangeLog);
 
@@ -837,9 +821,7 @@ public abstract class AbstractIntegrationTest {
      */
    @Test
    public void testDiffExternalForeignKeys() throws Exception {
-       if (database == null) {
-           return;
-       }
+       assumeNotNull(this.getDatabase());
        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
        liquibase.update(contexts);
 
@@ -849,9 +831,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void invalidIncludeDoesntBreakLiquibase() throws Exception{
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
             liquibase.update(new Contexts());
@@ -866,9 +846,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void contextsWithHyphensWorkInFormattedSql() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
@@ -881,9 +859,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void verifyObjectQuotingStrategy() throws Exception {
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
         if (!Arrays.asList("oracle,h2,hsqldb,postgresql,mysql").contains(database.getShortName())) {
             return;
         }
@@ -896,9 +872,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void testOutputChangeLogIgnoringSchema() throws Exception {
-        if (getDatabase() == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         String schemaName = getDatabase().getDefaultSchemaName();
         if (schemaName == null) {
@@ -926,9 +900,7 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void generateChangeLog_noChanges() throws Exception{
-        if (database == null) {
-            return;
-        }
+        assumeNotNull(this.getDatabase());
 
         runCompleteChangeLog();
 
