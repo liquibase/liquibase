@@ -71,6 +71,8 @@
 		<maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
 		<maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
+		<org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
+		<org.spockframework.version>1.1-groovy-2.4</org.spockframework.version>
 
 		<!-- JDBC driver versions -->
 		<derby.version>10.13.1.1</derby.version>
@@ -243,14 +245,14 @@
 			<dependency>
 				<groupId>org.codehaus.groovy</groupId>
 				<artifactId>groovy-all</artifactId>
-				<version>2.3.10</version>
+				<version>${org.codehaus.groovy.version}</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.spockframework</groupId>
 				<artifactId>spock-core</artifactId>
-				<version>1.0-groovy-2.3</version>
+				<version>${org.spockframework.version}</version>
 				<scope>test</scope>
 			</dependency>
 
