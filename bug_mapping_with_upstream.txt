@@ -9,4 +9,5 @@ to maximise its usefulness. Thank you.
 [Liquibase bug id] [DB-Manul bug id] [if fixed, commit#]                      [short bug description]
 =====================================================================================================================
 [CORE-3055]        none              0b2b69fe6f551f121786abb43925997b72601301 SQLAnywhere: supports Sequences
+[CORE-3054]        none              7d8e717571d87b18dcaecb6399011fd6b44c2da5 SQLAnywhere: java-coredump on changeSet-SQL
 [CORE-1775]        none              e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key

@@ -1,13 +1,12 @@
 package liquibase.database.jvm;
 
-import java.sql.Connection;
-
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
+
+import java.sql.Connection;
 
 /**
  * A SybaseASA specific Delegate that removes the calls 
- * to nativeSQL because driver issues.
+ * to nativeSQL due to driver issues.
  * 
  * @author <a href="mailto:andreas.pohl@mateurope.com">Andreas Pohl</a>
  *
