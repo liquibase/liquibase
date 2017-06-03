@@ -190,6 +190,14 @@
 							<name>dbmanul.defaultlogger.level</name>
 							<value>severe</value>
 						</property>
+						<property>
+							<name>java.util.logging.config.file</name>
+							<value>src/test/resources/logging.properties</value>
+						</property>
+						<systemPropertyVariables>
+							<org.slf4j.simpleLogger.defaultLogLevel>SEVERE</org.slf4j.simpleLogger.defaultLogLevel>
+							<org.slf4j.simpleLogger.showDateTime>true</org.slf4j.simpleLogger.showDateTime>
+						</systemPropertyVariables>
 					</systemProperties>
 				</configuration>
 			</plugin>

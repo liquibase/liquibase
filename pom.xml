@@ -55,7 +55,32 @@
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- Liquibase core dependencies and required jars versions -->
 		<org.springframework.version>4.3.8.RELEASE</org.springframework.version>
+		<snakeyaml.version>1.18</snakeyaml.version>
+
+		<!-- Liquibase SDK sdk/lib-sdk required libraries versions -->
+		<commons-cli.version>1.4</commons-cli.version>
+		<hamcrest-core.version>1.3</hamcrest-core.version>
+		<javax.servlet.version>3.0.0.v201112011016</javax.servlet.version>
+		<junit.version>4.12</junit.version>
+		<mockito.version>1.10.19</mockito.version>
+		<powermock.version>1.6.6</powermock.version>
+		<slf4j.version>1.7.25</slf4j.version>
+		<maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
+		<maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
+		<maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
+
+		<!-- JDBC driver versions -->
+		<derby.version>10.13.1.1</derby.version>
+		<mariadb-java-client.version>2.0.1</mariadb-java-client.version>
+		<mssql-jdbc.version>6.1.0.jre8</mssql-jdbc.version>
+		<hsqldb.version>2.4.0</hsqldb.version>
+		<mysql-connector-java.version>6.0.6</mysql-connector-java.version>
+		<jaybird.version>3.0.0</jaybird.version>
+		<postgresql.version>42.1.1</postgresql.version>
+
 	</properties>
 
 	<modules>
@@ -90,6 +115,7 @@
 				<optional>true</optional>
 			</dependency>
 
+			<!-- Apache Maven Plugins -->
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
@@ -109,17 +135,36 @@
 				<scope>test</scope>
 			</dependency>
 
+			<!-- JUnit & JUnit logging -->
 			<dependency>
-				<groupId>org.jboss.weld.se</groupId>
-				<artifactId>weld-se</artifactId>
-				<version>1.1.8.Final</version>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.11</version>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-nop</artifactId>
+				<version>${slf4j.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${slf4j.version}</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.weld.se</groupId>
+				<artifactId>weld-se</artifactId>
+				<version>1.1.8.Final</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -133,21 +178,21 @@
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-module-junit4</artifactId>
-				<version>1.5.6</version>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.powermock</groupId>
 				<artifactId>powermock-api-mockito</artifactId>
-				<version>1.5.6</version>
+				<version>${powermock.version}</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>1.9.5</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -191,7 +236,7 @@
 			<dependency>
 				<groupId>org.yaml</groupId>
 				<artifactId>snakeyaml</artifactId>
-				<version>1.17</version>
+				<version>${snakeyaml.version}</version>
 				<optional>true</optional>
 			</dependency>
 
@@ -219,13 +264,13 @@
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
-				<version>1.2</version>
+				<version>${commons-cli.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-all</artifactId>
-				<version>1.9.5</version>
+				<version>${mockito.version}</version>
 			</dependency>
 
 			<dependency>
@@ -258,59 +303,59 @@
 				<version>4.3.1</version>
 			</dependency>
 
-			<!-- JDBC drivers -->
-			<dependency>
-				<groupId>org.hsqldb</groupId>
-				<artifactId>hsqldb</artifactId>
-				<version>2.4.0</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>6.0.6</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.mariadb.jdbc</groupId>
-				<artifactId>mariadb-java-client</artifactId>
-				<version>2.0.1</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.1.1</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.derby</groupId>
-				<artifactId>derby</artifactId>
-				<version>10.13.1.1</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.firebirdsql.jdbc</groupId>
-				<artifactId>jaybird-jdk18</artifactId>
-				<version>3.0.0</version>
-				<scope>test</scope>
-			</dependency>
-
 			<dependency>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
 				<version>1.4.5</version>
 			</dependency>
 
+			<!-- JDBC drivers -->
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>${hsqldb.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql-connector-java.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mariadb.jdbc</groupId>
+				<artifactId>mariadb-java-client</artifactId>
+				<version>${mariadb-java-client.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgresql.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derby</artifactId>
+				<version>${derby.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.firebirdsql.jdbc</groupId>
+				<artifactId>jaybird-jdk18</artifactId>
+				<version>${jaybird.version}</version>
+				<scope>test</scope>
+			</dependency>
+
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>6.1.0.jre8</version>
+				<version>${mssql-jdbc.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -354,7 +399,7 @@
 
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.20</version>
+					<version>${maven-surefire-plugin.version}</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<reportFormat>plain</reportFormat>
@@ -363,8 +408,8 @@
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<version>2.20</version>
 					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>${maven-failsafe-plugin.version}</version>
 					<executions>
 						<execution>
 							<id>integration-test</id>
@@ -379,7 +424,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>1.4.1</version>
+					<version>${maven-enforcer-plugin.version}</version>
 					<executions>
 						<execution>
 							<id>enforce-java</id>

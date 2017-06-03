@@ -27,19 +27,6 @@
 	<properties>
 		<!-- No longer needed when parent POM is included -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<!-- Liquibase core dependencies and required jars versions -->
-		<!-- @todo Move this to the parent POM! -->
-		<snakeyaml.version>1.17</snakeyaml.version>
-		<postgresql.version>42.1.1</postgresql.version>
-
-		<!-- Liquibase SDK sdk/lib-sdk required libraries versions -->
-		<!-- @todo Move these to the parent POM! -->
-		<snakeyaml.version>1.17</snakeyaml.version>
-		<commons-cli.version>1.2</commons-cli.version>
-		<hamcrest-core.version>1.3</hamcrest-core.version>
-		<javax.servlet.version>3.0.0.v201112011016</javax.servlet.version>
-		<junit.version>4.11</junit.version>
 	</properties>
 
 	<developers>
