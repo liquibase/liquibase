@@ -347,18 +347,32 @@ public class StringUtils {
         return StringUtils.trimToNull(string.toString()) == null;
     }
 
-    public static interface StringUtilsFormatter<Type> {
-        public String toString(Type obj);
-    }
+    /**
+     * Compares a minimum version number given in string form (only the first three parts are considered) with a
+     * candidate version given as the three ints major, minor and patch.
+     *
+     * @param minimumVersion The minimum version that is required, given as a string with up to 3 parts, e.g. "7.4" or "9.6.3"
+     * @param candidateMajor the version number to be tested, major part
+     * @param candidateMinor the version number to be tested, minor part
+     * @param candidatePatch the version number to be tested, patch part
+     * @return true if candidateMajor.candidateMinor.candidatePatch >= minimumVersion or false if not
+     */
+    public static boolean isMinimumVersion(String minimumVersion, int candidateMajor, int candidateMinor,
+                                           int candidatePatch) {
+        String[] parts = minimumVersion.split("\\.", 3);
+        int minMajor = Integer.parseInt(parts[0]);
+        int minMinor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        int minPatch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
 
-    public static class ToStringFormatter implements StringUtilsFormatter {
-        @Override
-        public String toString(Object obj) {
-            if (obj == null) {
-                return null;
-            }
-            return obj.toString();
+        if (minMajor > candidateMajor) {
+            return false;
         }
+
+        if (minMajor == candidateMajor && minMinor > candidateMinor) {
+            return false;
+        }
+
+        return !(minMajor == candidateMajor && minMinor == candidateMinor && minPatch > candidatePatch);
     }
 
     public static String limitSize(String string, int maxLength) {
@@ -373,12 +387,26 @@ public class StringUtils {
      * @param len desired length of the string
      * @return an identifier of the desired length
      */
-    public static String randomIdentifer( int len ){
+    public static String randomIdentifer(int len) {
         final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         StringBuilder sb = new StringBuilder( len );
         for (int i = 0; i < len; i++)
             sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
         return sb.toString();
+    }
+
+    public interface StringUtilsFormatter<Type> {
+        String toString(Type obj);
+    }
+
+    public static class ToStringFormatter implements StringUtilsFormatter {
+        @Override
+        public String toString(Object obj) {
+            if (obj == null) {
+                return null;
+            }
+            return obj.toString();
+        }
     }
 }

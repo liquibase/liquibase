@@ -113,12 +113,6 @@ public class DataType extends AbstractLiquibaseSerializable {
         this.characterOctetLength = characterOctetLength;
     }
 
-
-    public static enum ColumnSizeUnit {
-        BYTE,
-        CHAR,
-    }
-
     @Override
     public String getSerializedObjectName() {
         return "dataType";
@@ -127,5 +121,13 @@ public class DataType extends AbstractLiquibaseSerializable {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_SNAPSHOT_NAMESPACE;
+    }
+
+    /**
+     * Specifies the unit of a column's size. Currently, the possible units are BYTE and CHAR.
+     */
+    public enum ColumnSizeUnit {
+        BYTE,
+        CHAR,
     }
 }

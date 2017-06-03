@@ -19,6 +19,15 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Interface that every DBMS supported by this software must implement. Most methods belong into ont of these
+ * categories:
+ * <ul></ul>
+ * <li>Information about the capabilities of the DBMS (e.g. can it work with catalogs? with schemas?)</li>
+ * <li>changing and manipulating types defined in the SQL standard into native types and vice-versa</li>
+ * <li>creating strings for use in SQL statements, e.g. literals for dates, time, numerals, etc.</li>
+ * </ul>
+ */
 public interface Database extends PrioritizedService {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
@@ -45,7 +54,7 @@ public interface Database extends PrioritizedService {
     /**
      * Auto-commit mode to run in
      */
-    public boolean getAutoCommitMode();
+    boolean getAutoCommitMode();
 
     /**
      * Determines if the database supports DDL within a transaction or not.
@@ -96,11 +105,11 @@ public interface Database extends PrioritizedService {
      */
     boolean supportsInitiallyDeferrableColumns();
 
-    public boolean supportsSequences();
+    boolean supportsSequences();
 
-    public boolean supportsDropTableCascadeConstraints();
+    boolean supportsDropTableCascadeConstraints();
 
-    public boolean supportsAutoIncrement();
+    boolean supportsAutoIncrement();
 
     String getDateLiteral(String isoDate);
 
@@ -120,32 +129,32 @@ public interface Database extends PrioritizedService {
 
     String getDatabaseChangeLogTableName();
 
-    String getDatabaseChangeLogLockTableName();
-
-    String getLiquibaseTablespaceName();
-
-    void setLiquibaseTablespaceName(String tablespaceName);
-
     /**
      * Set the table name of the change log to the given table name
      *
      * @param tableName
      */
-    public void setDatabaseChangeLogTableName(String tableName);
+    void setDatabaseChangeLogTableName(String tableName);
+
+    String getDatabaseChangeLogLockTableName();
 
     /**
      * Set the table name of the change log lock to the given table name
      *
      * @param tableName
      */
-    public void setDatabaseChangeLogLockTableName(String tableName);
+    void setDatabaseChangeLogLockTableName(String tableName);
+
+    String getLiquibaseTablespaceName();
+
+    void setLiquibaseTablespaceName(String tablespaceName);
 
     /**
      * Returns SQL to concat the passed values.
      */
     String getConcatSql(String... values);
 
-    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
+    void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
 
     /**
@@ -182,6 +191,23 @@ public interface Database extends PrioritizedService {
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
     String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
+
+    /**
+     * Determines the maximum precision (number of fractional digits) for TIMESTAMP columns for the given database.
+     * Might not always be able to give an exact answer since, for some DBMS, it depends on the actual software version
+     * if fractional digits are supported. A warning should be logged in this case.
+     *
+     * @return the number of allowed fractional digits for TIMESTAMP columns. May return 0.
+     */
+    int getMaxFractionalDigitsForTimestamp();
+
+    /**
+     * When a TIMESTAMP column without the parameter "number of fractional digits" is created, what is the default
+     * value?
+     *
+     * @return The default number of fractional digits for TIMESTAMP columns
+     */
+    int getDefaultFractionalDigitsForTimestamp();
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
@@ -277,19 +303,20 @@ public interface Database extends PrioritizedService {
      */
     void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
-    void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+    void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, LiquibaseException;
 
-    void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException;
-    void executeRollbackStatements(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException;
+    void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
-    void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+    void executeRollbackStatements(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
-    public Date parseDate(String dateAsString) throws DateParseException;
+    void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, LiquibaseException;
+
+    Date parseDate(String dateAsString) throws DateParseException;
 
     /**
      * Returns list of database native date functions
      */
-    public List<DatabaseFunction> getDateFunctions();
+    List<DatabaseFunction> getDateFunctions();
 
     void resetInternalState();
 
@@ -299,9 +326,9 @@ public interface Database extends PrioritizedService {
 
     void enableForeignKeyChecks() throws DatabaseException;
 
-    public boolean isCaseSensitive();
+    boolean isCaseSensitive();
 
-    public boolean isReservedWord(String string);
+    boolean isReservedWord(String string);
 
     /**
      * Returns a new CatalogAndSchema adjusted for this database. Examples of adjustments include:
@@ -340,18 +367,18 @@ public interface Database extends PrioritizedService {
      */
     String generateDatabaseFunctionValue(DatabaseFunction databaseFunction);
 
-    void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy);
-
     ObjectQuotingStrategy getObjectQuotingStrategy();
+
+    void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy);
 
     boolean createsIndexesForForeignKeys();
 
-    /**
-	 * Whether the default schema should be included in generated SQL
-	 */
-	void setOutputDefaultSchema(boolean outputDefaultSchema);
+    boolean getOutputDefaultSchema();
 
-	boolean getOutputDefaultSchema();
+    /**
+     * Whether the default schema should be included in generated SQL
+     */
+    void setOutputDefaultSchema(boolean outputDefaultSchema);
 
     /**
      * If the database supports schemas, test if a given combination of catalog and schema name equals to the default
@@ -385,9 +412,9 @@ public interface Database extends PrioritizedService {
      */
     boolean supportsNotNullConstraintNames();
 
-    public String getSystemSchema();
+    String getSystemSchema();
 
-    public void addReservedWords(Collection<String> words);
+    void addReservedWords(Collection<String> words);
 
     String escapeDataTypeName(String dataTypeName);
 

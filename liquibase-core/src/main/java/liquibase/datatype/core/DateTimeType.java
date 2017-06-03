@@ -5,7 +5,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
@@ -23,7 +22,7 @@ public class DateTimeType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-        int maxFractionalDigits = getMaxSupportedFractionalDigits(database);
+        int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
 
         if (database instanceof DerbyDatabase
                 || database instanceof FirebirdDatabase
@@ -144,74 +143,6 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         return new DatabaseDataType(getName());
-    }
-
-    /**
-     * Determines the maximum precision (number of fractional digits) for TIMESTAMP columns for the given database.
-     * Might not always be able to give an exact answer since, for some DBMS, it depends on the actual software version
-     * if fractional digits are supported. A warning will be logged in this case.
-     * @param database The DBMS to test
-     * @return the number of allowed fractional digits for TIMESTAMP columns. May return 0.
-     */
-    protected int getMaxSupportedFractionalDigits(Database database) {
-        int maximumDigits = 0;
-
-        if (database.getConnection() == null) {
-            // if no connection is there we cannot do anything...
-            LogFactory.getInstance().getLog().warning(
-                    "No database connection available - specified"
-                            + " DATETIME/TIMESTAMP precision will be tried");
-            return PRACITCALLY_INFINITE_FRACTIONAL_DIGITS;
-        }
-
-        try {
-            String minimumVersion = "0";
-            int major = database.getDatabaseMajorVersion();
-            int minor = database.getDatabaseMinorVersion();
-            int patch = 0;
-
-            if (MySQLDatabase.class.isInstance(database)) {
-                patch = ((MySQLDatabase) database).getDatabasePatchVersion();
-
-                // MySQL 5.6.4 introduced fractional support...
-                // https://dev.mysql.com/doc/refman/5.7/en/data-types.html
-                minimumVersion = "5.6.4";
-                maximumDigits = 6;
-            } else if (PostgresDatabase.class.isInstance(database)) {
-                // PostgreSQL 7.2 introduced fractional support...
-                // https://www.postgresql.org/docs/9.2/static/datatype-datetime.html
-                minimumVersion = "7.2";
-                maximumDigits = 6;
-            }
-
-            if (isMinimumVersion(minimumVersion, major, minor, patch))
-                return maximumDigits;
-            else
-                return 0;
-        } catch (DatabaseException x) {
-            LogFactory.getInstance().getLog().warning(
-                    "Unable to determine exact database server version"
-                            + " - specified TIMESTAMP precision"
-                            + " will not be set: ", x);
-            return 0;
-        }
-    }
-
-    protected boolean isMinimumVersion(String minimumVersion, int major, int minor, int patch) {
-        String[] parts = minimumVersion.split("\\.", 3);
-        int minMajor = Integer.parseInt(parts[0]);
-        int minMinor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        int minPatch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-        
-        if (minMajor > major) {
-            return false;
-        }
-
-        if (minMajor == major && minMinor > minor) {
-            return false;
-        }
-
-        return !(minMajor == major && minMinor == minor && minPatch > patch);
     }
 
     @Override

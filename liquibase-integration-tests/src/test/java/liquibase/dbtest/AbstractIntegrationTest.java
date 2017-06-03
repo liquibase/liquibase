@@ -58,6 +58,9 @@ import static org.junit.Assume.assumeNotNull;
 public abstract class AbstractIntegrationTest {
 
     protected String completeChangeLog;
+    protected String contexts = "test, context-b";
+    protected String username;
+    protected String password;
     private String rollbackChangeLog;
     private String includedChangeLog;
     private String encodingChangeLog;
@@ -66,12 +69,8 @@ public abstract class AbstractIntegrationTest {
     private String externalEntityChangeLog2;
     private String invalidReferenceChangeLog;
     private String objectQuotingStrategyChangeLog;
-
-    protected String contexts = "test, context-b";
     private Database database;
     private String jdbcUrl;
-    protected String username;
-    protected String password;
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -112,6 +111,46 @@ public abstract class AbstractIntegrationTest {
         this.setJdbcUrl(url);
 
         ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
+    }
+
+    public static DatabaseTestURL getDatabaseTestURL(String databaseManager) {
+        try {
+            Properties integrationTestProperties;
+            integrationTestProperties = new Properties();
+            integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+            InputStream localProperties = Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+            if (localProperties != null)
+                integrationTestProperties.load(localProperties);
+
+            String url = integrationTestProperties.getProperty("integration.test." + databaseManager + ".jdbcUrl");
+            if (url == null)
+                return null;
+
+            DatabaseTestURL testUrl = new DatabaseTestURL(databaseManager, url,
+                    // These may be set to null if not defined as properties.
+                    integrationTestProperties.getProperty("integration.test." + databaseManager + ".username"),
+                    integrationTestProperties.getProperty("integration.test." + databaseManager + ".password")
+            );
+            return testUrl;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Schedule a file to be deleted when JVM exits.
+     * If file is directory delete it and all sub-directories.
+     */
+    private static void deleteOnExit(final File file) {
+        file.deleteOnExit();
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File child : files) {
+                    deleteOnExit(child);
+                }
+            }
+        }
     }
 
     private void openConnection(String url, String username, String password) throws Exception {
@@ -173,7 +212,9 @@ public abstract class AbstractIntegrationTest {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
                     if (factory.has(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA), database))
                         database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
-                } else if (database.supportsCatalogs()) {
+                }
+
+                if (database.supportsCatalogs()) {
                     /*
                      * There is a special treatment for identifiers in the case when (a) the RDBMS does NOT support
                      * schemas AND (b) the RDBMS DOES support catalogs AND (c) someone uses "schemaName=..." in a
@@ -185,7 +226,8 @@ public abstract class AbstractIntegrationTest {
                     CatalogAndSchema[] alternativeLocations = new CatalogAndSchema[] {
                             new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
                             new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
-                            new CatalogAndSchema("LBCAT2", null)
+                            new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
+                            new CatalogAndSchema(database.getDefaultCatalogName(), "LBCAT2"),
                     };
                     for (CatalogAndSchema location: alternativeLocations) {
                         boolean catalogPresent = factory.has(new Catalog(location.getCatalogName()), database);
@@ -790,7 +832,6 @@ public abstract class AbstractIntegrationTest {
         deleteOnExit(outputDir);
     }
 
-
     /**
      * Create an SQL script from a change set which inserts data from CSV files. The first CSV file is encoded in
      * UTF-8, the second is encoded in Latin-1. The test is successful if the CSV data is converted into correct
@@ -911,48 +952,8 @@ public abstract class AbstractIntegrationTest {
         assertEquals(0, changeSets.size());
     }
 
-    public static DatabaseTestURL getDatabaseTestURL(String databaseManager)  {
-        try {
-            Properties integrationTestProperties;
-            integrationTestProperties = new Properties();
-            integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-            InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
-            if(localProperties!=null)
-                integrationTestProperties.load(localProperties);
-
-            String url=integrationTestProperties.getProperty("integration.test."+databaseManager+".jdbcUrl");
-            if (url==null)
-                return null;
-
-            DatabaseTestURL testUrl = new DatabaseTestURL(databaseManager, url,
-                // These may be set to null if not defined as properties.
-                integrationTestProperties.getProperty("integration.test."+databaseManager+".username"),
-                integrationTestProperties.getProperty("integration.test."+databaseManager+".password")
-            );
-            return testUrl;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     protected Database getDatabase(){
         return database;
-    }
-
-    /**
-     * Schedule a file to be deleted when JVM exits.
-     * If file is directory delete it and all sub-directories.
-     */
-    private static void deleteOnExit(final File file) {
-        file.deleteOnExit();
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File child  : files) {
-                    deleteOnExit(child);
-                }
-            }
-        }
     }
 
     public String getUsername() {

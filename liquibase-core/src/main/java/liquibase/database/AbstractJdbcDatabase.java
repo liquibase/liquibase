@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
+
 /**
  * AbstractJdbcDatabase is extended by all supported databases as a facade to the underlying database.
  * The physical connection can be retrieved from the AbstractJdbcDatabase implementation, as well as any
@@ -56,13 +57,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
     private final static int FETCH_SIZE = 1000;
-
-    private DatabaseConnection connection;
+    private static final int DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS = 9;
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private final Set<String> reservedWords = new HashSet<String>();
     protected String defaultCatalogName;
     protected String defaultSchemaName;
-
     protected String currentDateTimeFunction;
-
     /**
      * The sequence name will be substituted into the string e.g. NEXTVAL('%s')
      */
@@ -71,34 +71,24 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected String quotingStartCharacter = "\"";
     protected String quotingEndCharacter = "\"";
     protected String quotingEndReplacement = "\"\"";
-
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
-
     protected List<String> unmodifiableDataTypes = new ArrayList<String>();
-
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
-    private String databaseChangeLogTableName;
-    private String databaseChangeLogLockTableName;
-    private String liquibaseTablespaceName;
-    private String liquibaseSchemaName;
-    private String liquibaseCatalogName;
-
-    private Boolean previousAutoCommit;
-
-    private boolean canCacheLiquibaseTableInfo = false;
-
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
     // most databases either lowercase or uppercase unuqoted objects such as table and column names.
     protected Boolean unquotedObjectsAreUppercased = null;
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
-
-    private final Set<String> reservedWords = new HashSet<String>();
-
     protected Boolean caseSensitive;
+    private String databaseChangeLogTableName;
+    private String databaseChangeLogLockTableName;
+    private String liquibaseTablespaceName;
+    private String liquibaseSchemaName;
+    private String liquibaseCatalogName;
+    private Boolean previousAutoCommit;
+    private boolean canCacheLiquibaseTableInfo = false;
+    private DatabaseConnection connection;
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
 
@@ -243,11 +233,18 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     defaultCatalogName = getConnectionCatalogName();
                 } catch (DatabaseException e) {
-                    LogFactory.getInstance().getLog().info("Error getting default catalog", e);
+                    LogFactory.getLogger().info("Error getting default catalog", e);
                 }
             }
         }
         return defaultCatalogName;
+    }
+
+    @Override
+    public void setDefaultCatalogName(final String defaultCatalogName) {
+        this.defaultCatalogName = correctObjectName(defaultCatalogName, Catalog.class);
+        defaultCatalogSet = defaultCatalogName != null;
+
     }
 
     protected String getConnectionCatalogName() throws DatabaseException {
@@ -301,6 +298,15 @@ public abstract class AbstractJdbcDatabase implements Database {
         return defaultSchemaName;
     }
 
+    @Override
+    public void setDefaultSchemaName(final String schemaName) {
+        this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
+        defaultSchemaSet = schemaName != null;
+        if (!supportsSchemas()) {
+            defaultCatalogSet = schemaName != null;
+        }
+    }
+
     /**
      * Overwrite this method to get the default schema name for the connection.
      * If you only need to change the statement that obtains the current schema then override
@@ -334,22 +340,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected SqlStatement getConnectionSchemaNameCallStatement(){
         return new RawCallStatement("call current_schema");
-    }
-
-    @Override
-    public void setDefaultCatalogName(final String defaultCatalogName) {
-        this.defaultCatalogName = correctObjectName(defaultCatalogName, Catalog.class);
-        defaultCatalogSet = defaultCatalogName != null;
-
-    }
-
-    @Override
-    public void setDefaultSchemaName(final String schemaName) {
-        this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
-        defaultSchemaSet = schemaName != null;
-        if (!supportsSchemas()) {
-            defaultCatalogSet = schemaName != null;
-        }
     }
 
     @Override
@@ -389,14 +379,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
 
-    @Override
-    public void setCurrentDateTimeFunction(final String function) {
-        if (function != null) {
-            this.currentDateTimeFunction = function;
-            this.dateFunctions.add(new DatabaseFunction(function));
-        }
-    }
-
     /**
      * Return a date literal with the same value as a string formatted using ISO 8601.
      * <p/>
@@ -420,7 +402,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             return "BAD_DATE_FORMAT:" + isoDate;
         }
     }
-
 
     @Override
     public String getDateTimeLiteral(final java.sql.Timestamp date) {
@@ -522,7 +503,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return "--";
     }
 
-
     @Override
     public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
         if (!supportsAutoIncrement()) {
@@ -607,6 +587,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public void setDatabaseChangeLogTableName(final String tableName) {
+        this.databaseChangeLogTableName = tableName;
+    }
+
+    @Override
     public String getDatabaseChangeLogLockTableName() {
         if (databaseChangeLogLockTableName != null) {
             return databaseChangeLogLockTableName;
@@ -616,22 +601,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    public void setDatabaseChangeLogLockTableName(final String tableName) {
+        this.databaseChangeLogLockTableName = tableName;
+    }
+
+    @Override
     public String getLiquibaseTablespaceName() {
         if (liquibaseTablespaceName != null) {
             return liquibaseTablespaceName;
         }
 
         return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getLiquibaseTablespaceName();
-    }
-
-    @Override
-    public void setDatabaseChangeLogTableName(final String tableName) {
-        this.databaseChangeLogTableName = tableName;
-    }
-
-    @Override
-    public void setDatabaseChangeLogLockTableName(final String tableName) {
-        this.databaseChangeLogLockTableName = tableName;
     }
 
     @Override
@@ -873,7 +853,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return getConnection().getConnectionUserName() + " @ " + getConnection().getURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
     }
 
-
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
@@ -1015,7 +994,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeColumnName(final String catalogName, final String schemaName, final String tableName, final String columnName) {
         return escapeObjectName(columnName, Column.class);
     }
-
 
     @Override
     public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName, boolean quoteNamesThatMayBeFunctions) {
@@ -1205,8 +1183,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /**
-     * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we
-     * don't know it's safe to run the update.
+     * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
      *
      * @throws liquibase.exception.DatabaseException
      *
@@ -1231,6 +1208,13 @@ public abstract class AbstractJdbcDatabase implements Database {
         execute(statements, sqlVisitors);
     }
 
+    /*
+     * Executes the statements passed
+     *
+     * @param statements an array containing the SQL statements to be issued
+     * @param sqlVisitors a list of {@link SqlVisitor} objects to be applied to the executed statements
+     * @throws DatabaseException if there were problems issuing the statements
+     */
     @Override
     public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
@@ -1250,7 +1234,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-
     @Override
     public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
@@ -1265,7 +1248,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         execute(statements, filterRollbackVisitors(sqlVisitors));
     }
-    
+
     @Override
     public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         final SqlStatement[] statements = change.generateRollbackStatements(this);
@@ -1294,10 +1277,10 @@ public abstract class AbstractJdbcDatabase implements Database {
                }
             }
         }
-        
+
         return rollbackVisitors;
     }
-    
+
     @Override
     public List<DatabaseFunction> getDateFunctions() {
         return dateFunctions;
@@ -1381,13 +1364,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setObjectQuotingStrategy(final ObjectQuotingStrategy quotingStrategy) {
-        this.quotingStrategy = quotingStrategy;
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return this.quotingStrategy;
     }
 
     @Override
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return this.quotingStrategy;
+    public void setObjectQuotingStrategy(final ObjectQuotingStrategy quotingStrategy) {
+        this.quotingStrategy = quotingStrategy;
     }
 
     @Override
@@ -1453,11 +1436,13 @@ public abstract class AbstractJdbcDatabase implements Database {
         return currentDateTimeFunction;
     }
 
- 	@Override
-    public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
-		this.outputDefaultSchema = outputDefaultSchema;
-
- 	}
+    @Override
+    public void setCurrentDateTimeFunction(final String function) {
+        if (function != null) {
+            this.currentDateTimeFunction = function;
+            this.dateFunctions.add(new DatabaseFunction(function));
+        }
+    }
 
     @Override
     public boolean isDefaultSchema(final String catalog, final String schema) {
@@ -1485,6 +1470,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     public boolean getOutputDefaultSchema() {
  		return outputDefaultSchema;
  	}
+
+    @Override
+    public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
+        this.outputDefaultSchema = outputDefaultSchema;
+
+    }
 
     @Override
     public boolean getOutputDefaultCatalog() {
@@ -1538,6 +1529,36 @@ public abstract class AbstractJdbcDatabase implements Database {
     public ValidationErrors validate() {
         return new ValidationErrors();
     }
+
+    /**
+     * Most relational databases support 9 fractional digits, and subclasses must overwrite this method if they
+     * support less than that.
+     *
+     * @return the maxmimum number of supported fractional digits in TIMESTAMP columns
+     */
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        if (getConnection() == null) {
+            // if no connection is there we cannot do anything...
+            LogFactory.getInstance().getLog().warning(
+                    "No database connection available - specified"
+                            + " DATETIME/TIMESTAMP precision will be tried");
+            return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
+        }
+
+        return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
+    }
+
+    /**
+     * SQL Standard (Foundation) says: "...if <timestamp precision> is not specified, then 6 is implicit."
+     *
+     * @return the default precision / number of maximum digits in a timestamp if nothing else is specified.
+     */
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return (getMaxFractionalDigitsForTimestamp() >= 6 ? 6 : getMaxFractionalDigitsForTimestamp());
+    }
+
 
     @Override
     public boolean supportsNotNullConstraintNames() {

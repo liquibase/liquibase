@@ -50,9 +50,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     public class CachingDatabaseMetaData {
+        private final String SQL_FILTER_MATCH_ALL = "%";
         private DatabaseMetaData databaseMetaData;
         private Database database;
-        private final String SQL_FILTER_MATCH_ALL = "%";
 
         public CachingDatabaseMetaData(Database database, DatabaseMetaData metaData) {
             this.databaseMetaData = metaData;
@@ -510,20 +510,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                        return false;
-                    }
-
-                    return true;
-                    //having issues with some columns not being found
-//                    Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
-//                    if (seenTables == null) {
-//                        seenTables = new HashSet<String>();
-//                        resultSetCache.putInfo("seenTables", seenTables);
-//                    }
-//
-//                    seenTables.add(catalogName + ":" + schemaName + ":" + tableName);
-//                    return seenTables.size() > 2;
+                    return !(tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName()));
                 }
 
                 @Override
@@ -536,7 +523,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, SQL_FILTER_MATCH_ALL));
+                        return extract(
+                                databaseMetaData.getColumns(
+                                        ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
+                                        ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
+                                        tableName,
+                                        SQL_FILTER_MATCH_ALL)
+                        );
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
                             return new ArrayList<CachedRow>();
@@ -557,7 +550,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
+                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database)
+                                .getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database)
+                                .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) {
                             return new ArrayList<CachedRow>();

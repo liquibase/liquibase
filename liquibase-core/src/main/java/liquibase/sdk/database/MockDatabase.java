@@ -1,15 +1,5 @@
 package liquibase.sdk.database;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.Change;
@@ -27,6 +17,16 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 public class MockDatabase implements Database, InternalDatabase {
 
@@ -121,6 +121,10 @@ public class MockDatabase implements Database, InternalDatabase {
         return false;
     }
 
+    @Override
+    public void setAutoCommit(final boolean b) throws DatabaseException {
+
+    }
 
     @Override
     public boolean isCaseSensitive() {
@@ -129,11 +133,6 @@ public class MockDatabase implements Database, InternalDatabase {
 
     public void setCaseSensitive(boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
-    }
-
-    @Override
-    public void setAutoCommit(final boolean b) throws DatabaseException {
-
     }
 
     @Override
@@ -278,6 +277,15 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     /**
+     * Does nothing
+     *
+     * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
+     */
+    @Override
+    public void setDatabaseChangeLogTableName(final String tableName) {
+    }
+
+    /**
      * @see liquibase.database.Database#getDatabaseChangeLogLockTableName()
      */
     @Override
@@ -292,15 +300,6 @@ public class MockDatabase implements Database, InternalDatabase {
      */
     @Override
     public void setDatabaseChangeLogLockTableName(final String tableName) {
-    }
-
-	/**
-	 * Does nothing
-	 *
-     * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
-     */
-    @Override
-    public void setDatabaseChangeLogTableName(final String tableName) {
     }
 
 	@Override
@@ -456,7 +455,6 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ;
     }
 
     @Override
@@ -471,17 +469,14 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-        ;
     }
 
     @Override
     public void commit() {
-        ;
     }
 
     @Override
     public void rollback() {
-        ;
     }
 
     public SqlStatement getSelectChangeLogLockSQL() throws DatabaseException {
@@ -495,7 +490,6 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public void close() throws DatabaseException {
-        ;
     }
 
     @Override
@@ -525,32 +519,26 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        ;
     }
 
     @Override
     public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        ;
     }
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        ;
+    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
     }
 
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
-        ;
+    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
     }
 
     @Override
-    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
-        ;
+    public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
     }
     
     @Override
-    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        ;
+    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, LiquibaseException {
     }
 
     @Override
@@ -651,10 +639,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean isFunction(final String string) {
-        if (string.endsWith("()")) {
-            return true;
-        }
-        return false;
+        return string.endsWith("()");
     }
 
     @Override
@@ -693,12 +678,12 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void setObjectQuotingStrategy(final ObjectQuotingStrategy quotingStrategy) {
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return ObjectQuotingStrategy.LEGACY;
     }
 
     @Override
-    public ObjectQuotingStrategy getObjectQuotingStrategy() {
-        return ObjectQuotingStrategy.LEGACY;
+    public void setObjectQuotingStrategy(final ObjectQuotingStrategy quotingStrategy) {
     }
 
     @Override
@@ -711,17 +696,15 @@ public class MockDatabase implements Database, InternalDatabase {
         return false;
     }
 
-
-	@Override
-    public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
-		this.outputDefaultSchema = outputDefaultSchema;
-	}
-
-
 	@Override
     public boolean getOutputDefaultSchema() {
-		return outputDefaultSchema;
-	}
+        return outputDefaultSchema;
+    }
+
+    @Override
+    public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
+        this.outputDefaultSchema = outputDefaultSchema;
+    }
 
     @Override
     public boolean getOutputDefaultCatalog() {
@@ -787,5 +770,15 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public boolean supportsNotNullConstraintNames() {
         return false;
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        return 9;
+    }
+
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 6;
     }
 }

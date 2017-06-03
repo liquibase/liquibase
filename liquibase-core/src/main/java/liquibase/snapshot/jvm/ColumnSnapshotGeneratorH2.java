@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.SnapshotGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
@@ -19,6 +20,12 @@ public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
             return PRIORITY_NONE;
         }
     }
+
+    @Override
+    public Class<? extends SnapshotGenerator>[] replaces() {
+        return new Class[]{ColumnSnapshotGenerator.class};
+    }
+
 
     @Override
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {

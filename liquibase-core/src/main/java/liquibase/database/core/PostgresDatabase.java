@@ -234,7 +234,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             DatabaseConnection con = getConnection();
 
             if (con != null) {
-                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
+                String searchPathResult = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
 
                 if (searchPathResult != null) {
                     String dirtySearchPaths[] = searchPathResult.split("\\,");
@@ -279,5 +279,32 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
 
         return count != null && count > 0;
+    }
+
+    public int getMaxFractionalDigitsForTimestamp() {
+
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+
+        try {
+            major = getDatabaseMajorVersion();
+            minor = getDatabaseMinorVersion();
+        } catch (DatabaseException x) {
+            LogFactory.getInstance().getLog().warning(
+                    "Unable to determine exact database server version"
+                            + " - specified TIMESTAMP precision"
+                            + " will not be set: ", x);
+            return 0;
+        }
+
+        // PostgreSQL 7.2 introduced fractional support...
+        // https://www.postgresql.org/docs/9.2/static/datatype-datetime.html
+        String minimumVersion = "7.2";
+
+        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+            return 6;
+        else
+            return 0;
     }
 }
