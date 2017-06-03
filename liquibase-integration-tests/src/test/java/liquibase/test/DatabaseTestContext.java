@@ -55,8 +55,13 @@ public class DatabaseTestContext {
 
     private DatabaseConnection openConnection(final String givenUrl,
         final String username, final String password) throws Exception {
-        // Insert the temp dir path
-        String url = givenUrl.replace("***TEMPDIR***/", System.getProperty("java.io.tmpdir"));
+        // Insert the temp dir path and ensure our replacement ends with /
+        String tempDir = System.getProperty("java.io.tmpdir");
+        if (!tempDir.endsWith(System.getProperty("file.separator")))
+            tempDir += System.getProperty("file.separator");
+
+        String tempUrl = givenUrl.replace("***TEMPDIR***/", tempDir);
+        String url = tempUrl;
 
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
