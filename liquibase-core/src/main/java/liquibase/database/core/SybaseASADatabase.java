@@ -7,6 +7,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.jvm.SybaseASAConnection;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.core.Index;
@@ -286,6 +288,12 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 		 * As a consequence, we will always remove the index owner.
 		 */
 		return escapeObjectName(indexName, Index.class);
+	
+	@Override
+	public void setConnection(DatabaseConnection conn) {
+		DatabaseConnection dbConn = new SybaseASAConnection(
+				((JdbcConnection) conn).getWrappedConnection()
+				);
+		super.setConnection(dbConn);
 	}
 }
-
