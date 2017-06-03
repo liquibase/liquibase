@@ -7,14 +7,14 @@ import liquibase.executor.ExecutorService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import org.junit.Test;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 public class MariaDBIntegrationTest extends AbstractIntegrationTest {
 
@@ -70,8 +70,7 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
 
         Object defaultValue = createdColumn.getDefaultValue();
         assertNotNull(defaultValue);
-        assertTrue(defaultValue instanceof DatabaseFunction);
-        assertEquals("0000-00-00 00:00:00", ((DatabaseFunction) defaultValue).getValue());
+        assertEquals("0000-00-00 00:00:00", defaultValue);
     }
 
 }
