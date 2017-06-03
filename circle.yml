@@ -5,7 +5,7 @@ machine:
 dependencies:
  override:
   - sudo apt-get install -y rpm
-  - mvn install -DskipTests
+  - mvn install
 
 test:
   post:
