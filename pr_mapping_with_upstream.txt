@@ -10,4 +10,5 @@ request number (pr#) to maximise its usefulness. Thank you.
 =======================================================================================================================
 676     NO             CORE-3063 integration tests that cannot connect should be Ignored not Passed
                        -> Already fixed in DB-Manul
+673     MERGED         CORE-3055 SQLAnywhere: supports Sequences
 670     MERGED         CORE-3050 Do not build string to check StringBuilder is empty

@@ -14,4 +14,5 @@ GRANT CREATE MATERIALIZED VIEW TO "liquibase";
 GRANT CREATE PROCEDURE TO "liquibase";
 GRANT CREATE TABLE TO "liquibase";
 GRANT CREATE VIEW TO "liquibase";
-
+/* There seems to be no GRANT CREATE SEQUENCE in AS Anywhere */
+GRANT CREATE ANY SEQUENCE TO "liquibase";
