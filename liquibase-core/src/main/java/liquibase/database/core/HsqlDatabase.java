@@ -17,175 +17,10 @@ import java.util.*;
 import static liquibase.statement.DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER;
 
 public class HsqlDatabase extends AbstractJdbcDatabase {
+    private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
-    private static final Map<String, HashSet<String>> SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP;
-    static {
-        Map<String, HashSet<String>> tempMap = new HashMap<String, HashSet<String>>();
-        tempMap.put("datetime", new HashSet<String>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW", CURRENT_DATE_TIME_PLACE_HOLDER)));
-        SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP = Collections.unmodifiableMap(tempMap);
-    }
-    private Boolean oracleSyntax;
-
-    public HsqlDatabase() {
-    	super.unquotedObjectsAreUppercased=true;
-        super.setCurrentDateTimeFunction("NOW");
-        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
-    	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
-        super.sequenceCurrentValueFunction = "CURRVAL('%s')";
-    }
-    
-    @Override
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return "HSQL Database Engine".equalsIgnoreCase(conn.getDatabaseProductName());
-    }
-
-    @Override
-    public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:hsqldb:")) {
-            return "org.hsqldb.jdbcDriver";
-        }
-        return null;
-    }
-
-
-    @Override
-    public Integer getDefaultPort() {
-        return 9001;
-    }
-
-    @Override
-    protected String getDefaultDatabaseProductName() {
-        return "HyperSQL";
-    }
-
-    @Override
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    @Override
-    public String getShortName() {
-        return "hsqldb";
-    }
-
-    @Override
-    public boolean supportsSequences() {
-        return true;
-    }
-    
-    /**
-     * Checks to see if the string is an acceptable computed value for HSQL
-     *    "datetime" columns are the only columns for which HSQL supports computer values.
-     *
-     * @param columnType String of the column's data type
-     * @param defaultValue String to be checked for valid valueComputed in HSQL
-     * @return boolean True if the string represents a function supported by HSQL for default values
-     */
-    public static boolean supportsDefaultValueComputed(String columnType, String defaultValue){
-    	HashSet<String> possibleComputedValues = SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP.get(columnType);
-    	return (possibleComputedValues!=null) && possibleComputedValues.contains(defaultValue.toLowerCase());
-    }
-
-    @Override
-    public boolean supportsInitiallyDeferrableColumns() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsCatalogs() {
-        try {
-            if (getDatabaseMajorVersion() < 2) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (DatabaseException e) {
-            return true;
-        }
-    }
-
-    @Override
-    protected String getConnectionCatalogName() throws DatabaseException {
-        if (supportsCatalogs()) {
-            return "PUBLIC";
-        } else {
-            return null;
-        }
-
-    }
-
-    @Override
-    protected String getConnectionSchemaName() {
-        return "PUBLIC";
-    }
-
-    @Override
-    public String getConcatSql(String... values) {
-        if (values == null) {
-            return null;
-        }
-
-        return getConcatSql(Arrays.asList(values));
-    }
-
-    /**
-     * Recursive way of building CONCAT instruction
-     *
-     * @param values a non null List of String
-     * @return a String containing the CONCAT instruction with all elements, or only a value if there is only one element in the list
-     */
-    private String getConcatSql(List<String> values) {
-        if (values.size() == 1) {
-            return values.get(0);
-        } else {
-            return START_CONCAT + values.get(0) + SEP_CONCAT + getConcatSql(values.subList(1, values.size())) + END_CONCAT;
-        }
-    }
-
-    @Override
-    public String getDateLiteral(String isoDate) {
-        String returnString = isoDate;
-        try {
-            if (isDateTime(isoDate)) {
-                ISODateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
-            }
-        } catch (ParseException e) {
-            throw new RuntimeException("Unexpected date format: " + isoDate, e);
-        }
-        return "'" + returnString + "'";
-    }
-
-    @Override
-    public Date parseDate(String dateAsString) throws DateParseException {
-        try {
-            if (dateAsString.indexOf(" ") > 0) {
-                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dateAsString);
-            } else {
-                if (dateAsString.indexOf(":") > 0) {
-                    return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
-                } else {
-                    return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
-                }
-            }
-        } catch (ParseException e) {
-            throw new DateParseException(dateAsString);
-        }
-    }
-
-    @Override
-    public boolean supportsTablespaces() {
-        return false;
-    }
-
-    @Override
-    public boolean isReservedWord(String value) {
-        return keywords.contains(value.toUpperCase());
-    }
-
     private static List keywords = Arrays.asList(
             "ADD",
             "ALL",
@@ -470,6 +305,167 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "DOW",
             "INITIAL");
 
+    static {
+        Map<String, HashSet<String>> tempMap = new HashMap<String, HashSet<String>>();
+        tempMap.put("datetime", new HashSet<String>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW", CURRENT_DATE_TIME_PLACE_HOLDER)));
+        SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP = Collections.unmodifiableMap(tempMap);
+    }
+
+    private Boolean oracleSyntax;
+
+    public HsqlDatabase() {
+        super.unquotedObjectsAreUppercased = true;
+        super.setCurrentDateTimeFunction("NOW");
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        super.defaultAutoIncrementStartWith = BigInteger.ZERO;
+        super.sequenceCurrentValueFunction = "CURRVAL('%s')";
+    }
+
+    /**
+     * Checks to see if the string is an acceptable computed value for HSQL
+     * "datetime" columns are the only columns for which HSQL supports computer values.
+     *
+     * @param columnType   String of the column's data type
+     * @param defaultValue String to be checked for valid valueComputed in HSQL
+     * @return boolean True if the string represents a function supported by HSQL for default values
+     */
+    public static boolean supportsDefaultValueComputed(String columnType, String defaultValue) {
+        HashSet<String> possibleComputedValues = SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP.get(columnType);
+        return (possibleComputedValues != null) && possibleComputedValues.contains(defaultValue.toLowerCase());
+    }
+
+    @Override
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
+        return "HSQL Database Engine".equalsIgnoreCase(conn.getDatabaseProductName());
+    }
+
+    @Override
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:hsqldb:")) {
+            return "org.hsqldb.jdbcDriver";
+        }
+        return null;
+    }
+
+    @Override
+    public Integer getDefaultPort() {
+        return 9001;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "HyperSQL";
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    @Override
+    public String getShortName() {
+        return "hsqldb";
+    }
+
+    @Override
+    public boolean supportsSequences() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsInitiallyDeferrableColumns() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
+        try {
+            return getDatabaseMajorVersion() >= 2;
+        } catch (DatabaseException e) {
+            return true;
+        }
+    }
+
+    @Override
+    protected String getConnectionCatalogName() throws DatabaseException {
+        if (supportsCatalogs()) {
+            return "PUBLIC";
+        } else {
+            return null;
+        }
+
+    }
+
+    @Override
+    protected String getConnectionSchemaName() {
+        return "PUBLIC";
+    }
+
+    @Override
+    public String getConcatSql(String... values) {
+        if (values == null) {
+            return null;
+        }
+
+        return getConcatSql(Arrays.asList(values));
+    }
+
+    /**
+     * Recursive way of building CONCAT instruction
+     *
+     * @param values a non null List of String
+     * @return a String containing the CONCAT instruction with all elements, or only a value if there is only one element in the list
+     */
+    private String getConcatSql(List<String> values) {
+        if (values.size() == 1) {
+            return values.get(0);
+        } else {
+            return START_CONCAT + values.get(0) + SEP_CONCAT + getConcatSql(values.subList(1, values.size())) + END_CONCAT;
+        }
+    }
+
+    @Override
+    public String getDateLiteral(String isoDate) {
+        String returnString = isoDate;
+        try {
+            if (isDateTime(isoDate)) {
+                ISODateFormat isoTimestampFormat = new ISODateFormat();
+                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException("Unexpected date format: " + isoDate, e);
+        }
+        return "'" + returnString + "'";
+    }
+
+    @Override
+    public Date parseDate(String dateAsString) throws DateParseException {
+        try {
+            if (dateAsString.indexOf(" ") > 0) {
+                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dateAsString);
+            } else {
+                if (dateAsString.indexOf(":") > 0) {
+                    return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+                } else {
+                    return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
+                }
+            }
+        } catch (ParseException e) {
+            throw new DateParseException(dateAsString);
+        }
+    }
+
+    @Override
+    public boolean supportsTablespaces() {
+        return false;
+    }
+
+    @Override
+    public boolean isReservedWord(String value) {
+        return keywords.contains(value.toUpperCase());
+    }
+
     @Override
     public boolean isCaseSensitive() {
         return false;
@@ -506,5 +502,12 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
                 return "\""+objectName.toUpperCase()+"\"";
         }
         return objectName;
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        // HyperSQL does not seem to specify the exact number of possible fractional digits in its documentation,
+        // this value is derived from tests.
+        return 9;
     }
 }

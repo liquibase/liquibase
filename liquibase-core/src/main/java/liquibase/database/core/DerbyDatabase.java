@@ -1,35 +1,27 @@
 package liquibase.database.core;
 
-import java.sql.*;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
-    private Logger log = LogFactory.getInstance().getLog();
-
     protected int driverVersionMajor;
     protected int driverVersionMinor;
+    private Logger log = LogFactory.getInstance().getLog();
 
     public DerbyDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
@@ -96,13 +88,8 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        if ((driverVersionMajor == 10 && driverVersionMinor >= 6) ||
-                driverVersionMajor >= 11)
-        {
-            return true;
-        } else {
-            return false;
-        }
+        return (driverVersionMajor == 10 && driverVersionMinor >= 6) ||
+                driverVersionMajor >= 11;
     }
 
     @Override
@@ -229,4 +216,10 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     }
 
 
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        // According to
+        // https://db.apache.org/derby/docs/10.7/ref/rrefsqlj27620.html
+        return 9;
+    }
 }

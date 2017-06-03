@@ -5,14 +5,13 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DateParseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -24,17 +23,6 @@ import java.text.SimpleDateFormat;
 public class DB2Database extends AbstractJdbcDatabase {
 
     private DataServerType dataServerType;
-    
-    public static enum DataServerType {
-        /** DB2 on Linux, Unix and Windows */
-        DB2LUW,
-        
-        /** DB2 on IBM iSeries */
-        DB2I,
-        
-        /** DB2 on IBM zSeries */
-        DB2Z
-    }
     
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
@@ -172,7 +160,6 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
     }
 
-
     @Override
     public boolean supportsTablespaces() {
         return true;
@@ -185,7 +172,6 @@ public class DB2Database extends AbstractJdbcDatabase {
 
         return "FULL_DEFINITION: " + definition;
     }
-
 
     @Override
     public java.util.Date parseDate(String dateAsString) throws DateParseException {
@@ -252,7 +238,7 @@ public class DB2Database extends AbstractJdbcDatabase {
      * isAS400() methods, which was based on DatabaseMetaData
      * getDatabaseProductName(), which does not work correctly for some DB2
      * types.
-     * 
+     *
      * @see <a href="http://www.ibm.com/support/knowledgecenter/SSEPEK_10.0.0/com.ibm.db2z10.doc.java/src/tpc/imjcc_c0053013.html">ibm.com</a>
      * @return the data server type
      */
@@ -293,5 +279,34 @@ public class DB2Database extends AbstractJdbcDatabase {
             return true;
         }
         return super.isSystemObject(example);
+    }
+
+    @Override
+    public int getMaxFractionalDigitsForTimestamp() {
+        // According to
+        // https://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.sql.ref.doc/doc/r0000859.html
+        return 12;
+    }
+
+    @Override
+    public int getDefaultFractionalDigitsForTimestamp() {
+        return 6;
+    }
+
+    public enum DataServerType {
+        /**
+         * DB2 on Linux, Unix and Windows
+         */
+        DB2LUW,
+
+        /**
+         * DB2 on IBM iSeries
+         */
+        DB2I,
+
+        /**
+         * DB2 on IBM zSeries
+         */
+        DB2Z
     }
 }

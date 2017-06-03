@@ -1045,14 +1045,23 @@
         </preConditions>
     </changeSet>
 
-    <changeSet id="timestamp_column_precision" author="abuschka">
+    <changeSet id="timestamp_column_precisions3to6" author="abuschka">
         <comment>Test if we (and the JDBC driver) correctly fetch the number of fractional positions
             in a TIMESTAMP column for databases that support it.</comment>
         <createTable tableName="test_timestamp_fractions">
             <column name="timestampColumnDefault" type="timestamp" />
             <column name="timestampColumnPrec3" type="timestamp(3)" />
             <column name="timestampColumnPrec6" type="timestamp(6)" />
-            <column name="timestampColumnPrec9" type="timestamp(9)"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="timestamp_column_precision9" author="abuschka"
+               dbms="db2,derby,firebird,h2,hsql,informix,mssql,oracle,postgres,sqlite,asany,sybase">
+        <comment>Test if we (and the JDBC driver) correctly support TIMESTAMP columns with a extra-large precision
+            of 9 for supported DBMS.
+        </comment>
+        <addColumn tableName="test_timestamp_fractions">
+            <column name="timestampColumnPrec9" type="timestamp(9)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

@@ -7,6 +7,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseIncapableOfOperation;
 import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 import liquibase.util.grammar.ParseException;
@@ -27,6 +28,35 @@ public class TimestampType extends DateTimeType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
+        // If a fractional precision is given, check is the DBMS supports the length
+        if (getParameters().length > 0) {
+            Integer desiredLength = null;
+            try {
+                desiredLength = Integer.parseInt(String.valueOf(getParameters()[0]));
+            } catch (NumberFormatException e) {
+                // That is ok, we won't touch the parameter in this case.
+            }
+
+            if (desiredLength != null) {
+                int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
+                if (maxFractionalDigits < desiredLength) {
+                    throw new DatabaseIncapableOfOperation(
+                            String.format(
+                                    "Using a TIMESTAMP data type with a fractional precision of %d", desiredLength
+                            ),
+                            String.format(
+                                    "A timestamp datatype with %d fractional digits was requested, but %s " +
+                                            "only supports %d digits.",
+                                    desiredLength,
+                                    database.getDatabaseProductName(),
+                                    maxFractionalDigits
+                            ),
+                            database
+                    );
+                }
+            }
+        }
+
         if (database instanceof MySQLDatabase) {
             if (getRawDefinition().contains(" ") || getRawDefinition().contains("(")) {
                 return new DatabaseDataType(getRawDefinition());
@@ -34,7 +64,10 @@ public class TimestampType extends DateTimeType {
             return super.toDatabaseDataType(database);
         }
         if (database instanceof MSSQLDatabase) {
-            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("timestamp")) {
+            if (!LiquibaseConfiguration.getInstance()
+                    .getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES)
+                    .getValue(Boolean.class)
+                    && originalDefinition.toLowerCase().startsWith("timestamp")) {
                 return new DatabaseDataType(database.escapeDataTypeName("timestamp"));
             }
             return new DatabaseDataType(database.escapeDataTypeName("datetime"));
@@ -68,7 +101,7 @@ public class TimestampType extends DateTimeType {
                         "seem to be an integer.", fractionalDigitsInput, fractionalDigitsInput))
                 );
             }
-            int maxFractionalDigits = getMaxSupportedFractionalDigits(database);
+            int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
             if (maxFractionalDigits < fractionalDigits) {
                 LogFactory.getInstance().getLog().warning(String.format(
                         "A timestamp datatype with %d fractional digits was requested, but the DBMS %s only supports " +
