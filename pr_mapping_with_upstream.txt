@@ -10,6 +10,9 @@ request number (pr#) to maximise its usefulness. Thank you.
 =======================================================================================================================
 676     NO             [CORE-3063] integration tests that cannot connect should be Ignored not Passed
                        -> Already fixed in DB-Manul
-672     MERGED         [CORE-3054] SQLAnywhere: java-coredump on changeSet-SQL
+
 673     MERGED         [CORE-3055] SQLAnywhere: supports Sequences
+672     MERGED         [CORE-3054] SQLAnywhere: java-coredump on changeSet-SQL
+671     NO             [CORE-3051] ASANY supports no CASCADE in DROP TABLE
+                       -> Already fixed in DB-Manul
 670     MERGED         [CORE-3050] Do not build string to check StringBuilder is empty

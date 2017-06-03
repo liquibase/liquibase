@@ -8,7 +8,6 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.jvm.SybaseASAConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.core.Index;
@@ -279,7 +278,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public String escapeIndexName(String catalogName, String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
 		/*
 		 * https://help.sap.com/viewer/40c01c3500744c85a02db71276495de5/17.0/en-US/816be9016ce210148874e67c83ca6c67.html
 		 * "There is no way of specifying the index owner in the CREATE INDEX statement. Indexes are always owned by
@@ -287,9 +286,10 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 		 *
 		 * As a consequence, we will always remove the index owner.
 		 */
-		return escapeObjectName(indexName, Index.class);
-	
-	@Override
+        return escapeObjectName(indexName, Index.class);
+    }
+
+    @Override
 	public void setConnection(DatabaseConnection conn) {
 		DatabaseConnection dbConn = new SybaseASAConnection(
 				((JdbcConnection) conn).getWrappedConnection()
