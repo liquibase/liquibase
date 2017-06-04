@@ -15,15 +15,14 @@ import java.time.temporal.ChronoUnit;
  */
 public class TreeStyleLogger extends DefaultLogger {
 
-    private String name = "liquibase";
-    private PrintStream stderr = System.err;
-    private PrintStream stdout = System.out;
-
     LocalTime lastLoggingTs;
     String lastChangeLogPath;
     String currentChangeLogPath;
     String lastChangeSetName;
     String currentChangeSetName;
+    private String name = "liquibase";
+    private PrintStream stderr = System.err;
+    private PrintStream stdout = System.out;
 
     @Override
     public int getPriority() {
@@ -110,6 +109,7 @@ public class TreeStyleLogger extends DefaultLogger {
         PrintStream out;
         switch (logLevel) {
             case DEBUG:
+            case SQL:
             case INFO:
                 out = stdout;
                 break;

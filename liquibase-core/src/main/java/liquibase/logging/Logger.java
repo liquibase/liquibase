@@ -5,7 +5,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.servicelocator.PrioritizedService;
 
 /**
- * Interface for all logger implementations in this software
+ * Interface for all logger implementations in this software. The hierarchy of log levels is:
+ * (finest) DEBUG < SQL < INFO < WARNING < SEVERE (coarsest)
  */
 public interface Logger extends PrioritizedService {
 
@@ -25,20 +26,20 @@ public interface Logger extends PrioritizedService {
      * Changes the current log level
      * @param level the new disired log level
      */
-    void setLogLevel(String level);
+    void setLogLevel(LogLevel level);
 
     /**
      * Changes the current log level
      * @param level the new disired log level
      */
-    void setLogLevel(LogLevel level);
+    void setLogLevel(String level);
 
     /**
      * Opens a new log file and chooses a new log level at the same time. Typically used to initialize the Logger.
      * @param logLevel desired log level
      * @param logFile
      */
-    public void setLogLevel(String logLevel, String logFile);
+    void setLogLevel(String logLevel, String logFile);
 
     /**
      * Informs the logger that work on a new, possible different, DatabaseChangeLog has begun. Might be useful for
@@ -57,7 +58,7 @@ public interface Logger extends PrioritizedService {
     /**
      * Closes the current log output file.
      */
-    public void closeLogFile();
+    void closeLogFile();
 
     /**
      * Log a severe event.
@@ -103,6 +104,23 @@ public interface Logger extends PrioritizedService {
      * @see LogLevel
      */
     void info(String message, Throwable e);
+
+    /**
+     * Logs a native SQL statement sent to a database instance
+     *
+     * @param message the text message describing the event
+     * @see LogLevel
+     */
+    void sql(String message);
+
+    /**
+     * Logs a native SQL statement sent to a database instance together with data from an error/exception
+     *
+     * @param message the text message describing the event
+     * @param e       the error/exception that occured
+     * @see LogLevel
+     */
+    void sql(String message, Throwable e);
 
     /**
      * Logs a debugging event to aid in troubleshooting

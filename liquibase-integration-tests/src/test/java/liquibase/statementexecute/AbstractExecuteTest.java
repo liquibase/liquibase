@@ -1,7 +1,27 @@
 package liquibase.statementexecute;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import liquibase.CatalogAndSchema;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.core.UnsupportedDatabase;
+import liquibase.database.example.ExampleCustomDatabase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogFactory;
+import liquibase.sdk.database.MockDatabase;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.SqlStatement;
+import liquibase.structure.core.Table;
+import liquibase.test.DatabaseTestContext;
+import liquibase.test.TestContext;
+import org.junit.After;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,33 +30,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import liquibase.CatalogAndSchema;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.lockservice.LockServiceFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Table;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.database.example.ExampleCustomDatabase;
-import liquibase.sdk.database.MockDatabase;
-import liquibase.database.core.UnsupportedDatabase;
-import liquibase.executor.ExecutorService;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
-import liquibase.test.DatabaseTestContext;
-import liquibase.exception.DatabaseException;
-
-import org.junit.After;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public abstract class AbstractExecuteTest {
 
-    private Set<Class<? extends Database>> testedDatabases = new HashSet<Class<? extends Database>>();
     protected SqlStatement statementUnderTest;
+    private Set<Class<? extends Database>> testedDatabases = new HashSet<Class<? extends Database>>();
 
     @After
     public void reset() {
@@ -119,6 +119,7 @@ public abstract class AbstractExecuteTest {
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
                 String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
                 try {
+                    LogFactory.getInstance().getLog().sql(sqlToRun);
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
                     System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
@@ -203,13 +204,11 @@ public abstract class AbstractExecuteTest {
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {
-                ;
             }
             connection.commit();
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
             } catch (SQLException e) {
-                ;
             }
             connection.commit();
 

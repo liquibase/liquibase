@@ -8,6 +8,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sdk.database.MockDatabase;
 
@@ -104,11 +105,15 @@ public class DatabaseTestContext {
 
         try {
             if (url.startsWith("jdbc:hsql")) {
-                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA");
+                String sql = "CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA";
+                LogFactory.getInstance().getLog().sql(sql);
+                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             } else if (url.startsWith("jdbc:sqlserver")
                     || url.startsWith("jdbc:postgresql")
                     || url.startsWith("jdbc:h2")) {
-                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA);
+                String sql = "CREATE SCHEMA " + ALT_SCHEMA;
+                LogFactory.getInstance().getLog().sql(sql);
+                ((JdbcConnection) databaseConnection).getUnderlyingConnection().createStatement().execute(sql);
             }
             if (!databaseConnection.getAutoCommit()) {
                 databaseConnection.commit();

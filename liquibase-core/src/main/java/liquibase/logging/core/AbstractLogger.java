@@ -20,6 +20,11 @@ public abstract class AbstractLogger implements Logger {
     }
 
     @Override
+    public void setLogLevel(LogLevel level) {
+        this.logLevel = level;
+    }
+
+    @Override
     public void setLogLevel(String logLevel) {
         setLogLevel(toLogLevel(logLevel));
     }
@@ -37,6 +42,8 @@ public abstract class AbstractLogger implements Logger {
     protected LogLevel toLogLevel(String logLevel) {
         if ("debug".equalsIgnoreCase(logLevel)) {
             return LogLevel.DEBUG;
+        } else if ("sql".equalsIgnoreCase(logLevel)) {
+            return LogLevel.SQL;
         } else if ("info".equalsIgnoreCase(logLevel)) {
             return LogLevel.INFO;
         } else if ("warning".equalsIgnoreCase(logLevel)) {
@@ -70,11 +77,6 @@ public abstract class AbstractLogger implements Logger {
         }
         msg.append(message);
         return msg.toString();
-    }
-
-    @Override
-    public void setLogLevel(LogLevel level) {
-        this.logLevel = level;
     }
 
     @Override

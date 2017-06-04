@@ -101,6 +101,10 @@ public class Main {
 
     protected String outputFile;
 
+    public Main() {
+//        options = createOptions();
+    }
+
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         try {
             run(args);
@@ -449,7 +453,6 @@ public class Main {
                 || "markNextChangeSetRanSQL".equalsIgnoreCase(arg);
     }
 
-
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
         Properties props = new Properties();
         props.load(propertiesInputStream);
@@ -641,7 +644,8 @@ public class Main {
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");
-        stream.println("                                            (debug, info, warning, severe, off");
+        stream.println("                                            (debug, sql, info, warning, severe");
+        stream.println("                                             or off");
         stream.println(" --logFile=<file>                           Log file");
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
         stream.println("                                            used in SQL.");
@@ -714,10 +718,6 @@ public class Main {
         stream.println("Full documentation is available at");
         stream.println("http://www.dbmanul.org");
         stream.println("");
-    }
-
-    public Main() {
-//        options = createOptions();
     }
 
     protected void parseOptions(String[] args) throws CommandLineParsingException {
@@ -929,14 +929,12 @@ public class Main {
                 try {
                     outStream.close();
                 } catch (IOException ioe) {
-                    ;
                 }
             }
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException ioe) {
-                    ;
                 }
             }
         }
@@ -1327,7 +1325,7 @@ public class Main {
 //        return database;
     }
 
-    private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {
+    private Writer getOutputWriter() throws IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
 
         if (outputFile != null) {

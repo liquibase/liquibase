@@ -380,17 +380,22 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
 
+        String sql = "CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
+                "author VARCHAR(150) NOT NULL, " +
+                "filename VARCHAR(255) NOT NULL, " +
+                "dateExecuted " +
+                DataTypeFactory.getInstance().fromDescription(
+                        "datetime", database
+                ).toDatabaseDataType(database) + " NOT NULL, " +
+                "md5sum VARCHAR(32), " +
+                "description VARCHAR(255), " +
+                "comments VARCHAR(255), " +
+                "tag VARCHAR(255), " +
+                "liquibase VARCHAR(10), " +
+                "PRIMARY KEY(id, author, filename))";
+        LogFactory.getInstance().getLog().sql(sql);
 
-        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
-                "author varchar(150) NOT NULL, " +
-                "filename varchar(255) NOT NULL, " +
-                "dateExecuted "+ DataTypeFactory.getInstance().fromDescription("datetime", database).toDatabaseDataType(database) +" NOT NULL, " +
-                "md5sum varchar(32), " +
-                "description varchar(255), " +
-                "comments varchar(255), " +
-                "tag varchar(255), " +
-                "liquibase varchar(10), " +
-                "PRIMARY KEY(id, author, filename))");
+        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute(sql);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -444,7 +449,14 @@ public abstract class AbstractIntegrationTest {
                         database))
                 {
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                    final String sql = "DROP TABLE " +
+                            database.escapeTableName(
+                                    database.getLiquibaseCatalogName(),
+                                    database.getLiquibaseSchemaName(),
+                                    database.getDatabaseChangeLogTableName()
+                            );
+                    LogFactory.getInstance().getLog().sql(sql);
+                    statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {
@@ -465,7 +477,14 @@ public abstract class AbstractIntegrationTest {
                                 .setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())),
                         database)) {
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                    String sql = "DROP TABLE " +
+                            database.escapeTableName(
+                                    database.getLiquibaseCatalogName(),
+                                    database.getLiquibaseSchemaName(),
+                                    database.getDatabaseChangeLogLockTableName()
+                            );
+                    LogFactory.getInstance().getLog().sql(sql);
+                    statement.execute(sql);
                     database.commit();
                 }
             } catch (Exception e) {

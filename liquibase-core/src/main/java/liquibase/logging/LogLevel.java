@@ -11,6 +11,10 @@ public enum LogLevel {
      * troubleshooting.
      */
     DEBUG,
+    /*
+     * A native SQL statement sent to a database instance
+     */
+    SQL,
     /**
      * Regular message of a successful completion of a working unit, or output of configuration
      * information that is expected to be essential for troubleshooting.
@@ -28,6 +32,6 @@ public enum LogLevel {
     /**
      * No logging at all
      */
-    OFF;
+    OFF
 
 }

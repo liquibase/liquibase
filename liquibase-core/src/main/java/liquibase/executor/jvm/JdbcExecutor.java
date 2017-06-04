@@ -160,7 +160,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Number number = (Number) queryForObject(sql, Long.class, sqlVisitors);
+        Number number = queryForObject(sql, Long.class, sqlVisitors);
         return (number != null ? number.longValue() : 0);
     }
 
@@ -171,7 +171,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Number number = (Number) queryForObject(sql, Integer.class, sqlVisitors);
+        Number number = queryForObject(sql, Integer.class, sqlVisitors);
         return (number != null ? number.intValue() : 0);
     }
 
@@ -213,7 +213,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                log.debug("Executing UPDATE database command: "+sqlToExecute[0]);
+                log.sql(sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -294,7 +294,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.debug(String.format("Executing SQL: [%s]", statement));
+                log.sql(String.format("%s", statement));
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -344,7 +344,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.debug("Executing QUERY database command: "+sqlToExecute[0]);
+                log.sql(sqlToExecute[0]);
 
                 rs = stmt.executeQuery(sqlToExecute[0]);
                 ResultSet rsToUse = rs;

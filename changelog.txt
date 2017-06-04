@@ -54,10 +54,13 @@ DB-Manul 0.1:
     ============
 
     All supported databases:
-    - Completely new logging system during ChangeSet processing, produces (hopefully) better human-readable output.
 
-    - Logging only outputs errors and warnings to STDERR now; regular messages are printed to STDOUT. This should make
-      log files more readable.
+    Logging:
+      - Completely new logging system during ChangeSet processing, produces (hopefully) better human-readable output.
+      - Logging only outputs errors and warnings to STDERR now; regular messages are printed to STDOUT. This should make
+        log files more readable.
+      - The new log level SQL (between DEBUG and INFO) now prints everything INFO does, plus all native SQL statements
+        sent to a database instance.
 
     - When snapshotting a schema, a new command line parameter --overwriteOutputFile=true allows overwriting the
       target output file if the user really wants to (e.g. for scripting).

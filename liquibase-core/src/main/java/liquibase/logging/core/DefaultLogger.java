@@ -15,7 +15,7 @@ import java.util.Date;
 /**
  * The default logger for this software. The general output format created by this logger is:
  * [log level] date/time: liquibase: DatabaseChangeLog name:ChangeSet name: message.
- * DEBUG/INFO message are printer to STDOUT and WARNING/SEVERE messages are printed to STDERR.
+ * DEBUG/SQL/INFO message are printer to STDOUT and WARNING/SEVERE messages are printed to STDERR.
  */
 public class DefaultLogger extends AbstractLogger {
 
@@ -44,7 +44,9 @@ public class DefaultLogger extends AbstractLogger {
         LogLevel logLevel = super.getLogLevel();
 
         if (logLevel == null) {
-            return toLogLevel(LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class).getLogLevel());
+            return toLogLevel(LiquibaseConfiguration.getInstance().getConfiguration(
+                    DefaultLoggerConfiguration.class
+            ).getLogLevel());
         } else {
             return logLevel;
         }
@@ -61,7 +63,8 @@ public class DefaultLogger extends AbstractLogger {
                         throw new RuntimeException("Could not create logFile "+log.getAbsolutePath());
                     }
                 }
-                stderr = new PrintStream(log, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+                stderr = new PrintStream(log, LiquibaseConfiguration.getInstance()
+                        .getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -88,7 +91,7 @@ public class DefaultLogger extends AbstractLogger {
     /**
      * Outputs a message in the format
      * [log level] date/time: liquibase: DatabaseChangeLog name:ChangeSet name: message
-     * DEBUG/INFO message are printer to STDOUT and WARNING/SEVERE messages are printed to STDERR.
+     * DEBUG/SQL/INFO message are printer to STDOUT and WARNING/SEVERE messages are printed to STDERR.
      *
      * @param logLevel desired log level
      * @param message the message describing the event
@@ -99,12 +102,17 @@ public class DefaultLogger extends AbstractLogger {
             return;
         }
 
-        String outputString = String.format("[%s] %s",
+        String outputString = String.format(
+                "[%s] %s",
                 logLevel,
-                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ": " + name + ": " + buildMessage(message)
+                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                        .format(new Date()) + ": " + name + ": " + buildMessage(message)
         );
         switch (logLevel) {
             case DEBUG:
+                stdout.println(outputString);
+                break;
+            case SQL:
                 stdout.println(outputString);
                 break;
             case INFO:
@@ -155,6 +163,21 @@ public class DefaultLogger extends AbstractLogger {
     public void info(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
             print(LogLevel.INFO, message);
+            e.printStackTrace(stderr);
+        }
+    }
+
+    @Override
+    public void sql(String message) {
+        if (getLogLevel().compareTo(LogLevel.SQL) <= 0) {
+            print(LogLevel.SQL, message);
+        }
+    }
+
+    @Override
+    public void sql(String message, Throwable e) {
+        if (getLogLevel().compareTo(LogLevel.SQL) <= 0) {
+            print(LogLevel.SQL, message);
             e.printStackTrace(stderr);
         }
     }
