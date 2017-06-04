@@ -7,6 +7,9 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
+/**
+ * Represents a signed integer number using 32 bits of storage.
+ */
 @DataTypeInfo(name = "int", aliases = { "integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial", "int4", "serial4" }, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class IntType extends LiquibaseDataType {
 
@@ -47,7 +50,10 @@ public class IntType extends LiquibaseDataType {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase) {
-        	return new DatabaseDataType("INTEGER");
+            return new DatabaseDataType("INTEGER");
+        }
+        if (database instanceof SybaseASADatabase) {
+            return new DatabaseDataType("INTEGER");
         }
         return super.toDatabaseDataType(database);
 
