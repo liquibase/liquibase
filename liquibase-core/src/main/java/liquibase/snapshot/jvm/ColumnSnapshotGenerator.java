@@ -296,7 +296,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-
         if (database instanceof FirebirdDatabase) {
             if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
                 columnTypeName = "BLOB";
@@ -329,6 +328,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 LogFactory.getInstance().getLog().warning("Error fetching enum values", e);
             }
         }
+
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
@@ -364,6 +364,17 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnSize = null;
         }
 
+        // For SAP (Sybase) SQL ANywhere, JDBC returns "LONG(2147483647) binary" (the number is 2^31-1)
+        // but when creating a column, LONG BINARY must not have parameters.
+        // The same applies to LONG(...) VARCHAR.
+        if (database instanceof SybaseASADatabase) {
+            if (columnTypeName.equalsIgnoreCase("LONG BINARY")
+                    || columnTypeName.equalsIgnoreCase("LONG VARCHAR")) {
+                columnSize = null;
+            }
+
+        }
+
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
 
@@ -396,6 +407,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         type.setRadix(radix);
         type.setCharacterOctetLength(characterOctetLength);
         type.setColumnSizeUnit(columnSizeUnit);
+
 
         return type;
     }
