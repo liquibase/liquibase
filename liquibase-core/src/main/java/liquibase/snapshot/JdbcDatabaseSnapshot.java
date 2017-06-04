@@ -50,6 +50,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     public class CachingDatabaseMetaData {
+        public static final String ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE = "WW012";
         private final String SQL_FILTER_MATCH_ALL = "%";
         private DatabaseMetaData databaseMetaData;
         private Database database;
@@ -110,7 +111,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             if (database instanceof OracleDatabase) {
                                 throw new RuntimeException("Should have bulk selected");
                             } else {
-                                returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
+                                ResultSet metaData =
+                                        null;
+                                try {
+                                    metaData = databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable);
+                                    returnList.addAll(extract(metaData));
+                                } catch (SQLException e) {
+                                    // SAP SQL Anywhere throws an SQL Exception when we try to get FOREIGN KEYs
+                                    // from a table, but the table has no FOREIGN KEYs.
+                                    if (database instanceof SybaseASADatabase
+                                            && e.getSQLState().equalsIgnoreCase(ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
+                                        LogFactory.getInstance().getLog().debug(
+                                                String.format("Ignored SAP SQL Anywhere SQL " +
+                                                        "exception thrown when FOREIGN KEY list of table '%s' was " +
+                                                        "empty.", foundTable));
+                                    } else {
+                                        throw e; // Some different SQLException, upstream program code must deal with it
+                                    }
+
+                                }
                             }
                         }
 
