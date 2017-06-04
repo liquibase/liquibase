@@ -10,6 +10,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -25,6 +26,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,7 +62,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), example.getName());
+                columnMetadataRs = databaseMetaData.getColumns(
+                        ((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                        ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+                        relation.getName(),
+                        example.getName()
+                );
 
                 if (columnMetadataRs.size() > 0) {
                     CachedRow data = columnMetadataRs.get(0);
@@ -91,8 +98,45 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 Schema schema;
 
                 schema = relation.getSchema();
-                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
+                allColumnsMetadataRs = databaseMetaData.getColumns(
+                        ((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                        ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+                        relation.getName(),
+                        null);
 
+                /*
+                 * Microsoft SQL Server, SAP SQL Anywhere and probably other RDBMS guarantee non-duplicate
+                 * ORDINAL_POSITIONs for the columns of a single table. But they do not guarantee there are no gaps
+                 * in that integers (e.g. if columns have been deleted). So we need to check for that and renumber
+                 * if needed.
+                 */
+                TreeMap<Integer, CachedRow> treeSet = new TreeMap<>();
+                for (CachedRow row : allColumnsMetadataRs) {
+                    treeSet.put(row.getInt("ORDINAL_POSITION"), row);
+                }
+                Logger log = LogFactory.getInstance().getLog();
+
+                // Now we can iterate through the sorted list and repair if needed.
+                int currentOrdinal = 0;
+                for (CachedRow row : treeSet.values()) {
+                    currentOrdinal++;
+                    int rsOrdinal = row.getInt("ORDINAL_POSITION");
+                    if (rsOrdinal != currentOrdinal) {
+                        log.debug(
+                                String.format(
+                                        "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, bad ordinal=%d, " +
+                                                "new ordinal=%d",
+                                        relation.getName(),
+                                        row.getString("COLUMN_NAME"),
+                                        rsOrdinal,
+                                        currentOrdinal
+                                )
+                        );
+                        row.set("ORDINAL_POSITION", currentOrdinal);
+                    }
+                }
+
+                // Iterate through all (repaired) rows and add the columns to our result.
                 for (CachedRow row : allColumnsMetadataRs) {
                     Column column = readColumn(row, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);
@@ -252,8 +296,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         Object defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
 
-        // TODO Is uppercasing the potential function name always a good idea? In theory, we could get a quoted
-        // function name (inprobable, but not impossible)
+        // TODO Is uppercasing the potential function name always a good idea? In theory, we could get a quoted function name (inprobable, but not impossible)
         if (defaultValue != null
                 && defaultValue instanceof DatabaseFunction
                 && ((DatabaseFunction) defaultValue).getValue().matches("\\w+")) {
