@@ -61,6 +61,10 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         this.serializableFields.add("metadata");
     }
 
+    public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
+        this(examples, database, new SnapshotControl(database));
+    }
+
     protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
         if (examples != null) {
             Set<Catalog> catalogs = new HashSet<Catalog>();
@@ -70,20 +74,19 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
             }
 
-            for (Catalog catalog : catalogs) {
-                this.snapshotControl.addType(catalog.getClass(), database);
-                include(catalog);
+            if (getDatabase().supportsCatalogs()) {
+                for (Catalog catalog : catalogs) {
+                    this.snapshotControl.addType(catalog.getClass(), database);
+                    include(catalog);
+                }
             }
+            
             for (DatabaseObject obj : examples) {
                 this.snapshotControl.addType(obj.getClass(), database);
 
                 include(obj);
             }
         }
-    }
-
-    public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
-        this(examples, database, new SnapshotControl(database));
     }
 
     public DatabaseSnapshot clone(DatabaseObject[] examples) {
@@ -593,12 +596,12 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         return snapshotScratchPad.put(key, data);
     }
 
-    public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
-        this.schemaComparisons = schemaComparisons;
-    }
-
     public CompareControl.SchemaComparison[] getSchemaComparisons() {
         return schemaComparisons;
+    }
+
+    public void setSchemaComparisons(CompareControl.SchemaComparison[] schemaComparisons) {
+        this.schemaComparisons = schemaComparisons;
     }
 
     public Map<String, Object> getMetadata() {
