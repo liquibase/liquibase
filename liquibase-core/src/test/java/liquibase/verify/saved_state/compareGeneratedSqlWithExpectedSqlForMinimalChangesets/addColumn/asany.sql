@@ -4,4 +4,4 @@
 --     type="int"
 -- ], ]
 -- Change Parameter: tableName=person
-ALTER TABLE person ADD id INT NULL;
+ALTER TABLE person ADD id INTEGER NULL;
