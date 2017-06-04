@@ -13,9 +13,9 @@ import liquibase.util.StringUtils;
  * A null value for catalogName or schemaName signifies the default catalog/schema.
  */
 public class CatalogAndSchema {
+    public static final CatalogAndSchema DEFAULT = new CatalogAndSchema(null, null);
     private String catalogName;
     private String schemaName;
-    public static final CatalogAndSchema DEFAULT = new CatalogAndSchema(null, null);
 
     public CatalogAndSchema(String catalogName, String schemaName) {
         this.catalogName = catalogName;
@@ -68,7 +68,7 @@ public class CatalogAndSchema {
      * If either the schema or catalog matches the database default catalog or schema, they will be nulled out.
      * Catalog and/or schema names will be upper case.
      *
-     * @see {@link CatalogAndSchema#customize(liquibase.database.Database)}
+     * @see CatalogAndSchema#customize(liquibase.database.Database)
      * */
     public CatalogAndSchema standardize(Database accordingTo) {
         String catalogName = StringUtils.trimToNull(getCatalogName());
@@ -127,7 +127,7 @@ public class CatalogAndSchema {
      * retain a null value.
      * Catalog and schema capitalization will match what the database expects.
      *
-     * @see {@link CatalogAndSchema#standardize(liquibase.database.Database)}
+     * @see CatalogAndSchema#standardize(liquibase.database.Database)
      */
     public CatalogAndSchema customize(Database accordingTo) {
         CatalogAndSchema standard = standardize(accordingTo);
@@ -161,16 +161,16 @@ public class CatalogAndSchema {
      */
     @Override
     public String toString() {
-        String catalogName = getCatalogName();
-        String schemaName = getSchemaName();
+        String tmpCatalogName = getCatalogName();
+        String tmpSchemaName = getSchemaName();
 
-        if (catalogName == null) {
-            catalogName = "DEFAULT";
+        if (tmpCatalogName == null) {
+            tmpCatalogName = "DEFAULT";
         }
-        if (schemaName == null) {
-            schemaName = "DEFAULT";
+        if (tmpSchemaName == null) {
+            tmpSchemaName = "DEFAULT";
         }
 
-        return catalogName+"."+schemaName;
+        return tmpCatalogName + "." + tmpSchemaName;
     }
 }
