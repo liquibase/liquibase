@@ -570,6 +570,31 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
+		<!-- We are not interested in "Downloading (dependency).jar" logs - only bloats the CI log files! -->
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>set-system-properties</goal>
+						</goals>
+						<configuration>
+							<properties>
+								<property>
+									<name>org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener</name>
+									<value>warn</value>
+								</property>
+							</properties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
 	</build>
 
 	<distributionManagement>

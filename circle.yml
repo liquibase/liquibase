@@ -5,7 +5,7 @@ machine:
 dependencies:
  override:
   - sudo apt-get install -y rpm
-  - mvn install -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+  - mvn install -B
 
 test:
   post:
