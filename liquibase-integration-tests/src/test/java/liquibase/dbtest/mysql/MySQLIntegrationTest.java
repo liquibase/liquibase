@@ -13,8 +13,8 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Create the necessary databases with:

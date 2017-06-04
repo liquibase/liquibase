@@ -8,8 +8,8 @@ import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<MarkChangeSetRanStatement> {
     public MarkChangeSetRanGeneratorTest() throws Exception {

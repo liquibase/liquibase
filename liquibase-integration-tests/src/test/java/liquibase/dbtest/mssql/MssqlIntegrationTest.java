@@ -16,8 +16,7 @@ import org.junit.Test;
 import java.util.Calendar;
 import java.util.Date;
 
-import static junit.framework.Assert.*;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeNotNull;
 
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
@@ -99,7 +98,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                         expectedType="varbinary";
                         break;
                     default:
-                        ; // nothing to do
+                        // nothing to do
                 }
 
                 String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType(), new MSSQLDatabase()).toDatabaseDataType(getDatabase()).toString();
