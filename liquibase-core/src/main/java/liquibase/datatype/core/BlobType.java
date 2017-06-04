@@ -62,6 +62,7 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
             }
         }
+
         if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
                 return new DatabaseDataType("BLOB");
@@ -77,6 +78,7 @@ public class BlobType extends LiquibaseDataType {
                 return new DatabaseDataType("LONGBLOB");
             }
         }
+
         if (database instanceof PostgresDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
                 // There are two ways of handling byte arrays ("BLOBs") in pgsql. For consistency with Hibernate ORM
@@ -88,12 +90,15 @@ public class BlobType extends LiquibaseDataType {
 
             return new DatabaseDataType("BYTEA");
         }
+
         if (database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG BINARY");
         }
+
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType("IMAGE");
         }
+
         if (database instanceof OracleDatabase) {
             if (getRawDefinition().toLowerCase().startsWith("bfile")) {
                 return new DatabaseDataType("BFILE");
@@ -109,6 +114,7 @@ public class BlobType extends LiquibaseDataType {
         if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB");
         }
+
         return super.toDatabaseDataType(database);
     }
 
@@ -145,10 +151,5 @@ public class BlobType extends LiquibaseDataType {
             return value.toString();
         }
     }
-
-    //sqlite
-    //        } else if (columnTypeString.toLowerCase(Locale.ENGLISH).contains("blob") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("binary")) {
-//            type = new BlobType("BLOB");
 
 }
