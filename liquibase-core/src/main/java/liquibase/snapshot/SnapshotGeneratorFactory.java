@@ -51,6 +51,9 @@ public class SnapshotGeneratorFactory {
         instance = new SnapshotGeneratorFactory();
     }
 
+    public static synchronized void resetAll() {
+        instance = null;
+    }
 
     public void register(SnapshotGenerator generator) {
         generators.add(generator);
@@ -85,7 +88,6 @@ public class SnapshotGeneratorFactory {
         }
         return validGenerators;
     }
-
 
     /**
      * Checks if a specific object is present in a database
@@ -126,10 +128,10 @@ public class SnapshotGeneratorFactory {
           * If the query is about another object, try to create a snapshot of the of the object (or used the cached
           * snapshot. If that works, we count that as confirmation of existence.
           */
-          
+
         SnapshotControl snapshotControl = (new SnapshotControl(database, false, types.toArray(new Class[types.size()])));
         snapshotControl.setWarnIfObjectNotFound(false);
-        
+
         if (createSnapshot(example, database,snapshotControl) != null) {
             return true;
         }
@@ -142,7 +144,7 @@ public class SnapshotGeneratorFactory {
         DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database,
             new SnapshotControl(database, false, example.getClass()).setWarnIfObjectNotFound(false)
         );
-        
+
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, null, database)) {
                 return true;
@@ -155,19 +157,52 @@ public class SnapshotGeneratorFactory {
         return createSnapshot(new CatalogAndSchema[] {example}, database, snapshotControl);
     }
 
-    public DatabaseSnapshot createSnapshot(CatalogAndSchema[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+    /**
+     * Creates a database snapshot for a given array of catalog/schema combinations.
+     *
+     * @param examples        an array of CatalogAndSchema objects
+     * @param database        the database to work on
+     * @param snapshotControl the options/settings for snapshot generation
+     * @return a database snapshot that includes all objects matching the specification
+     * @throws DatabaseException       if a problem occurs during snapshotting
+     * @throws InvalidExampleException if the given catalog/schema combinations are invalid (e.g. duplicates)
+     */
+    public DatabaseSnapshot createSnapshot(CatalogAndSchema[] examples, Database database,
+                                           SnapshotControl snapshotControl)
+            throws DatabaseException, InvalidExampleException {
         if (database == null) {
             return null;
         }
+
+        /*
+         * Translate the given examples into "real" Schema objects according to the database's abilities (e.g.
+         * does the DB support catalogs? schemas? are the given schema/catalog names the default ones for the
+         * DB connection?)
+          */
         Schema[] schemas = new Schema[examples.length];
         for (int i = 0; i< schemas.length; i++) {
             examples[i] = examples[i].customize(database);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
+
+
         }
+
         return createSnapshot(schemas, database, snapshotControl);
     }
 
-    public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+    /**
+     * Creates a database snapshot for a given array of DatabaseObjects
+     *
+     * @param examples        an array of DatabaseObjects objects
+     * @param database        the database to work on
+     * @param snapshotControl the options/settings for snapshot generation
+     * @return a database snapshot that includes all objects matching the specification
+     * @throws DatabaseException       if a problem occurs during snapshotting
+     * @throws InvalidExampleException if the given catalog/schema combinations are invalid (e.g. duplicates)
+     */
+    public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database,
+                                           SnapshotControl snapshotControl)
+            throws DatabaseException, InvalidExampleException {
         if (database.getConnection() instanceof OfflineConnection) {
             DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot(examples);
             if (snapshot == null) {
@@ -178,10 +213,30 @@ public class SnapshotGeneratorFactory {
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }
 
+    /**
+     * Creates a DatabaseSnapshot for a single DatabaseObject.
+     * @param example the object to snapshot
+     * @param database the database to work on
+     * @param <T> the type of the object (must extend DatabaseObject)
+     * @return the snapshot of the desired object
+     * @throws DatabaseException if a problem occurs during snapshotting
+     * @throws InvalidExampleException if the given catalog/schema combinations are invalid (e.g. duplicates)
+     */
     public <T extends DatabaseObject> T createSnapshot(T example, Database database) throws DatabaseException, InvalidExampleException {
         return createSnapshot(example, database, new SnapshotControl(database));
     }
 
+    /**
+     *
+     * Creates a DatabaseSnapshot for a single DatabaseObject.
+     * @param example the object to snapshot
+     * @param database the database to work on
+     * @param snapshotControl the options/settings for snapshot generation
+     * @param <T> the type of the object (must extend DatabaseObject)
+     * @return the snapshot of the desired object
+     * @throws DatabaseException if a problem occurs during snapshotting
+     * @throws InvalidExampleException if the given catalog/schema combinations are invalid (e.g. duplicates)
+     */
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl)
             throws DatabaseException, InvalidExampleException {
         DatabaseSnapshot snapshot = createSnapshot(new DatabaseObject[]{example}, database, snapshotControl);
@@ -190,7 +245,8 @@ public class SnapshotGeneratorFactory {
 
     public Table getDatabaseChangeLogTable(SnapshotControl snapshotControl, Database database) throws DatabaseException {
         try {
-            Table liquibaseTable = (Table) new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
+            Table liquibaseTable = (Table) new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(
+                    new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
             return createSnapshot(liquibaseTable, database, snapshotControl);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -199,7 +255,8 @@ public class SnapshotGeneratorFactory {
 
     public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
         try {
-            Table example = (Table) new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
+            Table example = (Table) new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(
+                    new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
             return createSnapshot(example, database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
@@ -208,7 +265,8 @@ public class SnapshotGeneratorFactory {
 
     public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
         try {
-            return has(new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
+            return has(new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(new Schema(
+                    database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -216,17 +274,15 @@ public class SnapshotGeneratorFactory {
 
     public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
         try {
-            return has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
+            return has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(
+                    new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    public static synchronized void resetAll() {
-        instance = null;
-    }
-
-    public Set<Class<? extends DatabaseObject>> getContainerTypes(Class<? extends DatabaseObject> type, Database database) {
+    public Set<Class<? extends DatabaseObject>> getContainerTypes(Class<? extends DatabaseObject> type,
+                                                                  Database database) {
         Set<Class<? extends DatabaseObject>>  returnSet = new HashSet<Class<? extends DatabaseObject>>();
 
         getContainerTypes(type, database, returnSet);

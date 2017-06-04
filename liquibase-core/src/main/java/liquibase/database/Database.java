@@ -156,12 +156,12 @@ public interface Database extends PrioritizedService {
 
     void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
-
     /**
-     * Drops all objects in a specific schema/catalog.
+     * Drops all objects in a specified schema.
+     * @param schema schema (catalog+)schema to drop
+     * @throws LiquibaseException if any problem occurs
      */
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
-
 
     /**
      * Tags the database changelog with the given string.
