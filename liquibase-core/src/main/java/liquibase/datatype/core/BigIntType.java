@@ -7,6 +7,9 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
+/**
+ * Represents a signed integer number using 64 bits of storage.
+ */
 @DataTypeInfo(name="bigint", aliases = {"java.sql.Types.BIGINT", "java.math.BigInteger", "java.lang.Long", "integer8", "bigserial", "serial8", "int8"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BigIntType extends LiquibaseDataType {
 
@@ -48,6 +51,9 @@ public class BigIntType extends LiquibaseDataType {
             if (isAutoIncrement()) {
                 return new DatabaseDataType("BIGSERIAL");
             }
+        }
+        if (database instanceof SybaseASADatabase) {
+            return new DatabaseDataType("BIGINT");
         }
         return super.toDatabaseDataType(database);
     }
