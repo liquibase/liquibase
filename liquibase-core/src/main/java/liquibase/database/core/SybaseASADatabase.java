@@ -15,6 +15,7 @@ import liquibase.structure.core.Index;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -129,6 +130,8 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	public SybaseASADatabase() {
 		super();
 		super.setCurrentDateTimeFunction("now()");
+		super.unmodifiableDataTypes.addAll(Arrays.asList("integer", "bigint"));
+
 	}
 
 	@Override
