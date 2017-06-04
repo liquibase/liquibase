@@ -66,7 +66,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
         String owner = indexOwner.getString("owner");
 
-        assertEquals("LIQUIBASEB",owner);
+        assertEquals("LBCAT2", owner);
 
         // check that the automatically rollback now works too
         try {
@@ -103,7 +103,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
         String owner = indexOwner.getString("owner");
 
-        assertEquals("LIQUIBASEB",owner);
+        assertEquals("LBCAT2", owner);
 
         // check that the automatically rollback now works too
         try {
