@@ -9,12 +9,9 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
@@ -25,6 +22,7 @@ import java.util.*;
 
 public class SQLiteDatabase extends AbstractJdbcDatabase {
 
+    public static final String PRODUCT_NAME = "SQLite";
     private Set<String> systemTables = new HashSet<String>();
 
     {
@@ -33,92 +31,6 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public SQLiteDatabase() {
         super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
-    }
-
-    public static final String PRODUCT_NAME = "SQLite";
-
-    @Override
-    public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sqlite:")) {
-            return "org.sqlite.JDBC";
-        }
-        return null;
-    }
-
-    @Override
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-
-    @Override
-    public String getShortName() {
-        return "sqlite";
-    }
-
-
-    @Override
-    protected String getDefaultDatabaseProductName() {
-        return PRODUCT_NAME;
-    }
-
-    @Override
-    public Integer getDefaultPort() {
-        return null;
-    }
-
-    @Override
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
-            throws DatabaseException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
-    }
-
-    @Override
-    public boolean supportsInitiallyDeferrableColumns() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsTablespaces() {
-        return false;
-    }
-
-    @Override
-    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        return null;
-    }
-
-    @Override
-    public boolean supportsSequences() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsSchemas() {
-        return false;
-    }
-
-    public String getTrigger(String table, String column) {
-        return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" +
-                " UPDATE " + table + " SET " + column + " = DATETIME('NOW')" +
-                " WHERE rowid = new.rowid END ";
-    }
-
-    @Override
-    public String getAutoIncrementClause() {
-        return "AUTOINCREMENT";
-    }
-
-    @Override
-    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
-        // not supported
-        return false;
-    }
-
-    @Override
-    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
-        // not supported
-        return false;
     }
 
     public static List<SqlStatement> getAlterTableStatements(
@@ -206,6 +118,88 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:sqlite:")) {
+            return "org.sqlite.JDBC";
+        }
+        return null;
+    }
+
+    @Override
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    @Override
+    public String getShortName() {
+        return "sqlite";
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return PRODUCT_NAME;
+    }
+
+    @Override
+    public Integer getDefaultPort() {
+        return null;
+    }
+
+    @Override
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
+            throws DatabaseException {
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
+    }
+
+    @Override
+    public boolean supportsInitiallyDeferrableColumns() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsTablespaces() {
+        return false;
+    }
+
+    @Override
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+        return null;
+    }
+
+    @Override
+    public boolean supportsSequences() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    public String getTrigger(String table, String column) {
+        return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" +
+                " UPDATE " + table + " SET " + column + " = DATETIME('NOW')" +
+                " WHERE rowid = new.rowid END ";
+    }
+
+    @Override
+    public String getAutoIncrementClause() {
+        return "AUTOINCREMENT";
+    }
+
+    @Override
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+        // not supported
+        return false;
+    }
+
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+        // not supported
+        return false;
+    }
+
+    @Override
     protected Set<String> getSystemViews() {
         return systemTables;
     }
@@ -220,15 +214,18 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
-
-    public interface AlterTableVisitor {
-        public ColumnConfig[] getColumnsToAdd();
-
-        public boolean copyThisColumn(ColumnConfig column);
-
-        public boolean createThisColumn(ColumnConfig column);
-
-        public boolean createThisIndex(Index index);
+    @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        return false;
     }
 
+    public interface AlterTableVisitor {
+        ColumnConfig[] getColumnsToAdd();
+
+        boolean copyThisColumn(ColumnConfig column);
+
+        boolean createThisColumn(ColumnConfig column);
+
+        boolean createThisIndex(Index index);
+    }
 }
