@@ -104,11 +104,11 @@ public class MockDatabase implements Database, InternalDatabase {
         return null;
     }
 
-    public void setConnection(final Connection conn) {
-    }
-
     @Override
     public void setConnection(final DatabaseConnection conn) {
+    }
+
+    public void setConnection(final Connection conn) {
     }
 
     @Override
@@ -608,11 +608,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public boolean isReservedWord(final String string) {
         return false;
-    }
-
-    @Override
-    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
-        return schema.standardize(this);
     }
 
     @Override

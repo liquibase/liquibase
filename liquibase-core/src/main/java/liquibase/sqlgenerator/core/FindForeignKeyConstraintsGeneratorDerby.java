@@ -36,8 +36,11 @@ public class FindForeignKeyConstraintsGeneratorDerby extends AbstractSqlGenerato
 
 	@Override
 	public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		final CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
-		final StringBuilder sb = new StringBuilder();
+        final CatalogAndSchema schema =
+                (new CatalogAndSchema(
+                        statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName())
+                ).standardize(database);
+        final StringBuilder sb = new StringBuilder();
 		sb.append("SELECT ");
 		sb.append("co.constraintname AS ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(", ");
 		sb.append("t.tablename AS ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");

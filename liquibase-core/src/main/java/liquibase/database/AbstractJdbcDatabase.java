@@ -233,7 +233,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     defaultCatalogName = getConnectionCatalogName();
                 } catch (DatabaseException e) {
-                    LogFactory.getLogger().info("Error getting default catalog", e);
+                    LogFactory.getInstance().getLog().info("Error getting default catalog", e);
                 }
             }
         }
@@ -249,19 +249,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected String getConnectionCatalogName() throws DatabaseException {
         return connection.getCatalog();
-    }
-
-    public CatalogAndSchema correctSchema(final String catalog, final String schema) {
-        return new CatalogAndSchema(catalog, schema).standardize(this);
-    }
-
-    @Override
-    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
-        if (schema == null) {
-            return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
-        }
-
-        return schema.standardize(this);
     }
 
     @Override
