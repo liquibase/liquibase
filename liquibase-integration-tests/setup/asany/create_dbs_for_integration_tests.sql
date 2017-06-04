@@ -5,6 +5,9 @@ USER 'dba' DBA PASSWORD 'liquibase';
 
 CREATE DBSPACE "liquibase2" AS 'D:\\asany\\DBs\\liquibase2_dbspace.dbs';
 
+Create a Windows service for the database (makes scripting easier):
+dbsvc -as -t network -w liquibase d:\asany\bin64\dbsrv17.exe -x tcpip -c 8m d:\asany\DBs\liquibase.db
+
 Alternatively (dbinit is a command line tool):
 dbinit -z "1252LATIN1" -zn "UCA" -dba "dba","liquibase" -t "liquibase.log" "D:\asany\DBs\liquibase.db"
 
