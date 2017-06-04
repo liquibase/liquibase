@@ -378,6 +378,7 @@
 						<!-- Workaround for a bug in maven-compiler-plugin 3.1 which causes all files to always
 								 recompile, making the build _slower_ than faster. -->
 						<useIncrementalCompilation>false</useIncrementalCompilation>
+						<compilerArgument>-Xlint:deprecation</compilerArgument>
 					</configuration>
 				</plugin>
 
