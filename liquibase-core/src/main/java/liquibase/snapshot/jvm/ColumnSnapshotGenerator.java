@@ -124,8 +124,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (rsOrdinal != currentOrdinal) {
                         log.debug(
                                 String.format(
-                                        "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, bad ordinal=%d, " +
-                                                "new ordinal=%d",
+                                        "Repairing ORDINAL_POSITION with gaps for table=%s, column name=%s, " +
+                                                "bad ordinal=%d, new ordinal=%d",
                                         relation.getName(),
                                         row.getString("COLUMN_NAME"),
                                         rsOrdinal,
