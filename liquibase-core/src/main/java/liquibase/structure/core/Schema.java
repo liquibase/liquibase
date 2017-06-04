@@ -9,11 +9,6 @@ import java.util.*;
 
 public class Schema extends AbstractDatabaseObject {
 
-    @Override
-    public DatabaseObject[] getContainingObjects() {
-        return null;
-    }
-
     public Schema() {
         setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
@@ -21,13 +16,18 @@ public class Schema extends AbstractDatabaseObject {
     public Schema(String catalog, String schemaName) {
         this(new Catalog(catalog), schemaName);
     }
-    
+
     public Schema(Catalog catalog, String schemaName) {
         schemaName = StringUtils.trimToNull(schemaName);
 
         setAttribute("name", schemaName);
         setAttribute("catalog", catalog);
         setAttribute("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
+    }
+
+    @Override
+    public DatabaseObject[] getContainingObjects() {
+        return null;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public boolean isDefault() {
-        return getAttribute("default", false);
+        return getAttribute("default", false) || (getName() == null);
     }
 
     public Schema setDefault(Boolean isDefault) {
@@ -69,9 +69,7 @@ public class Schema extends AbstractDatabaseObject {
         Schema schema = (Schema) o;
 
         if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
-        if (getName() != null ? !getName().equalsIgnoreCase(schema.getName()) : schema.getName() != null) return false;
-
-        return true;
+        return getName() != null ? getName().equalsIgnoreCase(schema.getName()) : schema.getName() == null;
     }
 
     @Override

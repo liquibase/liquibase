@@ -47,7 +47,7 @@ public class Catalog extends AbstractDatabaseObject {
     }
 
     public boolean isDefault() {
-        return getAttribute("default", false);
+        return getAttribute("default", false) || (getName() == null);
     }
 
     public Catalog setDefault(Boolean isDefault) {
@@ -87,9 +87,7 @@ public class Catalog extends AbstractDatabaseObject {
 
         Catalog catalog = (Catalog) o;
 
-        if (getName() != null ? !getName().equalsIgnoreCase(catalog.getName()) : catalog.getName() != null) return false;
-
-        return true;
+        return getName() != null ? getName().equalsIgnoreCase(catalog.getName()) : catalog.getName() == null;
     }
 
 
