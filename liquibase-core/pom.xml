@@ -198,7 +198,6 @@
 						</property>
 
 					</systemProperties>
-					<argLine>-Djava.util.logging.config.file=${build.testOutputDirectory}/simplelogger.properties</argLine>
 				</configuration>
 			</plugin>
 
