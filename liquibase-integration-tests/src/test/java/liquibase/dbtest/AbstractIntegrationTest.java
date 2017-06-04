@@ -224,7 +224,8 @@ public abstract class AbstractIntegrationTest {
 
             SnapshotGeneratorFactory.resetAll();
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);
-            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+            emptyTestSchema(CatalogAndSchema.DEFAULT.getCatalogName(), CatalogAndSchema.DEFAULT.getSchemaName(),
+                    database);
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
             if (database.supportsSchemas()) {
@@ -278,8 +279,7 @@ public abstract class AbstractIntegrationTest {
         CatalogAndSchema target = new CatalogAndSchema(catalogName, schemaName).standardize(database);
         Catalog catalog = new Catalog(target.getCatalogName());
         Schema schema = new Schema(target.getCatalogName(), target.getSchemaName());
-        if (factory.has(catalog, database)
-                && factory.has(schema, database)) {
+        if (factory.has(schema, database)) {
             if (!emptySchemas.contains(target.toString())) {
                 database.dropDatabaseObjects(target);
                 emptySchemas.add(target.toString());
