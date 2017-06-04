@@ -35,7 +35,7 @@ public abstract class AbstractMssqlIntegrationTest extends AbstractIntegrationTe
     public void smartDataLoad() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
-        clearDatabase(liquibase);
+        clearDatabase();
         try {
             liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {

@@ -89,7 +89,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/yaml/common.tests.changelog.yaml");
@@ -110,7 +110,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/json/common.tests.changelog.json");

@@ -49,7 +49,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(this.indexOnSchemaChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         try {
             liquibase.update(this.contexts);
@@ -86,7 +86,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(this.viewOnSchemaChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         try {
             liquibase.update(this.contexts);
@@ -119,7 +119,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
-        clearDatabase(liquibase);
+        clearDatabase();
 
         try {
             liquibase.update(this.contexts);

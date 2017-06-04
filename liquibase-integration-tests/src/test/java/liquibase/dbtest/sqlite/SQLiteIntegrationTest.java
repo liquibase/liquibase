@@ -11,11 +11,6 @@ import java.util.Date;
 
 public class SQLiteIntegrationTest extends AbstractIntegrationTest {
 
-    @Override
-    protected boolean isDatabaseProvidedByTravisCI() {
-        return true;
-    }
-
     public SQLiteIntegrationTest() throws Exception {
         super("sqlite", DatabaseFactory.getInstance().getDatabase("sqlite"));
         File f = new File("sqlite");
@@ -30,6 +25,10 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    @Override
+    protected boolean isDatabaseProvidedByTravisCI() {
+        return true;
+    }
 
     @Override
     @Test
@@ -44,7 +43,7 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
-        clearDatabase(liquibase);
+        clearDatabase();
 
         try {
             liquibase.update(this.contexts);

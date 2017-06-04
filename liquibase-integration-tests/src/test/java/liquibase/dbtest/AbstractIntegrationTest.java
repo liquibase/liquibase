@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffGeneratorFactory;
@@ -61,6 +62,7 @@ public abstract class AbstractIntegrationTest {
     protected String contexts = "test, context-b";
     protected String username;
     protected String password;
+    Set<String> emptySchemas = new TreeSet<>();
     private String rollbackChangeLog;
     private String includedChangeLog;
     private String encodingChangeLog;
@@ -169,7 +171,9 @@ public abstract class AbstractIntegrationTest {
     abstract protected boolean isDatabaseProvidedByTravisCI();
 
     /**
-     * Attempt to wipe the database before each test.
+     * Reset database connection and internal objects before each test.
+     * CAUTION! Does not wipe the schemas - if you want that, you must call {@link #clearDatabase()} .
+     *
      */
     @Before
     public void setUp() throws Exception {
@@ -192,12 +196,30 @@ public abstract class AbstractIntegrationTest {
 
 
             ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        }
+    }
 
-            if (database.getConnection() != null) {
-                ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                    "drop table "+database.getDatabaseChangeLogLockTableName()
-                );
-                database.commit();
+    /**
+     * Wipes all Liquibase schemas in the database before testing starts. This includes the DATABASECHANGELOG/LOCK
+     * tables.
+     */
+    protected void wipeDatabase() {
+        emptySchemas.clear();
+        try {
+            // Try to erase the DATABASECHANGELOGLOCK (not: -LOG!) table that might be a leftover from a previously
+            // crashed or interrupted integration test.
+            // TODO the cleaner solution would be to have a noCachingHasObject() Method in SnapshotGeneratorFactory
+            try {
+                if (database.getConnection() != null) {
+                    ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                            "drop table " + database.getDatabaseChangeLogLockTableName()
+                    );
+                    database.commit();
+                }
+            } catch (SQLException e) {
+                if (database instanceof PostgresDatabase) { // throws "current transaction is aborted" unless we roll back the connection
+                    database.rollback();
+                }
             }
 
             SnapshotGeneratorFactory.resetAll();
@@ -206,12 +228,11 @@ public abstract class AbstractIntegrationTest {
             SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA));
+                emptyTestSchema(null, DatabaseTestContext.ALT_SCHEMA, database);
             }
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
-                    if (factory.has(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA), database))
-                        database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                    emptyTestSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database);
                 }
 
                 if (database.supportsCatalogs()) {
@@ -230,19 +251,41 @@ public abstract class AbstractIntegrationTest {
                             new CatalogAndSchema(database.getDefaultCatalogName(), "LBCAT2"),
                     };
                     for (CatalogAndSchema location: alternativeLocations) {
-                        boolean catalogPresent = factory.has(new Catalog(location.getCatalogName()), database);
-                        if (catalogPresent)
-                            database.dropDatabaseObjects(new CatalogAndSchema(location.getCatalogName(), null));
-
-                        boolean schemaPresent = factory.has(new Schema(location.getCatalogName(), location.getSchemaName()), database);
-                        if (schemaPresent)
-                            database.dropDatabaseObjects(location);
+                        emptyTestSchema(location.getCatalogName(), null, database);
                     }
                 }
             }
             database.commit();
             SnapshotGeneratorFactory.resetAll();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Transforms a given combination of catalogName and schemaName into the standardized format for the given
+     * database. If the database has the
+     *
+     * @param catalogName catalog name (or null)
+     * @param schemaName  schema name (or null)
+     * @param database    the database where the target might exist
+     * @throws LiquibaseException if any problem occurs during the process
+     */
+    protected void emptyTestSchema(String catalogName, String schemaName, Database database)
+            throws LiquibaseException {
+        SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
+
+        CatalogAndSchema target = new CatalogAndSchema(catalogName, schemaName).standardize(database);
+        Catalog catalog = new Catalog(target.getCatalogName());
+        Schema schema = new Schema(target.getCatalogName(), target.getSchemaName());
+        if (factory.has(catalog, database)
+                && factory.has(schema, database)) {
+            if (!emptySchemas.contains(target.toString())) {
+                database.dropDatabaseObjects(target);
+                emptySchemas.add(target.toString());
+            }
+        }
+
     }
 
     protected boolean supportsAltCatalogTests() {
@@ -310,7 +353,7 @@ public abstract class AbstractIntegrationTest {
 
     protected void runChangeLogFile(String changeLogFile) throws Exception {
         Liquibase liquibase = createLiquibase(changeLogFile);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         //run again to test changelog testing logic
         liquibase = createLiquibase(changeLogFile);
@@ -335,7 +378,7 @@ public abstract class AbstractIntegrationTest {
     public void runUpdateOnOldChangelogTableFormat() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
 
         ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
@@ -361,7 +404,7 @@ public abstract class AbstractIntegrationTest {
 
         StringWriter output = new StringWriter();
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts, output);
@@ -369,6 +412,8 @@ public abstract class AbstractIntegrationTest {
         String outputResult = output.getBuffer().toString();
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
+
+        // TODO should better written to a file so CI servers can pick it up as test artifacts.
         System.out.println(outputResult);
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
@@ -380,8 +425,14 @@ public abstract class AbstractIntegrationTest {
         assertEquals(0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
     }
 
-    protected void clearDatabase(Liquibase liquibase) throws DatabaseException {
-        liquibase.dropAll(getSchemasToDrop());
+    /**
+     * Drops all supported object types in all testing schemas and the DATABASECHANGELOG table if it resides in a
+     * different schema from the test schemas.
+     *
+     * @throws DatabaseException if something goes wrong during object deletion
+     */
+    protected void clearDatabase() throws DatabaseException {
+        wipeDatabase();
         try {
             Statement statement = null;
             try {
@@ -439,7 +490,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -452,12 +503,12 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
         liquibase.update(this.contexts);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -469,7 +520,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
@@ -489,7 +540,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
@@ -507,7 +558,7 @@ public abstract class AbstractIntegrationTest {
         StringWriter writer = new StringWriter();
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.futureRollbackSQL(new Contexts(this.contexts), new LabelExpression(), writer);
@@ -518,7 +569,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -585,7 +636,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             Liquibase liquibase = createLiquibase(tempFile.getName());
-            clearDatabase(liquibase);
+            clearDatabase();
 
             DatabaseSnapshot emptySnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
@@ -640,7 +691,7 @@ public abstract class AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase(includedChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         database.setDefaultSchemaName("lbcat2");
 
@@ -665,7 +716,7 @@ public abstract class AbstractIntegrationTest {
         }
 
         liquibase = createLiquibase(tempFile.getName());
-        clearDatabase(liquibase);
+        clearDatabase();
 
         //run again to test changelog testing logic
         Executor executor = ExecutorService.getInstance().getExecutor(database);
@@ -708,10 +759,10 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -725,7 +776,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
@@ -744,7 +795,7 @@ public abstract class AbstractIntegrationTest {
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -769,13 +820,13 @@ public abstract class AbstractIntegrationTest {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
         Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor());
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase.update(this.contexts);
 
         liquibase.update(this.contexts); //try again, make sure there are no errors
 
-        clearDatabase(liquibase);
+        clearDatabase();
     }
 
     private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
@@ -793,7 +844,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        wipeDatabase();
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
@@ -815,7 +866,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        wipeDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -906,9 +957,9 @@ public abstract class AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase(objectQuotingStrategyChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
         liquibase.update(contexts);
-        clearDatabase(liquibase);
+        clearDatabase();
     }
 
     @Test
@@ -925,7 +976,7 @@ public abstract class AbstractIntegrationTest {
 
         StringWriter output = new StringWriter();
         Liquibase liquibase = createLiquibase(includedChangeLog);
-        clearDatabase(liquibase);
+        clearDatabase();
 
         liquibase = createLiquibase(includedChangeLog);
         liquibase.update(contexts, output);
