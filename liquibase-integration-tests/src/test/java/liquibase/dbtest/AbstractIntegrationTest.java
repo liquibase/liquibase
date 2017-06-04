@@ -277,7 +277,6 @@ public abstract class AbstractIntegrationTest {
         SnapshotGeneratorFactory factory = SnapshotGeneratorFactory.getInstance();
 
         CatalogAndSchema target = new CatalogAndSchema(catalogName, schemaName).standardize(database);
-        Catalog catalog = new Catalog(target.getCatalogName());
         Schema schema = new Schema(target.getCatalogName(), target.getSchemaName());
         if (factory.has(schema, database)) {
             if (!emptySchemas.contains(target.toString())) {
