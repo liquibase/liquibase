@@ -211,8 +211,10 @@ public abstract class AbstractIntegrationTest {
             // TODO the cleaner solution would be to have a noCachingHasObject() Method in SnapshotGeneratorFactory
             try {
                 if (database.getConnection() != null) {
+                    String sql = "DROP TABLE " + database.getDatabaseChangeLogLockTableName();
+                    LogFactory.getInstance().getLog().sql(sql);
                     ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
-                            "drop table " + database.getDatabaseChangeLogLockTableName()
+                            sql
                     );
                     database.commit();
                 }
@@ -249,7 +251,7 @@ public abstract class AbstractIntegrationTest {
                             new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
                             new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
                             new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
-                            new CatalogAndSchema(database.getDefaultCatalogName(), "LBCAT2"),
+                            new CatalogAndSchema(null, "LBCAT2")
                     };
                     for (CatalogAndSchema location: alternativeLocations) {
                         emptyTestSchema(location.getCatalogName(), null, database);
@@ -709,9 +711,9 @@ public abstract class AbstractIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase(includedChangeLog);
+        database.setDefaultSchemaName("lbcat2");
         clearDatabase();
 
-        database.setDefaultSchemaName("lbcat2");
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.forceReleaseLock();
@@ -883,8 +885,8 @@ public abstract class AbstractIntegrationTest {
     public void testDbDoc() throws Exception {
         assumeNotNull(this.getDatabase());
 
-        Liquibase liquibase = createLiquibase(completeChangeLog);
-        wipeDatabase();
+        Liquibase liquibase;
+        clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -932,6 +934,7 @@ public abstract class AbstractIntegrationTest {
    @Test
    public void testDiffExternalForeignKeys() throws Exception {
        assumeNotNull(this.getDatabase());
+       clearDatabase();
        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
        liquibase.update(contexts);
 
