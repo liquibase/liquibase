@@ -50,8 +50,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     public class CachingDatabaseMetaData {
-        public static final String ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE = "WW012";
-        private final String SQL_FILTER_MATCH_ALL = "%";
+        private static final String ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE = "WW012";
+        private static final String SQL_FILTER_MATCH_ALL = "%";
         private DatabaseMetaData databaseMetaData;
         private Database database;
 
