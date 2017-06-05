@@ -46,3 +46,28 @@ USE [liquibase]
 GO
 CREATE SCHEMA [lbcat2] AUTHORIZATION [dbo]
 GO
+
+USE [master]
+GO
+
+CREATE DATABASE [liquibasec]
+ ON  PRIMARY
+( NAME = N'liquibasec', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibasec.mdf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
+ LOG ON
+( NAME = N'liquibasec_log', FILENAME = N'D:\MSSQL\MSSQL13.MSSQLSERVER\MSSQL\DATA\liquibasec_log.ldf' , SIZE = 8192KB , FILEGROWTH = 65536KB )
+GO
+
+ALTER DATABASE [liquibasec] SET COMPATIBILITY_LEVEL = 100
+GO
+
+USE [liquibasec]
+GO
+
+CREATE SCHEMA [liquibaseb] AUTHORIZATION [dbo]
+GO
+
+CREATE USER [lbuser] FOR LOGIN [lbuser]
+GO
+
+ALTER ROLE [db_owner] ADD MEMBER [lbuser]
+GO
