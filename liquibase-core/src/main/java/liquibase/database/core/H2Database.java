@@ -75,6 +75,11 @@ public class H2Database extends AbstractJdbcDatabase {
         this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
         super.sequenceNextValueFunction = "NEXTVAL('%s')";
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
+        // According to http://www.h2database.com/html/datatypes.html, retrieved on 2017-06-05
+        super.unmodifiableDataTypes.addAll(Arrays.asList("int", "integer", "mediumint", "int4", "signed", "boolean",
+                "bit", "bool", "tinyint", "smallint", "int2", "year", "bigint", "int8", "identity", "float", "float8",
+                "real", "float4", "time", "date", "timestamp", "datetime", "smalldatetime", "timestamp with time zone",
+                "other", "uuid", "array", "geometry"));
     }
 
     @Override
@@ -105,31 +110,6 @@ public class H2Database extends AbstractJdbcDatabase {
         return PRIORITY_DATABASE;
     }
 
-    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
-//        DatabaseConnection conn = getConnection();
-//        Statement dropStatement = null;
-//        try {
-//            dropStatement = conn.createStatement();
-//            dropStatement.executeUpdate("DROP ALL OBJECTS");
-//            changeLogTableExists = false;
-//            changeLogLockTableExists = false;
-//            changeLogCreateAttempted = false;
-//            changeLogLockCreateAttempted = false;
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        } finally {
-//            try {
-//                if (dropStatement != null) {
-//                    dropStatement.close();
-//                }
-//                conn.commit();
-//            } catch (SQLException e) {
-//                ;
-//            }
-//        }
-//
-//    }
-
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "H2".equals(conn.getDatabaseProductName());
@@ -159,11 +139,6 @@ public class H2Database extends AbstractJdbcDatabase {
             throw new DateParseException(dateAsString);
         }
     }
-
-//    @Override
-//    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-//        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
-//    }
 
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
