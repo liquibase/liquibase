@@ -13,7 +13,6 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
@@ -48,7 +47,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     // TODO: This test currently makes the whole VM exit with exit code -1, but does not generate a dump file
     // (not a "genuine" VM crash). I need to disable this test until I can find out how to catch/debug this.
     @Test
-    @Ignore
     public void diffToChangeLog() throws Exception{
         if (getDatabase() == null) {
             return;
