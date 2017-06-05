@@ -2,6 +2,7 @@ package liquibase.dbtest.h2;
 
 import liquibase.Liquibase;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -17,9 +18,11 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.sql.SQLException;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
+    private static final String H2_SQLSTATE_OBJECT_ALREADY_EXISTS = "90078";
     private final String changeSpecifyDbmsChangeLog;
     private final String dbmsExcludeChangelog;
 
@@ -102,6 +105,8 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/yaml/common.tests.changelog.yaml");
+        liquibase.setChangeLogParameter("loginuser", getUsername());
+
         try {
             liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {
@@ -123,6 +128,8 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         //run again to test changelog testing logic
         liquibase = createLiquibase("changelogs/json/common.tests.changelog.json");
+        liquibase.setChangeLogParameter("loginuser", getUsername());
+
         try {
             liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {
@@ -137,14 +144,26 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         super.generateChangeLog_noChanges();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
-    //    @Test
-//    public void testUpdateWithTurkishLocale() throws Exception {
-//        Locale originalDefault = Locale.getDefault();
-//
-//        Locale.setDefault(new Locale("tr","TR"));
-//        testRunChangeLog();
-//        Locale.setDefault(originalDefault);
-//    }
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
 
+        try {
+            // Create schemas for tests testRerunDiffChangeLogAltSchema
+            ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                    "CREATE SCHEMA LBCAT2"
+            );
+        } catch (SQLException e) {
+            if (e.getSQLState().equals(H2_SQLSTATE_OBJECT_ALREADY_EXISTS)) {
+                // do nothing
+            } else {
+                throw e;
+            }
+        }
+/*        ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
+                "SET SCHEMA LIQUIBASE"
+        ); */
+        getDatabase().commit();
 
+    }
 }
