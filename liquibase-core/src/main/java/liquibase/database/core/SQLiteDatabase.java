@@ -9,6 +9,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -27,6 +28,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     {
         systemTables.add("sqlite_sequence");
+        systemTables.add("sqlite_master");
     }
 
     public SQLiteDatabase() {
@@ -163,7 +165,13 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-        return null;
+        String definition = ExecutorService.getInstance().getExecutor(this).queryForObject(
+                new RawSqlStatement("SELECT sql FROM sqlite_master WHERE name=" + this.quoteObject(viewName, View.class)),
+                String.class);
+        // SQLite is friendly and already returns the form CREATE VIEW ... AS. However, we cannot use this, so we have
+        // to cut off that header.
+        definition = definition.replaceFirst("^(?i)CREATE [\\w\\s]*VIEW [^\\s]+ AS\\s*", "");
+        return definition;
     }
 
     @Override
