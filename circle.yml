@@ -10,8 +10,8 @@ dependencies:
 test:
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-    - find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp -v {} $CIRCLE_TEST_REPORTS/junit/ \;
 
     - cp liquibase-core/target/dbmanul*-bin.zip $CIRCLE_ARTIFACTS
     - cp liquibase-core/target/dbmanul*-bin.tar.gz $CIRCLE_ARTIFACTS
