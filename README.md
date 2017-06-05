@@ -16,6 +16,7 @@ Database support:
 
 Full support (DBMS-specific integration tests green, Software should be usable for everyday tasks):
 - Apache Derby (tested: 10.13.1.1)
+- H2 database (tested: 1.4.195) 
 - HyperSQL (hsqldb) (tested: 2.4.0)
 - IBM DB2 LUW Express (tested: 10.6) 
 - MariaDB (tested: 10.2.6, with InnoDB)
@@ -35,13 +36,14 @@ Somewhat working (work in progress):
   - Currently failing tests: 
     - runUpdateOnOldChangelogTableFormat (should not affect new users) 
     - Change logs working on more than one schema simultaneously
+- SQLite: Generally working except for operations that would be possible with ALTER TABLE on other
+    RDBMS (see https://dbmanul.atlassian.net/browse/DBM-3 for details)
 
 Unstable:
-- H2 (integration test ends (!) VM (System.exit?) with the current JDBC driver, causing 
   multiple integration tests to fail
 - IBM Informix (work started, but several SQL generators are broken; needs considerable work to get it back again)
   Currently completely broken due to a regression involving catalog and schema names
-- SQLite (work started, but several generators are broken for SQLite; needs considerable work)
+
 
 Untested/Work not started yet:
 - Sybase AS
