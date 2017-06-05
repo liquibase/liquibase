@@ -36,6 +36,8 @@ public class DerbyIntegrationTest extends AbstractIntegrationTest {
         } catch (SQLException e) {
             if (e.getSQLState().equals(DERBY_SQLSTATE_OBJECT_ALREADY_EXISTS)) {
                 // do nothing
+            } else {
+                throw e;
             }
         }
         ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().createStatement().executeUpdate(
