@@ -69,12 +69,6 @@ public class DropDefaultValueChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-
-//todo    	if (database instanceof SQLiteDatabase) {
-//    		// return special statements for SQLite databases
-//    		return generateStatementsForSQLiteDatabase(database);
-//        }
-
         return new SqlStatement[]{
                 new DropDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType()),
         };

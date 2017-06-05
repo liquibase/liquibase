@@ -409,7 +409,7 @@ public abstract class AbstractIntegrationTest {
         assumeNotNull(this.getDatabase());
 
         StringWriter output = new StringWriter();
-        Liquibase liquibase = createLiquibase(completeChangeLog);
+        Liquibase liquibase;
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);

@@ -189,6 +189,25 @@ DB-Manul 0.1:
 
       jdbc:informix-sqli://localhost:9090/liquibase:informixserver=ol_informix1210;DB_LOCALE=en_us.utf8;GL_DATE=%iY-%m-%d
 
+    Known bugs and problems
+    =======================
+
+    Unfortunately, there are some.
+
+    SQLite:
+        DBM-3 - Several broken SQLite operations relating to ALTER TABLE code
+
+        - The following change types (and their reverse/rollback counterparts) are currently not possible in combination
+          with SQLite:
+          - renameColumn
+          - addNotNullConstraint (-> dropNotNullConstraint)
+          - addForeignKeyConstraint (-> dropForeignKeyConstraint)
+          - addDefaultValue (-> dropDefaultValue)
+          - addPrimaryKey (-> dropPrimaryKey)
+          - addUniqueConstraint (-> dropUniqueConstraint)
+        - Please track this bug at https://dbmanul.atlassian.net/browse/DBM-3 for current information about bug fixing.
+
+
 ------------ DB-Manul forked between version 3.5.3 and Liquibase 3.6.0
 
 Changes in Liquibase version 3.5.2 (2016.09.21)
