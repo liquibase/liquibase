@@ -18,11 +18,7 @@ public class SQLiteIntegrationTest extends AbstractIntegrationTest {
         super("sqlite", DatabaseFactory.getInstance().getDatabase("sqlite"));
         File f = new File("sqlite");
         try {
-            if (f.mkdir()) {
-                System.out.println("Directory Created");
-            } else {
-                System.out.println("Directory is not created");
-            }
+            f.mkdir();
         } catch (Exception e) {
             e.printStackTrace();
         }
