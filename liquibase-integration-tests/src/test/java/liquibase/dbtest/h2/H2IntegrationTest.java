@@ -15,6 +15,9 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.PrintStream;
+
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
     private final String changeSpecifyDbmsChangeLog;
@@ -55,7 +58,15 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         runCompleteChangeLog();
 
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
-        new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, true, null)).print(System.out);
+        File outputFile = new File("diffToChangeLog_" + getDatabase().getShortName() + ".log");
+        if (outputFile.exists())
+            outputFile.delete();
+        PrintStream writer = new PrintStream(outputFile);
+
+        new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, true, null)).print(writer);
+        writer.close();
+
+
     }
 
     @Test
