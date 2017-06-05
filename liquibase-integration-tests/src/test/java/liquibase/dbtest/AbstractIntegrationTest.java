@@ -413,6 +413,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase();
 
         liquibase = createLiquibase(completeChangeLog);
+        liquibase.setChangeLogParameter("loginuser", getUsername());
         liquibase.update(this.contexts, output);
 
         String outputResult = output.getBuffer().toString();
