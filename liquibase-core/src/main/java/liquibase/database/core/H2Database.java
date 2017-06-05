@@ -72,7 +72,18 @@ public class H2Database extends AbstractJdbcDatabase {
     public H2Database() {
         super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("NOW()");
-        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
+        // for current date
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_DATE"));
+        this.dateFunctions.add(new DatabaseFunction("CURDATE"));
+        this.dateFunctions.add(new DatabaseFunction("SYSDATE"));
+        this.dateFunctions.add(new DatabaseFunction("TODAY"));
+        // for current time
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIME"));
+        this.dateFunctions.add(new DatabaseFunction("CURTIME"));
+        // for current timestamp
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
+        this.dateFunctions.add(new DatabaseFunction("NOW"));
+
         super.sequenceNextValueFunction = "NEXTVAL('%s')";
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
         // According to http://www.h2database.com/html/datatypes.html, retrieved on 2017-06-05
