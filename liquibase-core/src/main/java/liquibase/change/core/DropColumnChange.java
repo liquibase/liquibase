@@ -11,7 +11,6 @@ import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -111,6 +110,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
 
         for (ColumnConfig column : columns) {
             if (database instanceof SQLiteDatabase) {
+                // SQLite is special in that it needs multiple SQL statements (i.e. a whole table recreation!) to drop
+                // a single column.
                 statements.addAll(Arrays.asList(generateStatementsForSQLiteDatabase(database, column.getName())));
             } else {
                 dropStatements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
@@ -119,7 +120,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
 
         if (dropStatements.size() == 1) {
             statements.add(dropStatements.get(0));
-        } else {
+        } else if (dropStatements.size() > 1) {
             statements.add(new DropColumnStatement(dropStatements));
         }
 
