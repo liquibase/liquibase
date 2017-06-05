@@ -82,6 +82,7 @@
 		<mysql-connector-java.version>6.0.6</mysql-connector-java.version>
 		<jaybird.version>3.0.0</jaybird.version>
 		<postgresql.version>42.1.1</postgresql.version>
+		<com.h2database.version>1.4.195</com.h2database.version>
 
 	</properties>
 
@@ -284,7 +285,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.195</version>
+				<version>${com.h2database.version}</version>
 			</dependency>
 
 			<dependency>
