@@ -39,6 +39,9 @@ bug list (https://dbmanul.atlassian.net).
 - A crash that could occur when connecting to an SAP SQL Anywhere (formerly Siebel AS Anywhere) database using
   the SAP JDBC driver was fixed thanks to Andreas Pohl (eaa4604b529631b2a1b99aacd5e00ef5c1dd2191)
 
+- [CORE-3014] an empty column description is given in a `<createIndex>` operation, the program crashed with
+  a NullPointerException. Thanks to Tom Hombergs for the bugfix (e567bf5eef2764e2cf7d2e8d4bb21372e8aa3e77)
+  
 ### Database-specific bug fixes
 
 #### Oracle Database
@@ -269,4 +272,5 @@ The maintainer would like to thank the following people:
 - Richard Bradley (https://github.com/RichardBradley) for his patches that helped making the integration tests
   work again.
 - "alex-on-java" for his code cleanup in SpringLiquibase (c738963deeaa8539a4f0e7419db4cbc27d925171)
+- Tom Hombergs for his improvement for an error message during YAML parsing (5e264828ebe28f1ed86cdfc7bfbf4bb6ca05f83f)
 - Nathan Voxland for creating Liquibase (http://www.liquibase.org), the basis for DB-Manul

@@ -4,6 +4,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.DerbyConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -138,8 +140,10 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 }
                 LogFactory.getInstance().getLog().info("Shutting down derby connection: " + url);
                 // this cleans up the lock files in the embedded derby database folder
-                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                Driver driver = (Driver) contextClassLoader.loadClass(driverName).newInstance();
+                JdbcConnection connection = (JdbcConnection) getConnection();
+                ClassLoader classLoader = connection.getWrappedConnection().getClass().getClassLoader();
+                Driver driver = (Driver) classLoader.loadClass(driverName).newInstance();
+                // this cleans up the lock files in the embedded derby database folder
                 driver.connect(url, null);
             } catch (Exception e) {
                 if (e instanceof SQLException) {

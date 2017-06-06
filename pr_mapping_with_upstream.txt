@@ -23,3 +23,10 @@ request number (pr#) to maximise its usefulness. Thank you.
                        (upstream unit tests fail with this and my expertise has not advanced enough to
                        understand / fix it myself)
 668     MERGED         Bug fix for null pointer
+667     MERGED         Adding logic to persist full hierarchy of context expressions into databasechangelog table
+666     MERGED         refactoring: extract methods, decrease level on indention
+665     (TODO)         SAP/Sybase ASE: Liquibase change
+                       Failed to merge, the code base is too far off mine. Asked the original author if he is interested
+                       in rebasing it.
+664     MERGED         [CORE-3013] replaces "error in yaml" with "error in file <FILENAME>"
+663     MERGED         [CORE-3014] validation error on empty column name in CreateIndexChange
