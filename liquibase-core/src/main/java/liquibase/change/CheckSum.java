@@ -42,7 +42,7 @@ public class CheckSum {
      * Return the current CheckSum algorithm version.
      */
     public static int getCurrentVersion() {
-        return 7;
+        return 8;
     }
 
     /**
@@ -64,21 +64,15 @@ public class CheckSum {
         InputStream newStream = stream;
         if (standardizeLineEndings) {
             newStream = new InputStream() {
-                int lastChar = 'X';
-
                 @Override
                 public int read() throws IOException {
                     int read = stream.read();
-                    int returnChar = read;
-                    if (returnChar == '\r') {
-                        returnChar = '\n';
-                    }
-                    if (lastChar == '\r' && returnChar == '\n') {
-                        returnChar = stream.read(); //read next char
-                    }
 
-                    lastChar = read;
-                    return returnChar;
+                    if (read == '\r') {
+                        return read();
+                    } else {
+                        return read;
+                    }
                 }
             };
         }
