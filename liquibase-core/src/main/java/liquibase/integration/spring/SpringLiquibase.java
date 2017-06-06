@@ -47,20 +47,20 @@ import java.util.jar.Manifest;
  * <code>db-changelog.xml</code> from the classpath and apply it against <code>myDataSource</code>.
  * <p/>
  * <p/>
- * 
+ *
  * <pre>
  * &lt;bean id=&quot;myLiquibase&quot;
  *          class=&quot;liquibase.spring.SpringLiquibase&quot;
  *          &gt;
- * 
+ *
  *      &lt;property name=&quot;dataSource&quot; ref=&quot;myDataSource&quot; /&gt;
- * 
+ *
  *      &lt;property name=&quot;changeLog&quot; value=&quot;classpath:db-changelog.xml&quot; /&gt;
- * 
+ *
  * &lt;/bean&gt;
- * 
+ *
  * </pre>
- * 
+ *
  * @author Rob Schoening
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
@@ -76,49 +76,30 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         protected void init() {
             super.init();
             try {
-                Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources("");
-				if (resources.length == 0 || resources.length == 1 && !resources[0].exists()) { //sometimes not able to look up by empty string, try all the liquibase packages
-					Set<String> liquibasePackages = new HashSet<String>();
-					for (Resource manifest : ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources("META-INF/MANIFEST.MF")) {
-						if (manifest.exists()) {
-							InputStream inputStream = null;
-							try {
-								inputStream = manifest.getInputStream();
-								Manifest manifestObj = new Manifest(inputStream);
-								Attributes attributes = manifestObj.getAttributes("Liquibase-Package");
-								if (attributes != null) {
-									for (Object attr : attributes.values()) {
-										String packages = "\\s*,\\s*";
-										;
-										for (String fullPackage : attr.toString().split(packages)) {
-											liquibasePackages.add(fullPackage.split("\\.")[0]);
-										}
-                                    }
-								}
-							} finally {
-								if (inputStream != null) {
-									inputStream.close();
-								}
-							}
-						}
-					}
-
-                    if (liquibasePackages.size() == 0) {
-                        LogFactory.getInstance().getLog().warning("No Liquibase-Packages entry found in MANIFEST.MF. Using fallback of entire 'liquibase' package");
-                        liquibasePackages.add("liquibase");
+                Resource[] resources = getResources("");
+                if (resources.length != 0 && (resources.length != 1 || resources[0].exists())) {
+                    for (Resource res : resources) {
+                        addRootPath(res.getURL());
                     }
+                    return;
+                }
+                //sometimes not able to look up by empty string, try all the liquibase packages
+                Set<String> liquibasePackages = new HashSet<String>();
+                for (Resource manifest : getResources("META-INF/MANIFEST.MF")) {
+                    liquibasePackages.addAll(getPackagesFromManifest(manifest));
+                }
 
-                    for (String foundPackage : liquibasePackages) {
-						resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(foundPackage);
-						for (Resource res : resources) {
-							addRootPath(res.getURL());
-						}
-					}
-				} else {
-					for (Resource res : resources) {
-						addRootPath(res.getURL());
-					}
-				}
+                if (liquibasePackages.size() == 0) {
+                    LogFactory.getInstance().getLog().warning("No Liquibase-Packages entry found in MANIFEST.MF. Using fallback of entire 'liquibase' package");
+                    liquibasePackages.add("liquibase");
+                }
+
+                for (String foundPackage : liquibasePackages) {
+                    for (Resource res : getResources(foundPackage)) {
+                        addRootPath(res.getURL());
+                    }
+                }
+
             } catch (IOException e) {
                 LogFactory.getInstance().getLog().warning("Error initializing SpringLiquibase", e);
             }
@@ -131,10 +112,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			}
 
             Set<String> returnSet = new HashSet<String>();
-            
+
             String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
 
-			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(tempFile));
+			Resource[] resources = getResources(adjustClasspath(tempFile));
 
 			for (Resource res : resources) {
 				Set<String> list = super.list(null, res.getURL().toExternalForm(), includeFiles, includeDirectories, recursive);
@@ -152,7 +133,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 				return null;
 			}
             Set<InputStream> returnSet = new HashSet<InputStream>();
-            Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
+            Resource[] resources = getResources(adjustClasspath(path));
 
             if (resources == null || resources.length == 0) {
                 return null;
@@ -177,6 +158,39 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			}
 			return isPrefixPresent(parentFile) && !isPrefixPresent(file) ? ResourceLoader.CLASSPATH_URL_PREFIX + file : file;
 		}
+
+
+        private Resource[] getResources(String foundPackage) throws IOException {
+            return ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(foundPackage);
+        }
+
+        private Set<String> getPackagesFromManifest(Resource manifest) throws IOException {
+            Set<String> manifestPackages = new HashSet<String>();
+            if (!manifest.exists()) {
+                return manifestPackages;
+            }
+            InputStream inputStream = null;
+            try {
+                inputStream = manifest.getInputStream();
+                Manifest manifestObj = new Manifest(inputStream);
+                Attributes attributes = manifestObj.getAttributes("Liquibase-Package");
+                if (attributes == null) {
+                    return manifestPackages;
+                }
+                for (Object attr : attributes.values()) {
+                    String packages = "\\s*,\\s*";
+                    ;
+                    for (String fullPackage : attr.toString().split(packages)) {
+                        manifestPackages.add(fullPackage.split("\\.")[0]);
+                    }
+                }
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            }
+            return manifestPackages;
+        }
 
 		public boolean isPrefixPresent(String file) {
 			if (file == null) {
@@ -299,7 +313,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	/**
 	 * The DataSource that liquibase will use to perform the migration.
-	 * 
+	 *
 	 * @return
 	 */
 	public DataSource getDataSource() {
@@ -315,7 +329,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	/**
 	 * Returns a Resource that is able to resolve to a file or classpath resource.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getChangeLog() {
@@ -452,7 +466,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	/**
 	 * Subclasses may override this method add change some database settings such as
 	 * default schema before returning the database object.
-	 * 
+	 *
 	 * @param c
 	 * @return a Database implementation retrieved from the {@link DatabaseFactory}.
 	 * @throws DatabaseException
@@ -496,7 +510,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	/**
 	 * Gets the Spring-name of this instance.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getBeanName() {
