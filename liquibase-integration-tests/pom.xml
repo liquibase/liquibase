@@ -207,7 +207,7 @@
 					<systemProperties>
 						<property>
 							<name>liquibase.defaultlogger.level</name>
-							<value>SQL</value>
+							<value>WARNING</value>
 						</property>
 					</systemProperties>
 					<excludes>
@@ -231,7 +231,7 @@
 					<systemProperties>
 						<property>
 							<name>liquibase.defaultlogger.level</name>
-							<value>SQL</value>
+							<value>WARNING</value>
 						</property>
 					</systemProperties>
 					<includes>

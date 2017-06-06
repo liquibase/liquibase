@@ -8,7 +8,7 @@ machine:
 dependencies:
   override:
     - sudo apt-get install -y rpm
-
+    - service mongod stop
 
 compile:
   override:
@@ -17,6 +17,8 @@ compile:
 
 test:
   override:
+    # We may get into trouble if we try to do integration tests that need RDBMS servers running with more than
+    # one server, so we have to split up our integration tests for these.
     - sudo service mysql stop
     - mvn install -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     - sudo service postgresql stop
