@@ -42,6 +42,9 @@ bug list (https://dbmanul.atlassian.net).
 - [CORE-3014] an empty column description is given in a `<createIndex>` operation, the program crashed with
   a NullPointerException. Thanks to Tom Hombergs for the bugfix (e567bf5eef2764e2cf7d2e8d4bb21372e8aa3e77)
   
+- [CORE-3022] a problem with the wrong use of a classloader could cause in a ClassNotFound exception when 
+  DB-Manul is used by other software. This was fixed by Roman Fürst (b6fa2263d2db2a23d42369ee30b0cd11031c22ec)
+  
 ### Database-specific bug fixes
 
 #### Oracle Database

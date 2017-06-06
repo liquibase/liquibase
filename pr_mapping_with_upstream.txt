@@ -30,3 +30,4 @@ request number (pr#) to maximise its usefulness. Thank you.
                        in rebasing it.
 664     MERGED         [CORE-3013] replaces "error in yaml" with "error in file <FILENAME>"
 663     MERGED         [CORE-3014] validation error on empty column name in CreateIndexChange
+662     MERGED         [CORE-3022] Derby Database loads driver from wrong classloader on close
