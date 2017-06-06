@@ -12,6 +12,12 @@ public class StringUtils {
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
     private static final SecureRandom rnd = new SecureRandom();
 
+    /**
+     * Returns the trimmed (left and right) version of the input string. If null is passed, an empty string is returned.
+     *
+     * @param string the input string to trim
+     * @return the trimmed string, or an empty string if the input was null.
+     */
     public static String trimToEmpty(String string) {
         if (string == null) {
             return "";
@@ -19,6 +25,12 @@ public class StringUtils {
         return string.trim();
     }
 
+    /**
+     * Returns the trimmed (left and right) form of the input string. If the string is empty after trimming (or null
+     * was passed in the first place), null is returned, i.e. the input string is reduced to nothing.
+     * @param string the string to trim
+     * @return the trimmed string or null
+     */
     public static String trimToNull(String string) {
         if (string == null) {
             return null;
@@ -74,6 +86,14 @@ public class StringUtils {
         return returnArray.toArray(new String[returnArray.size()]);
     }
 
+    /**
+     * Returns true if the input is a delimiter in one of the popular RDBMSs. Recognized delimiters are: semicolon (;),
+     * a slash (as the only content) or the word GO (as the only content).
+     * @param piece the input line to test
+     * @param previousPiece the characters in the input stream that came before piece
+     * @param endDelimiter ??? (need to see this in a debugger to find out)
+     * @return
+     */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
             return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equals("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
@@ -87,7 +107,7 @@ public class StringUtils {
     }
 
     /**
-     * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
+     * Splits a candidate multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         return processMutliLineSQL(multiLineSQL, false, true, endDelimiter);
@@ -268,6 +288,11 @@ public class StringUtils {
         return true;
     }
 
+    /**
+     * Returns true if ch is a "7-bit-clean" ASCII character (ordinal number < 128).
+     * @param ch the character to test
+     * @return true if 7 bit-clean, false otherwise.
+     */
     public static boolean isAscii(char ch) {
         return ch < 128;
     }
@@ -277,17 +302,24 @@ public class StringUtils {
         int len = str.length();
         for (int i = 0; i < len; i++) {
             char c = str.charAt(i);
-                if (c > 0x7F) {
-                    out.append("&#");
-                    out.append(Integer.toString(c, 10));
-                    out.append(';');
-                } else {
-                    out.append(c);
-                }
+            if (c > 0x7F) {
+                out.append("&#");
+                out.append(Integer.toString(c, 10));
+                out.append(';');
+            } else {
+                out.append(c);
+            }
         }
         return out.toString();
     }
 
+    /**
+     * Adds spaces to the right of the input value until the string has reached the given length. Nothing is done
+     * if the string already has the given length or if the string is even longer.
+     * @param value The string to pad (if necessary)
+     * @param length the desired length
+     * @return the input string, padded if necessary.
+     */
     public static String pad(String value, int length) {
         value = StringUtils.trimToEmpty(value);
         if (value.length() >= length) {
@@ -297,6 +329,13 @@ public class StringUtils {
         return value + StringUtils.repeat(" ", length - value.length());
     }
 
+    /**
+     * Adds spaces to the left of the input value until the string has reached the given length. Nothing is done
+     * if the string already has the given length or if the string is even longer.
+     * @param value The string to pad (if necessary)
+     * @param length the desired length
+     * @return the input string, padded if necessary.
+     */
     public static String leftPad(String value, int length) {
         value = StringUtils.trimToEmpty(value);
         if (value.length() >= length) {
@@ -307,7 +346,7 @@ public class StringUtils {
     }
 
     /**
-     * Null-safe check if string is empty.
+     * Returns true if the input string is the empty string (null-safe).
      *
      * @param value String to be checked
      * @return true if String is null or empty
@@ -317,7 +356,7 @@ public class StringUtils {
     }
 
     /**
-     * Null-safe check if string is not empty
+     * Returns true if the input string is NOT the empty string. If the string is null, false is returned.
      *
      * @param value String to be checked
      * @return true if string is not null and not empty (length > 0)
@@ -340,6 +379,11 @@ public class StringUtils {
         return value.startsWith(startsWith);
     }
 
+    /**
+     * Returns true if the given string only consists of whitespace characters (null-safe)
+     * @param string the string to test
+     * @return true if the string is null or only consists of whitespaces.
+     */
     public static boolean isWhitespace(CharSequence string) {
         if (string == null) {
             return true;
