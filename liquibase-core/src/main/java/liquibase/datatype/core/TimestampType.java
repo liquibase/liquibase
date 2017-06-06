@@ -58,7 +58,7 @@ public class TimestampType extends DateTimeType {
         }
 
         if (database instanceof MySQLDatabase) {
-            if (getRawDefinition().contains(" ") || getRawDefinition().contains("(")) {
+            if (originalDefinition.contains(" ") || originalDefinition.contains("(")) {
                 return new DatabaseDataType(getRawDefinition());
             }
             return super.toDatabaseDataType(database);
