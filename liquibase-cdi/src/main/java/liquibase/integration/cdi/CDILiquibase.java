@@ -108,7 +108,10 @@ public class CDILiquibase implements Extension {
 
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            log.info("DB-Manul did not run on " + hostName + " because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+            log.info(String.format("Liquibase did not run on %s because %s was set to false.",
+                    hostName,
+                    liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN)
+            ));
             return;
         }
         initialized = true;
@@ -125,7 +128,6 @@ public class CDILiquibase implements Extension {
         try {
             c = dataSource.getConnection();
             liquibase = createLiquibase(c);
-            liquibase.getDatabase();
             liquibase.update(new Contexts(config.getContexts()), new LabelExpression(config.getLabels()));
             updateSuccessful = true;
         } catch (SQLException e) {

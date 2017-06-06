@@ -1,7 +1,5 @@
 package liquibase.integration.cdi;
 
-import liquibase.resource.ResourceAccessor;
-
 import java.util.Map;
 
 /**
