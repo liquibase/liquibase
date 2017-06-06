@@ -23,7 +23,7 @@
     <target name="tearDown">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
-        <delete dir="${temp.dir}"/>
+        <!--delete dir="${temp.dir}"/-->
     </target>
 
     <target name="testGenerateChangeLogLegacy">
