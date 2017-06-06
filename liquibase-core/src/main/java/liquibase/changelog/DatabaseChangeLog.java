@@ -53,16 +53,26 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private boolean ignoreClasspathPrefix = false;
 
     private DatabaseChangeLog rootChangeLog = ROOT_CHANGE_LOG.get();
+
     private DatabaseChangeLog parentChangeLog = PARENT_CHANGE_LOG.get();
 
     private ContextExpression contexts;
+
     private ContextExpression includeContexts;
 
     public DatabaseChangeLog() {
     }
 
+    public void setRootChangeLog(DatabaseChangeLog rootChangeLog) {
+        this.rootChangeLog = rootChangeLog;
+    }
+
     public DatabaseChangeLog getRootChangeLog() {
         return rootChangeLog != null ? rootChangeLog : this;
+    }
+
+    public void setParentChangeLog(DatabaseChangeLog parentChangeLog) {
+        this.parentChangeLog = parentChangeLog;
     }
 
     public DatabaseChangeLog getParentChangeLog() {
