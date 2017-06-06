@@ -18,9 +18,26 @@ DB-Manul 0.1:
     - When a warning during validation occured at the change set level, it previously was not printed at all
       (commit b73667d0630ebe0335c1472d999c5d67191fe51f)
 
+    - Invalid output could be written for change set preconditions when serializing into the YAML format. This was
+      fixed thanks to Kamil Kozioł (9a6e9dcb25ff8bf1ce6246b99ad338411b4479c1)
+
+    - A performance problem involving String processing was fixed by Olivier Chédru
+      (6c1e49f70adb6517266f965089d60dc505501e9c)
+
+    - Fixes for crashes and Java exceptions:
+        - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
+          was fixed thanks to "yuxiaobin" (0ea5040caf0175fc36fcaf5b2d375903c777c5eb).
+
+        - A Java exception that could occur when accessing a change log inside a JAR file in combination with relative
+          path names was fixed thanks to Robert Schulte (c41b250a001ded566a2a1d3ff1532b6743ad8760)
+
+        - A crash that could occur when connecting to an SAP SQL Anywhere (formerly Siebel AS Anywhere) database using
+          the SAP JDBC driver was fixed thanks to Andreas Pohl (eaa4604b529631b2a1b99aacd5e00ef5c1dd2191)
+
     Oracle Database-specific:
     - In some situations, valid TIMESTAMP and DATE literals were not recognized. This was fixed in commit
       #c307b0795a01086a60e89026a548745c54c1a79e and affected at least Oracle DB.
+    - A NullPointerException
 
     PostgreSQL-specific:
     - When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
@@ -50,13 +67,18 @@ DB-Manul 0.1:
     - Fixed an issue where PRIMARY KEYs might not get generated. This problem might be related to upstream bug
       "[CORE-1775] Informix error when creating primary key"
 
+    SAP SQL Anywhere (formerly Sybase AS Anywhere)-specific:
+    - Sequences are now supported thanks to Andreas Pohl (b7bd7fc0f7fc6e96e9990dc169507614f861ed05)
+
+
+
     New features
     ============
 
     All supported databases:
 
     Logging:
-      - Completely new logging system during ChangeSet processing, produces (hopefully) better human-readable output.
+      - Completely new logging system during ChangeSet processing produces (hopefully) better human-readable output.
       - Logging only outputs errors and warnings to STDERR now; regular messages are printed to STDOUT. This should make
         log files more readable.
       - The new log level SQL (between DEBUG and INFO) now prints everything INFO does, plus all native SQL statements
@@ -64,6 +86,13 @@ DB-Manul 0.1:
 
     - When snapshotting a schema, a new command line parameter --overwriteOutputFile=true allows overwriting the
       target output file if the user really wants to (e.g. for scripting).
+
+    Bookkeeping of executed change sets:
+    - The full hierarchy of context expressions is now persisted, thanks to Yura Nosenko
+      (d45a41471b17f9e78e211d75d31452239c218d7c)
+
+    CDI:
+        - TODO: detailed description of upstream pr #678 by islonik/Nikita Lipatov
 
     Oracle Database:
     - Oracle support names for NOT NULL constraints. If you want to name yours, these names can now be specified when
@@ -207,6 +236,11 @@ DB-Manul 0.1:
           - addUniqueConstraint (-> dropUniqueConstraint)
         - Please track this bug at https://dbmanul.atlassian.net/browse/DBM-3 for current information about bug fixing.
 
+    Additional thanks to
+    ====================
+
+    - Richard Bradley (https://github.com/RichardBradley) for his patches that helped making the integration tests
+      work again.
 
 ------------ DB-Manul forked between version 3.5.3 and Liquibase 3.6.0
 
