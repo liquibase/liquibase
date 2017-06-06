@@ -39,7 +39,7 @@ Database support:
 - Microsoft SQL Server (MSSQL) (tested: 2016, Express)
   - Problems with default values and DATE/DATETIME etc. columns
   - Tests running on multiple schemas simultaneously fail
-- SAP SQL Anywhere 17 (formerly Sybase AS Anywhere)
+- SAP SQL Anywhere 17 (formerly known as Sybase AS Anywhere)
   - Basic functionality is working
   - Currently failing tests: 
     - runUpdateOnOldChangelogTableFormat (should not affect new users) 
@@ -53,7 +53,7 @@ Database support:
   Currently completely broken due to a regression involving catalog and schema names
 
 **Untested / Work has not started yet:**
-- Sybase AS
+- SAP Adaptive Server Enterprise (ASE) (formely known as Sybase Adaptive Server)
 - Microsoft SQL Server (in case-sensitive mode)
 - Microsoft SQL Server (via JTDS driver)
 - Determine the oldest supported versions of the RDBMSs, procure them, and test compatibility 
