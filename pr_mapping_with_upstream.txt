@@ -10,11 +10,16 @@ request number (pr#) to maximise its usefulness. Thank you.
 =======================================================================================================================
 678     MERGED         Add SchemesCDIConfig+ (it should allow you to create a dependent tree…
 677     MERGED         Fix json serialize fail on changeset precondition enums
-676     NO             [CORE-3063] integration tests that cannot connect should be Ignored not Passed
+676     N/A            [CORE-3063] integration tests that cannot connect should be Ignored not Passed
                        -> Already fixed in DB-Manul
 675     MERGED         [CORE-3063] run integration tests in travis-ci for Pull Requests
+674     MERGED         Fix path handling for ClassLoaderResourceAccessor
 673     MERGED         [CORE-3055] SQLAnywhere: supports Sequences
 672     MERGED         [CORE-3054] SQLAnywhere: java-coredump on changeSet-SQL
-671     NO             [CORE-3051] ASANY supports no CASCADE in DROP TABLE
+671     N/A            [CORE-3051] ASANY supports no CASCADE in DROP TABLE
                        -> Already fixed in DB-Manul
 670     MERGED         [CORE-3050] Do not build string to check StringBuilder is empty
+669     (TODO)         Sets class name in CustomWrapper classes must be normalized.
+                       (upstream unit tests fail with this and my expertise has not advanced enough to
+                       understand / fix it myself)
+668     MERGED         Bug fix for null pointer
