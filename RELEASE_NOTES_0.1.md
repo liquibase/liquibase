@@ -28,6 +28,10 @@ bug list (https://dbmanul.atlassian.net).
 - When creating a differential report or a differential change set of a Microsoft SQL Server, SAP SQL Anywhere or SAP 
   Adaptive Server (ASE) schema, the order of columns could be falsely reported as deviating if columns were ever 
   dropped any of the the compared tables.
+  
+- When a changelog file was included by another changelog and the file did not exist, no warning or error was shown 
+  if the file name in the `<include>` tag did not have an extension. Thanks to Tomas Dvorak for the bugfix
+  (5608dfccf3c50f321d140b3d5f75059f8ce432ac).
 
 #### Crashes and Java exceptions:
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
