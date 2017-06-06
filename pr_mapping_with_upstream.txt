@@ -8,6 +8,8 @@ request number (pr#) to maximise its usefulness. Thank you.
 [pr#] | [merge status] [description]
 (2nd line):            [if not going to be merged: reason]
 =======================================================================================================================
+678     MERGED         Add SchemesCDIConfig+ (it should allow you to create a dependent tree…
+677     MERGED         Fix json serialize fail on changeset precondition enums
 676     NO             [CORE-3063] integration tests that cannot connect should be Ignored not Passed
                        -> Already fixed in DB-Manul
 675     MERGED         [CORE-3063] run integration tests in travis-ci for Pull Requests

@@ -8,6 +8,7 @@ to maximise its usefulness. Thank you.
 
 [Liquibase bug id] [DB-Manul bug id] [if fixed, commit#]                      [short bug description]
 =====================================================================================================================
+[CORE-3063]        none              (several commits)                        Integration tests failing on master
 [CORE-3055]        none              0b2b69fe6f551f121786abb43925997b72601301 SQLAnywhere: supports Sequences
 [CORE-3054]        none              7d8e717571d87b18dcaecb6399011fd6b44c2da5 SQLAnywhere: java-coredump on changeSet-SQL
 [CORE-3051]        none              50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad ASANY supports no CASCADE in DROP TABLE
