@@ -32,7 +32,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             try {
                 parsedYaml = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
+                throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
             }
 
             if (parsedYaml == null || parsedYaml.size() == 0) {
