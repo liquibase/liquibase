@@ -109,11 +109,13 @@ public class CatalogAndSchema {
                 schemaName = schemaName.toLowerCase();
             }
         } else {
-            if (catalogName != null) {
-                catalogName = catalogName.toUpperCase();
-            }
-            if (schemaName != null) {
-                schemaName = schemaName.toUpperCase();
+            if (!accordingTo.isCaseSensitive()) {
+                if (catalogName != null) {
+                    catalogName = catalogName.toUpperCase();
+                }
+                if (schemaName != null) {
+                    schemaName = schemaName.toUpperCase();
+                }
             }
         }
 

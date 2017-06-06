@@ -1,13 +1,28 @@
 machine:
   java:
     version: openjdk8
+  services:
+    - mysql
+    - postgresql
 
 dependencies:
- override:
-  - sudo apt-get install -y rpm
-  - mvn install -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+  override:
+    - sudo apt-get install -y rpm
+
+
+compile:
+  override:
+    - cp -vf liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.circleci.properties liquibase-integration-tests/src/test/resources/liquibase/liquibase.integrationtest.local.properties
+    - mvn compile -B
 
 test:
+  override:
+    - sudo service mysql stop
+    - mvn install -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+    - sudo service postgresql stop
+    - sudo service mysql start
+    - mvn install -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -pl liquibase-integration-tests -Dit.test=MySQLIntegrationTest -DskipUTs=true
+    - sudo service mysql stop
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp -v {} $CIRCLE_TEST_REPORTS/junit/ \;
@@ -18,3 +33,11 @@ test:
     - cp liquibase-core/target/dbmanul*-SNAPSHOT.jar $CIRCLE_ARTIFACTS
     - cp liquibase-rpm/target/rpm/dbmanul/RPMS/noarch/dbmanul-*.noarch.rpm $CIRCLE_ARTIFACTS
     - cp liquibase-debian/target/*.deb $CIRCLE_ARTIFACTS
+
+database:
+  override:
+    - mkdir -p /home/ubuntu/ts_liquibase2
+    - sudo chown postgres.postgres /home/ubuntu/ts_liquibase2
+    - psql postgres -f liquibase-integration-tests/setup/postgresql/create_dbs_for_integration_tests.sql --variable="path_for_tablespace='/home/ubuntu/ts_liquibase2'"
+    - mysql --verbose -u ubuntu mysql < liquibase-integration-tests/setup/mysql/create_dbs_for_integration_tests.sql
+

@@ -28,6 +28,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -41,9 +42,12 @@ import liquibase.test.*;
 import liquibase.util.RegexMatcher;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -73,7 +77,11 @@ public abstract class AbstractIntegrationTest {
     private String objectQuotingStrategyChangeLog;
     private Database database;
     private String jdbcUrl;
-
+    Logger logger;
+    
+    @Rule
+    public TemporaryFolder tempDirectory = new TemporaryFolder();
+    
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
@@ -84,6 +92,7 @@ public abstract class AbstractIntegrationTest {
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
         this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
+        logger = LogFactory.getInstance().getLog();
 
         // Get the integration test properties for both global settings and (if applicable) local overrides.
         Properties integrationTestProperties;
@@ -136,22 +145,6 @@ public abstract class AbstractIntegrationTest {
             return testUrl;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Schedule a file to be deleted when JVM exits.
-     * If file is directory delete it and all sub-directories.
-     */
-    private static void deleteOnExit(final File file) {
-        file.deleteOnExit();
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File child : files) {
-                    deleteOnExit(child);
-                }
-            }
         }
     }
 
@@ -251,7 +244,9 @@ public abstract class AbstractIntegrationTest {
                             new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, null),
                             new CatalogAndSchema(null, DatabaseTestContext.ALT_SCHEMA),
                             new CatalogAndSchema("LBCAT2", database.getDefaultSchemaName()),
-                            new CatalogAndSchema(null, "LBCAT2")
+                            new CatalogAndSchema(null, "LBCAT2"),
+                            new CatalogAndSchema("lbcat2", database.getDefaultSchemaName()),
+                            new CatalogAndSchema(null, "lbcat2")
                     };
                     for (CatalogAndSchema location: alternativeLocations) {
                         emptyTestSchema(location.getCatalogName(), null, database);
@@ -639,8 +634,8 @@ public abstract class AbstractIntegrationTest {
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
-            File tempFile = File.createTempFile("liquibase-test", ".xml");
-            deleteOnExit(tempFile);
+            File tempFile = tempDirectory.getRoot().createTempFile("liquibase-test", ".xml");
+            
             if (outputCsv) {
                 diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
             }
@@ -893,15 +888,13 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", getUsername());
         liquibase.update(this.contexts);
 
-        File outputDir = File.createTempFile("liquibase-dbdoctest", "dir");
-        outputDir.delete();
-        outputDir.mkdir();
+        Path outputDir = tempDirectory.newFolder().toPath().normalize();
+        logger.debug("Database documentation will be written to this temporary folder: " + outputDir);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
-        liquibase.generateDocumentation(outputDir.getAbsolutePath(), this.contexts);
+        liquibase.generateDocumentation(outputDir.toAbsolutePath().toString(), this.contexts);
 
-        deleteOnExit(outputDir);
     }
 
     /**

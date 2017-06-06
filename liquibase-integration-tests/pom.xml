@@ -207,7 +207,7 @@
 					<systemProperties>
 						<property>
 							<name>liquibase.defaultlogger.level</name>
-							<value>WARNING</value>
+							<value>SQL</value>
 						</property>
 					</systemProperties>
 					<excludes>
@@ -227,10 +227,11 @@
 					</execution>
 				</executions>
 				<configuration>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<systemProperties>
 						<property>
 							<name>liquibase.defaultlogger.level</name>
-							<value>WARNING</value>
+							<value>SQL</value>
 						</property>
 					</systemProperties>
 					<includes>

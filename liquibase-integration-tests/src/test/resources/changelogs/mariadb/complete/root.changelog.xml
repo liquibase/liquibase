@@ -306,7 +306,7 @@
         <sqlFile path="changelogs/mariadb/complete/sample.sql" stripComments="true"/>
     </changeSet>
 
-    <include file="changelogs\mariadb\complete\included.changelog.xml"/>
+    <include file="changelogs/mariadb/complete/included.changelog.xml"/>
 
     <include file="changelogs/mariadb/complete/renamed.changelog.xml"/>
 
@@ -314,7 +314,7 @@
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
 
-    <include file="../../common/schema.tests.changelog.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/common/schema.tests.changelog.xml" relativeToChangelogFile="true"/>
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">

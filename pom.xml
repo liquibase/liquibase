@@ -56,6 +56,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+		<!-- To skip all tests, pass -Dmaven.test.skip=true on the command line. Alternatively, pass
+		     -DskipITs=true to skip only the integration tests, or -DskipUTs=true to only skip the
+		     unit tests. -->
+		<skipTests>false</skipTests>
+		<skipITs>${skipTests}</skipITs>
+		<skipUTs>${skipTests}</skipUTs>
+
 		<!-- Liquibase core dependencies and required jars versions -->
 		<org.springframework.version>4.3.8.RELEASE</org.springframework.version>
 		<snakeyaml.version>1.18</snakeyaml.version>
@@ -395,7 +402,7 @@
 
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.0.2</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -407,6 +414,7 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<reportFormat>plain</reportFormat>
+						<skipTests>${skipUTs}</skipTests>
 					</configuration>
 				</plugin>
 
@@ -414,6 +422,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${maven-failsafe-plugin.version}</version>
+					<configuration>
+						<skipTests>${skipTests}</skipTests>
+						<skipITs>${skipITs}</skipITs>
+					</configuration>
 					<executions>
 						<execution>
 							<id>integration-test</id>
@@ -569,6 +581,7 @@
 					<artifactId>maven-plugin-plugin</artifactId>
 					<version>2.6</version>
 				</plugin>
+
 			</plugins>
 		</pluginManagement>
 	</build>

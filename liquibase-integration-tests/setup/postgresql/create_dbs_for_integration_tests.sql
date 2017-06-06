@@ -2,9 +2,13 @@
 /*
  * IMPORTANT!
  *
- * For this script to work, you MUST adjust the tablespace directory at the end of this script so that it fits
- * your environment (unless you are running pgsql 9.6 on Windows using the default installation directory)
+ * If you want to run this script outside of the CI environment, you must replace :path_for_tablespace with an
+ * absolute path on your filesystem. This path must already exist and it should be empty.
  */
+
+DROP DATABASE IF EXISTS liquibase;
+DROP TABLESPACE IF EXISTS liquibase2;
+DROP USER IF EXISTS lbuser;
 
 CREATE USER lbuser WITH
 	LOGIN
@@ -20,7 +24,7 @@ COMMENT ON ROLE lbuser IS 'Integration test user for DB-Manul (based on Liquibas
 
 CREATE DATABASE liquibase
 WITH
-OWNER = postgres
+OWNER = default
 ENCODING = 'UTF8'
 CONNECTION LIMIT = -1;
 
@@ -29,8 +33,10 @@ IS 'LB catalog/database for integration tests';
 
 GRANT ALL ON DATABASE liquibase TO lbuser;
 
+\c liquibase
+
 CREATE SCHEMA lbschem2
-	AUTHORIZATION postgres;
+  AUTHORIZATION lbuser;
 
 COMMENT ON SCHEMA lbschem2
 IS 'Testing schema for integration tests';
@@ -49,12 +55,10 @@ GRANT EXECUTE ON FUNCTIONS TO lbuser;
 ALTER DEFAULT PRIVILEGES IN SCHEMA lbschem2
 GRANT USAGE ON TYPES TO lbuser;
 
-CREATE TABLESPACE liquibase2
-	OWNER postgres
-LOCATION 'C:\Program Files\PostgreSQL\9.6\data';
+CREATE TABLESPACE liquibase2 LOCATION :path_for_tablespace;
 
 ALTER TABLESPACE liquibase2
-OWNER TO postgres;
+OWNER TO lbuser;
 
 COMMENT ON TABLESPACE liquibase2
 IS 'A testing tablespace for integration tests';
@@ -62,7 +66,7 @@ IS 'A testing tablespace for integration tests';
 GRANT CREATE ON TABLESPACE liquibase2 TO lbuser;
 
 CREATE SCHEMA lbcat2
-	AUTHORIZATION postgres;
+  AUTHORIZATION lbuser;
 
 COMMENT ON SCHEMA lbcat2
 IS 'Testing schema for integration tests';
