@@ -15,6 +15,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtils;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
@@ -29,6 +30,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -100,6 +103,17 @@ public abstract class BaseLiquibaseTask extends Task {
         return liquibase;
     }
 
+
+    /**
+     * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
+     *
+     * @return Returns null in this implementation. Subclasses that need a change log should implement.
+     * @see AbstractChangeLogBasedTask#getChangeLogDirectory()
+     */
+    public String getChangeLogDirectory() {
+      return null;
+    }
+
     /**
      * This method is designed to be overridden by subclasses when a change log is needed. By default it returns null.
      *
@@ -142,9 +156,15 @@ public abstract class BaseLiquibaseTask extends Task {
      * @return A ResourceAccessor.
      */
     private ResourceAccessor createResourceAccessor(ClassLoader classLoader) {
-        FileSystemResourceAccessor fileSystemResourceAccessor = new FileSystemResourceAccessor();
-        ClassLoaderResourceAccessor classLoaderResourceAccessor = new ClassLoaderResourceAccessor(classLoader);
-        return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
+        List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+        resourceAccessors.add(new FileSystemResourceAccessor());
+        resourceAccessors.add(new ClassLoaderResourceAccessor(classLoader));
+        String changeLogDirectory = getChangeLogDirectory();
+        if (changeLogDirectory != null) {
+          changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
+          resourceAccessors.add(new FileSystemResourceAccessor(changeLogDirectory));
+        }
+        return new CompositeResourceAccessor(resourceAccessors);
     }
 
     /**
