@@ -10,7 +10,7 @@ bug list (https://dbmanul.atlassian.net).
 
 ### Most or all supported databases:
 
-#### False bevaviour / wrong results
+#### False behaviour / wrong results
 
 - When creating a Index using the <createIndex> change type, the sort order for the columns was ignored. This was
   fixed. However, Firebird SQL only supports indexes with all columns ordered either ascending or descending; when
@@ -44,11 +44,10 @@ bug list (https://dbmanul.atlassian.net).
 #### Oracle Database
 - In some situations, valid TIMESTAMP and DATE literals were not recognized. This was fixed in commit
   c307b0795a01086a60e89026a548745c54c1a79e and affected at least Oracle DB.
-- A NullPointerException
 
 #### PostgreSQL
 - When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
-  This was fixed by commit 88f76fc67f10f17e02cd2909fea876ff904777c4
+  This was fixed by commit 88f76fc67f10f17e02cd2909fea876ff904777c4.
 - When snapshotting a PostgreSQL schema with a column of type "oid", the data type was wrongly snapshotted as
   "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid"
   (commit a96e3c84785f693d25063538257cc0c8cf0deced)
@@ -66,9 +65,9 @@ bug list (https://dbmanul.atlassian.net).
   was generated.
 
 #### Microsoft SQL Server
-- When snapshotting a SQL Server database, invalid "[]." prefixes that appear in front of identifiers could be generated
+- When snapshotting a SQL Server database, invalid `[].` prefixes that appear in front of identifiers could be generated
   due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
-  commit cabacfe3593324f5223e53496d80c894f48abfa2
+  commit cabacfe3593324f5223e53496d80c894f48abfa2.
 
 #### IBM Informix
 - Fixed an issue where PRIMARY KEYs might not get generated. This problem might be related to upstream bug
@@ -106,7 +105,7 @@ sent to a database instance.
         <addNotNullConstraint tableName="NOTNULL_NAMING_TEST" columnName="testcol2" constraintName="NN_NAMING_TEST_TESTCOL2_NN" />
     </changeSet>
 
-- Snapshotting an Oracle schema now extract the TABLESPACE property of each table (if it is not the default
+- Snapshotting an Oracle schema now extracts the TABLESPACE property of each table (if it is not the default
   tablespace for the connecting user).
 
 ### Miscellaneous
@@ -127,7 +126,7 @@ Incompatibilities
 
 ### Issues affecting some or all supported databases
 
-- Cointrary to Liquibase, DB-Manul tries to include as much meta data in the diff changelogs as possible, and
+- Contrary to Liquibase, DB-Manul tries to include as much metadata in the diff changelogs as possible, and
   will include catalog and schema names for all objects (unless they are the default catalog and/or
   schema of the database user making the snapshot). For tables and indexes, tablespace names are included by
   default. However, if not desired, these options can be switched off using the command line parameters
@@ -148,7 +147,7 @@ Unfortunately, supporting very old versions of DBMS is extremely difficult becau
 
 Due to this, please understand that the general policy is to support only DBMS which are not completely EOL yet
 (e.g. for Oracle Database, we try to support all versions that at least still have Extended Support). DB-Manul
-will refuse to connect to unsupported software versions to prevent schema corruption from SQL statement that have
+will refuse to connect to unsupported software versions to prevent schema corruption from SQL statements that have
 adverse effects in old software versions.
 
 ### Microsoft SQL Server
@@ -162,7 +161,7 @@ adverse effects in old software versions.
   https://docs.microsoft.com/en-us/sql/t-sql/data-types/ntext-text-and-image-transact-sql
   (commit cf667c6945a5902c54030146ca6929541b7d10f1)
 
-- Because DB-Manul is now based in JDK 8, you must upgrade your JDBC driver to version 6.1.0.jre8 or newer.
+- Because DB-Manul is based on JDK 8, you must upgrade your JDBC driver to version 6.1.0.jre8 or newer.
 
 ### MySQL and MariaDB
 
@@ -172,38 +171,40 @@ adverse effects in old software versions.
   connecting to a MySQL server. You can have both JDBC drivers in the classpath and DB-Manul will use the
   right one as long as your JDBC URL is configured correctly.
 
-- Because DB-Manul is now based in JDK 8, you must upgrade your MariaDB JDBC driver to version 2.0.2 (includes an
+- Because DB-Manul is based on JDK 8, you must upgrade your MariaDB JDBC driver to version 2.0.2 (includes an
   important bugfix regarding CONSTRAINT metadata) and/or your MySQL J-Connector to version 6.0.6 or higher.
 
 ### Oracle Database
 
-- Because DB-Manul is now based in JDK 8, you must upgrade your Oracle JDBC thin client to at least version 12.2.0.1.
+- Because DB-Manul is based on JDK 8, you must upgrade your Oracle JDBC thin client to at least version 12.2.0.1.
   Even if you are using this new version, you can connect to any Oracle RDBMS instance that is currently under support
-  by Oracle Corporation, i.e. Release 11gR2 or newer. Server version 11.2.0.4 has been tested, 11.2.0.1 could work in
-  theory, but has not been tested and is not a recommended configuration.
+  by Oracle Corporation, i.e. Release 11gR2 or newer. Server version 11.2.0.4 has been tested, connecting to version
+  11.2.0.1 (=11gR2 without any patch set updates) could work theoretically, but has not been tested and is not a 
+  recommended configuration.
 
 ### Firebird SQL
 
-- Because DB-Manul is now based in JDK 8, you must upgrade your Firebird SQL JDBC driver "Jaybird" to version 3.0.0
+- Because DB-Manul is based on JDK 8, you must upgrade your Firebird SQL JDBC driver "Jaybird" to version 3.0.0
   or newer. 
 - **You will most likely need to modify your JDBC connection string due to new requirements by the
   driver** (e.g. declaration of character sets)
 
 ### PostgreSQL
 
-- Because DB-Manul is now based in JDK 8, you must upgrade your PostgreSQL JDBC driver to version 42.1.1 or newer.
+- Because DB-Manul is based on JDK 8, you must upgrade your PostgreSQL JDBC driver to version 42.1.1 or newer.
 - PostgreSQL versions below 9.2 are desupported by postgresql.org (https://www.postgresql.org/support/versioning/).
   DB-Manul will refuse to connect to versions below 9.2.
 
 ### Apache Derby
 
-- Because DB-Manul is now based in JDK 8, you must upgrade your Apache Derby JDBC driver to version 10.13.1.1 or newer.
+- Because DB-Manul is based on JDK 8, you must upgrade your Apache Derby JDBC driver to version 10.13.1.1 or newer.
 
 ### IBM DB2 (Linux/Unix/Windows)
 
-- The <dropDefaultValue> operation now does not fail with an SQL error if the column does not have a default value
-  in the first place (i.e. there is nothing to do). This makes the behaviour consistent with other RDBMSs that do not
-  care if the column had a default value (commit b24e88ac3cae362ee23be372e4ed8f66589e0ec2)
+- The `<dropDefaultValue>` operation will not fail with an SQL error anymore if the column did not have a default 
+  value in the first place (i.e. there is nothing to do). This makes the behaviour consistent with other RDBMSs 
+  that do not care if the column had a default value before dropping the default 
+  (commit b24e88ac3cae362ee23be372e4ed8f66589e0ec2)
 
 ### IBM Informix SQL
 
@@ -219,7 +220,7 @@ adverse effects in old software versions.
   with the native INTERVAL HOUR TO FRACTION(5). This will ensure the DB-Manul will not try to change the data type.
 
     Abstract datatype     Liquibase 3.6.0 uses this      DB-Manul uses this
-    ================================================================================================
+    ############################################################################################################
     DATE                  DATE                           (same)
     DATETIME              DATETIME YEAR TO FRACTION(5)   (same)
     TIME                  INTERVAL HOUR TO FRACTION(5)   DATETIME HOUR TO FRACTION(5)
@@ -228,7 +229,7 @@ adverse effects in old software versions.
 environment variable or in the connection string.
 
 - Because there seems to be no locale-independent way of expressing a DATE default value for a DATE column,
-DB-Manul **requires the GL_DATE variable to be set to %iY-%m-%d**
+DB-Manul **requires the GL_DATE variable to be set to `%iY-%m-%d`**
 
   Example for a working JDBC connection string:
   
@@ -242,11 +243,11 @@ DB-Manul **requires the GL_DATE variable to be set to %iY-%m-%d**
 Known bugs and problems
 =======================
 
-Unfortunately, there are some.
+Regrettably, yes.
 
 ### SQLite
 
-#### DBM-3 - Several broken SQLite operations relating to ALTER TABLE code
+#### [DBM-3] - Several broken SQLite operations relating to ALTER TABLE code
 
 - The following change types (and their reverse/rollback counterparts) are currently not possible in combination
   with SQLite:
@@ -257,7 +258,8 @@ Unfortunately, there are some.
     - addPrimaryKey (-> dropPrimaryKey)
     - addUniqueConstraint (-> dropUniqueConstraint)
 
-- Please track this bug at https://dbmanul.atlassian.net/browse/DBM-3 for current information about bug fixing.
+- Please track this bug at 
+  https://dbmanul.atlassian.net/browse/DBM-3 for current information about bug fixing.
 
 Further credits and acknowledgements 
 ====================================
@@ -267,4 +269,4 @@ The maintainer would like to thank the following people:
 - Richard Bradley (https://github.com/RichardBradley) for his patches that helped making the integration tests
   work again.
 - "alex-on-java" for his code cleanup in SpringLiquibase (c738963deeaa8539a4f0e7419db4cbc27d925171)
-- Nathan Voxland for creating Liquibase, the basis for DB-Manul
+- Nathan Voxland for creating Liquibase (http://www.liquibase.org), the basis for DB-Manul
