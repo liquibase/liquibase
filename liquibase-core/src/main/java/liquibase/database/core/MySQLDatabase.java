@@ -27,7 +27,7 @@ import java.util.Set;
  * Encapsulates MySQL database support.
  */
 public class MySQLDatabase extends AbstractJdbcDatabase {
-    public static final String PRODUCT_NAME = "MySQL";
+    private static final String PRODUCT_NAME = "MySQL";
     private static Set<String> reservedWords = new HashSet();
     private Boolean hasJdbcConstraintDeferrableBug;
 
@@ -266,12 +266,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 "YEAR_MONTH",
                 "ZEROFILL"));
     }
-
-
-//todo: handle    @Override
-//    public String getConnectionUsername() throws DatabaseException {
-//        return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
-//    }
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
