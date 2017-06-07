@@ -18,6 +18,7 @@ Last updated: June 7th, 2017
 - Status of integration tests for Open Source DBMS (except Firebird, working on that): 
     https://circleci.com/gh/dbmanul/dbmanul
 - Issue tracking: https://dbmanul.atlassian.net
+- SONAR/Code quality improvement progress: https://sonarcloud.io/dashboard?id=org.dbmanul%3Adbmanul-parent
 - Unmerged PR progress: most upstream prs in the range #678 down to #652 
 
 Database support:
