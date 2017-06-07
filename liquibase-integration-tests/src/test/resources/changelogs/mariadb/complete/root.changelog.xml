@@ -314,7 +314,7 @@
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
 
-    <include file="changelogs/common/schema.tests.changelog.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/common/schema.tests.changelog.xml"/>
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">
