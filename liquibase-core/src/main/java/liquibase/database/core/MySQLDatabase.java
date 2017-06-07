@@ -485,7 +485,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
      * We need to know about this because this could lead to errors in database snapshots.
      * @return true if this database is affected, false if not, null if we cannot tell (e.g. OfflineConnection)
      */
-    public Boolean hasBugJdbcConstraintsDeferrable() {
+    @SuppressWarnings("squid:S2447") // null is explicitly documented as a possible return value.
+    // TODO: MariaDB connector 2.0.2 appearantly fixes this problem, and MySQL-ConnectorJ 6.0.6 did not have it in
+    // the first place.. Replace this crude workaround with a proper JDBC driver version check
+    public Boolean hasBugJdbcConstraintsDeferrable() throws DatabaseException {
         if (getConnection() instanceof OfflineConnection)
             return null;
         if (getHasJdbcConstraintDeferrableBug() != null)  // cached value
@@ -526,15 +529,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         } catch (DatabaseException|SQLException e) {
             throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug.", e);
         } finally {
-            try {
                 ExecutorService.getInstance().reset();
                 ExecutorService.getInstance().getExecutor(this).execute(
                         new RawSqlStatement("DROP TABLE " + randomIdentifier));
-            } catch (DatabaseException e) {
-                throw new UnexpectedLiquibaseException("Error during testing for MySQL/MariaDB JDBC driver bug. " +
-                        "Could not drop the temporary test table " + randomIdentifier + ". You will need to remove it " +
-                        "manually. Sorry.", e);
-            }
         }
 
         return getHasJdbcConstraintDeferrableBug();

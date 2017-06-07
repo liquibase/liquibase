@@ -183,8 +183,6 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 else
                     deferrability = row.getShort(METADATA_DEFERRABILITY);
                 
-
-                
                 // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
                 // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
                 if (deferrability == 0 || deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
