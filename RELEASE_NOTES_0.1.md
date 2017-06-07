@@ -19,7 +19,7 @@ bug list (https://dbmanul.atlassian.net).
 - When a warning during validation occured at the change set level, it previously was not printed at all
   (commit b73667d0630ebe0335c1472d999c5d67191fe51f)
 
-- Invalid output could be written for change set preconditions when serializing into the YAML format. This was
+- Invalid output could be written for change set preconditions when serialising into the YAML format. This was
   fixed thanks to Kamil Kozioł (9a6e9dcb25ff8bf1ce6246b99ad338411b4479c1)
 
 - A performance problem involving String processing was fixed by Olivier Chédru
@@ -114,7 +114,7 @@ sent to a database instance.
 
 ### Oracle Database
 
-- Oracle support names for NOT NULL constraints. If you want to name yours, these names can now be specified when
+- Oracle supports names for NOT NULL constraints. If you want to name yours, these names can now be specified when
   creating them using the new attribute notNullConstraintName.
 
     <changeSet id="notNullConstraintNamingTest" author="abuschka">
@@ -156,7 +156,7 @@ Incompatibilities
   `--includeCatalog=false`, `--includeSchema=false` and/or `--includeTablespace=false`.
 
 - Change sets targeted at MySQL/MariaDB and MS SQL Server must now specify tableName in dropIndex changes
-  (although ommitting this was allowed before, it produced syntax errors in the generated SQL)
+  (although omitting this was allowed before, it produced syntax errors in the generated SQL)
 
 ### DB-Manul support policy for older DBMS software versions
 
