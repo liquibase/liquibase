@@ -9,6 +9,8 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,11 +45,11 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
    */
   protected String contexts;
 
-    /**
-     * The Liquibase labels to execute, which can be "," separated if multiple labels
-     * are required or a more complex expression. If no label is specified then ALL all will be executed.
-     * @parameter expression="${liquibase.labels}" default-value=""
-     */
+  /**
+   * The Liquibase labels to execute, which can be "," separated if multiple labels
+   * are required or a more complex expression. If no label is specified then ALL all will be executed.
+   * @parameter expression="${liquibase.labels}" default-value=""
+   */
   protected String labels;
 
   @Override
@@ -83,22 +85,35 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
     resourceAccessors.add(new MavenResourceAccessor(cl));
     resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath()));
-
-    String theChangeLogDirectory = changeLogDirectory;
-    if (theChangeLogDirectory != null) {
-      theChangeLogDirectory = theChangeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
-      resourceAccessors.add(new FileSystemResourceAccessor(theChangeLogDirectory));
+    
+    if (changeLogDirectory != null) {
+      calculateChangeLogDirectoryAbsolutePath();
+      resourceAccessors.add(new FileSystemResourceAccessor(changeLogDirectory));
     }
+    
     return new CompositeResourceAccessor(resourceAccessors);
   }
 
   @Override
   protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        try {
-            String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
-            return new Liquibase(changeLog, fo, db);
-        } catch (LiquibaseException ex) {
-            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
-        }
+      try {
+          String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
+          return new Liquibase(changeLog, fo, db);
+      } catch (LiquibaseException ex) {
+          throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
+      }
+  }
+
+  private void calculateChangeLogDirectoryAbsolutePath() {
+    if (changeLogDirectory != null) {
+      // convert to standard / if using absolute path on windows
+      changeLogDirectory = changeLogDirectory.trim().replace('\\', '/');
+      // try to know if it's an absolute or relative path : the absolute path case is simpler and don't need more actions
+      File changeLogDirectoryFile = new File(changeLogDirectory);
+      if (!changeLogDirectoryFile.isAbsolute()) {
+        // we are in the relative path case
+        changeLogDirectory = project.getBasedir().getAbsolutePath().replace('\\', '/') + "/" + changeLogDirectory;
+      }
+    }
   }
 }
