@@ -51,17 +51,6 @@ bug list (https://dbmanul.atlassian.net).
   
 ### Database-specific bug fixes
 
-#### Oracle Database
-- In some situations, valid TIMESTAMP and DATE literals were not recognized. This was fixed in commit
-  c307b0795a01086a60e89026a548745c54c1a79e and affected at least Oracle DB.
-
-#### PostgreSQL
-- When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
-  This was fixed by commit 88f76fc67f10f17e02cd2909fea876ff904777c4.
-- When snapshotting a PostgreSQL schema with a column of type "oid", the data type was wrongly snapshotted as
-  "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid"
-  (commit a96e3c84785f693d25063538257cc0c8cf0deced)
-
 #### HyperSQL
 - The Liquibase macro current_datetime for a column default (replaced by the DBMS-specific function for getting the
   current date and/or time) did not work in HyperSQL. This was fixed in commit 23ef71b3a2c6ef872d7c27ef55f67cf4cc1b65ee
@@ -74,19 +63,36 @@ bug list (https://dbmanul.atlassian.net).
   spaces. This caused various comparisons to fail and, as a consequence, invalid snapshot change sets and/or SQL
   was generated.
 
-#### Microsoft SQL Server
-- When snapshotting a SQL Server database, invalid `[].` prefixes that appear in front of identifiers could be generated
-  due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
-  commit cabacfe3593324f5223e53496d80c894f48abfa2.
+#### IBM DB2
+- [CORE-2773] Detection of DB2 on AS400 did not work properly - fixed thanks to Martin Aberle 
+  (f425f011638db46b0bdc6a680e2d2e5f014feb8d)
 
 #### IBM Informix
 - Fixed an issue where PRIMARY KEYs might not get generated. This problem might be related to upstream bug
   "[CORE-1775] Informix error when creating primary key"
 
+#### Microsoft SQL Server
+- When snapshotting a SQL Server database, invalid `[].` prefixes that appear in front of identifiers could be generated
+  due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
+  commit cabacfe3593324f5223e53496d80c894f48abfa2.
+
+#### Oracle Database
+- In some situations, valid TIMESTAMP and DATE literals were not recognized. This was fixed in commit
+  c307b0795a01086a60e89026a548745c54c1a79e and affected at least Oracle DB.
+
+#### PostgreSQL
+- When creating columns with an auto-increment function in PostgreSQL, it was possible for invalid SQL to be generated.
+  This was fixed by commit 88f76fc67f10f17e02cd2909fea876ff904777c4.
+- When snapshotting a PostgreSQL schema with a column of type "oid", the data type was wrongly snapshotted as
+  "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid"
+  (commit a96e3c84785f693d25063538257cc0c8cf0deced)
+
 #### SAP SQL Anywhere (formerly Sybase AS Anywhere)
 - Sequences are now supported thanks to Andreas Pohl (b7bd7fc0f7fc6e96e9990dc169507614f861ed05)
-
+- In the operation `<dropUniqueConstraint>`, wrong sql in the form `ALTER TABLE ... DROP UNIOQUE (null)` was 
+  generated (c133369a5b6f0530d3cdd862a5bac3edbfd69319)
 - [CORE-3009] Wrong SQL was generated for the dropDefaultValue operation, fixed by Andreas Pohl (968bd791c91f6caa36271346ce66537260d9fbc9 )
+
 
 New features
 ------------
@@ -100,6 +106,11 @@ New features
 log files more readable.
 - The new log level SQL (between DEBUG and INFO) now prints everything INFO does, plus all native SQL statements
 sent to a database instance.
+
+### IBM DB2
+
+- [CORE-2993] Specifying the ORDERED attribute for a `<createSequence>` operation works now thanks to Martin Aberle 
+  (b5717eb7a6482ccf204d4bfc0656a8564a67e4e0)
 
 ### Oracle Database
 
@@ -257,9 +268,9 @@ Known bugs and problems
 
 Regrettably, yes.
 
-### SQLite
+## SQLite
 
-#### [DBM-3] - Several broken SQLite operations relating to ALTER TABLE code
+### [DBM-3] - Several broken SQLite operations relating to ALTER TABLE code
 
 - The following change types (and their reverse/rollback counterparts) are currently not possible in combination
   with SQLite:

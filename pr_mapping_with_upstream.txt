@@ -36,3 +36,16 @@ request number (pr#) to maximise its usefulness. Thank you.
                        In general, ALTER TABLE ... ALTER COLUMN ... SET DEFAULT works in MySQL/MariaDB - maybe
                        the problem only happens with certain expressions for defaultValue?
 659     MERGED         [CORE-3009] ASANY Drop Default Value failed
+658     GONE
+657     GONE
+656     MERGED         [CORE-2993] createSequence with order enabled for DB2
+655     MERGED         [CORE-2773] Detection of DB2/AS400 improved
+654     REJECTED       Mark failed changeset executions in the databasechangelog
+                       The behaviour changes so that the same change set is not executed again until the identifier
+                       changes - I don't think that's a good thing, it makes bugfixing of changesets inconvenient
+                       for developers
+653     N/A            [CORE-3003] SQLAnywhere: Owner/Schema-Identifier at index-names not allowed
+                       -> already fixed in DB-Manul
+652     N/A            [CORE-3002] SQLAnywhere: DROP UNIQUE CONSTRAINT fails
+                       -> already fixed in DB-Manul
+596     DUPLICATE      of pr #655

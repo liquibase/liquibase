@@ -9,7 +9,7 @@ This fork of the Liquibase source aims to provide:
 Current status summary
 ======================
 
-Last updated: June 6th, 2017
+Last updated: June 7th, 2017
 
 **PLEASE NOTE THAT THE FORK, IN GENERAL, SHOULD BE CONSIDERED UNSTABLE FOR THE MOMENT.**
     A lot of work is currently being done to get all integration tests (OSS + commercial RDBMSs) green; manual testing of features like CDI, RPM/Debian packaging, Spring integration etc. comes after that.   
@@ -17,7 +17,8 @@ Last updated: June 6th, 2017
 - General functionality/unit tests: OK
 - Status of integration tests for Open Source DBMS (except Firebird, working on that): 
     https://circleci.com/gh/dbmanul/dbmanul
-- Issue tracking: https://dbmanul.atlassian.net     
+- Issue tracking: https://dbmanul.atlassian.net
+- Unmerged PR progress: most upstream prs in the range #678 down to #652 
 
 Database support:
 -----------------
