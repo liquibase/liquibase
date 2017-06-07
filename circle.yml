@@ -24,9 +24,8 @@ test:
       sudo service postgresql stop &&
       sudo service mysql start &&
       mvn install -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -pl liquibase-integration-tests -Dit.test=MySQLIntegrationTest -DskipUTs=true &&
-      mvn sonar:sonar -pl liquibase-core -Dsonar.host.url=https://sonarcloud.io  -Dsonar.organization=dbmanul-github
-      -Dsonar
-      .login=$SONARQUBE_TOKEN &&
+      mvn -pl liquibase-core -Dsonar.host.url=https://sonarcloud.io  -Dsonar.organization=dbmanul-github
+      -Dsonar.login=$SONARQUBE_TOKEN clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar &&
       sudo service mysql stop
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
