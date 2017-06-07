@@ -20,6 +20,13 @@ import org.apache.maven.plugin.MojoFailureException;
 public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMojo {
 
   /**
+   * Specifies the change log directory into which liquibase can find the change log file.
+   * 
+   * @parameter expression="${liquibase.changeLogDirectory}"
+   */
+  protected String changeLogDirectory;
+
+  /**
    * Specifies the change log file to use for Liquibase.
    * @parameter expression="${liquibase.changeLogFile}"
    */
