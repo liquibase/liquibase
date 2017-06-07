@@ -9,6 +9,9 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -69,16 +72,24 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
   @Override
   protected void printSettings(String indent) {
     super.printSettings(indent);
+    getLog().info(indent + "changeLogDirectory: " + changeLogDirectory);
     getLog().info(indent + "changeLogFile: " + changeLogFile);
     getLog().info(indent + "context(s): " + contexts);
-      getLog().info(indent + "label(s): " + labels);
+    getLog().info(indent + "label(s): " + labels);
   }
 
   @Override
   protected ResourceAccessor getFileOpener(ClassLoader cl) {
-    ResourceAccessor mFO = new MavenResourceAccessor(cl);
-    ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
-    return new CompositeResourceAccessor(mFO, fsFO);
+    List<ResourceAccessor> resourceAccessors = new ArrayList<ResourceAccessor>();
+    resourceAccessors.add(new MavenResourceAccessor(cl));
+    resourceAccessors.add(new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath()));
+
+    String theChangeLogDirectory = changeLogDirectory;
+    if (theChangeLogDirectory != null) {
+      theChangeLogDirectory = theChangeLogDirectory.trim().replace('\\', '/');  //convert to standard / if using absolute path on windows
+      resourceAccessors.add(new FileSystemResourceAccessor(theChangeLogDirectory));
+    }
+    return new CompositeResourceAccessor(resourceAccessors);
   }
 
   @Override
