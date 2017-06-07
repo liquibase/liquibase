@@ -19,4 +19,5 @@ to maximise its usefulness. Thank you.
                                                                               CreateIndexChange
 [CORE-3013]        none              5e264828ebe28f1ed86cdfc7bfbf4bb6ca05f83f Improve error message on failing change
                                                                               set when using includeAll
+[CORE-3009]        none              968bd791c91f6caa36271346ce66537260d9fbc9 ASANY Drop Default Value failed (upstream pr #659)
 [CORE-1775]        none              e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key

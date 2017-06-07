@@ -86,6 +86,8 @@ bug list (https://dbmanul.atlassian.net).
 #### SAP SQL Anywhere (formerly Sybase AS Anywhere)
 - Sequences are now supported thanks to Andreas Pohl (b7bd7fc0f7fc6e96e9990dc169507614f861ed05)
 
+- [CORE-3009] Wrong SQL was generated for the dropDefaultValue operation, fixed by Andreas Pohl (968bd791c91f6caa36271346ce66537260d9fbc9 )
+
 New features
 ------------
 

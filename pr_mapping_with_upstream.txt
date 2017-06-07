@@ -32,3 +32,7 @@ request number (pr#) to maximise its usefulness. Thank you.
 663     MERGED         [CORE-3014] validation error on empty column name in CreateIndexChange
 662     MERGED         [CORE-3022] Derby Database loads driver from wrong classloader on close
 661     MERGED         [CORE-3020] No warning when included file doesn't exist
+660     (TODO)         [CORE-3010] MySQL Add Default Value failed
+                       In general, ALTER TABLE ... ALTER COLUMN ... SET DEFAULT works in MySQL/MariaDB - maybe
+                       the problem only happens with certain expressions for defaultValue?
+659     MERGED         [CORE-3009] ASANY Drop Default Value failed
