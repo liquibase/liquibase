@@ -248,9 +248,10 @@ public class DB2Database extends AbstractJdbcDatabase {
             if (databaseConnection != null && databaseConnection instanceof JdbcConnection) {
                 try {
                     String databaseProductVersion = databaseConnection.getDatabaseProductVersion();
+                    String databaseProductName = databaseConnection.getDatabaseProductName();
                     if (databaseProductVersion.startsWith("SQL")) {
                         this.dataServerType = DataServerType.DB2LUW;
-                    } else if (databaseProductVersion.startsWith("QSQ")) {
+                    } else if (databaseProductVersion.startsWith("QSQ") || databaseProductName.startsWith("DB2 UDB for AS/400")) {
                         this.dataServerType = DataServerType.DB2I;
                     } else if (databaseProductVersion.startsWith("DSN")) {
                         this.dataServerType = DataServerType.DB2Z;
