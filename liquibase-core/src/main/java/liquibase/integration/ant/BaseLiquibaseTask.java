@@ -15,7 +15,6 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
