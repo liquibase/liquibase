@@ -32,15 +32,15 @@ import java.util.concurrent.Callable;
 @Singleton
 public class SchemesCDIConfigBuilder {
 
-    private final static Logger log = LogFactory.getInstance().getLog(SchemesCDIConfigBuilder.class.getName());
+    private static final Logger log = LogFactory.getInstance().getLog(SchemesCDIConfigBuilder.class.getName());
 
-    private final static String ROOT_PATH = System.getProperty("java.io.tmpdir");
+    private static final String ROOT_PATH = System.getProperty("java.io.tmpdir");
 
-    private final static String SCHEMA_NAME = "/schema.template.xml";
-    private final static String TEMPLATE_NAME = "liquibase.cdi.schema.xml";
-    private final static String INCLUDE_TPL = "\t<include file=\"%s\"/>%n";
+    private static final String SCHEMA_NAME = "/schema.template.xml";
+    private static final String TEMPLATE_NAME = "liquibase.cdi.schema.xml";
+    private static final String INCLUDE_TPL = "\t<include file=\"%s\"/>%n";
 
-    private final static Long FILE_LOCK_TIMEOUT = 50L;
+    private static final Long FILE_LOCK_TIMEOUT = 50L;
 
     private final BeanManager bm;
     private final SchemesTreeBuilder treeBuilder;
@@ -83,13 +83,11 @@ public class SchemesCDIConfigBuilder {
             }
         }
     }
-
+    
     private CDILiquibaseConfig createCDILiquibaseConfig(final String id, final InputStream is) throws IOException {
         File liquibaseDir = new File(String.format("%s/liquibase/schemes", ROOT_PATH));
-        if (!liquibaseDir.exists()) {
-            if (!liquibaseDir.mkdirs()) {
-                throw new RuntimeException(String.format("[id = %s] Cannot create [%s] dirs.", id, liquibaseDir));
-            }
+        if (!liquibaseDir.exists() && (!liquibaseDir.mkdirs())) {
+            throw new RuntimeException(String.format("[id = %s] Cannot create [%s] dirs.", id, liquibaseDir));
         }
         log.debug(String.format("[id = %s] Includes directory: [path='%s']", id, liquibaseDir.getAbsolutePath()));
 
@@ -115,27 +113,27 @@ public class SchemesCDIConfigBuilder {
 
         Set<Bean<?>> beans = bm.getBeans(Object.class, new AnnotationLiteralDefault());
 
-        Set<Class<?>> classesSet = new LinkedHashSet<Class<?>>();
+        Set<Class<?>> classesSet = new LinkedHashSet<>();
         for (Bean<?> bean : beans) {
             classesSet.add(bean.getBeanClass());
         }
-        Set<Annotation> annotationsSet = new LinkedHashSet<Annotation>();
+        Set<Annotation> annotationsSet = new LinkedHashSet<>();
         for (Class clazz : classesSet) {
             annotationsSet.add(clazz.getAnnotation(LiquibaseSchema.class));
         }
-        List<LiquibaseSchema> liquibaseSchemaList = new ArrayList<LiquibaseSchema>();
+        List<LiquibaseSchema> liquibaseSchemaList = new ArrayList<>();
         for (Annotation ann : annotationsSet) {
             liquibaseSchemaList.add((LiquibaseSchema) ann);
         }
 
         List<LiquibaseSchema> treeList = treeBuilder.build(id, liquibaseSchemaList);
 
-        List<String[]> resourceList = new ArrayList<String[]>();
+        List<String[]> resourceList = new ArrayList<>();
         for (LiquibaseSchema liquibaseSchema : treeList) {
             resourceList.add(liquibaseSchema.resource());
         }
 
-        List<String> schemaPaths = new ArrayList<String>();
+        List<String> schemaPaths = new ArrayList<>();
         for (String[] resources : resourceList) {
             for (String resource : resources) {
                 schemaPaths.add(copyToFile(id, liquibaseDir.getAbsolutePath(), resource));
@@ -186,11 +184,11 @@ public class SchemesCDIConfigBuilder {
 
         CDILiquibaseConfig actionResult = null;
         FileLock lock = null;
-        FileOutputStream fileStream = null;
-        FileChannel fileChannel = null;
-        try {
-            fileStream = new FileOutputStream(lockPath);
-            fileChannel = fileStream.getChannel();
+        try (
+            FileOutputStream fileStream = new FileOutputStream(lockPath);
+            FileChannel fileChannel = fileStream.getChannel();
+        )
+        {
             while (null == lock) {
                 try {
                     lock = fileChannel.tryLock();
@@ -207,17 +205,6 @@ public class SchemesCDIConfigBuilder {
             lock.release();
         } catch (Exception e) {
             log.warning(e.getMessage(), e);
-        } finally {
-            try {
-                if (fileChannel != null) {
-                    fileChannel.close();
-                }
-                if (fileStream != null) {
-                    fileStream.close();
-                }
-            } catch (IOException ioe) {
-                log.warning(String.format("IOException during closing an input stream '%s'.", ioe.getMessage()), ioe);
-            }
         }
         return actionResult;
     }
@@ -235,14 +222,12 @@ public class SchemesCDIConfigBuilder {
 
             if (path.contains("/")) {
 
-                String dirPath = String.format("%s/%s", liquibase, path.substring(0, path.lastIndexOf("/")));
+                String dirPath = String.format("%s/%s", liquibase, path.substring(0, path.lastIndexOf('/')));
                 log.debug(String.format("[id = %s] LiquibaseSchema path contains intermediate directories [path='%s'], preparing its...", id, dirPath));
 
                 File file = new File(dirPath);
-                if (!file.exists()) {
-                    if (file.mkdirs()) {
-                        log.info(String.format("[id = %s] Directories for [path='%s'] file created.", id, file.getAbsolutePath()));
-                    }
+                if (!file.exists() && file.mkdirs()) {
+                    log.info(String.format("[id = %s] Directories for [path='%s'] file created.", id, file.getAbsolutePath()));
                 }
             }
 

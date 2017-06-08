@@ -26,7 +26,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
 
     @Override
     public String getName() {
-        return "execute";
+        return "executeSql";
     }
 
     public Database getDatabase() {
