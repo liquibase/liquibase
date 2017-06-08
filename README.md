@@ -1,10 +1,13 @@
 # dbmanul
 A change management system for databases based on Liquibase
 
-This fork of the Liquibase source aims to provide:
-- More thorough integration testing
-- Better Oracle database support
-- Supporting different connections for changesets (e.g. use an administrative connection for creating tablespaces and a "regular" connection for normal schema updates)
+This fork of the Liquibase source aims to:
+- Improve the integration tests
+- Improve code documentation and maintainability
+- Support more Oracle Database features
+- Support different connections for changesets (e.g. use an administrative connection for creating tablespaces and a "regular" connection for normal schema updates)
+- Modernise the code to use JDK 8 features.
+- Contributer-friendly reaction times to pull requests
 
 Current status summary
 ======================
