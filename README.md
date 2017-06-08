@@ -7,7 +7,6 @@ This fork of the Liquibase source aims to:
 - Support more Oracle Database features
 - Support different connections for changesets (e.g. use an administrative connection for creating tablespaces and a "regular" connection for normal schema updates)
 - Modernise the code to use JDK 8 features.
-- Contributer-friendly reaction times to pull requests
 
 Current status summary
 ======================
