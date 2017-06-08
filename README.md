@@ -1,4 +1,5 @@
-# dbmanul
+# DB-Manul
+
 A change management system for databases based on Liquibase
 
 This fork of the Liquibase source aims to:
