@@ -37,7 +37,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         super(examples, database);
     }
 
-    public CachingDatabaseMetaData getMetaData() throws SQLException {
+    public CachingDatabaseMetaData getMetaDataFromCache() throws SQLException {
         if (cachingDatabaseMetaData == null) {
             DatabaseMetaData databaseMetaData = null;
             if (getDatabase().getConnection() != null) {
@@ -346,7 +346,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
             return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
-                public boolean bulkFetch = false;
+                public boolean isBulkFetchMode = false;
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
@@ -388,11 +388,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "AND d.object_name IS NULL ";
 
 
-                        if (!bulkFetch && tableName != null) {
+                        if (!isBulkFetchMode && tableName != null) {
                             sql += " AND c.TABLE_NAME='" + tableName + "'";
                         }
 
-                        if (!bulkFetch && indexName != null) {
+                        if (!isBulkFetchMode && indexName != null) {
                             sql += " AND c.INDEX_NAME='" + indexName + "'";
                         }
 
@@ -421,11 +421,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "join sys.stats s on i.object_id=s.object_id and i.name=s.name " +
                                 "WHERE object_schema_name(i.object_id)='" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
 
-                        if (!bulkFetch && tableName != null) {
+                        if (!isBulkFetchMode && tableName != null) {
                             sql += " AND object_name(i.object_id)='" + database.escapeStringForDatabase(tableName) + "'";
                         }
 
-                        if (!bulkFetch && indexName != null) {
+                        if (!isBulkFetchMode && indexName != null) {
                             sql += " AND i.name='" + database.escapeStringForDatabase(indexName) + "'";
                         }
 
@@ -467,7 +467,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-                    this.bulkFetch = true;
+                    this.isBulkFetchMode = true;
                     return fastFetch();
                 }
 

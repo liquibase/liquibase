@@ -60,7 +60,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 column = (Column) example;
                 example.setAttribute(LIQUIBASE_COMPLETE, null);
             } else {
-                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache();
 
                 columnMetadataRs = databaseMetaData.getColumns(
                         ((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
@@ -93,7 +93,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             List<CachedRow> allColumnsMetadataRs = null;
             try {
 
-                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache();
 
                 Schema schema;
 

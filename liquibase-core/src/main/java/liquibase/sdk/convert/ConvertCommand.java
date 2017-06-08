@@ -11,7 +11,6 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sdk.Main;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 
@@ -25,12 +24,6 @@ public class ConvertCommand extends AbstractCommand {
     private String src;
     private String out;
     private String classpath;
-
-    private Main mainApp;
-
-    public ConvertCommand(Main mainApp) {
-        this.mainApp = mainApp;
-    }
 
     @Override
     public String getName() {
@@ -63,7 +56,7 @@ public class ConvertCommand extends AbstractCommand {
 
     @Override
     protected CommandResult run() throws Exception {
-        List<ResourceAccessor> openers = new ArrayList<ResourceAccessor>();
+        List<ResourceAccessor> openers = new ArrayList<>();
         openers.add(new FileSystemResourceAccessor());
         openers.add(new ClassLoaderResourceAccessor());
         if (classpath != null) {
@@ -80,12 +73,9 @@ public class ConvertCommand extends AbstractCommand {
         if (!outFile.exists()) {
             outFile.getParentFile().mkdirs();
         }
-        FileOutputStream outputStream = new FileOutputStream(outFile);
-        try {
+        
+        try (FileOutputStream outputStream = new FileOutputStream(outFile)) {
             outSerializer.write(changeLog.getChangeSets(), outputStream);
-        } finally {
-            outputStream.flush();
-            outputStream.close();
         }
 
         return new CommandResult("Converted successfully");

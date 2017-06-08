@@ -40,7 +40,7 @@ public class Main {
             LiquibaseCommand command;
             CommandLineParser commandParser = new GnuParser();
             if (main.command.equals("convert")) {
-                command = new ConvertCommand(main);
+                command = new ConvertCommand();
 
                 Options options = new Options();
                 options.addOption(OptionBuilder.hasArg().withDescription("Original changelog").isRequired().create("src"));

@@ -43,7 +43,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             List<CachedRow> rs = null;
             JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
             try {
-                databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+                databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache();
 
                 rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), null);
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
@@ -145,7 +145,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
         List<CachedRow> rs = null;
         try {
-            databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+            databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache();
 
             rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), tableName, exampleName);
 

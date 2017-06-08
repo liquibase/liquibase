@@ -2,10 +2,6 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -16,10 +12,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * Generates a diff between the specified database and the reference database.
@@ -182,10 +180,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, StringUtils.trimToNull(diffTypes));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
-            catch (IOException e) {
-                throw new LiquibaseException(e);
-            }
-            catch (ParserConfigurationException e) {
+            catch (IOException|ParserConfigurationException e) {
                 throw new LiquibaseException(e);
             }
         } else {
@@ -205,6 +200,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     }
 
     @Override
+    @SuppressWarnings("squid:S2068") // SONAR thinks we would hard-code passwords here.
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
         super.checkRequiredParametersAreSpecified();
 

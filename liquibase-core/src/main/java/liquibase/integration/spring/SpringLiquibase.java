@@ -416,9 +416,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
         if (rollbackFile != null) {
-            Writer output = null;
-            try {
-                output = new OutputStreamWriter(new FileOutputStream(rollbackFile), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            
+            try (
+                FileOutputStream fileOutputStream = new FileOutputStream(rollbackFile);
+                Writer output = new OutputStreamWriter(fileOutputStream, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
+            ) {
+                
                 if (tag != null) {
                     liquibase.futureRollbackSQL(tag, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
                 } else {
@@ -426,14 +429,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
-            } finally {
-                try {
-                    if (output != null) {
-                        output.close();
-                    }
-                } catch (IOException e) {
-                    log.severe("Error closing output", e);
-                }
             }
         }
     }
