@@ -9,10 +9,12 @@ This fork of the Liquibase source aims to:
 - Support different connections for changesets (e.g. use an administrative connection for creating tablespaces and a "regular" connection for normal schema updates)
 - Modernise the code to use JDK 8 features.
 
+For a current list of changes, fixes and improvements, please see: https://github.com/dbmanul/dbmanul/blob/master/RELEASE_NOTES_0.1.md
+
 Current status summary
 ======================
 
-Last updated: June 7th, 2017
+Last updated: June 8th, 2017
 
 **PLEASE NOTE THAT THE FORK, IN GENERAL, SHOULD BE CONSIDERED UNSTABLE FOR THE MOMENT.**
     A lot of work is currently being done to get all integration tests (OSS + commercial RDBMSs) green; manual testing of features like CDI, RPM/Debian packaging, Spring integration etc. comes after that.   
