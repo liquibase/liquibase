@@ -34,7 +34,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DiffToChangeLog {
-
+    
+    public static final String ORDER_ATTRIBUTE = "order";
+    public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
     private String idRoot = String.valueOf(new Date().getTime());
     private boolean overriddenIdRoot = false;
 
@@ -92,45 +94,46 @@ public class DiffToChangeLog {
             String xml = new String(out.toByteArray(), LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
             String innerXml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 
-            innerXml = innerXml.replaceFirst("</databaseChangeLog>", "");
+            innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
                 LogFactory.getInstance().getLog().info("No changes found, nothing to do");
                 return;
             }
-
-            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-            String line;
-            long offset = 0;
-            boolean foundEndTag = false;
-            while ((line = randomAccessFile.readLine()) != null) {
-                int index = line.indexOf("</databaseChangeLog>");
-                if (index >= 0) {
-                    foundEndTag = true;
-                    break;
-                } else {
-                    offset = randomAccessFile.getFilePointer();
+    
+            try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
+        
+                String line;
+                long offset = 0;
+                boolean foundEndTag = false;
+                while ((line = randomAccessFile.readLine()) != null) {
+                    int index = line.indexOf(DATABASE_CHANGE_LOG_CLOSING_XML_TAG);
+                    if (index >= 0) {
+                        foundEndTag = true;
+                        break;
+                    } else {
+                        offset = randomAccessFile.getFilePointer();
+                    }
                 }
+        
+                String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration
+                .class).getOutputLineSeparator();
+        
+                if (foundEndTag) {
+                    randomAccessFile.seek(offset);
+                    randomAccessFile.writeBytes("    ");
+                    randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
+                    (GlobalConfiguration.class).getOutputEncoding()));
+                    randomAccessFile.writeBytes(lineSeparator);
+                    randomAccessFile.writeBytes(DATABASE_CHANGE_LOG_CLOSING_XML_TAG + lineSeparator);
+                } else {
+                    randomAccessFile.seek(0);
+                    randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration
+                    (GlobalConfiguration.class).getOutputEncoding()));
+                }
+                randomAccessFile.close();
             }
-
-            String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
-
-            if (foundEndTag) {
-                randomAccessFile.seek(offset);
-                randomAccessFile.writeBytes("    ");
-                randomAccessFile.write(innerXml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-                randomAccessFile.writeBytes(lineSeparator);
-                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
-            } else {
-                randomAccessFile.seek(0);
-                randomAccessFile.write(xml.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
-            }
-            randomAccessFile.close();
-
-            // BufferedWriter fileWriter = new BufferedWriter(new
-            // FileWriter(file));
-            // fileWriter.append(xml);
-            // fileWriter.close();
+            
         }
     }
 
@@ -164,8 +167,8 @@ public class DiffToChangeLog {
             for (DatabaseObject object : diffResult.getMissingObjects(type, new DatabaseObjectComparator() {
                 @Override
                 public int compare(DatabaseObject o1, DatabaseObject o2) {
-                    if (o1 instanceof Column && o1.getAttribute("order", Integer.class) != null && o2.getAttribute("order", Integer.class) != null) {
-                        int i = o1.getAttribute("order", Integer.class).compareTo(o2.getAttribute("order", Integer.class));
+                    if (o1 instanceof Column && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                        int i = o1.getAttribute(ORDER_ATTRIBUTE, Integer.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Integer.class));
                         if (i != 0) {
                             return i;
                         }
@@ -251,7 +254,7 @@ public class DiffToChangeLog {
                 };
 
                 DependencyUtil.DependencyGraph graph = new DependencyUtil.DependencyGraph(nameListener);
-                addDependencies(graph, schemas, objects, database);
+                addDependencies(graph, schemas, database);
                 graph.computeDependencies();
 
                 if (dependencyOrder.size() > 0) {
@@ -322,7 +325,7 @@ public class DiffToChangeLog {
     /**
      * Adds dependencies to the graph as schema.object_name.
      */
-    protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Collection<DatabaseObject> missingObjects, Database database) throws DatabaseException {
+    protected void addDependencies(DependencyUtil.DependencyGraph<String> graph, List<String> schemas, Database database) throws DatabaseException {
         if (database instanceof DB2Database) {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement("select TABSCHEMA, TABNAME, BSCHEMA, BNAME from syscat.tabdep where (" + StringUtils.join(schemas, " OR ", new StringUtils.StringUtilsFormatter<String>() {
@@ -471,11 +474,13 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy, String created) {
         if (changes != null) {
-            String changeSetContext = this.changeSetContext;
+            String csContext = this.changeSetContext;
+            
             if (diffOutputControl.getContext() != null) {
-                changeSetContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
+                csContext = diffOutputControl.getContext().toString().replaceFirst("^\\(", "")
+                .replaceFirst("\\)$", "");
             }
-            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, changeSetContext,
+            ChangeSet changeSet = new ChangeSet(generateId(changes), getChangeSetAuthor(), false, false, this.changeSetPath, csContext,
                     null, false, quotingStrategy, null);
             changeSet.setCreated(created);
             if (diffOutputControl.getLabels() != null) {
@@ -598,10 +603,23 @@ public class DiffToChangeLog {
                     }
                 }
             }
+            checkForCycleInDependencies(generatorType);
+    
+    
+            List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
+            for (Node node : returnNodes) {
+                returnList.add(node.type);
+            }
+            return returnList;
+        }
+    
+        private void checkForCycleInDependencies(Class<? extends ChangeGenerator> generatorType) {
             //Check to see if all edges are removed
             for (Node n : allNodes.values()) {
                 if (!n.inEdges.isEmpty()) {
-                    String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due to dependency cycle. Dependencies: \n";
+                    String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due " +
+                     "to dependency cycle. Dependencies: \n";
+                     
                     for (Node node : allNodes.values()) {
                         SortedSet<String> fromTypes = new TreeSet<String>();
                         SortedSet<String> toTypes = new TreeSet<String>();
@@ -619,14 +637,9 @@ public class DiffToChangeLog {
                     throw new UnexpectedLiquibaseException(message);
                 }
             }
-            List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
-            for (Node node : returnNodes) {
-                returnList.add(node.type);
-            }
-            return returnList;
         }
-
-
+    
+    
         private Node getNode(Class<? extends DatabaseObject> type) {
             Node node = allNodes.get(type);
             if (node == null) {
