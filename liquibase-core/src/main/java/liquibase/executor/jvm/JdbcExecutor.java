@@ -67,7 +67,11 @@ public class JdbcExecutor extends AbstractExecutor {
             JdbcUtils.closeStatement(stmt);
         }
     }
-
+    
+    // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
+    // into a query. Instead, we process a whole query. The check should be performed at the places where
+    // the query is composed.
+    @SuppressWarnings("squid:S2077")
     public Object execute(CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         DatabaseConnection con = database.getConnection();
 
@@ -199,7 +203,11 @@ public class JdbcExecutor extends AbstractExecutor {
     public int update(final SqlStatement sql) throws DatabaseException {
         return update(sql, new ArrayList());
     }
-
+    
+    // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
+    // into a query. Instead, we process a whole query. The check should be performed at the places where
+    // the query is composed.
+    @SuppressWarnings("squid:S2077")
     @Override
     public int update(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof CallableSqlStatement) {
@@ -252,29 +260,6 @@ public class JdbcExecutor extends AbstractExecutor {
         LogFactory.getInstance().getLog().debug(message);
     }
 
-    /**
-     * Adapter to enable use of a RowCallbackHandler inside a ResultSetExtractor.
-     * <p>Uses a regular ResultSet, so we have to be careful when using it:
-     * We don't use it for navigating since this could lead to unpredictable consequences.
-     */
-    private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor {
-
-        private final RowCallbackHandler rch;
-
-        public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch) {
-            this.rch = rch;
-        }
-
-        @Override
-        public Object extractData(ResultSet rs) throws SQLException {
-            while (rs.next()) {
-                this.rch.processRow(rs);
-            }
-            return null;
-        }
-    }
-
-
     private class ExecuteStatementCallback implements StatementCallback {
 
         private final SqlStatement sql;
@@ -300,7 +285,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 }
                 try {
                     stmt.execute(statement);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     throw new DatabaseException(e.getMessage()+ " [Failed SQL: "+statement+"]", e);
                 }
             }
@@ -336,6 +321,10 @@ public class JdbcExecutor extends AbstractExecutor {
          * @throws DatabaseException If an error occurs in the DBMS-specific program code
          */
         @Override
+        // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
+        // into a query. Instead, we process a whole query. The check should be performed at the places where
+        // the query is composed.
+        @SuppressWarnings("squid:S2077")
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
             ResultSet rs = null;
             try {
