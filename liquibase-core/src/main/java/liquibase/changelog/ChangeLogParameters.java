@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public class ChangeLogParameters {
 	
-    private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
+    private List<ChangeLogParameter> changeLogParameters = new ArrayList<>();
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
     private Contexts currentContexts;
@@ -132,7 +132,7 @@ public class ChangeLogParameters {
     private ChangeLogParameter findParameter(String key, DatabaseChangeLog changeLog) {
     	ChangeLogParameter result = null;
     	
-    	List<ChangeLogParameter> found = new ArrayList<ChangeLogParameter>();
+    	List<ChangeLogParameter> found = new ArrayList<>();
         for (ChangeLogParameter param : changeLogParameters) {
             if (param.getKey().equalsIgnoreCase(key) && param.isValid()) {
             	found.add(param);

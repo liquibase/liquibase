@@ -59,7 +59,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
             return null;
         }
 
-        List<Change> changes = new ArrayList<Change>();
+        List<Change> changes = new ArrayList<>();
 
         handleTypeDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);
         handleNullableDifferences(column, differences, control, changes, referenceDatabase, comparisonDatabase);

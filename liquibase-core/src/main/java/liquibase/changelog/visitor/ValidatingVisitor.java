@@ -17,22 +17,22 @@ import java.util.*;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
-    private List<String> invalidMD5Sums = new ArrayList<String>();
-    private List<FailedPrecondition> failedPreconditions = new ArrayList<FailedPrecondition>();
-    private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
-    private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
-    private List<SetupException> setupExceptions = new ArrayList<SetupException>();
-    private List<Throwable> changeValidationExceptions = new ArrayList<Throwable>();
+    private List<String> invalidMD5Sums = new ArrayList<>();
+    private List<FailedPrecondition> failedPreconditions = new ArrayList<>();
+    private List<ErrorPrecondition> errorPreconditions = new ArrayList<>();
+    private Set<ChangeSet> duplicateChangeSets = new HashSet<>();
+    private List<SetupException> setupExceptions = new ArrayList<>();
+    private List<Throwable> changeValidationExceptions = new ArrayList<>();
     private ValidationErrors validationErrors = new ValidationErrors();
     private Warnings warnings = new Warnings();
 
-    private Set<String> seenChangeSets = new HashSet<String>();
+    private Set<String> seenChangeSets = new HashSet<>();
 
     private Map<String, RanChangeSet> ranIndex;
     private Database database;
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
-        ranIndex = new HashMap<String, RanChangeSet>();
+        ranIndex = new HashMap<>();
         for(RanChangeSet changeSet:ranChangeSets) {
             ranIndex.put(changeSet.toString(), changeSet);
         }

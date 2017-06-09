@@ -17,14 +17,7 @@ public class ChangeLogProperty extends AbstractLiquibaseSerializable implements 
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<String>(Arrays.asList(
-                "file",
-                "name",
-                "value",
-                "context",
-                "labels",
-                "dbms",
-                "global"));
+        return new LinkedHashSet<>(Arrays.asList("file", "name", "value", "context", "labels", "dbms", "global"));
     }
 
     @Override

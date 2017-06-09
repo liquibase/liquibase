@@ -59,7 +59,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private final static int FETCH_SIZE = 1000;
     private static final int DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS = 9;
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    private final Set<String> reservedWords = new HashSet<String>();
+    private final Set<String> reservedWords = new HashSet<>();
     protected String defaultCatalogName;
     protected String defaultSchemaName;
     protected String currentDateTimeFunction;
@@ -72,8 +72,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected String quotingEndCharacter = "\"";
     protected String quotingEndReplacement = "\"\"";
     // List of Database native functions.
-    protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
-    protected List<String> unmodifiableDataTypes = new ArrayList<String>();
+    protected List<DatabaseFunction> dateFunctions = new ArrayList<>();
+    protected List<String> unmodifiableDataTypes = new ArrayList<>();
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
     // most databases either lowercase or uppercase unuqoted objects such as table and column names.
@@ -95,7 +95,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean defaultCatalogSet = false;
     private boolean defaultSchemaSet = false;
 
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
 
     public String getName() {
         return toString();
@@ -338,7 +338,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Returns system (undroppable) views.
      */
     protected Set<String> getSystemTables() {
-        return new HashSet<String>();
+        return new HashSet<>();
     }
 
 
@@ -346,7 +346,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Returns system (undroppable) views.
      */
     protected Set<String> getSystemViews() {
-        return new HashSet<String>();
+        return new HashSet<>();
     }
 
     // ------- DATABASE FEATURE INFORMATION METHODS ---- //
@@ -1256,7 +1256,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Takes a list of SqlVisitors and returns a new list with only the SqlVisitors set to apply to rollbacks
      */
     protected List<SqlVisitor> filterRollbackVisitors(final List<SqlVisitor> visitors) {
-        final List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
+        final List<SqlVisitor> rollbackVisitors = new ArrayList<>();
         if (visitors != null) {
             for (SqlVisitor visitor : visitors) {
                if (visitor.isApplyToRollback()) {

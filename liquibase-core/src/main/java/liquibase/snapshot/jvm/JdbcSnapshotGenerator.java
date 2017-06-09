@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
-    private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
+    private Set<DiffStatusListener> statusListeners = new HashSet<>();
 
     private Class<? extends DatabaseObject> defaultFor = null;
     private Class<? extends DatabaseObject>[] addsTo = null;
@@ -133,7 +133,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
      * @throws DatabaseException if a different problem occurs during the DBMS-specific code
      */
     protected String[] getDatabaseCatalogNames(Database database) throws SQLException, DatabaseException {
-        List<String> returnList = new ArrayList<String>();
+        List<String> returnList = new ArrayList<>();
         
         ResultSet catalogs = null;
         

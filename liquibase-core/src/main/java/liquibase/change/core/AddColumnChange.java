@@ -32,7 +32,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     private List<AddColumnConfig> columns;
 
     public AddColumnChange() {
-        columns = new ArrayList<AddColumnConfig>();
+        columns = new ArrayList<>();
     }
     
     @DatabaseChangeProperty(mustEqualExisting ="relation.catalog", since = "3.0")
@@ -85,9 +85,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-        List<SqlStatement> sql = new ArrayList<SqlStatement>();
-        List<AddColumnStatement> addColumnStatements = new ArrayList<AddColumnStatement>();
-        List<UpdateStatement> addColumnUpdateStatements = new ArrayList<UpdateStatement>();
+        List<SqlStatement> sql = new ArrayList<>();
+        List<AddColumnStatement> addColumnStatements = new ArrayList<>();
+        List<UpdateStatement> addColumnUpdateStatements = new ArrayList<>();
 
         if (getColumns().size() == 0) {
             return new SqlStatement[] {
@@ -96,7 +96,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         }
 
         for (AddColumnConfig column : getColumns()) {
-            Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+            Set<ColumnConstraint> constraints = new HashSet<>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
                 if (constraintsConfig.isNullable() != null && !constraintsConfig.isNullable()) {
@@ -179,7 +179,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
     @Override
     protected Change[] createInverses() {
-        List<Change> inverses = new ArrayList<Change>();
+        List<Change> inverses = new ArrayList<>();
 
         DropColumnChange inverse = new DropColumnChange();
         inverse.setSchemaName(getSchemaName());
@@ -227,7 +227,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
     @Override
     public String getConfirmationMessage() {
-        List<String> names = new ArrayList<String>(columns.size());
+        List<String> names = new ArrayList<>(columns.size());
         for (ColumnConfig col : columns) {
             names.add(col.getName() + "(" + col.getType() + ")");
         }

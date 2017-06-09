@@ -16,7 +16,7 @@ public class StringClauses {
     private final String separator;
     private final String start;
     private final String end;
-    private LinkedHashMap<String, Object> clauses = new LinkedHashMap<String, Object>();
+    private LinkedHashMap<String, Object> clauses = new LinkedHashMap<>();
     private final Random random = new Random();
 
     /**
@@ -135,7 +135,7 @@ public class StringClauses {
 
     public StringClauses prepend(LiteralClause literal) {
         if (literal != null) {
-            LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+            LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
             newMap.put(uniqueKey(literal.getClass().getName().toLowerCase()), literal);
             newMap.putAll(this.clauses);
             this.clauses = newMap;
@@ -191,7 +191,7 @@ public class StringClauses {
             throw new IllegalArgumentException("Cannot add clause with key '" + key + "' because it is already defined");
         }
 
-        LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
         newMap.put(key, clause);
         newMap.putAll(this.clauses);
         this.clauses = newMap;
@@ -265,7 +265,7 @@ public class StringClauses {
         if (!clauses.containsKey(key)) {
             throw new IllegalArgumentException("Key '" + key + "' is not defined");
         }
-        LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : clauses.entrySet()) {
             if (entry.getKey().equals(key)) {
                 newMap.put(key, newValue);
@@ -331,7 +331,7 @@ public class StringClauses {
             throw new IllegalArgumentException("Cannot add clause with key '" + newKey + "' because it is already defined");
         }
 
-        LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : clauses.entrySet()) {
             if (entry.getKey().equals(existingKey)) {
                 newMap.put(newKey, newValue);
@@ -384,7 +384,7 @@ public class StringClauses {
             throw new IllegalArgumentException("Cannot add clause with key '" + newKey + "' because it is already defined");
         }
 
-        LinkedHashMap<String, Object> newMap = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> newMap = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : clauses.entrySet()) {
             newMap.put(entry.getKey(), entry.getValue());
             if (entry.getKey().equals(existingKey)) {
@@ -480,7 +480,7 @@ public class StringClauses {
 
     public Object[] toArray(boolean stringify) {
         Object[] returnArray = new Object[clauses.size()];
-        ArrayList<Object> currentValues = new ArrayList<Object>(clauses.values());
+        ArrayList<Object> currentValues = new ArrayList<>(clauses.values());
 
         for (int i=0; i<currentValues.size(); i++) {
             if (stringify) {

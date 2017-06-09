@@ -26,7 +26,7 @@ import java.util.Map;
  * @param <T> - class to be mapped.
  */
 public class HeaderColumnNameTranslateMappingStrategy<T> extends HeaderColumnNameMappingStrategy<T> {
-   private Map<String, String> columnMapping = new HashMap<String, String>();
+   private Map<String, String> columnMapping = new HashMap<>();
 
    /**
     * Default constructor.

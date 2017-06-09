@@ -11,8 +11,8 @@ import java.util.List;
 public class ForeignKey extends AbstractDatabaseObject{
 
     public ForeignKey() {
-        setForeignKeyColumns(new ArrayList<Column>());
-        setPrimaryKeyColumns(new ArrayList<Column>());
+        setForeignKeyColumns(new ArrayList<>());
+        setPrimaryKeyColumns(new ArrayList<>());
     }
 
     public ForeignKey(String name) {
@@ -27,7 +27,7 @@ public class ForeignKey extends AbstractDatabaseObject{
             setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
         }
         if (baseTableColumns != null && baseTableColumns.length > 0 && baseTableColumns[0] != null) {
-            setForeignKeyColumns(new ArrayList<Column>(Arrays.asList(baseTableColumns)));
+            setForeignKeyColumns(new ArrayList<>(Arrays.asList(baseTableColumns)));
         }
 
     }
@@ -35,7 +35,7 @@ public class ForeignKey extends AbstractDatabaseObject{
     @Override
     public DatabaseObject[] getContainingObjects() {
 
-        List<Column> objects = new ArrayList<Column>();
+        List<Column> objects = new ArrayList<>();
         if (getPrimaryKeyColumns() != null) {
             for (Column column : getPrimaryKeyColumns()) {
                 objects.add(column);

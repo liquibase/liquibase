@@ -11,8 +11,8 @@ import java.util.List;
 
 public class ValidationErrors {
 
-    protected List<String> errorMessages = new ArrayList<String>();
-    protected List<String> warningMessages = new ArrayList<String>();
+    protected List<String> errorMessages = new ArrayList<>();
+    protected List<String> warningMessages = new ArrayList<>();
 
     public boolean hasErrors() {
         return errorMessages.size() > 0;
@@ -102,7 +102,7 @@ public class ValidationErrors {
     }
 
     public List<String> getRequiredErrorMessages() {
-        List<String> requiredErrorMessages = new ArrayList<String>();
+        List<String> requiredErrorMessages = new ArrayList<>();
         for (String message : errorMessages) {
             if (message.contains("is required")) {
                 requiredErrorMessages.add(message);
@@ -112,7 +112,7 @@ public class ValidationErrors {
     }
 
     public List<String> getUnsupportedErrorMessages() {
-        List<String> unsupportedErrorMessages = new ArrayList<String>();
+        List<String> unsupportedErrorMessages = new ArrayList<>();
         for (String message : errorMessages) {
             if (message.contains(" is not allowed on ")) {
                 unsupportedErrorMessages.add(message);

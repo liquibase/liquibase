@@ -79,7 +79,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     protected Object toMap(LiquibaseSerializable object) {
         Comparator<String> comparator;
         comparator = getComparator(object);
-        Map<String, Object> objectMap = new TreeMap<String, Object>(comparator);
+        Map<String, Object> objectMap = new TreeMap<>(comparator);
 
         for (String field : object.getSerializableFields()) {
             Object value = object.getSerializableFieldValue(field);
@@ -138,7 +138,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
             }
         }
 
-        Map<String, Object> containerMap = new HashMap<String, Object>();
+        Map<String, Object> containerMap = new HashMap<>();
         containerMap.put(object.getSerializedObjectName(), objectMap);
         return containerMap;
     }
@@ -199,7 +199,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
 
         @Override
         protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
-            Set<Property> returnSet = new HashSet<Property>();
+            Set<Property> returnSet = new HashSet<>();
             LiquibaseSerializable serialzableType = null;
             try {
                 if (type.equals(ChangeSet.class)) {

@@ -16,7 +16,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
     protected String schemaName;
     protected String tableName;
 
-    protected List<ColumnConfig> whereParams = new ArrayList<ColumnConfig>();
+    protected List<ColumnConfig> whereParams = new ArrayList<>();
 
     protected String where;
 

@@ -11,9 +11,9 @@ public class ChangeLogHistoryServiceFactory {
 
     private static ChangeLogHistoryServiceFactory instance;
 
-    private List<ChangeLogHistoryService> registry = new ArrayList<ChangeLogHistoryService>();
+    private List<ChangeLogHistoryService> registry = new ArrayList<>();
 
-    private Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<Database, ChangeLogHistoryService>();
+    private Map<Database, ChangeLogHistoryService> services = new ConcurrentHashMap<>();
 
     public static synchronized ChangeLogHistoryServiceFactory getInstance() {
         if (instance == null) {
@@ -56,7 +56,7 @@ public class ChangeLogHistoryServiceFactory {
             if (services.containsKey(database)) {
                 return services.get(database);
             }
-            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<ChangeLogHistoryService>(new Comparator<ChangeLogHistoryService>() {
+            SortedSet<ChangeLogHistoryService> foundServices = new TreeSet<>(new Comparator<ChangeLogHistoryService>() {
                 @Override
                 public int compare(ChangeLogHistoryService o1, ChangeLogHistoryService o2) {
                     return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());

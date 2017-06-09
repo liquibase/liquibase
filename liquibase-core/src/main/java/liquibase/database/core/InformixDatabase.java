@@ -25,7 +25,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     private static final String TIME_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 
-	private final Set<String> systemTablesAndViews = new HashSet<String>();
+	private final Set<String> systemTablesAndViews = new HashSet<>();
 
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+",
     		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);

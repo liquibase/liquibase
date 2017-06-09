@@ -106,7 +106,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         updateStatement.setWhereClause(whereClause);
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
-        HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+        HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
             if (!hashPkFields.contains(columnKey)) {

@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ObjectUtil {
 
-    private static Map<Class<?>, Method[]> methodCache = new HashMap<Class<?>, Method[]>();
+    private static Map<Class<?>, Method[]> methodCache = new HashMap<>();
 
     public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
         Method readMethod = getReadMethod(object, propertyName);

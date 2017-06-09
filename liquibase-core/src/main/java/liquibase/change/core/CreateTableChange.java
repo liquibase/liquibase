@@ -36,7 +36,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public CreateTableChange() {
         super();
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @Override
@@ -115,7 +115,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         statement.setTablespace(StringUtils.trimToNull(getTablespace()));
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
         statements.add(statement);
 
         if (StringUtils.trimToNull(remarks) != null) {
@@ -195,7 +195,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         if (columns == null) {
-            return new ArrayList<ColumnConfig>();
+            return new ArrayList<>();
         }
         return columns;
     }

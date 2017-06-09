@@ -22,7 +22,7 @@ public class PreconditionFailedException extends Exception {
 
     public PreconditionFailedException(FailedPrecondition failedPrecondition) {
         super("Preconditions Failed");
-        this.failedPreconditions = new ArrayList<FailedPrecondition>();
+        this.failedPreconditions = new ArrayList<>();
         failedPreconditions.add(failedPrecondition);
     }
 

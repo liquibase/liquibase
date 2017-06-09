@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class ListVisitor implements ChangeSetVisitor {
 
-    private List<ChangeSet> seenChangeSets = new ArrayList<ChangeSet>();
+    private List<ChangeSet> seenChangeSets = new ArrayList<>();
 
     public List<ChangeSet> getSeenChangeSets() {
         return seenChangeSets;

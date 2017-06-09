@@ -24,12 +24,12 @@ public class SqlGeneratorFactory {
 
     private static SqlGeneratorFactory instance;
 
-    private List<SqlGenerator> generators = new ArrayList<SqlGenerator>();
+    private List<SqlGenerator> generators = new ArrayList<>();
 
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
-    private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<Class<?>, Type[]>();
-    private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<Class<?>, Type>();
-    private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<String, SortedSet<SqlGenerator>>();
+    private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<>();
+    private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<>();
+    private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<>();
 
     private SqlGeneratorFactory() {
         Class[] classes;
@@ -110,7 +110,7 @@ public class SqlGeneratorFactory {
             return generatorsByKey.get(key);
         }
 
-        SortedSet<SqlGenerator> validGenerators = new TreeSet<SqlGenerator>(new SqlGeneratorComparator());
+        SortedSet<SqlGenerator> validGenerators = new TreeSet<>(new SqlGeneratorComparator());
 
         for (SqlGenerator generator : getGenerators()) {
             Class clazz = generator.getClass();
@@ -204,7 +204,7 @@ public class SqlGeneratorFactory {
     }
 
     public Sql[] generateSql(SqlStatement[] statements, Database database) {
-        List<Sql> returnList = new ArrayList<Sql>();
+        List<Sql> returnList = new ArrayList<>();
         SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
         for (SqlStatement statement : statements) {
             Sql[] sqlArray = factory.generateSql(statement, database);
@@ -266,7 +266,7 @@ public class SqlGeneratorFactory {
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
-        Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
+        Set<DatabaseObject> affectedObjects = new HashSet<>();
 
         SqlGeneratorChain sqlGeneratorChain = createGeneratorChain(statement, database);
         if (sqlGeneratorChain != null) {

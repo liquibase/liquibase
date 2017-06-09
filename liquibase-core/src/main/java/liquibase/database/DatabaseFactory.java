@@ -18,8 +18,8 @@ import java.util.*;
 
 public class DatabaseFactory {
     private static DatabaseFactory instance;
-    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<String, SortedSet<Database>>();
-    private Map<String, SortedSet<Database>> internalDatabases = new HashMap<String, SortedSet<Database>>();
+    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
+    private Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
     private Logger log;
 
     private DatabaseFactory() {
@@ -63,7 +63,7 @@ public class DatabaseFactory {
      * Returns instances of all implemented database types.
      */
     public List<Database> getImplementedDatabases() {
-        List<Database> returnList = new ArrayList<Database>();
+        List<Database> returnList = new ArrayList<>();
         for (SortedSet<Database> set : implementedDatabases.values()) {
             returnList.add(set.iterator().next());
         }
@@ -74,7 +74,7 @@ public class DatabaseFactory {
      * Returns instances of all "internal" database types.
      */
     public List<Database> getInternalDatabases() {
-        List<Database> returnList = new ArrayList<Database>();
+        List<Database> returnList = new ArrayList<>();
         for (SortedSet<Database> set : internalDatabases.values()) {
             returnList.add(set.iterator().next());
         }
@@ -91,14 +91,14 @@ public class DatabaseFactory {
         }
 
         if (!map.containsKey(database.getShortName())) {
-            map.put(database.getShortName(), new TreeSet<Database>(new TreeSet<Database>(new DatabaseComparator())));
+            map.put(database.getShortName(), new TreeSet<>(new TreeSet<>(new DatabaseComparator())));
         }
         map.get(database.getShortName()).add(database);
     }
 
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
 
-        SortedSet<Database> foundDatabases = new TreeSet<Database>(new DatabaseComparator());
+        SortedSet<Database> foundDatabases = new TreeSet<>(new DatabaseComparator());
 
         for (Database implementedDatabase : getImplementedDatabases()) {
             if (connection instanceof OfflineConnection) {

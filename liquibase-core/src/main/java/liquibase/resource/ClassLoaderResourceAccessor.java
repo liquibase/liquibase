@@ -35,8 +35,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         if (resources == null || !resources.hasMoreElements()) {
             return null;
         }
-        Set<String> seenUrls = new HashSet<String>();
-        Set<InputStream> returnSet = new HashSet<InputStream>();
+        Set<String> seenUrls = new HashSet<>();
+        Set<InputStream> returnSet = new HashSet<>();
         while (resources.hasMoreElements()) {
             URL url = resources.nextElement();
             if (seenUrls.contains(url.toExternalForm())) {
@@ -62,10 +62,10 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
 
         Enumeration<URL> fileUrls = classLoader.getResources(path);
 
-        Set<String> returnSet = new HashSet<String>();
+        Set<String> returnSet = new HashSet<>();
 
         if (!fileUrls.hasMoreElements() && (path.startsWith("jar:") || path.startsWith("file:"))) {
-            fileUrls = new Vector<URL>(Arrays.asList(new URL(path))).elements();
+            fileUrls = new Vector<>(Arrays.asList(new URL(path))).elements();
         }
 
         while (fileUrls.hasMoreElements()) {
@@ -164,7 +164,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     public String toString() {
         String description;
         if (classLoader instanceof URLClassLoader) {
-            List<String> urls = new ArrayList<String>();
+            List<String> urls = new ArrayList<>();
             for (URL url : ((URLClassLoader) classLoader).getURLs()) {
                 urls.add(url.toExternalForm());
             }

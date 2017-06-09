@@ -20,7 +20,7 @@ public class DataTypeFactory {
 
     private static DataTypeFactory instance;
 
-    private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, List<Class<? extends LiquibaseDataType>>>();
+    private Map<String, List<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<>();
 
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
@@ -53,7 +53,7 @@ public class DataTypeFactory {
     public void register(Class<? extends LiquibaseDataType> dataTypeClass) {
         try {
             LiquibaseDataType example = dataTypeClass.newInstance();
-            List<String> names = new ArrayList<String>();
+            List<String> names = new ArrayList<>();
             names.add(example.getName());
             names.addAll(Arrays.asList(example.getAliases()));
 
@@ -71,7 +71,7 @@ public class DataTypeFactory {
             for (String name : names) {
                 name = name.toLowerCase();
                 if (registry.get(name) == null) {
-                    registry.put(name, new ArrayList<Class<? extends LiquibaseDataType>>());
+                    registry.put(name, new ArrayList<>());
                 }
                 List<Class<? extends LiquibaseDataType>> classes = registry.get(name);
                 classes.add(dataTypeClass);

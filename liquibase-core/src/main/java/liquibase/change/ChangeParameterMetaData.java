@@ -84,7 +84,7 @@ public class ChangeParameterMetaData {
             supportedDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
         }
 
-        Set<String> computedDatabases = new HashSet<String>();
+        Set<String> computedDatabases = new HashSet<>();
 
         if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
@@ -111,16 +111,16 @@ public class ChangeParameterMetaData {
             }
 
             if (validDatabases == 0) {
-                return new HashSet<String>(Arrays.asList("all"));
+                return new HashSet<>(Arrays.asList("all"));
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<String>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList("all"));
             }
 
             computedDatabases.remove("none");
 
             return computedDatabases;
         } else {
-            return new HashSet<String>(Arrays.asList(supportedDatabases));
+            return new HashSet<>(Arrays.asList(supportedDatabases));
         }
     }
 
@@ -130,7 +130,7 @@ public class ChangeParameterMetaData {
             requiredDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
         }
 
-        Set<String> computedDatabases = new HashSet<String>();
+        Set<String> computedDatabases = new HashSet<>();
 
         if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
@@ -151,15 +151,15 @@ public class ChangeParameterMetaData {
             }
 
             if (validDatabases == 0) {
-                return new HashSet<String>();
+                return new HashSet<>();
             } else if (computedDatabases.size() == validDatabases) {
-                computedDatabases = new HashSet<String>(Arrays.asList("all"));
+                computedDatabases = new HashSet<>(Arrays.asList("all"));
             }
 
             computedDatabases.remove("none");
 
         } else {
-            computedDatabases = new HashSet<String>(Arrays.asList(requiredDatabases));
+            computedDatabases = new HashSet<>(Arrays.asList(requiredDatabases));
         }
         computedDatabases.remove("none");
         return computedDatabases;
@@ -261,12 +261,15 @@ public class ChangeParameterMetaData {
     public void setValue(Change change, Object value) {
         if (value instanceof String && !dataType.equals("string")) {
             try {
-                if (dataType.equals("bigInteger")) {
-                    value = new BigInteger((String) value);
-                } else if (dataType.equals("databaseFunction")) {
-                    value = new DatabaseFunction((String) value);
-                } else {
-                    throw new UnexpectedLiquibaseException("Unknown Data Type: " + dataType);
+                switch (dataType) {
+                    case "bigInteger":
+                        value = new BigInteger((String) value);
+                        break;
+                    case "databaseFunction":
+                        value = new DatabaseFunction((String) value);
+                        break;
+                    default:
+                        throw new UnexpectedLiquibaseException("Unknown Data Type: " + dataType);
                 }
             } catch (Throwable e) {
                 throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage());
@@ -364,35 +367,40 @@ public class ChangeParameterMetaData {
                 }
             }
         }
-
-        if (dataType.equals("string")) {
-            return "A String";
-        } else if (dataType.equals("integer")) {
-            return 3;
-        } else if (dataType.equals("boolean")) {
-            return true;
-        } else if (dataType.equals("bigInteger")) {
-            return new BigInteger("371717");
-        } else if (dataType.equals("list")) {
-            return null; //"TODO";
-        } else if (dataType.equals("sequenceNextValueFunction")) {
-            return new SequenceNextValueFunction("seq_name");
-        } else if (dataType.equals("databaseFunction")) {
-            return new DatabaseFunction("now");
-        } else if (dataType.equals("list of columnConfig")) {
-            ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
-            list.add(new ColumnConfig().setName("id").setType("int"));
-            return list;
-        } else if (dataType.equals("list of addColumnConfig")) {
-            ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
-            list.add(new AddColumnConfig().setName("id").setType("int"));
-            return list;
-        } else if (dataType.equals("list of loadDataColumnConfig")) {
-            ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
-            list.add(new LoadDataColumnConfig().setName("id").setType("int"));
-            return list;
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown dataType " + dataType + " for " + getParameterName());
+    
+        switch (dataType) {
+            case "string":
+                return "A String";
+            case "integer":
+                return 3;
+            case "boolean":
+                return true;
+            case "bigInteger":
+                return new BigInteger("371717");
+            case "list":
+                return null; //"TODO";
+        
+            case "sequenceNextValueFunction":
+                return new SequenceNextValueFunction("seq_name");
+            case "databaseFunction":
+                return new DatabaseFunction("now");
+            case "list of columnConfig": {
+                ArrayList<ColumnConfig> list = new ArrayList<>();
+                list.add(new ColumnConfig().setName("id").setType("int"));
+                return list;
+            }
+            case "list of addColumnConfig": {
+                ArrayList<ColumnConfig> list = new ArrayList<>();
+                list.add(new AddColumnConfig().setName("id").setType("int"));
+                return list;
+            }
+            case "list of loadDataColumnConfig": {
+                ArrayList<ColumnConfig> list = new ArrayList<>();
+                list.add(new LoadDataColumnConfig().setName("id").setType("int"));
+                return list;
+            }
+            default:
+                throw new UnexpectedLiquibaseException("Unknown dataType " + dataType + " for " + getParameterName());
         }
     }
 
@@ -401,7 +409,7 @@ public class ChangeParameterMetaData {
             return description;
         }
 
-        Map<String, String> standardDescriptions = new HashMap<String, String>();
+        Map<String, String> standardDescriptions = new HashMap<>();
         standardDescriptions.put("tableName", "Name of the table");
         standardDescriptions.put("schemaName", "Name of the schema");
         standardDescriptions.put("catalogName", "Name of the catalog");

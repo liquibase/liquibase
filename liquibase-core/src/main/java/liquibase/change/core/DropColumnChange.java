@@ -28,7 +28,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     private String schemaName;
     private String tableName;
     private String columnName;
-    private List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
+    private List<ColumnConfig> columns = new ArrayList<>();
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
@@ -105,8 +105,8 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
 
     private SqlStatement[] generateMultipeColumns(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        List<DropColumnStatement> dropStatements = new ArrayList<DropColumnStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
+        List<DropColumnStatement> dropStatements = new ArrayList<>();
 
         for (ColumnConfig column : columns) {
             if (database instanceof SQLiteDatabase) {
@@ -137,7 +137,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
             return generateStatementsForSQLiteDatabase(database, getColumnName());
         }
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
@@ -163,7 +163,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
@@ -199,7 +199,7 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     @Override
     public String getConfirmationMessage() {
         if (isMultiple()) {
-            List<String> names = new ArrayList<String>(columns.size());
+            List<String> names = new ArrayList<>(columns.size());
             for (ColumnConfig column : columns) {
                 names.add(column.getName());
             }

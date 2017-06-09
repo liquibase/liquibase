@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
-    private final Map<String, String> params = new HashMap<String, String>();
+    private final Map<String, String> params = new HashMap<>();
     private DatabaseSnapshot snapshot = null;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
@@ -38,7 +38,7 @@ public class OfflineConnection implements DatabaseConnection {
     private String catalog;
     private boolean sendsStringParametersAsUnicode = true;
 
-    private final Map<String, String> databaseParams = new HashMap<String, String>();
+    private final Map<String, String> databaseParams = new HashMap<>();
     private String connectionUserName;
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
@@ -261,12 +261,13 @@ public class OfflineConnection implements DatabaseConnection {
             }
             s = s.toUpperCase();
             // For backward compatibility true is translated in ALL and false in NONE
-            if (s.equals("TRUE")) {
-                return ALL;
-            } else if (s.equals("FALSE")) {
-                return NONE;
-            } else {
-                return valueOf(s);
+            switch (s) {
+                case "TRUE":
+                    return ALL;
+                case "FALSE":
+                    return NONE;
+                default:
+                    return valueOf(s);
             }
         }
     }

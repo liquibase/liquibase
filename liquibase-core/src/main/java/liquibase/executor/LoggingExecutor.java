@@ -82,7 +82,7 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     private void outputStatement(SqlStatement sql) throws DatabaseException {
-        outputStatement(sql, new ArrayList<SqlVisitor>());
+        outputStatement(sql, new ArrayList<>());
     }
 
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {

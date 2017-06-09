@@ -24,7 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
-    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<ChangeLogOutputFile>();
+    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<>();
     private boolean includeSchema = true;
     private boolean includeCatalog = true;
     private boolean includeTablespace = true;

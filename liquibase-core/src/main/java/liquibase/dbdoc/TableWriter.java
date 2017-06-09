@@ -32,7 +32,7 @@ public class TableWriter extends HTMLWriter {
     }
 
     private void writeColumns(Writer fileWriter, Table table, Database database) throws IOException {
-        List<List<String>> cells = new ArrayList<List<String>>();
+        List<List<String>> cells = new ArrayList<>();
 
         for (Column column : table.getColumns()) {
             String remarks = column.getRemarks();
@@ -50,14 +50,14 @@ public class TableWriter extends HTMLWriter {
     private void writeTableRemarks(Writer fileWriter, Table table, Database database) throws IOException {
         final String tableRemarks = table.getRemarks();
         if (tableRemarks != null && tableRemarks.length() > 0) {
-        	final List<List<String>> cells = new ArrayList<List<String>>();
+        	final List<List<String>> cells = new ArrayList<>();
         	cells.add(Arrays.asList(tableRemarks));
         	writeTable("Table Description", cells, fileWriter);
         }
     }
     
     private void writeTableIndexes(Writer fileWriter, Table table, Database database) throws IOException {
-        final List<List<String>> cells = new ArrayList<List<String>>();
+        final List<List<String>> cells = new ArrayList<>();
         final PrimaryKey primaryKey = table.getPrimaryKey();
         if (!table.getIndexes().isEmpty()) {
             for (Index index : table.getIndexes()) {
@@ -71,7 +71,7 @@ public class TableWriter extends HTMLWriter {
     }
     
     private void writeTableForeignKeys(Writer fileWriter, Table table, Database database) throws IOException {
-        final List<List<String>> cells = new ArrayList<List<String>>();
+        final List<List<String>> cells = new ArrayList<>();
         if(!table.getOutgoingForeignKeys().isEmpty())
         {
             for (ForeignKey outgoingForeignKey : table.getOutgoingForeignKeys()) {

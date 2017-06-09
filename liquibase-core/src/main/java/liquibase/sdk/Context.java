@@ -20,8 +20,8 @@ public class Context {
 
     private boolean initialized = false;
 
-    private Set<Class> allClasses = new HashSet<Class>();
-    private Map<Class, Set<Class>> seenExtensionClasses = new HashMap<Class, Set<Class>>();
+    private Set<Class> allClasses = new HashSet<>();
+    private Map<Class, Set<Class>> seenExtensionClasses = new HashMap<>();
 
     private Set<File> propertyFiles;
 
@@ -60,7 +60,7 @@ public class Context {
 
 
     protected void init() throws Exception {
-        propertyFiles = new HashSet<File>();
+        propertyFiles = new HashSet<>();
 
 
         Enumeration<URL> resourceUrls = Context.class.getClassLoader().getResources(LIQUIBASE_SDK_PROPERTIES_FILENAME);
@@ -88,7 +88,7 @@ public class Context {
             Class type = getExtensionType(clazz);
             if (type != null) {
                 if (!seenExtensionClasses.containsKey(type)) {
-                    seenExtensionClasses.put(type, new HashSet<Class>());
+                    seenExtensionClasses.put(type, new HashSet<>());
                 }
                 seenExtensionClasses.get(type).add(clazz);
             }

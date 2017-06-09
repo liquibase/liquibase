@@ -15,12 +15,12 @@ import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
-    private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
-    private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
+    private Map<String, Integer> timesSingleQueried = new HashMap<>();
+    private Map<String, Boolean> didBulkQuery = new HashMap<>();
 
-    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
+    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<>();
 
-    private Map<String, Object> info = new HashMap<String, Object>();
+    private Map<String, Object> info = new HashMap<>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {
@@ -30,7 +30,7 @@ class ResultSetCache {
 
             Map<String, List<CachedRow>> cache = cacheBySchema.get(schemaKey);
             if (cache == null) {
-                cache = new HashMap<String, List<CachedRow>>();
+                cache = new HashMap<>();
                 cacheBySchema.put(schemaKey, cache);
             }
 
@@ -39,7 +39,7 @@ class ResultSetCache {
             }
 
             if (didBulkQuery.containsKey(schemaKey) && didBulkQuery.get(schemaKey)) {
-                return new ArrayList<CachedRow>();
+                return new ArrayList<>();
             }
 
             List<CachedRow> results;
@@ -48,7 +48,7 @@ class ResultSetCache {
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
             } else {
-                cache = new HashMap<String, List<CachedRow>>(); //don't store results in real cache to prevent confusion if later fetching all items.
+                cache = new HashMap<>(); //don't store results in real cache to prevent confusion if later fetching all items.
                 Integer previousCount = timesSingleQueried.get(schemaKey);
                 if (previousCount == null) {
                     previousCount = 0;
@@ -60,7 +60,7 @@ class ResultSetCache {
             for (CachedRow row : results) {
                 for (String rowKey : resultSetExtractor.rowKeyParameters(row).getKeyPermutations()) {
                     if (!cache.containsKey(rowKey)) {
-                        cache.put(rowKey, new ArrayList<CachedRow>());
+                        cache.put(rowKey, new ArrayList<>());
                     }
                     cache.get(rowKey).add(row);
                 }
@@ -68,7 +68,7 @@ class ResultSetCache {
 
             List<CachedRow> returnList = cache.get(wantedKey);
             if (returnList == null) {
-                returnList = new ArrayList<CachedRow>();
+                returnList = new ArrayList<>();
             }
             return returnList;
 
@@ -123,7 +123,7 @@ class ResultSetCache {
                         createKey(database, nullVersion)
                 };
             } else {
-                List<String> permutations = new ArrayList<String>();
+                List<String> permutations = new ArrayList<>();
 
                 Collections.addAll(permutations, permute(params, fromIndex + 1));
                 Collections.addAll(permutations, permute(nullVersion, fromIndex + 1));
@@ -180,7 +180,7 @@ class ResultSetCache {
 
         List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
             if (sql == null) {
-                return new ArrayList<CachedRow>();
+                return new ArrayList<>();
             }
             Statement statement = null;
             ResultSet resultSet = null;
@@ -226,7 +226,7 @@ class ResultSetCache {
         protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint) throws SQLException {
             resultSet.setFetchSize(database.getFetchSize());
             List<Map> result;
-            List<CachedRow> returnList = new ArrayList<CachedRow>();
+            List<CachedRow> returnList = new ArrayList<>();
             try {
                 result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
                     @Override

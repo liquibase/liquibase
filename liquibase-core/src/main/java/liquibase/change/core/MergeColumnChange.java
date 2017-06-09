@@ -114,7 +114,7 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);

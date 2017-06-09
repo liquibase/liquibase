@@ -19,8 +19,8 @@ public class ChangeFactory {
 
     private static ChangeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
+    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<>();
+    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<>();
 
     private Logger log;
 
@@ -71,7 +71,7 @@ public class ChangeFactory {
             ChangeMetaData metaData = getChangeMetaData(instance);
             String name = metaData.getName();
             if (registry.get(name) == null) {
-                registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
+                registry.put(name, new TreeSet<>(new Comparator<Class<? extends Change>>() {
                     @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
@@ -153,7 +153,7 @@ public class ChangeFactory {
     }
 
     public String[] getAllChangeNamespaces() {
-        Set<String> namespaces = new HashSet<String>();
+        Set<String> namespaces = new HashSet<>();
         for (String changeName : getDefinedChanges()) {
             Change change = create(changeName);
             namespaces.add(change.getSerializedObjectNamespace());
@@ -163,7 +163,7 @@ public class ChangeFactory {
     }
 
     public Map<String, Object> getParameters(Change change) {
-        Map<String, Object> returnMap = new HashMap<String, Object>();
+        Map<String, Object> returnMap = new HashMap<>();
         ChangeMetaData changeMetaData = getChangeMetaData(change);
         for (ChangeParameterMetaData param : changeMetaData.getParameters().values()) {
             Object currentValue = param.getCurrentValue(change);

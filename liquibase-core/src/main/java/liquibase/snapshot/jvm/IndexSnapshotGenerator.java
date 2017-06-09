@@ -46,7 +46,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache();
 
                 rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), null);
-                Map<String, Index> foundIndexes = new HashMap<String, Index>();
+                Map<String, Index> foundIndexes = new HashMap<>();
                 for (CachedRow row : rs) {
                     String indexName = row.getString("INDEX_NAME");
                     if (indexName == null) {
@@ -78,7 +78,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
-                List<Index> stillToAdd = new ArrayList<Index>();
+                List<Index> stillToAdd = new ArrayList<>();
                 for (Index exampleIndex : foundIndexes.values()) {
                     if (exampleIndex.getClustered() != null && exampleIndex.getClustered()) {
                         table.getIndexes().add(exampleIndex);
@@ -141,7 +141,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             exampleName = database.correctObjectName(exampleName, Index.class);
         }
 
-        Map<String, Index> foundIndexes = new HashMap<String, Index>();
+        Map<String, Index> foundIndexes = new HashMap<>();
         JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
         List<CachedRow> rs = null;
         try {
@@ -257,7 +257,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (database instanceof MSSQLDatabase && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
                     List<String> includedColumns = returnIndex.getAttribute("includedColumns", List.class);
                     if (includedColumns == null) {
-                        includedColumns = new ArrayList<String>();
+                        includedColumns = new ArrayList<>();
                         returnIndex.setAttribute("includedColumns", includedColumns);
                     }
                     includedColumns.add(columnName);
@@ -300,7 +300,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             return index;
         } else {
             //prefer clustered version of the index
-            List<Index> nonClusteredIndexes = new ArrayList<Index>();
+            List<Index> nonClusteredIndexes = new ArrayList<>();
             for (Index index : foundIndexes.values()) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, snapshot.getSchemaComparisons(), database)) {
                     boolean actuallyMatches = false;

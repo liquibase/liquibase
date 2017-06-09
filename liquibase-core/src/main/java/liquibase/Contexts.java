@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class Contexts {
 
-    private HashSet<String> contexts = new HashSet<String>();
+    private HashSet<String> contexts = new HashSet<>();
 
     public Contexts() {
     }

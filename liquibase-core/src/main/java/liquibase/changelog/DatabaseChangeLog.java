@@ -33,15 +33,15 @@ import java.util.*;
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditional {
-    private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<DatabaseChangeLog>();
-    private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<DatabaseChangeLog>();
+    private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
+    private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
 
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
     private ObjectQuotingStrategy objectQuotingStrategy;
 
-    private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+    private List<ChangeSet> changeSets = new ArrayList<>();
     private ChangeLogParameters changeLogParameters;
 
     private RuntimeEnvironment runtimeEnvironment;
@@ -312,95 +312,107 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         expandExpressions(node);
         String nodeName = node.getName();
-        if (nodeName.equals("changeSet")) {
-            this.addChangeSet(createChangeSet(node, resourceAccessor));
-        } else if (nodeName.equals("include")) {
-            String path = node.getChildValue(null, "file", String.class);
-            if (path == null) {
-                throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
-            }
-            path = path.replace('\\', '/');
-            ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
-            try {
-                include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor, includeContexts, true);
-            } catch (LiquibaseException e) {
-                throw new SetupException(e);
-            }
-        } else if (nodeName.equals("includeAll")) {
-            String path = node.getChildValue(null, "path", String.class);
-            String resourceFilterDef = node.getChildValue(null, "filter", String.class);
-            if (resourceFilterDef == null) {
-                resourceFilterDef = node.getChildValue(null, "resourceFilter", String.class);
-            }
-            IncludeAllFilter resourceFilter = null;
-            if (resourceFilterDef != null) {
+        switch (nodeName) {
+            case "changeSet":
+                this.addChangeSet(createChangeSet(node, resourceAccessor));
+                break;
+            case "include": {
+                String path = node.getChildValue(null, "file", String.class);
+                if (path == null) {
+                    throw new UnexpectedLiquibaseException("No 'file' attribute on 'include'");
+                }
+                path = path.replace('\\', '/');
+                ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String
+                .class));
                 try {
-                    resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
-                } catch (Exception e) {
+                    include(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceAccessor,
+                    includeContexts, true);
+                } catch (LiquibaseException e) {
                     throw new SetupException(e);
                 }
+                break;
             }
-
-            String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
-            Comparator<?> resourceComparator = null;
-            if (resourceComparatorDef != null) {
-                try {
-                	resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
-                } catch (Exception e) {
-            		//take default comparator
-                	LogFactory.getInstance().getLog().info("no resourceComparator defined - taking default implementation");
-                	resourceComparator=getStandardChangeLogComparator();
+            case "includeAll": {
+                String path = node.getChildValue(null, "path", String.class);
+                String resourceFilterDef = node.getChildValue(null, "filter", String.class);
+                if (resourceFilterDef == null) {
+                    resourceFilterDef = node.getChildValue(null, "resourceFilter", String.class);
                 }
-            }
-
-            ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String.class));
-            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter,
-                    node.getChildValue(null, "errorIfMissingOrEmpty", true),
-                    getStandardChangeLogComparator(), resourceAccessor, includeContexts);
-        } else if (nodeName.equals("preConditions")) {
-            this.preconditionContainer = new PreconditionContainer();
-            try {
-                this.preconditionContainer.load(node, resourceAccessor);
-            } catch (ParsedNodeException e) {
-                e.printStackTrace();
-            }
-        } else if (nodeName.equals("property")) {
-            try {
-                String context = node.getChildValue(null, "context", String.class);
-                String dbms = node.getChildValue(null, "dbms", String.class);
-                String labels = node.getChildValue(null, "labels", String.class);
-                Boolean global = node.getChildValue(null, "global", Boolean.class);
-                if (global == null) {
-                	// okay behave like liquibase < 3.4 and set global == true
-                	global = true;
-                }
-
-                String file = node.getChildValue(null, "file", String.class);
-                
-                if (file == null) {
-                	// direct referenced property, no file
-                	String name = node.getChildValue(null, "name", String.class);
-                	String value = node.getChildValue(null, "value", String.class);
-                	
-                    this.changeLogParameters.set(name, value, context, labels, dbms, global, this);
-                } else {
-                	// read properties from the file
-                    Properties props = new Properties();
-                    InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
-                    if (propertiesStream == null) {
-                        LogFactory.getInstance().getLog().info("Could not open properties file " + file);
-                    } else {
-                        props.load(propertiesStream);
-
-                        for (Map.Entry entry : props.entrySet()) {
-                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms, global, this);
-                        }
+                IncludeAllFilter resourceFilter = null;
+                if (resourceFilterDef != null) {
+                    try {
+                        resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
+                    } catch (Exception e) {
+                        throw new SetupException(e);
                     }
                 }
-            } catch (IOException e) {
-                throw new ParsedNodeException(e);
+            
+                String resourceComparatorDef = node.getChildValue(null, "resourceComparator", String.class);
+                Comparator<?> resourceComparator = null;
+                if (resourceComparatorDef != null) {
+                    try {
+                        resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
+                    } catch (Exception e) {
+                        //take default comparator
+                        LogFactory.getInstance().getLog().info("no resourceComparator defined - taking default " +
+                         "implementation");
+                        resourceComparator = getStandardChangeLogComparator();
+                    }
+                }
+            
+                ContextExpression includeContexts = new ContextExpression(node.getChildValue(null, "context", String
+                .class));
+                includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter, node
+                .getChildValue(null, "errorIfMissingOrEmpty", true), getStandardChangeLogComparator(),
+                resourceAccessor, includeContexts);
+                break;
             }
-
+            case "preConditions":
+                this.preconditionContainer = new PreconditionContainer();
+                try {
+                    this.preconditionContainer.load(node, resourceAccessor);
+                } catch (ParsedNodeException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "property":
+                try {
+                    String context = node.getChildValue(null, "context", String.class);
+                    String dbms = node.getChildValue(null, "dbms", String.class);
+                    String labels = node.getChildValue(null, "labels", String.class);
+                    Boolean global = node.getChildValue(null, "global", Boolean.class);
+                    if (global == null) {
+                        // okay behave like liquibase < 3.4 and set global == true
+                        global = true;
+                    }
+                
+                    String file = node.getChildValue(null, "file", String.class);
+                
+                    if (file == null) {
+                        // direct referenced property, no file
+                        String name = node.getChildValue(null, "name", String.class);
+                        String value = node.getChildValue(null, "value", String.class);
+                    
+                        this.changeLogParameters.set(name, value, context, labels, dbms, global, this);
+                    } else {
+                        // read properties from the file
+                        Properties props = new Properties();
+                        InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
+                        if (propertiesStream == null) {
+                            LogFactory.getInstance().getLog().info("Could not open properties file " + file);
+                        } else {
+                            props.load(propertiesStream);
+                        
+                            for (Map.Entry entry : props.entrySet()) {
+                                this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms, global, this);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new ParsedNodeException(e);
+                }
+            
+                break;
         }
     }
 
@@ -433,7 +445,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                     throw e;
                 }
             }
-            SortedSet<String> resources = new TreeSet<String>(resourceComparator);
+            SortedSet<String> resources = new TreeSet<>(resourceComparator);
             if (unsortedResources != null) {
                 for (String resourcePath : unsortedResources) {
                     if (resourceFilter == null || resourceFilter.include(resourcePath)) {

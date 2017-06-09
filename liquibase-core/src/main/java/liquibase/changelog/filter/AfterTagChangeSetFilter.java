@@ -12,7 +12,7 @@ import java.util.Set;
 public class AfterTagChangeSetFilter implements ChangeSetFilter {
 
     private final String tag;
-    private Set<String> changeLogsAfterTag = new HashSet<String>();
+    private Set<String> changeLogsAfterTag = new HashSet<>();
 
     public AfterTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets) throws RollbackFailedException {
         this.tag = tag;

@@ -99,7 +99,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
                if (childNode.getName().equals("dbms")) {
-                    this.setApplicableDbms(new HashSet<String>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
+                    this.setApplicableDbms(new HashSet<>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
                 } else if (childNode.getName().equals("applyToRollback")) {
                    Boolean value = childNode.getValue(Boolean.class);
                    if (value != null) {

@@ -82,9 +82,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    List<CachedRow> returnList = new ArrayList<CachedRow>();
+                    List<CachedRow> returnList = new ArrayList<>();
 
-                    List<String> tables = new ArrayList<String>();
+                    List<String> tables = new ArrayList<>();
                     String jdbcCatalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
@@ -360,7 +360,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
-                    List<CachedRow> returnList = new ArrayList<CachedRow>();
+                    List<CachedRow> returnList = new ArrayList<>();
 
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     if (database instanceof OracleDatabase) {
@@ -439,7 +439,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                          * First, we get a collection of all tables within the catalogAndSchema, then iterate through
                           * them until we (hopefully) find the index we are looking for.
                          */
-                        List<String> tables = new ArrayList<String>();
+                        List<String> tables = new ArrayList<>();
                         if (tableName == null) {
                             // Build a list of all candidate tables in the catalog/schema that might contain the index
                             for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null)) {
@@ -494,7 +494,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
 
             if (database instanceof MSSQLDatabase && userDefinedTypes == null) {
-                userDefinedTypes = new HashSet<String>();
+                userDefinedTypes = new HashSet<>();
                 DatabaseConnection databaseConnection = database.getConnection();
                 if (databaseConnection instanceof JdbcConnection) {
                     Statement stmt = null;
@@ -551,7 +551,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         );
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
-                            return new ArrayList<CachedRow>();
+                            return new ArrayList<>();
                         } else {
                             throw e;
                         }
@@ -574,7 +574,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 .getJdbcSchemaName(catalogAndSchema), SQL_FILTER_MATCH_ALL, SQL_FILTER_MATCH_ALL));
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) {
-                            return new ArrayList<CachedRow>();
+                            return new ArrayList<>();
                         } else {
                             throw e;
                         }
@@ -909,7 +909,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 public List<CachedRow> fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
                     try {
-                        List<CachedRow> foundPks = new ArrayList<CachedRow>();
+                        List<CachedRow> foundPks = new ArrayList<>();
                         if (table == null) {
                             List<CachedRow> tables = CachingDatabaseMetaData.this.getTables(catalogName, schemaName, null);
                             for (CachedRow table : tables) {

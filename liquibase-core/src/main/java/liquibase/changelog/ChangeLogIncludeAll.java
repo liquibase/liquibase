@@ -16,12 +16,7 @@ public class ChangeLogIncludeAll extends AbstractLiquibaseSerializable implement
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<String>(Arrays.asList(
-                "path",
-                "errorIfMissingOrEmpty",
-                "relativeToChangelogFile",
-                "resourceFilter",
-                "context"));
+        return new LinkedHashSet<>(Arrays.asList("path", "errorIfMissingOrEmpty", "relativeToChangelogFile", "resourceFilter", "context"));
     }
 
     @Override

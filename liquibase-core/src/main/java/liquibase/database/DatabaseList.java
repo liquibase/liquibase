@@ -44,7 +44,7 @@ public class DatabaseList {
             return false;
         }
 
-        Set<String> dbmsSupported = new HashSet<String>();
+        Set<String> dbmsSupported = new HashSet<>();
         // add all dbms that do not start with ! to a list
         for (String dbms: definition) {
             if (!dbms.startsWith("!")) {

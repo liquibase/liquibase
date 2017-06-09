@@ -32,7 +32,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
-        List<Sql> additionalSql = new ArrayList<Sql>();
+        List<Sql> additionalSql = new ArrayList<>();
     	
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),

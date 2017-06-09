@@ -85,7 +85,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
             change.setFullDefinition(view.getContainsFullDefinition());
         }
 
-        List<Change> changes = new ArrayList<Change>();
+        List<Change> changes = new ArrayList<>();
         changes.add(change);
 
         Difference changedRemarks = differences.getDifference("remarks");

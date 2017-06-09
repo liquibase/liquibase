@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class InsertSetStatement extends AbstractSqlStatement {
-    private LinkedList<InsertStatement> inserts = new LinkedList<InsertStatement>();
+    private LinkedList<InsertStatement> inserts = new LinkedList<>();
     private String catalogName;
     private String schemaName;
     private String tableName;

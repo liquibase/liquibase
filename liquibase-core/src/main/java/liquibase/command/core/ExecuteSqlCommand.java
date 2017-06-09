@@ -86,7 +86,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
                 if (rows.size() == 0) {
                     out += "-- Empty Resultset --\n";
                 } else {
-                    SortedSet<String> keys = new TreeSet<String>();
+                    SortedSet<String> keys = new TreeSet<>();
                     for (Map<String, ?> row : rows) {
                         keys.addAll(row.keySet());
                     }

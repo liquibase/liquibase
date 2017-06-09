@@ -615,7 +615,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     private Object getDefaultValue(Field field) throws IllegalAccessException {
-        List<Field> allFields = new ArrayList<Field>();
+        List<Field> allFields = new ArrayList<>();
         allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
         allFields.addAll(Arrays.asList(AbstractLiquibaseMojo.class.getDeclaredFields()));
 

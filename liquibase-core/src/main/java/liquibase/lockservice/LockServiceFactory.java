@@ -14,9 +14,9 @@ public class LockServiceFactory {
 
 	private static LockServiceFactory instance;
 
-	private List<LockService> registry = new ArrayList<LockService>();
+	private List<LockService> registry = new ArrayList<>();
 
-	private Map<Database, LockService> openLockServices = new ConcurrentHashMap<Database, LockService>();
+	private Map<Database, LockService> openLockServices = new ConcurrentHashMap<>();
 
 	public static synchronized LockServiceFactory getInstance() {
 		if (instance == null) {
@@ -57,12 +57,12 @@ public class LockServiceFactory {
 
 	public LockService getLockService(Database database) {
 		if (!openLockServices.containsKey(database)) {
-			SortedSet<LockService> foundServices = new TreeSet<LockService>(new Comparator<LockService>() {
-				@Override
+			SortedSet<LockService> foundServices = new TreeSet<>(new Comparator<LockService>() {
+                @Override
                 public int compare(LockService o1, LockService o2) {
-					return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
-				}
-			});
+                    return -1 * Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
+                }
+            });
 
 			for (LockService lockService : registry) {
 				if (lockService.supports(database)) {

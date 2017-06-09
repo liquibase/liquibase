@@ -28,7 +28,7 @@ import java.util.*;
 public class ParsedNode {
     private String namespace;
     private String name;
-    private List<ParsedNode> children = new ArrayList<ParsedNode>();
+    private List<ParsedNode> children = new ArrayList<>();
     private Object value;
 
     public ParsedNode(String namespace, String name) {
@@ -63,7 +63,7 @@ public class ParsedNode {
      * Returned list is unmodifiableList.
      */
     public List<ParsedNode> getChildren(String namespace, String nodename) {
-        List<ParsedNode> returnList = new ArrayList<ParsedNode>();
+        List<ParsedNode> returnList = new ArrayList<>();
         for (ParsedNode node : children) {
             if (nodeMatches(node, namespace, nodename)) {
                 returnList.add(node);

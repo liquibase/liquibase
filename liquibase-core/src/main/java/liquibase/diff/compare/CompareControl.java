@@ -12,8 +12,8 @@ import java.util.*;
 public class CompareControl {
 
     private CompareControl.SchemaComparison[] schemaComparisons;
-    private Set<Class<? extends DatabaseObject>> compareTypes = new HashSet<Class<? extends DatabaseObject>>();
-    private Map<Class<? extends DatabaseObject>, Set<String>> suppressedFields = new HashMap<Class<? extends DatabaseObject>, Set<String>>();
+    private Set<Class<? extends DatabaseObject>> compareTypes = new HashSet<>();
+    private Map<Class<? extends DatabaseObject>, Set<String>> suppressedFields = new HashMap<>();
 
     public static CompareControl STANDARD = new CompareControl();
 
@@ -82,7 +82,7 @@ public class CompareControl {
 
     public CompareControl addSuppressedField(Class<? extends DatabaseObject> type, String field) {
         if (!suppressedFields.containsKey(type)) {
-            suppressedFields.put(type, new HashSet<String>());
+            suppressedFields.put(type, new HashSet<>());
         }
         suppressedFields.get(type).add(field);
 
@@ -200,9 +200,9 @@ public class CompareControl {
             )};
             returnObj.finalTargetSchemas = new CatalogAndSchema[]{new CatalogAndSchema(defaultCatalogName, defaultSchemaName)};
         } else {
-            List<SchemaComparison> schemaComparisons = new ArrayList<CompareControl.SchemaComparison>();
-            List<CatalogAndSchema> referenceSchemas = new ArrayList<CatalogAndSchema>();
-            List<CatalogAndSchema> targetSchemas = new ArrayList<CatalogAndSchema>();
+            List<SchemaComparison> schemaComparisons = new ArrayList<>();
+            List<CatalogAndSchema> referenceSchemas = new ArrayList<>();
+            List<CatalogAndSchema> targetSchemas = new ArrayList<>();
 
             List<String> splitReferenceSchemaNames = StringUtils.splitAndTrim(referenceSchemaNames, ",");
             List<String> splitSchemaNames = StringUtils.splitAndTrim(schemaNames, ",");

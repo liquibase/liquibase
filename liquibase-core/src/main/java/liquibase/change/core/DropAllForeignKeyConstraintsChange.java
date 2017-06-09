@@ -52,7 +52,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
+        List<SqlStatement> sqlStatements = new ArrayList<>();
 
         List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(database);
 
@@ -72,7 +72,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private List<DropForeignKeyConstraintChange> generateChildren(Database database) {
         // Make a new list
-        List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
+        List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<>();
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
@@ -80,7 +80,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
         try {
             List<Map<String, ?>> results = executor.queryForList(sql);
-            Set<String> handledConstraints = new HashSet<String>();
+            Set<String> handledConstraints = new HashSet<>();
 
             if (results != null && results.size() > 0) {
                 for (Map result : results) {

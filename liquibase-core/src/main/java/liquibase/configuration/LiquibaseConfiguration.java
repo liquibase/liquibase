@@ -70,7 +70,7 @@ public class LiquibaseConfiguration {
      * Resets existing AbstractConfigurationContainer instances to their default values.
      */
     public void reset() {
-        this.configurations = new HashMap<Class, ConfigurationContainer>();
+        this.configurations = new HashMap<>();
     }
 
 
@@ -130,7 +130,7 @@ public class LiquibaseConfiguration {
      * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will attempt to set a default value.
      */
     public String describeValueLookupLogic(ConfigurationProperty property) {
-        List<String> reasons = new ArrayList<String>();
+        List<String> reasons = new ArrayList<>();
         for (ConfigurationValueProvider container : configurationValueProviders) {
             reasons.add(container.describeValueLookupLogic(property));
         }

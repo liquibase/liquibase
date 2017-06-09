@@ -1502,7 +1502,7 @@ public class Liquibase {
     public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter, PrintStream outputStream, ChangeLogSerializer changeLogSerializer, Class<? extends DatabaseObject>... snapshotTypes) throws DatabaseException, IOException, ParserConfigurationException {
         Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
         if (snapshotTypes != null && snapshotTypes.length > 0) {
-            finalCompareTypes = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(snapshotTypes));
+            finalCompareTypes = new HashSet<>(Arrays.asList(snapshotTypes));
         }
 
         SnapshotControl snapshotControl = new SnapshotControl(this.getDatabase(), snapshotTypes);

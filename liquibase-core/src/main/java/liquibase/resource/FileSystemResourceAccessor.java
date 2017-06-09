@@ -85,7 +85,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
 
 
-        Set<InputStream> returnSet = new HashSet<InputStream>();
+        Set<InputStream> returnSet = new HashSet<>();
         returnSet.add(fileStream);
         return returnSet;
     }
@@ -111,10 +111,10 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
         }
 
         if (finalDir.exists() && finalDir.isDirectory()) {
-            Set<String> returnSet = new HashSet<String>();
+            Set<String> returnSet = new HashSet<>();
             getContents(finalDir, recursive, includeFiles, includeDirectories, path, returnSet);
 
-            SortedSet<String> rootPaths = new TreeSet<String>(new Comparator<String>() {
+            SortedSet<String> rootPaths = new TreeSet<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
                     int i = -1 * ((Integer) o1.length()).compareTo(o2.length());
@@ -129,7 +129,7 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
                 rootPaths.add(rootPath.replaceFirst("^file:/", "").replace("\\", "/"));
             }
 
-            Set<String> finalReturnSet = new LinkedHashSet<String>();
+            Set<String> finalReturnSet = new LinkedHashSet<>();
             for (String returnPath : returnSet) {
                 returnPath = returnPath.replace("\\", "/");
                 for (String rootPath : rootPaths) {

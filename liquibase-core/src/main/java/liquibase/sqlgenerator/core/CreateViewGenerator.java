@@ -43,7 +43,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
         }
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Sql> sql = new ArrayList<>();
 
         StringClauses viewDefinition = SqlParser.parse(statement.getSelectQuery(), true, true);
 

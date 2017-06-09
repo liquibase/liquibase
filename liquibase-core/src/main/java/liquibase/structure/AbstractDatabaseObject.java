@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+    private Map<String, Object> attributes = new HashMap<>();
 
     private String snapshotId;
 
@@ -103,7 +103,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public Set<String> getSerializableFields() {
-        TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
+        TreeSet<String> fields = new TreeSet<>(attributes.keySet());
         fields.add("snapshotId");
         return fields;
     }

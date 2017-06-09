@@ -96,7 +96,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                     return;
                 }
             }
-            List<String> possibleOptions = new ArrayList<String>();
+            List<String> possibleOptions = new ArrayList<>();
             for (FailOption option : FailOption.values()) {
                 possibleOptions.add(option.key);
             }
@@ -122,7 +122,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                     return;
                 }
             }
-            List<String> possibleOptions = new ArrayList<String>();
+            List<String> possibleOptions = new ArrayList<>();
             for (ErrorOption option : ErrorOption.values()) {
                 possibleOptions.add(option.key);
             }
@@ -150,7 +150,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 return;
             }
         }
-        List<String> possibleOptions = new ArrayList<String>();
+        List<String> possibleOptions = new ArrayList<>();
         for (OnSqlOutputOption option : OnSqlOutputOption.values()) {
             possibleOptions.add(option.key);
         }

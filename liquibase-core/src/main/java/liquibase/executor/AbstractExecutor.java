@@ -42,7 +42,7 @@ public abstract class AbstractExecutor implements Executor {
 
     @Override
     public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
+        execute(change, new ArrayList<>());
     }
 
     @Override

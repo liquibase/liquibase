@@ -18,7 +18,7 @@ public class ChangeLogIterator {
     private DatabaseChangeLog databaseChangeLog;
     private List<ChangeSetFilter> changeSetFilters;
 
-    private Set<String> seenChangeSets = new HashSet<String>();
+    private Set<String> seenChangeSets = new HashSet<>();
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
@@ -26,7 +26,7 @@ public class ChangeLogIterator {
     }
 
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
-        final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+        final List<ChangeSet> changeSets = new ArrayList<>();
         for (RanChangeSet ranChangeSet : changeSetList) {
             ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
             if (changeSet != null) {
@@ -51,15 +51,15 @@ public class ChangeLogIterator {
         databaseChangeLog.setRuntimeEnvironment(env);
         log.setChangeLog(databaseChangeLog);
         try {
-            List<ChangeSet> changeSetList = new ArrayList<ChangeSet>(databaseChangeLog.getChangeSets());
+            List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
             if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
                 Collections.reverse(changeSetList);
             }
 
             for (ChangeSet changeSet : changeSetList) {
                 boolean shouldVisit = true;
-                Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<ChangeSetFilterResult>();
-                Set<ChangeSetFilterResult> reasonsDenied = new HashSet<ChangeSetFilterResult>();
+                Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<>();
+                Set<ChangeSetFilterResult> reasonsDenied = new HashSet<>();
                 if (changeSetFilters != null) {
                     for (ChangeSetFilter filter : changeSetFilters) {
                         ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);

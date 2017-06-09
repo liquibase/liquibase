@@ -15,10 +15,10 @@ public class DatabaseObjectComparatorFactory {
 
     private static DatabaseObjectComparatorFactory instance;
 
-    private List<DatabaseObjectComparator> comparators = new ArrayList<DatabaseObjectComparator>();
+    private List<DatabaseObjectComparator> comparators = new ArrayList<>();
 
-    private Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<String, List<DatabaseObjectComparator>>();
-    private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<String, DatabaseObjectComparatorChain>();
+    private Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<>();
+    private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<>();
 
     private DatabaseObjectComparatorFactory() {
         Class[] classes;
@@ -75,7 +75,7 @@ public class DatabaseObjectComparatorFactory {
             return validComparatorsByClassAndDatabase.get(key);
         }
 
-        List<DatabaseObjectComparator> validComparators = new ArrayList<DatabaseObjectComparator>();
+        List<DatabaseObjectComparator> validComparators = new ArrayList<>();
 
         for (DatabaseObjectComparator comparator : comparators) {
             if (comparator.getPriority(comparatorClass, database) > 0) {
@@ -167,7 +167,7 @@ public class DatabaseObjectComparatorFactory {
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
-        return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl, new HashSet<String>());
+        return createComparatorChain(object1.getClass(), compareControl.getSchemaComparisons(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl, new HashSet<>());
 
     }
 

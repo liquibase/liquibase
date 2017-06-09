@@ -27,7 +27,7 @@ public class PreconditionErrorException extends Exception {
 
     public PreconditionErrorException(ErrorPrecondition errorPrecondition) {
         super("Precondition Error", errorPrecondition.getCause());
-        this.erroredPreconditions = new ArrayList<ErrorPrecondition>();
+        this.erroredPreconditions = new ArrayList<>();
         erroredPreconditions.add(errorPrecondition);
     }
 

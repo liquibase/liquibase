@@ -37,7 +37,7 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
             return super.generateSql(statement, database, sqlGeneratorChain);
         }
 
-        List<Sql> commands = new ArrayList<Sql>(Arrays.asList(super.generateSql(statement, database, sqlGeneratorChain)));
+        List<Sql> commands = new ArrayList<>(Arrays.asList(super.generateSql(statement, database, sqlGeneratorChain)));
         // for postgres, we need to also set the sequence to be owned by this table for true serial like functionality.
         // this will allow a drop table cascade to remove the sequence as well.
         SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();

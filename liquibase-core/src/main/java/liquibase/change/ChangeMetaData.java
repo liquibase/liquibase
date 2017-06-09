@@ -23,11 +23,11 @@ public class ChangeMetaData implements PrioritizedService {
 
     private Map<String, ChangeParameterMetaData> parameters;
     private Set<String> appliesTo;
-    private HashMap<String, String> databaseNotes = new HashMap<String, String>();
+    private HashMap<String, String> databaseNotes = new HashMap<>();
 
     public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, String> databaseNotes, Set<ChangeParameterMetaData> parameters) {
         if (parameters == null) {
-            parameters  = new HashSet<ChangeParameterMetaData>();
+            parameters  = new HashSet<>();
         }
         if (appliesTo != null && appliesTo.length == 0) {
             appliesTo  = null;
@@ -36,7 +36,7 @@ public class ChangeMetaData implements PrioritizedService {
         this.description = description;
         this.priority = priority;
 
-        this.parameters = new HashMap<String, ChangeParameterMetaData>();
+        this.parameters = new HashMap<>();
         for (ChangeParameterMetaData param : parameters) {
             this.parameters.put(param.getParameterName(), param);
         }
@@ -44,7 +44,7 @@ public class ChangeMetaData implements PrioritizedService {
 
         this.appliesTo = null;
         if (appliesTo != null && appliesTo.length > 0) {
-            this.appliesTo = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(appliesTo)));
+            this.appliesTo = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(appliesTo)));
         }
 
         if (databaseNotes != null) {
@@ -89,7 +89,7 @@ public class ChangeMetaData implements PrioritizedService {
      * Return the parameters of the given change that are set to a non-null value. Will never return a null map, only an empty or populated map.
      */
     public Map<String, ChangeParameterMetaData> getSetParameters(Change change) {
-        Map<String, ChangeParameterMetaData> returnMap = new HashMap<String, ChangeParameterMetaData>();
+        Map<String, ChangeParameterMetaData> returnMap = new HashMap<>();
         for (Map.Entry<String, ChangeParameterMetaData> entry : getParameters().entrySet()) {
             if (entry.getValue().getCurrentValue(change) != null) {
                 returnMap.put(entry.getKey(), entry.getValue());
@@ -102,7 +102,7 @@ public class ChangeMetaData implements PrioritizedService {
      *  Returns the required parameters for this change for the given database. Will never return a null map, only an empty or populated map.
      */
     public Map<String, ChangeParameterMetaData> getRequiredParameters(Database database) {
-        Map<String, ChangeParameterMetaData> returnMap = new HashMap<String, ChangeParameterMetaData>();
+        Map<String, ChangeParameterMetaData> returnMap = new HashMap<>();
 
         for (ChangeParameterMetaData metaData : parameters.values()) {
             if (metaData.isRequiredFor(database)) {
@@ -116,7 +116,7 @@ public class ChangeMetaData implements PrioritizedService {
      *  Returns the optional parameters for this change for the given database. Will never return a null map, only an empty or populated map.
      */
     public Map<String, ChangeParameterMetaData> getOptionalParameters(Database database) {
-        Map<String, ChangeParameterMetaData> returnMap = new HashMap<String, ChangeParameterMetaData>();
+        Map<String, ChangeParameterMetaData> returnMap = new HashMap<>();
 
         for (ChangeParameterMetaData metaData : parameters.values()) {
             if (!metaData.isRequiredFor(database)) {

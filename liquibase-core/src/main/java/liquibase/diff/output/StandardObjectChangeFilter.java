@@ -15,7 +15,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
     private FilterType filterType;
 
-    private List<Filter> filters = new ArrayList<Filter>();
+    private List<Filter> filters = new ArrayList<>();
 
     public StandardObjectChangeFilter(FilterType type, String filter) {
         this.filterType = type;

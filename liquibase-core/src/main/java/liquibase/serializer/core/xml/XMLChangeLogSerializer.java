@@ -89,8 +89,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE);
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
-        Map<String, String> shortNameByNamespace = new HashMap<String, String>();
-        Map<String, String> urlByNamespace = new HashMap<String, String>();
+        Map<String, String> shortNameByNamespace = new HashMap<>();
+        Map<String, String> urlByNamespace = new HashMap<>();
 
         for (NamespaceDetails details : NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
             for (String namespace : details.getNamespaces()) {
@@ -360,7 +360,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             buffer.append(StringUtils.repeat(" ", indent));
         }
         buffer.append("<").append(node.getNodeName());
-        SortedMap<String, String> attributeMap = new TreeMap<String, String>();
+        SortedMap<String, String> attributeMap = new TreeMap<>();
         NamedNodeMap attributes = node.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node attribute = attributes.item(i);

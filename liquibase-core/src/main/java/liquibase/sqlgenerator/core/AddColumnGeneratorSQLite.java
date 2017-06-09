@@ -38,7 +38,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Sql> sql = new ArrayList<>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor =

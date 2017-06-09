@@ -20,7 +20,7 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
 
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
+        List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
             if (visitor.getLabels() != null && !labelExpression.matches(visitor.getLabels())) {
                 visitorsToRemove.add(visitor);

@@ -28,7 +28,7 @@ public class IndexComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        List<String> hashes = new ArrayList<String>();
+        List<String> hashes = new ArrayList<>();
         if (databaseObject.getName() != null) {
             hashes.add(databaseObject.getName().toLowerCase());
         }

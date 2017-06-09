@@ -44,9 +44,9 @@ public class SnapshotControl implements LiquibaseSerializable {
             setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
         } else {
             if (expandTypesIfNeeded) {
-                setTypes(new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types)), database);
+                setTypes(new HashSet<>(Arrays.asList(types)), database);
             } else {
-                this.types = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types));
+                this.types = new HashSet<>(Arrays.asList(types));
             }
         }
     }
@@ -75,13 +75,13 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     @Override
     public Set<String> getSerializableFields() {
-        return new HashSet<String>(Arrays.asList("includedType"));
+        return new HashSet<>(Arrays.asList("includedType"));
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
         if (field.equals("includedType")) {
-            SortedSet<String> types = new TreeSet<String>();
+            SortedSet<String> types = new TreeSet<>();
             for (Class type : this.getTypesToInclude()) {
                 types.add(type.getName());
             }
@@ -111,7 +111,7 @@ public class SnapshotControl implements LiquibaseSerializable {
     }
 
     private void setTypes(Set<Class<? extends DatabaseObject>> types, Database database) {
-        this.types = new HashSet<Class<? extends DatabaseObject>>();
+        this.types = new HashSet<>();
         for (Class<? extends DatabaseObject> type : types) {
             addType(type, database);
         }

@@ -29,9 +29,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
 
-    private Set<String> systemTablesAndViews = new HashSet<String>();
+    private Set<String> systemTablesAndViews = new HashSet<>();
 
-    private Set<String> reservedWords = new HashSet<String>();
+    private Set<String> reservedWords = new HashSet<>();
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -247,7 +247,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
                 if (searchPathResult != null) {
                     String dirtySearchPaths[] = searchPathResult.split("\\,");
-                    searchPaths = new ArrayList<String>();
+                    searchPaths = new ArrayList<>();
                     for (String searchPath : dirtySearchPaths) {
                         searchPath = searchPath.trim();
 

@@ -20,7 +20,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     private List<ColumnConfig> columns;
 
     public UpdateDataChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @Override

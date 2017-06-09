@@ -55,7 +55,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         buffer.append("(");
 
         Iterator<String> columnIterator = statement.getColumns().iterator();
-        List<String> primaryKeyColumns = new LinkedList<String>();
+        List<String> primaryKeyColumns = new LinkedList<>();
 
         /*
          * Build the list of columns and constraints in the form

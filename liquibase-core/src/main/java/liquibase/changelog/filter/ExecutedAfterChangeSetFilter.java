@@ -12,7 +12,7 @@ import java.util.Set;
 public class ExecutedAfterChangeSetFilter implements ChangeSetFilter {
 
     private final Date date;
-    private Set<String> changeLogsAfterDate = new HashSet<String>();
+    private Set<String> changeLogsAfterDate = new HashSet<>();
 
     public ExecutedAfterChangeSetFilter(Date date, List<RanChangeSet> ranChangeSets) {
         this.date = date;

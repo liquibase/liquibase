@@ -23,7 +23,7 @@ public class SchemesTreeBuilder {
     private class SchemaNode {
         private final LiquibaseSchema item;
 
-        private final Collection<SchemaNode> children = new ArrayList<SchemaNode>();
+        private final Collection<SchemaNode> children = new ArrayList<>();
 
         public SchemaNode(LiquibaseSchema item) {
             this.item = item;
@@ -62,7 +62,7 @@ public class SchemesTreeBuilder {
         }
 
         public List<LiquibaseSchema> toList() {
-            List<LiquibaseSchema> list = new ArrayList<LiquibaseSchema>(children.size() + 1);
+            List<LiquibaseSchema> list = new ArrayList<>(children.size() + 1);
             list.add(item);
             for (SchemaNode child : children) {
                 list.addAll(child.toList());
@@ -89,11 +89,11 @@ public class SchemesTreeBuilder {
         SchemaNode root = null;
 
         // first, copy schemes to no modify source collection
-        schemes = new ArrayList<LiquibaseSchema>(schemes);
-        Collection<LiquibaseSchema> availableSchemes = new ArrayList<LiquibaseSchema>(schemes);
+        schemes = new ArrayList<>(schemes);
+        Collection<LiquibaseSchema> availableSchemes = new ArrayList<>(schemes);
         // then find not dependent schemes - this will the roots of hierarchy.
 
-        List<LiquibaseSchema> notDependent = new ArrayList<LiquibaseSchema>();
+        List<LiquibaseSchema> notDependent = new ArrayList<>();
         for (LiquibaseSchema liquibaseSchema : schemes) {
             String depends = liquibaseSchema.depends();
             if (depends.trim().isEmpty()) {

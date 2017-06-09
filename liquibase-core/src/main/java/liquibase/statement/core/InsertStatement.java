@@ -10,7 +10,7 @@ public class InsertStatement extends AbstractSqlStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private Map<String, Object> columnValues = new LinkedHashMap<String, Object>();
+    private Map<String, Object> columnValues = new LinkedHashMap<>();
 
     public InsertStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;

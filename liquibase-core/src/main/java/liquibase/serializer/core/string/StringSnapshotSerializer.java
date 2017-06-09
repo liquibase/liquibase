@@ -31,7 +31,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
             StringBuffer buffer = new StringBuffer();
             buffer.append("[");
 
-            SortedSet<String> values = new TreeSet<String>();
+            SortedSet<String> values = new TreeSet<>();
             for (String field : objectToSerialize.getSerializableFields()) {
                 Object value = objectToSerialize.getSerializableFieldValue(field);
 

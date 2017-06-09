@@ -48,7 +48,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		this.tableName = tableName;
 		this.columns = columns;
 		this.changeSet = changeSet;
-		this.closeables = new HashSet<Closeable>();
+		this.closeables = new HashSet<>();
 		this.resourceAccessor = resourceAccessor;
 	}
 
@@ -56,7 +56,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
 		
 	    // build the sql statement
-		List<ColumnConfig> cols = new ArrayList<ColumnConfig>(getColumns().size());
+		List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 		
 	    String sql = generateSql(cols);
       log.info("Prepared statement: "+sql);
@@ -176,7 +176,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		try {
 			if (in instanceof FileInputStream) {
 				InputStream bufferedInput = createStream(in);
-				return new LOBContent<InputStream>(bufferedInput, ((FileInputStream) in).getChannel().size());
+				return new LOBContent<>(bufferedInput, ((FileInputStream) in).getChannel().size());
 			}
 			
 			in = createStream(in);
@@ -197,7 +197,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 				in = createStream(in);
 			}
 			
-			return new LOBContent<InputStream>(in, length);
+			return new LOBContent<>(in, length);
 		} finally {
 			if (in != null) {
 				closeables.add(in);
@@ -238,7 +238,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 				reader = createReader(in, encoding);
 			}
 			
-			return new LOBContent<Reader>(reader, length);
+			return new LOBContent<>(reader, length);
 		}
 		finally {
 			if (reader != null) {

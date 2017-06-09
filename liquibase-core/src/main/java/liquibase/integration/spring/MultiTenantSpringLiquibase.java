@@ -45,7 +45,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 	
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
-	private final List<DataSource> dataSources = new ArrayList<DataSource>();
+	private final List<DataSource> dataSources = new ArrayList<>();
 	
 		/** Defines a single data source and several schemas for a multi-tenant environment. */
 	private DataSource dataSource;
@@ -79,7 +79,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 				log.info("Schema based multitenancy enabled");
 				if(schemas==null || schemas.isEmpty()) {
 					log.warning("Schemas not defined, using defaultSchema only");
-					schemas = new ArrayList<String>();
+					schemas = new ArrayList<>();
 					schemas.add(defaultSchema);
 				}
 				runOnAllSchemas();

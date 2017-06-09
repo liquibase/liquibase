@@ -5,16 +5,16 @@ import java.util.*;
 public class CollectionUtil {
 
     public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
-        Set<Set<T>> sets = new HashSet<Set<T>>();
+        Set<Set<T>> sets = new HashSet<>();
         if (originalSet.isEmpty()) {
-            sets.add(new HashSet<T>());
+            sets.add(new HashSet<>());
             return sets;
         }
-        List<T> list = new ArrayList<T>(originalSet);
+        List<T> list = new ArrayList<>(originalSet);
         T head = list.get(0);
         Collection<T> rest = list.subList(1, list.size());
         for (Set<T> set : powerSet(rest)) {
-            Set<T> newSet = new HashSet<T>();
+            Set<T> newSet = new HashSet<>();
             newSet.add(head);
             newSet.addAll(set);
             sets.add(newSet);
@@ -24,12 +24,12 @@ public class CollectionUtil {
     }
 
     public static <T> List<Map<String, T>> permutations(Map<String, List<T>> parameterValues) {
-        List<Map<String, T>> list = new ArrayList<Map<String, T>>();
+        List<Map<String, T>> list = new ArrayList<>();
         if (parameterValues == null || parameterValues.size() == 0) {
             return list;
         }
 
-        permute(new HashMap<String, T>(), new ArrayList<String>(parameterValues.keySet()), parameterValues, list);
+        permute(new HashMap<>(), new ArrayList<>(parameterValues.keySet()), parameterValues, list);
 
         return list;
 
@@ -41,7 +41,7 @@ public class CollectionUtil {
         String thisKey = remainingKeys.get(0);
         remainingKeys = remainingKeys.subList(1, remainingKeys.size());
         for (T value : parameterValues.get(thisKey)) {
-            Map<String, T> permutation = new HashMap<String, T>(basePermutation);
+            Map<String, T> permutation = new HashMap<>(basePermutation);
 
             permutation.put(thisKey, value);
 

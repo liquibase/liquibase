@@ -23,9 +23,9 @@ public class DiffResult {
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
 
-    private Set<DatabaseObject> missingObjects = new HashSet<DatabaseObject>();
-    private Set<DatabaseObject> unexpectedObjects = new HashSet<DatabaseObject>();
-    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<DatabaseObject, ObjectDifferences>();
+    private Set<DatabaseObject> missingObjects = new HashSet<>();
+    private Set<DatabaseObject> unexpectedObjects = new HashSet<>();
+    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<>();
 
 
     public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {
@@ -78,7 +78,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedSet<T> getMissingObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        TreeSet<T> set = new TreeSet<T>(comparator);
+        TreeSet<T> set = new TreeSet<>(comparator);
         set.addAll(getMissingObjects(type));
         return set;
     }
@@ -116,7 +116,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedSet<T> getUnexpectedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        TreeSet<T> set = new TreeSet<T>(comparator);
+        TreeSet<T> set = new TreeSet<>(comparator);
         set.addAll(getUnexpectedObjects(type));
         return set;
     }
@@ -151,7 +151,7 @@ public class DiffResult {
     }
 
     public <T extends DatabaseObject> SortedMap<T, ObjectDifferences> getChangedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
-        SortedMap<T, ObjectDifferences> map = new TreeMap<T, ObjectDifferences>(comparator);
+        SortedMap<T, ObjectDifferences> map = new TreeMap<>(comparator);
         map.putAll(getChangedObjects(type));
         return map;
     }

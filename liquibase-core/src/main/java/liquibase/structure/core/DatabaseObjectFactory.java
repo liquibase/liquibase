@@ -29,10 +29,10 @@ public class DatabaseObjectFactory {
         if (StringUtils.trimToNull(typesString) == null) {
             return getStandardTypes();
         } else {
-            Set<Class<? extends DatabaseObject>> returnSet = new HashSet<Class<? extends DatabaseObject>>();
+            Set<Class<? extends DatabaseObject>> returnSet = new HashSet<>();
 
-            Set<String> typesToInclude = new HashSet<String>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
-            Set<String> typesNotFound = new HashSet<String>(typesToInclude);
+            Set<String> typesToInclude = new HashSet<>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
+            Set<String> typesNotFound = new HashSet<>(typesToInclude);
 
             Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
@@ -55,7 +55,7 @@ public class DatabaseObjectFactory {
 
     public Set<Class<? extends DatabaseObject>> getStandardTypes() {
         if (standardTypes == null) {
-            Set<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
+            Set<Class<? extends DatabaseObject>> set = new HashSet<>();
 
             Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {

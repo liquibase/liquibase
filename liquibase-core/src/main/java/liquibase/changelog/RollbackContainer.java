@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RollbackContainer extends AbstractLiquibaseSerializable {
-    private List<Change> changes = new ArrayList<Change>();
+    private List<Change> changes = new ArrayList<>();
 
     @Override
     public String getSerializedObjectName() {

@@ -39,9 +39,9 @@ public class CustomChangeWrapper extends AbstractChange {
     
     private String className;
 
-    private SortedSet<String> params = new TreeSet<String>();
+    private SortedSet<String> params = new TreeSet<>();
 
-    private Map<String, String> paramValues = new HashMap<String, String>();
+    private Map<String, String> paramValues = new HashMap<>();
 
     private ClassLoader classLoader;
 
@@ -256,29 +256,31 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("class")) {
-            return SerializationType.NAMED_FIELD;
-        } else if (field.equals("param")) {
-            return SerializationType.NESTED_OBJECT;
-        } else {
-            throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field "+field);
+        switch (field) {
+            case "class":
+                return SerializationType.NAMED_FIELD;
+            case "param":
+                return SerializationType.NESTED_OBJECT;
+            default:
+                throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field " + field);
         }
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        if (field.equals("class")) {
-            return getClassName();
-        } else if (field.equals("param")) {
-            return this.paramValues;
-        } else {
-            throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field "+field);
+        switch (field) {
+            case "class":
+                return getClassName();
+            case "param":
+                return this.paramValues;
+            default:
+                throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field " + field);
         }
     }
 
     @Override
     public Set<String> getSerializableFields() {
-        return new HashSet<String>(Arrays.asList("class", "param"));
+        return new HashSet<>(Arrays.asList("class", "param"));
     }
 
     @Override

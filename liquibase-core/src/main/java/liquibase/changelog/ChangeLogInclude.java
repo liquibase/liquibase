@@ -14,10 +14,7 @@ public class ChangeLogInclude extends AbstractLiquibaseSerializable implements C
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<String>(Arrays.asList(
-                "file",
-                "relativeToChangelogFile",
-                "context"));
+        return new LinkedHashSet<>(Arrays.asList("file", "relativeToChangelogFile", "context"));
     }
 
     @Override

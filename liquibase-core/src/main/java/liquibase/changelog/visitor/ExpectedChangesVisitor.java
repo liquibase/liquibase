@@ -13,7 +13,7 @@ public class ExpectedChangesVisitor implements ChangeSetVisitor {
     private final LinkedHashSet<RanChangeSet> unexpectedChangeSets;
 
     public ExpectedChangesVisitor(List<RanChangeSet> ranChangeSetList) {
-        this.unexpectedChangeSets = new LinkedHashSet<RanChangeSet>(ranChangeSetList);
+        this.unexpectedChangeSets = new LinkedHashSet<>(ranChangeSetList);
     }
 
     @Override

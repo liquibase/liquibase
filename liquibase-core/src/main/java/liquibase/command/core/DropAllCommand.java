@@ -63,7 +63,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
         }
 
         schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
+        List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }

@@ -135,7 +135,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public List<String> getColumnNamesAsList() {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (Column col : getColumns()) {
             names.add(col.getName());
         }

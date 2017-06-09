@@ -37,7 +37,7 @@ public class OrPrecondition extends PreconditionLogic {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         boolean onePassed = false;
-        List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
+        List<FailedPrecondition> failures = new ArrayList<>();
         for (Precondition precondition : getNestedPreconditions()) {
             try {
                 precondition.check(database, changeLog, changeSet);

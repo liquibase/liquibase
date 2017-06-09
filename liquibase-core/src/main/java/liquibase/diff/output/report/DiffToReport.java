@@ -90,7 +90,7 @@ public class DiffToReport {
         printComparison("Product Version", diffResult.getProductVersionDiff(), out);
 
 
-        TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<Class<? extends DatabaseObject>>(new Comparator<Class<? extends DatabaseObject>>() {
+        TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<>(new Comparator<Class<? extends DatabaseObject>>() {
             @Override
             public int compare(Class<? extends DatabaseObject> o1, Class<? extends DatabaseObject> o2) {
                 return o1.getSimpleName().compareTo(o2.getSimpleName());

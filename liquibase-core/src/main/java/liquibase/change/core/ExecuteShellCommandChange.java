@@ -41,7 +41,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     private String executable;
     private List<String> os;
-    private List<String> args = new ArrayList<String>();
+    private List<String> args = new ArrayList<>();
     protected List<String> finalCommandArray;
 
     @Override
@@ -148,7 +148,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     protected List<String> createFinalCommandArray(Database database) {
-        List<String> commandArray = new ArrayList<String>();
+        List<String> commandArray = new ArrayList<>();
         commandArray.add(getExecutable());
         commandArray.addAll(getArgs());
         return commandArray;
@@ -225,7 +225,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
         String passedValue = StringUtils.trimToNull(parsedNode.getChildValue(null, "os", String.class));
         if (passedValue == null) {
-            this.os = new ArrayList<String>();
+            this.os = new ArrayList<>();
         } else {
             List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os", String.class)), ",");
             if (os.size() == 1 && os.get(0).equals("")) {

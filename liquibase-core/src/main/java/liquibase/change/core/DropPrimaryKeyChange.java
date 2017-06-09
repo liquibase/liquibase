@@ -110,7 +110,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     	// Note: The attribute "constraintName" is used to pass the column 
     	// name instead of the constraint name.
 		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<>();
     	
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {

@@ -65,7 +65,7 @@ public class RenameTableChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));

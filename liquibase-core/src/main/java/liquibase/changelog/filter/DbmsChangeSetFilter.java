@@ -22,7 +22,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         if (database == null) {
             return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass());
         }
-         List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
+         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
             if (!DatabaseList.definitionMatches(visitor.getApplicableDbms(), database, true)) {
                 visitorsToRemove.add(visitor);

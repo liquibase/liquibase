@@ -28,7 +28,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
         
         StringBuffer updateClause = new StringBuffer("ON DUPLICATE KEY UPDATE ");
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
-        HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+        HashSet<String> hashPkFields = new HashSet<>(Arrays.asList(pkFields));
         boolean hasFields = false;
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {

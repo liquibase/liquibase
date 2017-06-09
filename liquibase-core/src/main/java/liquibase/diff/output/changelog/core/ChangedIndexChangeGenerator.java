@@ -83,7 +83,7 @@ public class ChangedIndexChangeGenerator extends AbstractChangeGenerator impleme
 
         CreateIndexChange addIndexChange = createCreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
-        List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
+        List<AddColumnConfig> columns = new ArrayList<>();
         for (Column col : index.getColumns()) {
             columns.add(new AddColumnConfig(col));
         }

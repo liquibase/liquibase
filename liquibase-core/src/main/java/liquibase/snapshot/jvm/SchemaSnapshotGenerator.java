@@ -122,7 +122,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
      * @throws DatabaseException if a different problem occurs during the DBMS-specific code
      */
     protected String[] getDatabaseSchemaNames(Database database) throws SQLException, DatabaseException {
-        List<String> returnList = new ArrayList<String>();
+        List<String> returnList = new ArrayList<>();
 
         ResultSet schemas = null;
         try {

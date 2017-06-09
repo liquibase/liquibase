@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class DiffOutputControl {
 
-    private Set<CatalogAndSchema> includeSchemas = new HashSet<CatalogAndSchema>();
+    private Set<CatalogAndSchema> includeSchemas = new HashSet<>();
 
     private boolean includeSchema;
     private boolean includeCatalog;

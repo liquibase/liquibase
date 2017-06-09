@@ -32,7 +32,7 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public Set<Type> getTypes() {
-                Set<Type> types = new HashSet<Type>();
+                Set<Type> types = new HashSet<>();
                 types.add(CDILiquibase.class);
                 types.add(Object.class);
                 return types;
@@ -40,7 +40,7 @@ public class CDIBootstrap implements Extension {
 
             @Override
             public Set<Annotation> getQualifiers() {
-                Set<Annotation> qualifiers = new HashSet<Annotation>();
+                Set<Annotation> qualifiers = new HashSet<>();
                 qualifiers.add( new AnnotationLiteral<Default>() {
                     private static final long serialVersionUID = 6919382612875193843L;
                 } );

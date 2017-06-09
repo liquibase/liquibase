@@ -41,7 +41,7 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
     @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        List<Change> returnList = new ArrayList<Change>();
+        List<Change> returnList = new ArrayList<>();
 
         UniqueConstraint uniqueConstraint = (UniqueConstraint) changedObject;
 

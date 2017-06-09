@@ -11,7 +11,7 @@ public class NotInChangeLogChangeSetFilter implements ChangeSetFilter {
     private Set<ChangeSet> changeSets;
 
     public NotInChangeLogChangeSetFilter(DatabaseChangeLog databaseChangeLog) {
-        this.changeSets = new HashSet<ChangeSet>(databaseChangeLog.getChangeSets());
+        this.changeSets = new HashSet<>(databaseChangeLog.getChangeSets());
     }
 
     @Override

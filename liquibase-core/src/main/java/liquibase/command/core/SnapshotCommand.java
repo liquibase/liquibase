@@ -52,7 +52,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
         }
 
         schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
-        List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
+        List<CatalogAndSchema> finalList = new ArrayList<>();
         for (String schema : schemas) {
             finalList.add(new CatalogAndSchema(null, schema).customize(database));
         }

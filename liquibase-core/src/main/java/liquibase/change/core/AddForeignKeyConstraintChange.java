@@ -42,7 +42,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     @Override
     protected String[] createSupportedDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if (parameterName.equals("deferrable") || parameterName.equals("initiallyDeferred")) {
-            List<String> supported = new ArrayList<String>();
+            List<String> supported = new ArrayList<>();
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if (database.supportsInitiallyDeferrableColumns()) {
                     supported.add(database.getShortName());

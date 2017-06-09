@@ -1172,46 +1172,51 @@ public class FilenameUtils {
             }
 
             // loop whilst tokens and text left to process
+            label:
             while (wcsIdx < wcs.length) {
-
-                if (wcs[wcsIdx].equals("?")) {
-                    // ? so move to next text char
-                    textIdx++;
-                    anyChars = false;
-
-                } else if (wcs[wcsIdx].equals("*")) {
-                    // set any chars status
-                    anyChars = true;
-                    if (wcsIdx == wcs.length - 1) {
-                        textIdx = filename.length();
-                    }
-
-                } else {
-                    // matching text token
-                    if (anyChars) {
-                        // any chars then try to locate text token
-                        textIdx = filename.indexOf(wcs[wcsIdx], textIdx);
-                        if (textIdx == -1) {
-                            // token not found
-                            break;
+        
+                switch (wcs[wcsIdx]) {
+                    case "?":
+                        // ? so move to next text char
+                        textIdx++;
+                        anyChars = false;
+                
+                        break;
+                    case "*":
+                        // set any chars status
+                        anyChars = true;
+                        if (wcsIdx == wcs.length - 1) {
+                            textIdx = filename.length();
                         }
-                        int repeat = filename.indexOf(wcs[wcsIdx], textIdx + 1);
-                        if (repeat >= 0) {
-                            backtrack.push(new int[] {wcsIdx, repeat});
+                
+                        break;
+                    default:
+                        // matching text token
+                        if (anyChars) {
+                            // any chars then try to locate text token
+                            textIdx = filename.indexOf(wcs[wcsIdx], textIdx);
+                            if (textIdx == -1) {
+                                // token not found
+                                break label;
+                            }
+                            int repeat = filename.indexOf(wcs[wcsIdx], textIdx + 1);
+                            if (repeat >= 0) {
+                                backtrack.push(new int[]{wcsIdx, repeat});
+                            }
+                        } else {
+                            // matching from current position
+                            if (!filename.startsWith(wcs[wcsIdx], textIdx)) {
+                                // couldnt match token
+                                break label;
+                            }
                         }
-                    } else {
-                        // matching from current position
-                        if (!filename.startsWith(wcs[wcsIdx], textIdx)) {
-                            // couldnt match token
-                            break;
-                        }
-                    }
-
-                    // matched text token, move text index to end of matched token
-                    textIdx += wcs[wcsIdx].length();
-                    anyChars = false;
+                
+                        // matched text token, move text index to end of matched token
+                        textIdx += wcs[wcsIdx].length();
+                        anyChars = false;
+                        break;
                 }
-
+        
                 wcsIdx++;
             }
 

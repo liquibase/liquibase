@@ -35,7 +35,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
-        Set<String> contents = new HashSet<String>();
+        Set<String> contents = new HashSet<>();
         Set<String> superList = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
         if (superList != null) {
             contents.addAll(superList);
@@ -53,7 +53,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
      * Return alternate options for the given path that the user maybe meant. Return in order of likelihood.
      */
     protected List<String> getAlternatePaths(String path) {
-        List<String> alternatePaths = new ArrayList<String>();
+        List<String> alternatePaths = new ArrayList<>();
 
         if (path.startsWith("/")) { //People are often confused about leading slashes in resource paths...
             alternatePaths.add(path.substring(1));

@@ -24,7 +24,7 @@ import java.util.*;
 public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "SQLite";
-    private Set<String> systemTables = new HashSet<String>();
+    private Set<String> systemTables = new HashSet<>();
 
     {
         systemTables.add("sqlite_sequence");
@@ -40,14 +40,14 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             Database database, String catalogName, String schemaName, String tableName)
             throws DatabaseException {
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         Table table = null;
         try {
             table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
 
-            List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
-            List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();
+            List<ColumnConfig> createColumns = new ArrayList<>();
+            List<ColumnConfig> copyColumns = new ArrayList<>();
             if (table != null) {
                 for (Column column : table.getColumns()) {
                     ColumnConfig new_column = new ColumnConfig(column);
@@ -70,7 +70,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
                 }
             }
 
-            List<Index> newIndices = new ArrayList<Index>();
+            List<Index> newIndices = new ArrayList<>();
             for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
                 if (index.getTable().getName().equalsIgnoreCase(tableName)) {
                     if (alterTableVisitor.createThisIndex(index)) {

@@ -30,7 +30,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	private static final Set<String> systemTablesAndViews;
 
 	static {
-		systemTablesAndViews = new HashSet<String>();
+		systemTablesAndViews = new HashSet<>();
 		systemTablesAndViews.add("dummy");
 		systemTablesAndViews.add("sysarticle");
 		systemTablesAndViews.add("sysarticlecol");

@@ -154,7 +154,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (column.getAutoIncrementInformation() != null && database instanceof MSSQLDatabase && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
             Map<String, Column.AutoIncrementInformation> autoIncrementColumns = (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
-                autoIncrementColumns = new HashMap<String, Column.AutoIncrementInformation>();
+                autoIncrementColumns = new HashMap<>();
                 Executor executor = ExecutorService.getInstance().getExecutor(database);
                 try {
                     List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement("select object_schema_name(object_id) as schema_name, object_name(object_id) as table_name, name as column_name, cast(seed_value as bigint) as start_value, cast(increment_value as bigint) as increment_by from sys.identity_columns"));

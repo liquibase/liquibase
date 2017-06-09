@@ -164,13 +164,13 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
             if (line == null) { //empty file
                 writeHeader(this.changeLogFile);
-                return new ArrayList<RanChangeSet>();
+                return new ArrayList<>();
             }
             if (!line[COLUMN_ID].equals("ID")) {
                 throw new DatabaseException("Missing header in file "+this.changeLogFile.getAbsolutePath());
             }
 
-            List<RanChangeSet> returnList = new ArrayList<RanChangeSet>();
+            List<RanChangeSet> returnList = new ArrayList<>();
             while ((line = csvReader.readNext()) != null) {
                 ContextExpression contexts = new ContextExpression();
                 if (line.length > COLUMN_CONTEXTS) {
@@ -332,7 +332,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 CSVReader csvReader = new CSVReader(reader);
                 String[] line = csvReader.readNext(); //skip header line
 
-                List<RanChangeSet> returnList = new ArrayList<RanChangeSet>();
+                List<RanChangeSet> returnList = new ArrayList<>();
                 while ((line = csvReader.readNext()) != null) {
                     try {
                         lastChangeSetSequenceValue = Integer.valueOf(line[COLUMN_ORDEREXECUTED]);

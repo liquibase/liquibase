@@ -80,7 +80,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
 
-        List<Sql> returnList = new ArrayList<Sql>();
+        List<Sql> returnList = new ArrayList<>();
         returnList.add(new UnparsedSql(sql, getAffectedColumn(statement)));
 
         if (database instanceof DB2Database) {

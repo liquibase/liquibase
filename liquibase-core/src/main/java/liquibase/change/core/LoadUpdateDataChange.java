@@ -59,7 +59,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
 
     @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
         SqlStatement[] forward = this.generateStatements(database);
 
         for(SqlStatement thisForward: forward){

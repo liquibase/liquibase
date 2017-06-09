@@ -12,14 +12,14 @@ import java.util.*;
 public class ObjectDifferences {
 
     private CompareControl compareControl;
-    private HashMap<String, Difference> differences = new HashMap<String, Difference>();
+    private HashMap<String, Difference> differences = new HashMap<>();
 
     public ObjectDifferences(CompareControl compareControl) {
         this.compareControl = compareControl;
     }
 
     public Set<Difference> getDifferences() {
-        return Collections.unmodifiableSet(new TreeSet<Difference>(differences.values()));
+        return Collections.unmodifiableSet(new TreeSet<>(differences.values()));
     }
 
     public Difference getDifference(String field) {

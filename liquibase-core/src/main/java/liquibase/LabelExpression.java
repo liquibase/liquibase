@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class LabelExpression {
 
-    private HashSet<String> labels = new LinkedHashSet<String>();
+    private HashSet<String> labels = new LinkedHashSet<>();
     private String originalString = null;
 
     public LabelExpression() {

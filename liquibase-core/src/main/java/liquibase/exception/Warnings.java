@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Warnings {
 
-    private List<String> messages = new ArrayList<String>();
+    private List<String> messages = new ArrayList<>();
 
     public Warnings addWarning(String warning) {
         messages.add(warning);

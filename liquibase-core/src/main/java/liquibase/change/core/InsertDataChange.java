@@ -26,7 +26,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     private String dbms;
 
     public InsertDataChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @Override

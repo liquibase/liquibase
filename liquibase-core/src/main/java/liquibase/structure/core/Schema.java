@@ -126,9 +126,9 @@ public class Schema extends AbstractDatabaseObject {
     public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
         Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
         if (databaseObjects == null) {
-            return new ArrayList<DatabaseObjectType>();
+            return new ArrayList<>();
         }
-        return new ArrayList<DatabaseObjectType>(databaseObjects);
+        return new ArrayList<>(databaseObjects);
     }
 
     public void addDatabaseObject(DatabaseObject databaseObject) {
@@ -137,7 +137,7 @@ public class Schema extends AbstractDatabaseObject {
         }
         Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
         if (objects == null) {
-            objects = new HashSet<DatabaseObject>();
+            objects = new HashSet<>();
             this.getObjects().put(databaseObject.getClass(), objects);
         }
         objects.add(databaseObject);

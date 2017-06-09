@@ -336,7 +336,7 @@ public class CSVParser {
             }
         }
 
-        List<String> tokensOnThisLine = new ArrayList<String>();
+        List<String> tokensOnThisLine = new ArrayList<>();
         StringBuilder sb = new StringBuilder(nextLine.length() + READ_BUFFER_SIZE);
         boolean inQuotes = false;
         boolean fromQuotedField = false;

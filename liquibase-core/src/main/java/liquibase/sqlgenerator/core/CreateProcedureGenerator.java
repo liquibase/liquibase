@@ -41,7 +41,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
 
     @Override
     public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Sql> sql = new ArrayList<>();
 
         String schemaName = statement.getSchemaName();
         if (schemaName == null && LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getAlwaysOverrideStoredLogicSchema()) {

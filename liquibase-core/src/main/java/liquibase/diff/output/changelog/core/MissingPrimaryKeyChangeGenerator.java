@@ -50,7 +50,7 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        List<Change> returnList = new ArrayList<Change>();
+        List<Change> returnList = new ArrayList<>();
 
         PrimaryKey pk = (PrimaryKey) missingObject;
 

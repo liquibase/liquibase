@@ -41,7 +41,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
     @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
-        List<Change> returnList = new ArrayList<Change>();
+        List<Change> returnList = new ArrayList<>();
 
         UniqueConstraint uc = (UniqueConstraint) missingObject;
 

@@ -28,7 +28,7 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        Set<String> hashes = new HashSet<String>();
+        Set<String> hashes = new HashSet<>();
         hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), null, accordingTo)));
         hashes.addAll(Arrays.asList(chain.hash(databaseObject, accordingTo)));
 

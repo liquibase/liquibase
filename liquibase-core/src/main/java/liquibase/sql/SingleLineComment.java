@@ -17,7 +17,7 @@ public class SingleLineComment implements Sql {
 	
 	@Override
     public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
-		return new HashSet<DatabaseObject>();
+		return new HashSet<>();
 	}
 
 	@Override

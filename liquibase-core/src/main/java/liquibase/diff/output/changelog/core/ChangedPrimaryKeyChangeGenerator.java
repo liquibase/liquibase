@@ -55,7 +55,7 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         PrimaryKey pk = (PrimaryKey) changedObject;
 
-        List<Change> returnList = new ArrayList<Change>();
+        List<Change> returnList = new ArrayList<>();
 
 
         DropPrimaryKeyChange dropPkChange = new DropPrimaryKeyChange();

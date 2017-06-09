@@ -9,7 +9,7 @@ public class UnparsedSql implements Sql {
 
     private String sql;
     private String endDelimiter;
-    private Set<DatabaseObject> affectedDatabaseObjects = new HashSet<DatabaseObject>();
+    private Set<DatabaseObject> affectedDatabaseObjects = new HashSet<>();
 
 
     public UnparsedSql(String sql, DatabaseObject... affectedDatabaseObjects) {
@@ -21,7 +21,7 @@ public class UnparsedSql implements Sql {
         this.endDelimiter = endDelimiter;
 
         this.affectedDatabaseObjects.addAll(Arrays.asList(affectedDatabaseObjects));
-        List<DatabaseObject> moreAffectedDatabaseObjects = new ArrayList<DatabaseObject>();
+        List<DatabaseObject> moreAffectedDatabaseObjects = new ArrayList<>();
 
         boolean foundMore = true;
         while (foundMore) {

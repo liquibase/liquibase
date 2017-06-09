@@ -211,7 +211,7 @@ public class CreateViewChange extends AbstractChange {
 
 	@Override
     public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
 		boolean replaceIfExists = false;
 		if (getReplaceIfExists() != null && getReplaceIfExists()) {

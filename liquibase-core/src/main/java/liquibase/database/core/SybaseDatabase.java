@@ -24,7 +24,7 @@ import java.util.Set;
  */
 public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
-    protected Set<String> systemTablesAndViews = new HashSet<String>();
+    protected Set<String> systemTablesAndViews = new HashSet<>();
 
     @Override
     public String getShortName() {

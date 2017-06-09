@@ -70,7 +70,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
 
-    private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
+    private List<LoadDataColumnConfig> columns = new ArrayList<>();
 
     @Override
     public boolean supports(Database database) {
@@ -203,7 +203,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException("Data file " + getFile() + " was empty");
             }
 
-            List<SqlStatement> statements = new ArrayList<SqlStatement>();
+            List<SqlStatement> statements = new ArrayList<>();
 
             boolean anyPreparedStatements = false;
 
@@ -226,7 +226,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                 boolean needsPreparedStatement = false;
 
-                List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
+                List<ColumnConfig> columns = new ArrayList<>();
                 for (int i = 0; i < headers.length; i++) {
                     Object value = line[i];
                     String columnName = headers[i].trim();

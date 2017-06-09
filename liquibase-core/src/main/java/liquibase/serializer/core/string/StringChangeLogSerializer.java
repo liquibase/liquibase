@@ -41,7 +41,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             StringBuffer buffer = new StringBuffer();
             buffer.append("[");
 
-            SortedSet<String> values = new TreeSet<String>();
+            SortedSet<String> values = new TreeSet<>();
             for (String field : objectToSerialize.getSerializableFields()) {
                 Object value = objectToSerialize.getSerializableFieldValue(field);
                 if (value == null) {

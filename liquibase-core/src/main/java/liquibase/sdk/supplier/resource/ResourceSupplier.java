@@ -43,7 +43,7 @@ public class ResourceSupplier {
             } else {
                 throw new RuntimeException("Unknown resource type: "+ path);
             }
-            return new HashSet<InputStream>(Arrays.asList(stream));
+            return new HashSet<>(Arrays.asList(stream));
         }
 
         @Override

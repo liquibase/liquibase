@@ -134,7 +134,7 @@ public class RenameColumnChange extends AbstractChange {
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
     
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<>();
     	
     	// define alter table logic
 		AlterTableVisitor rename_alter_visitor = 

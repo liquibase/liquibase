@@ -44,14 +44,14 @@ public class DBDocVisitor implements ChangeSetVisitor {
     public DBDocVisitor(Database database) {
         this.database = database;
 
-        changesByObject = new HashMap<DatabaseObject, List<Change>>();
-        changesByAuthor = new HashMap<String, List<Change>>();
-        changeLogs = new TreeSet<ChangeLogInfo>();
+        changesByObject = new HashMap<>();
+        changesByAuthor = new HashMap<>();
+        changeLogs = new TreeSet<>();
 
-        changesToRunByObject = new HashMap<DatabaseObject, List<Change>>();
-        changesToRunByAuthor = new HashMap<String, List<Change>>();
-        changesToRun = new ArrayList<Change>();
-        recentChanges = new ArrayList<Change>();
+        changesToRunByObject = new HashMap<>();
+        changesToRunByAuthor = new HashMap<>();
+        changesToRun = new ArrayList<>();
+        recentChanges = new ArrayList<>();
     }
 
     @Override
@@ -71,10 +71,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         if (!changesByAuthor.containsKey(changeSet.getAuthor())) {
-            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
         if (!changesToRunByAuthor.containsKey(changeSet.getAuthor())) {
-            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<Change>());
+            changesToRunByAuthor.put(changeSet.getAuthor(), new ArrayList<>());
         }
 
         boolean toRun = runStatus.equals(ChangeSet.RunStatus.NOT_RAN) || runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN);
@@ -100,12 +100,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {
                         if (!changesToRunByObject.containsKey(dbObject)) {
-                            changesToRunByObject.put(dbObject, new ArrayList<Change>());
+                            changesToRunByObject.put(dbObject, new ArrayList<>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
                     } else {
                        if (!changesByObject.containsKey(dbObject)) {
-                           changesByObject.put(dbObject, new ArrayList<Change>());
+                           changesByObject.put(dbObject, new ArrayList<>());
                        }
                        changesByObject.get(dbObject).add(change);
                     }
@@ -131,7 +131,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
-        SortedSet<Table> tables = new TreeSet<Table>(snapshot.get(Table.class));
+        SortedSet<Table> tables = new TreeSet<>(snapshot.get(Table.class));
         Iterator<Table> tableIterator = tables.iterator();
         while (tableIterator.hasNext()) {
             if (database.isLiquibaseObject(tableIterator.next())) {

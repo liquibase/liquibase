@@ -94,7 +94,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     private Sql[] generateMultipleColumns(List<AddColumnStatement> columns, Database database) {
-        List<Sql> result = new ArrayList<Sql>();
+        List<Sql> result = new ArrayList<>();
         if (database instanceof MySQLDatabase) {
             String alterTable = generateSingleColumBaseSQL(columns.get(0), database);
             for (int i = 0; i < columns.size(); i++) {
@@ -122,7 +122,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         String alterTable = generateSingleColumBaseSQL(statement, database);
         alterTable += generateSingleColumnSQL(statement, database);
 
-        List<Sql> returnSql = new ArrayList<Sql>();
+        List<Sql> returnSql = new ArrayList<>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
         addUniqueConstrantStatements(statement, database, returnSql);
@@ -171,7 +171,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected Column[] getAffectedColumns(List<AddColumnStatement> columns) {
-        List<Column> cols = new ArrayList<Column>();
+        List<Column> cols = new ArrayList<>();
         for (AddColumnStatement c : columns) {
             cols.add(getAffectedColumn(c));
         }

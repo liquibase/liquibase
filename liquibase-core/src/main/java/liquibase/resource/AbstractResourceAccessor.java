@@ -14,7 +14,7 @@ import java.util.*;
 public abstract class AbstractResourceAccessor implements ResourceAccessor {
 
     //We don't use an HashSet otherwise iteration order is not deterministic
-	private List<String> rootStrings = new ArrayList<String>();
+	private List<String> rootStrings = new ArrayList<>();
 
     protected AbstractResourceAccessor() {
         init();
@@ -26,7 +26,7 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
             ClassLoader classLoader = toClassLoader();
             if (classLoader != null) {
                 if (classLoader instanceof URLClassLoader) {
-                    baseUrls = new Vector<URL>(Arrays.asList(((URLClassLoader) classLoader).getURLs())).elements();
+                    baseUrls = new Vector<>(Arrays.asList(((URLClassLoader) classLoader).getURLs())).elements();
 
                     while (baseUrls.hasMoreElements()) {
                         addRootPath(baseUrls.nextElement());

@@ -23,7 +23,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     private int minParameters;
     private int maxParameters;
 
-    private List<Object> parameters = new ArrayList<Object>();
+    private List<Object> parameters = new ArrayList<>();
     private String additionalInformation;
     private String rawDefinition;
 

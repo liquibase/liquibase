@@ -34,7 +34,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 
     public CreateIndexChange() {
-        columns = new ArrayList<AddColumnConfig>();
+        columns = new ArrayList<>();
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to create")
@@ -68,7 +68,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
     public List<AddColumnConfig> getColumns() {
         if (columns == null) {
-            return new ArrayList<AddColumnConfig>();
+            return new ArrayList<>();
         }
         return columns;
     }

@@ -15,7 +15,7 @@ public class ReflectionSerializer {
         return instance;
     }
 
-    private Map<Class, Map<String, Field>> reflectionCache = new HashMap<Class, Map<String, Field>>();
+    private Map<Class, Map<String, Field>> reflectionCache = new HashMap<>();
 
     private ReflectionSerializer() {
 
@@ -25,8 +25,8 @@ public class ReflectionSerializer {
 
         if (!reflectionCache.containsKey(object.getClass())) {
 
-            Map<String, Field> fields = new HashMap<String, Field>();
-            Set<Field> allFields = new HashSet<Field>();
+            Map<String, Field> fields = new HashMap<>();
+            Set<Field> allFields = new HashSet<>();
 
             Class classToExtractFieldsFrom = object.getClass();
             while (!classToExtractFieldsFrom.equals(Object.class)) {

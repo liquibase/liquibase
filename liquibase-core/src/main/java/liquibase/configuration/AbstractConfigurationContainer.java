@@ -44,7 +44,7 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
      */
     @Override
     public Set<ConfigurationProperty> getProperties() {
-        return new HashSet<ConfigurationProperty>(getContainer().properties.values());
+        return new HashSet<>(getContainer().properties.values());
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
     protected static class ConfigurationContainer {
 
         private final String namespace;
-        private final Map<String, ConfigurationProperty> properties = new HashMap<String, ConfigurationProperty>();
+        private final Map<String, ConfigurationProperty> properties = new HashMap<>();
 
         protected ConfigurationContainer(String namespace) {
             this.namespace = namespace;

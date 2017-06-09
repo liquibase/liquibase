@@ -43,7 +43,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
     protected final int ORACLE_12C_MAJOR_VERSION = 12;
 
-    private Set<String> reservedWords = new HashSet<String>();
+    private Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes = null;
 
     private Boolean canAccessDbaRecycleBin;
@@ -429,7 +429,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     public Set<String> getUserDefinedTypes() {
         if (userDefinedTypes == null) {
-            userDefinedTypes = new HashSet<String>();
+            userDefinedTypes = new HashSet<>();
             if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
                 try {
                     try {

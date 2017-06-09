@@ -59,7 +59,7 @@ public abstract class AbstractChange implements Change {
                 throw new UnexpectedLiquibaseException("No @DatabaseChange annotation for " + getClass().getName());
             }
 
-            Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
+            Set<ChangeParameterMetaData> params = new HashSet<>();
             for (PropertyDescriptor property : PropertyUtils.getInstance().getDescriptors(getClass())) {
                 if (isInvalidProperty(property)) {
                     continue;
@@ -82,7 +82,7 @@ public abstract class AbstractChange implements Change {
 
             }
 
-            Map<String, String> notes = new HashMap<String, String>();
+            Map<String, String> notes = new HashMap<>();
             for (DatabaseChangeNote note : databaseChange.databaseNotes()) {
                 notes.put(note.database(), note.notes());
             }
@@ -199,7 +199,7 @@ public abstract class AbstractChange implements Change {
             return null;
         }
 
-        Map<String, Object> examples = new HashMap<String, Object>();
+        Map<String, Object> examples = new HashMap<>();
         examples.put("all", StringUtils.trimToNull(changePropertyAnnotation.exampleValue()));
 
         return examples;
@@ -426,7 +426,7 @@ public abstract class AbstractChange implements Change {
             throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
         }
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<>();
 
         try {
             for (Change inverse : inverses) {
@@ -478,9 +478,9 @@ public abstract class AbstractChange implements Change {
     @Override
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
         if (this.generateStatementsVolatile(database)) {
-            return new HashSet<DatabaseObject>();
+            return new HashSet<>();
         }
-        Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
+        Set<DatabaseObject> affectedObjects = new HashSet<>();
         SqlStatement[] statements = generateStatements(database);
 
         if (statements != null) {
@@ -546,7 +546,7 @@ public abstract class AbstractChange implements Change {
                     if (param.getDataTypeClassParameters().length == 1) {
                         Class collectionType = (Class) param.getDataTypeClassParameters()[0];
                         if (ColumnConfig.class.isAssignableFrom(collectionType)) {
-                            List<ParsedNode> columnNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                            List<ParsedNode> columnNodes = new ArrayList<>(parsedNode.getChildren(null, param.getParameterName()));
                             columnNodes.addAll(parsedNode.getChildren(null, "column"));
 
                             Object nodeValue = parsedNode.getValue();
@@ -582,7 +582,7 @@ public abstract class AbstractChange implements Change {
                                     && !Modifier.isAbstract(collectionType.getModifiers())) {
 
                                  String elementName = ((LiquibaseSerializable) collectionType.newInstance()).getSerializedObjectName();
-                                 List<ParsedNode> nodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                                 List<ParsedNode> nodes = new ArrayList<>(parsedNode.getChildren(null, param.getParameterName()));
                                 if (!elementName.equals(param.getParameterName())) {
                                     nodes.addAll(parsedNode.getChildren(null, elementName));
                                 }
@@ -704,7 +704,7 @@ public abstract class AbstractChange implements Change {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         String description = metaData.getName();
 
-        SortedSet<String> names = new TreeSet<String>();
+        SortedSet<String> names = new TreeSet<>();
         for (Map.Entry<String, ChangeParameterMetaData> entry : metaData.getParameters().entrySet()) {
             String lowerCaseKey = entry.getKey().toLowerCase();
             if (lowerCaseKey.endsWith("name") && !lowerCaseKey.contains("schema") && !lowerCaseKey.contains("catalog")) {

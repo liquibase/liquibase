@@ -45,7 +45,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
 
-        Set<String> attributes = new HashSet<String>();
+        Set<String> attributes = new HashSet<>();
         attributes.addAll(databaseObject1.getAttributes());
         attributes.addAll(databaseObject2.getAttributes());
 

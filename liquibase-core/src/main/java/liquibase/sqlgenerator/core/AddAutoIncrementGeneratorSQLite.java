@@ -55,7 +55,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
     @Override
     public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> statements = new ArrayList<Sql>();
+        List<Sql> statements = new ArrayList<>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {

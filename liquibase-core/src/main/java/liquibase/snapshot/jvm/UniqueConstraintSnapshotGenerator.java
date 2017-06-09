@@ -86,7 +86,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 throw new DatabaseException(e);
             }
 
-            Set<String> seenConstraints = new HashSet<String>();
+            Set<String> seenConstraints = new HashSet<>();
 
             for (CachedRow constraint : metadata) {
                 UniqueConstraint uq = new UniqueConstraint()
@@ -223,7 +223,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         + "WHERE c.constraintname='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
                 List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
-                List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
+                List<Map<String, ?>> returnList = new ArrayList<>();
                 if (rows.size() == 0) {
                     return returnList;
                 } else if (rows.size() > 1) {
@@ -238,7 +238,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                                         + "join sys.systables t on t.tableid=c.referenceid "
                                         + "where t.tablename='" + rowData.get("TABLENAME") + "' and c.columnnumber=" + columnNumber), String.class);
 
-                        Map<String, String> row = new HashMap<String, String>();
+                        Map<String, String> row = new HashMap<>();
                         row.put("COLUMN_NAME", columnName);
                         returnList.add(row);
                     }
@@ -287,13 +287,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
             if (bulkQuery) {
-                columnCache = new HashMap<String, List<Map<String, ?>>>();
+                columnCache = new HashMap<>();
                 snapshot.setScratchData(cacheKey, columnCache);
                 for (Map<String, ?> row : rows) {
                     String key = row.get("CONSTRAINT_CONTAINER") + "_" + row.get("CONSTRAINT_NAME");
                     List<Map<String, ?>> constraintRows = columnCache.get(key);
                     if (constraintRows == null) {
-                        constraintRows = new ArrayList<Map<String, ?>>();
+                        constraintRows = new ArrayList<>();
                         columnCache.put(key, constraintRows);
                     }
                     constraintRows.add(row);
@@ -307,7 +307,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             String lookupKey = schema.getName() + "_" + example.getName();
             List<Map<String, ?>> rows = columnCache.get(lookupKey);
             if (rows == null) {
-                rows = new ArrayList<Map<String, ?>>();
+                rows = new ArrayList<>();
             }
             return rows;
         }

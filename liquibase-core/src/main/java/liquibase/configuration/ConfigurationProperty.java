@@ -15,7 +15,7 @@ public class ConfigurationProperty {
     private final String namespace;
     private final String name;
     private final Class type;
-    private List<String> aliases = new ArrayList<String>();
+    private List<String> aliases = new ArrayList<>();
 
     private Object value;
     private String description;

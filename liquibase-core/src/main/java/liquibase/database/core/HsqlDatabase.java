@@ -306,8 +306,8 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "INITIAL");
 
     static {
-        Map<String, HashSet<String>> tempMap = new HashMap<String, HashSet<String>>();
-        tempMap.put("datetime", new HashSet<String>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW", CURRENT_DATE_TIME_PLACE_HOLDER)));
+        Map<String, HashSet<String>> tempMap = new HashMap<>();
+        tempMap.put("datetime", new HashSet<>(Arrays.asList("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "TODAY", "NOW", CURRENT_DATE_TIME_PLACE_HOLDER)));
         SUPPORTED_DEFAULT_VALUE_COMPUTED_MAP = Collections.unmodifiableMap(tempMap);
     }
 

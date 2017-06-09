@@ -203,7 +203,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
+        List<SqlStatement> returnStatements = new ArrayList<>();
 
         String sql = StringUtils.trimToNull(getSql());
         if (sql == null) {
@@ -270,7 +270,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         private PushbackInputStream stream;
 
         private byte[] quickBuffer = new byte[100];
-        private List<Byte> resizingBuffer = new ArrayList<Byte>();
+        private List<Byte> resizingBuffer = new ArrayList<>();
 
 
         private int lastChar = 'X';

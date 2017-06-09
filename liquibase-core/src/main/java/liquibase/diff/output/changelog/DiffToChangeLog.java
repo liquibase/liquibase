@@ -49,7 +49,7 @@ public class DiffToChangeLog {
     private DiffOutputControl diffOutputControl;
 
 
-    private static Set<Class> loggedOrderFor = new HashSet<Class>();
+    private static Set<Class> loggedOrderFor = new HashSet<>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -159,10 +159,10 @@ public class DiffToChangeLog {
             created = new SimpleDateFormat("yyyy-MM-dd HH:mmZ").format(new Date());
         }
 
-        List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+        List<ChangeSet> changeSets = new ArrayList<>();
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
 
-        List<DatabaseObject> missingObjects = new ArrayList<DatabaseObject>();
+        List<DatabaseObject> missingObjects = new ArrayList<>();
         for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getMissingObjects(type, new DatabaseObjectComparator() {
                 @Override
@@ -228,7 +228,7 @@ public class DiffToChangeLog {
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
 
         if (diffOutputControl.getSchemaComparisons() != null && objects.size() > 0  && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
-            List<String> schemas = new ArrayList<String>();
+            List<String> schemas = new ArrayList<>();
             CompareControl.SchemaComparison[] schemaComparisons = this.diffOutputControl.getSchemaComparisons();
             if (schemaComparisons != null) {
                 for (CompareControl.SchemaComparison comparison : schemaComparisons) {
@@ -245,7 +245,7 @@ public class DiffToChangeLog {
             }
 
             try {
-                final List<String> dependencyOrder = new ArrayList<String>();
+                final List<String> dependencyOrder = new ArrayList<>();
                 DependencyUtil.NodeValueListener<String> nameListener = new DependencyUtil.NodeValueListener<String>() {
                     @Override
                     public void evaluating(String nodeValue) {
@@ -259,8 +259,8 @@ public class DiffToChangeLog {
 
                 if (dependencyOrder.size() > 0) {
 
-                    final List<DatabaseObject> toSort = new ArrayList<DatabaseObject>();
-                    final List<DatabaseObject> toNotSort = new ArrayList<DatabaseObject>();
+                    final List<DatabaseObject> toSort = new ArrayList<>();
+                    final List<DatabaseObject> toNotSort = new ArrayList<>();
 
                     for (DatabaseObject obj : objects) {
                         if (!(obj instanceof Column)) {
@@ -312,7 +312,7 @@ public class DiffToChangeLog {
             }
         }
 
-        return new ArrayList<DatabaseObject>(objects);
+        return new ArrayList<>(objects);
     }
 
     /**
@@ -551,7 +551,7 @@ public class DiffToChangeLog {
 
     private static class DependencyGraph {
 
-        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
+        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<>();
 
         private void addType(Class<? extends DatabaseObject> type) {
             allNodes.put(type, new Node(type));
@@ -570,9 +570,9 @@ public class DiffToChangeLog {
             }
 
 
-            ArrayList<Node> returnNodes = new ArrayList<Node>();
+            ArrayList<Node> returnNodes = new ArrayList<>();
 
-            SortedSet<Node> nodesWithNoIncomingEdges = new TreeSet<Node>(new Comparator<Node>() {
+            SortedSet<Node> nodesWithNoIncomingEdges = new TreeSet<>(new Comparator<Node>() {
                 @Override
                 public int compare(Node o1, Node o2) {
                     return o1.type.getName().compareTo(o2.type.getName());
@@ -606,7 +606,7 @@ public class DiffToChangeLog {
             checkForCycleInDependencies(generatorType);
     
     
-            List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
+            List<Class<? extends DatabaseObject>> returnList = new ArrayList<>();
             for (Node node : returnNodes) {
                 returnList.add(node.type);
             }
@@ -621,8 +621,8 @@ public class DiffToChangeLog {
                      "to dependency cycle. Dependencies: \n";
                      
                     for (Node node : allNodes.values()) {
-                        SortedSet<String> fromTypes = new TreeSet<String>();
-                        SortedSet<String> toTypes = new TreeSet<String>();
+                        SortedSet<String> fromTypes = new TreeSet<>();
+                        SortedSet<String> toTypes = new TreeSet<>();
                         for (Edge edge : node.inEdges) {
                             fromTypes.add(edge.from.type.getSimpleName());
                         }
@@ -656,8 +656,8 @@ public class DiffToChangeLog {
 
             public Node(Class<? extends DatabaseObject> type) {
                 this.type = type;
-                inEdges = new HashSet<Edge>();
-                outEdges = new HashSet<Edge>();
+                inEdges = new HashSet<>();
+                outEdges = new HashSet<>();
             }
 
             public Node addEdge(Node node) {

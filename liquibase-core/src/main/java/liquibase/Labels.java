@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class Labels {
 
-    private Set<String> labels = new LinkedHashSet<String>();
+    private Set<String> labels = new LinkedHashSet<>();
 
     public Labels() {
     }
@@ -59,7 +59,7 @@ public class Labels {
 
     @Override
     public String toString() {
-        return StringUtils.join(new LinkedHashSet<String>(this.labels),",");
+        return StringUtils.join(new LinkedHashSet<>(this.labels),",");
     }
 
     public boolean isEmpty() {

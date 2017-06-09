@@ -19,7 +19,7 @@ import java.util.logging.LogRecord;
 public class LiquibaseStatusServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1092565349351848089L;
-    private static List<LogRecord> liquibaseRunLog = new ArrayList<LogRecord>();
+    private static List<LogRecord> liquibaseRunLog = new ArrayList<>();
 
     public static synchronized void logMessage(LogRecord message) {
         liquibaseRunLog.add(message);

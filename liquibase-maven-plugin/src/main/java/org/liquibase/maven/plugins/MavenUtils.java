@@ -46,7 +46,7 @@ public class MavenUtils {
     if (verbose) {
       log.info("Loading artfacts into URLClassLoader");
     }
-    Set<URI> uris = new HashSet<URI>();
+    Set<URI> uris = new HashSet<>();
     // Find project dependencies, including the transitive ones.
     Set dependencies = project.getArtifacts();
 	if (dependencies != null && !dependencies.isEmpty()) {
@@ -78,7 +78,7 @@ public class MavenUtils {
       log.info(LOG_SEPARATOR);
     }
 
-    List<URI> uriList = new ArrayList<URI>(uris);
+    List<URI> uriList = new ArrayList<>(uris);
     URL[] urlArray = new URL[uris.size()];
     for (int i=0; i<uris.size(); i++ ) {
         urlArray[i] = uriList.get(i).toURL();

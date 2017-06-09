@@ -84,7 +84,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     return;
                 }
                 //sometimes not able to look up by empty string, try all the liquibase packages
-                Set<String> liquibasePackages = new HashSet<String>();
+                Set<String> liquibasePackages = new HashSet<>();
                 for (Resource manifest : getResources("META-INF/MANIFEST.MF")) {
                     liquibasePackages.addAll(getPackagesFromManifest(manifest));
                 }
@@ -111,7 +111,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 				return null;
 			}
 
-            Set<String> returnSet = new HashSet<String>();
+            Set<String> returnSet = new HashSet<>();
 
             String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeTo), path);
 
@@ -132,7 +132,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			if (path == null) {
 				return null;
 			}
-            Set<InputStream> returnSet = new HashSet<InputStream>();
+            Set<InputStream> returnSet = new HashSet<>();
             Resource[] resources = getResources(adjustClasspath(path));
 
             if (resources == null || resources.length == 0) {
@@ -165,7 +165,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         private Set<String> getPackagesFromManifest(Resource manifest) throws IOException {
-            Set<String> manifestPackages = new HashSet<String>();
+            Set<String> manifestPackages = new HashSet<>();
             if (!manifest.exists()) {
                 return manifestPackages;
             }

@@ -30,7 +30,7 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
 		if (schemas != null) {
-            List<CatalogAndSchema> schemaObjs = new ArrayList<CatalogAndSchema>();
+            List<CatalogAndSchema> schemaObjs = new ArrayList<>();
             for (String name : schemas.split(",")) {
                 schemaObjs.add(new CatalogAndSchema(catalog, name));
             }

@@ -104,7 +104,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new UnexpectedLiquibaseException(e);
         }
 
-        List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
+        List<SqlStatement> statementsToExecute = new ArrayList<>();
 
         boolean changeLogCreateAttempted = false;
         if (changeLogTable != null) {
@@ -265,7 +265,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         if (this.ranChangeSetList == null) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
-            List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
+            List<RanChangeSet> ranChangeSetList = new ArrayList<>();
             if (hasDatabaseChangeLogTable()) {
                 LogFactory.getInstance().getLog().info("Reading from " + databaseChangeLogTableName);
                 List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);

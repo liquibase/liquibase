@@ -96,7 +96,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<>();
 
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
@@ -118,7 +118,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
     	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<>();
     	
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())

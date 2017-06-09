@@ -35,7 +35,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 		StringBuffer sql = new StringBuffer();
 		generateHeader(sql, statement, database);
 
-		ArrayList<Sql> result = new ArrayList<Sql>();
+		ArrayList<Sql> result = new ArrayList<>();
 		int index = 0;
 		for (InsertStatement sttmnt : statement.getStatements()) {
 			index++;

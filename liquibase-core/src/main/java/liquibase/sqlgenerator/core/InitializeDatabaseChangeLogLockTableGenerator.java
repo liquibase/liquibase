@@ -27,7 +27,7 @@ public class InitializeDatabaseChangeLogLockTableGenerator extends AbstractSqlGe
                 .addColumnValue("ID", 1)
                 .addColumnValue("LOCKED", Boolean.FALSE);
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Sql> sql = new ArrayList<>();
 
         sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(deleteStatement, database)));
         sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(insertStatement, database)));

@@ -95,12 +95,12 @@ public class ServiceLocator {
 
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
-        this.classesBySuperclass = new HashMap<Class, List<Class>>();
+        this.classesBySuperclass = new HashMap<>();
 
-        this.classResolver.setClassLoaders(new HashSet<ClassLoader>(Arrays.asList(new ClassLoader[] {resourceAccessor.toClassLoader()})));
+        this.classResolver.setClassLoaders(new HashSet<>(Arrays.asList(new ClassLoader[]{resourceAccessor.toClassLoader()})));
 
         if (packagesToScan == null) {
-            packagesToScan = new ArrayList<String>();
+            packagesToScan = new ArrayList<>();
             String packagesToScanSystemProp = System.getProperty("liquibase.scan.packages");
             if ((packagesToScanSystemProp != null) &&
                 ((packagesToScanSystemProp = StringUtils.trimToNull(packagesToScanSystemProp)) != null)) {
@@ -202,7 +202,7 @@ public class ServiceLocator {
             }
 
         List<Class> classes = classesBySuperclass.get(requiredInterface);
-        HashSet<Class> uniqueClasses = new HashSet<Class>(classes);
+        HashSet<Class> uniqueClasses = new HashSet<>(classes);
         return uniqueClasses.toArray(new Class[uniqueClasses.size()]);
     }
 
@@ -217,7 +217,7 @@ public class ServiceLocator {
     private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
         logger.debug("ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
-        List<Class> classes = new ArrayList<Class>();
+        List<Class> classes = new ArrayList<>();
 
         classResolver.addClassLoader(resourceAccessor.toClassLoader());
         for (Class<?> clazz : classResolver.findImplementations(requiredInterface, packagesToScan.toArray(new String[packagesToScan.size()]))) {

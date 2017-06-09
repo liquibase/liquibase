@@ -46,7 +46,7 @@ public class ChangeLogParserFactory {
             }
         };
 
-        parsers = new ArrayList<ChangeLogParser>();
+        parsers = new ArrayList<>();
         try {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 

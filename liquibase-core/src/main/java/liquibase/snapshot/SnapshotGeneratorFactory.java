@@ -20,7 +20,7 @@ public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
-    private List<SnapshotGenerator> generators = new ArrayList<SnapshotGenerator>();
+    private List<SnapshotGenerator> generators = new ArrayList<>();
 
     protected SnapshotGeneratorFactory() {
         Class[] classes;
@@ -75,7 +75,7 @@ public class SnapshotGeneratorFactory {
     }
 
     protected SortedSet<SnapshotGenerator> getGenerators(Class<? extends DatabaseObject> generatorClass, Database database) {
-        SortedSet<SnapshotGenerator> validGenerators = new TreeSet<SnapshotGenerator>(new SnapshotGeneratorComparator(generatorClass, database));
+        SortedSet<SnapshotGenerator> validGenerators = new TreeSet<>(new SnapshotGeneratorComparator(generatorClass, database));
 
         /*
          * Query all SnapshotGenerators if they consider themselves applicable for the generatorClass (e.g. a Table)
@@ -99,7 +99,7 @@ public class SnapshotGeneratorFactory {
      */
     public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
         // @todo I have seen duplicates in types - maybe convert the List into a Set? Need to understand it more thoroughly.
-        List<Class<? extends DatabaseObject>> types = new ArrayList<Class<? extends DatabaseObject>>(getContainerTypes(example.getClass(), database));
+        List<Class<? extends DatabaseObject>> types = new ArrayList<>(getContainerTypes(example.getClass(), database));
         types.add(example.getClass());
 
         /*
@@ -283,7 +283,7 @@ public class SnapshotGeneratorFactory {
 
     public Set<Class<? extends DatabaseObject>> getContainerTypes(Class<? extends DatabaseObject> type,
                                                                   Database database) {
-        Set<Class<? extends DatabaseObject>>  returnSet = new HashSet<Class<? extends DatabaseObject>>();
+        Set<Class<? extends DatabaseObject>>  returnSet = new HashSet<>();
 
         getContainerTypes(type, database, returnSet);
 

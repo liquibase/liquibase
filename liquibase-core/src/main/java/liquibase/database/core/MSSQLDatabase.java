@@ -36,7 +36,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final int SQL_SERVER_2016_MAJOR_VERSION = 13;
     public static final int SQL_SERVER_2017_MAJOR_VERSION = 14;
 
-    protected Set<String> systemTablesAndViews = new HashSet<String>();
+    protected Set<String> systemTablesAndViews = new HashSet<>();
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 

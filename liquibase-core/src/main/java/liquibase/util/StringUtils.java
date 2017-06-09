@@ -54,7 +54,7 @@ public class StringUtils {
 
         StringClauses parsed = SqlParser.parse(multiLineSQL, true, !stripComments);
 
-        List<String> returnArray = new ArrayList<String>();
+        List<String> returnArray = new ArrayList<>();
 
         StringBuilder currentString = new StringBuilder();
         String previousPiece = null;
@@ -161,7 +161,7 @@ public class StringUtils {
 
     public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
         if (sorted) {
-            TreeSet<String> sortedSet = new TreeSet<String>();
+            TreeSet<String> sortedSet = new TreeSet<>();
             for (Object obj : collection) {
                 sortedSet.add(formatter.toString(obj));
             }
@@ -172,7 +172,7 @@ public class StringUtils {
 
     public static String join(Collection<String> collection, String delimiter, boolean sorted) {
         if (sorted) {
-            return join(new TreeSet<String>(collection), delimiter);
+            return join(new TreeSet<>(collection), delimiter);
         } else {
             return join(collection, delimiter);
         }
@@ -183,7 +183,7 @@ public class StringUtils {
     }
 
     public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
             list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
         }
@@ -194,7 +194,7 @@ public class StringUtils {
         if (s == null) {
             return null;
         }
-        List<String> returnList = new ArrayList<String>();
+        List<String> returnList = new ArrayList<>();
         for (String string : s.split(regex)) {
             returnList.add(string.trim());
         }

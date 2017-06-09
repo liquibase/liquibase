@@ -90,7 +90,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
       }
 
       try {
-         List<T> list = new ArrayList<T>();
+         List<T> list = new ArrayList<>();
          while (null != (line = csv.readNext())) {
             lineProcessed++;
             processLine(mapper, filter, line, list);
@@ -149,7 +149,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
 
    private PropertyEditor getPropertyEditorValue(Class<?> cls) {
       if (editorMap == null) {
-         editorMap = new HashMap<Class<?>, PropertyEditor>();
+         editorMap = new HashMap<>();
       }
 
       PropertyEditor editor = editorMap.get(cls);

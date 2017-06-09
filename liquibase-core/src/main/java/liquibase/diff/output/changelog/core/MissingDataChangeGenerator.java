@@ -67,12 +67,12 @@ public class MissingDataChangeGenerator extends AbstractChangeGenerator implemen
             stmt.setFetchSize(1000);
             rs = stmt.executeQuery(sql);
 
-            List<String> columnNames = new ArrayList<String>();
+            List<String> columnNames = new ArrayList<>();
             for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
                 columnNames.add(rs.getMetaData().getColumnName(i + 1));
             }
 
-            List<Change> changes = new ArrayList<Change>();
+            List<Change> changes = new ArrayList<>();
             while (rs.next()) {
                 InsertDataChange change = new InsertDataChange();
                 if (outputControl.getIncludeCatalog()) {

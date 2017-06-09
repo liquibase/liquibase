@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class ColumnSnapshotGeneratorInformix extends ColumnSnapshotGenerator {
 
-    private static final Map<Integer, String> qualifiers = new HashMap<Integer, String>();
+    private static final Map<Integer, String> qualifiers = new HashMap<>();
 
     static {
         qualifiers.put(0, "YEAR");

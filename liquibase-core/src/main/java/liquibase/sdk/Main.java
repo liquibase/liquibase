@@ -16,7 +16,7 @@ public class Main {
 
     private CommandLine globalArguments;
     private String command;
-    private List<String> commandArgs = new ArrayList<String>();
+    private List<String> commandArgs = new ArrayList<>();
 
     private Options globalOptions;
 
@@ -82,7 +82,7 @@ public class Main {
         Context.reset();
         CommandLineParser globalParser = new GnuParser();
 
-        List<String> globalArgs = new ArrayList<String>();
+        List<String> globalArgs = new ArrayList<>();
 
         boolean inGlobal = true;
         for (String arg : args) {
@@ -205,7 +205,7 @@ public class Main {
     }
 
     public String getPath(String... possibleFileNames) {
-        Set<String> fileNames = new HashSet<String>();
+        Set<String> fileNames = new HashSet<>();
 
         for (String dir : getPath().split("[:;]")) {
             for (String fileName : possibleFileNames) {
