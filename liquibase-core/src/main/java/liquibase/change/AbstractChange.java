@@ -88,7 +88,7 @@ public abstract class AbstractChange implements Change {
             }
 
             return new ChangeMetaData(databaseChange.name(), databaseChange.description(), databaseChange.priority(), databaseChange.appliesTo(), notes, params);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
@@ -456,19 +456,19 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
-        this.resourceAccessor = resourceAccessor;
-    }
-
-    /**
      * @{inheritDoc}
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
     }
 
     /**

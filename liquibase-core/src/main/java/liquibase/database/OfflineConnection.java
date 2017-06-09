@@ -27,6 +27,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<>();
+    private final Map<String, String> databaseParams = new HashMap<>();
     private DatabaseSnapshot snapshot = null;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
@@ -37,8 +38,6 @@ public class OfflineConnection implements DatabaseConnection {
     private int databaseMinorVersion = 999;
     private String catalog;
     private boolean sendsStringParametersAsUnicode = true;
-
-    private final Map<String, String> databaseParams = new HashMap<>();
     private String connectionUserName;
 
     public OfflineConnection(String url, ResourceAccessor resourceAccessor) {
@@ -114,7 +113,7 @@ public class OfflineConnection implements DatabaseConnection {
         for (Map.Entry<String, String> param : this.databaseParams.entrySet()) {
             try {
                 ObjectUtil.setProperty(database, param.getKey(), param.getValue());
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 LogFactory.getInstance().getLog().warning("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
             }
         }
@@ -152,6 +151,11 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     @Override
+    public void setAutoCommit(boolean autoCommit) throws DatabaseException {
+
+    }
+
+    @Override
     public String getCatalog() throws DatabaseException {
         return catalog;
     }
@@ -179,11 +183,6 @@ public class OfflineConnection implements DatabaseConnection {
     }
 
     @Override
-    public void setAutoCommit(boolean autoCommit) throws DatabaseException {
-
-    }
-
-    @Override
     public String getDatabaseProductName() throws DatabaseException {
         return productName;
     }
@@ -202,10 +201,6 @@ public class OfflineConnection implements DatabaseConnection {
         this.databaseMajorVersion = databaseMajorVersion;
     }
 
-    public void setDatabaseMinorVersion(int databaseMinorVersion) {
-        this.databaseMinorVersion = databaseMinorVersion;
-    }
-
     public void setProductVersion(String productVersion) {
         this.productVersion = productVersion;
     }
@@ -217,6 +212,10 @@ public class OfflineConnection implements DatabaseConnection {
     @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         return databaseMinorVersion;
+    }
+
+    public void setDatabaseMinorVersion(int databaseMinorVersion) {
+        this.databaseMinorVersion = databaseMinorVersion;
     }
 
     @Override
@@ -238,10 +237,26 @@ public class OfflineConnection implements DatabaseConnection {
         return false;
     }
 
+    public boolean getSendsStringParametersAsUnicode() {
+        return sendsStringParametersAsUnicode;
+    }
+
+    public void setSendsStringParametersAsUnicode(boolean sendsStringParametersAsUnicode) {
+        this.sendsStringParametersAsUnicode = sendsStringParametersAsUnicode;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
+    }
+
     /**
      * Output Liquibase SQL
      */
-    private static enum OutputLiquibaseSql {
+    private enum OutputLiquibaseSql {
         /**
          * Don't output anything
          */
@@ -270,21 +285,5 @@ public class OfflineConnection implements DatabaseConnection {
                     return valueOf(s);
             }
         }
-    }
-
-    public boolean getSendsStringParametersAsUnicode() {
-        return sendsStringParametersAsUnicode;
-    }
-
-    public void setSendsStringParametersAsUnicode(boolean sendsStringParametersAsUnicode) {
-        this.sendsStringParametersAsUnicode = sendsStringParametersAsUnicode;
-    }
-
-    public boolean isCaseSensitive() {
-        return caseSensitive;
-    }
-
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
     }
 }

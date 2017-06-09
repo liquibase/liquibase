@@ -51,7 +51,7 @@ public class NetUtil {
     public static String getLocalHostAddress() throws UnknownHostException, SocketException {
         try {
             return getLocalHost().getHostAddress();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LogFactory.getInstance().getLog().debug("Error getting hostname", e);
             return "unknown";
         }
@@ -66,7 +66,7 @@ public class NetUtil {
     public static String getLocalHostName() throws UnknownHostException, SocketException {
         try {
             return getLocalHost().getHostName();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LogFactory.getInstance().getLog().debug("Error getting hostname", e);
             return "unknown";
         }

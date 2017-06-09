@@ -271,7 +271,7 @@ public class ChangeParameterMetaData {
                     default:
                         throw new UnexpectedLiquibaseException("Unknown Data Type: " + dataType);
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage());
             }
         }

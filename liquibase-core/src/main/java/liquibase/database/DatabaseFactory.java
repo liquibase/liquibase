@@ -30,7 +30,7 @@ public class DatabaseFactory {
             for (Class<? extends Database> clazz : classes) {
                 try {
                     register(clazz.getConstructor().newInstance());
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     throw new UnexpectedLiquibaseException("Error registering "+clazz.getName(), e);
                 }
             }
@@ -48,15 +48,15 @@ public class DatabaseFactory {
         return instance;
     }
 
-    public static synchronized void reset() {
-        instance = new DatabaseFactory();
-    }
-
     /**
      * Set singleton instance. Primarily used in testing
      */
     public static synchronized void setInstance(DatabaseFactory databaseFactory) {
         instance = databaseFactory;
+    }
+
+    public static synchronized void reset() {
+        instance = new DatabaseFactory();
     }
 
     /**

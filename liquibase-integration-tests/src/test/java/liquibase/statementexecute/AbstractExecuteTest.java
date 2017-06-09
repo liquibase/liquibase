@@ -198,7 +198,7 @@ public abstract class AbstractExecuteTest {
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
             }
             try {

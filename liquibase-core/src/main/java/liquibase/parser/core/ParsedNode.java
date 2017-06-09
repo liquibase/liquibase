@@ -80,15 +80,6 @@ public class ParsedNode {
     }
 
     /**
-     * Return the value associated with this node converted to the given type.
-     *
-     * @throws ParsedNodeException if the current value type cannot be converted
-     */
-    public <T> T getValue(Class<T> type) throws ParsedNodeException {
-        return convertObject(value, type);
-    }
-
-    /**
      * Sets the value of this ParsedNode.
      * If the passed value is a ParsedNode, it is added as a child, not as the value.
      * If the passed value is a Map, it is converted to a ParsedNode and added as a child, not as the value.
@@ -122,6 +113,15 @@ public class ParsedNode {
             this.value = value;
         }
         return this;
+    }
+
+    /**
+     * Return the value associated with this node converted to the given type.
+     *
+     * @throws ParsedNodeException if the current value type cannot be converted
+     */
+    public <T> T getValue(Class<T> type) throws ParsedNodeException {
+        return convertObject(value, type);
     }
 
     /**
@@ -260,7 +260,7 @@ public class ParsedNode {
             } else {
                 throw new UnexpectedLiquibaseException("Cannot convert " + rawValue.getClass().getName() + " '" + rawValue + "' to " + type.getName());
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (e instanceof UnexpectedLiquibaseException) {
                 throw (UnexpectedLiquibaseException) e;
             }

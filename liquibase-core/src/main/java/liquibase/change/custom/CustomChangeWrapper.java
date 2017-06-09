@@ -147,7 +147,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
         try {
             return customChange.validate(database);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return new ValidationErrors().addError("Exception thrown calling "+getClassName()+".validate():"+ e.getMessage());
         }
     }

@@ -122,7 +122,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                                             StringUtils.join(foundErrors.getWarningMessages(), ", "));
                         validationErrors.addAll(foundErrors, changeSet);
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     changeValidationExceptions.add(e);
                 }
             }
