@@ -25,7 +25,7 @@ public class ChangeLogHistoryServiceFactory {
     /**
      * Set the instance used by this singleton. Used primarily for testing.
      */
-    public static void setInstance(ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory) {
+    public static synchronized void setInstance(ChangeLogHistoryServiceFactory changeLogHistoryServiceFactory) {
         ChangeLogHistoryServiceFactory.instance = changeLogHistoryServiceFactory;
     }
 
@@ -69,8 +69,9 @@ public class ChangeLogHistoryServiceFactory {
                 }
             }
 
-            if (foundServices.size() == 0) {
-                throw new UnexpectedLiquibaseException("Cannot find ChangeLogHistoryService for " + database.getShortName());
+            if (foundServices.isEmpty()) {
+                throw new UnexpectedLiquibaseException("Cannot find ChangeLogHistoryService for " +
+                    database.getShortName());
             }
 
             try {
