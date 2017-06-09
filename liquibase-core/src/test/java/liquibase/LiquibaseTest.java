@@ -49,26 +49,9 @@ public class LiquibaseTest {
 
     private Logger mockLogger;
 
-//    private TestLiquibase testLiquibase;
-//    private DatabaseConnection connectionForConstructor;
-
     @Before
     public void before() throws Exception {
-//        if (connectionForConstructor != null) {
-//            reset(connectionForConstructor);
-//        }
-//        connectionForConstructor = createMock(DatabaseConnection.class);
-//        connectionForConstructor.setAutoCommit(false);
-//        expectLastCall().atLeastOnce();
-//
-//        DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-//        expect(metaData.getDatabaseProductName()).andReturn("Oracle");
-//        replay(metaData);
-//
-////        expect(connectionForConstructor.getMetaData()).andReturn(metaData);
-//        replay(connectionForConstructor);
-//
-//        testLiquibase = new TestLiquibase();
+
         mockResourceAccessor = new MockResourceAccessor();
         mockDatabase = mock(Database.class);
         mockLockService = mock(LockService.class);
@@ -195,56 +178,6 @@ public class LiquibaseTest {
         liquibase.reset();
     }
 
-//    @Test
-//    public void update() throws LiquibaseException {
-//        Contexts contexts = new Contexts("a,b");
-//
-//        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase) {
-//            @Override
-//            protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
-//                return mockChangeLogIterator;
-//            }
-//        };
-//
-//        liquibase.update(contexts);
-//
-//        verify(mockLockService).waitForLock();
-////        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, contexts);
-////        verify(mockDatabase).checkDatabaseChangeLogLockTable();
-//        verify(mockChangeLog).validate(mockDatabase, contexts);
-//        verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
-//        verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
-//        verify(mockLockService).releaseLock();
-//        verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //quoting strategy needs to be set back in case it changed during the update
-//
-//
-//        assertEquals("Passed contexts were not set on the changelog parameters object", "a,b", liquibase.getChangeLogParameters().getContexts().toString());
-//    }
-
-//    @Test
-//    public void update_nullContexts() throws LiquibaseException {
-//        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase) {
-//            @Override
-//            protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
-//                return mockChangeLogIterator;
-//            }
-//        };
-//
-//        liquibase.update((Contexts) null);
-//
-//        verify(mockLockService).waitForLock();
-////        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, (Contexts) null);
-////        verify(mockDatabase).checkDatabaseChangeLogLockTable();
-//        verify(mockChangeLog).validate(mockDatabase, (Contexts) null);
-//        verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
-//        verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
-//        verify(mockLockService).releaseLock();
-//        verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //quoting strategy needs to be set back in case it changed during the update
-//
-//
-//        assertNull(liquibase.getChangeLogParameters().getContexts());
-//    }
-
     @Test(expected = LockException.class)
     public void update_exceptionGettingLock() throws LiquibaseException {
 
@@ -278,14 +211,6 @@ public class LiquibaseTest {
 
     }
 
-//    @Test
-//    public void update_exceptionReleasingLock() throws LiquibaseException {
-//        doThrow(LockException.class).when(mockLockService).releaseLock();
-//
-//        update(); //works like normal, just logs error
-//        verify(mockLogger).severe(eq("Could not release lock"), any(Exception.class));
-//    }
-
     @Test
     public void getStandardChangelogIterator() throws LiquibaseException {
         ChangeLogIterator iterator = new Liquibase("com/example/changelog.xml", mockResourceAccessor, mockDatabase).getStandardChangelogIterator(new Contexts("a", "b"), new LabelExpression("x", "y"), mockChangeLog);
@@ -318,105 +243,6 @@ public class LiquibaseTest {
 //        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(new PrintWriter(System.out), database));
 //        assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunUpdate());
 //
-//    }
-
-/*    
-    @Test
-    public void testBlosDocumentation() throws Exception {
-    	testLiquibase.generateDocumentation(".");
-    }
-*/    
-
-//    @Test
-//    public void getImplementedDatabases() throws Exception {
-//        List<Database> databases = DatabaseFactory.getInstance().getImplementedDatabases();
-//        assertTrue(databases.size() > 15);
-//
-//        boolean foundOracle = false;
-//        boolean foundPostgres = false;
-//        boolean foundMSSQL = false;
-//
-//        for (Database db : databases) {
-//            if (db instanceof OracleDatabase) {
-//                foundOracle = true;
-//            } else if (db instanceof PostgresDatabase) {
-//                foundPostgres = true;
-//            } else if (db instanceof MSSQLDatabase) {
-//                foundMSSQL = true;
-//            }
-//        }
-//
-//        assertTrue("Oracle not in Implemented Databases", foundOracle);
-//        assertTrue("MSSQL not in Implemented Databases", foundMSSQL);
-//        assertTrue("Postgres not in Implemented Databases", foundPostgres);
-//    }
-
-//    private class TestLiquibase extends Liquibase {
-//        private String url;
-//        // instead use super.database
-//        //private Database database;
-//        private InputStream inputStream;
-//
-//        public TestLiquibase() throws LiquibaseException {
-//            super("liquibase/test.xml", new ClassLoaderResourceAccessor(), ((Database) null));
-//            inputStream = createMock(InputStream.class);
-//            replay(inputStream);
-//        }
-//
-//        @Override
-//        public Database getDatabase() {
-//            if (database == null) {
-//                database = new OracleDatabase() {
-//
-//                };
-//            }
-//            return database;
-//        }
-//
-//        public void setDatabase(Database database) {
-//            this.database = database;
-//        }
-//
-//
-//        @SuppressWarnings("unused")
-//		public Database[] getImplementedDatabases() {
-//            Database mockDatabase = createMock(Database.class);
-//            try {
-//
-//                expect(mockDatabase.isCorrectDatabaseImplementation(null)).andReturn(true).atLeastOnce();
-//                mockDatabase.setConnection((DatabaseConnection) null);
-//                expectLastCall();
-//                expect(mockDatabase.getConnection()).andReturn(connectionForConstructor);
-//                replay(mockDatabase);
-//
-//                return new Database[]{
-//                        mockDatabase,
-//                };
-//            } catch (DatabaseException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//
-//        public void setUrl(String url) {
-//            this.url = url;
-//        }
-//
-//        @Override
-//        public ResourceAccessor getFileOpener() {
-//            return new ResourceAccessor() {
-//                public InputStream getResourceAsStream(String file) {
-//                    return inputStream;
-//                }
-//
-//                public Enumeration<URL> getResources(String packageName) {
-//                    return null;
-//                }
-//
-//                public ClassLoader toClassLoader() {
-//                    return null;
-//                }
-//            };
-//        }
 //    }
 
     /**
