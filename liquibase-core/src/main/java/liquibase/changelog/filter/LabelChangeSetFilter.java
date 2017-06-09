@@ -1,6 +1,5 @@
 package liquibase.changelog.filter;
 
-import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.changelog.ChangeSet;
 import liquibase.sql.visitor.SqlVisitor;

@@ -1,16 +1,15 @@
 package liquibase.util;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.Set;
-
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Set;
 
 /**
  * Utilities for working with streams.

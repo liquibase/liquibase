@@ -3,7 +3,6 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
 
 import java.util.Date;
 import java.util.HashSet;

@@ -1,6 +1,5 @@
 package liquibase.diff.compare.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -10,7 +9,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.Set;
 
 public class SchemaComparator implements DatabaseObjectComparator {
     @Override

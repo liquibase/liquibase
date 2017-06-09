@@ -10,7 +10,6 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.AbstractPrecondition;
-import liquibase.precondition.Precondition;
 
 public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
 

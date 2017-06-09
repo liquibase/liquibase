@@ -1,17 +1,14 @@
 package liquibase.integration.commandline;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.Properties;
-
-import liquibase.database.Database;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Properties;
 
 public class ChangeExecListenerUtilsTest extends Assert {
 //	private Database database = createMock(Database.class);

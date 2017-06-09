@@ -16,8 +16,6 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.opencsv.enums.CSVReaderNullFieldIndicator;
 

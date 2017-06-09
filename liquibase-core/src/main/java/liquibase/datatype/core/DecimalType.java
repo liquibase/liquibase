@@ -1,12 +1,13 @@
 package liquibase.datatype.core;
 
-import java.util.Arrays;
-
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+
+import java.util.Arrays;
 
 @DataTypeInfo(name = "decimal", aliases = { "java.sql.Types.DECIMAL", "java.math.BigDecimal" }, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DecimalType  extends LiquibaseDataType {

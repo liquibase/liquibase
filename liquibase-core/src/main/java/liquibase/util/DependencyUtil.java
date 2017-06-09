@@ -2,7 +2,10 @@ package liquibase.util;
 
 import liquibase.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class DependencyUtil {
 

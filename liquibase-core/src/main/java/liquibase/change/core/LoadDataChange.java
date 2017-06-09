@@ -1,13 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeStatus;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.CheckSum;
-import liquibase.change.ColumnConfig;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -20,10 +13,10 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertSetStatement;
-import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.BooleanParser;
@@ -34,7 +27,8 @@ import liquibase.util.csv.CSVReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @DatabaseChange(name = "loadData",

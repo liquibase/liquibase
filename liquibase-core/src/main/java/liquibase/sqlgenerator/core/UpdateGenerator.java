@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -13,6 +12,8 @@ import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
 import java.util.Date;
+
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 

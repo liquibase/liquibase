@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
+import liquibase.statement.AbstractSqlStatement;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.statement.AbstractSqlStatement;
 
 public class DropColumnStatement extends AbstractSqlStatement {
 

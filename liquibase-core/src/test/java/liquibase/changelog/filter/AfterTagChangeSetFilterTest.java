@@ -4,11 +4,12 @@ import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.RollbackFailedException;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import static org.junit.Assert.*;
 
 public class AfterTagChangeSetFilterTest {
 

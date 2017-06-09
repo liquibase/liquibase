@@ -1,15 +1,13 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.structure.core.Schema;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.structure.core.Column;
 
 public class AddDefaultValueGeneratorMSSQL extends AddDefaultValueGenerator {
     @Override

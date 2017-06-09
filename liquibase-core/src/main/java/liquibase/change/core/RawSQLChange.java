@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractSQLChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;

@@ -17,8 +17,6 @@ package liquibase.util.csv.opencsv;
  */
 
 import java.io.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 /**

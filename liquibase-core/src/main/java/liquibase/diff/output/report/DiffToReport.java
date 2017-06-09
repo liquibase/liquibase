@@ -1,13 +1,13 @@
 package liquibase.diff.output.report;
 
 import liquibase.database.Database;
+import liquibase.diff.DiffResult;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
-import liquibase.diff.compare.CompareControl;
-import liquibase.structure.DatabaseObject;
-import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
+import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;

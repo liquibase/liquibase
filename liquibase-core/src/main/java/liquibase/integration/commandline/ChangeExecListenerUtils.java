@@ -1,17 +1,17 @@
 package liquibase.integration.commandline;
 
+import liquibase.changelog.visitor.ChangeExecListener;
+import liquibase.database.Database;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import liquibase.resource.ResourceAccessor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Properties;
-
-import liquibase.changelog.visitor.ChangeExecListener;
-import liquibase.database.Database;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-import liquibase.resource.ResourceAccessor;
 
 public final class ChangeExecListenerUtils {
 	private ChangeExecListenerUtils() {

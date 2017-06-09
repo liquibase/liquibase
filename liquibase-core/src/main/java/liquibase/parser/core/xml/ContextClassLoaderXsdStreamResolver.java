@@ -1,9 +1,9 @@
 package liquibase.parser.core.xml;
 
-import java.io.InputStream;
-
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+
+import java.io.InputStream;
 
 public class ContextClassLoaderXsdStreamResolver extends XsdStreamResolver {
 

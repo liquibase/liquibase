@@ -1,11 +1,8 @@
 package liquibase.diff.output.changelog.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.database.Database;
-import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.core.SchemaComparator;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.AbstractChangeGenerator;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;

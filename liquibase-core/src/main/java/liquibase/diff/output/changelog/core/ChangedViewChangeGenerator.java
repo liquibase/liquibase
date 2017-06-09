@@ -18,7 +18,6 @@ import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ChangedViewChangeGenerator extends AbstractChangeGenerator implements ChangedObjectChangeGenerator {

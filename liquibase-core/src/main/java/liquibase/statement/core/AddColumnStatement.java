@@ -1,17 +1,8 @@
 package liquibase.statement.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import liquibase.statement.*;
 
-import liquibase.statement.AbstractSqlStatement;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.statement.UniqueConstraint;
+import java.util.*;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 

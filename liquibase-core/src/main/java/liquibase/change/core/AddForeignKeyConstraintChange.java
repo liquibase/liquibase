@@ -3,13 +3,13 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;

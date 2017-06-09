@@ -1,25 +1,24 @@
 package liquibase.precondition.core;
 
-import static java.lang.String.format;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.*;
+import liquibase.precondition.AbstractPrecondition;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.exception.*;
-import liquibase.precondition.Precondition;
-import liquibase.structure.core.Table;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
+import static java.lang.String.format;
 
 public class ColumnExistsPrecondition extends AbstractPrecondition {
     private String catalogName;

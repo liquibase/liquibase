@@ -1,8 +1,5 @@
 package liquibase.datatype.core;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -10,6 +7,9 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+
+import java.math.BigInteger;
+import java.util.Arrays;
 
 @DataTypeInfo(name="nchar", aliases = { "java.sql.Types.NCHAR", "nchar2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NCharType extends CharType {

@@ -1,22 +1,8 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
-
-import java.math.BigInteger;
-
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.IntType;
 import liquibase.sql.Sql;
@@ -27,8 +13,11 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-
 import org.junit.Test;
+
+import java.math.BigInteger;
+
+import static org.junit.Assert.assertEquals;
 
 public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
 

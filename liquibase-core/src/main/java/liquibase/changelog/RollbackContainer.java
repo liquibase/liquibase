@@ -1,10 +1,10 @@
 package liquibase.changelog;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.change.Change;
 import liquibase.serializer.AbstractLiquibaseSerializable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RollbackContainer extends AbstractLiquibaseSerializable {
     private List<Change> changes = new ArrayList<Change>();

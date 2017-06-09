@@ -1,12 +1,12 @@
 package liquibase.datatype.core;
 
-import java.util.Arrays;
-
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+
+import java.util.Arrays;
 
 @DataTypeInfo(name="number", aliases = {"numeric", "java.sql.Types.NUMERIC"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NumberType extends LiquibaseDataType {

@@ -2,7 +2,6 @@ package liquibase.dbdoc;
 
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.io.*;

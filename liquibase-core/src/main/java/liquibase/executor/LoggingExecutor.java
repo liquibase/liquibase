@@ -1,11 +1,5 @@
 package liquibase.executor;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -17,13 +11,14 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.statement.core.*;
 import liquibase.util.StreamUtil;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor {

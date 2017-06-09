@@ -1,13 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.structure.core.Column;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  *

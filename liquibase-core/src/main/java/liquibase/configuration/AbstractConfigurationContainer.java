@@ -2,7 +2,10 @@ package liquibase.configuration;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for configuration classes used by {@link liquibase.configuration.LiquibaseConfiguration}.

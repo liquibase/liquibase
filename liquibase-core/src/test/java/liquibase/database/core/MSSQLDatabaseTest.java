@@ -1,18 +1,11 @@
 package liquibase.database.core;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * Tests for {@link MSSQLDatabase}

@@ -3,25 +3,19 @@
  */
 package liquibase.integration.spring;
 
+import liquibase.exception.LiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.ResourceLoader;
+
+import javax.naming.*;
+import javax.sql.DataSource;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.ResourceLoader;
 
 /**
  * A wrapper of Liquibase suitable in multi-tenant environments where multiple

@@ -1,6 +1,5 @@
 package liquibase.logging;
 
-import liquibase.exception.ServiceNotFoundException;
 import liquibase.logging.core.DefaultLogger;
 import liquibase.servicelocator.ServiceLocator;
 

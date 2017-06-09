@@ -1,8 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -12,6 +9,9 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatement> {
 

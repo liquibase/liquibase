@@ -1,10 +1,10 @@
 package liquibase.changelog;
 
+import liquibase.serializer.AbstractLiquibaseSerializable;
+
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import liquibase.serializer.AbstractLiquibaseSerializable;
 
 public class ChangeLogProperty extends AbstractLiquibaseSerializable implements ChangeLogChild {
     private String file;

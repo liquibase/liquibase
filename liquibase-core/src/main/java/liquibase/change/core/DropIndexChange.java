@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
-import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Index;
 
 /**

@@ -2,8 +2,10 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.util.*;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Basic tests verifying the configuration of the {@link LiquibaseRollback} plugin.

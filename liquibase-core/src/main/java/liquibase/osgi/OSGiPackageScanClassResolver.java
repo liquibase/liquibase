@@ -1,13 +1,12 @@
 package liquibase.osgi;
 
-import java.util.Collection;
-import java.util.Set;
-
 import liquibase.servicelocator.DefaultPackageScanClassResolver;
 import liquibase.servicelocator.PackageScanFilter;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
+
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * Package scan resolver that works with OSGI frameworks.

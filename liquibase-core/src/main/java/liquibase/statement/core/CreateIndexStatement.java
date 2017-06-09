@@ -2,7 +2,6 @@ package liquibase.statement.core;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
-import liquibase.structure.core.Column;
 
 public class CreateIndexStatement extends AbstractSqlStatement {
 

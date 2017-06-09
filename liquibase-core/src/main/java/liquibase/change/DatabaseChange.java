@@ -1,7 +1,5 @@
 package liquibase.change;
 
-import liquibase.structure.DatabaseObject;
-
 import java.lang.annotation.*;
 
 /**

@@ -1,22 +1,19 @@
 package liquibase.database;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.change.core.CreateTableChange;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.executor.MockExecutor;
 import liquibase.sql.visitor.AppendSqlVisitor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
-
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Base test class for database-specific tests

@@ -16,8 +16,6 @@ package liquibase.util.csv.opencsv;
  limitations under the License.
  */
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.util.csv.opencsv.stream.reader.LineReader;
 
 import java.io.BufferedReader;

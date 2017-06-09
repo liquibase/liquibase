@@ -1,12 +1,12 @@
 package liquibase.statement;
 
 
-import java.util.List;
-
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.resource.ResourceAccessor;
+
+import java.util.List;
 
 /**
  * Handles INSERT Execution

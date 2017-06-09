@@ -7,9 +7,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import liquibase.util.SystemUtils;
 
 /**
  * Class Loader for loading JDBC drivers in unit tests.  It was orginally not a singleton, but

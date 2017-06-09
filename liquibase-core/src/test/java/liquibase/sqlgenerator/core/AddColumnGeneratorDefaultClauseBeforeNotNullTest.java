@@ -6,8 +6,9 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnGeneratorTest {
     public AddColumnGeneratorDefaultClauseBeforeNotNullTest() throws Exception {

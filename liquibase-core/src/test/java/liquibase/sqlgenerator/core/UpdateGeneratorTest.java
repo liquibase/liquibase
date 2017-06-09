@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class UpdateGeneratorTest {
     @Test

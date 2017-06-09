@@ -1,9 +1,5 @@
 package liquibase.parser.core.xml;
 
-import java.io.InputStream;
-
-import org.xml.sax.InputSource;
-
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
@@ -11,6 +7,9 @@ import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializer;
+import org.xml.sax.InputSource;
+
+import java.io.InputStream;
 
 class LiquibaseSchemaResolver {
 

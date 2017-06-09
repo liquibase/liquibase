@@ -9,9 +9,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 public class DiffResult {

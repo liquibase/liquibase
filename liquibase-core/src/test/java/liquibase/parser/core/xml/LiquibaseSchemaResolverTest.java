@@ -1,11 +1,10 @@
 package liquibase.parser.core.xml;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Mockito.when;
-
-import java.io.InputStream;
-
+import liquibase.parser.LiquibaseParser;
+import liquibase.parser.NamespaceDetails;
+import liquibase.parser.NamespaceDetailsFactory;
+import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +15,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.xml.sax.InputSource;
 
-import liquibase.parser.LiquibaseParser;
-import liquibase.parser.NamespaceDetails;
-import liquibase.parser.NamespaceDetailsFactory;
-import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializer;
+import java.io.InputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(NamespaceDetailsFactory.class)

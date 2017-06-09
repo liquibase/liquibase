@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TagDatabaseGeneratorTest {
 ////    @Test

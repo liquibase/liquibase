@@ -1,9 +1,5 @@
 package org.liquibase.maven.plugins;
 
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
@@ -12,8 +8,10 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.util.StringUtils;
-
 import org.apache.maven.plugin.MojoExecutionException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * Generates SQL that marks all unapplied changes as applied.

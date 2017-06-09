@@ -2,7 +2,6 @@ package org.liquibase.maven.plugins;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.structure.core.Schema;
 import liquibase.exception.LiquibaseException;
 
 import java.util.ArrayList;

@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -9,6 +8,8 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
+
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 

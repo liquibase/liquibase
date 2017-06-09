@@ -1,17 +1,15 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.precondition.AbstractPrecondition;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Schema;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.precondition.Precondition;
+import liquibase.precondition.AbstractPrecondition;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class TableExistsPrecondition extends AbstractPrecondition {

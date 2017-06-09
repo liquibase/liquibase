@@ -14,7 +14,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 public class StringSnapshotSerializerReadable implements SnapshotSerializer {

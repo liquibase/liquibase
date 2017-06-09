@@ -1,10 +1,5 @@
 package liquibase.change.core;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -19,6 +14,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Adds a column to an existing table.

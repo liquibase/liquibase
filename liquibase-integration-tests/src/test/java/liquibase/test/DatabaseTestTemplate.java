@@ -1,9 +1,5 @@
 package liquibase.test;
 
-import java.util.Set;
-
-import org.junit.ComparisonFailure;
-
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.MigrationFailedException;
@@ -11,6 +7,9 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import org.junit.ComparisonFailure;
+
+import java.util.Set;
 
 public class DatabaseTestTemplate {
     public void testOnAvailableDatabases(DatabaseTest test) throws Exception {

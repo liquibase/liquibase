@@ -1,6 +1,5 @@
 package liquibase.statement;
 
-import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -9,6 +8,8 @@ import liquibase.resource.ResourceAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static liquibase.util.SqlUtil.replacePredicatePlaceholders;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 

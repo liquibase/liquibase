@@ -1,6 +1,5 @@
 package liquibase.changelog.visitor;
 
-import liquibase.change.CheckSum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.NotInChangeLogChangeSetFilter;

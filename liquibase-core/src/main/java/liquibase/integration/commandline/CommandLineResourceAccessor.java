@@ -1,13 +1,13 @@
 package liquibase.integration.commandline;
 
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} that adds extra fuzzy searching logic based on

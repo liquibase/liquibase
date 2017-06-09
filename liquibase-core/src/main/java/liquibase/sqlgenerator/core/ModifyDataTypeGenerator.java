@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.DatabaseDataType;
-import liquibase.exception.Warnings;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 

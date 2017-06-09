@@ -1,8 +1,5 @@
 package liquibase.command;
 
-import liquibase.exception.ValidationErrors;
-import liquibase.servicelocator.PrioritizedService;
-
 /**
  * Commands are higher-level functions. They may execute multiple {@link liquibase.change.Change}s and usually interact with the outside world.
  * Commands are different from Actions in that they implement end-user functionality rather than small pieces of logic.

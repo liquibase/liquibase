@@ -10,9 +10,7 @@ import org.junit.Test;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Nikita Lipatov (https://github.com/islonik), antoermo (https://github.com/dikeert)

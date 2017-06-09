@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import liquibase.change.*;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
@@ -11,6 +11,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a Change for custom SQL stored in a File.

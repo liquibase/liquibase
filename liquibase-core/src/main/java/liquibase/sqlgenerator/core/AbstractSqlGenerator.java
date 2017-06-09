@@ -5,7 +5,6 @@ import liquibase.exception.Warnings;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateViewStatement;
 
 public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> implements SqlGenerator<StatementType> {
 
