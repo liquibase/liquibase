@@ -3,6 +3,7 @@ package liquibase.exception;
 import liquibase.database.Database;
 
 public class DatabaseIncapableOfOperation extends RuntimeException {
+    private static final long serialVersionUID = -2179551294831803877L;
     private String operation;
     private String reason;
 

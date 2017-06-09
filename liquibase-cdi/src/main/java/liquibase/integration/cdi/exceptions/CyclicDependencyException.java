@@ -5,6 +5,8 @@ package liquibase.integration.cdi.exceptions;
  * @since 31/07/2015
  */
 public class CyclicDependencyException extends RuntimeException {
+    private static final long serialVersionUID = -3311896900258674329L;
+    
     public CyclicDependencyException(String message) {
         super(message);
     }

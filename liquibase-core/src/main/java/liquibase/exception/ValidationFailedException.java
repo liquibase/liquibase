@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Set;
 
 public class ValidationFailedException extends MigrationFailedException {
-
+    
+    private static final long serialVersionUID = -6824856974397660436L;
     private List<String> invalidMD5Sums;
     private List<FailedPrecondition> failedPreconditions;
     private List<ErrorPrecondition> errorPreconditions;

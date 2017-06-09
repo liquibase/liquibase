@@ -225,7 +225,9 @@ public class Main {
     }
 
     private static class UserError extends RuntimeException {
-
+    
+        private static final long serialVersionUID = 6926190469964122370L;
+    
         public UserError(String message) {
             super(message);
         }

@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
@@ -50,6 +50,8 @@ public class StopChange extends AbstractChange {
     }
 
     public static class StopChangeException extends RuntimeException {
+        private static final long serialVersionUID = 6681759443230468424L;
+    
         public StopChangeException(String message) {
             super(message);
         }

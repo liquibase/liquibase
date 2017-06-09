@@ -34,11 +34,6 @@ public class MigrationFailedException extends LiquibaseException {
             message += " for change set "+failedChangeSet.toString(false);
         }
         message += ":\n     Reason: "+super.getMessage();
-//        Throwable cause = this.getCause();
-//        while (cause != null) {
-//            message += ":\n          Caused By: "+cause.getMessage();
-//            cause = cause.getCause();
-//        }
 
         return message;
     }

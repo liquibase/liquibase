@@ -5,6 +5,8 @@ package liquibase.exception;
  * only be thrown in "impossible" cases where the software suspects a bug in itself.
  */
 public class UnexpectedLiquibaseException extends RuntimeException {
+    private static final long serialVersionUID = 1570124571347160550L;
+    
     /**
      * Constructs a new {@link UnexpectedLiquibaseException} with the given message
      * @param message a message describing what should never have happened

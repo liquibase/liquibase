@@ -5,8 +5,10 @@ package liquibase.integration.cdi.exceptions;
  * @since 31/07/2015
  */
 public class DependencyNotFoundException extends RuntimeException {
-
-	public DependencyNotFoundException(String message) {
+    
+    private static final long serialVersionUID = 8350372637527962559L;
+    
+    public DependencyNotFoundException(String message) {
 		super(message);
 	}
 }

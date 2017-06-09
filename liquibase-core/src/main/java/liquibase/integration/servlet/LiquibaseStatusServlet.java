@@ -17,7 +17,8 @@ import java.util.logging.LogRecord;
  * Servlet that can be registered via web.xml to view the log of the Liquibase run from the LiquibaseServletListener.
  */
 public class LiquibaseStatusServlet extends HttpServlet {
-
+    
+    private static final long serialVersionUID = 1092565349351848089L;
     private static List<LogRecord> liquibaseRunLog = new ArrayList<LogRecord>();
 
     public static synchronized void logMessage(LogRecord message) {
