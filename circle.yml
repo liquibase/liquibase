@@ -10,7 +10,6 @@ machine:
 dependencies:
   override:
     - sudo apt-get install -y rpm
-    - service mongod stop
 
 compile:
   override:
