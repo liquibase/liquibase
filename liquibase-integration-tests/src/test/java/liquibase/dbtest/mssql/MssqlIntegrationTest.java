@@ -32,6 +32,8 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
     @Test
     public void defaultValuesTests() throws Exception {
+        clearDatabase();
+
         assumeNotNull(this.getDatabase());
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/default.values.xml");
