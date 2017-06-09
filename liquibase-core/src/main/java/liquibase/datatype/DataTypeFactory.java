@@ -128,8 +128,10 @@ public class DataTypeFactory {
         }
 
         String additionalInfo = null;
-        if (dataTypeName.toLowerCase().startsWith("bit varying") || dataTypeName.toLowerCase().startsWith("character varying")) {
-            //not going to do anything. Special case for postgres in our tests, need to better support handling these types of differences
+        if (dataTypeName.toLowerCase().startsWith("bit varying")
+            || dataTypeName.toLowerCase().startsWith("character varying")) {
+            // not going to do anything. Special case for postgres in our tests,
+            // need to better support handling these types of differences
         } else {
             String[] splitTypeName = dataTypeName.split("\\s+", 2);
             dataTypeName = splitTypeName[0];
@@ -181,7 +183,10 @@ public class DataTypeFactory {
                     if (liquibaseDataType instanceof CharType && !(database instanceof OracleDatabase)) {
                         // TODO this might lead to wrong snapshot results in Oracle Database, because it assumes
                         // NLS_LENGTH_SEMANTICS=BYTE. If NLS_LENGTH_SEMANTICS=CHAR, we need to trim " CHAR" instead.
-                        param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle, not sure what else supports it
+    
+                        // not sure what else supports it:
+                        param = param.replaceFirst(" BYTE", ""); //only use byte types on oracle,
+                        
                     }
                     liquibaseDataType.addParameter(param);
                 }
@@ -210,7 +215,8 @@ public class DataTypeFactory {
                     try {
                         ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
                     } catch (Exception e) {
-                        throw new RuntimeException("Unknown property "+paramAndValue[0]+" for "+liquibaseDataType.getClass().getName()+" "+liquibaseDataType.toString());
+                        throw new RuntimeException("Unknown property " + paramAndValue[0] + " for " +
+                            liquibaseDataType.getClass().getName()+" "+liquibaseDataType.toString());
                     }
                 }
             }
