@@ -5,14 +5,13 @@ import liquibase.Labels;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -27,13 +26,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
-
-            Map parsedYaml;
-            try {
-                parsedYaml = yaml.loadAs(changeLogStream, Map.class);
-            } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
-            }
+    
+            Map parsedYaml = parseYamlStream(physicalChangeLogLocation, yaml, changeLogStream);
 
             if (parsedYaml == null || parsedYaml.size() == 0) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
@@ -66,17 +60,8 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
 
                         changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"), global, changeLog);
                     } else if (property.containsKey("file")) {
-                        Properties props = new Properties();
-                        InputStream propertiesStream = StreamUtil.singleInputStream((String) property.get("file"), resourceAccessor);
-                        if (propertiesStream == null) {
-                            log.info("Could not open properties file " + property.get("file"));
-                        } else {
-                            props.load(propertiesStream);
-
-                            for (Map.Entry entry : props.entrySet()) {
-                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"), global, changeLog);
-                            }
-                        }
+                        loadChangeLogParametersFromFile(changeLogParameters, resourceAccessor, changeLog, property,
+                        context, labels, global);
                     }
                 }
             }
@@ -91,15 +76,44 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             changeLog.load(databaseChangeLogNode, resourceAccessor);
 
             return changeLog;
-        } catch (Throwable e) {
-            if (e instanceof ChangeLogParseException) {
-                throw (ChangeLogParseException) e;
-            }
+        } catch (ChangeLogParseException e) {
+            throw e;
+        } catch (Exception e) {
             throw new ChangeLogParseException("Error parsing "+physicalChangeLogLocation, e);
         }
     }
+    
+    private Map parseYamlStream(String physicalChangeLogLocation, Yaml yaml, InputStream changeLogStream) throws ChangeLogParseException {
+        Map parsedYaml;
+        try {
+            parsedYaml = yaml.loadAs(changeLogStream, Map.class);
+        } catch (Exception e) {
+            throw new ChangeLogParseException("Syntax error in file " + physicalChangeLogLocation + ": " + e.getMessage(), e);
+            
+        }
+        return parsedYaml;
+    }
+    
+    private void loadChangeLogParametersFromFile(ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, DatabaseChangeLog changeLog, Map property, ContextExpression context, Labels labels, Boolean global) throws IOException {
+        Properties props = new Properties();
+        try (
+            InputStream propertiesStream = StreamUtil.singleInputStream(
+                (String) property.get("file"), resourceAccessor))
+        {
+            
+            if (propertiesStream == null) {
+                log.info("Could not open properties file " + property.get("file"));
+            } else {
+                props.load(propertiesStream);
 
-	/**
+                for (Map.Entry entry : props.entrySet()) {
+                    changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"), global, changeLog);
+                }
+            }
+        }
+    }
+    
+    /**
 	 * Extract the global parameter from the properties.
 	 * 
 	 * @param property the map of props
