@@ -1,215 +1,266 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
+	<!-- IMPORTANT!
+	     There are unit test that ensure the help text does not exceed
+	     80 characters per line. This may seem ancient, but still makes sense
+	     for server text-only consoles and the default setting of the
+	     infamous Windows command line window.
+ -->
 	<entry key="commandline-helptext">
 		<![CDATA[
-Usage: java -jar dbmanul.jar [options] [command]
+Anwendung: java -jar dbmanul.jar [options] [command]
 
-Standard Commands:
- update                         Updates database to current version
- updateSQL                      Writes SQL to update database to current
-                                version to STDOUT
- updateCount <num>              Applies next NUM changes to the database
- updateCountSQL <num>           Writes SQL to apply next NUM changes
-                                to the database
- updateToTag <tag>              Updates the database to the changeSet with the
-                                specified tag
- updateToTagSQL <tag>           Writes (to standard out) the SQL to update to
-                                the changeSet with the specified tag
- rollback <tag>                 Rolls back the database to the the state is was
-                                when the tag was applied
- rollbackSQL <tag>              Writes SQL to roll back the database to that
-                                state it was in when the tag was applied
-                                to STDOUT
- rollbackToDate <date/time>     Rolls back the database to the the state is was
-                                at the given date/time.
-                                Date Format: yyyy-MM-dd'T'HH:mm:ss
- rollbackToDateSQL <date/time>  Writes SQL to roll back the database to that
-                                state it was in at the given date/time version
-                                to STDOUT
- rollbackCount <value>          Rolls back the last <value> change sets
-                                applied to the database
- rollbackCountSQL <value>       Writes SQL to roll back the last
-                                <value> change sets to STDOUT
-                                applied to the database
- futureRollbackSQL              Writes SQL to roll back the database to the
-                                current state after the changes in the
-                                changeslog have been applied
- futureRollbackSQL <value>      Writes SQL to roll back the database to the
-                                current state after <value> changes in the
-                                changeslog have been applied
- futureRollbackFromTagSQL <tag> Writes (to standard out) the SQL to roll back
-                                the database to its current state after the
-                                changes up to the specified tag have been
-                                applied
- updateTestingRollback          Updates database, then rolls back changes before
-                                updating again. Useful for testing
-                                rollback support
- generateChangeLog              Writes Change Log XML to copy the current state
-                                of the database to standard out
- snapshot                       Writes the current state
-                                of the database to standard out
- snapshotReference              Writes the current state
-                                of the referenceUrl database to standard out
+Die wichtigsten Hauptbefehle:
+ update                         Wendet ChangeLog-Dateien an, um die Struktur
+                                der Datenbank zu aktualisieren
+                                (Simulation möglich)
+ updateCount <num>              Wendet die nächsten <NUM> Changes an
+                                (Simulation möglich)
+ updateToTag <tag>              Wendet alle Changes an, bis das Tag <tag>
+                                erreicht wird.
+                                (Simulation möglich)
+ rollback <tag>                 Versucht, alle Schemaänderungen bis zurück zu
+                                <tag> rückgängig zu machen.
+                                (Simulation möglich)
+ rollbackToDate <date/time>     Versucht, alle Schemaänderungen der Datenbank
+                                nach dem Zeitpunkt <date/time> rückgängig zu
+                                machen. Datumsformat: yyyy-MM-dd'T'HH:mm:ss
+                                (Simulation möglich)
+ rollbackCount <value>          Versucht, die letzten <value> Changes an der
+                                Datenbank rückgängig zu machen.
+                                (Simulation möglich)
+ futureRollbackSQL              Gibt die SQL-Anweisungen aus, mit denen sich
+                                die DB-Struktur nach dem nächsten Update auf
+                                den jetzigen Stand wiederherstellen lässt.
+ futureRollbackSQL <value>      Wie futureRollbackSQL, aber nur für die ersten
+                                <value> Änderungen
+ futureRollbackFromTagSQL <tag> Wie futureRollbackSQL, aber nur bis zurück
+                                zum angegebenen <tag>
+ updateTestingRollback          Führt die Schritte update, rollback und (erneut)
+                                update aus. Hilfreich in der Entwicklung, um
+                                zu testen, ob die Änderungen zurückrollbar sind.
+ generateChangeLog              Erzeugt eine ChangeLog-Datei, die die Struktur
+                                der Datenbank auf einer leeren Datenbank
+                                duplizieren kann.
+ snapshot                       Gibt die aktuell vorhandenen Objekte als
+                                hierarchische Textliste aus.
+ snapshotReference              Gibt die aktuell vorhandenen Objekte der
+                                durch --referenceUrl erreichbaren Datenbank als
+                                hierarchische Textliste aus.
 
-Diff Commands
- diff [diff parameters]          Writes description of differences
-                                 to standard out
- diffChangeLog [diff parameters] Writes Change Log XML to update
-                                 the database
-                                 to the reference database to standard out
 
-Documentation Commands
- dbDoc <outputDirectory>         Generates Javadoc-like documentation
-                                 based on current database and change log
+Simulationsmodus:
+Wo oben angegeben, kann z.B. anstatt "update" auch "updateSQL"
+angegeben werden. Das bewirkt, dass die Änderungen nicht tatsächlich
+durchgeführt werden, sondern die SQL-Statements angezeigt werden, die
+abgesendet würden.
 
-Maintenance Commands
- tag <tag string>          'Tags' the current database state for future rollback
- tagExists <tag string>    Checks whether the given tag is already existing
- status [--verbose]        Outputs count (list if --verbose) of unrun changesets
+Kommandos zum Vergleichen von Datenbanken:
+ diff [Diff-Parameters]          Gibt die Unterschiede zwischen zwei Datenbanken
+                                 an der Standardausgabe aus.
+ diffChangeLog [diff parameters] Gibt eine ChangeLog-Datei im XML-Format an
+                                 der Standardausgabe aus, mit der eine Datenbank
+                                 auf den Stand der Referenzdatenbank
+                                 gebracht werden kann.
+
+Kommando zum Dokumentieren von Datenbanken:
+ dbDoc <Ausgabeverzeichnis>      Generiert eine Javadoc-ähnliche Dokumentation
+                                 auf Basis der aktuellen Datenbank und der
+                                 Changelog-Datei
+
+Werkzeug- und Wartungskommandos:
+ tag <tag string>          Markiert den aktuellen Stand. Diese Markierung kann
+                           später für die Rollback-Operation genutzt werden.
+ tagExists <tag string>    Prüft, ob eine bestimmte Markierung <tag> existiert
+ status [--verbose]        Gibt die Anzahl (oder, falls --verbose angegeben
+                           ist, die Liste) der noch nicht angewendeten
+                           ChangeSets aus.
  unexpectedChangeSets [--verbose]
-                           Outputs count (list if --verbose) of changesets run
-                           in the database that do not exist in the changelog.
- validate                  Checks changelog for errors
- calculateCheckSum <id>    Calculates and prints a checksum for the changeset
-                           with the given id in the format filepath::id::author.
- clearCheckSums            Removes all saved checksums from database log.
-                           Useful for 'MD5Sum Check Failed' errors
- changelogSync             Mark all changes as executed in the database
- changelogSyncSQL          Writes SQL to mark all changes as executed
-                           in the database to STDOUT
- markNextChangeSetRan      Mark the next change changes as executed
-                           in the database
- markNextChangeSetRanSQL   Writes SQL to mark the next change
-                           as executed in the database to STDOUT
- listLocks                 Lists who currently has locks on the
-                           database changelog
- releaseLocks              Releases all locks on the database changelog
- dropAll                   Drop all database objects owned by user
+                           Die die Anzahl (oder mit --verbose die Liste )
+                           der ChangeSets aus, die in der DB, aber nicht im
+                           ChangeLog vorhanden sind.
+ validate                  Überprüft das ChangeLog auf Syntax und Anwendbarkeit
+ calculateCheckSum <id>    Errechnet manuell die Prüfsumme für ein bestimmtes
+                           ChangeSet, das in der Form Dateipfad::ID::Autor
+                           angegeben sein muss.
+ clearCheckSums            Löscht alle aufgezeichneten Prüfsummen angewendeter
+                           ChangeSets aus. VORSICHT, anschließend kann nicht
+                           mehr zuverlässig erkannt werden, wenn ChangeSets
+                           sich nach der Anwendung verändert haben.
+ changelogSync             Markiert alle Änderungen in den ChangeLogs in der
+                           Datenbank als erledigt (Simulation möglich)
+ markNextChangeSetRan      Markiert das nächste anzuwendende ChangeSet als
+                           bereits erledigt (z.B. bei händischer Durchführung)
+                           (Simulation möglich)
+ listLocks                 Zeigt an, wer aktuell die Sperre für die Historien-
+                           Tabelle blockiert.
+ releaseLocks              Erzwingt die Aufhebung der Sperre auf der Historien-
+                           Tabelle.
+ dropAll                   VORSICHT! Zerstört alle Datenbankobjekte, die dem
+                           Login-Benutzer der --url-Verbindung gehören.
 
-Required Parameters:
- --changeLogFile=<path and filename>        Migration file
- --username=<value>                         Database username
- --password=<value>                         Database password. If values
-                                            is PROMPT, DB-Manul will
-                                            prompt for a password
- --url=<value>                              Database URL
+Bei jeder Operation benötigte Parameter:
+ --changeLogFile=<path and filename>        Name der obersten ChangeLog-Datei
+ --username=<value>                         Benutzername zur Anmeldung an der DB
+ --password=<value>                         Passwort zur Anmeldung. Falls
+                                            PROMPT angegeben ist, wird es an der
+                                            Konsole erfragt.
+ --url=<value>                              JDBC-URL zur Verbindungsherstellung
 
-Optional Parameters:
- --classpath=<value>                        Classpath containing
-                                            migration files and JDBC Driver
- --driver=<jdbc.driver.ClassName>           Database driver class name
- --databaseClass=<database.ClassName>       custom liquibase.database.Database
-                                            implementation to use
- --propertyProviderClass=<properties.ClassName>  custom Properties
-                                            implementation to use
- --defaultSchemaName=<name>                 Default database schema to use
- --contexts=<value>                         ChangeSet contexts to execute
+Optionale Parameter:
+ --classpath=<value>                        Erweitert den Classpath, um JDBC-
+                                            Treiber und evtl. in Ressourcen
+                                            eingebettete ChangeLog-Dateien zu
+                                            finden.
+ --driver=<jdbc.driver.ClassName>           Gibt den Java-Klassennamen des
+                                            JDBC-Treibers an, falls dieser nicht
+                                            automatisch erkannt wird
+ --databaseClass=<database.ClassName>       Gibt den Java-Klassennamen für den
+                                            Datenbank-Adapter an, falls dieser
+                                            nicht automatisch erkannt wird
+ --propertyProviderClass=<properties.ClassName> Gibt den Java-Klassennamen
+                                            einer Implementierung zum Auslesen
+                                            von Java-Properties an
+ --defaultSchemaName=<name>                 Setzt das Standardschema für
+                                            Operationen, die keinen expliziten
+                                            Schema-Namen angeben. Ansonsten
+                                            ist der Standardwert vom DBMS
+                                            abhängig.
+ --contexts=<value>                         Gibt eine Liste mit Kontexten an,
+                                            anhand derer in den ChangeSets
+                                            entschieden werden kann, ob ein
+                                            ChangeSet ausgeführt wird.
  --labels=<expression>                      Expression defining labeled
-                                            ChangeSet to execute
- --defaultsFile=</path/to/file.properties>  File with default option values
-                                            (default: ./liquibase.properties)
- --delimiter=<string>                       Used with executeSql command to set
-                                            the string used to break up files
-                                            that consist of multiple statements.
- --driverPropertiesFile=</path/to/file.properties>  File with custom properties
-                                            to be set on the JDBC connection
-                                            to be created
+                                            ChangeSet to execute (TODO)
+ --defaultsFile=</path/to/file.properties>  Gibt den Pfad zu einer Datei
+                                            mit Java-Properties an, in der
+                                            Standardwerte für die Optionen
+                                            aufgelistet sein können.
+                                            (Standard: ./liquibase.properties)
+ --delimiter=<string>                       Überschreibt die automatische
+                                            Erkennung von Trennzeichen zwischen
+                                            den SQL-Befehlen durch den gegebenen
+                                            String.
+ --driverPropertiesFile=</path/to/file.properties>  Datei mit Java-Properties,
+                                            die an den JDBC-Treiber übergeben
+                                            werden.
  --changeExecListenerClass=<ChangeExecListener.ClassName>     Custom Change Exec
                                             listener implementation to use
+                                            (TODO)
  --changeExecListenerPropertiesFile=</path/to/file.properties> Properties for
-                                            Custom Change Exec listener
- --liquibaseCatalogName=<name>              The name of the catalog with the
-                                            liquibase tables
- --liquibaseSchemaName=<name>               The name of the schema with the
-                                            liquibase tables
- --databaseChangeLogTableName=<name>        The name of the DB-Manul ChangeLog
-                                            table (default: DATABASECHANGELOG)
- --databaseChangeLogLockTableName=<name>    The name of the DB-Manul ChangeLog
-                                            Lock table
-                                            (default: DATABASECHANGELOGLOCK)
- --liquibaseSchemaName=<name>               The name of the schema with the
-                                            liquibase tables
- --includeSystemClasspath=<true|false>      Include the system classpath
-                                            in the DB-Manul classpath
-                                            (default: true)
- --overwriteOutputFile=true                 Force overwriting generated
-                                            changelog/SQL files
- --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost
-                                            databases (default: false)
- --logLevel=<level>                         Execution log level
-                                            (debug, sql, info, warning, severe
-                                             or off
- --logFile=<file>                           Log file
- --currentDateTimeFunction=<value>          Overrides current date time function
-                                            used in SQL.
-                                            Useful for unsupported databases
- --outputDefaultSchema=<true|false>         If true, SQL object references
-                                            include the schema name, even if
-                                            it is the default schema.
-                                            Defaults to true
- --outputDefaultCatalog=<true|false>        If true, SQL object references
-                                            include the catalog name, even if
-                                            it is the default catalog.
-                                            Defaults to true
- --outputFile=<file>                        File to write output to for commands
-                                            that write output, e.g. updateSQL.
-                                            If not specified, writes to sysout.
- --help                                     Prints this message
- --version                                  Prints this version information
+                                            Custom Change Exec listener (TODO)
+ --liquibaseCatalogName=<name>              Gibt an, in welchem Katalog
+                                            (meistens: Katalog = Datenbank)
+                                            die Historientabelle gespeichert ist
+ --liquibaseSchemaName=<name>               Gibt an, in welchem Datenbankschema
+                                            die Historientabelle gespeichert ist
+ --databaseChangeLogTableName=<name>        Gibt den Namen der Historientabelle
+                                            explizit an (Standardwert:
+                                            DATABASECHANGELOG)
+ --databaseChangeLogLockTableName=<name>    Gibt den Namen der Datenbanktabelle,
+                                            die die Sperre auf die Historien-
+                                            tabelle verwaltet, an. (Standard:
+                                            (DATABASECHANGELOGLOCK)
+ --includeSystemClasspath=<true|false>      Berücksichtigt den Standard-Java-
+                                            Classpath des Systems für die
+                                            Ausführung (Standardwert: true)
+ --overwriteOutputFile=true                 Erzwingt das Überschreiben der
+                                            durch --changeLogFile angegeben
+                                            Datei (z.B. bei "snapshot").
+                                            (Standardwert: false)
+ --promptForNonLocalDatabase=<true|false>   Frägt zur Unfallvermeidung lieber
+                                            noch einmal nach, denn auf eine
+                                            Datenbank außerhalb des eigenen
+                                            Computers zugegriffen wird
+                                            (Standardwert: false)
+ --logLevel=<level>                         Gibt an, wie ausführlich das
+                                            Protokoll sein soll. Mögliche
+                                            Level sind: (debug, sql, info,
+                                            warning, severe oder off)
+ --logFile=<file>                           Gibt an, wohin das Protokoll
+                                            geschrieben werden soll (falls
+                                            nicht angegeben: an die Standard-
+                                            ausgabe)
+ --currentDateTimeFunction=<value>          Legt explizit fest, mit welcher
+                                            Funktion man vom DBMS das
+                                            aktuelle Datum und die Uhrzeit
+                                            erhält.
+ --outputDefaultSchema=<true|false>         Schreibt explizit für jedes Objekt
+                                            den Schema-Namen bei der Skript-
+                                            erzeugung auf (Standard: true)
+ --outputDefaultCatalog=<true|false>        Schreibt explizit für jedes Objekt
+                                            den Katalog- (Datenbank-)namen bei
+                                            der Skripterzeugung auf.
+                                            Standard: true
+ --outputFile=<file>                        Leitet bei allen Befehlen, die
+                                            ansonsten zur Standardausgabe
+                                            schreiben, die Ausgabe in eine
+                                            Datei um (z.B. updateSQL).
+ --help                                     Zeigt diesen Text an
+ --version                                  Gibt den Versionsstand der Software
+                                            aus.
 
-Required Diff Parameters:
- --referenceUsername=<value>                Reference Database username
- --referencePassword=<value>                Reference Database password. If
-                                            value is PROMPT, DB-Manul will
-                                            prompt for a password
- --referenceUrl=<value>                     Reference Database URL
+Pflichtparameter beim Vergleichen von zwei Datenbanken:
+ --referenceUsername=<value>                Benutzername der Referenz-DB
+ --referencePassword=<value>                Passwort der Referenz-DB
+                                            (PROMPT kann angegegeben werden,
+                                            s.o.)
+ --referenceUrl=<value>                     JDBC-URL zur Referenz-DB.
 
-Optional Diff Parameters:
- --defaultCatalogName=<name>                Default database catalog to use
- --defaultSchemaName=<name>                 Default database schema to use
- --referenceDefaultCatalogName=<name>       Reference database catalog to use
- --referenceDefaultSchemaName=<name>        Reference database schema to use
- --schemas=<name1,name2>                    Database schemas to include
-                                            objects from in comparison
- --referenceSchemas=<name1,name2>           Reference database schemas to
-                                            include objects from in comparison
-                                            only needed if different than
-                                            --schemas
- --outputSchemaAs=<name1,name2>             On diffChangeLog/generateChangeLog,
-                                            use these names as schemaName
-                                            instead of the real names.
- --includeCatalog=<true|false>              If true, the catalog will be
-                                            included in generated changeSets
-                                            Defaults to true
- --includeSchema=<true|false>               If true, the schema will be
-                                            included in generated changeSets
-                                            Defaults to true
- --includeTablespace=<true|false>           If true, the tablespace of tables
-                                            and indexes will be included.
-                                            Defaults to true
- --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name
- --dataOutputDirectory=DIR                  Output data as CSV in the given
-                                            directory
- --diffTypes                                List of diff types to include in
-                                            Change Log expressed as a comma
-                                            separated list from: tables, views,
+Optionale Parameter für Vergleichsoperationen:
+ --defaultCatalogName=<name>                Standardname des Katalogs
+                                            (=Datenbank)
+ --defaultSchemaName=<name>                 Standardname für das Schema
+ --referenceDefaultCatalogName=<name>       Katalog-/Datenbankname der Referenz
+ --referenceDefaultSchemaName=<name>        Schemaname der Referenz
+ --schemas=<name1,name2>                    Liste der zu vergleichenden Schemata
+ --referenceSchemas=<name1,name2>           Liste der Schemata in der
+                                            Referenz-DB (nur falls anders als
+                                            --schemas)
+ --outputSchemaAs=<name1,name2>             Ersetzt die bei --schemas
+                                            angegebenen Namen in der Ausgabe
+                                            durch andere
+ --includeCatalog=<true|false>              Gibt in den erzeugten ChangeSets
+                                            immer den Katalog-/Datenbanknamen an
+                                            (Standard: true)
+ --includeSchema=<true|false>               Gibt in den erzeugten ChangeSets
+                                            immer den Schemanamen an
+                                            (Standard: true)
+ --includeTablespace=<true|false>           Gibt in den erzeugten ChangeSets
+                                            immer die Tablespaces (physikalische
+                                            Speicherorte von Tabellen, Indizes
+                                            etc.) an
+                                            (Standard: true)
+ --referenceDriver=<jdbc.driver.ClassName>  Java-Klassenname für den JDBC-
+                                            Treiber beim Zugriff auf die
+                                            Referenz-DB
+ --dataOutputDirectory=DIR                  Speichert Abweichungen in den
+                                            Tabellenzeilen als CSV-Daten
+                                            im angegeben Verzeichnis
+ --diffTypes                                Gibt an, welche Objekttypen bei
+                                            Vergleichen berücksichtigt
+                                            werden. Mögliche Werte (durch
+                                            Komma getrennt): tables, views,
                                             columns, indexes, foreignkeys,
                                             primarykeys, uniqueconstraints
-                                            data.
-                                            If this is null then the default
-                                            types will be: tables, views,
-                                            columns, indexes, foreignkeys,
-                                             primarykeys, uniqueconstraints.
+                                            oder data
+                                            Standardwert:
+                                            "tables,views,columns,indexes,
+                                            foreignkeys,primarykeys,
+                                            uniqueconstraints"
 
-Change Log Properties:
- -D<property.name>=<property.value>         Pass a name/value pair for
-                                            substitution in the change log(s)
+ChangeLog-Parameter
+ -D<Property Name>=<Einzusetzender Wert>    Ersetzt während der Anwendung die
+                                            Vorkommen von ${Property Name} durch
+                                            Einzusetzender Wert
 
-Default value for parameters can be stored in a file called
-'liquibase.properties' that is read from the current working directory.
+Wenn nichts anderes durch die o.g. Optionen festgelegt ist, werden die
+Standardoptionen aus den Dateien "liquibase.properties" und
+"liquibase.local.properties" im aktuellen Verzeichnis eingelesen, falls sie
+existieren.
 
-Full documentation is available at
+Die vollständige Dokumentation befindet sich auf:
 http://www.dbmanul.org
 ]]>
 	</entry>

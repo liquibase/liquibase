@@ -14,12 +14,14 @@ import java.util.ResourceBundle;
  * This code is a direct copy from the JavaDoc of ResourceBundle.Control.
  */
 public class XmlResourceBundleControl extends ResourceBundle.Control {
+    @Override
     public List<String> getFormats(String baseName) {
         if (baseName == null)
-            throw new NullPointerException();
+            throw new IllegalArgumentException("attempt to call getFormats(null)");
         return Arrays.asList("xml");
     }
 
+    @Override
     public ResourceBundle newBundle(String baseName,
                                     Locale locale,
                                     String format,
@@ -30,9 +32,10 @@ public class XmlResourceBundleControl extends ResourceBundle.Control {
             IOException {
         if (baseName == null || locale == null
                 || format == null || loader == null)
-            throw new NullPointerException();
+            throw new IllegalArgumentException(
+                    "attempt to call newBundle with baseName, locale, format or loader being null.");
         ResourceBundle bundle = null;
-        if (format.equals("xml")) {
+        if ("xml".equals(format)) {
             String bundleName = toBundleName(baseName, locale);
             String resourceName = toResourceName(bundleName, format);
             InputStream stream = null;

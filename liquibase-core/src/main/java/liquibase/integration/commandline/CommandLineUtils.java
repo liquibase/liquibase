@@ -10,14 +10,12 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
-import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
@@ -129,14 +127,6 @@ public class CommandLineUtils {
             //Todo: move to database object methods in 4.0
             initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
 
-//            ValidationErrors errors = database.validate();
-//            if (errors.hasErrors()) {
-//                throw new DatabaseException("Database validation failed: "+errors.toString());
-//            } else {
-//                for (String warning : errors.getWarningMessages()) {
-//                    LogFactory.getInstance().getLog().warning(warning);
-//                }
-//            }
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -219,7 +209,7 @@ public class CommandLineUtils {
                 .setOutputStream(System.out);
 
         System.out.println("");
-        System.out.println("Diff Results:");
+        System.out.println(coreBundle.getString("diff.results"));
         try {
             diffCommand.execute();
         } catch (CommandExecutionException e) {
@@ -330,19 +320,9 @@ public class CommandLineUtils {
                         (RFC_1123_DATE_TIME)
         ));
         if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
-            banner.append(String.format(" (version %s built at %s)", myVersion, buildTimeString));
+            banner.append(String.format(coreBundle.getString("dbmanul.version.builddate"), myVersion, buildTimeString));
         }
         return banner.toString();
-    }
-
-    private static class OutDiffStatusListener implements DiffStatusListener {
-
-        @Override
-        public void statusUpdate(String message) {
-            LogFactory.getInstance().getLog().info(message);
-
-        }
-
     }
 
 }

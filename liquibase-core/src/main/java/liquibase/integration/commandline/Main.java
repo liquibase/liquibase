@@ -153,47 +153,6 @@ public class Main {
                 throw e;
             }
 
-            File propertiesFile = new File(main.defaultsFile);
-            String localDefaultsPathName = main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
-            File localPropertiesFile = new File(localDefaultsPathName);
-
-            if (localPropertiesFile.exists()) {
-                FileInputStream stream = new FileInputStream(localPropertiesFile);
-                try {
-                    main.parsePropertiesFile(stream);
-                } finally {
-                    stream.close();
-                }
-            } else {
-                InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream
-                        (localDefaultsPathName);
-                if (resourceAsStream != null) {
-                    try {
-                        main.parsePropertiesFile(resourceAsStream);
-                    } finally {
-                        resourceAsStream.close();
-                    }
-                }
-            }
-            if (propertiesFile.exists()) {
-                FileInputStream stream = new FileInputStream(propertiesFile);
-                try {
-                    main.parsePropertiesFile(stream);
-                } finally {
-                    stream.close();
-                }
-            } else {
-                InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(main.defaultsFile);
-                if (resourceAsStream != null) {
-                    try {
-                        main.parsePropertiesFile(resourceAsStream);
-                    } finally {
-                        resourceAsStream.close();
-                    }
-                }
-
-            }
-
             List<String> setupMessages = main.checkSetup();
             if (!setupMessages.isEmpty()) {
                 main.printHelp(setupMessages, System.err);
@@ -405,6 +364,44 @@ public class Main {
         return tempFile;
     }
 
+    protected void parseDefaultPropertyFiles() throws CommandLineParsingException {
+        File[] potentialPropertyFiles = new File[2];
+
+        potentialPropertyFiles[0] = new File(defaultsFile);
+        String localDefaultsPathName = defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
+        potentialPropertyFiles[1] = new File(localDefaultsPathName);
+
+        for (File potentialPropertyFile : potentialPropertyFiles) {
+
+            try {
+                if (potentialPropertyFile.exists()) {
+                    parseDefaultPropertyFileFromFile(potentialPropertyFile);
+                } else {
+                    parseDefaultPropertyFileFromResource(potentialPropertyFile);
+                }
+            } catch (IOException e) {
+                throw new CommandLineParsingException(e);
+            }
+        }
+    }
+
+    private void parseDefaultPropertyFileFromResource(File potentialPropertyFile) throws IOException,
+            CommandLineParsingException {
+        try (InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream
+                (potentialPropertyFile.getAbsolutePath())) {
+            if (resourceAsStream != null) {
+                parsePropertiesFile(resourceAsStream);
+            }
+        }
+    }
+
+    private void parseDefaultPropertyFileFromFile(File potentialPropertyFile) throws IOException,
+            CommandLineParsingException {
+        try (FileInputStream stream = new FileInputStream(potentialPropertyFile)) {
+            parsePropertiesFile(stream);
+        }
+    }
+
     /**
      * On windows machines, it splits args on '=' signs.  Put it back like it was.
      */
@@ -594,18 +591,24 @@ public class Main {
                 }
             } catch (NoSuchFieldException ignored) {
                 if (strict) {
-                    throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
+                    throw new CommandLineParsingException(
+                            String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                    );
                 } else {
-                    LogFactory.getInstance().getLog().info("Ignored parameter: " + entry.getKey());
+                    LogFactory.getInstance().getLog().warning(
+                            String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
+                    );
                 }
             } catch (Exception e) {
-                throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
+                throw new CommandLineParsingException(
+                        String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
+                );
             }
         }
     }
 
     protected void printHelp(List<String> errorMessages, PrintStream stream) {
-        stream.println("Errors:");
+        stream.println(coreBundle.getString("errors"));
         for (String message : errorMessages) {
             stream.println("  " + message);
         }
@@ -646,16 +649,20 @@ public class Main {
                     changeLogParameters.put(attributeName, value);
                 } else {
                     commandParams.add(arg);
-                    if (arg.startsWith("--")) parseOptionArgument(arg);
+                    if (arg.startsWith("--"))
+                        parseOptionArgument(arg);
                 }
             } else if (arg.startsWith("--")) {
                 parseOptionArgument(arg);
             } else {
-                throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a " +
-                        "'--'");
+                throw new CommandLineParsingException(
+                        String.format(coreBundle.getString("unexpected.value"), arg));
             }
         }
 
+        // Now apply default values from the default property files. We waited with this until this point
+        // since command line parameters might have changed the location where we will look for them.
+        parseDefaultPropertyFiles();
     }
 
     /**
@@ -722,7 +729,7 @@ public class Main {
             this.outputDefaultSchema = "true";
         }
         if (this.defaultsFile == null) {
-            this.defaultsFile = "liquibase/i18n/liquibase.properties";
+            this.defaultsFile = "liquibase.properties";
         }
     }
 
@@ -850,8 +857,9 @@ public class Main {
                     includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
 
             if (excludeObjects != null && includeObjects != null) {
-                throw new UnexpectedLiquibaseException("Cannot specify both " + OPTIONS.EXCLUDE_OBJECTS + " and " +
-                        OPTIONS.INCLUDE_OBJECTS);
+                throw new UnexpectedLiquibaseException(
+                        String.format(coreBundle.getString("cannot.specify.both"),
+                                OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
             if (excludeObjects != null) {
                 diffOutputControl.setObjectChangeFilter(
@@ -890,20 +898,22 @@ public class Main {
                 if (currentChangeLogFile == null) {
                     currentChangeLogFile = ""; //will output to stdout
                 }
-                // By default the generateChangeLog command is destructive, and
-                // Liquibase's attempt to append doesn't work properly. Just
-                // fail the build if the file already exists.
+
                 File file = new File(currentChangeLogFile);
                 if (file.exists() && (!Boolean.parseBoolean(overwriteOutputFile))) {
-                    throw new LiquibaseException("ChangeLogFile " + currentChangeLogFile + " already exists!");
+                    throw new LiquibaseException(
+                            String.format(coreBundle.getString("changelogfile.already.exists"), currentChangeLogFile));
                 } else {
                     try {
                         if (!file.delete()) {
                             // Nothing needs to be done
                         }
                     } catch (Exception e) {
-                        throw new LiquibaseException("Attempt to delete the file " + currentChangeLogFile +
-                                "  failed. Cannot continue.", e);
+                        throw new LiquibaseException(
+                                String.format(coreBundle.getString("attempt.to.delete.the.file.failed.cannot.continue"),
+                                        currentChangeLogFile
+                                ), e
+                        );
                     }
                 }
 
@@ -923,7 +933,8 @@ public class Main {
                 );
                 snapshotCommand.setSerializerFormat(getCommandParam("snapshotFormat", null));
                 Writer outputWriter = getOutputWriter();
-                outputWriter.write(snapshotCommand.execute().print());
+                String result = snapshotCommand.execute().print();
+                outputWriter.write(result);
                 outputWriter.flush();
                 outputWriter.close();
                 return;
@@ -974,28 +985,40 @@ public class Main {
             } else if (COMMANDS.RELEASE_LOCKS.equalsIgnoreCase(command)) {
                 LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                 lockService.forceReleaseLock();
-                printErrNoLog(
-                        "Successfully released all database change log locks for " +
+                printErrNoLog(String.format(
+                        coreBundle.getString("successfully.released.database.change.log.locks"),
                                 liquibase.getDatabase().getConnection().getConnectionUserName() +
                                 "@" + liquibase.getDatabase().getConnection().getURL()
+                        )
                 );
                 return;
             } else if (COMMANDS.TAG.equalsIgnoreCase(command)) {
                 liquibase.tag(getCommandArgument());
-                LogFactory.getInstance().getLog().info("Successfully tagged " + liquibase.getDatabase().getConnection
-                        ().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                LogFactory.getInstance().getLog().info(
+                        String.format(
+                                coreBundle.getString("successfully.tagged"), liquibase.getDatabase()
+                                        .getConnection().getConnectionUserName() + "@" +
+                                        liquibase.getDatabase().getConnection().getURL()
+                        )
+                );
                 return;
             } else if (COMMANDS.TAG_EXISTS.equalsIgnoreCase(command)) {
                 String tag = commandParams.iterator().next();
                 boolean exists = liquibase.tagExists(tag);
                 if (exists) {
-                    LogFactory.getInstance().getLog().info("The tag " + tag + " already exists in " + liquibase
-                            .getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase()
-                            .getConnection().getURL());
+                    LogFactory.getInstance().getLog().info(
+                            String.format(coreBundle.getString("tag.exists"), tag,
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
+                            )
+                    );
                 } else {
-                    LogFactory.getInstance().getLog().info("The tag " + tag + " does not exist in " + liquibase
-                            .getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase()
-                            .getConnection().getURL());
+                    LogFactory.getInstance().getLog().info(
+                            String.format(coreBundle.getString("tag.does.not.exist"), tag,
+                                    liquibase.getDatabase().getConnection().getConnectionUserName() + "@" +
+                                            liquibase.getDatabase().getConnection().getURL()
+                            )
+                    );
                 }
                 return;
             } else if (COMMANDS.DROP_ALL.equals(command)) {
@@ -1032,7 +1055,7 @@ public class Main {
                     e.printDescriptiveError(System.err);
                     return;
                 }
-                printErrNoLog("No validation errors found");
+                printErrNoLog(coreBundle.getString("no.validation.errors.found"));
                 return;
             } else if (COMMANDS.CLEAR_CHECKSUMS.equalsIgnoreCase(command)) {
                 liquibase.clearCheckSums();
@@ -1044,10 +1067,10 @@ public class Main {
                 return;
             } else if (COMMANDS.DB_DOC.equalsIgnoreCase(command)) {
                 if (commandParams.isEmpty()) {
-                    throw new CommandLineParsingException("dbdoc requires an output directory");
+                    throw new CommandLineParsingException(coreBundle.getString("dbdoc.requires.output.directory"));
                 }
                 if (changeLogFile == null) {
-                    throw new CommandLineParsingException("dbdoc requires a changeLog parameter");
+                    throw new CommandLineParsingException(coreBundle.getString("dbdoc.requires.changelog.parameter"));
                 }
                 liquibase.generateDocumentation(commandParams.iterator().next(), contexts);
                 return;
@@ -1073,14 +1096,17 @@ public class Main {
                             LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.isEmpty()) {
-                        throw new CommandLineParsingException("updateToTag requires a tag");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
 
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
                             (labels));
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.isEmpty()) {
-                        throw new CommandLineParsingException("updateToTagSQL requires a tag");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.tag"),
+                                        COMMANDS.UPDATE_TO_TAG_SQL));
                     }
 
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
@@ -1089,13 +1115,16 @@ public class Main {
                     liquibase.update(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("rollback requires a rollback tag");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.tag"), COMMANDS.ROLLBACK));
                     }
                     liquibase.rollback(getCommandArgument(), getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null), new
                             Contexts(contexts), new LabelExpression(labels));
                 } else if (COMMANDS.ROLLBACK_TO_DATE.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("rollback requires a rollback date");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.timestamp"),
+                                        COMMANDS.ROLLBACK_TO_DATE));
                     }
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
                             (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression(labels));
@@ -1105,13 +1134,17 @@ public class Main {
 
                 } else if (COMMANDS.ROLLBACK_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.tag"),
+                                        COMMANDS.ROLLBACK_SQL));
                     }
                     liquibase.rollback(getCommandArgument(), getCommandParam(COMMANDS.ROLLBACK_SCRIPT, null), new
                             Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_TO_DATE_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.timestamp"),
+                                        COMMANDS.ROLLBACK_TO_DATE_SQL));
                     }
                     liquibase.rollback(new ISODateFormat().parse(getCommandArgument()), getCommandParam
                                     (COMMANDS.ROLLBACK_SCRIPT, null), new Contexts(contexts), new LabelExpression
@@ -1119,7 +1152,9 @@ public class Main {
                             getOutputWriter());
                 } else if (COMMANDS.ROLLBACK_COUNT_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("rollbackCountSQL requires a rollback count");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.count"),
+                                        COMMANDS.ROLLBACK_COUNT_SQL));
                     }
 
                     liquibase.rollback(Integer.parseInt(getCommandArgument()), getCommandParam
@@ -1131,14 +1166,18 @@ public class Main {
                     liquibase.futureRollbackSQL(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.FUTURE_ROLLBACK_COUNT_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("futureRollbackCountSQL requires a rollback count");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.count"),
+                                        COMMANDS.FUTURE_ROLLBACK_COUNT_SQL));
                     }
 
                     liquibase.futureRollbackSQL(Integer.parseInt(getCommandArgument()), new Contexts(contexts), new
                             LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL.equalsIgnoreCase(command)) {
                     if (getCommandArgument() == null) {
-                        throw new CommandLineParsingException("futureRollbackFromTagSQL requires a tag");
+                        throw new CommandLineParsingException(
+                                String.format(coreBundle.getString("command.requires.tag"),
+                                        COMMANDS.FUTURE_ROLLBACK_FROM_TAG_SQL));
                     }
 
                     liquibase.futureRollbackSQL(getCommandArgument(), new Contexts(contexts), new LabelExpression
@@ -1146,17 +1185,19 @@ public class Main {
                 } else if (COMMANDS.UPDATE_TESTING_ROLLBACK.equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else {
-                    throw new CommandLineParsingException("Unknown command: " + command);
+                    throw new CommandLineParsingException(
+                            String.format(coreBundle.getString("command.unknown"), command));
                 }
             } catch (ParseException ignored) {
-                throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd'T'HH:mm:ss'");
+                throw new CommandLineParsingException(
+                        coreBundle.getString("timeformat.invalid"));
             }
         } finally {
             try {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogFactory.getInstance().getLog().warning("problem closing connection", e);
+                LogFactory.getInstance().getLog().warning(coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
@@ -1221,7 +1262,8 @@ public class Main {
         }
 
         if (refUrl == null) {
-            throw new CommandLineParsingException("referenceUrl parameter missing");
+            throw new CommandLineParsingException(
+                    String.format(coreBundle.getString("option.required"), "--referenceUrl"));
         }
 
         return CommandLineUtils.createDatabaseObject(resourceAccessor, refUrl, refUsername, refPassword, refDriver,
@@ -1240,7 +1282,8 @@ public class Main {
             ) {
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
-                LogFactory.getInstance().getLog().severe(String.format("Could not create output file %s%n",
+                LogFactory.getInstance().getLog().severe(String.format(coreBundle.getString("could.not.create.output" +
+                                ".file") + "\n",
                         outputFile));
                 throw e;
             }

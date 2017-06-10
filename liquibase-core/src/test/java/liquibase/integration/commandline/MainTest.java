@@ -6,13 +6,13 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtils;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -25,13 +25,17 @@ import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.support.membermodification.MemberMatcher.method;
 
 
 /**
  * Tests for {@link Main}
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(CommandFactory.class)
+// PowerMockito tends to choke on these, and we do not really need to mock them anyway:
+@PowerMockIgnore({"javax.xml.*", "org.xml.sax.*", "org.w3c.dom.*", "org.springframework.context.*", "org.apache.log4j" +
+        ".*"})
+@PrepareForTest({Main.class, CommandFactory.class})
 public class MainTest {
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -52,19 +56,43 @@ public class MainTest {
         snapshotCommand = PowerMockito.mock(SnapshotCommand.class);
         snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
 
+        // Do not do actual database snapshots.
         when(CommandFactory.getInstance()).thenReturn(commandFactory);
         when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
         when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
         when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");
+
+        // This one is not so much for JUnit, but for people working with IntelliJ. It seems that IntelliJ's
+        // test runner can get confused badly if tests open an OutputStreamWriter in STDOUT.
+        PowerMockito.stub(method(Main.class, "getOutputWriter"))
+                .toReturn(new OutputStreamWriter(System.err));
+
     }
 
-    @Before
-    public void setUp() {
-        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
-                .setValue("shouldRun", true);
-        ExpectedSystemExit.none();
-    }
+    @Test
+    public void testLocalProperties() throws Exception {
 
+        String[] args = new String[]{
+                "--driver=DRIVER",
+                "--username=USERNAME",
+                "--password=PASSWORD",
+                "--url=offline:mock?version=1.20&productName=SuperDuperDatabase&catalog=startCatalog" +
+                        "&caseSensitive=true&changeLogFile=liquibase/database/simpleChangeLog.xml" +
+                        "&sendsStringParametersAsUnicode=true",
+                "--changeLogFile=dummy.log",
+                "--changeExecListenerClass=MockChangeExecListener",
+                "--defaultsFile=target/test-classes/liquibase.properties",
+                "snapshot"
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertTrue("Read context from liquibase.local.properties", (cli.contexts != null && cli.contexts.contains
+                ("local-context-for-liquibase-unit-tests")));
+        assertTrue("Read context from liquibase.properties", (cli.logFile != null && cli.logFile.equals
+                ("target/logfile_set_from_liquibase_properties.log")));
+    }
 
     @Test
     public void startWithoutParameters() throws IOException, CommandLineParsingException {
@@ -78,6 +106,8 @@ public class MainTest {
         LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
                 .setValue("shouldRun", false);
         int errorLevel = Main.run(new String[0]);
+        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .setValue("shouldRun", true);
         assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
     }
 
@@ -95,8 +125,24 @@ public class MainTest {
                 "snapshot",
         };
         int errorLevel = Main.run(args);
-        assertEquals("Operation executes with errorlevel 0", 0, errorLevel);
+        assertEquals(0, errorLevel);
+    }
 
+    @Test
+    public void localPropertyFiles() throws Exception {
+        String[] args = new String[]{
+                "--driver=DRIVER",
+                "--username=USERNAME",
+                "--password=PASSWORD",
+                "--url=offline:mock?version=1.20&productName=SuperDuperDatabase&catalog=startCatalog" +
+                        "&caseSensitive=true&changeLogFile=liquibase/database/simpleChangeLog.xml" +
+                        "&sendsStringParametersAsUnicode=true",
+                "--changeLogFile=dummy.log",
+                "--changeExecListenerClass=MockChangeExecListener",
+                "snapshot",
+        };
+        int errorLevel = Main.run(args);
+        assertEquals(0, errorLevel);
     }
 
     @Test
