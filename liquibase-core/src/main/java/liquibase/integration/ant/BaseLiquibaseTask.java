@@ -29,15 +29,20 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.util.ResourceBundle;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Base class for all Ant Liquibase tasks.  This class sets up Liquibase and defines parameters
  * that are common to all tasks.
  */
 public abstract class BaseLiquibaseTask extends Task {
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
+
     private AntClassLoader classLoader;
     private Liquibase liquibase;
 
@@ -59,7 +64,7 @@ public abstract class BaseLiquibaseTask extends Task {
     @Override
     public final void execute() throws BuildException {
         super.execute();
-        log("Starting DB-Manul.", Project.MSG_INFO);
+        log(coreBundle.getString("starting.db.manul"), Project.MSG_INFO);
         classLoader = getProject().createClassLoader(classpath);
         classLoader.setParent(this.getClass().getClassLoader());
         classLoader.setThreadContextLoader();
@@ -114,6 +119,10 @@ public abstract class BaseLiquibaseTask extends Task {
         return null;
     }
 
+    public void setChangeLogFile(String changeLogFile) {
+        // This method is deprecated. Use child implementation.
+    }
+
     protected boolean shouldRun() {
         LiquibaseConfiguration configuration = LiquibaseConfiguration.getInstance();
         GlobalConfiguration globalConfiguration = configuration.getConfiguration(GlobalConfiguration.class);
@@ -151,6 +160,10 @@ public abstract class BaseLiquibaseTask extends Task {
         return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
     }
 
+    /*
+     * Ant parameters
+     */
+
     /**
      * Convenience method to safely close the database connection.
      *
@@ -165,10 +178,6 @@ public abstract class BaseLiquibaseTask extends Task {
             log("Error closing the database connection.", e, Project.MSG_WARN);
         }
     }
-
-    /*
-     * Ant parameters
-     */
 
     public Path createClasspath() {
         if (this.classpath == null) {
@@ -209,13 +218,13 @@ public abstract class BaseLiquibaseTask extends Task {
         return promptOnNonLocalDatabase;
     }
 
-    public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
-        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
-    }
-
     /*************************
      * Deprecated parameters *
      *************************/
+
+    public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
+        this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
+    }
 
     /**
      * Helper method for deprecated ant attributes. This method will be removed when the deprecated methods are removed.
@@ -309,10 +318,6 @@ public abstract class BaseLiquibaseTask extends Task {
     public void setPassword(String password) {
         log("The password attribute is deprecated. Use a nested <database> element or set the databaseRef attribute instead.", Project.MSG_WARN);
         getDatabaseType().setPassword(password);
-    }
-
-    public void setChangeLogFile(String changeLogFile) {
-        // This method is deprecated. Use child implementation.
     }
 
     /**
@@ -464,67 +469,6 @@ public abstract class BaseLiquibaseTask extends Task {
         // Parent method is deprecated. Use child implementations.
     }
 
-
-    /**
-     * Redirector of logs from java.util.logging to ANT's logging
-     */
-    @Deprecated
-    protected static class LogRedirector {
-
-        private final Task task;
-
-        /**
-         * Constructor
-         *
-         * @param task Ant task
-         */
-        protected LogRedirector(Task task) {
-            super();
-            this.task = task;
-        }
-
-        protected void redirectLogger() {
-            registerHandler(createHandler());
-        }
-
-        protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getInstance().getLog();
-        }
-
-
-        protected Handler createHandler() {
-            return new Handler() {
-                @Override
-                public void publish(LogRecord logRecord) {
-                    task.log(logRecord.getMessage(), mapLevelToAntLevel(logRecord.getLevel()));
-                }
-
-                @Override
-                public void close() throws SecurityException {
-                }
-
-                @Override
-                public void flush() {
-                }
-
-                protected int mapLevelToAntLevel(Level level) {
-                    if (Level.ALL == level) {
-                        return Project.MSG_INFO;
-                    } else if (Level.SEVERE == level) {
-                        return Project.MSG_ERR;
-                    } else if (Level.WARNING == level) {
-                        return Project.MSG_WARN;
-                    } else if (Level.INFO == level) {
-                        return Project.MSG_INFO;
-                    } else {
-                        return Project.MSG_VERBOSE;
-                    }
-                }
-            };
-        }
-
-    }
-
     /**
      * @deprecated Use {@link #closeDatabase(liquibase.database.Database)} instead.
      */
@@ -661,6 +605,66 @@ public abstract class BaseLiquibaseTask extends Task {
     @Deprecated
     public void setLogLevel(String level) {
         LogFactory.getInstance().getLog().setLogLevel(level);
+    }
+
+    /**
+     * Redirector of logs from java.util.logging to ANT's logging
+     */
+    @Deprecated
+    protected static class LogRedirector {
+
+        private final Task task;
+
+        /**
+         * Constructor
+         *
+         * @param task Ant task
+         */
+        protected LogRedirector(Task task) {
+            super();
+            this.task = task;
+        }
+
+        protected void redirectLogger() {
+            registerHandler(createHandler());
+        }
+
+        protected void registerHandler(Handler theHandler) {
+            Logger logger = LogFactory.getInstance().getLog();
+        }
+
+
+        protected Handler createHandler() {
+            return new Handler() {
+                @Override
+                public void publish(LogRecord logRecord) {
+                    task.log(logRecord.getMessage(), mapLevelToAntLevel(logRecord.getLevel()));
+                }
+
+                @Override
+                public void close() throws SecurityException {
+                }
+
+                @Override
+                public void flush() {
+                }
+
+                protected int mapLevelToAntLevel(Level level) {
+                    if (Level.ALL == level) {
+                        return Project.MSG_INFO;
+                    } else if (Level.SEVERE == level) {
+                        return Project.MSG_ERR;
+                    } else if (Level.WARNING == level) {
+                        return Project.MSG_WARN;
+                    } else if (Level.INFO == level) {
+                        return Project.MSG_INFO;
+                    } else {
+                        return Project.MSG_VERBOSE;
+                    }
+                }
+            };
+        }
+
     }
 
     /**

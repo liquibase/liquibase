@@ -1,23 +1,104 @@
 package liquibase.integration.commandline;
 
+import liquibase.command.CommandFactory;
+import liquibase.command.core.SnapshotCommand;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.util.StringUtils;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 
 /**
  * Tests for {@link Main}
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(CommandFactory.class)
 public class MainTest {
-    
+    @Rule
+    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
+    @Mock
+    private CommandFactory commandFactory;
+
+    @Mock
+    private SnapshotCommand snapshotCommand;
+
+    @Mock
+    private SnapshotCommand.SnapshotCommandResult snapshotCommandResult;
+
+    public MainTest() throws Exception {
+        PowerMockito.mockStatic(CommandFactory.class);
+
+        commandFactory = PowerMockito.mock(CommandFactory.class);
+        snapshotCommand = PowerMockito.mock(SnapshotCommand.class);
+        snapshotCommandResult = PowerMockito.mock(SnapshotCommand.SnapshotCommandResult.class);
+
+        when(CommandFactory.getInstance()).thenReturn(commandFactory);
+        when(commandFactory.getCommand("snapshot")).thenReturn(snapshotCommand);
+        when(snapshotCommand.execute()).thenReturn(snapshotCommandResult);
+        when(snapshotCommandResult.print()).thenReturn("<?xml version=\"1.0\" encoding=\"UTF-8\"?>...");
+    }
+
+    @Before
+    public void setUp() {
+        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .setValue("shouldRun", true);
+        ExpectedSystemExit.none();
+    }
+
+
+    @Test
+    public void startWithoutParameters() throws IOException, CommandLineParsingException {
+        exit.expectSystemExitWithStatus(1);
+        Main.main(new String[0]);
+        assertTrue("We just want to survive until this point", true);
+    }
+
+    @Test
+    public void globalConfigurationSaysDoNotRun() throws Exception {
+        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                .setValue("shouldRun", false);
+        int errorLevel = Main.run(new String[0]);
+        assertEquals(errorLevel, 0); // If it SHOULD run, and we would call without parameters, we would get -1
+    }
+
+    @Test
+    public void mockedSnapshotRun() throws Exception {
+        String[] args = new String[]{
+                "--driver=DRIVER",
+                "--username=USERNAME",
+                "--password=PASSWORD",
+                "--url=offline:mock?version=1.20&productName=SuperDuperDatabase&catalog=startCatalog" +
+                        "&caseSensitive=true&changeLogFile=liquibase/database/simpleChangeLog.xml" +
+                        "&sendsStringParametersAsUnicode=true",
+                "--changeLogFile=dummy.log",
+                "--changeExecListenerClass=MockChangeExecListener",
+                "snapshot",
+        };
+        int errorLevel = Main.run(args);
+        assertEquals("Operation executes with errorlevel 0", 0, errorLevel);
+
+    }
+
     @Test
     public void migrateWithAllParameters() throws Exception {
         String[] args = new String[]{
@@ -37,17 +118,20 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
-        assertEquals("DRIVER", cli.driver);
-        assertEquals("USERNAME", cli.username);
-        assertEquals("PASSWORD", cli.password);
-        assertEquals("URL", cli.url);
-        assertEquals("FILE", cli.changeLogFile);
-        assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
-        assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
-        assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals("update", cli.command);
-        assertEquals("MockChangeExecListener", cli.changeExecListenerClass);
-        assertEquals("PROPS", cli.changeExecListenerPropertiesFile);
+        assertEquals("Option --driver was parsed correctly", "DRIVER", cli.driver);
+        assertEquals("Option --username was parsed correctly", "USERNAME", cli.username);
+        assertEquals("Option --password was parsed correctly", "PASSWORD", cli.password);
+        assertEquals("Option --url was parsed correctly", "URL", cli.url);
+        assertEquals("Option --changeLogFile was parsed correctly", "FILE", cli.changeLogFile);
+        assertEquals("Option --classpath was parsed correctly", "CLASSPATH;CLASSPATH2", cli.classpath);
+        assertEquals("Option --contexts was parsed correctly", "CONTEXT1,CONTEXT2", cli.contexts);
+        assertEquals("Option --promptForNonLocalDatabase was parsed correctly", Boolean.TRUE,
+                cli.promptForNonLocalDatabase);
+        assertEquals("Main command 'update' was parsed correctly", "update", cli.command);
+        assertEquals("Option --changeExecListenerClass was parsed correctly", "MockChangeExecListener", cli
+                .changeExecListenerClass);
+        assertEquals("Option --changeExecListenerPropertiesFile was parsed correctly", "PROPS", cli
+                .changeExecListenerPropertiesFile);
     }
 
     @Test
@@ -60,9 +144,9 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
-        assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
-        assertEquals("update", cli.command);
-
+        assertEquals("Option --promptForNonLocalDatabase=false was parsed correctly", Boolean.FALSE, cli
+                .promptForNonLocalDatabase);
+        assertEquals("Main command 'update' was parsed correctly", "update", cli.command);
     }
 
     @Test
@@ -75,8 +159,7 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
-        assertEquals("update", cli.command);
-
+        assertEquals("Main command 'migrate' was parsed correctly as 'update'", "update", cli.command);
     }
 
     @Test
@@ -89,8 +172,9 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
-        assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals("update", cli.command);
+        assertEquals("Option --promptForNonLocalDatabase=true was parsed correctly",
+                Boolean.TRUE, cli.promptForNonLocalDatabase);
+        assertEquals("Main command 'update' was parsed correctly", "update", cli.command);
 
     }
 
@@ -104,6 +188,37 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
     }
+
+    @Test
+    public void emptyUrlParameter() throws Exception {
+        String[] args = new String[]{
+                "--changeLogFile=FILE",
+                "--url=",
+                "update",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals("specifying an empty URL should return 1 error message.", 1, errMsgs.size());
+    }
+
+    @Test
+    public void misplacedDiffTypesDataOption() throws Exception {
+        String[] args = new String[]{
+                "--changeLogFile=FILE",
+                "--url=TESTFILE",
+                "diffChangeLog",
+                "--diffTypes=data"
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+        List<String> errMsgs = cli.checkSetup();
+        assertEquals("the combination of --diffTypes=data and diffChangeLog must not be accepted.", 1, errMsgs.size());
+    }
+
+
 
     @Test(expected = CommandLineParsingException.class)
     public void unknownParameter() throws Exception {
@@ -136,9 +251,9 @@ public class MainTest {
           cli.configureClassLoader();
 
           URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
-          assertEquals(2, classloaderURLs.length);
-          assertEquals("file:/c:/", classloaderURLs[0].toExternalForm());
-          assertEquals("file:/c:/windows/", classloaderURLs[1].toExternalForm());
+            assertEquals("Parsing example Windows classpath returns 2 entries", 2, classloaderURLs.length);
+            assertEquals("Windows path C:\\ is correctly parsed", "file:/c:/", classloaderURLs[0].toExternalForm());
+            assertEquals("Windows path C:\\windows\\ is correctly parsed", "file:/c:/windows/", classloaderURLs[1].toExternalForm());
         }
     }
 
@@ -283,15 +398,15 @@ public class MainTest {
 
         cli.promptForNonLocalDatabase = Boolean.TRUE;
         cli.applyDefaults();
-        assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
+        assertEquals("Correct default value for --promptForNonLocalDatabase", Boolean.TRUE, cli.promptForNonLocalDatabase);
 
         cli.promptForNonLocalDatabase = Boolean.FALSE;
         cli.applyDefaults();
-        assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
+        assertEquals("Correct default value for --promptForNonLocalDatabase", Boolean.FALSE, cli.promptForNonLocalDatabase);
 
         cli.promptForNonLocalDatabase = null;
         cli.applyDefaults();
-        assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
+        assertEquals("Correct default value for --promptForNonLocalDatabase", Boolean.FALSE, cli.promptForNonLocalDatabase);
 
     }
 
@@ -427,7 +542,7 @@ public class MainTest {
         String line;
         while ((line = reader.readLine()) != null) {
             if (line.length() > MAXIMUM_LENGTH) {
-                fail("'" + line + String.format("' is longer than &d chars", MAXIMUM_LENGTH));
+                fail("'" + line + String.format("' is longer than %d chars", MAXIMUM_LENGTH));
             }
         }
     }
@@ -448,15 +563,15 @@ public class MainTest {
         Main cli = new Main();
         cli.parseOptions(args);
 
-        assertEquals("DRIVER", cli.driver);
-        assertEquals("USERNAME", cli.username);
-        assertEquals("PASSWORD", cli.password);
-        assertEquals("URL", cli.url);
-        assertEquals("FILE", cli.changeLogFile);
-        assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
-        assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
-        assertEquals("tag", cli.command);
-        assertEquals("TagHere", cli.commandParams.iterator().next());
+        assertEquals("Command line option --driver is parsed correctly", "DRIVER", cli.driver);
+        assertEquals("Command line option --username is parsed correctly", "USERNAME", cli.username);
+        assertEquals("Command line option --password is parsed correctly", "PASSWORD", cli.password);
+        assertEquals("Command line option --url is parsed correctly", "URL", cli.url);
+        assertEquals("Command line option --changeLogFile is parsed correctly", "FILE", cli.changeLogFile);
+        assertEquals("Command line option --classpath is parsed correctly", "CLASSPATH;CLASSPATH2", cli.classpath);
+        assertEquals("Command line option --contexts is parsed correctly", "CONTEXT1,CONTEXT2", cli.contexts);
+        assertEquals("Main command 'tag' is parsed correctly", "tag", cli.command);
+        assertEquals("Command parameter 'TagHere' is parsed correctly", "TagHere", cli.commandParams.iterator().next());
     }
 
     @Test
@@ -476,11 +591,13 @@ public class MainTest {
     @Test
     public void fixArgs() {
         Main liquibase = new Main();
-        String[] fixedArgs = liquibase.fixupArgs(new String[] {"--defaultsFile","liquibase.properties", "migrate"});
-        assertEquals("--defaultsFile=liquibase.properties migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+        String[] fixedArgs = liquibase.fixupArgs(new String[]{"--defaultsFile", "liquibase.properties", "migrate"});
+        assertEquals("--defaultsFile=liquibase.properties migrate",
+                StringUtils.join(Arrays.asList(fixedArgs), " "));
 
         fixedArgs = liquibase.fixupArgs(new String[] {"--defaultsFile=liquibase.properties", "migrate"});
-        assertEquals("--defaultsFile=liquibase.properties migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+        assertEquals("--defaultsFile=liquibase.properties migrate",
+                StringUtils.join(Arrays.asList(fixedArgs), " "));
 
         fixedArgs = liquibase.fixupArgs(new String[] {"--driver=DRIVER",
                 "--username=USERNAME",
@@ -492,13 +609,15 @@ public class MainTest {
                 "--promptForNonLocalDatabase=true",
                 "migrate"
         });
-        assertEquals("--driver=DRIVER --username=USERNAME --password=PASSWORD --url=URL --changeLogFile=FILE --classpath=CLASSPATH;CLASSPATH2 --contexts=CONTEXT1,CONTEXT2 --promptForNonLocalDatabase=true migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+        assertEquals("--driver=DRIVER --username=USERNAME --password=PASSWORD --url=URL --changeLogFile=FILE " +
+                "--classpath=CLASSPATH;CLASSPATH2 --contexts=CONTEXT1,CONTEXT2 " +
+                "--promptForNonLocalDatabase=true migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
     }
 
     @Test
     public void testVersionArg() throws Exception {
         Main.run(new String[] {"--version"});
-
+        assertTrue(true); // Just want to test if the call goes through
     }
 
 	@Test
@@ -509,8 +628,8 @@ public class MainTest {
 
 		tested.parseOptions(new String[] { "--" + argName + "=" + argValue });
 
-		assertEquals(argValue, tested.password);
-	}
+        assertEquals("Password containing an equal sign (=) is parsed correctly", argValue, tested.password);
+    }
 
     @Test
     public void testDatabaseChangeLogTableName_Properties() throws IOException, CommandLineParsingException {
@@ -522,8 +641,9 @@ public class MainTest {
         props.store(propFile, "");
         main.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
 
-        assertEquals("PROPSCHANGELOG", main.databaseChangeLogTableName);
-        assertEquals("PROPSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+        assertEquals("Custom database change log table gets parsed correctly (as a property)", "PROPSCHANGELOG", main
+                .databaseChangeLogTableName);
+        assertEquals("Custom database change log LOCK table gets parsed correctly (as a property)", "PROPSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
     }
 
     @Test
@@ -533,7 +653,8 @@ public class MainTest {
                 "--databaseChangeLogTableName=OPTSCHANGELOG",
                 "--databaseChangeLogLockTableName=OPTSCHANGELOGLOCK"};
         main.parseOptions(opts);
-        assertEquals("OPTSCHANGELOG", main.databaseChangeLogTableName);
-        assertEquals("OPTSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
+        assertEquals("Custom database change log table gets parsed correctly (as an option argument)",
+                "OPTSCHANGELOG", main.databaseChangeLogTableName);
+        assertEquals("Custom database change log LOCK table gets parsed correctly (as an option argument)", "OPTSCHANGELOGLOCK", main.databaseChangeLogLockTableName);
     }
 }

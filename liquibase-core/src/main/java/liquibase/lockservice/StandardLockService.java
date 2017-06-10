@@ -22,12 +22,12 @@ import liquibase.statement.core.*;
 import liquibase.structure.core.Table;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static java.util.ResourceBundle.getBundle;
 
 public class StandardLockService implements LockService {
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
 
@@ -275,7 +275,7 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogFactory.getInstance().getLog().info("Successfully acquired change log lock");
+                LogFactory.getInstance().getLog().info(coreBundle.getString("successfully.acquired.change.log.lock"));
 
                 hasChangeLogLock = true;
 

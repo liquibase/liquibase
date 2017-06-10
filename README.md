@@ -8,13 +8,14 @@ This fork of the Liquibase source aims to:
 - Support more Oracle Database features
 - Support different connections for changesets (e.g. use an administrative connection for creating tablespaces and a "regular" connection for normal schema updates)
 - Modernise the code to use JDK 8 features.
+- Internationalise the messages
 
 For a current list of changes, fixes and improvements, please see: https://github.com/dbmanul/dbmanul/blob/master/RELEASE_NOTES_0.1.md
 
 Current status summary
 ======================
 
-Last updated: June 8th, 2017
+Last updated: June 10th, 2017
 
 **PLEASE NOTE THAT THE FORK, IN GENERAL, SHOULD BE CONSIDERED UNSTABLE FOR THE MOMENT.**
     A lot of work is currently being done to get all integration tests (OSS + commercial RDBMSs) green; manual testing of features like CDI, RPM/Debian packaging, Spring integration etc. comes after that.   
@@ -24,7 +25,8 @@ Last updated: June 8th, 2017
     https://circleci.com/gh/dbmanul/dbmanul
 - Issue tracking: https://dbmanul.atlassian.net
 - SONAR/Code quality improvement progress: https://sonarcloud.io/dashboard?id=org.dbmanul%3Adbmanul-parent
-- Unmerged PR progress: most upstream prs in the range #678 down to #652 
+- Unmerged PR progress: most upstream prs in the range #678 down to #652
+- I18N work has begun, but lots of strings need to be processed. Probably not complete by version 0.1.
 
 Database support:
 -----------------

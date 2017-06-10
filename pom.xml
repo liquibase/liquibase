@@ -80,6 +80,7 @@
 		<maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
 		<org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
 		<org.spockframework.version>1.1-groovy-2.4</org.spockframework.version>
+		<system-rules.version>1.16.0</system-rules.version>
 
 		<!-- JDBC driver versions -->
 		<derby.version>10.13.1.1</derby.version>
@@ -150,6 +151,12 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.github.stefanbirkner</groupId>
+				<artifactId>system-rules</artifactId>
+				<version>${system-rules.version}</version>
 				<scope>test</scope>
 			</dependency>
 

@@ -325,7 +325,8 @@ public class CommandLineUtils {
         StringBuffer banner = new StringBuffer();
 
         banner.append(String.format(
-                "Starting DB-Manul at %s", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS).format
+                coreBundle.getString("starting.db.manul.at.timestamp"), OffsetDateTime.now().truncatedTo(ChronoUnit
+                        .SECONDS).format
                         (RFC_1123_DATE_TIME)
         ));
         if (!myVersion.isEmpty() && !buildTimeString.isEmpty()) {
