@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
-    private final Map<String, String> params = new HashMap<>();
     private final Map<String, String> databaseParams = new HashMap<>();
     private DatabaseSnapshot snapshot = null;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
@@ -48,17 +47,17 @@ public class OfflineConnection implements DatabaseConnection {
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
         String params = StringUtils.trimToNull(matcher.group(2));
+        Map<String, String> params1 = new HashMap<String, String>();
         if (params != null) {
             String[] keyValues = params.split("&");
             for (String param : keyValues) {
                 String[] split = param.split("=");
-                this.params.put(split[0], split[1]);
+                params1.put(split[0], split[1]);
             }
         }
 
-
         this.productName = "Offline "+databaseShortName;
-        for (Map.Entry<String, String> paramEntry : this.params.entrySet()) {
+        for (Map.Entry<String, String> paramEntry : params1.entrySet()) {
 
             if (paramEntry.getKey().equals("version")) {
                 this.productVersion = paramEntry.getValue();
@@ -74,7 +73,7 @@ public class OfflineConnection implements DatabaseConnection {
             } else if (paramEntry.getKey().equals("productName")) {
                 this.productName = paramEntry.getValue();
             } else if (paramEntry.getKey().equals("catalog")) {
-                this.catalog = this.params.get("catalog");
+                this.catalog = params1.get("catalog");
             } else if (paramEntry.getKey().equals("caseSensitive")) {
                  this.caseSensitive = Boolean.parseBoolean(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("changeLogFile")) {
@@ -84,7 +83,8 @@ public class OfflineConnection implements DatabaseConnection {
             } else if (paramEntry.getKey().equals("snapshot")) {
                 String snapshotFile = paramEntry.getValue();
                 try {
-                    SnapshotParser parser = SnapshotParserFactory.getInstance().getParser(snapshotFile, resourceAccessor);
+                    SnapshotParser parser = SnapshotParserFactory.getInstance()
+                            .getParser(snapshotFile, resourceAccessor);
                     this.snapshot = parser.parse(snapshotFile, resourceAccessor);
                     this.snapshot.getDatabase().setConnection(this);
 
@@ -131,8 +131,33 @@ public class OfflineConnection implements DatabaseConnection {
         );
     }
 
+    /**
+     * Returns a copy of the current simulated content  of the database, filtered by the given
+     * array.
+     *
+     * @param examples the list of objects to clone
+     * @return a new DatabaseSnapshot object containing all objects matching examples. If none are found,
+     * an empty DatabaseSnapshot is returned.
+     */
     public DatabaseSnapshot getSnapshot(DatabaseObject[] examples) {
         return this.snapshot.clone(examples);
+    }
+
+    /**
+     * For debugging purposes: sets a DatabaseSnapshot object for this connection. Effectively,
+     * this simulates the content of the database in this OfflineConnection.
+     *
+     * @param snapshot the snapshot with the simulated database content
+     */
+    public void setSnapshot(DatabaseSnapshot snapshot) {
+        this.snapshot = snapshot;
+        this.snapshot.getDatabase().setConnection(this);
+
+        for (Catalog catalog : this.snapshot.get(Catalog.class)) {
+            if (catalog.isDefault()) {
+                this.catalog = catalog.getName();
+            }
+        }
     }
 
     @Override

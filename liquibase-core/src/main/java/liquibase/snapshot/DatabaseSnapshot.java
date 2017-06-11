@@ -48,7 +48,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         referencedObjects = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
-        this.originalExamples = examples;
+        this.originalExamples = (examples == null ? new DatabaseObject[0] : examples);
 
         init(examples);
 
@@ -89,6 +89,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
     }
 
+    /**
+     * Searches the current snapshot content for the given examples. Returns a new DatabaseSnapshot
+     * containing a clone of every object from the examples array that was found.
+     *
+     * @param examples The array of snapshot objects to search and clone
+     * @return a new DatabaseSnapshot object with the clones of the desired objects. If no object is
+     * found, an empty DatabaseSnapshot will be returned.
+     */
     public DatabaseSnapshot clone(DatabaseObject[] examples) {
         try {
             DatabaseSnapshot returnSnapshot = new RestoredDatabaseSnapshot(this.database);
@@ -100,6 +108,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                 }
                 if (example instanceof Schema) {
                     for (Class<? extends DatabaseObject> type : this.snapshotControl.getTypesToInclude()) {
+
                         for (DatabaseObject object : this.get(type)) {
                             if (object.getSchema() == null) {
                                 if (object instanceof Catalog) {
