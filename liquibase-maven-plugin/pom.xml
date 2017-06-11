@@ -8,7 +8,6 @@
 
 	<name>DB-Manul Maven Plugin</name>
 	<description>A Maven plugin wraps up some of the functionality of DB-Manul</description>
-
 	<parent>
 		<artifactId>dbmanul-parent</artifactId>
 		<groupId>org.dbmanul</groupId>
