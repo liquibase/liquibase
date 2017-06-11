@@ -51,6 +51,7 @@
 	</developers>
 
 	<properties>
+		<jdk.version>1.8</jdk.version>
 		<maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -81,6 +82,11 @@
 		<org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
 		<org.spockframework.version>1.1-groovy-2.4</org.spockframework.version>
 		<system-rules.version>1.16.0</system-rules.version>
+		<jacoco.version>0.7.7.201606060606</jacoco.version>
+		<jacoco.it.execution.data.file>${project.build.directory}/coverage-reports/jacoco-it.exec
+		</jacoco.it.execution.data.file>
+		<jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec
+		</jacoco.ut.execution.data.file>
 
 		<!-- JDBC driver versions -->
 		<derby.version>10.13.1.1</derby.version>
@@ -207,6 +213,13 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.jacoco</groupId>
+				<artifactId>org.jacoco.agent</artifactId>
+				<version>${jacoco.version}</version>
+				<classifier>runtime</classifier>
+			</dependency>
+
+			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
 				<version>${mockito.version}</version>
@@ -293,7 +306,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>1.5.0</version>
+				<version>3.8.0</version>
 			</dependency>
 
 			<dependency>
@@ -385,15 +398,15 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.1</version>
 					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
+						<source>${jdk.version}</source>
+						<target>${jdk.version}</target>
 						<optimize>true</optimize>
 						<debug>true</debug>
 						<encoding>${project.build.sourceEncoding}</encoding>
 						<!-- Workaround for a bug in maven-compiler-plugin 3.1 which causes all files to always
 								 recompile, making the build _slower_ than faster. -->
 						<useIncrementalCompilation>false</useIncrementalCompilation>
-						<compilerArgument>-Xlint:deprecation</compilerArgument>
+						<!-- <compilerArgument>-Xlint:deprecation</compilerArgument> -->
 					</configuration>
 				</plugin>
 
@@ -422,6 +435,9 @@
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<reportFormat>plain</reportFormat>
 						<skipTests>${skipUTs}</skipTests>
+						<systemPropertyVariables>
+							<jacoco-agent.destfile>${project.build.directory}/coverage.exec</jacoco-agent.destfile>
+						</systemPropertyVariables>
 					</configuration>
 				</plugin>
 
@@ -574,7 +590,7 @@
 				<plugin>
 					<groupId>org.apache.felix</groupId>
 					<artifactId>maven-bundle-plugin</artifactId>
-					<version>2.5.4</version>
+					<version>3.3.0</version>
 				</plugin>
 
 				<plugin>

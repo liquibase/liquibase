@@ -66,6 +66,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>org.jacoco.agent</artifactId>
+			<classifier>runtime</classifier>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<scope>test</scope>
@@ -173,17 +178,43 @@
 			</plugin>
 
 			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<archive>
-						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-					</archive>
+					<source>${jdk.version}</source>
+					<target>${jdk.version}</target>
+					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.version}</version>
 				<executions>
 					<execution>
+						<id>default-instrument</id>
+						<phase>process-classes</phase>
 						<goals>
-							<goal>test-jar</goal>
+							<goal>instrument</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>default-restore-instrumented-classes</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>restore-instrumented-classes</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/coverage.exec</dataFile>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -196,12 +227,14 @@
 						<exclude>**/*.xml</exclude>
 					</excludes>
 					<printSummary>false</printSummary>
+					<systemPropertyVariables>
+						<jacoco-agent.destfile>${project.build.directory}/coverage.exec</jacoco-agent.destfile>
+					</systemPropertyVariables>
 					<systemProperties>
 						<property>
 							<name>dbmanul.defaultlogger.level</name>
 							<value>severe</value>
 						</property>
-
 					</systemProperties>
 				</configuration>
 			</plugin>
@@ -251,6 +284,22 @@
 			</plugin>
 
 			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
@@ -261,12 +310,8 @@
 						</goals>
 						<configuration>
 							<descriptors>
-								<!-- create the distribution archives -->
 								<descriptor>src/main/resources/assembly/bin.xml</descriptor>
 							</descriptors>
-							<!--<archive>
-								<manifestFile>../liquibase-core/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-							</archive>-->
 						</configuration>
 					</execution>
 				</executions>
