@@ -29,8 +29,14 @@ public class Table extends Relation {
         this.setAttribute("primaryKey", primaryKey);
     }
 
+    /**
+     * Returns the list of all outgoing FOREIGN KEYS from this table
+     *
+     * @return
+     */
     public List<ForeignKey> getOutgoingForeignKeys() {
-        return getAttribute("outgoingForeignKeys", List.class);
+        List<ForeignKey> fkList = getAttribute("outgoingForeignKeys", List.class);
+        return ((fkList == null) ? new ArrayList<ForeignKey>(0) : fkList);
     }
 
     public List<Index> getIndexes() {
