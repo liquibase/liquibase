@@ -183,7 +183,7 @@
 							-DartifactId=jconnect -Dversion=16.0.SP02.PL05
 
 					One possible download source is the "SAP Store" at https://store.sap.com where you can search for the
-					term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for �0.00.
+					term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for € 0.00.
 
 					 After that, adjust the driver version number in the following <dependency> tag.
 			 -->
