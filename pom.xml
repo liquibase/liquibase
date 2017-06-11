@@ -82,11 +82,14 @@
 		<org.codehaus.groovy.version>2.4.11</org.codehaus.groovy.version>
 		<org.spockframework.version>1.1-groovy-2.4</org.spockframework.version>
 		<system-rules.version>1.16.0</system-rules.version>
+
+		<!-- Code coverage settings for the combination JaCoCo (offline instrumentation) and SONAR (cloud) -->
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
-		<jacoco.it.execution.data.file>${project.build.directory}/coverage-reports/jacoco-it.exec
-		</jacoco.it.execution.data.file>
-		<jacoco.ut.execution.data.file>${project.build.directory}/coverage-reports/jacoco-ut.exec
-		</jacoco.ut.execution.data.file>
+		<jacoco.ut.execution.data.file>${project.build.directory}/coverage.exec</jacoco.ut.execution.data.file>
+		<jacoco.it.execution.data.file>${project.build.directory}/coverage-it.exec</jacoco.it.execution.data.file>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.organization>dbmanul-github</sonar.organization>
+		<sonar.jacoco.reportPaths>target/coverage.exec,target/coverage-it.exec</sonar.jacoco.reportPaths>
 
 		<!-- JDBC driver versions -->
 		<derby.version>10.13.1.1</derby.version>
@@ -210,13 +213,6 @@
 				<artifactId>powermock-api-mockito</artifactId>
 				<version>${powermock.version}</version>
 				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.jacoco</groupId>
-				<artifactId>org.jacoco.agent</artifactId>
-				<version>${jacoco.version}</version>
-				<classifier>runtime</classifier>
 			</dependency>
 
 			<dependency>
@@ -411,6 +407,12 @@
 				</plugin>
 
 				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+				</plugin>
+
+				<plugin>
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>2.3.1</version>
 				</plugin>
@@ -434,30 +436,18 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<reportFormat>plain</reportFormat>
+						<printSummary>false</printSummary>
 						<skipTests>${skipUTs}</skipTests>
 						<systemPropertyVariables>
-							<jacoco-agent.destfile>${project.build.directory}/coverage.exec</jacoco-agent.destfile>
+							<jacoco-agent.destfile>${jacoco.ut.execution.data.file}</jacoco-agent.destfile>
 						</systemPropertyVariables>
+						<systemProperties>
+							<property>
+								<name>dbmanul.defaultlogger.level</name>
+								<value>severe</value>
+							</property>
+						</systemProperties>
 					</configuration>
-				</plugin>
-
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>${maven-failsafe-plugin.version}</version>
-					<configuration>
-						<skipTests>${skipTests}</skipTests>
-						<skipITs>${skipITs}</skipITs>
-					</configuration>
-					<executions>
-						<execution>
-							<id>integration-test</id>
-							<goals>
-								<goal>integration-test</goal>
-								<goal>verify</goal>
-							</goals>
-						</execution>
-					</executions>
 				</plugin>
 
 				<plugin>
@@ -607,6 +597,7 @@
 
 			</plugins>
 		</pluginManagement>
+
 	</build>
 
 	<distributionManagement>
@@ -708,6 +699,36 @@
 							<execution>
 								<goals>
 									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>sonar</id>
+			<!-- This is the JaCoCo setup offline instrumentation for all production classes. -->
+			<dependencies>
+				<dependency>
+					<groupId>org.jacoco</groupId>
+					<artifactId>org.jacoco.agent</artifactId>
+					<classifier>runtime</classifier>
+					<version>${jacoco.version}</version>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>unit-test-instrument</id>
+								<phase>process-classes</phase>
+								<goals>
+									<goal>instrument</goal>
 								</goals>
 							</execution>
 						</executions>
