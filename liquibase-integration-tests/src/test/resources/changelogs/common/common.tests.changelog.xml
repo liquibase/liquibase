@@ -1071,11 +1071,45 @@
             <arg value="-n"/>
             <arg value="1"/>
         </executeCommand>
-        <executeCommand executable="/bin/ls" os="Linux, Mac OS X, SunOS, FreeBSD">
-            <arg value="*nothing_at_all*"/>
-        </executeCommand>
-        <executeCommand executable="/usr/bin/ls" os="SunOS">
-            <arg value="*nothing_at_all*"/>
-        </executeCommand>
+        <executeCommand executable="/bin/ls" os="Linux, Mac OS X, SunOS, FreeBSD"/>
+        <executeCommand executable="/usr/bin/ls" os="SunOS"/>
     </changeSet>
+
+    <changeSet id="drop_all_foreign_keys" author="abuschka" dbms="!sqlite">
+        <createTable tableName="father_table1">
+            <column name="some_key" type="int">
+                <constraints primaryKey="true" primaryKeyName="pk_father1"/>
+            </column>
+            <column name="some_value" type="varchar(200)"/>
+        </createTable>
+        <createTable tableName="father_table2">
+            <column name="some_key" type="int">
+                <constraints primaryKey="true" primaryKeyName="pk_father2"/>
+            </column>
+            <column name="some_value" type="varchar(200)"/>
+        </createTable>
+        <createTable tableName="child_table">
+            <column name="ref1" type="int">
+                <constraints foreignKeyName="fk_ref1" referencedTableName="father_table1"
+                             referencedColumnNames="some_key"/>
+            </column>
+            <column name="ref2" type="int">
+                <constraints foreignKeyName="fk_ref2" referencedTableName="father_table2"
+                             referencedColumnNames="some_key"/>
+            </column>
+        </createTable>
+        <dropAllForeignKeyConstraints baseTableName="child_table"/>
+    </changeSet>
+
+    <changeSet id="verify_drop_all_foreign_keys" author="abuschka" dbms="!sqlite">
+        <preConditions>
+            <not>
+                <or>
+                    <foreignKeyConstraintExists foreignKeyName="fk_ref1" foreignKeyTableName="child_table"/>
+                    <foreignKeyConstraintExists foreignKeyName="fk_ref2" foreignKeyTableName="child_table"/>
+                </or>
+            </not>
+        </preConditions>
+    </changeSet>
+
 </databaseChangeLog>
