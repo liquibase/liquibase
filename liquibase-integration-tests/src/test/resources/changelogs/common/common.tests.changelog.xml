@@ -1064,4 +1064,18 @@
             <column name="timestampColumnPrec9" type="timestamp(9)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="windows_execute_command_test" author="abuschka">
+        <executeCommand executable="ping.exe" os="Windows Vista, Windows 7, Windows 8, Windows 8.1, Windows 10">
+            <arg value="127.0.0.1"/>
+            <arg value="-n"/>
+            <arg value="1"/>
+        </executeCommand>
+        <executeCommand executable="/bin/ls" os="Linux, Mac OS X, SunOS, FreeBSD">
+            <arg value="*nothing_at_all*"/>
+        </executeCommand>
+        <executeCommand executable="/usr/bin/ls" os="SunOS">
+            <arg value="*nothing_at_all*"/>
+        </executeCommand>
+    </changeSet>
 </databaseChangeLog>

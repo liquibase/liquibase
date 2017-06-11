@@ -209,6 +209,8 @@ public class StandardLockService implements LockService {
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
+                    // Restore thread interrupt status
+                    Thread.currentThread().interrupt();
                 }
             }
         }

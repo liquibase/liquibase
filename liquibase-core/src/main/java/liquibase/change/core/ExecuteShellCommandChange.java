@@ -179,6 +179,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
             outputGobbler.finish();
 
         } catch (InterruptedException e) {
+            // Restore thread interrupt status
+            Thread.currentThread().interrupt();
         }
 
         String errorStreamOut = errorStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
@@ -268,7 +270,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     }
                     try {
                         Thread.sleep(THREAD_SLEEP_MILLIS);
-                    } catch (InterruptedException ignore) {
+                    } catch (InterruptedException e) {
+                        // Restore thread interrupt status
+                        Thread.currentThread().interrupt();
                     }
                 }
             } catch (IOException ioe) {
