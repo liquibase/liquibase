@@ -17,15 +17,14 @@ import java.sql.Driver;
 import java.util.*;
 
 public class DatabaseFactory {
+    private static final Logger LOG = LogFactory.getInstance().getLog();
     private static DatabaseFactory instance;
     private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
     private Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
-    private Logger log;
 
     private DatabaseFactory() {
-        log = new LogFactory().getLog();
         try {
-            Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
+            Class<? extends Database>[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
             for (Class<? extends Database> clazz : classes) {
                 try {
@@ -113,7 +112,7 @@ public class DatabaseFactory {
         }
 
         if (foundDatabases.size() == 0) {
-            log.warning("Unknown database: " + connection.getDatabaseProductName());
+            LOG.warning("Unknown database: " + connection.getDatabaseProductName());
             UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
             unsupportedDB.setConnection(connection);
             return unsupportedDB;
@@ -166,8 +165,11 @@ public class DatabaseFactory {
                                              String driverPropertiesFile,
                                              String propertyProviderClass,
                                              ResourceAccessor resourceAccessor) throws DatabaseException {
+
         if (url.startsWith("offline:")) {
-            return new OfflineConnection(url, resourceAccessor);
+            OfflineConnection offlineConnection = new OfflineConnection(url, resourceAccessor);
+            offlineConnection.setConnectionUserName(username);
+            return offlineConnection;
         }
 
         driver = StringUtils.trimToNull(driver);
@@ -213,7 +215,9 @@ public class DatabaseFactory {
             if (null != driverPropertiesFile) {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
-//                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
+                    LOG.debug(
+                            "Loading properties from the file:'" + driverPropertiesFile + "'"
+                    );
                     FileInputStream inputStream = new FileInputStream(propertiesFile);
                     try {
                         driverProperties.load(inputStream);
@@ -227,15 +231,15 @@ public class DatabaseFactory {
             }
 
 
-//            System.out.println("Properties:");
-//            for (Map.Entry entry : driverProperties.entrySet()) {
-//                System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
-//            }
+            LOG.debug("Properties:");
+            for (Map.Entry entry : driverProperties.entrySet()) {
+                LOG.debug("Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+            }
 
 
-//            System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
+            LOG.debug("Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
             Connection connection = driverObject.connect(url, driverProperties);
-//            System.out.println("Connection has been created");
+            LOG.debug("Connection has been created");
             if (connection == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
@@ -246,6 +250,13 @@ public class DatabaseFactory {
         }
     }
 
+    /**
+     * Returns the Java class name of the JDBC driver class (e.g. "org.mariadb.jdbc.Driver")
+     * for the specified JDBC URL, if any Database class supports that URL.
+     *
+     * @param url the JDBC URL to analyse
+     * @return a Database object supporting the URL. May also return null if the JDBC URL is unknown to all handlers.
+     */
     public String findDefaultDriver(String url) {
         for (Database database : this.getImplementedDatabases()) {
             String defaultDriver = database.getDefaultDriver(url);

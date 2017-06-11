@@ -6,6 +6,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.jvm.SybaseASAConnection;
 import liquibase.exception.DatabaseException;
@@ -197,14 +198,15 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	@Override
 	protected String getConnectionSchemaName() {
 		try {
-			Connection connection = ((JdbcConnection)getConnection()).getWrappedConnection();
-			if (connection == null) {
-				return null;
-			}
-			return connection.getMetaData().getUserName();
-		} catch (SQLException e) {
-			throw new UnexpectedLiquibaseException(e);
-		}
+            if (getConnection() instanceof OfflineConnection) {
+                return "dba";
+            } else {
+                Connection connection = ((JdbcConnection) getConnection()).getWrappedConnection();
+                return (connection == null ? null : connection.getMetaData().getUserName());
+            }
+        } catch (SQLException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
 	}
 
 	@Override
@@ -294,9 +296,14 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 
     @Override
 	public void setConnection(DatabaseConnection conn) {
-		DatabaseConnection dbConn = new SybaseASAConnection(
-				((JdbcConnection) conn).getWrappedConnection()
-				);
-		super.setConnection(dbConn);
-	}
+        DatabaseConnection dbConn;
+        if (conn instanceof JdbcConnection) {
+            // If conn is a real connection (JDBC), wrap it to prevent a driver bug
+            // (see SysbaseASAConnection for details)
+            dbConn = new SybaseASAConnection(((JdbcConnection) conn).getWrappedConnection());
+        } else {
+            dbConn = conn;
+        }
+        super.setConnection(dbConn);
+    }
 }
