@@ -16,6 +16,7 @@
 	<properties>
 		<bundle.namespace>dbmanul.*</bundle.namespace>
 		<project.version>${project.version}-SNP</project.version>
+		<sonar.tests>src/test/groovy,src/test/java</sonar.tests>
 	</properties>
 
 	<dependencies>
