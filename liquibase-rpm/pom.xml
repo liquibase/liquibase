@@ -2,20 +2,6 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.dbmanul</groupId>
-	<artifactId>dbmanul-rpm</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<url>http://www.dbmanul.org/</url>
-
-	<name>DB-Manul RPM Package</name>
-	<description>DB-Manul is a change management system for databases built on the work of Liquibase
-		(http://www.liquibase.org).
-	</description>
-	<organization>
-		<name>dbmanul.org</name>
-		<url>http://www.dbmanul.org</url>
-	</organization>
 
 	<parent>
 		<groupId>org.dbmanul</groupId>
@@ -23,17 +9,28 @@
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
 
+	<artifactId>dbmanul-rpm</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>DB-Manul RPM Package</name>
+	<description>DB-Manul is a change management system for databases built on the work of Liquibase
+		(http://www.liquibase.org).
+	</description>
+
+	<url>http://www.dbmanul.org/</url>
+
+	<organization>
+		<name>dbmanul.org</name>
+		<url>http://www.dbmanul.org</url>
+	</organization>
+
 	<licenses>
 		<license>
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 			<name>Apache License, Version 2.0</name>
 		</license>
 	</licenses>
-
-	<properties>
-		<!-- No longer needed when parent POM is included -->
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 
 	<developers>
 		<developer>
@@ -51,6 +48,11 @@
 			<url>https://github.com/adriens</url>
 		</developer>
 	</developers>
+
+	<properties>
+		<!-- No longer needed when parent POM is included -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<dependencies>
 		<dependency>
