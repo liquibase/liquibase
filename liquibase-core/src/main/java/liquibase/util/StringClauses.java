@@ -1,6 +1,7 @@
 package liquibase.util;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -16,8 +17,8 @@ public class StringClauses {
     private final String separator;
     private final String start;
     private final String end;
+    private final Random random = new SecureRandom();
     private LinkedHashMap<String, Object> clauses = new LinkedHashMap<>();
-    private final Random random = new Random();
 
     /**
      * Creates a new StringClause with no start or end strings and a space separator.
@@ -505,7 +506,7 @@ public class StringClauses {
         return true;
     }
 
-    public static interface LiteralClause {
+    public interface LiteralClause {
         String toString();
     }
 
@@ -550,8 +551,8 @@ public class StringClauses {
 
     public static class ClauseIterator implements Iterator {
 
-        private ListIterator<String> keyIterator;
         private final LinkedHashMap<String, Object> clauses;
+        private ListIterator<String> keyIterator;
 
         public ClauseIterator(LinkedHashMap<String, Object> clauses) {
             this.keyIterator = new ArrayList(clauses.keySet()).listIterator();
