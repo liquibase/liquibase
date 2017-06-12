@@ -85,11 +85,11 @@
 
 		<!-- Code coverage settings for the combination JaCoCo (offline instrumentation) and SONAR (cloud) -->
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
-		<jacoco.ut.execution.data.file>${project.build.directory}/coverage.exec</jacoco.ut.execution.data.file>
+		<jacoco.ut.execution.data.file>${project.basedir}/../target/coverage.exec</jacoco.ut.execution.data.file>
 		<jacoco.it.execution.data.file>${project.basedir}/../target/coverage-it.exec</jacoco.it.execution.data.file>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dbmanul</sonar.organization>
-		<sonar.jacoco.reportPaths>target/coverage.exec,../target/coverage-it.exec</sonar.jacoco.reportPaths>
+		<sonar.jacoco.reportPaths>../target/coverage.exec,../target/coverage-it.exec</sonar.jacoco.reportPaths>
 
 		<!-- JDBC driver versions -->
 		<derby.version>10.13.1.1</derby.version>
