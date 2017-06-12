@@ -24,9 +24,31 @@
 		</license>
 	</licenses>
 
-	<issueManagement>
-		<url>dbmanul.atlassian.net</url>
-	</issueManagement>
+	<developers>
+		<developer>
+			<id>stupiddog1979</id>
+			<name>Andreas Buschka</name>
+			<email>andreas.buschka@dbmanul.org</email>
+			<url>http://dbmanul.org</url>
+			<organizationUrl>http://dbmanul.org</organizationUrl>
+			<roles>
+				<role>developer</role>
+				<role>maintainer</role>
+			</roles>
+			<timezone>Europe/Berlin</timezone>
+		</developer>
+	</developers>
+
+	<prerequisites>
+		<maven>3.0</maven>
+	</prerequisites>
+
+	<modules>
+		<module>liquibase-core</module>
+		<module>liquibase-maven-plugin</module>
+		<module>liquibase-cdi</module>
+		<module>liquibase-integration-tests</module>
+	</modules>
 
 	<scm>
 		<connection>scm:git:git@github.com:dbmanul/dbmanul.git</connection>
@@ -35,20 +57,28 @@
 		<tag>HEAD</tag>
 	</scm>
 
-	<developers>
-		<developer>
-			<id>abuschka</id>
-			<name>Andreas Buschka</name>
-			<email>andreas.buschka@dbmanul.org</email>
-			<url>http://dbmanul.org</url>
-			<organizationUrl>http://dbmanul.org</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>Europe/Berlin</timezone>
-		</developer>
-	</developers>
+	<issueManagement>
+		<system>JIRA</system>
+		<url>dbmanul.atlassian.net</url>
+	</issueManagement>
+
+	<ciManagement>
+		<system>CircleCI</system>
+		<url>https://circleci.com/gh/dbmanul/dbmanul/tree/master</url>
+	</ciManagement>
+
+	<distributionManagement>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Sonatype Production Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+		</repository>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sontatype Snapshot Repository</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<properties>
 		<jdk.version>1.8</jdk.version>
@@ -84,7 +114,7 @@
 		<system-rules.version>1.16.0</system-rules.version>
 
 		<!-- Code coverage settings for the combination JaCoCo (offline instrumentation) and SONAR (cloud) -->
-		<jacoco.version>0.7.7.201606060606</jacoco.version>
+		<jacoco.version>0.7.9</jacoco.version>
 		<jacoco.ut.execution.data.file>${project.basedir}/../target/coverage.exec</jacoco.ut.execution.data.file>
 		<jacoco.it.execution.data.file>${project.basedir}/../target/coverage-it.exec</jacoco.it.execution.data.file>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -102,13 +132,6 @@
 		<com.h2database.version>1.4.195</com.h2database.version>
 
 	</properties>
-
-	<modules>
-		<module>liquibase-core</module>
-		<module>liquibase-maven-plugin</module>
-		<module>liquibase-cdi</module>
-		<module>liquibase-integration-tests</module>
-	</modules>
 
 	<dependencyManagement>
 		<dependencies>
@@ -599,19 +622,6 @@
 		</pluginManagement>
 
 	</build>
-
-	<distributionManagement>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Sonatype Production Repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-		<snapshotRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sontatype Snapshot Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<profiles>
 		<profile>
