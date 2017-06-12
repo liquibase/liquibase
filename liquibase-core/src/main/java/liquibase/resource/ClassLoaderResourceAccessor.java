@@ -84,12 +84,16 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
                 zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
-                if (path.startsWith("classpath:")) {
+                /*if (path.startsWith("classpath:")) {
                     path = path.replaceFirst("classpath:", "");
                 }
                 if (path.startsWith("classpath*:")) {
                     path = path.replaceFirst("classpath\\*:", "");
-                }
+                }*/
+                
+                path = zipAndFile[1].replaceFirst("/", "");
+                if (zipAndFile.length==3) path = path + zipAndFile[2]; 
+                
 
                 // TODO:When we update to Java 7+, we can can create a FileSystem from the JAR (zip)
                 // file, and then use NIO's directory walking and filtering mechanisms to search through it.
