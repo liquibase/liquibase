@@ -86,7 +86,7 @@
 		<!-- Code coverage settings for the combination JaCoCo (offline instrumentation) and SONAR (cloud) -->
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
 		<jacoco.ut.execution.data.file>${project.build.directory}/coverage.exec</jacoco.ut.execution.data.file>
-		<jacoco.it.execution.data.file>${session.executionRootDirectory}/target/coverage-it.exec</jacoco.it.execution.data.file>
+		<jacoco.it.execution.data.file>${project.basedir}/../target/coverage-it.exec</jacoco.it.execution.data.file>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>dbmanul</sonar.organization>
 		<sonar.jacoco.reportPaths>target/coverage.exec,target/coverage-it.exec</sonar.jacoco.reportPaths>
@@ -733,6 +733,29 @@
 							</execution>
 						</executions>
 					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>mkdir-target</id>
+								<inherited>false</inherited>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<!-- Safety -->
+										<mkdir dir="${project.build.directory}"/>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
 				</plugins>
 			</build>
 		</profile>
