@@ -45,7 +45,7 @@ public class CheckSumTest {
     @Test
     public void compute_Stream() {
         String valueToHash = "asdf";
-        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
+        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()));
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertFalse(checkSum.toString().equals(valueToHash));
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
@@ -80,9 +80,17 @@ public class CheckSumTest {
 
         assertFalse(checkSum.equals(CheckSum.compute("a string\n\nwith\n\nlines").toString()));
 
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\nwith\nlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\rlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\nwith\r\nlines".getBytes()), true).toString());
-        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\r\nlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.computeWithEolStandardization(
+            new ByteArrayInputStream("a string\nwith\nlines".getBytes())).toString()
+        );
+        assertEquals(checkSum, CheckSum.computeWithEolStandardization(
+            new ByteArrayInputStream("a string\rwith\rlines".getBytes())).toString()
+        );
+        assertEquals(checkSum, CheckSum.computeWithEolStandardization(
+            new ByteArrayInputStream("a string\r\nwith\r\nlines".getBytes())).toString()
+        );
+        assertEquals(checkSum, CheckSum.computeWithEolStandardization(
+            new ByteArrayInputStream("a string\rwith\r\nlines".getBytes())
+        ).toString());
     }
 }

@@ -175,10 +175,16 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes(LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()));
+                stream = new ByteArrayInputStream(
+                    sql.getBytes(
+                        LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class)
+                        .getOutputEncoding()
+                    )
+                );
             }
 
-            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(),
+                this.isStripComments(), stream));
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {
@@ -222,8 +228,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                     escapedStatement = database.getConnection().nativeSQL(statement);
                 }
             } catch (DatabaseException e) {
-				escapedStatement = statement;
-			}
+                escapedStatement = statement;
+            }
 
             returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
         }
@@ -249,21 +255,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected String normalizeLineEndings(String string) {
         return string.replace("\r", "");
     }
-
-//    @Override
-//    public Set<String> getSerializableFields() {
-//        Set<String> fieldsToSerialize = new HashSet<String>(super.getSerializableFields());
-//        fieldsToSerialize.add("splitStatements");
-//        fieldsToSerialize.add("stripComments");
-//        return Collections.unmodifiableSet(fieldsToSerialize);
-//    }
-//
-//    @Override
-//    public Object getSerializableFieldValue(String field) {
-//        if (field.equals("splitStatements")) {
-//            return isSplitStatements();
-//        }
-//    }
 
     public static class NormalizingStream extends InputStream {
         private ByteArrayInputStream headerStream;
