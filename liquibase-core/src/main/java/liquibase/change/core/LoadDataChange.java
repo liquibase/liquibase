@@ -66,7 +66,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
 
-    private Boolean usePreparedStatements = false;
+    private Boolean usePreparedStatements;
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
