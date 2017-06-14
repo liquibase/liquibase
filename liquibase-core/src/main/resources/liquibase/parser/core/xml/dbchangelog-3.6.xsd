@@ -561,7 +561,7 @@
             <xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attribute name="file" type="xsd:string" />
 			<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-			<xsd:attribute name="usePreparedStatement" type="booleanExp" />
+			<xsd:attribute name="usePreparedStatements" type="booleanExp" />
 			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
 			<xsd:attribute name="separator" type="xsd:string" default=","/>
 			<xsd:attribute name="quotchar" type="xsd:string" default="&quot;"/>

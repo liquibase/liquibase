@@ -66,7 +66,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private String separator = liquibase.util.csv.CSVReader.DEFAULT_SEPARATOR + "";
     private String quotchar = liquibase.util.csv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
 
-    private Boolean usePreparedStatement = false;
+    private Boolean usePreparedStatements = false;
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
@@ -116,12 +116,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.file = file;
     }
 
-    public Boolean getUsePreparedStatement() {
-        return usePreparedStatement;
+    public Boolean getUsePreparedStatements() {
+        return usePreparedStatements;
     }
 
-    public void setUsePreparedStatement(Boolean usePreparedStatement) {
-        this.usePreparedStatement = usePreparedStatement;
+    public void setUsePreparedStatements(Boolean usePreparedStatements) {
+        this.usePreparedStatements = usePreparedStatements;
     }
 
     public String getCommentLineStartsWith() {
@@ -231,7 +231,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
 
                 boolean needsPreparedStatement = false;
-                if (usePreparedStatement != null && usePreparedStatement) {
+                if (usePreparedStatements != null && usePreparedStatements) {
                     needsPreparedStatement = true;
                 }
 
