@@ -987,7 +987,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     Database database = JdbcDatabaseSnapshot.this.getDatabase();
                     String sql;
-                    if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
+                    if( database instanceof Ingres9Database ) {
+                        sql = "select CONSTRAINT_NAME, TABLE_NAME from iiconstraints where schema_name ='"
+                                + schemaName + "' and constraint_type='U'";
+                        if (tableName != null) {
+                            sql += " and table_name='" + tableName + "'";
+                        }
+                    } else if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".table_constraints "
                                 + "where constraint_schema='" + jdbcCatalogName + "' "

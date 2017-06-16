@@ -291,6 +291,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         "and sysconstraint.table_object_id = systable.object_id " +
                         "and sysconstraint.constraint_name = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
                         "and systable.table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
+            } else if(database instanceof Ingres9Database) {
+                sql = "select constraint_name, column_name " +
+                        "from iikeys " +
+                        "where constraint_name = '" + database.correctObjectName(name, UniqueConstraint.class) + "' " +
+                        "and table_name = '" + database.correctObjectName(example.getTable().getName(), Table.class) + "'";
             } else {
                 String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
                 String schemaName = database.correctObjectName(schema.getName(), Schema.class);
