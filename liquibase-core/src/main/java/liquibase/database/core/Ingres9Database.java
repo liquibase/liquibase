@@ -76,7 +76,7 @@ public class Ingres9Database extends AbstractJdbcDatabase {
 
     @Override
     public String getShortName() {
-        return PRODUCT_NAME;
+        return "ingres";
     }
 
     @Override
