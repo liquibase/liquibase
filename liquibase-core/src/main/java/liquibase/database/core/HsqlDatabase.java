@@ -398,6 +398,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "START",
             "STATIC",
             "SUBMULTISET",
+            "SUM",
             "SYMMETRIC",
             "SYSTEM",
             "SYSTEM_USER",
