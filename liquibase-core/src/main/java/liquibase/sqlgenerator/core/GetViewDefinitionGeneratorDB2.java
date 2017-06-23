@@ -24,6 +24,11 @@ public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 
+        if ((database instanceof DB2Database) && ((DB2Database)database).isZOS()) {
+            return new Sql[] {
+                    new UnparsedSql("select STATEMENT AS view_definition from SYSIBM.SYSVIEWS where NAME='" + statement.getViewName() + "' and PATHSCHEMAS LIKE '%" + schema.getSchemaName() + "%'")
+            };        	
+        }
         return new Sql[] {
                     new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + schema.getSchemaName() + "'")
             };
