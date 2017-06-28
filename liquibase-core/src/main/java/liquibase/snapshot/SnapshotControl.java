@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -14,6 +15,7 @@ import java.util.*;
 public class SnapshotControl implements LiquibaseSerializable {
 
     private Set<Class<? extends DatabaseObject>> types;
+    private ObjectChangeFilter objectChangeFilter;
     private SnapshotListener snapshotListener;
 
     public SnapshotControl(Database database) {
@@ -38,6 +40,12 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     public SnapshotControl(Database database, String types) {
         setTypes(DatabaseObjectFactory.getInstance().parseTypes(types), database);
+    }
+
+    public SnapshotControl(Database database, ObjectChangeFilter objectChangeFilter, Class<? extends DatabaseObject>... types) {
+        this(database, true, types);
+
+        this.objectChangeFilter = objectChangeFilter;
     }
 
     public SnapshotListener getSnapshotListener() {
@@ -127,4 +135,10 @@ public class SnapshotControl implements LiquibaseSerializable {
         throw new RuntimeException("TODO");
     }
 
+    public <T extends DatabaseObject> boolean shouldInclude(T example) {
+        if (objectChangeFilter != null) {
+            return objectChangeFilter.include(example);
+        }
+        return shouldInclude(example.getClass());
+    }
 }
