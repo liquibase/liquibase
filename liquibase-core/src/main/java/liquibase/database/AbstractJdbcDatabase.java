@@ -1563,4 +1563,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public boolean supportsNotNullConstraintNames() {
         return false;
     }
+
+    @Override
+    public boolean requiresExplicitNullForColumns() {
+        return false;
+    }
 }

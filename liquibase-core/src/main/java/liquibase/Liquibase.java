@@ -57,11 +57,10 @@ import java.util.*;
  */
 public class Liquibase {
 
+    protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
     private ResourceAccessor resourceAccessor;
-
-    protected Database database;
     private Logger log;
 
     private ChangeLogParameters changeLogParameters;
@@ -186,7 +185,7 @@ public class Liquibase {
     }
 
     public void update(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
-    	update(contexts, labelExpression, true);
+        update(contexts, labelExpression, true);
     }
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
@@ -252,11 +251,11 @@ public class Liquibase {
     }
 
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        update(contexts, labelExpression, output, true);	
+        update(contexts, labelExpression, output, true);
     }
     
-    public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables) 
-    		throws LiquibaseException {
+    public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
+            throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -1487,12 +1486,12 @@ public class Liquibase {
         this.changeLogSyncListener = changeLogSyncListener;
     }
 
-    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
-        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
-    }
-
     public boolean isIgnoreClasspathPrefix() {
         return ignoreClasspathPrefix;
+    }
+
+    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
+        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
     }
 
     public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter, PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes) throws DatabaseException, IOException, ParserConfigurationException {

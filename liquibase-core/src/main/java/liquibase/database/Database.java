@@ -410,6 +410,14 @@ public interface Database extends PrioritizedService {
      */
     boolean supportsBatchUpdates() throws DatabaseException;
 
+    /**
+     * Does the database require explicit NULL for nullable columns?
+     *
+     * @return true if the database behaves incorrectly if NULL is not explicitly specified,
+     * false if it behaves like any good RDBMS should.
+     */
+    boolean requiresExplicitNullForColumns();
+
     String getSystemSchema();
 
     void addReservedWords(Collection<String> words);

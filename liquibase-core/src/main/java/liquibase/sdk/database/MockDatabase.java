@@ -104,11 +104,11 @@ public class MockDatabase implements Database, InternalDatabase {
         return null;
     }
 
-    @Override
-    public void setConnection(final DatabaseConnection conn) {
+    public void setConnection(final Connection conn) {
     }
 
-    public void setConnection(final Connection conn) {
+    @Override
+    public void setConnection(final DatabaseConnection conn) {
     }
 
     @Override
@@ -782,4 +782,8 @@ public class MockDatabase implements Database, InternalDatabase {
         return 6;
     }
 
+    @Override
+    public boolean requiresExplicitNullForColumns() {
+        return false;
+    }
 }

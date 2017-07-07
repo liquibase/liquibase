@@ -48,6 +48,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -62,11 +63,14 @@ import static org.junit.Assume.assumeNotNull;
  */
 public abstract class AbstractIntegrationTest {
 
+    @Rule
+    public TemporaryFolder tempDirectory = new TemporaryFolder();
     protected String completeChangeLog;
     protected String contexts = "test, context-b";
     protected String username;
     protected String password;
     Set<String> emptySchemas = new TreeSet<>();
+    Logger logger;
     private String rollbackChangeLog;
     private String includedChangeLog;
     private String encodingChangeLog;
@@ -77,10 +81,6 @@ public abstract class AbstractIntegrationTest {
     private String objectQuotingStrategyChangeLog;
     private Database database;
     private String jdbcUrl;
-    Logger logger;
-
-    @Rule
-    public TemporaryFolder tempDirectory = new TemporaryFolder();
 
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -322,7 +322,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void batchInsert() throws LiquibaseException, Exception {
+    public void batchInsert() throws Exception {
         if (this.getDatabase() == null) {
             return;
         }
@@ -389,6 +389,8 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
 
+        String nullableKeyword = database.requiresExplicitNullForColumns() ? " NULL" : "";
+
         String sql = "CREATE TABLE " +
                 database.escapeTableName(
                         database.getDefaultCatalogName(), database.getDefaultSchemaName(), "DATABASECHANGELOG"
@@ -400,16 +402,20 @@ public abstract class AbstractIntegrationTest {
                 DataTypeFactory.getInstance().fromDescription(
                         "datetime", database
                 ).toDatabaseDataType(database) + " NOT NULL, " +
-                "md5sum VARCHAR(32) NULL, " +
-                "description VARCHAR(255) NULL, " +
-                "comments VARCHAR(255) NULL, " +
-                "tag VARCHAR(255) NULL, " +
-                "liquibase VARCHAR(10) NULL, " +
+                "md5sum VARCHAR(32)" + nullableKeyword + "," +
+                "description VARCHAR(255)" + nullableKeyword + "," +
+                "comments VARCHAR(255)" + nullableKeyword + "," +
+                "tag VARCHAR(255)" + nullableKeyword + "," +
+                "liquibase VARCHAR(10)" + nullableKeyword + "," +
                 "PRIMARY KEY(id, author, filename))";
         LogFactory.getInstance().getLog().sql(sql);
 
-        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute(sql);
-        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().commit();
+        Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+        boolean savedAcSetting = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+        conn.createStatement().execute(sql);
+        conn.commit();
+        conn.setAutoCommit(savedAcSetting);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());

@@ -26,11 +26,6 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<>();
 
-    @Override
-    public String getShortName() {
-        return "sybase";
-    }
-
     public SybaseDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
         systemTablesAndViews.add("syscolumns");
@@ -59,6 +54,11 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         super.quotingStartCharacter ="[";
         super.quotingEndCharacter="]";
 
+    }
+
+    @Override
+    public String getShortName() {
+        return "sybase";
     }
 
 /*    public void setConnection(Connection connection) {
@@ -302,5 +302,15 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return objectName;
         }
         return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+    }
+
+    @Override
+    public boolean requiresExplicitNullForColumns() {
+        /* SAP Adaptive Server Enterprise and, by extension, SQL Anywhere in ASE compatiblity mode have the
+         * strange requirement of setting the nullability of a column to NOT NULL if neither NULL nor
+         * NOT NULL are specified. See:
+         * http://dcx.sap.com/index.html#sqla170/en/html/819378356ce21014a17f8d51529119ee.html
+         */
+        return true;
     }
 }
