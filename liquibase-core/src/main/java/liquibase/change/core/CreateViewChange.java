@@ -195,7 +195,7 @@ public class CreateViewChange extends AbstractChange {
 				}
 			}
 
-			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
+			CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream));
 
 			return CheckSum.compute(super.generateCheckSum().toString() + ":" + checkSum.toString());
 		} finally {

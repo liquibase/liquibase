@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
@@ -20,9 +21,39 @@ import java.util.List;
  * Adds a not-null constraint to an existing column.
  */
 @DatabaseChange(name="addNotNullConstraint",
-        description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to the passed value before the constraint is applied.",
-        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+                description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is " +
+                "passed, all null values for the column will be updated to the passed value before the constraint " +
+                "is applied.",
+                priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddNotNullConstraintChange extends AbstractChange {
+
+    class SQLiteAlterTableVisitor implements AlterTableVisitor {
+        @Override
+        public ColumnConfig[] getColumnsToAdd() {
+            return new ColumnConfig[0];
+        }
+    
+        @Override
+        public boolean copyThisColumn(ColumnConfig column) {
+            return true;
+        }
+    
+        @Override
+        public boolean createThisColumn(ColumnConfig column) {
+            if (column.getName().equals(getColumnName())) {
+                column.getConstraints().setNullable(false);
+            }
+            return true;
+        }
+    
+        @Override
+        public boolean createThisIndex(Index index) {
+            return true;
+        }
+    
+    }
+
+
     private String catalogName;
     private String schemaName;
     private String tableName;
@@ -30,156 +61,128 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String defaultNullValue;
     private String columnDataType;
     private String constraintName;
-
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
+    
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
-
+    
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
     }
-
+    
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
-
+    
     public void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
     }
-
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to the passed value before the constraint is applied.")
+    
+    @DatabaseChangeProperty(description = "Adds a not-null constraint to an " +
+     "existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to " +
+     "the passed value before the constraint is applied.", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
-
+    
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation.column", description = "Name of the column to add the constraint to")
+    
+    @DatabaseChangeProperty(description = "Name of the column to add the constraint to",
+        mustEqualExisting = "column.relation.column")
     public String getColumnName() {
         return columnName;
     }
-
+    
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
-
-    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail if null values exist")
+    
+    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail " +
+     "if null values exist")
     public String getDefaultNullValue() {
         return defaultNullValue;
     }
-
+    
     public void setDefaultNullValue(String defaultNullValue) {
         this.defaultNullValue = defaultNullValue;
     }
-
+    
     @DatabaseChangeProperty(description = "Current data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }
-
+    
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
     }
-
-    @DatabaseChangeProperty(description = "Created constraint name (if database supports names for NOT NULL constraints)")
+    
+    @DatabaseChangeProperty(description = "Created constraint name (if database supports names for NOT NULL " +
+     "constraints)")
     public String getConstraintName() {
         return constraintName;
     }
-
+    
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
     }
-
+    
     @Override
     public SqlStatement[] generateStatements(Database database) {
-    	List<SqlStatement> statements = new ArrayList<>();
-
+        List<SqlStatement> statements = new ArrayList<>();
+        
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
-                    .addNewColumnValue(getColumnName(), defaultNullValue)
-                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
+                                   .addNewColumnValue(getColumnName(), defaultNullValue)
+                                   .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) +
+                                   " IS NULL"));
         }
         
-    	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false, getConstraintName()));
+        statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(),
+            getColumnDataType(), false, getConstraintName()));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-        }           
+        }
         
         return statements.toArray(new SqlStatement[statements.size()]);
     }
-
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    	
-    	List<SqlStatement> statements = new ArrayList<>();
-    	
+    
+    // TODO Please do not remove this, I intend to restore SQLite support for this operation shortly.
+    @SuppressWarnings("squid:UnusedPrivateMethod")
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) throws DatabaseException {
+    
+        // SQLite does not support this ALTER TABLE operation until now.
+        // For more information see: http://www.sqlite.org/omitted.html.
+        // This is a small work around...
+    
+        List<SqlStatement> statements = new ArrayList<>();
+    
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
-                    .addNewColumnValue(getColumnName(), getDefaultNullValue())
-                    .setWhereClause(getColumnName() + " IS NULL"));
+            statements.add(
+                new UpdateStatement(
+                    getCatalogName(), getSchemaName(),
+                    getTableName()
+                ).addNewColumnValue(
+                    getColumnName(), getDefaultNullValue()).setWhereClause(getColumnName() + " IS NULL")
+            );
         }
-
-//		// ... test if column contains NULL values
-//		if (defaultNullValue == null) {
-//			List<Map> null_rows = null;
-//			try {
-//				null_rows = database.getExecutor().
-//					queryForList(new RawSqlStatement(
-//						"SELECT * FROM `"+
-//						database.escapeTableName(getSchemaName(), getTableName())+
-//						"` WHERE `"+getColumnName()+"` IS NULL;"));
-//			} catch (DatabaseException e) {
-//				e.printStackTrace();
-//			}
-//    		if (null_rows.size()>0) {
-//    			throw new UnsupportedChangeException(
-//    					"Failed to add a Not-Null-Constraint because " +
-//    					"some values are null. Use the " +
-//    					"defaultNullValue attribute to define default " +
-//    					"values for the existing null values.");
-//    		}
-//    	}
-		
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			@Override
-            public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			@Override
-            public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			@Override
-            public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getColumnName())) {
-					column.getConstraints().setNullable(false);
-				}
-				return true;
-			}
-			@Override
-            public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-		try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
-    	} catch (Exception e) {
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+    
+        // define alter table logic
+        AlterTableVisitor renameAlterVisitor = new SQLiteAlterTableVisitor();
+    
+        // alter table
+        statements.addAll(
+            SQLiteDatabase.getAlterTableStatements(
+                renameAlterVisitor, database, getCatalogName(), getSchemaName(), getTableName()
+            )
+        );
+    
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
-
+    
     @Override
     protected Change[] createInverses() {
         DropNotNullConstraintChange inverse = new DropNotNullConstraintChange();
@@ -187,21 +190,23 @@ public class AddNotNullConstraintChange extends AbstractChange {
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setColumnDataType(getColumnDataType());
-
+        
         return new Change[]{
                 inverse
         };
     }
-
+    
     @Override
     public String getConfirmationMessage() {
-        return "NOT NULL constraint "
-                + (StringUtils.trimToNull(getConstraintName()) != null ? String.format("\"%s\" ", getConstraintName()) : "" )
-                 + "has been added to " + getTableName() + "." + getColumnName();
+        return "NOT NULL constraint " +
+            (StringUtils.trimToNull(getConstraintName()) != null
+                ? String.format("\"%s\" ", getConstraintName()) : "" ) +
+            "has been added to " + getTableName() + "." + getColumnName();
     }
-
+    
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 }
+
