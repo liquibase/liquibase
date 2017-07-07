@@ -402,12 +402,12 @@ public abstract class AbstractIntegrationTest {
                 DataTypeFactory.getInstance().fromDescription(
                         "datetime", database
                 ).toDatabaseDataType(database) + " NOT NULL, " +
-                "md5sum VARCHAR(32)" + nullableKeyword + "," +
-                "description VARCHAR(255)" + nullableKeyword + "," +
-                "comments VARCHAR(255)" + nullableKeyword + "," +
-                "tag VARCHAR(255)" + nullableKeyword + "," +
-                "liquibase VARCHAR(10)" + nullableKeyword + "," +
-                "PRIMARY KEY(id, author, filename))";
+                "md5sum VARCHAR(32)" + nullableKeyword + ", " +
+                "description VARCHAR(255)" + nullableKeyword + ", " +
+                "comments VARCHAR(255)" + nullableKeyword + ", " +
+                "tag VARCHAR(255)" + nullableKeyword + ", " +
+                "liquibase VARCHAR(10)" + nullableKeyword + ", " +
+                "PRIMARY KEY (id, author, filename))";
         LogFactory.getInstance().getLog().sql(sql);
 
         Connection conn = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();

@@ -957,7 +957,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 throw new SQLException(e);
                             }
                         } else {
-                            return extract(databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table));
+                            return extract(
+                                    databaseMetaData.getPrimaryKeys(
+                                            ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema),
+                                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema),
+                                            table
+                                    )
+                            );
                         }
                     }
                     return pkInfo;
