@@ -242,9 +242,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
 
     /**
-     * Set the number this column should be set to. Supports integers and decimals, and strips off any wrapping parentheses.
-     * If the passed value cannot be parsed as a number, it is assumed to be a function that returns a number.
-     * If the value "null" is passed, it will set a null value.
+     * Set the number this column should be set to. Supports integers and decimals, and strips off any wrapping
+     * parentheses. If the passed value cannot be parsed as a number in US locale, it is assumed to be a function
+     * that returns a number. If the value "null" is passed, it will set a null value.
      */
     public ColumnConfig setValueNumeric(String valueNumeric) {
         if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {

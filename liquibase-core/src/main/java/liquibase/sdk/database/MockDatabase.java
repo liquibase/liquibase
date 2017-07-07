@@ -31,13 +31,13 @@ import java.util.List;
 public class MockDatabase implements Database, InternalDatabase {
 
     private final static int FETCH_SIZE = 1000;
-	
+
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
     private boolean supportsCatalogs = true;
     private boolean supportsSchemas = true;
-	private boolean supportsSequences = true;
-	private String defaultCatalogName;
+    private boolean supportsSequences = true;
+    private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
 
@@ -205,14 +205,14 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean supportsSequences() {
-		return supportsSequences;
+        return supportsSequences;
     }
 
-	public void setSupportsSequences(boolean supportsSequences) {
-		this.supportsSequences = supportsSequences;
-	}
+    public void setSupportsSequences(boolean supportsSequences) {
+        this.supportsSequences = supportsSequences;
+    }
 
-	@Override
+    @Override
     public boolean supportsDropTableCascadeConstraints() {
         return false;
     }
@@ -259,9 +259,9 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
-    	return "AUTO_INCREMENT_CLAUSE"
-    			+ startWith != null ? (" " + startWith) : ""
-    		    + incrementBy != null ? (" " + incrementBy) : "";
+        return "AUTO_INCREMENT_CLAUSE"
+                + startWith != null ? (" " + startWith) : ""
+                + incrementBy != null ? (" " + incrementBy) : "";
     }
 
     public SqlStatement getCommitSQL() {
@@ -302,7 +302,7 @@ public class MockDatabase implements Database, InternalDatabase {
     public void setDatabaseChangeLogLockTableName(final String tableName) {
     }
 
-	@Override
+    @Override
     public String getConcatSql(final String... values) {
         return null;
     }
@@ -504,7 +504,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
-    	return true;
+        return true;
     }
 
     @Override
@@ -553,8 +553,8 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getLiquibaseSchemaName(){
-		return null;
-	}
+        return null;
+    }
 
     @Override
     public void setLiquibaseSchemaName(final String schemaName) {
@@ -576,10 +576,10 @@ public class MockDatabase implements Database, InternalDatabase {
         return new Date();
     }
 
-	@Override
+    @Override
     public List<DatabaseFunction> getDateFunctions() {
-		return null;
-	}
+        return null;
+    }
 
     @Override
     public void resetInternalState() {
@@ -691,7 +691,7 @@ public class MockDatabase implements Database, InternalDatabase {
         return false;
     }
 
-	@Override
+    @Override
     public boolean getOutputDefaultSchema() {
         return outputDefaultSchema;
     }
@@ -727,10 +727,10 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
 
-	@Override
-	public String getSystemSchema() {
-		return "information_schema";
-	}
+    @Override
+    public String getSystemSchema() {
+        return "information_schema";
+    }
 
     @Override
     public void addReservedWords(Collection<String> words) {
@@ -768,6 +768,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public boolean supportsBatchUpdates() throws DatabaseException {
+        return false;
+    }
+
+    @Override
     public int getMaxFractionalDigitsForTimestamp() {
         return 9;
     }
@@ -776,4 +781,5 @@ public class MockDatabase implements Database, InternalDatabase {
     public int getDefaultFractionalDigitsForTimestamp() {
         return 6;
     }
+
 }

@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -101,6 +102,11 @@ public class TimeType  extends LiquibaseDataType {
         } catch (ParseException e) {
             return new DatabaseFunction(value);
         }
+    }
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.DATE;
     }
 
     private boolean zeroTime(String stringVal) {

@@ -229,8 +229,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     }
 
     /**
-     * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null if the object does not exist in the database.
-     * If the same object was returned by an earlier include() call, the same object instance will be returned.
+     * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null
+     * if the object does not exist in the database. If the same object was returned by an earlier include() call,
+     * the same object instance will be returned.
      */
     protected <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {

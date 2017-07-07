@@ -78,10 +78,10 @@ public abstract class AbstractIntegrationTest {
     private Database database;
     private String jdbcUrl;
     Logger logger;
-    
+
     @Rule
     public TemporaryFolder tempDirectory = new TemporaryFolder();
-    
+
     protected AbstractIntegrationTest(String changelogDir, Database dbms) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
@@ -322,6 +322,19 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    public void batchInsert() throws LiquibaseException, Exception {
+        if (this.getDatabase() == null) {
+            return;
+        }
+        clearDatabase();
+
+        createLiquibase("changelogs/common/batchInsert.changelog.xml").update(this.contexts);
+        // ChangeLog already contains the verification code
+        assertTrue("batchInsert ChangeLog completed its internal verification successfully", true);
+    }
+
+
+    @Test
     public void testDatabaseIsReachableIfRequired() {
         if (isDatabaseProvidedByTravisCI()) {
             assertNotNull(
@@ -376,22 +389,27 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
 
-        String sql = "CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
+        String sql = "CREATE TABLE " +
+                database.escapeTableName(
+                        database.getDefaultCatalogName(), database.getDefaultSchemaName(), "DATABASECHANGELOG"
+                ) +
+                " (id varchar(150) NOT NULL, " +
                 "author VARCHAR(150) NOT NULL, " +
                 "filename VARCHAR(255) NOT NULL, " +
                 "dateExecuted " +
                 DataTypeFactory.getInstance().fromDescription(
                         "datetime", database
                 ).toDatabaseDataType(database) + " NOT NULL, " +
-                "md5sum VARCHAR(32), " +
-                "description VARCHAR(255), " +
-                "comments VARCHAR(255), " +
-                "tag VARCHAR(255), " +
-                "liquibase VARCHAR(10), " +
+                "md5sum VARCHAR(32) NULL, " +
+                "description VARCHAR(255) NULL, " +
+                "comments VARCHAR(255) NULL, " +
+                "tag VARCHAR(255) NULL, " +
+                "liquibase VARCHAR(10) NULL, " +
                 "PRIMARY KEY(id, author, filename))";
         LogFactory.getInstance().getLog().sql(sql);
 
         ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute(sql);
+        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().commit();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.setChangeLogParameter( "loginuser", getUsername());
@@ -622,7 +640,6 @@ public abstract class AbstractIntegrationTest {
             runCompleteChangeLog();
 
             SnapshotControl snapshotControl = new SnapshotControl(database);
-//todo            compareControl.setDiffData(true);
 
             DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, snapshotControl);
 
@@ -631,11 +648,12 @@ public abstract class AbstractIntegrationTest {
             compareControl.addSuppressedField(Column.class, "autoIncrementInformation"); //database returns different data even if the same
             if (database instanceof OracleDatabase) {
                 compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
+                compareControl.addSuppressedField(Column.class, "nullable"); // database returns different nullable on views, e.g. v_person.id
             }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = tempDirectory.getRoot().createTempFile("liquibase-test", ".xml");
-            
+
             if (outputCsv) {
                 diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
             }

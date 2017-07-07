@@ -4,6 +4,7 @@ import liquibase.Liquibase;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNotNull;
 
 /**
- * create tablespace liquibase2 datafile 'C:\ORACLEXE\ORADATA\XE\LIQUIBASE2.DBF' SIZE 5M autoextend on next 5M
+ * Integration test for Oracle Database, Version 11gR2 and above.
  */
 public class OracleIntegrationTest extends AbstractIntegrationTest {
     String indexOnSchemaChangeLog;

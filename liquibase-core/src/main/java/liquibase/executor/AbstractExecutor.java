@@ -11,6 +11,9 @@ import liquibase.statement.SqlStatement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Code common to all Executor services / blueprint for Executor service classes.
+ */
 public abstract class AbstractExecutor implements Executor {
     protected Database database;
 

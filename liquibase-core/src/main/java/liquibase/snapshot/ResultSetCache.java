@@ -48,7 +48,8 @@ class ResultSetCache {
                 results = resultSetExtractor.bulkFetch();
                 didBulkQuery.put(schemaKey, true);
             } else {
-                cache = new HashMap<>(); //don't store results in real cache to prevent confusion if later fetching all items.
+                // Don't store results in real cache to prevent confusion if later fetching all items.
+                cache = new HashMap<>();
                 Integer previousCount = timesSingleQueried.get(schemaKey);
                 if (previousCount == null) {
                     previousCount = 0;
@@ -178,7 +179,8 @@ class ResultSetCache {
             return executeAndExtract(sql, database, false);
         }
 
-        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint) throws DatabaseException, SQLException {
+        List<CachedRow> executeAndExtract(String sql, Database database, boolean informixTrimHint)
+                throws DatabaseException, SQLException {
             if (sql == null) {
                 return new ArrayList<>();
             }
@@ -223,7 +225,8 @@ class ResultSetCache {
             return extract(resultSet, false);
         }
 
-        protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint) throws SQLException {
+        protected List<CachedRow> extract(ResultSet resultSet, final boolean informixIndexTrimHint)
+                throws SQLException {
             resultSet.setFetchSize(database.getFetchSize());
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<>();

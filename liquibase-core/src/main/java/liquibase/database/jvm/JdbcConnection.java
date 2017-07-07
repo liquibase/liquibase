@@ -451,4 +451,12 @@ public class JdbcConnection implements DatabaseConnection {
         }
         return underlyingConnection.hashCode();
     }
+
+    public boolean supportsBatchUpdates() throws DatabaseException {
+        try {
+            return getUnderlyingConnection().getMetaData().supportsBatchUpdates();
+        } catch (SQLException e) {
+            throw new DatabaseException("Asking the JDBC driver if it supports batched updates has failed.", e);
+        }
+    }
 }

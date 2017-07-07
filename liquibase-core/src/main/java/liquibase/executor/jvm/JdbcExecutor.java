@@ -321,8 +321,8 @@ public class JdbcExecutor extends AbstractExecutor {
          * @throws DatabaseException If an error occurs in the DBMS-specific program code
          */
         @Override
-        // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised parameter
-        // into a query. Instead, we process a whole query. The check should be performed at the places where
+        // Incorrect warning, at least at this point. The situation here is not that we inject some unsanitised
+        // parameter into a query. Instead, we process a whole query. The check should be performed at the places where
         // the query is composed.
         @SuppressWarnings("squid:S2077")
         public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {

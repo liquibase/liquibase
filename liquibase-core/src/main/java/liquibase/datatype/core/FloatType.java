@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -48,17 +49,9 @@ public class FloatType  extends LiquibaseDataType {
         return super.toDatabaseDataType(database);
     }
 
-    //sqlite
-    //        } else if (columnTypeString.equals("REAL") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("float")) {
-    //            type = new FloatType("REAL");
-
-
-
-    //postgres
-    //        } else if (type.toDatabaseDataType().toLowerCase().startsWith("float8")) {
-//            type.setDataTypeName("FLOAT8");
-//        } else if (type.toDatabaseDataType().toLowerCase().startsWith("float4")) {
-//            type.setDataTypeName("FLOAT4");
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
 
 }

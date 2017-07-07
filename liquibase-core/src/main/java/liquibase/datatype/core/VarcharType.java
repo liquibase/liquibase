@@ -54,27 +54,5 @@ public class VarcharType extends CharType {
         return super.toDatabaseDataType(database);
     }
 
-    //oracle
-    //			if (columnTypeString.toUpperCase().startsWith("VARCHAR2")) {
-//				// Varchar2 type pattern: VARCHAR2(50 BYTE) | VARCHAR2(50 CHAR)
-//				returnTypeName = getVarcharType();
-//				if (precision != null) {
-//					String[] typeParams = precision.split(" ");
-//					returnTypeName.setFirstParameter(typeParams[0].trim());
-//					if (typeParams.length > 1) {
-//						returnTypeName.setUnit(typeParams[1]);
-//					}
-//				}
-//			} else if (columnTypeString.toUpperCase().startsWith("NVARCHAR2")) {
-//				// NVarchar2 type pattern: VARCHAR2(50 BYTE) | VARCHAR2(50 CHAR)
-//				returnTypeName = getNVarcharType();
-//				if (precision != null) {
-//					String[] typeParams = precision.split(" ");
-//					returnTypeName.setFirstParameter(typeParams[0].trim());
-//					if (typeParams.length > 1) {
-//						returnTypeName.setUnit(typeParams[1]);
-//					}
-//				}
-//			}
 
 }
