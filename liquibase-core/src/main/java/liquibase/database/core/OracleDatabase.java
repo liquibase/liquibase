@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -11,6 +12,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
@@ -28,16 +30,17 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.ResourceBundle.getBundle;
 
 /**
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     public static final String PRODUCT_NAME = "oracle";
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
@@ -45,22 +48,31 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     private Set<String> reservedWords = new HashSet<>();
     private Set<String> userDefinedTypes = null;
+    private Map<String, String> savedSessionNlsSettings;
 
     private Boolean canAccessDbaRecycleBin;
     private Integer databaseMajorVersion;
     private Integer databaseMinorVersion;
 
+    /**
+     * Default constructor for an object that represents the Oracle Database DBMS.
+     */
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
+        //noinspection HardCodedStringLiteral
         super.setCurrentDateTimeFunction("SYSTIMESTAMP");
         // Setting list of Oracle's native functions
+        //noinspection HardCodedStringLiteral
         dateFunctions.add(new DatabaseFunction("SYSDATE"));
+        //noinspection HardCodedStringLiteral
         dateFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
+        //noinspection HardCodedStringLiteral
         dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
+        //noinspection HardCodedStringLiteral
         super.sequenceNextValueFunction = "%s.nextval";
+        //noinspection HardCodedStringLiteral
         super.sequenceCurrentValueFunction = "%s.currval";
     }
-
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
@@ -68,6 +80,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public void setConnection(DatabaseConnection conn) {
+        //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
+        // HardCodedStringLiteral
+        //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
+        // HardCodedStringLiteral
         reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE", "UID", "DESC", "ORDER")); //more reserved words not returned by driver
 
         Connection sqlConn = null;
@@ -89,8 +105,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
             if (sqlConn != null) {
                 try {
+                    //noinspection HardCodedStringLiteral
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
+                    //noinspection HardCodedStringLiteral
                     LogFactory.getInstance().getLog().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
@@ -99,6 +117,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.setAccessible(true);
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
+                    //noinspection HardCodedStringLiteral
                     LogFactory.getInstance().getLog().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
                     ; //cannot set it. That is OK
                 }
@@ -107,9 +126,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 ResultSet resultSet = null;
                 try {
                     statement = sqlConn.createStatement();
+                    //noinspection HardCodedStringLiteral
                     resultSet = statement.executeQuery("SELECT value FROM v$parameter WHERE name = 'compatible'");
                     String compatibleVersion = null;
                     if (resultSet.next()) {
+                        //noinspection HardCodedStringLiteral
                         compatibleVersion = resultSet.getString("value");
                     }
                     if (compatibleVersion != null) {
@@ -120,7 +141,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                         }
                     }
                 } catch (SQLException e) {
-                    String message = "Cannot read from v$parameter: "+e.getMessage();
+                    @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from v$parameter: "+e.getMessage();
+
+                    //noinspection HardCodedStringLiteral
                     LogFactory.getInstance().getLog().info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
@@ -135,11 +158,13 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getShortName() {
+        //noinspection HardCodedStringLiteral
         return "oracle";
     }
 
     @Override
     protected String getDefaultDatabaseProductName() {
+        //noinspection HardCodedStringLiteral
         return "Oracle";
     }
 
@@ -179,8 +204,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String generatePrimaryKeyName(String tableName) {
         if (tableName.length() > 27) {
+            //noinspection HardCodedStringLiteral
             return "PK_" + tableName.toUpperCase().substring(0, 27);
         } else {
+            //noinspection HardCodedStringLiteral
             return "PK_" + tableName.toUpperCase();
         }
     }
@@ -216,8 +243,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return getConnection().getCatalog();
         }
         try {
+            //noinspection HardCodedStringLiteral
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
+            //noinspection HardCodedStringLiteral
             LogFactory.getInstance().getLog().info("Error getting default schema", e);
         }
         return null;
@@ -230,6 +259,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultDriver(String url) {
+        //noinspection HardCodedStringLiteral
         if (url.startsWith("jdbc:oracle")) {
             return "oracle.jdbc.OracleDriver";
         }
@@ -261,29 +291,38 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
         if (isDateOnly(isoDate)) {
             StringBuffer val = new StringBuffer();
+            //noinspection HardCodedStringLiteral
             val.append("TO_DATE(");
             val.append(normalLiteral);
+            //noinspection HardCodedStringLiteral
             val.append(", 'YYYY-MM-DD')");
             return val.toString();
         } else if (isTimeOnly(isoDate)) {
             StringBuffer val = new StringBuffer();
+            //noinspection HardCodedStringLiteral
             val.append("TO_DATE(");
             val.append(normalLiteral);
+            //noinspection HardCodedStringLiteral
             val.append(", 'HH24:MI:SS')");
             return val.toString();
         } else if (isTimestamp(isoDate)) {
             StringBuffer val = new StringBuffer(26);
+            //noinspection HardCodedStringLiteral
             val.append("TO_TIMESTAMP(");
             val.append(normalLiteral);
+            //noinspection HardCodedStringLiteral
             val.append(", 'YYYY-MM-DD HH24:MI:SS.FF')");
             return val.toString();
         } else if (isDateTime(isoDate)) {
             StringBuffer val = new StringBuffer(26);
+            //noinspection HardCodedStringLiteral
             val.append("TO_DATE(");
             val.append(normalLiteral);
+            //noinspection HardCodedStringLiteral
             val.append(", 'YYYY-MM-DD HH24:MI:SS')");
             return val.toString();
         } else {
+            //noinspection HardCodedStringLiteral
             return "UNSUPPORTED:" + isoDate;
         }
     }
@@ -299,9 +338,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
 
         if (example instanceof Schema) {
+            //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
             if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
                 return true;
             }
+            //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
                 return true;
             }
@@ -309,10 +350,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return true;
         }
         if (example instanceof Catalog) {
+            //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
             if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
                 return true;
             }
         } else if (example.getName() != null) {
+            //noinspection HardCodedStringLiteral
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
                 boolean filteredInOriginalQuery = this.canAccessDbaRecycleBin();
                 if (!filteredInOriginalQuery) {
@@ -328,28 +371,39 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 } else {
                     return true;
                 }
-            } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
+            } else //noinspection HardCodedStringLiteral
+                if (example.getName().startsWith("AQ$")) { //oracle AQ tables
                 return true;
-            } else if (example.getName().startsWith("DR$")) { //oracle index tables
+            } else //noinspection HardCodedStringLiteral
+                if (example.getName().startsWith("DR$")) { //oracle index tables
                 return true;
-            } else if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
+            } else //noinspection HardCodedStringLiteral
+                    if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
                 return true;
-            } else if ((example.getName().startsWith("MDRT_") || example.getName().startsWith("MDRS_")) && example.getName().endsWith("$")) {
+            } else //noinspection HardCodedStringLiteral,HardCodedStringLiteral
+                        if ((example.getName().startsWith("MDRT_") || example.getName().startsWith("MDRS_")) && example.getName().endsWith("$")) {
                 // CORE-1768 - Oracle creates these for spatial indices and will remove them when the index is removed.
                 return true;
-            } else if (example.getName().startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.
+            } else //noinspection HardCodedStringLiteral
+                            if (example.getName().startsWith("MLOG$_")) { //Created by materliaized view logs for every table that is part of a materialized view. Not available for DDL operations.
                 return true;
-            } else if (example.getName().startsWith("RUPD$_")) { //Created by materialized view log tables using primary keys. Not available for DDL operations.
+            } else //noinspection HardCodedStringLiteral
+                    if (example.getName().startsWith("RUPD$_")) { //Created by materialized view log tables using primary keys. Not available for DDL operations.
                 return true;
-            } else if (example.getName().startsWith("WM$_")) { //Workspace Manager backup tables.
+            } else //noinspection HardCodedStringLiteral
+                        if (example.getName().startsWith("WM$_")) { //Workspace Manager backup tables.
                 return true;
-            } else if (example.getName().equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
+            } else //noinspection HardCodedStringLiteral
+                        if (example.getName().equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
                 return true;
-            } else if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
+            } else //noinspection HardCodedStringLiteral
+                    if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
                 return true;
-            } else if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
+            } else //noinspection HardCodedStringLiteral
+                    if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
                 return true;
-            } else if (example.getName().startsWith("USLOG$")) { //for update materialized view
+            } else //noinspection HardCodedStringLiteral
+                if (example.getName().startsWith("USLOG$")) { //for update materialized view
                 return true;
             }
         }
@@ -413,9 +467,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public int getDataTypeMaxParameters(String dataTypeName) {
+        //noinspection HardCodedStringLiteral
         if (dataTypeName.toUpperCase().equals("BINARY_FLOAT")) {
             return 0;
         }
+        //noinspection HardCodedStringLiteral
         if (dataTypeName.toUpperCase().equals("BINARY_DOUBLE")) {
             return 0;
         }
@@ -433,8 +489,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
                 try {
                     try {
+                        //noinspection HardCodedStringLiteral
                         userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT DISTINCT TYPE_NAME FROM ALL_TYPES"), String.class));
                     } catch (DatabaseException e) { //fall back to USER_TYPES if the user cannot see ALL_TYPES
+                        //noinspection HardCodedStringLiteral
                         userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
                     }
                 } catch (DatabaseException e) {
@@ -448,6 +506,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
+        //noinspection HardCodedStringLiteral
         if (databaseFunction != null && databaseFunction.toString().equalsIgnoreCase("current_timestamp")) {
             return databaseFunction.toString();
         }
@@ -467,6 +526,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         ValidationErrors errors = super.validate();
         DatabaseConnection connection = getConnection();
         if (connection == null || connection instanceof OfflineConnection) {
+            //noinspection HardCodedStringLiteral
             LogFactory.getInstance().getLog().info("Cannot validate offline database");
             return errors;
         }
@@ -480,6 +540,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     public String getDbaRecycleBinWarning() {
+        //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
+        // HardCodedStringLiteral
+        //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
         return "DB-Manul needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
         "constraints are deleted and restored. Since Oracle doesn't properly restore the original table names " +
         "referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this" +
@@ -502,13 +565,15 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             Statement statement = null;
             try {
                 statement = ((JdbcConnection) connection).createStatement();
-                ResultSet resultSet = statement.executeQuery("select 1 from dba_recyclebin where 0=1");
+                @SuppressWarnings("HardCodedStringLiteral") ResultSet resultSet = statement.executeQuery("select 1 from dba_recyclebin where 0=1");
                 resultSet.close(); //don't need to do anything with the result set, just make sure statement ran.
                 this.canAccessDbaRecycleBin = true;
             } catch (Exception e) {
+                //noinspection HardCodedStringLiteral
                 if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
                     this.canAccessDbaRecycleBin = false;
                 } else {
+                    //noinspection HardCodedStringLiteral
                     LogFactory.getInstance().getLog().warning("Cannot check dba_recyclebin access", e);
                     this.canAccessDbaRecycleBin = false;
                 }

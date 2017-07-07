@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -10,6 +11,11 @@ import liquibase.util.StringUtils;
 
 @DataTypeInfo(name="currency", aliases = {"money", "smallmoney"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class CurrencyType  extends LiquibaseDataType {
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {

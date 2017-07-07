@@ -1,5 +1,6 @@
 package liquibase.datatype;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -182,10 +183,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
             }
             returnString = returnString.replaceFirst(",$", "");
 
-//            if (getUnit() != null) {
-//                returnString+=" " + getUnit();
-//            }
-
             returnString += ")";
         }
 
@@ -231,5 +228,10 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return value.replaceFirst("\\.0+$", "");
     }
 
+    /**
+     * Returns one of the four basic data types for use in LoadData: BOOLEAN, NUMERIC, DATE or STRING
+     * @return one of the above Strings
+     */
+    public abstract LoadDataChange.LOAD_DATA_TYPE getLoadTypeName();
 
 }

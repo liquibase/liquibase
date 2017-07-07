@@ -1,5 +1,6 @@
 package liquibase.common.datatype;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -11,7 +12,7 @@ import liquibase.datatype.LiquibaseDataType;
  * 
  * @author islavov
  */
-public class DataTypeWrapper  extends LiquibaseDataType {
+public class DataTypeWrapper extends LiquibaseDataType {
 	
 	private static LiquibaseDataType stripWrappedDataType(LiquibaseDataType candidate) {
 		
@@ -108,6 +109,11 @@ public class DataTypeWrapper  extends LiquibaseDataType {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.STRING;
     }
 
 }

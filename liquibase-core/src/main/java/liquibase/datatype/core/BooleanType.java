@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -127,9 +128,9 @@ public class BooleanType extends LiquibaseDataType {
         return "TRUE";
     }
 
-    //sqllite
-    //        } else if (columnTypeString.toLowerCase(Locale.ENGLISH).contains("boolean") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("binary")) {
-//            type = new BooleanType("BOOLEAN");
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.BOOLEAN;
+    }
 
 }

@@ -10,7 +10,7 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -119,6 +119,14 @@ public class OfflineConnection implements DatabaseConnection {
         }
         if (database instanceof AbstractJdbcDatabase) {
             ((AbstractJdbcDatabase) database).setCaseSensitive(this.caseSensitive);
+        }
+
+        if ( snapshot == null) {
+            try {
+                snapshot = new EmptyDatabaseSnapshot(database);
+            } catch (DatabaseException|InvalidExampleException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
 
         ChangeLogHistoryServiceFactory.getInstance().register(createChangeLogHistoryService(database));

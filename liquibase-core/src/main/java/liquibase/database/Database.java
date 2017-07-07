@@ -403,6 +403,13 @@ public interface Database extends PrioritizedService {
      */
     boolean supportsNotNullConstraintNames();
 
+    /**
+     * Does the database support batched DML (INSERT/UPDATE/DELETE/MERGE/...) statements sent in a single call to
+     * the database?
+     * @return true if the database has this capability for all DML statements, false in all other cases
+     */
+    boolean supportsBatchUpdates() throws DatabaseException;
+
     String getSystemSchema();
 
     void addReservedWords(Collection<String> words);
@@ -414,6 +421,5 @@ public interface Database extends PrioritizedService {
     String unescapeDataTypeString(String dataTypeString);
 
     ValidationErrors validate();
-
 }
 

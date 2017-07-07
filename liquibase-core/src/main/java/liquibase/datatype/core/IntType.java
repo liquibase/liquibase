@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -56,12 +57,6 @@ public class IntType extends LiquibaseDataType {
             return new DatabaseDataType("INTEGER");
         }
         return super.toDatabaseDataType(database);
-
-        //sqllite
-        //        if (columnTypeString.equals("INTEGER") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("int") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("bit")) {
-//            type = new IntType("INTEGER");
     }
 
     @Override
@@ -85,5 +80,9 @@ public class IntType extends LiquibaseDataType {
         return formatNumber(value.toString());
     }
 
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
+    }
 
 }

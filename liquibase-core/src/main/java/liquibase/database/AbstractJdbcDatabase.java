@@ -311,7 +311,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             SqlStatement currentSchemaStatement = getConnectionSchemaNameCallStatement();
             return ExecutorService.getInstance().getExecutor(this).
-            		queryForObject(currentSchemaStatement, String.class);
+                    queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
             LogFactory.getInstance().getLog().info("Error getting default schema", e);
         }
@@ -655,21 +655,21 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isCaseSensitive() {
-    	if (caseSensitive == null) {
+        if (caseSensitive == null) {
             if (connection != null && connection instanceof JdbcConnection) {
                 try {
-                	caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
+                    caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
                     LogFactory.getInstance().getLog().warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
 
-    	if (caseSensitive == null) {
+        if (caseSensitive == null) {
             return false;
-    	} else {
-    		return caseSensitive.booleanValue();
-    	}
+        } else {
+            return caseSensitive.booleanValue();
+        }
     }
 
     public void setCaseSensitive(Boolean caseSensitive) {
@@ -695,28 +695,28 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             DatabaseSnapshot snapshot;
             try {
-	            final SnapshotControl snapshotControl = new SnapshotControl(this);
-	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+                final SnapshotControl snapshotControl = new SnapshotControl(this);
+                final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
 
-	            //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
-	            //as part of tables.
-	            typesToInclude.remove(Index.class);
-	            typesToInclude.remove(PrimaryKey.class);
-	            typesToInclude.remove(UniqueConstraint.class);
+                //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+                //as part of tables.
+                typesToInclude.remove(Index.class);
+                typesToInclude.remove(PrimaryKey.class);
+                typesToInclude.remove(UniqueConstraint.class);
 
-	            if (supportsForeignKeyDisable()) {
-		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
-		            typesToInclude.remove(ForeignKey.class);
-	            }
+                if (supportsForeignKeyDisable()) {
+                    //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+                    typesToInclude.remove(ForeignKey.class);
+                }
 
-	            final long createSnapshotStarted = System.currentTimeMillis();
-	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-	            LogFactory.getInstance().getLog().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+                final long createSnapshotStarted = System.currentTimeMillis();
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+                LogFactory.getInstance().getLog().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-	        final long changeSetStarted = System.currentTimeMillis();
+            final long changeSetStarted = System.currentTimeMillis();
             CompareControl compareControl = new CompareControl(
                     new CompareControl.SchemaComparison[] {
                             new CompareControl.SchemaComparison(
@@ -724,12 +724,12 @@ public abstract class AbstractJdbcDatabase implements Database {
                                     schemaToDrop)},
                     snapshot.getSnapshotControl().getTypesToInclude());
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
-	                new EmptyDatabaseSnapshot(this),
+                    new EmptyDatabaseSnapshot(this),
                     snapshot,
                     compareControl);
 
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
-	        LogFactory.getInstance().getLog().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+            LogFactory.getInstance().getLog().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
             this.commit(); //clear out currently executed statements
@@ -1453,10 +1453,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     }
 
- 	@Override
+    @Override
     public boolean getOutputDefaultSchema() {
- 		return outputDefaultSchema;
- 	}
+        return outputDefaultSchema;
+    }
 
     @Override
     public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
@@ -1480,8 +1480,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-	public String getSystemSchema(){
-    	return "information_schema";
+    public String getSystemSchema(){
+        return "information_schema";
     }
 
     @Override
@@ -1546,6 +1546,18 @@ public abstract class AbstractJdbcDatabase implements Database {
         return (getMaxFractionalDigitsForTimestamp() >= 6 ? 6 : getMaxFractionalDigitsForTimestamp());
     }
 
+    @Override
+    public boolean supportsBatchUpdates() throws DatabaseException {
+        if (connection instanceof OfflineConnection) {
+            return false;
+        } else if (connection instanceof JdbcConnection) {
+            return ((JdbcConnection)getConnection()).supportsBatchUpdates();
+        } else {
+            // Normally, the connection can only be one of the two above types. But if, for whatever reason, it is
+            // not, let's err on the safe side.
+            return false;
+        }
+    }
 
     @Override
     public boolean supportsNotNullConstraintNames() {

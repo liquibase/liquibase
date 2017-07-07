@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -118,16 +119,10 @@ public class ClobType extends LiquibaseDataType {
         return super.toDatabaseDataType(database);
     }
 
-    //sqlite
-    //        } else if (columnTypeString.equals("TEXT") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("uuid") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("uniqueidentifier") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).equals("uniqueidentifier") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).equals("datetime") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("timestamp") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("char") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("clob") ||
-//                columnTypeString.toLowerCase(Locale.ENGLISH).contains("text")) {
-//            type = new CustomType("TEXT",0,0);
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.CLOB;
+    }
+
 
 }

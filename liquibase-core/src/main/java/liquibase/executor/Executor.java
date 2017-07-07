@@ -82,8 +82,23 @@ public interface Executor {
 
     List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
+    /**
+     * Executes a given SQL statement and returns a List of rows. Each row is represented a a Map<String, ?>,
+     * where the String is the column name and the value if the content of the column in the row (=cell).
+     * @param sql the SQL query to execute
+     * @return a List of [Column name] -> [column value]-mapped rows.
+     * @throws DatabaseException if an error occurs during SQL processing (e.g. the SQL is not valid for the database)
+     */
     List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException;
 
+    /**
+     * Applies a list of SqlVisitors to the SQL query, then executes the (possibly modified) SQL query and lastly,
+     * returns the list of rows. Each row is represented a a Map<String, ?>,
+     * where the String is the column name and the value if the content of the column in the row (=cell).
+     * @param sql the SQL query to execute
+     * @return a List of [Column name] -> [column value]-mapped rows.
+     * @throws DatabaseException if an error occurs during SQL processing (e.g. the SQL is not valid for the database)
+     */
     List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
 

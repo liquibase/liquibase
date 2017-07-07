@@ -2,6 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -203,8 +204,12 @@ public class SnapshotGeneratorFactory {
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database,
                                            SnapshotControl snapshotControl)
             throws DatabaseException, InvalidExampleException {
-        if (database.getConnection() instanceof OfflineConnection) {
-            DatabaseSnapshot snapshot = ((OfflineConnection) database.getConnection()).getSnapshot(examples);
+        DatabaseConnection conn = database.getConnection();
+        if (conn == null) {
+            return new EmptyDatabaseSnapshot(database, snapshotControl);
+        }
+        if (conn instanceof OfflineConnection) {
+            DatabaseSnapshot snapshot = ((OfflineConnection) conn).getSnapshot(examples);
             if (snapshot == null) {
                 throw new DatabaseException("No snapshotFile parameter specified for offline database");
             }

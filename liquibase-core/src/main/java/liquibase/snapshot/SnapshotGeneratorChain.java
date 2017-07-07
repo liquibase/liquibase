@@ -26,7 +26,8 @@ public class SnapshotGeneratorChain {
         }
     }
 
-    public <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    public <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot)
+            throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
         }

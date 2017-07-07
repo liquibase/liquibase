@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
@@ -48,6 +49,11 @@ public class NVarcharType extends CharType {
             return type;
         }
         return super.toDatabaseDataType(database);
+    }
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.STRING;
     }
 
 }

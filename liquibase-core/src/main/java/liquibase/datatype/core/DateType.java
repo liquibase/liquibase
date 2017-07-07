@@ -1,5 +1,6 @@
 package liquibase.datatype.core;
 
+import liquibase.change.core.LoadDataChange;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
@@ -22,6 +23,11 @@ public class DateType extends LiquibaseDataType {
             return new DatabaseDataType(database.escapeDataTypeName("date"));
         }
         return new DatabaseDataType(getName());
+    }
+
+    @Override
+    public LoadDataChange.LOAD_DATA_TYPE getLoadTypeName() {
+        return LoadDataChange.LOAD_DATA_TYPE.DATE;
     }
 
     @Override
@@ -83,7 +89,4 @@ public class DateType extends LiquibaseDataType {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
     }
-
-
-
 }
