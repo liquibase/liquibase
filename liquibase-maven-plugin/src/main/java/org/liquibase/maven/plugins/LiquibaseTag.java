@@ -13,6 +13,8 @@ import org.apache.maven.plugin.MojoFailureException;
 public class LiquibaseTag extends AbstractLiquibaseMojo {
 
   /**
+   * The text to write to the databasechangelog.
+   *
    * @parameter expression="${liquibase.tag}"
    * @required
    */

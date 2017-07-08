@@ -39,7 +39,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   @Override
   public void configureFieldsAndValues(ResourceAccessor fo)
           throws MojoExecutionException, MojoFailureException {
-    getLog().warn("This plugin goal is DEPRICATED and will bre removed in a future "
+    getLog().warn("This plugin goal is DEPRECATED and will bre removed in a future "
                   + "release, please use \"updateSQL\" instead of \"migrateSQL\".");
     super.configureFieldsAndValues(fo);
   }

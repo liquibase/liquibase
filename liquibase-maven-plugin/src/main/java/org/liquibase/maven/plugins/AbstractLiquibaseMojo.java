@@ -97,12 +97,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean emptyPassword;
 
-	/**
-	 * Whether to ignore the schema name.
-	 *
-	 * @parameter expression="${liquibase.outputDefaultSchema}"
-	 */
-	protected boolean outputDefaultSchema;
+    /**
+     * Whether to ignore the schema name.
+     *
+     * @parameter expression="${liquibase.outputDefaultSchema}"
+     */
+    protected boolean outputDefaultSchema;
 
     /**
      * Whether to ignore the catalog/database name.
@@ -200,7 +200,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean propertyFileWillOverride;
 
     /**
-     * Flag for forcing the checksums to be cleared from teh DatabaseChangeLog table.
+     * Flag for forcing the checksums to be cleared from the DatabaseChangeLog table.
      *
      * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
      */
@@ -235,10 +235,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Properties expressionVars;
 
     /**
-     * Set this to 'false' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
+     * Set this to 'true' to skip running liquibase. Its use is NOT RECOMMENDED, but quite
      * convenient on occasion.
      *
-     * @parameter expression="${liquibase.skip}"
+     * @parameter expression="${liquibase.skip}" default-value="false"
      */
     protected boolean skip = false;
 
@@ -546,7 +546,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     /**
-     * Parses a properties file and sets the assocaited fields in the plugin.
+     * Parses a properties file and sets the associated fields in the plugin.
      *
      * @param propertiesInputStream The input stream which is the Liquibase properties that
      *                              needs to be parsed.

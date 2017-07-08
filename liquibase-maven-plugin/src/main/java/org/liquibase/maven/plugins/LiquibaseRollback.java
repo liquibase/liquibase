@@ -14,7 +14,8 @@ import java.text.ParseException;
 import java.util.Date;
 
 /**
- * Invokes Liquibase rollbacks on a database.
+ * Invokes Liquibase rollbacks the database to the specified using
+ * pointing attributes 'rollbackCount', 'rollbackTag' and/or 'rollbackDate'
  * @author Peter Murray
  * @goal rollback
  */
