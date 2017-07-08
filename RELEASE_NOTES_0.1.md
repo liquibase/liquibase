@@ -66,6 +66,8 @@ bug list (https://dbmanul.atlassian.net).
 #### IBM DB2
 - [CORE-2773] Detection of DB2 on AS400 did not work properly - fixed thanks to Martin Aberle 
   (f425f011638db46b0bdc6a680e2d2e5f014feb8d)
+- Enumeration of Views in a DB2 database might return objects that are not actually views - fixed thanks to 
+  Mårten Svantesson (Upstream pr #686, Commit)
 
 #### IBM Informix
 - Fixed an issue where PRIMARY KEYs might not get generated. This problem might be related to upstream bug

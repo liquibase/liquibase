@@ -8,6 +8,7 @@ request number (pr#) to maximise its usefulness. Thank you.
 [pr#] | [merge status] [description]
 (2nd line):            [if not going to be merged: reason]
 =======================================================================================================================
+686     MERGED         Prevent liquibase.exception.DatabaseException
 678     MERGED         Add SchemesCDIConfig+ (it should allow you to create a dependent tree…
 677     MERGED         Fix json serialize fail on changeset precondition enums
 676     N/A            [CORE-3063] integration tests that cannot connect should be Ignored not Passed
