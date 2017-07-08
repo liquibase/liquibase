@@ -6,11 +6,13 @@ This fork of the Liquibase source aims to:
 - Improve the integration tests
 - Improve code documentation and maintainability
 - Support more Oracle Database features
-- Support different connections for changesets (e.g. use an administrative connection for creating tablespaces and a "regular" connection for normal schema updates)
+- Support different connections for changesets (e.g. use an administrative connection for creating tablespaces and a 
+  "regular" connection for normal schema updates)
 - Modernise the code to use JDK 8 features.
 - Internationalise the messages
 
-For a current list of changes, fixes and improvements, please see: https://github.com/dbmanul/dbmanul/blob/master/RELEASE_NOTES_0.1.md
+For a current list of changes, fixes and improvements, please see: 
+    https://github.com/dbmanul/dbmanul/blob/master/RELEASE_NOTES_0.1.md
 
 Current status summary
 ======================
