@@ -19,11 +19,25 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DB2Database extends AbstractJdbcDatabase {
 
+    private static final Set<String> systemTablesAndViews;
+
+    static {
+      systemTablesAndViews = new HashSet<String>();
+      systemTablesAndViews.add("SYSCHKCST");
+      systemTablesAndViews.add("SYSCST");
+      systemTablesAndViews.add("SYSCSTCOL");
+      systemTablesAndViews.add("SYSCSTDEP");
+      systemTablesAndViews.add("SYSKEYCST");
+      systemTablesAndViews.add("SYSREFCST");
+    }
+
     private DataServerType dataServerType;
-    
+
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
@@ -309,5 +323,10 @@ public class DB2Database extends AbstractJdbcDatabase {
          * DB2 on IBM zSeries
          */
         DB2Z
+    }
+
+    @Override
+    public Set<String> getSystemViews() {
+        return systemTablesAndViews;
     }
 }
