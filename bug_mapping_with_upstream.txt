@@ -16,14 +16,19 @@ to maximise its usefulness. Thank you.
 [CORE-3054]        none           7d8e717571d87b18dcaecb6399011fd6b44c2da5 SQLAnywhere: java-coredump on
                                                                            changeSet-SQL
 [CORE-3051]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad ASANY supports no CASCADE in DROP TABLE
-[CORE-3022]        none           b6fa2263d2db2a23d42369ee30b0cd11031c22ec Derby Database loads driver from wrong classloader on close
+[CORE-3040]        none           58b2839feefd1a003e6555c3761bd0e28c64cc8d onlyUpdate="true" flag generates empty
+                                                                           statements for MySQL DB (pr#682)
+[CORE-3022]        none           b6fa2263d2db2a23d42369ee30b0cd11031c22ec Derby Database loads driver from wrong
+                                                                           classloader on close
 [CORE-3020]        none           5608dfccf3c50f321d140b3d5f75059f8ce432ac No warning when included file doesn't exist
 [CORE-3014]        none           e567bf5eef2764e2cf7d2e8d4bb21372e8aa3e77 validation error on empty column name in
                                                                            CreateIndexChange
 [CORE-3013]        none           5e264828ebe28f1ed86cdfc7bfbf4bb6ca05f83f Improve error message on failing change
                                                                            set when using includeAll
-[CORE-3009]        none           968bd791c91f6caa36271346ce66537260d9fbc9 ASANY Drop Default Value failed (upstream pr #659)
-[CORE-3003]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad SQLAnywhere: Owner/Schema-Identifier at index-names not allowed
+[CORE-3009]        none           968bd791c91f6caa36271346ce66537260d9fbc9 ASANY Drop Default Value failed
+                                                                           (upstream pr #659)
+[CORE-3003]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad SQLAnywhere: Owner/Schema-Identifier at
+                                                                           index-names not allowed
 [CORE-3002]        none           c133369a5b6f0530d3cdd862a5bac3edbfd69319 SQLAnywhere: DROP UNIQUE CONSTRAINT fails
 [CORE-2993]        none           b5717eb7a6482ccf204d4bfc0656a8564a67e4e0 createSequence with order enabled for DB2
 [CORE-2773]        none           f425f011638db46b0bdc6a680e2d2e5f014feb8d Detection of DB2/AS400 improved

@@ -80,6 +80,10 @@ bug list (https://dbmanul.atlassian.net).
   due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
   commit cabacfe3593324f5223e53496d80c894f48abfa2.
 
+#### MySQL / MariaDB
+ - [CORE-3040] - onlyUpdate="true" flag generates empty statements for MySQL DB. Thanks to Luciano Boschi
+   for the bug fix (upstream pr#682, commit 58b2839feefd1a003e6555c3761bd0e28c64cc8d). 
+
 #### Oracle Database
 - In some situations, valid TIMESTAMP and DATE literals were not recognized. This was fixed in commit
   c307b0795a01086a60e89026a548745c54c1a79e and affected at least Oracle DB.
