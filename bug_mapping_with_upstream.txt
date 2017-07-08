@@ -27,6 +27,8 @@ to maximise its usefulness. Thank you.
                                                                            set when using includeAll
 [CORE-3009]        none           968bd791c91f6caa36271346ce66537260d9fbc9 ASANY Drop Default Value failed
                                                                            (upstream pr #659)
+[CORE-3005]        none           60adb8f56fa2d13036f5ae33139dd3f0169e233b Consideration of DB2 system views
+                                                                           (upstream pr#647)
 [CORE-3003]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad SQLAnywhere: Owner/Schema-Identifier at
                                                                            index-names not allowed
 [CORE-3002]        none           c133369a5b6f0530d3cdd862a5bac3edbfd69319 SQLAnywhere: DROP UNIQUE CONSTRAINT fails

@@ -61,4 +61,5 @@ request number (pr#) to maximise its usefulness. Thank you.
                        work with all JDBC drivers that support batching, not just Oracle DB.
 649     MERGED         Corrected documentation errors in AbstractLiquibaseMojo.java
 648     MERGED         [CORE-1852] checksum depends on line endings and startCommentSymbol
+647     MERGED         [CORE-3005] Consideration of DB2 system views
 596     DUPLICATE      of pr #655
