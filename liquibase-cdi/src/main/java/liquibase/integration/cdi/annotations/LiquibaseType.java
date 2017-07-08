@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 
 /**
- * Qualifier Annontation
+ * Qualifier Annotation
  *
  *  @author Aaron Walker (http://github.com/aaronwalker)
  */

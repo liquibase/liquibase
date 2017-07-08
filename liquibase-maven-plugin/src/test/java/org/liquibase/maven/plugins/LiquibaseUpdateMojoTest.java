@@ -41,7 +41,7 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
     checkValues(DEFAULT_PROPERTIES, values);
   }
 
-  public void testOverideAllWithPropertiesFile() throws Exception {
+  public void testOverrideAllWithPropertiesFile() throws Exception {
     // Create the properties file for this test
     Properties props = new Properties();
     props.setProperty("driver", "properties_driver_value");
