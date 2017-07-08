@@ -304,3 +304,4 @@ The maintainer would like to thank the following people:
 - "alex-on-java" for his code cleanup in SpringLiquibase (c738963deeaa8539a4f0e7419db4cbc27d925171)
 - Tom Hombergs for his improvement for an error message during YAML parsing (5e264828ebe28f1ed86cdfc7bfbf4bb6ca05f83f)
 - Nathan Voxland for creating Liquibase (http://www.liquibase.org), the basis for DB-Manul
+- Gordon Dickens fixed several typos (d05057715c3b0da254ecce3e04b1c55c0dea893e)
