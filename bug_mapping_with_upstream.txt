@@ -10,6 +10,7 @@ to maximise its usefulness. Thank you.
 =====================================================================================================================
 [CORE-3079]        none           e14e982bb01b35ec4eae51580ee33b131142edb3 Make includeObjects and excludeObjects
                                                                            affect which objects are snapshotted
+[CORE-3076]        none           eaf994fed9e54a3388928aeaaa5f867ebd0c4833 SUM is not reserved word for HsqlDB
 [CORE-3063]        none           (several commits)                        Integration tests failing on master
 [CORE-3055]        none           0b2b69fe6f551f121786abb43925997b72601301 SQLAnywhere: supports Sequences
 [CORE-3054]        none           7d8e717571d87b18dcaecb6399011fd6b44c2da5 SQLAnywhere: java-coredump on

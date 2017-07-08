@@ -56,6 +56,8 @@ bug list (https://dbmanul.atlassian.net).
   current date and/or time) did not work in HyperSQL. This was fixed in commit 23ef71b3a2c6ef872d7c27ef55f67cf4cc1b65ee
 - When snapshotting a HyperSQL column of the TIMESTAMP type that had a literal (e.g. TIMESTAMP'2017-05-27 18:34:45')
   as default value, incorrect SQL was generated. This was fixed in commit 8148b5bca5f6905c6b1bfa4617ffd4a7b202cca1.
+- The keyword SUM was not recognized as a reserved HSQLDB keyword [CORE-3076]. Thanks to GitHub user "TheLegion"
+  for the fix (upstream pr#684)
 
 #### Firebird SQL
 - Fixed various problems in snapshotting Firebird databases. The root cause was that the data dictionary views (RDB$)
