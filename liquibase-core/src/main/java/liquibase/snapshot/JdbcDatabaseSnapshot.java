@@ -854,10 +854,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    if (database instanceof DB2Database && ((DB2Database)database).getDataServerType() == DataServerType.DB2I) {
+                        return queryDB2I(schema, view);
+                    }
                     return extract(databaseMetaData.getTables(catalog, schema,
                             (view == null ? SQL_FILTER_MATCH_ALL : view), new String[]{"VIEW"}));
                 }
-
 
                 @Override
                 public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
@@ -869,7 +871,19 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    if (database instanceof DB2Database && ((DB2Database)database).getDataServerType() == DataServerType.DB2I) {
+                        return queryDB2I(schema, null);
+                    }
                     return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
+                }
+
+
+                private List<CachedRow> queryDB2I(String schema, String view) throws DatabaseException, SQLException {
+                    String sql = "SELECT TABLE_CATALOG as TABLE_CAT, TABLE_SCHEMA as TABLE_SCHEM, TABLE_NAME, VIEW_DEFINITION as OBJECT_BODY FROM SYSIBM.VIEWS WHERE TABLE_SCHEMA='" + schema + "'";
+                    if (view != null) {
+                        sql += " AND TABLE_NAME='" + view + "'";
+                    }
+                    return executeAndExtract(sql, database);
                 }
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
