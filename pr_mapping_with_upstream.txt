@@ -55,4 +55,9 @@ request number (pr#) to maximise its usefulness. Thank you.
                        -> already fixed in DB-Manul
 652     N/A            [CORE-3002] SQLAnywhere: DROP UNIQUE CONSTRAINT fails
                        -> already fixed in DB-Manul
+651     N/A            Does not apply to DB-Manul because dropAllForeignKeys has been completely rewritten and no
+                       DBMS-specific generators exist for that anymore.
+650     MERGED         CORE-3000 BatchInsertExecutablePreparedStatement merged, but with modifications to make it
+                       work with all JDBC drivers that support batching, not just Oracle DB.
+
 596     DUPLICATE      of pr #655
