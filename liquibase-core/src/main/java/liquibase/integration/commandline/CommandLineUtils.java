@@ -12,6 +12,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -221,15 +222,18 @@ public class CommandLineUtils {
                                          Database referenceDatabase,
                                          Database targetDatabase,
                                          DiffOutputControl diffOutputControl,
+                                         ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
-        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, snapshotTypes, null);
+        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, objectChangeFilter,
+                snapshotTypes, null);
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
                                          DiffOutputControl diffOutputControl,
+                                         ObjectChangeFilter objectChangeFilter,
                                          String snapshotTypes,
                                          CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
@@ -240,6 +244,7 @@ public class CommandLineUtils {
                 .setTargetDatabase(targetDatabase)
                 .setSnapshotTypes(snapshotTypes)
                 .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
+                .setObjectChangeFilter(objectChangeFilter)
                 .setOutputStream(System.out);
         command.setChangeLogFile(changeLogFile)
                 .setDiffOutputControl(diffOutputControl);
