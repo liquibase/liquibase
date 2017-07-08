@@ -33,6 +33,8 @@ bug list (https://dbmanul.atlassian.net).
   if the file name in the `<include>` tag did not have an extension. Thanks to Tomas Dvorak for the bugfix
   (5608dfccf3c50f321d140b3d5f75059f8ce432ac).
 
+- [CORE-1852] checksum depends on line endings and startCommentSymbol was fixed by Ivan Melnikov (upstream pr#648)
+
 #### Crashes and Java exceptions:
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
   was fixed thanks to "yuxiaobin" (0ea5040caf0175fc36fcaf5b2d375903c777c5eb).

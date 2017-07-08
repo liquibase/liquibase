@@ -32,4 +32,6 @@ to maximise its usefulness. Thank you.
 [CORE-3002]        none           c133369a5b6f0530d3cdd862a5bac3edbfd69319 SQLAnywhere: DROP UNIQUE CONSTRAINT fails
 [CORE-2993]        none           b5717eb7a6482ccf204d4bfc0656a8564a67e4e0 createSequence with order enabled for DB2
 [CORE-2773]        none           f425f011638db46b0bdc6a680e2d2e5f014feb8d Detection of DB2/AS400 improved
+[CORE-1852]        none           6a379a7a9aaf0ceffe6762b9bcc95c29d3be4615 checksum depends on line endings and
+                                                                           startCommentSymbol
 [CORE-1775]        none           e87c24f02b8a4b0e8bda59f7a8582c4069a077d2 Informix error when creating primary key
