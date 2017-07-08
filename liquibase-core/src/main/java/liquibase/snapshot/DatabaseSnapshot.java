@@ -11,6 +11,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -27,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
+    private static final Logger LOGGER = new LogFactory().getLog("DatabaseSnapshot");
     private final DatabaseObject[] originalExamples;
     private HashSet<String> serializableFields;
     private SnapshotControl snapshotControl;
@@ -247,7 +249,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 
-        if (!snapshotControl.shouldInclude(example.getClass())) {
+        if (!snapshotControl.shouldInclude(example)) {
+            LOGGER.debug("Excluding " + example);
             return example;
         }
 

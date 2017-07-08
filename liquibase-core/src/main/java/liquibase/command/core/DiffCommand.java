@@ -9,6 +9,7 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
@@ -28,6 +29,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     private SnapshotListener snapshotListener;
     private SnapshotControl referenceSnapshotControl;
     private SnapshotControl targetSnapshotControl;
+    private ObjectChangeFilter objectChangeFilter;
     private CompareControl compareControl;
 
 
@@ -207,7 +209,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
 
         SnapshotControl snapshotControl = getReferenceSnapshotControl();
         if (snapshotControl == null) {
-            snapshotControl = new SnapshotControl(referenceDatabase, snapshotTypes);
+            snapshotControl = new SnapshotControl(referenceDatabase, objectChangeFilter, snapshotTypes);
         }
         if (getSnapshotListener() != null) {
             snapshotControl.setSnapshotListener(getSnapshotListener());
@@ -220,6 +222,11 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
         } finally {
             referenceDatabase.setObjectQuotingStrategy(originalStrategy);
         }
+    }
+
+    public DiffCommand setObjectChangeFilter(ObjectChangeFilter objectChangeFilter) {
+        this.objectChangeFilter = objectChangeFilter;
+        return this;
     }
 }
 

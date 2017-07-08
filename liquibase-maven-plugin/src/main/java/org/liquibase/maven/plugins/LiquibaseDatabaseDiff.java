@@ -6,6 +6,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -71,15 +72,6 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter expression="${liquibase.referenceDefaultSchemaName}"
      */
     protected String referenceDefaultSchemaName;
-
-    /**
-     * The server id in settings.xml to use when authenticating with.
-     *
-     * @parameter expression="${liquibase.referenceServer}"
-     */
-    private String referenceServer;
-
-
     /**
      * If this parameter is set, the changelog needed to "fix" differences between the two databases is output. If the file exists, it is appended to.
      * If this is null, a comparison report is output to stdout.
@@ -87,28 +79,24 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter expression="${liquibase.diffChangeLogFile}"
      */
     protected String diffChangeLogFile;
-
     /**
      * Include the catalog in the diff output? If this is null then the catalog will not be included
      *
      * @parameter expression="${liquibase.diffIncludeCatalog}"
      */
     protected boolean diffIncludeCatalog;
-
     /**
      * Include the schema in the diff output? If this is null then the schema will not be included
      *
      * @parameter expression="${liquibase.diffIncludeSchema}"
      */
     protected boolean diffIncludeSchema;
-
     /**
      * Include the tablespace in the diff output? If this is null then the tablespace will not be included
      *
      * @parameter expression="${liquibase.diffIncludeTablespace}"
      */
     protected boolean diffIncludeTablespace;
-    
     /**
      * List of diff types to include in Change Log expressed as a comma separated list from: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints, data.
      * If this is null then the default types will be: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints
@@ -116,20 +104,24 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter expression="${liquibase.diffTypes}"
      */
     protected String diffTypes;
-
     /**
      * Objects to be excluded from the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
      * @parameter expression="${liquibase.diffExcludeObjects}"
      */
     protected String diffExcludeObjects;
-
     /**
      * Objects to be included in the changelog. Example filters: "table_name", "table:main_.*", "column:*._lock, table:primary.*".
      *
      * @parameter expression="${liquibase.diffIncludeObjects}"
      */
     protected String diffIncludeObjects;
+    /**
+     * The server id in settings.xml to use when authenticating with.
+     *
+     * @parameter expression="${liquibase.referenceServer}"
+     */
+    private String referenceServer;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -170,14 +162,19 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 if (diffExcludeObjects != null && diffIncludeObjects != null) {
                     throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
                 }
+                ObjectChangeFilter objectChangeFilter = null;
                 if (diffExcludeObjects != null) {
-                    diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE, diffExcludeObjects));
+                    objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType
+                            .EXCLUDE, diffExcludeObjects);
+                    diffOutputControl.setObjectChangeFilter(objectChangeFilter);
                 }
                 if (diffIncludeObjects != null) {
-                    diffOutputControl.setObjectChangeFilter(new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE, diffIncludeObjects));
+                    objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType
+                            .INCLUDE, diffIncludeObjects);
+                    diffOutputControl.setObjectChangeFilter(objectChangeFilter);
                 }
 
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, StringUtils.trimToNull(diffTypes));
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, diffOutputControl, objectChangeFilter, StringUtils.trimToNull(diffTypes));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
             catch (IOException|ParserConfigurationException e) {

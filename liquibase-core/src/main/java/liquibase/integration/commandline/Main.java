@@ -15,6 +15,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.ObjectChangeFilter;
 import liquibase.diff.output.StandardObjectChangeFilter;
 import liquibase.exception.*;
 import liquibase.lockservice.LockService;
@@ -861,19 +862,16 @@ public class Main {
                         String.format(coreBundle.getString("cannot.specify.both"),
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
             }
+            ObjectChangeFilter objectChangeFilter = null;
             if (excludeObjects != null) {
-                diffOutputControl.setObjectChangeFilter(
-                        new StandardObjectChangeFilter(
-                                StandardObjectChangeFilter.FilterType.EXCLUDE, excludeObjects
-                        )
-                );
+                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
+                        excludeObjects);
+                diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
             if (includeObjects != null) {
-                diffOutputControl.setObjectChangeFilter(
-                        new StandardObjectChangeFilter(
-                                StandardObjectChangeFilter.FilterType.INCLUDE, includeObjects
-                        )
-                );
+                objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
+                        includeObjects);
+                diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
 
             for (CompareControl.SchemaComparison schema : finalSchemaComparisons) {
@@ -889,8 +887,9 @@ public class Main {
                 return;
             } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile,
-                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener), database,
-                        diffOutputControl, StringUtils.trimToNull(diffTypes), finalSchemaComparisons
+                        createReferenceDatabaseFromCommandParams(commandParams, fileOpener),
+                        database,
+                        diffOutputControl, objectChangeFilter, StringUtils.trimToNull(diffTypes), finalSchemaComparisons
                 );
                 return;
             } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
