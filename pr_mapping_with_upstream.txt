@@ -62,4 +62,6 @@ request number (pr#) to maximise its usefulness. Thank you.
 649     MERGED         Corrected documentation errors in AbstractLiquibaseMojo.java
 648     MERGED         [CORE-1852] checksum depends on line endings and startCommentSymbol
 647     MERGED         [CORE-3005] Consideration of DB2 system views
+646     N/A            [CORE-3006] probably already fixed in DB-Manul by another fix; needs verification
+
 596     DUPLICATE      of pr #655

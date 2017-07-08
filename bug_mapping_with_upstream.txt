@@ -27,6 +27,8 @@ to maximise its usefulness. Thank you.
                                                                            set when using includeAll
 [CORE-3009]        none           968bd791c91f6caa36271346ce66537260d9fbc9 ASANY Drop Default Value failed
                                                                            (upstream pr #659)
+[CORE-3006]        none           c307b0795a01086a60e89026a548745c54c1a79e Probably fixed with rewrite of date literal
+                                                                           detection using RegExp; needs verification
 [CORE-3005]        none           60adb8f56fa2d13036f5ae33139dd3f0169e233b Consideration of DB2 system views
                                                                            (upstream pr#647)
 [CORE-3003]        none           50c53d50b8c17ba52c0a24f6d36fc94a5f0d55ad SQLAnywhere: Owner/Schema-Identifier at
