@@ -100,6 +100,8 @@ New features
 ------------
 
 ### All supported databases:
+- When diffing database objects, the filters includeObjects and excludeObjects are now applied to the list of objects
+  that are compared. ([CORE-3079], fixed by Mårten Svantesson)
 
 #### Logging
 
