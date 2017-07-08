@@ -11,6 +11,9 @@ request number (pr#) to maximise its usefulness. Thank you.
 686     MERGED         Prevent liquibase.exception.DatabaseException
 685     MERGED         [CORE-3079] Make includeObjects and excludeObjects affect which objects are snapshotted
 684     MERGED         [CORE-3076] HsqlDB: add SUM to keywords
+683     (TODO)         Adds support for Actian Ingres RDBMS - need to clarify license, create integration tests etc.
+                       before I can fully merge it.
+681     N/A            Support for Actian Ingress RDBMS - work probably already included in #683.
 678     MERGED         Add SchemesCDIConfig+ (it should allow you to create a dependent tree…
 677     MERGED         Fix json serialize fail on changeset precondition enums
 676     N/A            [CORE-3063] integration tests that cannot connect should be Ignored not Passed
