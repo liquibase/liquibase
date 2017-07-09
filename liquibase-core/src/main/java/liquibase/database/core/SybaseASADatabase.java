@@ -167,7 +167,6 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
     */
     @Override
     public String getShortName() {
-
         return "asany";
     }
 
@@ -212,7 +211,6 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName)
             throws DatabaseException {
-        // TODO Auto-generated method stub
         return super.getViewDefinition(schema, viewName);
     }
 

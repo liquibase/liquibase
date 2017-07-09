@@ -281,7 +281,6 @@ public class StandardLockService implements LockService {
 
                 hasChangeLogLock = true;
 
-                database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
         } catch (Exception e) {
@@ -351,8 +350,6 @@ public class StandardLockService implements LockService {
         } finally {
             try {
                 hasChangeLogLock = false;
-
-                database.setCanCacheLiquibaseTableInfo(false);
 
                 LogFactory.getInstance().getLog().info("Successfully released change log lock");
                 database.rollback();

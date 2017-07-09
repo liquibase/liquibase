@@ -42,8 +42,6 @@ public class TestContext {
                         || database instanceof MockDatabase) {
                     toRemove.add(database);
                 }
-
-                database.setCanCacheLiquibaseTableInfo(false);
             }
             allDatabases.removeAll(toRemove);
         }

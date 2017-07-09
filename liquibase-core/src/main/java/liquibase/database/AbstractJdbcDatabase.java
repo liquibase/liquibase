@@ -87,7 +87,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private String liquibaseSchemaName;
     private String liquibaseCatalogName;
     private Boolean previousAutoCommit;
-    private boolean canCacheLiquibaseTableInfo = false;
     private DatabaseConnection connection;
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
@@ -611,11 +610,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void setCanCacheLiquibaseTableInfo(final boolean canCacheLiquibaseTableInfo) {
-        this.canCacheLiquibaseTableInfo = canCacheLiquibaseTableInfo;
-    }
-
-    @Override
     public String getLiquibaseCatalogName() {
         if (liquibaseCatalogName != null) {
             return liquibaseCatalogName;
@@ -782,7 +776,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (example == null) {
             return false;
         }
-        if (example.getSchema() != null && example.getSchema().getName() != null && example.getSchema().getName().equalsIgnoreCase("information_schema")) {
+        if (example.getSchema() != null && example.getSchema().getName() != null && "information_schema"
+                .equalsIgnoreCase(example.getSchema().getName())) {
             return true;
         }
         if (example instanceof Table && getSystemTables().contains(example.getName())) {
@@ -904,7 +899,9 @@ public abstract class AbstractJdbcDatabase implements Database {
                     }
                 }
             } else {
-                if (schemaName != null) { //they actually mean catalog name
+
+                //they actually mean catalog name
+                if (schemaName != null) {
                     if (getOutputDefaultCatalog()) {
                         return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                     } else {
@@ -1107,8 +1104,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         AbstractJdbcDatabase that = (AbstractJdbcDatabase) o;
 
@@ -1259,9 +1260,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         final List<SqlVisitor> rollbackVisitors = new ArrayList<>();
         if (visitors != null) {
             for (SqlVisitor visitor : visitors) {
-               if (visitor.isApplyToRollback()) {
-                   rollbackVisitors.add(visitor);
-               }
+                if (visitor.isApplyToRollback()) {
+                    rollbackVisitors.add(visitor);
+                }
             }
         }
 

@@ -154,8 +154,6 @@ public interface Database extends PrioritizedService {
      */
     String getConcatSql(String... values);
 
-    void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
-
     /**
      * Drops all objects in a specified schema.
      * @param schema schema (catalog+)schema to drop

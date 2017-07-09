@@ -75,11 +75,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void setCanCacheLiquibaseTableInfo(final boolean canCacheLiquibaseTableInfo) {
-        //
-    }
-
-    @Override
     public boolean requiresUsername() {
         return false;
     }
@@ -104,11 +99,11 @@ public class MockDatabase implements Database, InternalDatabase {
         return null;
     }
 
-    public void setConnection(final Connection conn) {
-    }
-
     @Override
     public void setConnection(final DatabaseConnection conn) {
+    }
+
+    public void setConnection(final Connection conn) {
     }
 
     @Override
