@@ -37,6 +37,8 @@ public class IntType extends LiquibaseDataType {
         if (database instanceof PostgresDatabase) {
             if (autoIncrement) {
                 return new DatabaseDataType("SERIAL");
+            } else {
+                return new DatabaseDataType("INTEGER");
             }
         }
         if (database instanceof MSSQLDatabase) {
