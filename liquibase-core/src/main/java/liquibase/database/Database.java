@@ -364,6 +364,11 @@ public interface Database extends PrioritizedService {
 
     boolean createsIndexesForForeignKeys();
 
+    /**
+     * Should the schema be included in identifiers even if it is the default schema?
+     *
+     * @return true (if the schema should be included in every case) or false (omit if default schema)
+     */
     boolean getOutputDefaultSchema();
 
     /**
