@@ -81,6 +81,13 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockedby] varchar(255) null, " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))"}, MariaDBDatabase.class);
 
+        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
+                "[id] int not null, " +
+                "[locked] boolean not null, " +
+                "[lockgranted] datetime, " +
+                "[lockedby] varchar(255), " +
+                "constraint [databasechangeloglock_pkey] primary key ([id]))"}, PostgresDatabase.class);
+
         // all other RDBMS
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +
