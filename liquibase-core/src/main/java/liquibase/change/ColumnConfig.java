@@ -166,8 +166,32 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
     public ColumnConfig() {
     }
 
+    public static ColumnConfig fromName(String name) {
+        name = name.trim();
+        Boolean descending = null;
+        if (name.matches("(?i).*\\s+DESC")) {
+            name = name.replaceFirst("(?i)\\s+DESC$", "");
+            descending = true;
+        } else if (name.matches("(?i).*\\s+ASC")) {
+            name = name.replaceFirst("(?i)\\s+ASC$", "");
+            descending = false;
+        }
+        return new ColumnConfig()
+                .setName(name)
+                .setDescending(descending);
+    }
 
-
+    public static ColumnConfig[] arrayFromNames(String names) {
+        if (names == null) {
+            return null;
+        }
+        List<String> nameArray = StringUtils.splitAndTrim(names, ",");
+        ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
+        for (int i = 0; i < nameArray.size(); i++) {
+            returnArray[i] = fromName(nameArray.get(i));
+        }
+        return returnArray;
+    }
 
     /**
      * The name of the column.
@@ -219,7 +243,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return value;
     }
 
-
     /**
      * Sets the string value this column should be set to.
      * If you are trying to set a value type other than a string, use the more specific functions like {@link #setValueNumeric(Number)}.
@@ -240,6 +263,11 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return valueNumeric;
     }
 
+    public ColumnConfig setValueNumeric(Number valueNumeric) {
+        this.valueNumeric = valueNumeric;
+
+        return this;
+    }
 
     /**
      * Set the number this column should be set to. Supports integers and decimals, and strips off any wrapping
@@ -266,88 +294,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public ColumnConfig setValueNumeric(Number valueNumeric) {
-        this.valueNumeric = valueNumeric;
-
-        return this;
-    }
-    
-	public static class ValueNumeric extends Number {
-		private static final long serialVersionUID = 1381154777956917462L;
-		
-		private final Number delegate;
-		private final String value;
-
-		private static ValueNumeric of(Locale locale, String value) throws ParseException {
-			final Number parsedNumber = NumberFormat.getInstance(locale)
-					.parse(value);
-			return new ValueNumeric(value, parsedNumber);
-		}
-
-		private ValueNumeric(final String value, final Number numeric) {
-			this.delegate = numeric;
-			this.value = value;
-		}
-
-		@Override
-		public double doubleValue() {
-			return delegate.doubleValue();
-		}
-
-		@Override
-		public float floatValue() {
-			return delegate.floatValue();
-		}
-
-		@Override
-		public int intValue() {
-			return delegate.intValue();
-		}
-
-		@Override
-		public long longValue() {
-			return delegate.longValue();
-		}
-
-		@Override
-		public String toString() {
-			return value;
-		}
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-
-            if (!(obj instanceof Number)) {
-                return false;
-            }
-            return obj.toString().equals(this.toString());
-        }
-
-        @Override
-        public int hashCode() {
-            return this.toString().hashCode();
-        }
-
-        public Number getDelegate() {
-          return delegate;
-        }
-    }
-
     /**
      * Return the boolean value this column should be set to.
      * @see #setValue(String)
      */
     public Boolean getValueBoolean() {
         return valueBoolean;
-    }
-
-    public ColumnConfig setValueBoolean(Boolean valueBoolean) {
-        this.valueBoolean = valueBoolean;
-
-        return this;
     }
 
     /**
@@ -374,6 +326,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public ColumnConfig setValueBoolean(Boolean valueBoolean) {
+        this.valueBoolean = valueBoolean;
+
+        return this;
+    }
+
     /**
      * Return the function this column should be set from.
      * @see #setValue(String)
@@ -389,18 +347,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public ColumnConfig setValueSequenceNext(SequenceNextValueFunction valueSequenceNext) {
-        this.valueSequenceNext = valueSequenceNext;
-
-        return this;
-    }
-
     public SequenceNextValueFunction getValueSequenceNext() {
         return valueSequenceNext;
     }
 
-    public ColumnConfig setValueSequenceCurrent(SequenceCurrentValueFunction valueSequenceCurrent) {
-        this.valueSequenceCurrent = valueSequenceCurrent;
+    public ColumnConfig setValueSequenceNext(SequenceNextValueFunction valueSequenceNext) {
+        this.valueSequenceNext = valueSequenceNext;
 
         return this;
     }
@@ -409,18 +361,18 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return valueSequenceCurrent;
     }
 
+    public ColumnConfig setValueSequenceCurrent(SequenceCurrentValueFunction valueSequenceCurrent) {
+        this.valueSequenceCurrent = valueSequenceCurrent;
+
+        return this;
+    }
+
     /**
      * Return the date value this column should be set to.
      * @see #setValue(String)
      */
     public Date getValueDate() {
         return valueDate;
-    }
-
-    public ColumnConfig setValueDate(Date valueDate) {
-        this.valueDate = valueDate;
-
-        return this;
     }
 
     /**
@@ -439,6 +391,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
                 this.valueComputed = new DatabaseFunction(valueDate);
             }
         }
+
+        return this;
+    }
+
+    public ColumnConfig setValueDate(Date valueDate) {
+        this.valueDate = valueDate;
 
         return this;
     }
@@ -480,7 +438,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         this.encoding = encoding;
         return this;
     }
-    
+
     /**
      * Return the value from whatever setValue* function was called. Will return null if none were set.
      */
@@ -507,7 +465,6 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return null;
     }
 
-
     /**
      * The String default value to assign to this column. If you do not want the default set by {@link #setDefaultValue(String)}
      * use a more specific function like {@link #getDefaultValueNumeric()} or the more generic {@link #getDefaultValueObject()}
@@ -528,19 +485,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-
     /**
      * Return the numeric value this column should default to.
      * @see #setDefaultValue(String)
      */
     public Number getDefaultValueNumeric() {
         return defaultValueNumeric;
-    }
-
-    public ColumnConfig setDefaultValueNumeric(Number defaultValueNumeric) {
-        this.defaultValueNumeric = defaultValueNumeric;
-
-        return this;
     }
 
     /**
@@ -572,12 +522,24 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
+    public ColumnConfig setDefaultValueNumeric(Number defaultValueNumeric) {
+        this.defaultValueNumeric = defaultValueNumeric;
+
+        return this;
+    }
+
     /**
      * Return the date value this column should default to.
      * @see #setDefaultValue(String)
      */
     public Date getDefaultValueDate() {
         return defaultValueDate;
+    }
+
+    public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
+        this.defaultValueDate = defaultValueDate;
+
+        return this;
     }
 
     /**
@@ -601,24 +563,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         return this;
     }
 
-    public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
-        this.defaultValueDate = defaultValueDate;
-
-        return this;
-    }
-
     /**
      * Return the boolean value this column should default to.
      * @see #setDefaultValue(String)
      */
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
-    }
-
-    public ColumnConfig setDefaultValueBoolean(Boolean defaultValueBoolean) {
-        this.defaultValueBoolean = defaultValueBoolean;
-
-        return this;
     }
 
     /**
@@ -641,6 +591,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             }
 
         }
+
+        return this;
+    }
+
+    public ColumnConfig setDefaultValueBoolean(Boolean defaultValueBoolean) {
+        this.defaultValueBoolean = defaultValueBoolean;
 
         return this;
     }
@@ -822,7 +778,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         if (value == null) {
             value = StringUtils.trimToNull((String) parsedNode.getValue());
         }
-        
+
         setValueNumeric(parsedNode.getChildValue(null, "valueNumeric", String.class));
 
         try {
@@ -850,7 +806,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         defaultValueConstraintName = parsedNode.getChildValue(null, "defaultValueConstraintName", String.class);
 
         defaultValue = parsedNode.getChildValue(null, "defaultValue", String.class);
-        
+
         setDefaultValueNumeric(parsedNode.getChildValue(null, "defaultValueNumeric", String.class));
 
         try {
@@ -898,30 +854,67 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
     }
 
-    public static ColumnConfig fromName(String name) {
-        name = name.trim();
-        Boolean descending = null;
-        if (name.matches("(?i).*\\s+DESC")) {
-            name = name.replaceFirst("(?i)\\s+DESC$", "");
-            descending = true;
-        } else if (name.matches("(?i).*\\s+ASC")) {
-            name = name.replaceFirst("(?i)\\s+ASC$", "");
-            descending = false;
-        }
-        return new ColumnConfig()
-                .setName(name)
-                .setDescending(descending);
-    }
+    public static class ValueNumeric extends Number {
+        private static final long serialVersionUID = 1381154777956917462L;
 
-    public static ColumnConfig[] arrayFromNames(String names) {
-        if (names == null) {
-            return null;
+        private final Number delegate;
+        private final String value;
+
+        private ValueNumeric(final String value, final Number numeric) {
+            this.delegate = numeric;
+            this.value = value;
         }
-        List<String> nameArray = StringUtils.splitAndTrim(names, ",");
-        ColumnConfig[] returnArray = new ColumnConfig[nameArray.size()];
-        for (int i = 0; i < nameArray.size(); i++) {
-            returnArray[i] = fromName(nameArray.get(i));
+
+        private static ValueNumeric of(Locale locale, String value) throws ParseException {
+            final Number parsedNumber = NumberFormat.getInstance(locale)
+                    .parse(value);
+            return new ValueNumeric(value, parsedNumber);
         }
-        return returnArray;
+
+        @Override
+        public double doubleValue() {
+            return delegate.doubleValue();
+        }
+
+        @Override
+        public float floatValue() {
+            return delegate.floatValue();
+        }
+
+        @Override
+        public int intValue() {
+            return delegate.intValue();
+        }
+
+        @Override
+        public long longValue() {
+            return delegate.longValue();
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (!(obj instanceof Number)) {
+                return false;
+            }
+            return obj.toString().equals(this.toString());
+        }
+
+        @Override
+        public int hashCode() {
+            return this.toString().hashCode();
+        }
+
+        public Number getDelegate() {
+            return delegate;
+        }
     }
 }
