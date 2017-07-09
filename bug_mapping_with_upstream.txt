@@ -42,6 +42,7 @@ to maximise its usefulness. Thank you.
                                                                            code generation
 [CORE-2977]        none           4b65c947c7711eadfde5713af31eccb654fb5bfc Use the same name as Postgres for primary key
                                                                            constraints
+[CORE-2944]        none           b03d74146a235520edc69388f003d569f0d3b31e outputDefaultSchema and outputDefaultCatalog command line parameters not respected
 [CORE-2773]        none           f425f011638db46b0bdc6a680e2d2e5f014feb8d Detection of DB2/AS400 improved
 [CORE-2162]        none           none                                     MSSQL: Multiple inserts in sqlFile do not
                                                                            fail as expected - IMHO not a valid bug.

@@ -91,5 +91,6 @@ request number (pr#) to maximise its usefulness. Thank you.
 630     TODO           Trigger an exception on a RAISERROR - the idea looks good, but I still fail to find a test
                        case where a single executed statement returns multiple result sets. I need that to make a
                        test case to protect against regression.
-
+629     MERGED         [CORE-2944] Honor `outputDefaultSchema=false` and `outputDefaultCatalog=false` when generating
+                       SQL code.
 596     DUPLICATE      of pr #655

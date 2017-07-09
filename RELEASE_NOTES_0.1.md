@@ -41,6 +41,9 @@ bug list (https://dbmanul.atlassian.net).
 - When specifying the attribute "objectQuotingStrategy" for a change set, the attribute was applied during the 
   execution phase, but not during the validation phase. Thanks to GitHub user "mway-dmueller" for the fix
   (3965d341a2046cd22a8cf578b16199652442f39c).
+  
+- [CORE-2944] Honor `outputDefaultSchema=false` and `outputDefaultCatalog=false` when generating SQL code 
+  did not work. Thanks to Piotrek Bzdyl for the bug fix.   
 
 #### Crashes and Java exceptions:
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
