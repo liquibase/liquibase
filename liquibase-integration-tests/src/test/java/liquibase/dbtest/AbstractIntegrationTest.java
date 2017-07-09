@@ -322,7 +322,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void batchInsert() throws Exception {
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
+    public void testBatchInsert() throws Exception {
         if (this.getDatabase() == null) {
             return;
         }
@@ -330,7 +331,6 @@ public abstract class AbstractIntegrationTest {
 
         createLiquibase("changelogs/common/batchInsert.changelog.xml").update(this.contexts);
         // ChangeLog already contains the verification code
-        assertTrue("batchInsert ChangeLog completed its internal verification successfully", true);
     }
 
 
@@ -350,6 +350,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRunChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -384,7 +385,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void runUpdateOnOldChangelogTableFormat() throws Exception {
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
+    public void testRunUpdateOnOldChangelogTableFormat() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(completeChangeLog);
         clearDatabase();
@@ -436,19 +438,19 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(this.contexts, output);
 
         String outputResult = output.getBuffer().toString();
-        assertNotNull(outputResult);
-        assertTrue(outputResult.length() > 100); //should be pretty big
+        assertNotNull("generated output change log must not be empty", outputResult);
+        assertTrue("generated output change log is at least 100 bytes long", outputResult.length() > 100);
 
         // TODO should better written to a file so CI servers can pick it up as test artifacts.
         System.out.println(outputResult);
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 
-        assertTrue(outputResult.contains("€"));
-        assertTrue(outputResult.contains("€"));
+        assertTrue("generated output contains a correctly encoded Euro sign", outputResult.contains("€"));
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
-        assertEquals(0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
+        assertEquals("no database objects were actually created during creation of the output changelog",
+                0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
     }
 
     /**
@@ -526,6 +528,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testUpdateTwice() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -539,6 +542,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testUpdateClearUpdate() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -556,6 +560,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -576,6 +581,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -592,6 +598,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -605,6 +612,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testTag() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -630,7 +638,8 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, compareControl);
 
         try {
-            assertTrue(diffResult.areEqual());
+            assertTrue("comapring a database with itself should return a result of 'DBs are equal'",
+                    diffResult.areEqual());
         } catch (AssertionError e) {
             new DiffToReport(diffResult, System.err).print();
             throw e;
@@ -693,7 +702,9 @@ public abstract class AbstractIntegrationTest {
 
             DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, compareControl);
             try {
-                assertTrue(finalDiffResult.areEqual());
+                assertTrue("recreating the database from the generated change log should cause both 'before' and " +
+                                "'after' snapshots to be equal.",
+                        finalDiffResult.areEqual());
             } catch (AssertionError e) {
                 new DiffToReport(finalDiffResult, System.err).print();
                 throw e;
@@ -718,8 +729,11 @@ public abstract class AbstractIntegrationTest {
             }
 
             DatabaseSnapshot emptyAgainSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
-            assertEquals(2, emptyAgainSnapshot.get(Table.class).size());
-            assertEquals(0, emptyAgainSnapshot.get(View.class).size());
+            assertEquals("a database that was 'updated' to an empty snapshot should only have 2 tables left: " +
+                            "the database change log table and the lock table.",
+                    2, emptyAgainSnapshot.get(Table.class).size());
+            assertEquals("a database that was 'updated' to an empty snapshot should not contain any views.",
+                    0, emptyAgainSnapshot.get(View.class).size());
         }
     }
 
@@ -742,7 +756,15 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
-        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{new CompareControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "lbcat2"))}, originalSnapshot.getSnapshotControl().getTypesToInclude());
+        CompareControl compareControl = new CompareControl(
+                new CompareControl.SchemaComparison[]{
+                        new CompareControl.SchemaComparison(
+                                CatalogAndSchema.DEFAULT,
+                                new CatalogAndSchema(null, "lbcat2")
+                        )
+                },
+                originalSnapshot.getSnapshotControl().getTypesToInclude()
+        );
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
@@ -791,10 +813,13 @@ public abstract class AbstractIntegrationTest {
         finalCompareControl.addSuppressedField(Column.class, "autoIncrementInformation");
         DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, finalCompareControl);
         new DiffToReport(finalDiffResult, System.out).print();
-        assertTrue(finalDiffResult.areEqual());
+        assertTrue("running the same change log two times against an alternative schema should produce " +
+                        "equal snapshots.",
+                finalDiffResult.areEqual());
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testClearChecksums() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -812,6 +837,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testTagEmptyDatabase() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -841,11 +867,13 @@ public abstract class AbstractIntegrationTest {
         liquibase.setChangeLogParameter( "loginuser", getUsername());
         List<ChangeSet> list = liquibase.listUnrunChangeSets(new Contexts(this.contexts), new LabelExpression());
 
-        assertTrue(list.size() > 0);
+        assertTrue("querying the changelog table on an empty target should return at least 1 un-run change set",
+                list.size() > 0);
 
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testAbsolutePathChangeLog() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -880,6 +908,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testRollbackToChange() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -902,6 +931,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
     public void testDbDoc() throws Exception {
         assumeNotNull(this.getDatabase());
 
@@ -949,6 +979,7 @@ public abstract class AbstractIntegrationTest {
      * Test that diff is capable to detect foreign keys to external schemas that doesn't appear in the changelog
      */
    @Test
+   @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
    public void testDiffExternalForeignKeys() throws Exception {
        assumeNotNull(this.getDatabase());
        clearDatabase();
@@ -960,7 +991,7 @@ public abstract class AbstractIntegrationTest {
    }
 
     @Test
-    public void invalidIncludeDoesntBreakLiquibase() throws Exception{
+    public void testInvalidIncludeDoesntBreakLiquibase() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
@@ -975,7 +1006,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void contextsWithHyphensWorkInFormattedSql() throws Exception {
+    public void testContextsWithHyphensWorkInFormattedSql() throws Exception {
         assumeNotNull(this.getDatabase());
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
@@ -988,7 +1019,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void verifyObjectQuotingStrategy() throws Exception {
+    @SuppressWarnings("squid:S2699") // Successful execution qualifies as test success.
+    public void testObjectQuotingStrategy() throws Exception {
         assumeNotNull(this.getDatabase());
         if (!Arrays.asList("oracle,h2,hsqldb,postgresql,mysql").contains(database.getShortName())) {
             return;
@@ -1020,16 +1052,17 @@ public abstract class AbstractIntegrationTest {
         liquibase.update(contexts, output);
 
         String outputResult = output.getBuffer().toString();
-        assertNotNull(outputResult);
-        assertTrue(outputResult.length() > 100); //should be pretty big
+        assertNotNull("generated SQL may not be empty", outputResult);
+        assertTrue("Expect at least 100 bytes of output in generated SQL", outputResult.length() > 100);
         CharSequence expected = "CREATE TABLE "+getDatabase().escapeTableName(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains(expected));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains(expected));
-        assertFalse("the scheame name '"+schemaName+"' should be ignored\n\n"+outputResult, outputResult.contains(schemaName+"."));
+        assertFalse("the scheame name '"+schemaName+"' should be ignored\n\n"+outputResult, outputResult.contains
+                (schemaName+"."));
     }
 
     @Test
-    public void generateChangeLog_noChanges() throws Exception{
+    public void testGenerateChangeLogWithNoChanges() throws Exception {
         assumeNotNull(this.getDatabase());
 
         runCompleteChangeLog();
@@ -1038,7 +1071,8 @@ public abstract class AbstractIntegrationTest {
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false, null));
         List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
-        assertEquals(0, changeSets.size());
+        assertEquals("generating two change logs without any changes in between should result in an empty generated " +
+                "differential change set.", 0, changeSets.size());
     }
 
     protected Database getDatabase(){
