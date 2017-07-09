@@ -101,6 +101,8 @@
             <column name="timeA" type="time"/>
             <column name="datetimeA" type="datetime"/>
             <column name="datetimeB" type="datetime"/>
+            <column name="timestampA" type="timestamp"/>
+            <column name="timestampB" type="timestamp"/>
             <column name="computedDate" type="datetime"/>
         </createTable>
 
@@ -111,6 +113,10 @@
         <addDefaultValue tableName="defaultValueTest" columnName="timeA" defaultValueDate="14:15:16" columnDataType="time" />
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeA" defaultValueDate="2007-08-09T10:11:12" columnDataType="datetime" />
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeB" defaultValueDate="2007-08-09 10:11:12" columnDataType="datetime" />
+        <addDefaultValue tableName="defaultValueTest" columnName="timestampA" defaultValueDate="2007-08-09T10:11:12.123"
+                         columnDataType="timestamp"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="timestampB" defaultValueDate="2007-08-09 10:11:12.12"
+                         columnDataType="timestamp"/>
         <addDefaultValue tableName="defaultValueTest" columnName="computedDate" defaultValueComputed="current_datetime" columnDataType="datetime" />
 
         <insert tableName="defaultValueTest">
@@ -128,6 +134,8 @@
             <column name="timeA" type="time" defaultValueDate="14:15:16"/>
             <column name="datetimeA" type="datetime" defaultValueDate="2007-08-09T10:11:12"/>
             <column name="datetimeB" type="datetime" defaultValueDate="2007-08-09 10:11:12"/>
+            <column name="timestampA" type="timestamp" defaultValueDate="2007-08-09T10:11:12.123"/>
+            <column name="timestampB" type="timestamp" defaultValueDate="2007-08-09 10:11:12.12"/>
         </createTable>
 
         <insert tableName="defaultValueTest2">
@@ -991,7 +999,7 @@
 
     <sql>
       <![CDATA[  
-	    insert into testutf8insert (stringvalue) values ('€');
+        insert into testutf8insert (stringvalue) values ('€');
         insert into testutf8insert (stringvalue) values ('£');
         ]]>
     </sql>
