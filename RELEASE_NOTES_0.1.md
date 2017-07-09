@@ -106,8 +106,8 @@ bug list (https://dbmanul.atlassian.net).
 - [CORE-3009] Wrong SQL was generated for the dropDefaultValue operation, fixed by Andreas Pohl (968bd791c91f6caa36271346ce66537260d9fbc9 )
 
 
-New features
-------------
+New features / enhancements
+---------------------------
 
 ### All supported databases:
 - When diffing database objects, the filters includeObjects and excludeObjects are now applied to the list of objects
@@ -144,6 +144,12 @@ sent to a database instance.
 
 - Snapshotting an Oracle schema now extracts the TABLESPACE property of each table (if it is not the default
   tablespace for the connecting user).
+
+### PostgreSQL
+
+- [CORE-2977] Generated primary key constraint name doesn't match Postgres default was implemented by 
+  Dario Sneidermanis. DB-Manul will now auto-generate pgsql PK constraint names in the same way as pgsql does
+  (table name_pk).
 
 ### Miscellaneous
 

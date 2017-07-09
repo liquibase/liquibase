@@ -66,4 +66,6 @@ request number (pr#) to maximise its usefulness. Thank you.
 645     GONE
 644     N/A            [CORE-2978] Broken PostgreSQL AddAutoIncrementChange SQL code generation
                        (likely already fixed by another checkin)
+643     GONE
+642     MERGED         [CORE-2977] Use the same name as Postgres for primary key constraints
 596     DUPLICATE      of pr #655

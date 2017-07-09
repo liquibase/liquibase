@@ -275,6 +275,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return new RawCallStatement("select current_schema()");
     }
 
+    @Override
+    public String generatePrimaryKeyName(final String tableName) {
+        return tableName.toUpperCase() + "_PKEY";
+    }
+
     private boolean catalogExists(String catalogName) throws DatabaseException {
         return catalogName != null && runExistsQuery(
                 "select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
