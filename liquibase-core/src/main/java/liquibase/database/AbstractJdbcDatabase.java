@@ -92,7 +92,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean outputDefaultCatalog = true;
 
     private boolean defaultCatalogSet = false;
-    private boolean defaultSchemaSet = false;
 
     private Map<String, Object> attributes = new HashMap<>();
 
@@ -271,7 +270,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getDefaultSchemaName() {
-
         if (!supportsSchemas()) {
             return getDefaultCatalogName();
         }
@@ -280,14 +278,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             defaultSchemaName = getConnectionSchemaName();
         }
 
-
         return defaultSchemaName;
     }
 
     @Override
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
-        defaultSchemaSet = schemaName != null;
         if (!supportsSchemas()) {
             defaultCatalogSet = schemaName != null;
         }
@@ -870,15 +866,16 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (catalogName == null && schemaName == null) {
                 return escapeObjectName(objectName, objectType);
             } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
-                if (defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
+                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
                     return escapeObjectName(objectName, objectType);
                 } else {
                     return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 }
             } else {
-                if (defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
+                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog
+                        ()) {
                     return escapeObjectName(objectName, objectType);
-                } else if (defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
+                } else if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
                     return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 } else {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
