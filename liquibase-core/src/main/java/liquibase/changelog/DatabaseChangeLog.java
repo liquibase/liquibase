@@ -257,6 +257,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void validate(Database database, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
 
+    	database.setObjectQuotingStrategy(objectQuotingStrategy);
+    	
         ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts), new LabelChangeSetFilter(labelExpression));
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
