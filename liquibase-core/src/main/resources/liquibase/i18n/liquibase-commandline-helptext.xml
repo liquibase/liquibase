@@ -109,7 +109,7 @@ Optional Parameters:
                                             implementation to use
  --propertyProviderClass=<properties.ClassName>  custom Properties
                                             implementation to use
- --defaultSchemaName=<name>                 Default database schema to use
+ --defaultSchemaName=<name>                 Overwrites the database schema to use
  --contexts=<value>                         ChangeSet contexts to execute
  --labels=<expression>                      Expression defining labeled
                                             ChangeSet to execute

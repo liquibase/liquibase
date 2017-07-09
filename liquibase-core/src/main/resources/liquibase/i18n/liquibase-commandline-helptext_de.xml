@@ -122,11 +122,10 @@ Optionale Parameter:
  --propertyProviderClass=<properties.ClassName> Gibt den Java-Klassennamen
                                             einer Implementierung zum Auslesen
                                             von Java-Properties an
- --defaultSchemaName=<name>                 Setzt das Standardschema für
-                                            Operationen, die keinen expliziten
-                                            Schema-Namen angeben. Ansonsten
-                                            ist der Standardwert vom DBMS
-                                            abhängig.
+ --defaultSchemaName=<name>                 Überschreibt das Standardschema,
+                                            das ansonsten nach
+                                            Verbindungsaufbau vom DBMS
+                                            ausgelesen würde.
  --contexts=<value>                         Gibt eine Liste mit Kontexten an,
                                             anhand derer in den ChangeSets
                                             entschieden werden kann, ob ein
