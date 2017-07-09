@@ -94,4 +94,6 @@ request number (pr#) to maximise its usefulness. Thank you.
 629     MERGED         [CORE-2944] Honor `outputDefaultSchema=false` and `outputDefaultCatalog=false` when generating
                        SQL code.
 628     MERGED         Fix for whitespace before delimiter
+627     GONE
+626     MERGED         Postgres does not support parameters for type int
 596     DUPLICATE      of pr #655

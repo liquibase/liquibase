@@ -111,6 +111,8 @@ bug list (https://dbmanul.atlassian.net).
 - When snapshotting a PostgreSQL schema with a column of type "oid", the data type was wrongly snapshotted as
   "oid(16)", which causes an SQL syntax error later. It is now snapshotted as simply "oid"
   (commit a96e3c84785f693d25063538257cc0c8cf0deced)
+- The column type int is now correctly translated to the pgsql type INTEGER (if no auto increment is involved) thanks
+  to Felix Barny (2aad252e583bcdeefee0dad293a8947a67c3dfc9)
 
 #### SAP SQL Anywhere (formerly Sybase AS Anywhere)
 - Sequences are now supported thanks to Andreas Pohl (b7bd7fc0f7fc6e96e9990dc169507614f861ed05)
