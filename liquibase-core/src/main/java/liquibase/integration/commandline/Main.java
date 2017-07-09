@@ -191,7 +191,7 @@ public class Main {
                     printErrNoLog(generateLogLevelWarningMessage());
                 }
             } catch (Exception e1) {
-                e.printStackTrace();
+                e1.printStackTrace();
             }
             throw new LiquibaseException(String.format(coreBundle.getString("unexpected.error"), message), e);
         }
@@ -1276,13 +1276,12 @@ public class Main {
                 .getOutputEncoding();
 
         if (outputFile != null) {
-            try (
-                    FileOutputStream fileOut = new FileOutputStream(outputFile, false)
-            ) {
+            try {
+                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
-                LogFactory.getInstance().getLog().severe(String.format(coreBundle.getString("could.not.create.output" +
-                                ".file") + "\n",
+                LogFactory.getInstance().getLog().severe(String.format(
+                        coreBundle.getString("could.not.create.output.file") + "\n",
                         outputFile));
                 throw e;
             }
