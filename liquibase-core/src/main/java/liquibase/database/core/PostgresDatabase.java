@@ -5,12 +5,10 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.JdbcUtils;
@@ -18,8 +16,11 @@ import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Encapsulates PostgreSQL database support.
@@ -28,6 +29,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
     public static final int MINIMUM_DBMS_MAJOR_VERSION = 9;
     public static final int MINIMUM_DBMS_MINOR_VERSION = 2;
+    private static final int PGSQL_DEFAULT_TCP_PORT_NUMBER = 5432;
+    private static final Logger LOG = LogFactory.getInstance().getLog();
 
     private Set<String> systemTablesAndViews = new HashSet<>();
 
@@ -56,6 +59,18 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean equals(Object o) {
+        // Actually, we don't need and more specific checks than the base method. This exists just to make SONAR happy.
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        // Actually, we don't need and more specific hashing than the base method. This exists just to make SONAR happy.
+        return super.hashCode();
+    }
+
+    @Override
     public String getShortName() {
         return "postgresql";
     }
@@ -67,7 +82,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public Integer getDefaultPort() {
-        return 5432;
+        return PGSQL_DEFAULT_TCP_PORT_NUMBER;
     }
 
     @Override
@@ -87,8 +102,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        if (! PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName()))
+        if (!PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName())) {
             return false;
+        }
 
         int majorVersion = conn.getDatabaseMajorVersion();
         int minorVersion =conn.getDatabaseMinorVersion();
@@ -96,8 +112,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (majorVersion < MINIMUM_DBMS_MAJOR_VERSION ||
                 (majorVersion == MINIMUM_DBMS_MAJOR_VERSION && minorVersion < MINIMUM_DBMS_MINOR_VERSION)) {
             LogFactory.getInstance().getLog().warning(
-            String.format("Your PostgreSQL software version (%d.%d) seems to indicate that your software is older than " +
-                            "%d.%d. Unfortunately, this is not supported, and this connection cannot be used. Sorry.",
+                    String.format("Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
+                                    "older than %d.%d. Unfortunately, this is not supported, and this connection " +
+                                    "cannot be " +
+                                    "used. Sorry.",
                     majorVersion, minorVersion, majorVersion, minorVersion));
             return false;
         }
@@ -137,7 +155,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);
 
-        Logger log = LogFactory.getInstance().getLog();
+
 
         if (conn instanceof JdbcConnection) {
             Statement statement = null;
@@ -147,12 +165,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'");
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
-                    if (setting != null && setting.equals("on")) {
-                        log.warning("EnterpriseDB "+conn.getURL()+" does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
+                    if (setting != null && "on".equals(setting)) {
+                        LOG.warning("EnterpriseDB " + conn.getURL() + " does not store DATE columns. Auto-converts " +
+                                "them " +
+                                "to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
-            } catch (Exception e) {
-                log.info("Cannot check pg_settings", e);
+            } catch (SQLException | DatabaseException e) {
+                LOG.info("Cannot check pg_settings", e);
             } finally {
                 JdbcUtils.close(resultSet, statement);
             }
@@ -162,14 +182,19 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Table) {
-            if (example.getSchema() != null) {
-                if ("pg_catalog".equals(example.getSchema().getName())
-                        || "pg_toast".equals(example.getSchema().getName())) {
-                    return true;
-                }
-            }
+        // All tables in the schemas pg_catalog and pg_toast are definitely system tables.
+        if
+                (
+                (example instanceof Table)
+                        && (example.getSchema() != null)
+                        && (
+                        ("pg_catalog".equals(example.getSchema().getName()))
+                                || ("pg_toast".equals(example.getSchema().getName()))
+                )
+                ) {
+            return true;
         }
+
         return super.isSystemObject(example);
     }
 
@@ -207,7 +232,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (objectName == null || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
             return super.correctObjectName(objectName, objectType);
         }
-        if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+        if (objectName.contains("-")
+                || hasMixedCase(objectName)
+                || startsWithNumeric(objectName)
+                || isReservedWord(objectName)) {
             return objectName;
         } else {
             return objectName.toLowerCase();
@@ -216,9 +244,11 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     /*
     * Check if given string has case problems according to postgresql documentation.
-    * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped.
+    * If there are at least one characters with upper case while all other are in lower case (or vice versa) this
+    * string should be escaped.
     *
-    * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards compatibility.
+    * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards
+    * compatibility.
     * Method is public so a subclass extension can override it to always return false.
     */
     protected boolean hasMixedCase(String tableName) {
@@ -233,43 +263,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return reservedWords.contains(tableName.toUpperCase());
     }
 
-    /*
-     * Get the current search paths
-     */
-    private List<String> getSearchPaths() {
-        List<String> searchPaths = null;
-
-        try {
-            DatabaseConnection con = getConnection();
-
-            if (con != null) {
-                String searchPathResult = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
-
-                if (searchPathResult != null) {
-                    String dirtySearchPaths[] = searchPathResult.split("\\,");
-                    searchPaths = new ArrayList<>();
-                    for (String searchPath : dirtySearchPaths) {
-                        searchPath = searchPath.trim();
-
-                        // Ensure there is consistency ..
-                        if (searchPath.equals("\"$user\"")) {
-                            searchPath = "$user";
-                        }
-
-                        searchPaths.add(searchPath);
-                    }
-                }
-
-            }
-        } catch (Exception e) {
-            // TODO: Something?
-            e.printStackTrace();
-            LogFactory.getInstance().getLog().severe("Failed to get default catalog name from postgres", e);
-        }
-
-        return searchPaths;
-    }
-
     @Override
     protected SqlStatement getConnectionSchemaNameCallStatement() {
         return new RawCallStatement("select current_schema()");
@@ -280,26 +273,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return tableName.toUpperCase() + "_PKEY";
     }
 
-    private boolean catalogExists(String catalogName) throws DatabaseException {
-        return catalogName != null && runExistsQuery(
-                "select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
-    }
-
-    private boolean schemaExists(String schemaName) throws DatabaseException {
-        return schemaName != null && runExistsQuery("select count(*) from information_schema.schemata where schema_name='" + schemaName + "'");
-    }
-
-    private boolean runExistsQuery(String query) throws DatabaseException {
-        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
-
-        return count != null && count > 0;
-    }
-
+    @Override
+    @SuppressWarnings("squid:S109")
     public int getMaxFractionalDigitsForTimestamp() {
 
         int major = 0;
         int minor = 0;
-        int patch = 0;
 
         try {
             major = getDatabaseMajorVersion();
@@ -316,9 +295,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         // https://www.postgresql.org/docs/9.2/static/datatype-datetime.html
         String minimumVersion = "7.2";
 
-        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, patch))
+        if (StringUtils.isMinimumVersion(minimumVersion, major, minor, 0)) {
             return 6;
-        else
+        } else {
             return 0;
+        }
     }
 }
