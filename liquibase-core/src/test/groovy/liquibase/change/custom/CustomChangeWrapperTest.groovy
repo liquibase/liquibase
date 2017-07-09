@@ -248,7 +248,7 @@ class CustomChangeWrapperTest extends Specification {
         thrown(RollbackImpossibleException.class)
     }
 
-    def getConfirmationMessage() {
+    def getConfirmationMessage_nominal() {
         when:
         CustomChangeWrapper changeWrapper = new CustomChangeWrapper()
 
@@ -257,6 +257,18 @@ class CustomChangeWrapperTest extends Specification {
 
         then:
         changeWrapper.getConfirmationMessage() == "mock message"
+    }
+
+    def getConfirmationMessage_usingParams() {
+        when:
+        CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
+        changeWrapper.setClassLoader(getClass().getClassLoader());
+        changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
+        changeWrapper.setParam("tableName", "myName");
+        changeWrapper.setParam("columnName", "myCol");
+
+        then:
+        changeWrapper.getConfirmationMessage() == "Custom class updated myName.myCol";
     }
 
     def "load works correctly"() {

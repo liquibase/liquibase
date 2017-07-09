@@ -171,9 +171,7 @@ public class CustomChangeWrapper extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
         try {
-            if (!configured) {
-                configureCustomChange();
-            }
+            configureCustomChange();
             if (customChange instanceof CustomSqlChange) {
                 statements = ((CustomSqlChange) customChange).generateStatements(database);
             } else if (customChange instanceof CustomTaskChange) {
@@ -202,9 +200,7 @@ public class CustomChangeWrapper extends AbstractChange {
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
-            if (!configured) {
-                configureCustomChange();
-            }
+            configureCustomChange();
             if (customChange instanceof CustomSqlRollback) {
                 statements = ((CustomSqlRollback) customChange).generateRollbackStatements(database);
             } else if (customChange instanceof CustomTaskRollback) {
@@ -239,16 +235,28 @@ public class CustomChangeWrapper extends AbstractChange {
      */
     @Override
     public String getConfirmationMessage() {
+        try {
+            configureCustomChange();
+        } catch (CustomChangeException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
         return customChange.getConfirmationMessage();
     }
 
     private void configureCustomChange() throws CustomChangeException {
+        if (configured) {
+            return;
+        }
+
         try {
             for (String param : params) {
                 ObjectUtil.setProperty(customChange, param, paramValues.get(param));
             }
             customChange.setFileOpener(getResourceAccessor());
             customChange.setUp();
+
+            configured = true;
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
