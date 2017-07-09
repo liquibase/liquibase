@@ -45,6 +45,9 @@ bug list (https://dbmanul.atlassian.net).
 - [CORE-2944] Honor `outputDefaultSchema=false` and `outputDefaultCatalog=false` when generating SQL code 
   did not work. Thanks to Piotrek Bzdyl for the bug fix.   
 
+- In `<sql>` blocks, when a whitespace occured on the line before the delimiter (e.g. `statement 1 \nGO\nstatement 2`),
+  the delimiter was not detected. Thanks to Mirek Pluta for the bug fix.
+  
 #### Crashes and Java exceptions:
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
   was fixed thanks to "yuxiaobin" (0ea5040caf0175fc36fcaf5b2d375903c777c5eb).

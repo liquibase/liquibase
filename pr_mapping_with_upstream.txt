@@ -93,4 +93,5 @@ request number (pr#) to maximise its usefulness. Thank you.
                        test case to protect against regression.
 629     MERGED         [CORE-2944] Honor `outputDefaultSchema=false` and `outputDefaultCatalog=false` when generating
                        SQL code.
+628     MERGED         Fix for whitespace before delimiter
 596     DUPLICATE      of pr #655
