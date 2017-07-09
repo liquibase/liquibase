@@ -1057,7 +1057,7 @@ public abstract class AbstractIntegrationTest {
         CharSequence expected = "CREATE TABLE "+getDatabase().escapeTableName(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains(expected));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains(expected));
-        assertFalse("the scheame name '"+schemaName+"' should be ignored\n\n"+outputResult, outputResult.contains
+        assertFalse("the schema name '" + schemaName + "' should be ignored\n\n" + outputResult, outputResult.contains
                 (schemaName+"."));
     }
 
