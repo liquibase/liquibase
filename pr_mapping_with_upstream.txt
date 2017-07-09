@@ -68,4 +68,28 @@ request number (pr#) to maximise its usefulness. Thank you.
                        (likely already fixed by another checkin)
 643     GONE
 642     MERGED         [CORE-2977] Use the same name as Postgres for primary key constraints
+641     GONE
+640     N/A            Could not reproduce the problem with the current DB-Manul codebase. Added an integration test
+                       for it (commit #f6e83948c9f235ac45d30e9dd8cc4c9f75de70a3). It may be that I misunderstood the
+                       problem description - please contact me if that is the case.
+639     GONE
+638     GONE
+637     N/A            already implemented in DB-Manul
+636     N/A            already implemented in DB-Manul
+635     GONE
+634     MERGED         [CORE-2989]: Custom change: configure change before calling getConfirmationMessage
+633     (TODO)         [CORE-2965] allow any additional attributes for the change elements in … #633
+                       proposal looks good, but I am a little worried about
+                       <xsd:anyAttribute namespace="##any"/> - before I merge it, I need to confirm that ##any does
+                       not cause invalid attribute names from the changeset-3.6.xsd to pass as valid. Maybe
+                       <xsd:anyAttribute namespace="##other"/> would serve the same purpose? Need to investigate.
+632     REJECTED       [CORE-2162] MSSQL: Multiple inserts in sqlFile do not fail as expected.
+                       The problem here is that multiple DML commands should never go into a single
+                       java.sql.Statement.execute call. Therefore, I think that [CORE-2162] is not a valid bug.
+631     MERGED         Fix for "Different object quoting strategies are used for validation and execution of a
+                       ChangeSet."
+630     TODO           Trigger an exception on a RAISERROR - the idea looks good, but I still fail to find a test
+                       case where a single executed statement returns multiple result sets. I need that to make a
+                       test case to protect against regression.
+
 596     DUPLICATE      of pr #655
