@@ -37,7 +37,7 @@ to maximise its usefulness. Thank you.
 [CORE-2993]        none           b5717eb7a6482ccf204d4bfc0656a8564a67e4e0 createSequence with order enabled for DB2
 [CORE-2978]        none           88f76fc67f10f17e02cd2909fea876ff904777c4 Broken PostgreSQL AddAutoIncrementChange SQL
                                                                            code generation
-[CORE-2977]        none           @todo                                    Use the same name as Postgres for primary key
+[CORE-2977]        none           4b65c947c7711eadfde5713af31eccb654fb5bfc Use the same name as Postgres for primary key
                                                                            constraints
 [CORE-2773]        none           f425f011638db46b0bdc6a680e2d2e5f014feb8d Detection of DB2/AS400 improved
 [CORE-1852]        none           6a379a7a9aaf0ceffe6762b9bcc95c29d3be4615 checksum depends on line endings and
