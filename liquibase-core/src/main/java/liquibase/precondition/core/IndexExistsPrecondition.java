@@ -75,15 +75,15 @@ public class IndexExistsPrecondition extends AbstractPrecondition {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if ((getIndexName() == null) && (getTableName() == null) && (getColumnNames() == null)) {
-            validationErrors.addError("indexName OR tableName and columnNames is required");
+        if (getIndexName() == null && (getTableName() == null || getColumnNames() == null)) {
+            validationErrors.addError("indexName OR (tableName and columnNames) is required");
         }
         return validationErrors;
     }
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-    	try {
+        try {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
             Index example = new Index();
             String tableName = StringUtils.trimToNull(getTableName());
