@@ -35,17 +35,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final int SQL_SERVER_2014_MAJOR_VERSION = 12;
     public static final int SQL_SERVER_2016_MAJOR_VERSION = 13;
     public static final int SQL_SERVER_2017_MAJOR_VERSION = 14;
-
+    protected static final int MSSQL_DEFAULT_TCP_PORT = 1433;
+    private static Pattern CREATE_VIEW_AS_PATTERN =
+        Pattern.compile(
+            "(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*",
+            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+        );
     protected Set<String> systemTablesAndViews = new HashSet<>();
-
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     private Boolean sendsStringParametersAsUnicode;
-
-    @Override
-    public String getShortName() {
-        return "mssql";
-    }
 
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
@@ -81,6 +78,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         super.quotingEndReplacement = "]]";
     }
 
+    @Override
+    public String getShortName() {
+        return "mssql";
+    }
 
     @Override
     public int getPriority() {
@@ -94,7 +95,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public Integer getDefaultPort() {
-        return 1433;
+        return MSSQL_DEFAULT_TCP_PORT;
     }
 
     @Override
@@ -156,7 +157,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementClause() {
-    	return "IDENTITY";
+        return "IDENTITY";
     }
     
     @Override
@@ -171,12 +172,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getAutoIncrementStartWithClause() {
-    	return "%d";
+        return "%d";
     }
 
     @Override
     protected String getAutoIncrementByClause() {
-    	return "%d";
+        return "%d";
     }
 
     @Override
@@ -211,47 +212,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
-    //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
-//        Statement dropStatement = null;
-//        PreparedStatement fkStatement = null;
-//        ResultSet rs = null;
-//        try {
-//            dropStatement = conn.createStatement();
-//
-//            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
-//            fkStatement.setString(1, getDefaultCatalogName());
-//            rs = fkStatement.executeQuery();
-//            while (rs.next()) {
-//                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-//                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
-//                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
-//
-//                try {
-//                    dropStatement.execute(dropFK.generateStatements(this)[0]);
-//                } catch (UnsupportedChangeException e) {
-//                    throw new DatabaseException(e.getMessage());
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        } finally {
-//            try {
-//                if (dropStatement != null) {
-//                    dropStatement.close();
-//                }
-//                if (fkStatement != null) {
-//                    fkStatement.close();
-//                }
-//                if (rs != null) {
-//                    rs.close();
-//                }
-//            } catch (SQLException e) {
-//                throw new DatabaseException(e);
-//            }
-//        }
-//
-//    }
-
     @Override
     public boolean supportsTablespaces() {
         return true;
@@ -283,7 +243,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return null;
         }
 
-        if (objectName.contains("(")) { //probably a function
+        if (objectName.contains("(")) {
+            // probably a function
             return objectName;
         }
 
@@ -295,7 +256,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
     }
 
-	@Override
+    @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
@@ -312,8 +273,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-          schema = schema.customize(this);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        schema = schema.customize(this);
+        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this)
+            .queryForList(
+                new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName),
+                String.class
+            );
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);
@@ -322,7 +287,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         String finalDef =definition.replaceAll("\\r\\n", "\n").trim();
 
-        if (finalDef.startsWith("--") || finalDef.startsWith("/*")) { //keep comment as beginning of statement
+        // Keep comment as beginning of statement:
+        if (finalDef.startsWith("--") || finalDef.startsWith("/*")) {
             return "FULL_DEFINITION: " + finalDef;
         }
 
@@ -344,8 +310,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        if (View.class.isAssignableFrom(objectType)) { //SQLServer does not support specifying the database name as a prefix to the object name
+    public String escapeObjectName(String catalogName, String schemaName, String objectName,
+                                   Class<? extends DatabaseObject> objectType) {
+        if (View.class.isAssignableFrom(objectType)) {
+            // SQLServer does not support specifying the database name as a prefix to the object name
             String name = this.escapeObjectName(objectName, objectType);
             if (schemaName != null) {
                 name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
@@ -384,8 +352,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() instanceof JdbcConnection) {
                     String catalog = getConnection().getCatalog();
-                    String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+                    String sql =
+                        "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) +
+                            "', 'Collation'))";
+                    String collation = ExecutorService.getInstance().getExecutor(this)
+                        .queryForObject(new RawSqlStatement(sql), String.class);
                     caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
@@ -470,27 +441,27 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String unescapeDataTypeName(String dataTypeName) {
-         int indexOfPeriod = dataTypeName.indexOf('.');
+        int indexOfPeriod = dataTypeName.indexOf('.');
 
-         if (indexOfPeriod < 0) {
-             if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
-                 dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
-             }
+        if (indexOfPeriod < 0) {
+            if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
+                dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+            }
 
-             return dataTypeName;
-         }
+            return dataTypeName;
+        }
 
-         String schemaName = dataTypeName.substring(0, indexOfPeriod);
-         if (schemaName.matches("\\[[^]\\[]++\\]")) {
-             schemaName = schemaName.substring(1, schemaName.length() - 1);
-         }
+        String schemaName = dataTypeName.substring(0, indexOfPeriod);
+        if (schemaName.matches("\\[[^]\\[]++\\]")) {
+            schemaName = schemaName.substring(1, schemaName.length() - 1);
+        }
 
-         dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
-         if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
-             dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
-         }
+        dataTypeName = dataTypeName.substring(indexOfPeriod + 1, dataTypeName.length());
+        if (dataTypeName.matches("\\[[^]\\[]++\\]")) {
+            dataTypeName = dataTypeName.substring(1, dataTypeName.length() - 1);
+        }
 
-         return schemaName + "." + dataTypeName;
+        return schemaName + "." + dataTypeName;
     }
 
     @Override
@@ -519,15 +490,19 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         if (rs.next()) {
                             baseType = rs.getString(1);
                         }
-                        sendsStringParametersAsUnicode = (baseType == null) || baseType.startsWith("n"); // i.e. nvarchar (or nchar)
+                        // baseTypes starting with "n" can be something like nvarchar (or nchar)
+                        sendsStringParametersAsUnicode =
+                            (baseType == null) || baseType.startsWith("n");
                     } finally {
                         JdbcUtils.close(rs, ps);
                     }
                 } else if (getConnection() instanceof OfflineConnection) {
-                    sendsStringParametersAsUnicode = ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
+                    sendsStringParametersAsUnicode =
+                        ((OfflineConnection) getConnection()).getSendsStringParametersAsUnicode();
                 }
             } catch (Exception e) {
-                LogFactory.getInstance().getLog().warning("Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
+                LogFactory.getInstance().getLog().warning(
+                    "Cannot determine whether String parameters are sent as Unicode for MSSQL", e);
             }
         }
 
@@ -549,7 +524,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         "         WHEN 5 THEN 'Azure'\n" +
                         "         ELSE 'Unknown'\n" +
                         "       END";
-                return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
+                return ExecutorService.getInstance().getExecutor(this)
+                    .queryForObject(new RawSqlStatement(sql), String.class);
             }
         } catch (DatabaseException e) {
             LogFactory.getInstance().getLog().warning("Could not determine engine edition", e);
