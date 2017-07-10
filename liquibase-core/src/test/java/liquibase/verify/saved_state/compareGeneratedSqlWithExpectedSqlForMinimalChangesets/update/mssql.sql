@@ -4,4 +4,4 @@
 --     type="int"
 -- ], ]
 -- Change Parameter: tableName=person
-UPDATE [person] SET [id] = NULL;
+UPDATE person SET id = NULL;

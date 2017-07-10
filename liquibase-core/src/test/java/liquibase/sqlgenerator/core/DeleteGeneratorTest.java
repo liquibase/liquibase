@@ -29,10 +29,10 @@ public class DeleteGeneratorTest {
 
         // then
         assertEquals(
-                "DELETE FROM [DATABASECHANGELOG] " +
-                "WHERE [ID] = '1' " +
-                "AND [AUTHOR] = 'a' "  +
-                "AND [FILENAME] = 'server_principals/BUILTIN$Administrators.xml'",
+            "DELETE FROM DATABASECHANGELOG " +
+                "WHERE ID = '1' " +
+                "AND AUTHOR = 'a' " +
+                "AND FILENAME = 'server_principals/BUILTIN$Administrators.xml'",
                 sqls[0].toSql());
     }
 }

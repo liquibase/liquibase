@@ -167,7 +167,6 @@ public class DataTypeFactory {
         }
         if (liquibaseDataType == null) {
             liquibaseDataType = new UnknownType(dataTypeName);
-
         }
         liquibaseDataType.setAdditionalInformation(additionalInfo);
 

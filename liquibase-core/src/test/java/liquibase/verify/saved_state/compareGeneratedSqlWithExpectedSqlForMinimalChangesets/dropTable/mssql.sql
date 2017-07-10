@@ -1,3 +1,3 @@
 -- Database: mssql
 -- Change Parameter: tableName=person
-DROP TABLE [person];
+DROP TABLE person;

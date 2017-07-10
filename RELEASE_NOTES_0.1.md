@@ -234,6 +234,9 @@ adverse effects in old software versions.
 
 - Because DB-Manul is based on JDK 8, you must upgrade your JDBC driver to version 6.1.0.jre8 or newer.
 
+- Consistent with the behaviour on other RDBMS, DB-Manul will now only escape Microsoft SQL Server object names
+  (e.g. `myTableWithAnÜUmlaut` -> `[myTableWithAnÜUmlaut]` only when quoting is necessary)
+
 ### MySQL and MariaDB
 
 - Because MySQL and MariaDB start to diverge (currently only in relatively minor details, but this is expected to

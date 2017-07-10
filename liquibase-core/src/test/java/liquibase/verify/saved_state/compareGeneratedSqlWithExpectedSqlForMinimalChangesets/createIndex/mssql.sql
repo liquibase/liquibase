@@ -4,4 +4,4 @@
 --     type="int"
 -- ], ]
 -- Change Parameter: tableName=person
-CREATE NONCLUSTERED INDEX ON [person]([id]);
+CREATE NONCLUSTERED INDEX ON person(id);

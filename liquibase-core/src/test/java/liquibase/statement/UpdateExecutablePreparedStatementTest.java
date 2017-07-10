@@ -74,11 +74,11 @@ public class UpdateExecutablePreparedStatementTest {
 
         // then
         verify(connection).prepareStatement(
-                "UPDATE [DATABASECHANGELOG] " +
-                "SET [MD5SUM] = ? " +
-                "WHERE [ID] = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
-                "AND [AUTHOR] = 'martin' " +
-                "AND [FILENAME] = 'db/changelog.xml'");
+            "UPDATE DATABASECHANGELOG " +
+                "SET MD5SUM = ? " +
+                "WHERE ID = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
+                "AND AUTHOR = 'martin' " +
+                "AND FILENAME = 'db/changelog.xml'");
         verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
     }
 
@@ -110,11 +110,11 @@ public class UpdateExecutablePreparedStatementTest {
 
         // then
         verify(connection).prepareStatement(
-                "UPDATE [DATABASECHANGELOG] " +
-                "SET [MD5SUM] = ? " +
-                "WHERE [ID] = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
-                "AND [AUTHOR] = 'martin' " +
-                "AND [FILENAME] = 'db/changelog.xml'");
+            "UPDATE DATABASECHANGELOG " +
+                "SET MD5SUM = ? " +
+                "WHERE ID = N'SYPA: AUTO_START tüüp INT -> TEXT, vaartus 0 00 17 * * ?' " +
+                "AND AUTHOR = 'martin' " +
+                "AND FILENAME = 'db/changelog.xml'");
         verify(ps).setString(1, "7:e27bf9c0c2313160ef960a15d44ced47");
     }
 }

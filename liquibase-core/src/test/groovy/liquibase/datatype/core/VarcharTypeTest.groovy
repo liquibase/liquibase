@@ -1,11 +1,6 @@
 package liquibase.datatype.core
 
-import liquibase.database.core.DerbyDatabase
-import liquibase.database.core.HsqlDatabase
-import liquibase.database.core.MSSQLDatabase
-import liquibase.database.core.MySQLDatabase
-import liquibase.database.core.OracleDatabase
-import liquibase.database.core.PostgresDatabase
+import liquibase.database.core.*
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -33,9 +28,9 @@ class VarcharTypeTest extends Specification {
         [13]         | new HsqlDatabase()     | true              | "VARCHAR2(13)"
         [13]         | new PostgresDatabase() | false             | "VARCHAR(13)"
         [13]         | new OracleDatabase()   | false             | "VARCHAR2(13)"
-        []           | new MSSQLDatabase()    | false             | "[varchar](1)"
-        [13]         | new MSSQLDatabase()    | false             | "[varchar](13)"
-        [2147483647] | new MSSQLDatabase()    | false             | "[varchar](MAX)"
+        []           | new MSSQLDatabase()    | false             | "varchar(1)"
+        [13]         | new MSSQLDatabase()    | false             | "varchar(13)"
+        [2147483647] | new MSSQLDatabase()    | false             | "varchar(MAX)"
         [13]         | new MySQLDatabase()    | false             | "VARCHAR(13)"
     }
 }
