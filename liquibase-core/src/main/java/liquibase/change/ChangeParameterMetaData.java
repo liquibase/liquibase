@@ -14,9 +14,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.util.beans.PropertyUtils;
 
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -45,10 +43,7 @@ public class ChangeParameterMetaData {
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
-                                   Map<String, Object> exampleValues, String since, Type dataType,
-                                   String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
-                                   LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, Map<String, Object> exampleValues, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -97,8 +92,7 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (supportedDatabases.length == 1
-            && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if (database.getShortName() == null || "unsupported".equals(database.getShortName())) {
@@ -120,8 +114,7 @@ public class ChangeParameterMetaData {
                         }
                         validDatabases++;
                     }
-                } catch (InstantiationException|IllegalAccessException ignore) {
-                    // Do nothing
+                } catch (Exception ignore) {
                 }
             }
 
@@ -147,8 +140,7 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (requiredDatabases.length == 1
-            && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -165,8 +157,7 @@ public class ChangeParameterMetaData {
                         }
                         validDatabases++;
                     }
-                } catch (InstantiationException|IllegalAccessException ignore) {
-                    // Do nothing
+                } catch (Exception ignore) {
                 }
             }
 
@@ -177,7 +168,6 @@ public class ChangeParameterMetaData {
             }
 
             computedDatabases.remove("none");
-
         } else {
             computedDatabases = new HashSet<>(Arrays.asList(requiredDatabases));
         }
@@ -276,8 +266,7 @@ public class ChangeParameterMetaData {
                 }
             }
             throw new RuntimeException("Could not find readMethod for " + this.parameterName);
-        } catch (IntrospectionException|NoSuchMethodException|SecurityException|IllegalAccessException
-            |IllegalArgumentException|InvocationTargetException e) {
+        } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
@@ -298,10 +287,8 @@ public class ChangeParameterMetaData {
                     default:
                         throw new UnexpectedLiquibaseException("Unknown data type: " + dataType);
                 }
-            } catch (UnexpectedLiquibaseException e) {
-                throw new UnexpectedLiquibaseException(
-                    "Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage()
-                );
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage());
             }
         }
 
@@ -327,7 +314,7 @@ public class ChangeParameterMetaData {
                     writeMethod.invoke(change, value);
                 }
             }
-        } catch (IllegalAccessException|IntrospectionException|InvocationTargetException e) {
+        } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
         }
     }
@@ -415,6 +402,7 @@ public class ChangeParameterMetaData {
                 return new BigInteger("371717");
             case "list":
                 return null; // TODO
+        
             case "sequenceNextValueFunction":
                 return new SequenceNextValueFunction("seq_name");
             case "databaseFunction":
