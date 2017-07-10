@@ -18,7 +18,12 @@ import java.util.List;
 /**
  * Renames an existing column.
  */
-@DatabaseChange(name="renameColumn", description = "Renames an existing column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(
+    name="renameColumn",
+    description = "Renames an existing column",
+    priority = ChangeMetaData.PRIORITY_DEFAULT,
+    appliesTo = "column"
+)
 public class RenameColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -29,7 +34,7 @@ public class RenameColumnChange extends AbstractChange {
     private String columnDataType;
     private String remarks;
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(since = "3.0", mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -47,7 +52,10 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing that the column to rename")
+    @DatabaseChangeProperty(
+        description = "Name of the table containing that the column to rename",
+        mustEqualExisting = "column.relation"
+    )
     public String getTableName() {
         return tableName;
     }
@@ -56,7 +64,11 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column", exampleValue = "name", description = "Name of the existing column to rename")
+    @DatabaseChangeProperty(
+        description = "Name of the existing column to rename",
+        exampleValue = "name",
+        mustEqualExisting = "column"
+    )
     public String getOldColumnName() {
         return oldColumnName;
     }
@@ -94,16 +106,11 @@ public class RenameColumnChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-//todo    	if (database instanceof SQLiteDatabase) {
-//    		// return special statements for SQLite databases
-//    		return generateStatementsForSQLiteDatabase(database);
-//        }
-
-    	return new SqlStatement[] { new RenameColumnStatement(
+        return new SqlStatement[] { new RenameColumnStatement(
                 getCatalogName(),
                 getSchemaName(),
-    			getTableName(), getOldColumnName(), getNewColumnName(), 
-    			getColumnDataType(),getRemarks())
+                getTableName(), getOldColumnName(), getNewColumnName(),
+                getColumnDataType(),getRemarks())
         };
     }
 
@@ -111,8 +118,14 @@ public class RenameColumnChange extends AbstractChange {
     public ChangeStatus checkStatus(Database database) {
         try {
             ChangeStatus changeStatus = new ChangeStatus();
-            Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()), database);
-            Column oldColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getOldColumnName()), database);
+            Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()),
+                database
+            );
+            Column oldColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(
+                new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getOldColumnName()),
+                database
+            );
 
             if (newColumn == null && oldColumn == null) {
                 return changeStatus.unknown("Neither column exists");
@@ -129,34 +142,32 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
+
+        // SQLite does not support this ALTER TABLE operation until now.
+        // For more information see: http://www.sqlite.org/omitted.html.
+        // This is a small work around...
     
-    	List<SqlStatement> statements = new ArrayList<>();
-    	
-    	// define alter table logic
-		AlterTableVisitor rename_alter_visitor = 
-		new AlterTableVisitor() {
-			@Override
+        // define alter table logic
+        AlterTableVisitor renameAlterVisitor =
+        new AlterTableVisitor() {
+            @Override
             public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			@Override
+                return new ColumnConfig[0];
+            }
+            @Override
             public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			@Override
+                return true;
+            }
+            @Override
             public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getOldColumnName())) {
-					column.setName(getNewColumnName());
-				}
-				return true;
-			}
-			@Override
+                if (column.getName().equals(getOldColumnName())) {
+                    column.setName(getNewColumnName());
+                }
+                return true;
+            }
+            @Override
             public boolean createThisIndex(Index index) {
-				if (index.getColumnNames().contains(getOldColumnName())) {
+                if (index.getColumnNames().contains(getOldColumnName())) {
                     Iterator<Column> columnIterator = index.getColumns().iterator();
                     while (columnIterator.hasNext()) {
                         Column column = columnIterator.next();
@@ -165,23 +176,25 @@ public class RenameColumnChange extends AbstractChange {
                             break;
                         }
                     }
-					index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
-				}
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
-		} catch (Exception e) {
-			System.err.println(e);
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+                    index.addColumn(new Column(getNewColumnName()).setRelation(index.getTable()));
+                }
+                return true;
+            }
+        };
+
+        List<SqlStatement> statements = new ArrayList<>();
+
+        try {
+            // alter table
+            statements.addAll(SQLiteDatabase.getAlterTableStatements(
+                    renameAlterVisitor,
+                    database,getCatalogName(), getSchemaName(),getTableName()));
+        } catch (Exception e) {
+            System.err.println(e);
+            e.printStackTrace();
+        }
+
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     @Override

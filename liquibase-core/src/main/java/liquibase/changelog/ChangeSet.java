@@ -359,7 +359,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                     SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
                     if (sqlVisitor != null) {
                         sqlVisitor.setApplyToRollback(applyToRollback);
-                        if (dbms.size() > 0) {
+                        if (!dbms.isEmpty()) {
                             sqlVisitor.setApplicableDbms(dbms);
                         }
                         sqlVisitor.setContexts(context);
@@ -719,7 +719,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
     protected boolean hasCustomRollbackChanges() {
-        return rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0;
+        return rollback != null && rollback.getChanges() != null && !rollback.getChanges().isEmpty();
     }
     
     /**
@@ -817,7 +817,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public void addRollBackSQL(String sql) {
         if (StringUtils.trimToNull(sql) == null) {
-            if (rollback.getChanges().size() == 0) {
+            if (rollback.getChanges().isEmpty()) {
                 rollback.getChanges().add(new EmptyChange());
             }
             return;
@@ -838,7 +838,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
 
     public boolean supportsRollback(Database database) {
-        if (rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0) {
+        if (rollback != null && rollback.getChanges() != null && !rollback.getChanges().isEmpty()) {
             return true;
         }
 
@@ -852,7 +852,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public String getDescription() {
         List<Change> changes = getChanges();
-        if (changes.size() == 0) {
+        if (changes.isEmpty()) {
             return "empty";
         }
 
@@ -895,7 +895,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public boolean isCheckSumValid(CheckSum storedCheckSum) {
         // no need to generate the checksum if any has been set as the valid checksum
         for (CheckSum validCheckSum : validCheckSums) {
-            if (validCheckSum.toString().equalsIgnoreCase("1:any") || validCheckSum.toString().equalsIgnoreCase("1:all") || validCheckSum.toString().equalsIgnoreCase("1:*")) {
+            if ("1:any".equalsIgnoreCase(validCheckSum.toString())
+                || "1:all".equalsIgnoreCase(validCheckSum.toString())
+                || "1:*".equalsIgnoreCase(validCheckSum.toString())) {
                 return true;
             }
         }
@@ -973,7 +975,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     public void setRunOrder(String runOrder) {
         if (runOrder != null) {
             runOrder = runOrder.toLowerCase();
-            if (!runOrder.equals("first") && !runOrder.equals("last")) {
+            if (!"first".equals(runOrder) && !"last".equals(runOrder)) {
                 throw new UnexpectedLiquibaseException("runOrder must be 'first' or 'last'");
             }
         }
@@ -987,20 +989,25 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     @Override
     public Set<String> getSerializableFields() {
-        return new LinkedHashSet<>(Arrays.asList("id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms", "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels", "objectQuotingStrategy", "created"));
-
+        return new LinkedHashSet<>(
+            Arrays.asList(
+                "id", "author", "runAlways", "runOnChange", "failOnError", "context", "labels", "dbms",
+                "objectQuotingStrategy", "comment", "preconditions", "changes", "rollback", "labels",
+                "objectQuotingStrategy", "created"
+            )
+        );
     }
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        if (field.equals("id")) {
+        if ("id".equals(field)) {
             return this.getId();
         }
-        if (field.equals("author")) {
+        if ("author".equals(field)) {
             return this.getAuthor();
         }
 
-        if (field.equals("runAlways")) {
+        if ("runAlways".equals(field)) {
             if (this.isAlwaysRun()) {
                 return true;
             } else {
@@ -1008,7 +1015,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
-        if (field.equals("runOnChange")) {
+        if ("runOnChange".equals(field)) {
             if (this.isRunOnChange()) {
                 return true;
             } else {
@@ -1016,11 +1023,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
-        if (field.equals("failOnError")) {
+        if ("failOnError".equals(field)) {
             return this.getFailOnError();
         }
 
-        if (field.equals("context")) {
+        if ("context".equals(field)) {
             if (!this.getContexts().isEmpty()) {
                 return this.getContexts().toString().replaceFirst("^\\(", "").replaceFirst("\\)$", "");
             } else {
@@ -1028,7 +1035,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
-        if (field.equals("labels")) {
+        if ("labels".equals(field)) {
             if (this.getLabels() != null && !this.getLabels().isEmpty()) {
                 return StringUtils.join(this.getLabels().getLabels(), ", ");
             } else {
@@ -1036,8 +1043,8 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
-        if (field.equals("dbms")) {
-            if (this.getDbmsSet() != null && this.getDbmsSet().size() > 0) {
+        if ("dbms".equals(field)) {
+            if (this.getDbmsSet() != null && !this.getDbmsSet().isEmpty()) {
                 StringBuffer dbmsString = new StringBuffer();
                 for (String dbms : this.getDbmsSet()) {
                     dbmsString.append(dbms).append(",");
@@ -1048,35 +1055,35 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             }
         }
 
-        if (field.equals("comment")) {
+        if ("comment".equals(field)) {
             return StringUtils.trimToNull(this.getComments());
         }
 
-        if (field.equals("objectQuotingStrategy")) {
+        if ("objectQuotingStrategy".equals(field)) {
             if (this.getObjectQuotingStrategy() == null) {
                 return null;
             }
             return this.getObjectQuotingStrategy().toString();
         }
 
-        if (field.equals("preconditions")) {
-            if (this.getPreconditions() != null && this.getPreconditions().getNestedPreconditions().size() > 0) {
+        if ("preconditions".equals(field)) {
+            if (this.getPreconditions() != null && !this.getPreconditions().getNestedPreconditions().isEmpty()) {
                 return this.getPreconditions();
             } else {
                 return null;
             }
         }
 
-        if (field.equals("changes")) {
+        if ("changes".equals(field)) {
             return getChanges();
         }
 
-        if (field.equals("created")) {
+        if ("created".equals(field)) {
             return getCreated();
         }
 
-        if (field.equals("rollback")) {
-            if (rollback != null && rollback.getChanges() != null && rollback.getChanges().size() > 0) {
+        if ("rollback".equals(field)) {
+            if (rollback != null && rollback.getChanges() != null && !rollback.getChanges().isEmpty()) {
                 return rollback;
             } else {
                 return null;
@@ -1088,10 +1095,9 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("comment") || field.equals("preconditions") || field.equals("changes") || field.equals("rollback")) {
+        if ("comment".equals(field) || "preconditions".equals(field) || "changes".equals(field) || "rollback".equals
+            (field)) {
             return SerializationType.NESTED_OBJECT;
-//        } else if (field.equals()) {
-//            return SerializationType.DIRECT_VALUE;
         } else {
             return SerializationType.NAMED_FIELD;
         }
