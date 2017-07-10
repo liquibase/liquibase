@@ -64,6 +64,9 @@ bug list (https://dbmanul.atlassian.net).
 - [CORE-3022] a problem with the wrong use of a classloader could cause in a ClassNotFound exception when 
   DB-Manul is used by other software. This was fixed by Roman Fürst (b6fa2263d2db2a23d42369ee30b0cd11031c22ec)
   
+- Steffen Yount fixed a bug where a hard-coded reference to a specific YAML library could break the Liquibase
+  class loader when the YAML library gets updated in the pom.xml files (7524694b41d490148c94093a5cfd282dc11f007b).
+  
 ### Database-specific bug fixes
 
 #### HyperSQL

@@ -100,8 +100,10 @@ request number (pr#) to maximise its usefulness. Thank you.
                        implemented as a proper command line option (in the classes Main and CommandLineUtils, so that
                        it can be used from Maven/Ant/etc. as well). I also found the queries where the recycle bin is
                        used, maybe I can work around the need to access to it.
-624     N/A            Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 4.0.x (I could not
+624     DUPLICATE      Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 4.0.x (I could not
                        find a Liquibase 4.x.x branch that is more current than the master branch, so I use the 3.5.x
                        version of the same PR:
-623
+623     MERGED         Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 3.5.x
+622     DUPLICATE      Another version of #623 (already merged)
+
 596     DUPLICATE      of pr #655
