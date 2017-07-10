@@ -138,7 +138,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      * Returns the value object in a format to include in SQL. Quote if necessary.
      */
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return functionToSql((DatabaseFunction) value, database);

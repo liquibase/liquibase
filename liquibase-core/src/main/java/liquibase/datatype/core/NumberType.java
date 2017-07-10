@@ -44,7 +44,7 @@ public class NumberType extends LiquibaseDataType {
                 || database instanceof SybaseDatabase) {
             return new DatabaseDataType("numeric", getParameters());
         } else if (database instanceof OracleDatabase) {
-            if (getParameters().length > 1 && getParameters()[0].equals("0") && getParameters()[1].equals("-127")) {
+            if (getParameters().length > 1 && "0".equals(getParameters()[0]) && "-127".equals(getParameters()[1])) {
                 return new DatabaseDataType("NUMBER");
             } else {
                 return new DatabaseDataType("NUMBER", getParameters());

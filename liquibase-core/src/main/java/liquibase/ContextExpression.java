@@ -93,10 +93,10 @@ public class ContextExpression {
             return true;
         }
 
-        if (expression.trim().equals(":TRUE")) {
+        if (":TRUE".equals(expression.trim())) {
             return true;
         }
-        if (expression.trim().equals(":FALSE")) {
+        if (":FALSE".equals(expression.trim())) {
             return false;
         }
 

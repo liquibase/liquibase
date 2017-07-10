@@ -38,7 +38,8 @@ public class CharType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         } else if (database instanceof PostgresDatabase){
-            if (getParameters() != null && getParameters().length == 1 && getParameters()[0].toString().equals("2147483647")) {
+            if (getParameters() != null && getParameters().length == 1 && "2147483647".equals(getParameters()[0]
+                .toString())) {
                 DatabaseDataType type = new DatabaseDataType("CHARACTER");
                 type.addAdditionalInformation("VARYING");
                 return type;
@@ -51,7 +52,7 @@ public class CharType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
 

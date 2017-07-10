@@ -16,7 +16,7 @@ public class ClobType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
 
@@ -79,7 +79,7 @@ public class ClobType extends LiquibaseDataType {
                     + (StringUtils.isEmpty(originalExtraInfo) ? "" : " " + originalExtraInfo));
                 return type;
             }
-            if (originalDefinition.equalsIgnoreCase("nclob")) {
+            if ("nclob".equalsIgnoreCase(originalDefinition)) {
                 return new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
             }
 
@@ -107,7 +107,7 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
-            if (originalDefinition.equalsIgnoreCase("nclob")) {
+            if ("nclob".equalsIgnoreCase(originalDefinition)) {
                 return new DatabaseDataType("NCLOB");
             }
             return new DatabaseDataType("CLOB");

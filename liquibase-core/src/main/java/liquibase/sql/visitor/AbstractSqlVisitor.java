@@ -98,14 +98,14 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
-               if (childNode.getName().equals("dbms")) {
+               if ("dbms".equals(childNode.getName())) {
                     this.setApplicableDbms(new HashSet<>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
-                } else if (childNode.getName().equals("applyToRollback")) {
+                } else if ("applyToRollback".equals(childNode.getName())) {
                    Boolean value = childNode.getValue(Boolean.class);
                    if (value != null) {
                        setApplyToRollback(value);
                    }
-               } else if (childNode.getName().equals("context") || childNode.getName().equals("contexts")) {
+               } else if ("context".equals(childNode.getName()) || "contexts".equals(childNode.getName())) {
                    setContexts(new ContextExpression((String) childNode.getValue()));
                 } else  if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
                    Object value = childNode.getValue();

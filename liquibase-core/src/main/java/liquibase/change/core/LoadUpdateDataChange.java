@@ -116,10 +116,10 @@ public class LoadUpdateDataChange extends LoadDataChange {
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                     insertOrUpdateStatement.getSchemaName(),
                     insertOrUpdateStatement.getTableName(),
-                    thisPkColumn)).append(newValue == null || newValue.toString().equalsIgnoreCase("NULL") ? " is " :
+                    thisPkColumn)).append(newValue == null || "NULL".equalsIgnoreCase(newValue.toString()) ? " is " :
                     " = ");
 
-            if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+            if (newValue == null || "NULL".equalsIgnoreCase(newValue.toString())) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue,

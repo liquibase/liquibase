@@ -35,14 +35,14 @@ public class FloatType  extends LiquibaseDataType {
         }
         if (database instanceof MySQLDatabase || database instanceof DB2Database
                 || database instanceof H2Database) {
-            if (originalDefinition.equalsIgnoreCase("REAL")) {
+            if ("REAL".equalsIgnoreCase(originalDefinition)) {
                 return new DatabaseDataType("REAL");
             }
         }
         if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("FLOAT");
         } else if (database instanceof PostgresDatabase) {
-            if (originalDefinition.equalsIgnoreCase("real")) {
+            if ("real".equalsIgnoreCase(originalDefinition)) {
                 return new DatabaseDataType("REAL");
             }
         }

@@ -304,12 +304,12 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean parseBoolean(String value) {
         value = StringUtils.trimToNull(value);
-        if (value == null || value.equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value)) {
             return null;
         } else {
-            if (value.equalsIgnoreCase("true") || value.equals("1")) {
+            if ("true".equalsIgnoreCase(value) || "1".equals(value)) {
                 return true;
-            } else if (value.equalsIgnoreCase("false") || value.equals("0")) {
+            } else if ("false".equalsIgnoreCase(value) || "0".equals(value)) {
                 return false;
             } else {
                 throw new UnexpectedLiquibaseException("Unparsable boolean value: "+value);

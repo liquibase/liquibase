@@ -10,7 +10,9 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.SnapshotParser;
 import liquibase.parser.SnapshotParserFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.*;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -59,7 +61,7 @@ public class OfflineConnection implements DatabaseConnection {
         this.productName = "Offline "+databaseShortName;
         for (Map.Entry<String, String> paramEntry : params1.entrySet()) {
 
-            if (paramEntry.getKey().equals("version")) {
+            if ("version".equals(paramEntry.getKey())) {
                 this.productVersion = paramEntry.getValue();
                 String[] versionParts = productVersion.split("\\.");
                 try {
@@ -70,17 +72,17 @@ public class OfflineConnection implements DatabaseConnection {
                 } catch (NumberFormatException e) {
                     LogFactory.getInstance().getLog().warning("Cannot parse database version "+productVersion);
                 }
-            } else if (paramEntry.getKey().equals("productName")) {
+            } else if ("productName".equals(paramEntry.getKey())) {
                 this.productName = paramEntry.getValue();
-            } else if (paramEntry.getKey().equals("catalog")) {
+            } else if ("catalog".equals(paramEntry.getKey())) {
                 this.catalog = params1.get("catalog");
-            } else if (paramEntry.getKey().equals("caseSensitive")) {
+            } else if ("caseSensitive".equals(paramEntry.getKey())) {
                  this.caseSensitive = Boolean.parseBoolean(paramEntry.getValue());
-            } else if (paramEntry.getKey().equals("changeLogFile")) {
+            } else if ("changeLogFile".equals(paramEntry.getKey())) {
                 this.changeLogFile = paramEntry.getValue();
-            } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
+            } else if ("outputLiquibaseSql".equals(paramEntry.getKey())) {
                 this.outputLiquibaseSql = OutputLiquibaseSql.fromString(paramEntry.getValue());
-            } else if (paramEntry.getKey().equals("snapshot")) {
+            } else if ("snapshot".equals(paramEntry.getKey())) {
                 String snapshotFile = paramEntry.getValue();
                 try {
                     SnapshotParser parser = SnapshotParserFactory.getInstance()
@@ -96,7 +98,7 @@ public class OfflineConnection implements DatabaseConnection {
                 } catch (LiquibaseException e) {
                     throw new UnexpectedLiquibaseException("Cannot parse snapshot " + url, e);
                 }
-            } else if (paramEntry.getKey().equals("sendsStringParametersAsUnicode")) {
+            } else if ("sendsStringParametersAsUnicode".equals(paramEntry.getKey())) {
                 this.sendsStringParametersAsUnicode = Boolean.parseBoolean(paramEntry.getValue());
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());

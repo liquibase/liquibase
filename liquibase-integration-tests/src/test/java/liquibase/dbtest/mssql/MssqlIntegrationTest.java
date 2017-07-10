@@ -113,7 +113,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                     foundType.toLowerCase()
                 );
 
-                if (expectedType.equalsIgnoreCase("varbinary")) {
+                if ("varbinary".equalsIgnoreCase(expectedType)) {
                     if (column.getName().endsWith("_MAX")) {
                         assertEquals("VARBINARY(MAX)", foundTypeDefinition.toUpperCase());
                     } else {

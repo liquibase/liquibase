@@ -37,16 +37,17 @@ public class ColumnSnapshotGeneratorOracle extends ColumnSnapshotGenerator {
 
         DataType type = new DataType(dataType);
         type.setDataTypeId(columnMetadataResultSet.getInt("DATA_TYPE"));
-        if (dataType.equalsIgnoreCase("NUMBER")) {
+        if ("NUMBER".equalsIgnoreCase(dataType)) {
             type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
             type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
 
         } else {
             type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
 
-            if (dataType.equalsIgnoreCase("NCLOB") || dataType.equalsIgnoreCase("BLOB") || dataType.equalsIgnoreCase("CLOB")) {
+            if ("NCLOB".equalsIgnoreCase(dataType) || "BLOB".equalsIgnoreCase(dataType) || "CLOB".equalsIgnoreCase
+                (dataType)) {
                 type.setColumnSize(null);
-            } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
+            } else if ("NVARCHAR".equalsIgnoreCase(dataType) || "NCHAR".equalsIgnoreCase(dataType)) {
                 type.setColumnSize(columnMetadataResultSet.getInt("CHAR_LENGTH"));
                 type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
             } else {

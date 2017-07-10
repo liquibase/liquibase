@@ -263,10 +263,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.isSystemObject(example);
         }
 
-        if (example instanceof Table && example.getSchema().getName().equals("sys")) {
+        if (example instanceof Table && "sys".equals(example.getSchema().getName())) {
             return true;
         }
-        if (example instanceof View && example.getSchema().getName().equals("sys")) {
+        if (example instanceof View && "sys".equals(example.getSchema().getName())) {
             return true;
         }
         return super.isSystemObject(example);

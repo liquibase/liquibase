@@ -32,14 +32,14 @@ public class BlobType extends LiquibaseDataType {
 
         if (database instanceof MSSQLDatabase) {
             Object[] parameters = getParameters();
-            if (originalDefinition.equalsIgnoreCase("varbinary")
-                    || originalDefinition.equals("[varbinary]")
+            if ("varbinary".equalsIgnoreCase(originalDefinition)
+                    || "[varbinary]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)varbinary\\s*\\(.+")
                     || originalDefinition.matches("\\[varbinary\\]\\s*\\(.+")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("varbinary"), maybeMaxParam(parameters, database));
-            } else if (originalDefinition.equalsIgnoreCase("binary")
-                    || originalDefinition.equals("[binary]")
+            } else if ("binary".equalsIgnoreCase(originalDefinition)
+                    || "[binary]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)binary\\s*\\(.+")
                     || originalDefinition.matches("\\[binary\\]\\s*\\(.+")) {
 
@@ -50,8 +50,8 @@ public class BlobType extends LiquibaseDataType {
                 }
                 return new DatabaseDataType(database.escapeDataTypeName("binary"), parameters);
             }
-            if (originalDefinition.equalsIgnoreCase("image")
-                    || originalDefinition.equals("[image]")
+            if ("image".equalsIgnoreCase(originalDefinition)
+                    || "[image]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)image\\s*\\(.+")
                     || originalDefinition.matches("\\[image\\]\\s*\\(.+")) {
 
@@ -65,9 +65,10 @@ public class BlobType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+            if (originalDefinition.toLowerCase().startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
                 return new DatabaseDataType("BLOB");
-            } else if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.equals("java.sql.Types.VARBINARY")) {
+            } else if (originalDefinition.toLowerCase().startsWith("varbinary") || "java.sql.Types.VARBINARY".equals
+                (originalDefinition)) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase().startsWith("tinyblob")) {
                 return new DatabaseDataType("TINYBLOB");
@@ -81,7 +82,7 @@ public class BlobType extends LiquibaseDataType {
         }
 
         if (database instanceof PostgresDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
+            if (originalDefinition.toLowerCase().startsWith("blob") || "java.sql.Types.BLOB".equals(originalDefinition)) {
                 // There are two ways of handling byte arrays ("BLOBs") in pgsql. For consistency with Hibernate ORM
                 // (see upstream bug https://liquibase.jira.com/browse/CORE-1863) we choose the oid variant.
                 // For a more thorough discussion of the two alternatives, see:

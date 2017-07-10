@@ -89,7 +89,7 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        if (field.equals("includedType")) {
+        if ("includedType".equals(field)) {
             SortedSet<String> types = new TreeSet<>();
             for (Class type : this.getTypesToInclude()) {
                 types.add(type.getName());
@@ -102,7 +102,7 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("includedType")) {
+        if ("includedType".equals(field)) {
             return SerializationType.NESTED_OBJECT;
         } else {
             throw new UnexpectedLiquibaseException("Unknown field "+field);

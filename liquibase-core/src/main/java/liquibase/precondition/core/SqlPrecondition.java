@@ -73,7 +73,7 @@ public class SqlPrecondition extends AbstractPrecondition {
 
     @Override
     public SerializationType getSerializableFieldType(String field) {
-        if (field.equals("sql")) {
+        if ("sql".equals(field)) {
             return SerializationType.DIRECT_VALUE;
         }
         return super.getSerializableFieldType(field);

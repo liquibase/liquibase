@@ -56,7 +56,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     private String convertToString(Object newValue, Database database) {
         String sqlString;
-        if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
+        if (newValue == null || "NULL".equalsIgnoreCase(newValue.toString())) {
             sqlString = "NULL";
         } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
             sqlString = DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database);

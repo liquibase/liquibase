@@ -32,11 +32,11 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
     public void compareGeneratedSqlWithExpectedSqlForMinimalChangesets() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
         for (String changeName : changeFactory.getDefinedChanges()) {
-            if (changeName.equals("addDefaultValue")) {
+            if ("addDefaultValue".equals(changeName)) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
             }
-            if (changeName.equals("changeWithNestedTags") || changeName.equals("sampleChange")
-                || changeName.equals("output") || changeName.equals("tagDatabase") ){
+            if ("changeWithNestedTags".equals(changeName) || "sampleChange".equals(changeName)
+                || "output".equals(changeName) || "tagDatabase".equals(changeName)){
                 continue; //not a real change
             }
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
@@ -62,17 +62,17 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 // one of two parameters in a group is required.
                 TreeSet<String> requiredParams = new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet());
                 /* dropColumn allows either one column or a list of columns; we choose to test with a single column. */
-                if (changeName.equalsIgnoreCase("dropColumn")) requiredParams.add("columnName");
+                if ("dropColumn".equalsIgnoreCase(changeName)) requiredParams.add("columnName");
                 /* When testing table and column remarks, do not test with an empty remark. */
-                if (changeName.equalsIgnoreCase("setColumnRemarks")) requiredParams.add("remarks");
-                if (changeName.equalsIgnoreCase("setTableRemarks")) requiredParams.add("remarks");
-                if (changeName.equalsIgnoreCase("createView")) requiredParams.add("selectQuery");
+                if ("setColumnRemarks".equalsIgnoreCase(changeName)) requiredParams.add("remarks");
+                if ("setTableRemarks".equalsIgnoreCase(changeName)) requiredParams.add("remarks");
+                if ("createView".equalsIgnoreCase(changeName)) requiredParams.add("selectQuery");
                 /* ALTER SEQUENCE should change at least one property
                  * hsqldb/h2 do not support incrementBy. */
-                if (changeName.equalsIgnoreCase("alterSequence")) {
-                    if (database.getShortName().equalsIgnoreCase("h2")) {
+                if ("alterSequence".equalsIgnoreCase(changeName)) {
+                    if ("h2".equalsIgnoreCase(database.getShortName())) {
                         requiredParams.add("ordered");
-                    } else if (database.getShortName().equalsIgnoreCase("hsqldb")) {
+                    } else if ("hsqldb".equalsIgnoreCase(database.getShortName())) {
                         requiredParams.add("minValue");
                     } else {
                         requiredParams.add("incrementBy");
@@ -171,11 +171,11 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
     public void extraParamsIsValidSql() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
         for (String changeName : changeFactory.getDefinedChanges()) {
-            if (changeName.equals("addDefaultValue")) {
+            if ("addDefaultValue".equals(changeName)) {
                 continue; //need to better handle strange "one of defaultValue* is required" logic
             }
 
-            if (changeName.equals("createProcedure")) {
+            if ("createProcedure".equals(changeName)) {
                 continue; //need to better handle strange "one of path or body is required" logic
             }
 

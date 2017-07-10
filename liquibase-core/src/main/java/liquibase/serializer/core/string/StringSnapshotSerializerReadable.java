@@ -122,13 +122,13 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
         final List<String> attributes = sort(databaseObject.getAttributes());
         for (String attribute : attributes) {
-            if (attribute.equals("name")) {
+            if ("name".equals(attribute)) {
                 continue;
             }
-            if (attribute.equals("schema")) {
+            if ("schema".equals(attribute)) {
                 continue;
             }
-            if (attribute.equals("catalog")) {
+            if ("catalog".equals(attribute)) {
                 continue;
             }
             Object value = databaseObject.getAttribute(attribute, Object.class);

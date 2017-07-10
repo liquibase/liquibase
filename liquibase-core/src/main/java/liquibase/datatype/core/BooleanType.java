@@ -48,15 +48,17 @@ public class BooleanType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
 
         String returnValue;
         if (value instanceof String) {
-            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase("b'1'") || value.equals("t") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
+            if ("true".equalsIgnoreCase((String) value) || "1".equals(value) || "b'1'".equalsIgnoreCase((String)
+                value) || "t".equals(value) || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
                 returnValue = this.getTrueBooleanValue(database);
-            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase("b'0'") || value.equals("f") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
+            } else if ("false".equalsIgnoreCase((String) value) || "0".equals(value) || "b'0'".equalsIgnoreCase(
+                (String) value) || "f".equals(value) || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
                 returnValue = this.getFalseBooleanValue(database);
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
@@ -68,7 +70,7 @@ public class BooleanType extends LiquibaseDataType {
                 returnValue = this.getFalseBooleanValue(database);
             }
         } else if (value instanceof Number) {
-            if (value.equals(1) || value.toString().equals("1") || value.toString().equals("1.0")) {
+            if (value.equals(1) || "1".equals(value.toString()) || "1.0".equals(value.toString())) {
                 returnValue = this.getTrueBooleanValue(database);
             } else {
                 returnValue = this.getFalseBooleanValue(database);

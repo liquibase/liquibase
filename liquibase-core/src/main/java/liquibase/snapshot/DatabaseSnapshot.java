@@ -310,7 +310,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
-            if (field.equals("columns") && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
+            if ("columns".equals(field) && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
                 if (fieldValue != null && ((Collection) fieldValue).size() > 0) {
                     String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
                     if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC")) {
@@ -320,7 +320,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
-                if ((object instanceof UniqueConstraint || object instanceof PrimaryKey || object instanceof ForeignKey) && field.equals("backingIndex")) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
+                if ((object instanceof UniqueConstraint || object instanceof PrimaryKey || object instanceof ForeignKey) && "backingIndex".equals(field)) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
                     object.setAttribute(field, null);
                 }
             } else if (fieldValue != newFieldValue) {

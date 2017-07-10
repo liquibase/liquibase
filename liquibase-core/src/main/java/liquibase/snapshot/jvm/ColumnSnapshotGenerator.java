@@ -208,7 +208,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");
-            if (nullable.equals("Y")) {
+            if ("Y".equals(nullable)) {
                 column.setNullable(true);
             } else {
                 column.setNullable(false);
@@ -238,11 +238,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         isAutoincrement = StringUtils.trimToNull(isAutoincrement);
                         if (isAutoincrement == null) {
                             column.setAutoIncrementInformation(null);
-                        } else if (isAutoincrement.equals("YES")) {
+                        } else if ("YES".equals(isAutoincrement)) {
                             column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                        } else if (isAutoincrement.equals("NO")) {
+                        } else if ("NO".equals(isAutoincrement)) {
                             column.setAutoIncrementInformation(null);
-                        } else if (isAutoincrement.equals("")) {
+                        } else if ("".equals(isAutoincrement)) {
                             LogFactory.getInstance().getLog().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                             column.setAutoIncrementInformation(null);
                         } else {
@@ -323,35 +323,36 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
         if (database instanceof MSSQLDatabase) {
-            if (columnTypeName.equalsIgnoreCase("numeric() identity")) {
+            if ("numeric() identity".equalsIgnoreCase(columnTypeName)) {
                 columnTypeName = "numeric";
-            } else if (columnTypeName.equalsIgnoreCase("decimal() identity")) {
+            } else if ("decimal() identity".equalsIgnoreCase(columnTypeName)) {
                 columnTypeName = "decimal";
-            } else if (columnTypeName.equalsIgnoreCase("xml")) {
+            } else if ("xml".equalsIgnoreCase(columnTypeName)) {
                 columnMetadataResultSet.set("COLUMN_SIZE", null);
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
-            } else if (columnTypeName.equalsIgnoreCase("datetimeoffset")) {
+            } else if ("datetimeoffset".equalsIgnoreCase(columnTypeName)) {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
-            } else if (columnTypeName.equalsIgnoreCase("time")) {
+            } else if ("time".equalsIgnoreCase(columnTypeName)) {
                 columnMetadataResultSet.set("COLUMN_SIZE", columnMetadataResultSet.getInt("DECIMAL_DIGITS"));
                 columnMetadataResultSet.set("DECIMAL_DIGITS", null);
             }
         }
 
         if (database instanceof FirebirdDatabase) {
-            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
+            if ("BLOB SUB_TYPE 0".equals(columnTypeName)) {
                 columnTypeName = "BLOB";
             }
-            if (columnTypeName.equals("BLOB SUB_TYPE 1")) {
+            if ("BLOB SUB_TYPE 1".equals(columnTypeName)) {
                 columnTypeName = "CLOB";
             }
         }
 
-        if (database instanceof MySQLDatabase && (columnTypeName.equalsIgnoreCase("ENUM") || columnTypeName.equalsIgnoreCase("SET"))) {
+        if (database instanceof MySQLDatabase && ("ENUM".equalsIgnoreCase(columnTypeName) || "SET".equalsIgnoreCase
+            (columnTypeName))) {
             try {
                 String boilerLength;
-                if (columnTypeName.equalsIgnoreCase("ENUM"))
+                if ("ENUM".equalsIgnoreCase(columnTypeName))
                     boilerLength = "7";
                 else // SET
                     boilerLength = "6";
@@ -391,13 +392,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database instanceof DB2Database) {
             String typeName = columnMetadataResultSet.getString("TYPE_NAME");
-            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC")
-                    || typeName.equalsIgnoreCase("VARGRAPHIC")) {
+            if ("DBCLOB".equalsIgnoreCase(typeName) || "GRAPHIC".equalsIgnoreCase(typeName)
+                    || "VARGRAPHIC".equalsIgnoreCase(typeName)) {
                 if (columnSize != null) {
                     columnSize = columnSize / 2; //Stored as double length chars
                 }
             }
-            if (columnTypeName.equalsIgnoreCase("TIMESTAMP") && decimalDigits == null) { //actually a date
+            if ("TIMESTAMP".equalsIgnoreCase(columnTypeName) && decimalDigits == null) { //actually a date
                 columnTypeName = "DATE";
                 dataType = Types.DATE;
             }
@@ -411,8 +412,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         // but when creating a column, LONG BINARY must not have parameters.
         // The same applies to LONG(...) VARCHAR.
         if (database instanceof SybaseASADatabase) {
-            if (columnTypeName.equalsIgnoreCase("LONG BINARY")
-                    || columnTypeName.equalsIgnoreCase("LONG VARCHAR")) {
+            if ("LONG BINARY".equalsIgnoreCase(columnTypeName)
+                    || "LONG VARCHAR".equalsIgnoreCase(columnTypeName)) {
                 columnSize = null;
             }
 
@@ -460,7 +461,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
             if (defaultValue != null && defaultValue instanceof String) {
-                if (defaultValue.equals("(NULL)")) {
+                if ("(NULL)".equals(defaultValue)) {
                     columnMetadataResultSet.set("COLUMN_DEF", new DatabaseFunction("null"));
                 }
             }
@@ -470,18 +471,19 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
                 columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
 
-                if (columnMetadataResultSet.get("COLUMN_DEF") != null && ((String) columnMetadataResultSet.get("COLUMN_DEF")).equalsIgnoreCase("NULL")) {
+                if (columnMetadataResultSet.get("COLUMN_DEF") != null && "NULL".equalsIgnoreCase((String)
+                    columnMetadataResultSet.get("COLUMN_DEF"))) {
                     columnMetadataResultSet.set("COLUMN_DEF", null);
                 }
 
                 Object columnDef = columnMetadataResultSet.get("COLUMN_DEF");
-                if (columnInfo.getType().getTypeName().equalsIgnoreCase("CHAR") && columnDef instanceof String && !((String) columnDef).startsWith("'") && !((String) columnDef).endsWith("'")) {
+                if ("CHAR".equalsIgnoreCase(columnInfo.getType().getTypeName()) && columnDef instanceof String && !((String) columnDef).startsWith("'") && !((String) columnDef).endsWith("'")) {
                     return new DatabaseFunction((String) columnDef);
                 }
 
-                if (columnMetadataResultSet.get("VIRTUAL_COLUMN").equals("YES")) {
+                if ("YES".equals(columnMetadataResultSet.get("VIRTUAL_COLUMN"))) {
                     Object column_def = columnMetadataResultSet.get("COLUMN_DEF");
-                    if (column_def != null && !column_def.equals("null")) {
+                    if (column_def != null && !"null".equals(column_def)) {
                         columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS (" + column_def + ")");
                     }
                 }
@@ -516,7 +518,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof DB2Database) {
-            if (columnMetadataResultSet.get("COLUMN_DEF") != null && ((String) columnMetadataResultSet.get("COLUMN_DEF")).equalsIgnoreCase("NULL")) {
+            if (columnMetadataResultSet.get("COLUMN_DEF") != null && "NULL".equalsIgnoreCase((String)
+                columnMetadataResultSet.get("COLUMN_DEF"))) {
                 columnMetadataResultSet.set("COLUMN_DEF", null);
             }
         }

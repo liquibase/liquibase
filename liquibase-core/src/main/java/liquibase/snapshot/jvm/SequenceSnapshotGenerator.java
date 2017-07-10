@@ -106,11 +106,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
         String valueAsString = value.toString();
         valueAsString = valueAsString.replace("'", "");
-        if (valueAsString.equalsIgnoreCase("true")
-                || valueAsString.equalsIgnoreCase("'true'")
-                || valueAsString.equalsIgnoreCase("y")
-                || valueAsString.equalsIgnoreCase("1")
-                || valueAsString.equalsIgnoreCase("t")) {
+        if ("true".equalsIgnoreCase(valueAsString)
+                || "'true'".equalsIgnoreCase(valueAsString)
+                || "y".equalsIgnoreCase(valueAsString)
+                || "1".equalsIgnoreCase(valueAsString)
+                || "t".equalsIgnoreCase(valueAsString)) {
             return Boolean.TRUE;
         } else {
             return Boolean.FALSE;

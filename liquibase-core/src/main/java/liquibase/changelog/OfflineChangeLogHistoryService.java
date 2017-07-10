@@ -166,7 +166,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 writeHeader(this.changeLogFile);
                 return new ArrayList<>();
             }
-            if (!line[COLUMN_ID].equals("ID")) {
+            if (!"ID".equals(line[COLUMN_ID])) {
                 throw new DatabaseException("Missing header in file "+this.changeLogFile.getAbsolutePath());
             }
 

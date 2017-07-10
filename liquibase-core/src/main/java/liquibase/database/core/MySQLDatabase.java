@@ -282,7 +282,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String correctObjectName(String name, Class<? extends DatabaseObject> objectType) {
-        if (objectType.equals(PrimaryKey.class) && name.equals("PRIMARY")) {
+        if (objectType.equals(PrimaryKey.class) && "PRIMARY".equals(name)) {
             return null;
         } else {
             name = super.correctObjectName(name, objectType);

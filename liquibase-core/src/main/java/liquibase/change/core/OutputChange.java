@@ -55,17 +55,18 @@ public class OutputChange extends AbstractChange {
             @Override
             public Sql[] generate(Database database) {
                 String target = getTarget();
-                if (target.equalsIgnoreCase("STDOUT")) {
+                if ("STDOUT".equalsIgnoreCase(target)) {
                     System.out.println(getMessage());
-                } else if (target.equalsIgnoreCase("STDERR")) {
+                } else if ("STDERR".equalsIgnoreCase(target)) {
                     System.err.println(getMessage());
-                } else if (target.equalsIgnoreCase("DEBUG")) {
+                } else if ("DEBUG".equalsIgnoreCase(target)) {
                     LogFactory.getInstance().getLog().debug(getMessage());
-                } else if (target.equalsIgnoreCase("INFO")) {
+                } else if ("INFO".equalsIgnoreCase(target)) {
                     LogFactory.getInstance().getLog().info(getMessage());
-                } else if (target.equalsIgnoreCase("WARN") || target.equalsIgnoreCase("WARNING")) {
+                } else if ("WARN".equalsIgnoreCase(target) || "WARNING".equalsIgnoreCase(target)) {
                     LogFactory.getInstance().getLog().warning(getMessage());
-                } else if (target.equalsIgnoreCase("SEVERE") || target.equalsIgnoreCase("FATAL") || target.equalsIgnoreCase("ERROR")) {
+                } else if ("SEVERE".equalsIgnoreCase(target) || "FATAL".equalsIgnoreCase(target) || "ERROR"
+                    .equalsIgnoreCase(target)) {
                     LogFactory.getInstance().getLog().severe(getMessage());
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
@@ -88,7 +89,7 @@ public class OutputChange extends AbstractChange {
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if (field.equals("target") && value.equals("")) {
+        if ("target".equals(field) && "".equals(value)) {
             return null;
         }
         return value;

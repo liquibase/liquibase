@@ -100,7 +100,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     @Override
     protected boolean shouldAutoLoad(ParsedNode node) {
-        if (node.getName().equals("params")) {
+        if ("params".equals(node.getName())) {
             return false;
         }
         return super.shouldAutoLoad(node);

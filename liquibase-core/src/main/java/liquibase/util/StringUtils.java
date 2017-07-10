@@ -96,7 +96,7 @@ public class StringUtils {
      */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
-            return piece.equals(";") || ((piece.equalsIgnoreCase("go") || piece.equals("/")) && (previousPiece == null || previousPiece.endsWith("\n")));
+            return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && (previousPiece == null || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());

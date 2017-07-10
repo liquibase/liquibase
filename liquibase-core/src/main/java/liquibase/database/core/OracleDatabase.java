@@ -2,7 +2,6 @@ package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -12,7 +11,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.RawCallStatement;
@@ -394,10 +392,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                         if (example.getName().startsWith("WM$_")) { //Workspace Manager backup tables.
                 return true;
             } else //noinspection HardCodedStringLiteral
-                        if (example.getName().equals("CREATE$JAVA$LOB$TABLE")) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
+                        if ("CREATE$JAVA$LOB$TABLE".equals(example.getName())) { //This table contains the name of the Java object, the date it was loaded, and has a BLOB column to store the Java object.
                 return true;
             } else //noinspection HardCodedStringLiteral
-                    if (example.getName().equals("JAVA$CLASS$MD5$TABLE")) { //This is a hash table that tracks the loading of Java objects into a schema.
+                    if ("JAVA$CLASS$MD5$TABLE".equals(example.getName())) { //This is a hash table that tracks the loading of Java objects into a schema.
                 return true;
             } else //noinspection HardCodedStringLiteral
                     if (example.getName().startsWith("ISEQ$$_")) { //System-generated sequence
@@ -468,11 +466,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public int getDataTypeMaxParameters(String dataTypeName) {
         //noinspection HardCodedStringLiteral
-        if (dataTypeName.toUpperCase().equals("BINARY_FLOAT")) {
+        if ("BINARY_FLOAT".equals(dataTypeName.toUpperCase())) {
             return 0;
         }
         //noinspection HardCodedStringLiteral
-        if (dataTypeName.toUpperCase().equals("BINARY_DOUBLE")) {
+        if ("BINARY_DOUBLE".equals(dataTypeName.toUpperCase())) {
             return 0;
         }
         return super.getDataTypeMaxParameters(dataTypeName);
@@ -507,7 +505,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
         //noinspection HardCodedStringLiteral
-        if (databaseFunction != null && databaseFunction.toString().equalsIgnoreCase("current_timestamp")) {
+        if (databaseFunction != null && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
         if(databaseFunction instanceof SequenceNextValueFunction

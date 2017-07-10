@@ -87,7 +87,7 @@ public abstract class JdbcUtils {
         try {
             obj = rs.getObject(index);
         } catch (SQLException e) {
-            if (e.getMessage().equals("The conversion from char to SMALLINT is unsupported.")) {
+            if ("The conversion from char to SMALLINT is unsupported.".equals(e.getMessage())) {
                 //issue with sqlserver jdbc 3.0 http://social.msdn.microsoft.com/Forums/sqlserver/en-US/2c908b45-6f75-484a-a891-5e8206f8844f/conversion-error-in-the-jdbc-30-driver-when-accessing-metadata
                 obj = rs.getString(index);
             } else {

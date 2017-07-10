@@ -35,10 +35,10 @@ public class ReflectionSerializer {
             }
 
             for (Field field : allFields) {
-                if (field.getName().equals("serialVersionUID") || field.getName().equals("serializableFields")) {
+                if ("serialVersionUID".equals(field.getName()) || "serializableFields".equals(field.getName())) {
                     continue;
                 }
-                if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
+                if (field.isSynthetic() || "$VRc".equals(field.getName())) { //from emma
                     continue;
                 }
 

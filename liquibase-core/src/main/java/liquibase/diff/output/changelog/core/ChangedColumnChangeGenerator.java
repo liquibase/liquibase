@@ -154,7 +154,8 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
             String tableName = column.getRelation().getName();
 
-            if (comparisonDatabase instanceof OracleDatabase && (((DataType) typeDifference.getReferenceValue()).getTypeName().equalsIgnoreCase("clob") || ((DataType) typeDifference.getComparedValue()).getTypeName().equalsIgnoreCase("clob"))) {
+            if (comparisonDatabase instanceof OracleDatabase && ("clob".equalsIgnoreCase(((DataType) typeDifference
+                .getReferenceValue()).getTypeName()) || "clob".equalsIgnoreCase(((DataType) typeDifference.getComparedValue()).getTypeName()))) {
                 String tempColName = "TEMP_CLOB_CONVERT";
                 OutputChange outputChange = new OutputChange();
                 outputChange.setMessage("Cannot convert directly from " + ((DataType) typeDifference.getComparedValue()).getTypeName()+" to "+((DataType) typeDifference.getReferenceValue()).getTypeName()+". Instead a new column will be created and the data transferred. This may cause unexpected side effects including constraint issues and/or table locks.");

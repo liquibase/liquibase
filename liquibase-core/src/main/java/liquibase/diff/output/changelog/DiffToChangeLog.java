@@ -297,7 +297,7 @@ public class DiffToChangeLog {
                             int o2Order = dependencyOrder.indexOf(o2Schema + "." + o2.getName());
 
                             int order = o1Order.compareTo(o2Order);
-                            if (type.equals("unexpected")) {
+                            if ("unexpected".equals(type)) {
                                 order = order * -1;
                             }
                             return order;

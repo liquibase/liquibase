@@ -1256,7 +1256,7 @@ public class FilenameUtils {
                 if (array[i] == '?') {
                     list.add("?");
                 } else if (list.size() == 0 ||
-                        (i > 0 && list.get(list.size() - 1).equals("*") == false)) {
+                        (i > 0 && "*".equals(list.get(list.size() - 1)) == false)) {
                     list.add("*");
                 }
             } else {

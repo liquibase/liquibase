@@ -106,7 +106,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
         for (Map.Entry<String, String> entry : shortNameByNamespace.entrySet()) {
-            if (!entry.getValue().equals("")) {
+            if (!"".equals(entry.getValue())) {
                 changeLogElement.setAttribute("xmlns:"+entry.getValue(), entry.getKey());
             }
         }
@@ -114,7 +114,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         String schemaLocationAttribute = "";
         for (Map.Entry<String, String> entry : urlByNamespace.entrySet()) {
-            if (!entry.getValue().equals("")) {
+            if (!"".equals(entry.getValue())) {
                 schemaLocationAttribute += entry.getKey()+" "+entry.getValue()+" ";
             }
         }
@@ -163,7 +163,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         String nodeName = object.getSerializedObjectName();
 
         NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
-        if (details != null && !details.getShortName(namespace).equals("")) {
+        if (details != null && !"".equals(details.getShortName(namespace))) {
             nodeName = details.getShortName(namespace)+":"+nodeName;
         }
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
@@ -401,7 +401,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         }
 
-        if (!sawChildren && textContent.equals("")) {
+        if (!sawChildren && "".equals(textContent)) {
             buffer.replace(buffer.length()-1, buffer.length(), "/>");
         } else {
             buffer.append("</").append(node.getNodeName()).append(">");

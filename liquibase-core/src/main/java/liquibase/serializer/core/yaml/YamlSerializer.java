@@ -55,7 +55,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
     }
 
     protected boolean isJson() {
-        return getValidFileExtensions()[0].equals("json");
+        return "json".equals(getValidFileExtensions()[0]);
     }
 
     @Override

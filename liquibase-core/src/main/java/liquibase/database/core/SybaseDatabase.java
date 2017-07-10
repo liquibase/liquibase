@@ -207,10 +207,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isSystemObject(DatabaseObject example) {
         if (example.getSchema() != null && example.getSchema().getName() != null) {
-            if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            if (example instanceof Table && ("sys".equals(example.getSchema().getName()) || "sybfi".equals(example
+                .getSchema().getName()))) {
                 return true;
             }
-            if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            if (example instanceof View && ("sys".equals(example.getSchema().getName()) || "sybfi".equals(example
+                .getSchema().getName()))) {
                 return true;
             }
         }

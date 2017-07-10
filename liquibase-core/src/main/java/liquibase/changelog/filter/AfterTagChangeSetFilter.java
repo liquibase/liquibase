@@ -24,7 +24,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
 
             if (!seenTag && tag.equalsIgnoreCase(ranChangeSet.getTag())) {
                 seenTag = true;
-                if (StringUtils.trimToEmpty(ranChangeSet.getDescription()).equals("tagDatabase")) { //changeSet is just tagging the database. Also remove it.
+                if ("tagDatabase".equals(StringUtils.trimToEmpty(ranChangeSet.getDescription()))) { //changeSet is just tagging the database. Also remove it.
                     changeLogsAfterTag.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
                 }
             }

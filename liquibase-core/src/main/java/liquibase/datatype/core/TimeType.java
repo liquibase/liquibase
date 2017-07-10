@@ -66,7 +66,7 @@ public class TimeType  extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }  else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
@@ -110,7 +110,7 @@ public class TimeType  extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getTimeFormat(Database database) {

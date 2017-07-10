@@ -60,7 +60,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             StringClauses parsedSql = SqlParser.parse(procedureText, true, true);
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
-            while (next != null && !(next.toString().equalsIgnoreCase("create") || next.toString().equalsIgnoreCase("alter")) && clauseIterator.hasNext()) {
+            while (next != null && !("create".equalsIgnoreCase(next.toString()) || "alter".equalsIgnoreCase(next
+                .toString())) && clauseIterator.hasNext()) {
                 next = clauseIterator.nextNonWhitespace();
             }
             clauseIterator.replace("ALTER");
@@ -76,7 +77,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             boolean reallyMerge = false;
             while (clauseIterator.hasNext()) {
                 Object clause = clauseIterator.nextNonWhitespace();
-                if (((String) clause).equalsIgnoreCase("merge")) {
+                if ("merge".equalsIgnoreCase((String) clause)) {
                     reallyMerge = true;
                 }
             }
@@ -103,7 +104,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         String fixedText = procedureText;
         while (fixedText.length() > 0) {
             String lastChar = fixedText.substring(fixedText.length() - 1);
-            if (lastChar.equals(" ") || lastChar.equals("\n") || lastChar.equals("\r") || lastChar.equals("\t")) {
+            if (" ".equals(lastChar) || "\n".equals(lastChar) || "\r".equals(lastChar) || "\t".equals(lastChar)) {
                 fixedText = fixedText.substring(0, fixedText.length() - 1);
             } else {
                 break;
@@ -145,7 +146,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
             StringClauses.ClauseIterator clauseIterator = parsedSql.getClauseIterator();
             Object next = "START";
             while (next != null && !next.toString().equalsIgnoreCase(keywordBeforeName) && clauseIterator.hasNext()) {
-                if (!keywordBeforeName.equalsIgnoreCase("PACKAGE") && ((String) next).equalsIgnoreCase("PACKAGE")) {
+                if (!"PACKAGE".equalsIgnoreCase(keywordBeforeName) && "PACKAGE".equalsIgnoreCase((String) next)) {
                     return procedureText;
                 }
                 next = clauseIterator.nextNonWhitespace();

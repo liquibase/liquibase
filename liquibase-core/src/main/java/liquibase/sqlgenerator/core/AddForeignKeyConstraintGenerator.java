@@ -59,7 +59,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    if (statement.getOnUpdate() != null) {
 		    if (database instanceof OracleDatabase) {
 			    //don't use
-            } else if ((database instanceof MSSQLDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+            } else if ((database instanceof MSSQLDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnUpdate())) {
                 //don't use
 		    } else if (database instanceof InformixDatabase) {
 			    //TODO don't know if correct
@@ -69,11 +69,12 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    }
 
 	    if (statement.getOnDelete() != null) {
-            if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
+            if ((database instanceof OracleDatabase) && ("RESTRICT".equalsIgnoreCase(statement.getOnDelete()) || ("NO " +
+                "ACTION").equalsIgnoreCase(statement.getOnDelete()))) {
                 //don't use
-            } else if ((database instanceof MSSQLDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
+            } else if ((database instanceof MSSQLDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnDelete())) {
                 //don't use
-		    } else if (database instanceof InformixDatabase && !(statement.getOnDelete().equalsIgnoreCase("CASCADE"))) {
+		    } else if (database instanceof InformixDatabase && !("CASCADE".equalsIgnoreCase(statement.getOnDelete()))) {
 			    //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
 		    	// see "REFERENCES Clause" in manual
 		    } else {

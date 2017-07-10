@@ -15,7 +15,7 @@ public class FluentPropertyBeanIntrospector implements BeanIntrospector {
                 int argCount = argTypes.length;
                 if (argCount == 1 && method.getName().startsWith("set")) {
                     String propertyName = Introspector.decapitalize(method.getName().substring(3));
-                    if (!propertyName.equals("class")) {
+                    if (!"class".equals(propertyName)) {
                         PropertyDescriptor pd = context.getDescriptor(propertyName);
                         boolean setWriteMethod = false;
                         if (pd == null) {

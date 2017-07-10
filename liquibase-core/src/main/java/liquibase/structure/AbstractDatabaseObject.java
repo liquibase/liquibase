@@ -110,7 +110,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public Object getSerializableFieldValue(String field) {
-        if (field.equals("snapshotId")) {
+        if ("snapshotId".equals(field)) {
             return snapshotId;
         }
         if (!attributes.containsKey(field)) {
@@ -148,7 +148,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode child : parsedNode.getChildren()) {
             String name = child.getName();
-            if (name.equals("snapshotId")) {
+            if ("snapshotId".equals(name)) {
                 this.snapshotId = child.getValue(String.class);
                 continue;
             }

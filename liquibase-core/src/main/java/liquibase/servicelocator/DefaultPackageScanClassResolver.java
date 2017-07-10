@@ -151,10 +151,10 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 String host = null;
                 urlPath = URLDecoder.decode(urlPath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
-                if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
+                if ("vfs".equals(url.getProtocol()) && !urlPath.startsWith("vfs")) {
                     urlPath = "vfs:"+urlPath;
                 }
-                if (url.getProtocol().equals("vfszip") && !urlPath.startsWith("vfszip")) {
+                if ("vfszip".equals(url.getProtocol()) && !urlPath.startsWith("vfszip")) {
                     urlPath = "vfszip:"+urlPath;
                 }
 

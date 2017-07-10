@@ -44,7 +44,8 @@ public class VarcharType extends CharType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         } else if (database instanceof PostgresDatabase) {
-            if (getParameters() != null && getParameters().length == 1 && getParameters()[0].toString().equals("2147483647")) {
+            if (getParameters() != null && getParameters().length == 1 && "2147483647".equals(getParameters()[0]
+                .toString())) {
                 DatabaseDataType type = new DatabaseDataType("CHARACTER");
                 type.addAdditionalInformation("VARYING");
                 return type;

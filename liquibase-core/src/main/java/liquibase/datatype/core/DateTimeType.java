@@ -49,8 +49,8 @@ public class DateTimeType extends LiquibaseDataType {
                     || originalDefinition.toLowerCase().startsWith("[smalldatetime")) {
 
                 return new DatabaseDataType(database.escapeDataTypeName("smalldatetime"));
-            } else if (originalDefinition.equalsIgnoreCase("datetime2")
-                    || originalDefinition.equals("[datetime2]")
+            } else if ("datetime2".equalsIgnoreCase(originalDefinition)
+                    || "[datetime2]".equals(originalDefinition)
                     || originalDefinition.matches("(?i)datetime2\\s*\\(.+")
                     || originalDefinition.matches("\\[datetime2\\]\\s*\\(.+")) {
 
@@ -148,7 +148,7 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
@@ -212,7 +212,7 @@ public class DateTimeType extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getDateTimeFormat(Database database) {

@@ -129,7 +129,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 	
 	private void runOnAllSchemas() throws LiquibaseException {
 		for(String schema : schemas) {
-			if(schema.equals("default")) {
+			if("default".equals(schema)) {
 				schema = null;
 			}
 			log.info("Initializing DB-Manul for schema " + schema);

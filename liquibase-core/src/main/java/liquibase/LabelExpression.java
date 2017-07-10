@@ -93,10 +93,10 @@ public class LabelExpression {
             return true;
         }
 
-        if (expression.trim().equals(":TRUE")) {
+        if (":TRUE".equals(expression.trim())) {
             return true;
         }
-        if (expression.trim().equals(":FALSE")) {
+        if (":FALSE".equals(expression.trim())) {
             return false;
         }
 
@@ -143,10 +143,10 @@ public class LabelExpression {
             expression = expression.substring(4);
         }
 
-        if (expression.trim().equals(":TRUE")) {
+        if (":TRUE".equals(expression.trim())) {
             return !notExpression;
         }
-        if (expression.trim().equals(":FALSE")) {
+        if (":FALSE".equals(expression.trim())) {
             return notExpression;
         }
 

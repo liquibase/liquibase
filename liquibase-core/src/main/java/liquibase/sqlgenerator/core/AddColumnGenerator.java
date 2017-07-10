@@ -150,7 +150,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase|| (database instanceof MSSQLDatabase && columnType.toString().equalsIgnoreCase("timestamp"))) {
+            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase|| (database instanceof MSSQLDatabase && "timestamp".equalsIgnoreCase(columnType.toString()))) {
                 alterTable += " NULL";
             }
         }

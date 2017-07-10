@@ -32,14 +32,14 @@ public class Main {
                 throw new UserError("No command passed");
             }
 
-            if (main.command.equals("help")) {
+            if ("help".equals(main.command)) {
                 main.printHelp();
                 return;
             }
 
             LiquibaseCommand command;
             CommandLineParser commandParser = new GnuParser();
-            if (main.command.equals("convert")) {
+            if ("convert".equals(main.command)) {
                 command = new ConvertCommand();
 
                 Options options = new Options();
@@ -136,7 +136,7 @@ public class Main {
             if (dir.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
-                    return name.equals("liquibase-sdk.bat");
+                    return "liquibase-sdk.bat".equals(name);
                 }
             }).length > 0) {
                 return dir;

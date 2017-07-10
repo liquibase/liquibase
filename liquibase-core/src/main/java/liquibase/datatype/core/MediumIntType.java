@@ -8,8 +8,6 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 
-import static liquibase.change.core.LoadDataChange.LOAD_DATA_TYPE.NUMERIC;
-
 @DataTypeInfo(name="mediumint", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class MediumIntType extends LiquibaseDataType {
 
@@ -41,7 +39,7 @@ public class MediumIntType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
         if (value instanceof DatabaseFunction) {

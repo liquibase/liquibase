@@ -37,7 +37,7 @@ public class UnknownType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         int dataTypeMaxParameters;
-        if (getName().equalsIgnoreCase("enum") || getName().equalsIgnoreCase("set")) {
+        if ("enum".equalsIgnoreCase(getName()) || "set".equalsIgnoreCase(getName())) {
             dataTypeMaxParameters = Integer.MAX_VALUE;
         } else {
             dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
@@ -45,14 +45,14 @@ public class UnknownType extends LiquibaseDataType {
         Object[] parameters = getParameters();
 
         if (database instanceof OracleDatabase) {
-            if (getName().equalsIgnoreCase("LONG")
-                    || getName().equalsIgnoreCase("BFILE")
-                    || getName().equalsIgnoreCase("ROWID")
-                    || getName().equalsIgnoreCase("ANYDATA")
-                    || getName().equalsIgnoreCase("SDO_GEOMETRY")
+            if ("LONG".equalsIgnoreCase(getName())
+                    || "BFILE".equalsIgnoreCase(getName())
+                    || "ROWID".equalsIgnoreCase(getName())
+                    || "ANYDATA".equalsIgnoreCase(getName())
+                    || "SDO_GEOMETRY".equalsIgnoreCase(getName())
                     ) {
                 parameters = new Object[0];
-            } else if (getName().equalsIgnoreCase("RAW")) {
+            } else if ("RAW".equalsIgnoreCase(getName())) {
                 return new DatabaseDataType(getName(), parameters);
             } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
                 return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));

@@ -39,7 +39,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
                 try {
                     Class<DatabaseObject> clazz = (Class<DatabaseObject>) Class.forName(className);
                     filters.add(new Filter(clazz, Pattern.compile(split[1])));
-                    catalogOrSchemaFilter |= className.equals("Catalog") || className.equals("Schema");
+                    catalogOrSchemaFilter |= "Catalog".equals(className) || "Schema".equals(className);
                 } catch (ClassNotFoundException e) {
                     throw new UnexpectedLiquibaseException(e);
                 }

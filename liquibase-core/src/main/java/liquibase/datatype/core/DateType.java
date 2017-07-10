@@ -32,11 +32,11 @@ public class DateType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || value.toString().equalsIgnoreCase("null")) {
+        if (value == null || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
-        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+        } else if ("CURRENT_TIMESTAMP()".equals(value.toString())) {
               return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Timestamp) {
             return database.getDateLiteral(((java.sql.Timestamp) value));
@@ -79,7 +79,7 @@ public class DateType extends LiquibaseDataType {
     }
 
     private boolean zeroTime(String stringVal) {
-        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+        return "".equals(stringVal.replace("-", "").replace(":", "").replace(" ", "").replace("0", ""));
     }
 
     protected DateFormat getDateFormat(Database database) {
