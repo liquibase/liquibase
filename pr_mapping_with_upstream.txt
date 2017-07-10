@@ -109,5 +109,5 @@ request number (pr#) to maximise its usefulness. Thank you.
 620     N/A            Made ChangeWithColumns extend Change so that an extension would have …
                        It seems the original author did not want to merge that change any more (from what he wrote
                        in his comments), but did not delete the PR. Skipping it for now.
-
+619     MERGED         Avoid null pointer exception on snapshot action
 596     DUPLICATE      of pr #655

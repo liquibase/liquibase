@@ -74,6 +74,9 @@ bug list (https://dbmanul.atlassian.net).
 - Steffen Yount fixed a bug where a hard-coded reference to a specific YAML library could break the Liquibase
   class loader when the YAML library gets updated in the pom.xml files (7524694b41d490148c94093a5cfd282dc11f007b).
   
+- A bug in the snapshotter where the snapshotting task could crash due to a NullPointerException was fixed by 
+  GitHub user "syjust" (1df8d796d12b7c4403bf3af52d2904aef3c1ac7d)
+  
 ### Database-specific bug fixes
 
 #### HyperSQL
