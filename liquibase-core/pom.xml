@@ -3,15 +3,15 @@
 				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>dbmanul-core</artifactId>
-	<name>DB-Manul Core</name>
-	<packaging>jar</packaging>
-
 	<parent>
 		<groupId>org.dbmanul</groupId>
 		<artifactId>dbmanul-parent</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 	</parent>
+
+	<artifactId>dbmanul-core</artifactId>
+	<packaging>jar</packaging>
+	<name>DB-Manul Core</name>
 
 	<properties>
 		<bundle.namespace>dbmanul.*</bundle.namespace>

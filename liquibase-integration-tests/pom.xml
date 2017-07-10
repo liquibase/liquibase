@@ -3,14 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dbmanul-integration-tests</artifactId>
-    <name>DB-Manul Integration Tests</name>
-
     <parent>
         <artifactId>dbmanul-parent</artifactId>
         <groupId>org.dbmanul</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
+
+    <artifactId>dbmanul-integration-tests</artifactId>
+    <name>DB-Manul Integration Tests</name>
 
     <dependencies>
         <dependency>
@@ -130,77 +130,8 @@
 
     </dependencies>
 
-    <profiles>
-        <profile>
-            <!-- The Oracle RDBMS JDBC driver is only available under a proprietary license from the Oracle
-                     Maven repository. You have to register and accept a license agreement to gain access. The procedure
-                     is described at
-                     http://docs.oracle.com/middleware/1213/core/MAVEN/config_maven_repo.htm#MAVEN9012
-            -->
-            <id>oracle</id>
-            <dependencies>
-                <dependency>
-                    <groupId>com.oracle.jdbc</groupId>
-                    <artifactId>ojdbc8</artifactId>
-                    <version>12.2.0.1</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <!-- IBM DB2 drivers are not available at all in Maven repositories (due to their proprietary nature
-                     and IBM not having a Maven repository that would contain these artifacts. The only way to get
-                     these drivers is to extract the file db2jcc4.jar from a licensed software installation and
-                     manually install them in your local (per-user) maven repository like this (you will need to replace
-                     the path to the JAR and the actual version number of the JDBC driver!):
-
-                     mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
-                            -Dfile=d:\IBM\SQLLIB\java\db2jcc4.jar -DgroupId=com.ibm.db2.jcc -DartifactId=db2jcc4 \
-                            -Dversion=4.22.29
-
-                     After that, adjust the driver version number in the following <dependency> tag.
-             -->
-            <id>db2</id>
-            <dependencies>
-                <dependency>
-                    <groupId>com.ibm.db2.jcc</groupId>
-                    <artifactId>db2jcc4</artifactId>
-                    <version>4.22.29</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <!-- SAP (formerly: Sybase) j/Connect drivers are not available at all in Maven repositories (due to their
-            proprietary nature
-                     and IBM not having a Maven repository that would contain these artifacts. The only way to get
-                     these drivers is to extract the file jconn4.jar from a licensed software installation and
-                     manually install them in your local (per-user) maven repository like this (you will need to replace
-                     the path to the JAR and the actual version number of the JDBC driver!):
-
-                     mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
-                            -Dfile=D:\sap\jConnect-16_0\classes\jconn4.jar -DgroupId=com.sybase.jdbc4.utils \
-                            -DartifactId=jconnect -Dversion=16.0.SP02.PL05
-
-                    One possible download source is the "SAP Store" at https://store.sap.com where you can search for the
-                    term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for € 0.00.
-
-                     After that, adjust the driver version number in the following <dependency> tag.
-             -->
-            <id>sap-jconnect</id>
-            <dependencies>
-                <dependency>
-                    <groupId>com.sybase.jdbc4.utils</groupId>
-                    <artifactId>jconnect</artifactId>
-                    <version>16.0.SP02.PL05</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-
-    </profiles>
     <build>
         <plugins>
-
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
@@ -283,5 +214,74 @@
             </testResource>
         </testResources>
     </build>
+
+    <profiles>
+        <profile>
+            <!-- The Oracle RDBMS JDBC driver is only available under a proprietary license from the Oracle
+                     Maven repository. You have to register and accept a license agreement to gain access. The procedure
+                     is described at
+                     http://docs.oracle.com/middleware/1213/core/MAVEN/config_maven_repo.htm#MAVEN9012
+            -->
+            <id>oracle</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.oracle.jdbc</groupId>
+                    <artifactId>ojdbc8</artifactId>
+                    <version>12.2.0.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <!-- IBM DB2 drivers are not available at all in Maven repositories (due to their proprietary nature
+                     and IBM not having a Maven repository that would contain these artifacts. The only way to get
+                     these drivers is to extract the file db2jcc4.jar from a licensed software installation and
+                     manually install them in your local (per-user) maven repository like this (you will need to replace
+                     the path to the JAR and the actual version number of the JDBC driver!):
+
+                     mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
+                            -Dfile=d:\IBM\SQLLIB\java\db2jcc4.jar -DgroupId=com.ibm.db2.jcc -DartifactId=db2jcc4 \
+                            -Dversion=4.22.29
+
+                     After that, adjust the driver version number in the following <dependency> tag.
+             -->
+            <id>db2</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.ibm.db2.jcc</groupId>
+                    <artifactId>db2jcc4</artifactId>
+                    <version>4.22.29</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <!-- SAP (formerly: Sybase) j/Connect drivers are not available at all in Maven repositories (due to their
+            proprietary nature
+                     and IBM not having a Maven repository that would contain these artifacts. The only way to get
+                     these drivers is to extract the file jconn4.jar from a licensed software installation and
+                     manually install them in your local (per-user) maven repository like this (you will need to replace
+                     the path to the JAR and the actual version number of the JDBC driver!):
+
+                     mvn install:install-file -DlocalRepositoryPath=lib -DcreateChecksum=true -Dpackaging=jar \
+                            -Dfile=D:\sap\jConnect-16_0\classes\jconn4.jar -DgroupId=com.sybase.jdbc4.utils \
+                            -DartifactId=jconnect -Dversion=16.0.SP02.PL05
+
+                    One possible download source is the "SAP Store" at https://store.sap.com where you can search for the
+                    term "SCN ADAPTIVE SERVER ENTERPRISE SDK" and "buy" it as "trial" software for € 0.00.
+
+                     After that, adjust the driver version number in the following <dependency> tag.
+             -->
+            <id>sap-jconnect</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.sybase.jdbc4.utils</groupId>
+                    <artifactId>jconnect</artifactId>
+                    <version>16.0.SP02.PL05</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+    </profiles>
 
 </project>
