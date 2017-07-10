@@ -68,7 +68,8 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet)
+        throws PreconditionFailedException, PreconditionErrorException {
         try {
             ForeignKey example = new ForeignKey();
             example.setName(getForeignKeyName());
@@ -79,7 +80,11 @@ public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
             example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
-                    throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);
+                throw new PreconditionFailedException("Foreign Key " +
+                    database.escapeIndexName(catalogName, schemaName, foreignKeyName) + " does not exist",
+                    changeLog,
+                    this
+                );
             }
         } catch (PreconditionFailedException e) {
             throw e;
