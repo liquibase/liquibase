@@ -69,7 +69,7 @@ public class CompareControl {
     }
 
     protected void setTypes(Set<Class<? extends DatabaseObject>> types) {
-        if (types == null || types.size() == 0) {
+        if (types == null || types.isEmpty()) {
             types = DatabaseObjectFactory.getInstance().getStandardTypes();
         }
         this.compareTypes = types;

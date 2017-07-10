@@ -311,7 +311,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
             if ("columns".equals(field) && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
-                if (fieldValue != null && ((Collection) fieldValue).size() > 0) {
+                if (fieldValue != null && !((Collection) fieldValue).isEmpty()) {
                     String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
                     if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC")) {
                         continue;
@@ -498,7 +498,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     protected SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
-        if (generators == null || generators.size() == 0) {
+        if (generators == null || generators.isEmpty()) {
             return null;
         }
         //noinspection unchecked
@@ -545,7 +545,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                         } else {
                             object.setAttribute(attr, allObjects.get(value));
                         }
-                    } else if (value instanceof Collection && ((Collection) value).size() > 0 && allObjects.containsKey(((Collection) value).iterator().next())) {
+                    } else if (value instanceof Collection && !((Collection) value).isEmpty() && allObjects.containsKey(((Collection) value).iterator().next())) {
                         List newList = new ArrayList();
                         for (String element : (Collection<String>) value) {
                             newList.add(allObjects.get(element));

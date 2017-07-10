@@ -173,7 +173,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     @Override
     public String toString() {
         String returnString = getName();
-        if (parameters != null && parameters.size() > 0 && maxParameters > 0) {
+        if (parameters != null && !parameters.isEmpty() && maxParameters > 0) {
             returnString += "(";
             for (Object param : parameters) {
                 if (returnString == null) {

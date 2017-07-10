@@ -29,7 +29,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     
             Map parsedYaml = parseYamlStream(physicalChangeLogLocation, yaml, changeLogStream);
 
-            if (parsedYaml == null || parsedYaml.size() == 0) {
+            if (parsedYaml == null || parsedYaml.isEmpty()) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
 

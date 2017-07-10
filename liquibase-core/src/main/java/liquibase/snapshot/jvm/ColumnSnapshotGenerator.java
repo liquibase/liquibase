@@ -69,7 +69,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                         example.getName()
                 );
 
-                if (columnMetadataRs.size() > 0) {
+                if (!columnMetadataRs.isEmpty()) {
                     CachedRow data = columnMetadataRs.get(0);
                     column = readColumn(data, relation, database);
                     setAutoIncrementDetails(column, database, snapshot);

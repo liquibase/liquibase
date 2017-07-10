@@ -183,7 +183,7 @@ public class StreamUtil {
 
     public static InputStream singleInputStream(String path, ResourceAccessor resourceAccessor) throws IOException {
         Set<InputStream> streams = resourceAccessor.getResourcesAsStream(path);
-        if (streams == null || streams.size() == 0) {
+        if (streams == null || streams.isEmpty()) {
             return null;
         }
         if (streams.size() != 1) {

@@ -74,7 +74,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 }
             }
 
-            if (values.size() > 0) {
+            if (!values.isEmpty()) {
                 buffer.append("\n");
                 buffer.append(StringUtils.join(values, "\n"));
                 buffer.append("\n");
@@ -113,7 +113,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String serializeObject(Collection collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 
@@ -133,7 +133,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String serializeObject(Map collection, int indent) {
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "[]";
         }
 

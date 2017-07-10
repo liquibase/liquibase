@@ -48,7 +48,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             if ("current".equals(function.getValue())) {
                 if (database instanceof InformixDatabase) {
                     if (dataType instanceof DateTimeType) {
-                        if (dataType.getAdditionalInformation() == null || dataType.getAdditionalInformation().length() == 0) {
+                        if (dataType.getAdditionalInformation() == null || dataType.getAdditionalInformation().isEmpty()) {
                             if (dataType.getParameters() != null && dataType.getParameters().length > 0) {
 
                                 String parameter = String.valueOf(dataType.getParameters()[0]);

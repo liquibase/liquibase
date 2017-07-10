@@ -40,7 +40,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
         writer.println("<html>");
         writer.println("<head><title>DB-Manul Status</title></head>");
         writer.println("<body>");
-        if (liquibaseRunLog.size() == 0) {
+        if (liquibaseRunLog.isEmpty()) {
             writer.println("<b>DB-Manul did not run</b>");
         } else {
             writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest)

@@ -24,6 +24,6 @@ public class Warnings {
     }
 
     public boolean hasWarnings() {
-        return messages.size() > 0;
+        return !messages.isEmpty();
     }
 }

@@ -227,7 +227,7 @@ public class DiffToChangeLog {
 
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
 
-        if (diffOutputControl.getSchemaComparisons() != null && objects.size() > 0  && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+        if (diffOutputControl.getSchemaComparisons() != null && !objects.isEmpty() && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<>();
             CompareControl.SchemaComparison[] schemaComparisons = this.diffOutputControl.getSchemaComparisons();
             if (schemaComparisons != null) {
@@ -240,7 +240,7 @@ public class DiffToChangeLog {
                 }
             }
 
-            if (schemas.size() == 0) {
+            if (schemas.isEmpty()) {
                 schemas.add(database.getDefaultSchemaName());
             }
 
@@ -257,7 +257,7 @@ public class DiffToChangeLog {
                 addDependencies(graph, schemas, database);
                 graph.computeDependencies();
 
-                if (dependencyOrder.size() > 0) {
+                if (!dependencyOrder.isEmpty()) {
 
                     final List<DatabaseObject> toSort = new ArrayList<>();
                     final List<DatabaseObject> toNotSort = new ArrayList<>();
@@ -438,7 +438,7 @@ public class DiffToChangeLog {
             });
 
             List<Map<String, ?>> rs = executor.queryForList(new RawSqlStatement(sql));
-            if (rs.size() > 0) {
+            if (!rs.isEmpty()) {
                 for (Map<String, ?> row : rs) {
                     String bName = StringUtils.trimToNull((String) row.get("REFERENCED_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCED_NAME"));
                     String tabName = StringUtils.trimToNull((String) row.get("REFERENCING_SCHEMA_NAME")) + "." + StringUtils.trimToNull((String) row.get("REFERENCING_NAME"));
@@ -579,7 +579,7 @@ public class DiffToChangeLog {
                 }
             });
             for (Node n : allNodes.values()) {
-                if (n.inEdges.size() == 0) {
+                if (n.inEdges.isEmpty()) {
                     nodesWithNoIncomingEdges.add(n);
                 }
             }

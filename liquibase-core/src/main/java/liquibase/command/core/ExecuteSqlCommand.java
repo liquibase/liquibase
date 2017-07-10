@@ -83,7 +83,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
             if (sql.toLowerCase().matches("\\s*select .*")) {
                 List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sql));
                 out += "Output of "+sql+":\n";
-                if (rows.size() == 0) {
+                if (rows.isEmpty()) {
                     out += "-- Empty Resultset --\n";
                 } else {
                     SortedSet<String> keys = new TreeSet<>();

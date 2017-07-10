@@ -103,7 +103,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
     protected void outputObjects(List objects, Class type, StringBuilder catalogBuffer) {
         List<? extends DatabaseObject> databaseObjects = sort(objects);
-        if (databaseObjects.size() > 0) {
+        if (!databaseObjects.isEmpty()) {
             catalogBuffer.append(type.getName()).append(":\n");
 
             StringBuilder typeBuffer = new StringBuilder();
@@ -150,7 +150,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                     value = databaseObject.getSerializableFieldValue(attribute);
                 }
             } else if (value instanceof Collection) {
-                if (((Collection) value).size() == 0) {
+                if (((Collection) value).isEmpty()) {
                     value = null;
                 } else {
                     if (((Collection) value).iterator().next() instanceof DatabaseObject) {

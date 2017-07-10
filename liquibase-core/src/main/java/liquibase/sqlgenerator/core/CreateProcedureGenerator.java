@@ -102,7 +102,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
         }
 
         String fixedText = procedureText;
-        while (fixedText.length() > 0) {
+        while (!fixedText.isEmpty()) {
             String lastChar = fixedText.substring(fixedText.length() - 1);
             if (" ".equals(lastChar) || "\n".equals(lastChar) || "\r".equals(lastChar) || "\t".equals(lastChar)) {
                 fixedText = fixedText.substring(0, fixedText.length() - 1);

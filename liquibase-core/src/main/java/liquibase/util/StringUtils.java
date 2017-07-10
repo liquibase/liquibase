@@ -36,7 +36,7 @@ public class StringUtils {
             return null;
         }
         String returnString = string.trim();
-        if (returnString.length() == 0) {
+        if (returnString.isEmpty()) {
             return null;
         } else {
             return returnString;
@@ -146,7 +146,7 @@ public class StringUtils {
             return null;
         }
 
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             return "";
         }
         
@@ -352,7 +352,7 @@ public class StringUtils {
      * @return true if String is null or empty
      */
     public static boolean isEmpty(String value) {
-        return value == null || value.length() == 0;
+        return value == null || value.isEmpty();
     }
 
     /**

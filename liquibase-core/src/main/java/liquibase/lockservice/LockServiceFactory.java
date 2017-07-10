@@ -70,7 +70,7 @@ public class LockServiceFactory {
 				}
 			}
 
-			if (foundServices.size() == 0) {
+			if (foundServices.isEmpty()) {
 				throw new UnexpectedLiquibaseException("Cannot find LockService for " + database.getShortName());
 			}
 

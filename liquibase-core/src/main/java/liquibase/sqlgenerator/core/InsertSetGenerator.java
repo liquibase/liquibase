@@ -69,7 +69,7 @@ public class InsertSetGenerator extends AbstractSqlGenerator<InsertSetStatement>
 
 	protected InsertGenerator getInsertGenerator(Database database) {
 		SortedSet<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators(new InsertStatement(null, null, null), database);
-		if (generators == null || generators.size() == 0) {
+		if (generators == null || generators.isEmpty()) {
 			return null;
 		}
 		return (InsertGenerator) generators.iterator().next();

@@ -22,7 +22,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
-        if (updateStatement.getWhereParameters() != null && updateStatement.getWhereParameters().size() > 0 && updateStatement.getWhereClause() == null) {
+        if (updateStatement.getWhereParameters() != null && !updateStatement.getWhereParameters().isEmpty() && updateStatement.getWhereClause() == null) {
             validationErrors.addError("whereParams set but no whereClause");
         }
         return validationErrors;

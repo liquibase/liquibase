@@ -190,7 +190,7 @@ public class DiffResult {
 //            differencesInData = !changeSets.isEmpty();
 //        }
 
-        return missingObjects.size() == 0 && unexpectedObjects.size() == 0 && changedObjects.size() == 0;
+        return missingObjects.isEmpty() && unexpectedObjects.isEmpty() && changedObjects.isEmpty();
     }
 
     public Set<Class<? extends DatabaseObject>> getComparedTypes() {

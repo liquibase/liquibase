@@ -43,7 +43,7 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
         for (String altPath : getAlternatePaths(path)) {
             contents.addAll(super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive));
         }
-        if (contents.size() == 0) {
+        if (contents.isEmpty()) {
             return null;
         }
         return contents;

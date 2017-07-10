@@ -33,7 +33,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), objectName);
 
             Table table;
-            if (rs.size() > 0) {
+            if (!rs.isEmpty()) {
                 table = readTable(rs.get(0), database);
             } else {
                 return null;

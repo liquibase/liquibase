@@ -217,7 +217,7 @@ public class DatabaseTestContext {
     }
 
     public Set<Database> getAvailableDatabases() throws Exception {
-        if (availableDatabases.size() == 0) {
+        if (availableDatabases.isEmpty()) {
             for (DatabaseConnection conn : getAvailableConnections()) {
                     availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }

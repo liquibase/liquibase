@@ -726,7 +726,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
                     List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
-                    if (database instanceof MSSQLDatabase && userDefinedTypes.size() > 0) { //UDT types in MSSQL don't take parameters
+                    if (database instanceof MSSQLDatabase && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
                         for (CachedRow row : rows) {
                             String dataType = (String) row.get("TYPE_NAME");
                             if (userDefinedTypes.contains(dataType.toLowerCase())) {

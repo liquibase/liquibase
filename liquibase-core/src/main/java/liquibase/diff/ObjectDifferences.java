@@ -43,7 +43,7 @@ public class ObjectDifferences {
     }
 
     public boolean hasDifferences() {
-        return differences.size() > 0;
+        return !differences.isEmpty();
     }
 
     public void compare(String attribute, DatabaseObject referenceObject, DatabaseObject compareToObject, CompareFunction compareFunction) {

@@ -31,7 +31,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer();
         
-        if (statement.getCopyColumns().size() == 0) {
+        if (statement.getCopyColumns().isEmpty()) {
             return new Sql[]{};
         }
         

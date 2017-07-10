@@ -27,7 +27,7 @@ public class MavenResourceAccessor extends ClassLoaderResourceAccessor {
     @Override
     public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
         Set<String> contents = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
-        if (contents == null || contents.size() == 0) {
+        if (contents == null || contents.isEmpty()) {
             contents = super.list(relativeTo, path.replaceFirst("^target/classes/", ""), includeFiles, includeDirectories, recursive);
         }
         return contents;

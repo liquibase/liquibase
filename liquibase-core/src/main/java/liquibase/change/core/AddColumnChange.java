@@ -89,7 +89,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         List<AddColumnStatement> addColumnStatements = new ArrayList<>();
         List<UpdateStatement> addColumnUpdateStatements = new ArrayList<>();
 
-        if (getColumns().size() == 0) {
+        if (getColumns().isEmpty()) {
             return new SqlStatement[] {
                     new AddColumnStatement(catalogName, schemaName, tableName, null, null, null)
             };

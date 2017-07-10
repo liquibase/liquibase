@@ -76,7 +76,7 @@ public class LabelExpression {
         if (runtimeLabels == null || runtimeLabels.isEmpty()) {
             return true;
         }
-        if (this.labels.size() == 0) {
+        if (this.labels.isEmpty()) {
             return true;
         }
 
@@ -161,7 +161,7 @@ public class LabelExpression {
     }
 
     public boolean isEmpty() {
-        return this.labels == null || this.labels.size() == 0;
+        return this.labels == null || this.labels.isEmpty();
     }
 
 }

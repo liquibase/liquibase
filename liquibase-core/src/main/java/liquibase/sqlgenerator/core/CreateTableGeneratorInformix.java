@@ -102,7 +102,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 if (database.supportsAutoIncrement()) {
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
                 
-                    if (autoIncrementClause.length() > 0) {
+                    if (!autoIncrementClause.isEmpty()) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
                 } else {
@@ -131,7 +131,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         //
 
         PrimaryKeyConstraint pkConstraint = statement.getPrimaryKeyConstraint();
-        if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
+        if (statement.getPrimaryKeyConstraint() != null && !statement.getPrimaryKeyConstraint().getColumns().isEmpty()) {
             buffer.append(" PRIMARY KEY (");
             buffer.append(StringUtils.join(primaryKeyColumns, ", "));
             buffer.append(")");

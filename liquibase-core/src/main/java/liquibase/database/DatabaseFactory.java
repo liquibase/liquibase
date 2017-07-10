@@ -111,7 +111,7 @@ public class DatabaseFactory {
             }
         }
 
-        if (foundDatabases.size() == 0) {
+        if (foundDatabases.isEmpty()) {
             LOG.warning("Unknown database: " + connection.getDatabaseProductName());
             UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
             unsupportedDB.setConnection(connection);

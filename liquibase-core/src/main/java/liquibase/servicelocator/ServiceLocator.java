@@ -127,7 +127,7 @@ public class ServiceLocator {
                     throw new UnexpectedLiquibaseException(e);
                 }
 
-                if (packagesToScan.size() == 0) {
+                if (packagesToScan.isEmpty()) {
                     addPackageToScan("liquibase.change");
                     addPackageToScan("liquibase.changelog");
                     addPackageToScan("liquibase.database");

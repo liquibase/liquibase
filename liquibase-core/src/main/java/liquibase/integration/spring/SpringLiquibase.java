@@ -89,7 +89,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     liquibasePackages.addAll(getPackagesFromManifest(manifest));
                 }
 
-                if (liquibasePackages.size() == 0) {
+                if (liquibasePackages.isEmpty()) {
                     LogFactory.getInstance().getLog().warning("No Liquibase-Packages entry found in MANIFEST.MF. Using fallback of entire 'liquibase' package");
                     liquibasePackages.add("liquibase");
                 }

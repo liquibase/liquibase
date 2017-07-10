@@ -66,7 +66,7 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof InformixDatabase) {
 
           // From database to changelog
-          if (getAdditionalInformation() == null || getAdditionalInformation().length() == 0) {
+          if (getAdditionalInformation() == null || getAdditionalInformation().isEmpty()) {
             if (getParameters() != null && getParameters().length > 0) {
 
               String parameter = String.valueOf(getParameters()[0]);
@@ -90,7 +90,7 @@ public class DateTimeType extends LiquibaseDataType {
           }
 
           // From changelog to the database
-          if (getAdditionalInformation() != null && getAdditionalInformation().length() > 0) {
+          if (getAdditionalInformation() != null && !getAdditionalInformation().isEmpty()) {
             return new DatabaseDataType(originalDefinition);
           }
 

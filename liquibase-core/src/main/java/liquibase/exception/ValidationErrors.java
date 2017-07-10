@@ -15,13 +15,13 @@ public class ValidationErrors {
     protected List<String> warningMessages = new ArrayList<>();
 
     public boolean hasErrors() {
-        return errorMessages.size() > 0;
+        return !errorMessages.isEmpty();
     }
 
     public void checkRequiredField(String requiredFieldName, Object value) {
         if (value == null) {
             addError(requiredFieldName + " is required");
-        } else if (value instanceof Collection && ((Collection) value).size() == 0) {
+        } else if (value instanceof Collection && ((Collection) value).isEmpty()) {
             addError(requiredFieldName + " is empty");
         } else if (value instanceof Object[] && ((Object[]) value).length == 0) {
             addError(requiredFieldName + " is empty");
@@ -82,7 +82,7 @@ public class ValidationErrors {
 
     @Override
     public String toString() {
-        if (getErrorMessages().size() == 0) {
+        if (getErrorMessages().isEmpty()) {
             return "No errors";
         }
         return StringUtils.join(getErrorMessages(), "; ");

@@ -116,7 +116,7 @@ public class ChangeLogParserFactoryTest {
 	@Test
     public void builtInGeneratorsAreFound() {
         List parsers = ChangeLogParserFactory.getInstance().getParsers();
-        assertTrue(parsers.size() > 0);
+        assertTrue(!parsers.isEmpty());
     }
 
     private static class MockChangeLogParser implements ChangeLogParser {

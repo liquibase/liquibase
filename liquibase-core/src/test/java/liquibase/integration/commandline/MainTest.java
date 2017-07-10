@@ -474,7 +474,7 @@ public class MainTest {
     @Test
     public void checkSetup() {
         Main cli = new Main();
-        assertTrue(cli.checkSetup().size() > 0);
+        assertTrue(!cli.checkSetup().isEmpty());
 
         cli.driver = "driver";
         cli.username = "username";
@@ -483,10 +483,10 @@ public class MainTest {
         cli.changeLogFile = "file";
         cli.classpath = "classpath";
 
-        assertTrue(cli.checkSetup().size() > 0);
+        assertTrue(!cli.checkSetup().isEmpty());
 
         cli.command = "BadCommand";
-        assertTrue(cli.checkSetup().size() > 0);
+        assertTrue(!cli.checkSetup().isEmpty());
 
         cli.command = "migrate";
         assertEquals(0, cli.checkSetup().size());

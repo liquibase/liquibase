@@ -167,7 +167,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 isSinglePrimaryKeyColumn &&
                 isPrimaryKeyAutoIncrement) ) {
 
-            if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
+            if (statement.getPrimaryKeyConstraint() != null && !statement.getPrimaryKeyConstraint().getColumns()
+                .isEmpty()) {
                 if (database.supportsPrimaryKeyNames()) {
                     String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
                     if (pkName == null) {

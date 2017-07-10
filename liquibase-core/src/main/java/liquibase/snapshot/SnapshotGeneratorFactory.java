@@ -308,7 +308,7 @@ public class SnapshotGeneratorFactory {
         // object type "type" in the DBMS "database"
         SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
 
-        if (generators != null && generators.size() > 0) {
+        if (generators != null && !generators.isEmpty()) {
             SnapshotGenerator generator = generators.iterator().next();
             addsTo = generator.addsTo();
             if (addsTo != null) {

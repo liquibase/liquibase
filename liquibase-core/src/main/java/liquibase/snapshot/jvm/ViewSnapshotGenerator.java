@@ -59,7 +59,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         List<CachedRow> viewsMetadataRs = null;
         try {
             viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaDataFromCache().getViews(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName());
-            if (viewsMetadataRs.size() > 0) {
+            if (!viewsMetadataRs.isEmpty()) {
                 CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
                 String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));

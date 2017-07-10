@@ -461,7 +461,7 @@ public class StringClauses {
 
     @Override
     public String toString() {
-        if (clauses.size() == 0) {
+        if (clauses.isEmpty()) {
             return "";
         }
 
@@ -495,7 +495,7 @@ public class StringClauses {
     }
 
     public boolean isEmpty() {
-        if (clauses.size() == 0) {
+        if (clauses.isEmpty()) {
             return true;
         }
         for (Object clause : clauses.values()) {

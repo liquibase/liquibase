@@ -40,7 +40,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<Map<String, ?>> metadata = listColumns(exampleConstraint, database, snapshot);
 
-        if (metadata.size() == 0) {
+        if (metadata.isEmpty()) {
             return null;
         }
         UniqueConstraint constraint = new UniqueConstraint();
@@ -224,7 +224,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
                 List<Map<String, ?>> returnList = new ArrayList<>();
-                if (rows.size() == 0) {
+                if (rows.isEmpty()) {
                     return returnList;
                 } else if (rows.size() > 1) {
                     throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");

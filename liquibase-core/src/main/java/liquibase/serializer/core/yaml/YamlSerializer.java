@@ -98,7 +98,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 }
                 if (value instanceof Collection) {
                     List valueAsList = new ArrayList((Collection) value);
-                    if (valueAsList.size() == 0) {
+                    if (valueAsList.isEmpty()) {
                         continue;
                     }
                     for (int i = 0; i < valueAsList.size(); i++) {
@@ -110,7 +110,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
 
                 }
                 if (value instanceof Map) {
-                    if  (((Map) value).size() == 0) {
+                    if  (((Map) value).isEmpty()) {
                         continue;
                     }
 
@@ -120,7 +120,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                             ((Map) value).put(key, toMap((LiquibaseSerializable) mapValue));
                         } else if (mapValue instanceof Collection) {
                             List valueAsList = new ArrayList((Collection) mapValue);
-                            if (valueAsList.size() == 0) {
+                            if (valueAsList.isEmpty()) {
                                 continue;
                             }
                             for (int i = 0; i < valueAsList.size(); i++) {

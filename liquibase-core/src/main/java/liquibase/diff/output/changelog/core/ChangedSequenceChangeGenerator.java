@@ -69,7 +69,7 @@ public class ChangedSequenceChangeGenerator extends AbstractChangeGenerator impl
             changes.add(change);
         }
 
-        if (changes.size() == 0) {
+        if (changes.isEmpty()) {
             return null;
         } else {
             return changes.toArray(new Change[changes.size()]);

@@ -149,7 +149,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             }
         }
 
-        if (returnSet.size() == 0) {
+        if (returnSet.isEmpty()) {
             return null;
         }
         return returnSet;

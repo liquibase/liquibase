@@ -35,7 +35,7 @@ public class UnparsedSql implements Sql {
                     }
                 }
             }
-            foundMore = moreAffectedDatabaseObjects.size() > 0;
+            foundMore = !moreAffectedDatabaseObjects.isEmpty();
             this.affectedDatabaseObjects.addAll(moreAffectedDatabaseObjects);
             moreAffectedDatabaseObjects.clear();
         }

@@ -100,7 +100,7 @@ public class ParsedNode {
                     newValue.add(obj);
                 }
             }
-            if (newValue.size() == 0) {
+            if (newValue.isEmpty()) {
                 //do nothing
             } else if (newValue.size() == 1) {
                 this.value = newValue.get(0);
@@ -150,7 +150,7 @@ public class ParsedNode {
      * For each key in the map, a new child is added with the key as the name and the value (with all {@link #setValue(Object)}) logic) is the value.
      */
     public ParsedNode addChildren(Map<String, Object> child) throws ParsedNodeException {
-        if (child == null || child.size() == 0) {
+        if (child == null || child.isEmpty()) {
             return this; //do nothing
         }
         for (Map.Entry<String, Object> entry : child.entrySet()) {
@@ -282,7 +282,7 @@ public class ParsedNode {
     @Override
     public String toString() {
         String string = name;
-        if (children.size() > 0) {
+        if (!children.isEmpty()) {
             string += "[" + StringUtils.join(children, ",", new StringUtils.ToStringFormatter(), true) + "]";
         }
         if (value != null) {

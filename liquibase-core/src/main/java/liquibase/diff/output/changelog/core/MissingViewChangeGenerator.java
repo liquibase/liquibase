@@ -54,7 +54,8 @@ public class MissingViewChangeGenerator extends AbstractChangeGenerator implemen
         boolean fullDefinitionOverridden = false;
         if (selectQuery == null) {
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
-        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
+        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && !view.getColumns()
+            .isEmpty()) {
             String viewName;
             if (change.getCatalogName() == null && change.getSchemaName() == null) {
                 viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);

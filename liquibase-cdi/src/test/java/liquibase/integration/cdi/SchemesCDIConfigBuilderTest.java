@@ -244,7 +244,7 @@ public class SchemesCDIConfigBuilderTest {
                 }
             }
             // exit from the infinite loop
-            if (futures.size() == 0) {
+            if (futures.isEmpty()) {
                 break;
             }
         }

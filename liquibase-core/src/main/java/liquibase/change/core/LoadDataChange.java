@@ -641,7 +641,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         char quotchar;
-        if (StringUtils.trimToEmpty(this.quotchar).length() == 0) {
+        if (StringUtils.trimToEmpty(this.quotchar).isEmpty()) {
             // hope this is impossible to have a field surrounded with non ascii char 0x01
             quotchar = '\1';
         } else {

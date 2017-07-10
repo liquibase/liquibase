@@ -77,7 +77,7 @@ public class ChangeGeneratorFactory {
 
     private ChangeGeneratorChain createGeneratorChain(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {
         SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
-        if (generators == null || generators.size() == 0) {
+        if (generators == null || generators.isEmpty()) {
             return null;
         }
         //noinspection unchecked

@@ -25,7 +25,7 @@ public class CollectionUtil {
 
     public static <T> List<Map<String, T>> permutations(Map<String, List<T>> parameterValues) {
         List<Map<String, T>> list = new ArrayList<>();
-        if (parameterValues == null || parameterValues.size() == 0) {
+        if (parameterValues == null || parameterValues.isEmpty()) {
             return list;
         }
 
@@ -45,7 +45,7 @@ public class CollectionUtil {
 
             permutation.put(thisKey, value);
 
-            if (remainingKeys.size() == 0) {
+            if (remainingKeys.isEmpty()) {
                 returnList.add(permutation);
             } else {
                 permute(permutation, remainingKeys, parameterValues, returnList);

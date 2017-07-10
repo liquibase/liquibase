@@ -125,34 +125,34 @@ public class ValidationFailedException extends MigrationFailedException {
 
     public void printDescriptiveError(PrintStream out) {
         out.println("Validation Error: ");
-        if (invalidMD5Sums.size() > 0) {
+        if (!invalidMD5Sums.isEmpty()) {
             out.println(INDENT_SPACES +invalidMD5Sums.size()+" change sets have changed since they were ran against the database");
             for (String message : invalidMD5Sums) {
                 out.println("          " + message);
             }
         }
 
-        if (failedPreconditions.size() > 0) {
+        if (!failedPreconditions.isEmpty()) {
             out.println(INDENT_SPACES +failedPreconditions.size()+" preconditions failed");
             for (FailedPrecondition failedPrecondition : failedPreconditions) {
                 out.println("          "+failedPrecondition.toString());
             }
         }
-        if (errorPreconditions.size() > 0) {
+        if (!errorPreconditions.isEmpty()) {
             out.println(INDENT_SPACES +errorPreconditions.size()+" preconditions generated an error");
             for (ErrorPrecondition errorPrecondition : errorPreconditions) {
                 out.println("          "+errorPrecondition.toString());
             }
         }
 
-        if (duplicateChangeSets.size() > 0) {
+        if (!duplicateChangeSets.isEmpty()) {
             out.println(INDENT_SPACES +duplicateChangeSets.size()+" change sets had duplicate identifiers");
             for (ChangeSet duplicate : duplicateChangeSets) {
                 out.println("          "+duplicate.toString(false));
             }
         }
         
-        if(setupExceptions.size() >0) {
+        if(!setupExceptions.isEmpty()) {
             out.println(INDENT_SPACES +setupExceptions.size()+" changes had errors");
             for (SetupException setupEx : setupExceptions) {
                 out.println("          "+setupEx.getMessage());

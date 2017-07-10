@@ -185,7 +185,7 @@ public class SqlGeneratorFactory {
 
     private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
         SortedSet<SqlGenerator> sqlGenerators = getGenerators(statement, database);
-        if (sqlGenerators == null || sqlGenerators.size() == 0) {
+        if (sqlGenerators == null || sqlGenerators.isEmpty()) {
             return null;
         }
         //noinspection unchecked
@@ -246,7 +246,7 @@ public class SqlGeneratorFactory {
     }
 
     public boolean supports(SqlStatement statement, Database database) {
-        return getGenerators(statement, database).size() > 0;
+        return !getGenerators(statement, database).isEmpty();
     }
 
     public ValidationErrors validate(SqlStatement statement, Database database) {

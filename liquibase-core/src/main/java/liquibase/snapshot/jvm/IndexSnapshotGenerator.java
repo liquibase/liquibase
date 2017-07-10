@@ -322,7 +322,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 }
             }
-            if (nonClusteredIndexes.size() > 0) {
+            if (!nonClusteredIndexes.isEmpty()) {
                 return finalizeIndex(schema, tableName, nonClusteredIndexes.get(0), snapshot);
             }
             return null;

@@ -56,7 +56,7 @@ public class CommandFactory  {
 
         List<LiquibaseCommand> sortedCommands = new ArrayList<>(commands);
         Collections.sort(sortedCommands, commandComparator);
-        if (sortedCommands.size() == 0) {
+        if (sortedCommands.isEmpty()) {
             throw new UnexpectedLiquibaseException("Could not find command class for "+commandName);
         }
         try {

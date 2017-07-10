@@ -181,7 +181,7 @@ public class DatabaseObjectComparatorFactory {
         }
 
         List<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
-        if (comparators == null || comparators.size() == 0) {
+        if (comparators == null || comparators.isEmpty()) {
             return null;
         }
 

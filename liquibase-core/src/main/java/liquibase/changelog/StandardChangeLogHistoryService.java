@@ -209,7 +209,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
 
             List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), new ColumnConfig().setName("MD5SUM")).setLimit(1));
-            if (md5sumRS.size() > 0) {
+            if (!md5sumRS.isEmpty()) {
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");

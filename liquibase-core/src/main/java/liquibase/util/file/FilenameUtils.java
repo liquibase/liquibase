@@ -1019,7 +1019,7 @@ public class FilenameUtils {
         if (filename == null) {
             return false;
         }
-        if (extension == null || extension.length() == 0) {
+        if (extension == null || extension.isEmpty()) {
             return (indexOfExtension(filename) == -1);
         }
         String fileExt = getExtension(filename);
@@ -1164,7 +1164,7 @@ public class FilenameUtils {
 
         // loop around a backtrack stack, to handle complex * matching
         do {
-            if (backtrack.size() > 0) {
+            if (!backtrack.isEmpty()) {
                 int[] array = (int[]) backtrack.pop();
                 wcsIdx = array[0];
                 textIdx = array[1];
@@ -1225,7 +1225,7 @@ public class FilenameUtils {
                 return true;
             }
 
-        } while (backtrack.size() > 0);
+        } while (!backtrack.isEmpty());
 
         return false;
     }
@@ -1255,7 +1255,7 @@ public class FilenameUtils {
                 }
                 if (array[i] == '?') {
                     list.add("?");
-                } else if (list.size() == 0 ||
+                } else if (list.isEmpty() ||
                         (i > 0 && "*".equals(list.get(list.size() - 1)) == false)) {
                     list.add("*");
                 }

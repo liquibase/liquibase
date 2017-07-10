@@ -49,7 +49,7 @@ public class TableWriter extends HTMLWriter {
     
     private void writeTableRemarks(Writer fileWriter, Table table, Database database) throws IOException {
         final String tableRemarks = table.getRemarks();
-        if (tableRemarks != null && tableRemarks.length() > 0) {
+        if (tableRemarks != null && !tableRemarks.isEmpty()) {
         	final List<List<String>> cells = new ArrayList<>();
         	cells.add(Arrays.asList(tableRemarks));
         	writeTable("Table Description", cells, fileWriter);

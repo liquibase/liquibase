@@ -121,7 +121,7 @@ public class DiffToReport {
 
     protected void printChangedComparison(String title, Map<? extends DatabaseObject, ObjectDifferences> objects, PrintStream out) {
         out.print(title + ": ");
-        if (objects.size() == 0) {
+        if (objects.isEmpty()) {
             out.println("NONE");
         } else {
             out.println();
@@ -139,7 +139,7 @@ public class DiffToReport {
     protected void printSetComparison(String title, Set<? extends DatabaseObject> objects, PrintStream out) {
         out.print(title + ": ");
         Schema lastSchema = null;
-        if (objects.size() == 0) {
+        if (objects.isEmpty()) {
             out.println("NONE");
         } else {
             out.println();

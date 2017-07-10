@@ -124,7 +124,7 @@ public class DiffOutputControl {
     }
 
     public boolean shouldOutput(DatabaseObject object, Database accordingTo) {
-        if (includeSchemas.size() > 0) {
+        if (!includeSchemas.isEmpty()) {
             Schema schema = object.getSchema();
             if (schema == null) {
                 return true;

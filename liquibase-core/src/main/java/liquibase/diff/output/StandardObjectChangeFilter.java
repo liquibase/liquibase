@@ -64,7 +64,7 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
 
     @Override
     public boolean include(DatabaseObject object) {
-        if (filters.size() == 0) {
+        if (filters.isEmpty()) {
             return true;
         }
         for (Filter filter : filters) {

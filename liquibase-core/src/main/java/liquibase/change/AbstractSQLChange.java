@@ -345,7 +345,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                         return true;
                     }
                     if (!isWhiteSpace(read)) {
-                        if (resizingBuffer.size() > 0) {
+                        if (!resizingBuffer.isEmpty()) {
 
                             byte[] buf = new byte[resizingBuffer.size()];
                             for (int i=0; i< resizingBuffer.size(); i++) {

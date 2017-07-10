@@ -76,7 +76,7 @@ public class ContextExpression {
         if (runtimeContexts == null || runtimeContexts.isEmpty()) {
             return true;
         }
-        if (this.contexts.size() == 0) {
+        if (this.contexts.isEmpty()) {
             return true;
         }
 
@@ -159,7 +159,7 @@ public class ContextExpression {
     }
 
     public boolean isEmpty() {
-        return this.contexts == null || this.contexts.size() == 0;
+        return this.contexts == null || this.contexts.isEmpty();
     }
 
     public static boolean matchesAll(Collection<ContextExpression> expressions, Contexts contexts) {

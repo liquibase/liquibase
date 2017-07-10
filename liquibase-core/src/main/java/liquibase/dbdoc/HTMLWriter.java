@@ -77,7 +77,7 @@ public abstract class HTMLWriter {
     protected void writeTable(String title, List<List<String>> cells, Writer fileWriter) throws IOException {
         fileWriter.append("<P>");
         int colspan = 0;
-        if (cells.size() == 0) {
+        if (cells.isEmpty()) {
             colspan = 0;
         } else {
             colspan = cells.get(0).size();
@@ -127,7 +127,7 @@ public abstract class HTMLWriter {
         fileWriter.append("</TR>\n");
 
         ChangeSet lastChangeSet = null;
-        if (changes == null || changes.size() == 0) {
+        if (changes == null || changes.isEmpty()) {
             fileWriter.append("<tr><td>None Found</td></tr>");
         } else {
             for (Change change : changes) {

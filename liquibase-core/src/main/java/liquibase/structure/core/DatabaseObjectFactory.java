@@ -46,7 +46,7 @@ public class DatabaseObjectFactory {
                     typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"es");
                 }
             }
-            if (typesNotFound.size() > 0) {
+            if (!typesNotFound.isEmpty()) {
                 throw new UnexpectedLiquibaseException("Unknown snapshot type(s) "+StringUtils.join(typesNotFound, ", "));
             }
             return returnSet;
