@@ -14,7 +14,9 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.util.beans.PropertyUtils;
 
+import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -43,7 +45,10 @@ public class ChangeParameterMetaData {
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, Map<String, Object> exampleValues, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
+                                   Map<String, Object> exampleValues, String since, Type dataType,
+                                   String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
+                                   LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -66,7 +71,13 @@ public class ChangeParameterMetaData {
             this.dataType = StringUtils.lowerCaseFirst(((Class) dataType).getSimpleName());
             this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
-            this.dataType = StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() + " of " + StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()));
+            this.dataType = StringUtils.lowerCaseFirst(
+                ((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() +
+                    " of " +
+                    StringUtils.lowerCaseFirst(
+                        ((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()
+                    )
+            );
             this.dataTypeClass = (Class) ((ParameterizedType) dataType).getRawType();
             this.dataTypeClassParameters = ((ParameterizedType) dataType).getActualTypeArguments();
         }
@@ -86,10 +97,11 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if (supportedDatabases.length == 1
+            && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                if (database.getShortName() == null || database.getShortName().equals("unsupported")) {
+                if (database.getShortName() == null || "unsupported".equals(database.getShortName())) {
                     continue;
                 }
                 if (!change.supports(database)) {
@@ -101,12 +113,15 @@ public class ChangeParameterMetaData {
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
-                        if (finalErrors.getUnsupportedErrorMessages().size() == 0 || finalErrors.getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages().size()) {
+                        if (finalErrors.getUnsupportedErrorMessages().isEmpty()
+                            || finalErrors.getUnsupportedErrorMessages().size() ==
+                                originalErrors.getUnsupportedErrorMessages().size()) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
                     }
-                } catch (Exception ignore) {
+                } catch (InstantiationException|IllegalAccessException ignore) {
+                    // Do nothing
                 }
             }
 
@@ -132,7 +147,8 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if (requiredDatabases.length == 1
+            && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -141,12 +157,16 @@ public class ChangeParameterMetaData {
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
-                        if (originalErrors.getRequiredErrorMessages().size() > 0 && finalErrors.getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size()) {
+                        if (!originalErrors.getRequiredErrorMessages().isEmpty()
+                            && finalErrors.getRequiredErrorMessages().size() <
+                               originalErrors.getRequiredErrorMessages().size()
+                         ) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
                     }
-                } catch (Exception ignore) {
+                } catch (InstantiationException|IllegalAccessException ignore) {
+                    // Do nothing
                 }
             }
 
@@ -165,7 +185,7 @@ public class ChangeParameterMetaData {
         return computedDatabases;
     }
 
-    private ValidationErrors getStatementErrors(Change testChange, Database database) {
+    private static ValidationErrors getStatementErrors(Change testChange, Database database) {
         ValidationErrors errors = new ValidationErrors();
         SqlStatement[] statements = testChange.generateStatements(database);
         for (SqlStatement statement : statements) {
@@ -194,7 +214,8 @@ public class ChangeParameterMetaData {
     }
 
     /**
-     * Return the data type of value stored in this parameter. Used for documentation and integration purposes as well as validation.
+     * Return the data type of value stored in this parameter. Used for documentation and integration purposes as well
+     * as validation.
      */
     public String getDataType() {
         return dataType;
@@ -209,9 +230,11 @@ public class ChangeParameterMetaData {
     }
 
     /**
-     * Return the database types for which this parameter is required. The strings returned correspond to the values returned by {@link liquibase.database.Database#getShortName()}.
+     * Return the database types for which this parameter is required. The strings returned correspond to the values
+     * returned by {@link liquibase.database.Database#getShortName()}.
      * If the parameter is required for all datatabases, this will return the string "all" as an element.
-     * If the parameter is required for no databases, this will return an empty set. Passing the string "none" to the constructor also results in an empty set.
+     * If the parameter is required for no databases, this will return an empty set. Passing the string "none" to the
+     * constructor also results in an empty set.
      * This method will never return a null value
      */
     public Set<String> getRequiredForDatabase() {
@@ -224,7 +247,8 @@ public class ChangeParameterMetaData {
 
     /**
      * A convenience method for testing the value returned by {@link #getRequiredForDatabase()} against a given database.
-     * Returns true if the {@link Database#getShortName()} method is contained in the required databases or the required database list contains the string "all"
+     * Returns true if the {@link Database#getShortName()} method is contained in the required databases or the
+     * required database list contains the string "all"
      */
     public boolean isRequiredFor(Database database) {
         return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
@@ -244,13 +268,16 @@ public class ChangeParameterMetaData {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
-                        readMethod = change.getClass().getMethod("is" + StringUtils.upperCaseFirst(descriptor.getName()));
+                        readMethod = change.getClass().getMethod(
+                            "is" + StringUtils.upperCaseFirst(descriptor.getName())
+                        );
                     }
                     return readMethod.invoke(change);
                 }
             }
             throw new RuntimeException("Could not find readMethod for " + this.parameterName);
-        } catch (Exception e) {
+        } catch (IntrospectionException|NoSuchMethodException|SecurityException|IllegalAccessException
+            |IllegalArgumentException|InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
@@ -259,7 +286,7 @@ public class ChangeParameterMetaData {
      * Sets the value of this parameter on the given change.
      */
     public void setValue(Change change, Object value) {
-        if (value instanceof String && !dataType.equals("string")) {
+        if (value instanceof String && (! "string".equals(dataType))) {
             try {
                 switch (dataType) {
                     case "bigInteger":
@@ -269,10 +296,12 @@ public class ChangeParameterMetaData {
                         value = new DatabaseFunction((String) value);
                         break;
                     default:
-                        throw new UnexpectedLiquibaseException("Unknown Data Type: " + dataType);
+                        throw new UnexpectedLiquibaseException("Unknown data type: " + dataType);
                 }
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage());
+            } catch (UnexpectedLiquibaseException e) {
+                throw new UnexpectedLiquibaseException(
+                    "Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage()
+                );
             }
         }
 
@@ -288,26 +317,33 @@ public class ChangeParameterMetaData {
                         if (expectedWriteType.equals(String.class)) {
                             value = value.toString();
                         } else {
-                            throw new UnexpectedLiquibaseException("Could not convert " + value.getClass().getName() + " to " + expectedWriteType.getName());
+                            throw new UnexpectedLiquibaseException(
+                                "Could not convert " + value.getClass().getName() +
+                                " to " +
+                                expectedWriteType.getName()
+                            );
                         }
                     }
                     writeMethod.invoke(change, value);
                 }
             }
-        } catch (Exception e) {
+        } catch (IllegalAccessException|IntrospectionException|InvocationTargetException e) {
             throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
         }
     }
 
     /**
-     * Returns a dot-delimited chain of {@link liquibase.structure.DatabaseObject} fields describing what existing value this parameter would need to be set if applying the Change to a particular DatabaseObject.
+     * Returns a dot-delimited chain of {@link liquibase.structure.DatabaseObject} fields describing what existing
+     * value this parameter would need to be set if applying the Change to a particular DatabaseObject.
      * <p></p>
-     * For example, in an addColumn Change, the "name" parameter would return "column.name" because if you know of an existing Column object, the "name" parameter needs to be set to the column's name.
+     * For example, in an addColumn Change, the "name" parameter would return "column.name" because if you know of an
+     * existing Column object, the "name" parameter needs to be set to the column's name.
      * In the addColumn's "tableName" parameter, this method would return "column.table.name".
      * <p></p>
      * The values of the chain correspond to the {@link liquibase.structure.DatabaseObject#getObjectTypeName()} and {@link liquibase.structure.DatabaseObject#getAttributes()}
      * <p></p>
-     * This method is used by integrations that want to generate Change instances or configurations pre-filled with data required to apply to an existing database object.
+     * This method is used by integrations that want to generate Change instances or configurations pre-filled with
+     * data required to apply to an existing database object.
      */
     public String getMustEqualExisting() {
         return mustEqualExisting;
@@ -325,7 +361,7 @@ public class ChangeParameterMetaData {
             Object exampleValue = null;
 
             for (Map.Entry<String, Object> entry: exampleValues.entrySet()) {
-                if (entry.getKey().equalsIgnoreCase("all")) {
+                if ("all".equalsIgnoreCase(entry.getKey())) {
                     exampleValue = entry.getValue();
                 } else if (DatabaseList.definitionMatches(entry.getKey(), database, false)) {
                     return entry.getValue();
@@ -378,8 +414,7 @@ public class ChangeParameterMetaData {
             case "bigInteger":
                 return new BigInteger("371717");
             case "list":
-                return null; //"TODO";
-        
+                return null; // TODO
             case "sequenceNextValueFunction":
                 return new SequenceNextValueFunction("seq_name");
             case "databaseFunction":
@@ -421,6 +456,6 @@ public class ChangeParameterMetaData {
 
     @Override
     public String toString() {
-        return (change != null ? change.toString() + "." : "") + getParameterName();
+        return (change != null ? (change.toString() + ".") : "") + getParameterName();
     }
 }
