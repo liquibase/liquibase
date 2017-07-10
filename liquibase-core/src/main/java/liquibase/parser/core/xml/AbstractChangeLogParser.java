@@ -10,7 +10,8 @@ import liquibase.resource.ResourceAccessor;
 public abstract class AbstractChangeLogParser implements ChangeLogParser {
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+                                   ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         ParsedNode parsedNode = parseToNode(physicalChangeLogLocation, changeLogParameters, resourceAccessor);
         if (parsedNode == null) {
             return null;
@@ -27,5 +28,6 @@ public abstract class AbstractChangeLogParser implements ChangeLogParser {
         return changeLog;
     }
 
-    protected abstract ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException;
+    protected abstract ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters,
+                                              ResourceAccessor resourceAccessor) throws ChangeLogParseException;
 }
