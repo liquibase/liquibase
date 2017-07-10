@@ -330,7 +330,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             if (StringUtils.isEmpty(schemaName)) {
                 schemaName = this.getDefaultSchemaName();
             }
-            if (! StringUtils.isEmpty(schemaName)) {
+            if ((!StringUtils.isEmpty(schemaName) && (!schemaName.equals(getConnectionSchemaName())))) {
                 name = this.escapeObjectName(schemaName, Schema.class)+"."+name;
             }
             return name;
