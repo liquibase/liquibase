@@ -96,4 +96,12 @@ request number (pr#) to maximise its usefulness. Thank you.
 628     MERGED         Fix for whitespace before delimiter
 627     GONE
 626     MERGED         Postgres does not support parameters for type int
+625     TODO           --do-not-warn-about--DBA_RECYCLEBIN the idea is legitimate, but I would rather have it
+                       implemented as a proper command line option (in the classes Main and CommandLineUtils, so that
+                       it can be used from Maven/Ant/etc. as well). I also found the queries where the recycle bin is
+                       used, maybe I can work around the need to access to it.
+624     N/A            Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 4.0.x (I could not
+                       find a Liquibase 4.x.x branch that is more current than the master branch, so I use the 3.5.x
+                       version of the same PR:
+623
 596     DUPLICATE      of pr #655
