@@ -105,5 +105,5 @@ request number (pr#) to maximise its usefulness. Thank you.
                        version of the same PR:
 623     MERGED         Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 3.5.x
 622     DUPLICATE      Another version of #623 (already merged)
-
+621     MERGED         Fix some required fields in the preconditions
 596     DUPLICATE      of pr #655

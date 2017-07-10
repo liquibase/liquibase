@@ -48,6 +48,13 @@ bug list (https://dbmanul.atlassian.net).
 - In `<sql>` blocks, when a whitespace occured on the line before the delimiter (e.g. `statement 1 \nGO\nstatement 2`),
   the delimiter was not detected. Thanks to Mirek Pluta for the bug fix.
   
+- When verifying an IndexExists pre-condition, specifying either the column names or the table name (but not both)
+  was falsely accepted during the validation phase, which lead to a runtime error / crash later. Thanks to 
+  Olivier Vermeulen for the bug fix (a61d73772bc04f219faebe712a62432baf8fc523)
+  
+- When verifying a ForeignKeyConstraintExists pre-condition, a missing foreign key name was not recognized as an error
+  during the validation phase. Thanks to Olivier Vermeulen for the bug fix (a61d73772bc04f219faebe712a62432baf8fc523).
+  
 #### Crashes and Java exceptions:
 - A NullPointerException that could arise when using the Oracle Database BFILE type or the MySQL TIMESTAMP type
   was fixed thanks to "yuxiaobin" (0ea5040caf0175fc36fcaf5b2d375903c777c5eb).
