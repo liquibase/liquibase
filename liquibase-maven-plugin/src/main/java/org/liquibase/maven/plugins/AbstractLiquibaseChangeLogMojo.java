@@ -75,11 +75,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
   @Override
   protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        try {
-            String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
-            return new Liquibase(changeLog, fo, db);
-        } catch (LiquibaseException ex) {
-            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
-        }
+      String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
+      return new Liquibase(changeLog, fo, db);
   }
 }
