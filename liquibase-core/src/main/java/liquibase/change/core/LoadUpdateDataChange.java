@@ -6,7 +6,9 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.*;
+import liquibase.statement.BatchDmlExecutablePreparedStatement;
+import liquibase.statement.ExecutablePreparedStatementBase;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
@@ -26,7 +28,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     private Boolean onlyUpdate = Boolean.FALSE;
 
     @Override
-    protected boolean getPreparedStatementsImplemented() { return false; }
+    protected boolean hasPreparedStatementsImplemented() { return false; }
 
     @Override
     @DatabaseChangeProperty(description = "Name of the table to insert or update data in", requiredForDatabase = "all")
@@ -73,7 +75,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     protected ExecutablePreparedStatementBase createPreparedStatement(
             Database database, String catalogName, String schemaName, String tableName,
             List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
-        // TODO: Not supported yet. When this is implemented, we can remove getPreparedStatementsImplemented().
+        // TODO: Not supported yet. When this is implemented, we can remove hasPreparedStatementsImplemented().
         throw new UnsupportedOperationException("Executable Prepared Statements are not supported for " +
                 "LoadUpdateDataChange yet . Very sorry.");
     }
