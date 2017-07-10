@@ -30,7 +30,7 @@ import java.util.List;
 
 public class MockDatabase implements Database, InternalDatabase {
 
-    private final static int FETCH_SIZE = 1000;
+    private static final int FETCH_SIZE = 1000;
 
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;

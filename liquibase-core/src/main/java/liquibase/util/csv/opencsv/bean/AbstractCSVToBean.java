@@ -16,7 +16,7 @@ public abstract class AbstractCSVToBean {
      * @throws InstantiationException - thrown when getting the PropertyEditor for the class.
      * @throws IllegalAccessException - thrown when getting the PropertyEditor for the class.
      */
-    abstract protected PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws InstantiationException, IllegalAccessException;
+    protected abstract PropertyEditor getPropertyEditor(PropertyDescriptor desc) throws InstantiationException, IllegalAccessException;
 
     /**
      * Returns the trimmed value of the string only if the property the string is describing should be trimmed

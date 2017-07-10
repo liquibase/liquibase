@@ -18,7 +18,7 @@ import java.util.List;
  */
 @ApplicationScoped
 public class SchemesTreeBuilder {
-    private final static Logger log = LogFactory.getInstance().getLog(SchemesTreeBuilder.class.getName());
+    private static final Logger log = LogFactory.getInstance().getLog(SchemesTreeBuilder.class.getName());
 
     private class SchemaNode {
         private final LiquibaseSchema item;

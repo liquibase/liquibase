@@ -9,11 +9,11 @@ import java.util.*;
 public class Index extends AbstractDatabaseObject {
 
 	/** Marks Index as associated with Primary Key [PK] */
-	public final static String MARK_PRIMARY_KEY = "primaryKey";
+    public static final String MARK_PRIMARY_KEY = "primaryKey";
 	/** Marks Index as associated with Foreign Key [FK] */
-	public final static String MARK_FOREIGN_KEY = "foreignKey";
+    public static final String MARK_FOREIGN_KEY = "foreignKey";
 	/** Marks Index as associated with Unique Constraint [UC] */
-	public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
+    public static final String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
 
     public Index() {
         setAttribute("columns", new ArrayList<String>());

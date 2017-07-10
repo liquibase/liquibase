@@ -3,8 +3,8 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class CommentStatement extends AbstractSqlStatement {
-	final private String text;
-	final private int MAX_LENGTH = 80;
+	private final String text;
+	private final int MAX_LENGTH = 80;
 	
 	public CommentStatement(String text) {
 		this.text = text;

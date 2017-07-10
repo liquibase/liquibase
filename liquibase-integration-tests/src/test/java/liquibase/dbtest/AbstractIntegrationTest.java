@@ -161,7 +161,7 @@ public abstract class AbstractIntegrationTest {
      *
      * See https://docs.travis-ci.com/user/database-setup/
      */
-    abstract protected boolean isDatabaseProvidedByTravisCI();
+    protected abstract boolean isDatabaseProvidedByTravisCI();
 
     /**
      * Reset database connection and internal objects before each test.

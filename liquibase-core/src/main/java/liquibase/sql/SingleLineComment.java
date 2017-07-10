@@ -7,8 +7,8 @@ import java.util.HashSet;
 
 public class SingleLineComment implements Sql {
 
-	final private String sql;
-	final private String lineCommentToken;
+	private final String sql;
+	private final String lineCommentToken;
 	
 	public SingleLineComment(String sql, String lineCommentToken) {
 		this.sql = sql;

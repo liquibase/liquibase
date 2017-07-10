@@ -63,7 +63,7 @@ public class AbstractResourceAccessorJavaTest {
 		assertEquals("cs-1.0.xml", path);
 	}
 
-	private final static class MyARA extends AbstractResourceAccessor {
+	private static final class MyARA extends AbstractResourceAccessor {
 		
 		@Override
 		protected void init() {

@@ -38,9 +38,9 @@ import static org.mockito.Mockito.when;
  */
 public class SchemesCDIConfigBuilderTest {
 
-    private final static Long FILE_LOCK_TIMEOUT = 5L;
-    private final static String BEFORE_KEY = "Before";
-    private final static String AFTER_KEY = "After";
+    private static final Long FILE_LOCK_TIMEOUT = 5L;
+    private static final String BEFORE_KEY = "Before";
+    private static final String AFTER_KEY = "After";
     private static AtomicLong COUNTER;
     private static Logger log;
 

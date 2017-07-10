@@ -130,7 +130,7 @@ public class DependencyUtil {
         }
     }
 
-    static private class GraphNode<T> {
+    private static class GraphNode<T> {
         public T value;
         private List<GraphNode<T>> comingInNodes;
         private List<GraphNode<T>> goingOutNodes;
