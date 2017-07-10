@@ -26,11 +26,7 @@ public abstract class JdbcUtils {
         if (stmt != null) {
             try {
                 stmt.close();
-            }
-            catch (SQLException ex) {
-//                logger.debug("Could not close JDBC Statement", ex);
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 // We don't trust the JDBC driver: It might throw RuntimeException or Error.
 //                logger.debug("Unexpected exception on closing JDBC Statement", ex);
             }
@@ -47,11 +43,7 @@ public abstract class JdbcUtils {
         if (rs != null) {
             try {
                 rs.close();
-            }
-            catch (SQLException ex) {
-//                logger.debug("Could not close JDBC ResultSet", ex);
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 // We don't trust the JDBC driver: It might throw RuntimeException or Error.
 //                logger.debug("Unexpected exception on closing JDBC ResultSet", ex);
             }

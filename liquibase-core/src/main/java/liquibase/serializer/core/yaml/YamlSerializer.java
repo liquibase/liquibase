@@ -209,9 +209,7 @@ public abstract class YamlSerializer implements LiquibaseSerializer {
                 } else {
                     return super.getProperties(type);
                 }
-            } catch (InstantiationException e) {
-                throw new UnexpectedLiquibaseException(e);
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
             for (String property : serialzableType.getSerializableFields()) {

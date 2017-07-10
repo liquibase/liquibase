@@ -380,9 +380,6 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         } catch (ClassNotFoundException e) {
             log.debug("Cannot find class '" + className + "' in classloader: " + classLoader
                     + ". Reason: " + e, e);
-        } catch (NoClassDefFoundError e) {
-            log.debug("Cannot find the class definition '" + className + "' in classloader: " + classLoader
-                    + ". Reason: " + e, e);
         } catch (LinkageError e) {
             log.debug("Cannot find the class definition '" + className + "' in classloader: " + classLoader
                     + ". Reason: " + e, e);
@@ -504,9 +501,6 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     break;
                 } catch (ClassNotFoundException e) {
                     log.debug("Cannot find class '" + fqn + "' in classloader: " + classLoader
-                            + ". Reason: " + e, e);
-                } catch (NoClassDefFoundError e) {
-                    log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (LinkageError e) {
                     log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader

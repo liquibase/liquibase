@@ -294,9 +294,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             try {
                 includeNestedObjects(object);
-            } catch (InstantiationException e) {
-                throw new UnexpectedLiquibaseException(e);
-            } catch (IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }

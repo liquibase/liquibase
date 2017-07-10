@@ -471,9 +471,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         String versionStrings[] = databaseProductVersion.split("\\.");
         try {
             return Integer.parseInt(versionStrings[2].replaceFirst("\\D.*", ""));
-        } catch (IndexOutOfBoundsException e) {
-            return 0;
-        } catch (NumberFormatException e) {
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
             return 0;
         }
 

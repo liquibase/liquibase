@@ -75,12 +75,10 @@ public class ObjectUtil {
         }
         try {
             method.invoke(object, finalValue);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
-        } catch (InvocationTargetException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
     }
 
@@ -101,12 +99,10 @@ public class ObjectUtil {
             }
 
             method.invoke(object, propertyValue);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
             throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + (propertyValue == null ? "null" : propertyValue.getClass().getName()));
-        } catch (InvocationTargetException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
     }
 

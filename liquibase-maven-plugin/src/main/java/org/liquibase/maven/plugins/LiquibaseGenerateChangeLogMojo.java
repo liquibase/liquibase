@@ -113,13 +113,10 @@ public class LiquibaseGenerateChangeLogMojo extends
                     StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), diffOutputControl);
             getLog().info("Output written to Change Log file, " + outputChangeLogFile);
         }
-        catch (IOException e) {
+        catch (IOException | ParserConfigurationException e) {
             throw new LiquibaseException(e);
         }
-        catch (ParserConfigurationException e) {
-            throw new LiquibaseException(e);
-        }
-	}
+    }
 
 	@Override
 	protected void printSettings(String indent) {

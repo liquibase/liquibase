@@ -131,9 +131,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     if (file.exists()) {
                         getContents(file, recursive, includeFiles, includeDirectories, path, returnSet);
                     }
-                } catch (URISyntaxException e) {
-                    //not a local file
-                } catch (IllegalArgumentException e) {
+                } catch (URISyntaxException | IllegalArgumentException e) {
                     //not a local file
                 }
             }

@@ -139,13 +139,9 @@ public class MavenUtils {
                                        true,
                                        classLoader).newInstance();
     }
-    catch (InstantiationException e) {
+    catch (InstantiationException | IllegalAccessException e) {
       throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
-    }
-    catch (IllegalAccessException e) {
-      throw new LiquibaseException("Failed to load JDBC driver, " + driver, e);
-    }
-    catch (ClassNotFoundException e) {
+    } catch (ClassNotFoundException e) {
       throw new LiquibaseException("Missing Class '" + e.getMessage() + "'. Database "
                                    + "driver may not be included in the project "
                                    + "dependencies or with wrong scope.");
