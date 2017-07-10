@@ -43,7 +43,10 @@ public class ChangeParameterMetaData {
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, Map<String, Object> exampleValues, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description,
+                                   Map<String, Object> exampleValues, String since, Type dataType,
+                                   String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting,
+                                   LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -92,7 +95,8 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if (supportedDatabases.length == 1
+            && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 if (database.getShortName() == null || "unsupported".equals(database.getShortName())) {
@@ -115,6 +119,7 @@ public class ChangeParameterMetaData {
                         validDatabases++;
                     }
                 } catch (Exception ignore) {
+                    // Do nothing
                 }
             }
 
@@ -140,7 +145,8 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if (requiredDatabases.length == 1
+            && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -158,6 +164,7 @@ public class ChangeParameterMetaData {
                         validDatabases++;
                     }
                 } catch (Exception ignore) {
+                    // Do nothing
                 }
             }
 
@@ -288,7 +295,8 @@ public class ChangeParameterMetaData {
                         throw new UnexpectedLiquibaseException("Unknown data type: " + dataType);
                 }
             } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage());
+                throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " +
+                    dataType + ": " + e.getMessage());
             }
         }
 

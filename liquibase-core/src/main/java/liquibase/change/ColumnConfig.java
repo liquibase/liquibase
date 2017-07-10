@@ -22,8 +22,9 @@ import java.util.Locale;
 
 /**
  * The standard configuration used by Change classes to represent a column.
- * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful convenience.
- * The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable in all cases.
+ * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful
+ * convenience. The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable
+ * in all cases.
  */
 public class ColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
@@ -138,20 +139,19 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             List<ForeignKey> fks = table.getOutgoingForeignKeys();
             if (fks != null) {
                 for (ForeignKey fk : fks) {
-                    if (fk.getForeignKeyColumns() != null && fk.getForeignKeyColumns().size() == 1 && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
+                    if (fk.getForeignKeyColumns() != null
+                        && fk.getForeignKeyColumns().size() == 1
+                        && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
                         constraints.setForeignKeyName(fk.getName());
-                        constraints.setReferences(fk.getPrimaryKeyTable().getName() + "(" + fk.getPrimaryKeyColumns().get(0).getName() + ")");
+                        constraints.setReferences(fk.getPrimaryKeyTable().getName() +
+                            "(" +
+                            fk.getPrimaryKeyColumns().get(0).getName() +
+                            ")");
                         nonDefaultConstraints = true;
                     }
                 }
             }
 
-//            if (constraints.isPrimaryKey() == null) {
-//                constraints.setPrimaryKey(false);
-//            }
-//            if (constraints.isUnique() == null) {
-//                constraints.setUnique(false);
-//            }
             if (nonDefaultConstraints) {
                 setConstraints(constraints);
             }
@@ -236,8 +236,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * The String value to set this column to. If you do not want the value set by {@link #setValue(String)}
      * use a more specific function like {@link #getValueNumeric()} or the more generic {@link #getValueObject()}
      * <p></p>
-     * If performing an data manipulation operation, the setValue* functions should be used to set what the columns should be set to.
-     * If performing a data definition operation, this setValue* functions should be used to set what existing rows should be set to (may be different than the default value for new rows)
+     * If performing an data manipulation operation, the setValue* functions should be used to set what the columns
+     * should be set to. If performing a data definition operation, this setValue* functions should be used to set
+     * what existing rows should be set to (may be different than the default value for new rows)
      */
     public String getValue() {
         return value;
@@ -275,10 +276,10 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * that returns a number. If the value "null" is passed, it will set a null value.
      */
     public ColumnConfig setValueNumeric(String valueNumeric) {
-        if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
+        if (valueNumeric == null || "null".equalsIgnoreCase(valueNumeric)) {
             this.valueNumeric = null;
         } else {
-          String saved = valueNumeric;
+            String saved = valueNumeric;
             if (valueNumeric.startsWith("(")) {
                 valueNumeric = valueNumeric.replaceFirst("^\\(", "");
                 valueNumeric = valueNumeric.replaceFirst("\\)$", "");
@@ -310,12 +311,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig setValueBoolean(String valueBoolean) {
         valueBoolean = StringUtils.trimToNull(valueBoolean);
-        if (valueBoolean == null || valueBoolean.equalsIgnoreCase("null")) {
+        if (valueBoolean == null || "null".equalsIgnoreCase(valueBoolean)) {
             this.valueBoolean = null;
         } else {
-            if (valueBoolean.equalsIgnoreCase("true") || valueBoolean.equals("1")) {
+            if ("true".equalsIgnoreCase(valueBoolean) || "1".equals(valueBoolean)) {
                 this.valueBoolean = true;
-            } else if (valueBoolean.equalsIgnoreCase("false") || valueBoolean.equals("0")) {
+            } else if ("false".equalsIgnoreCase(valueBoolean) || "0".equals(valueBoolean)) {
                 this.valueBoolean = false;
             } else {
                 this.valueComputed = new DatabaseFunction(valueBoolean);
@@ -381,7 +382,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If the string "null" is passed, it will set a null value.
      */
     public ColumnConfig setValueDate(String valueDate) {
-        if (valueDate == null || valueDate.equalsIgnoreCase("null")) {
+        if (valueDate == null || "null".equalsIgnoreCase(valueDate)) {
             this.valueDate = null;
         } else {
             try {
@@ -501,7 +502,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * A special case is made for "GENERATED_BY_DEFAULT" which simply sets the ColumnConfig object to autoIncrement.
      */
     public ColumnConfig setDefaultValueNumeric(String defaultValueNumeric) {
-        if (defaultValueNumeric == null || defaultValueNumeric.equalsIgnoreCase("null")) {
+        if (defaultValueNumeric == null || "null".equalsIgnoreCase(defaultValueNumeric)) {
             this.defaultValueNumeric = null;
         } else {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
@@ -549,7 +550,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
         defaultValueDate = StringUtils.trimToNull(defaultValueDate);
-        if (defaultValueDate == null || defaultValueDate.equalsIgnoreCase("null")) {
+        if (defaultValueDate == null || "null".equalsIgnoreCase(defaultValueDate)) {
             this.defaultValueDate = null;
         } else {
             try {
@@ -579,12 +580,12 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig setDefaultValueBoolean(String defaultValueBoolean) {
         defaultValueBoolean = StringUtils.trimToNull(defaultValueBoolean);
-        if (defaultValueBoolean == null || defaultValueBoolean.equalsIgnoreCase("null")) {
+        if (defaultValueBoolean == null || "null".equalsIgnoreCase(defaultValueBoolean)) {
             this.defaultValueBoolean = null;
         } else {
-            if (defaultValueBoolean.equalsIgnoreCase("true") || defaultValueBoolean.equals("1")) {
+            if ("true".equalsIgnoreCase(defaultValueBoolean) || "1".equals(defaultValueBoolean)) {
                 this.defaultValueBoolean = true;
-            } else if (defaultValueBoolean.equalsIgnoreCase("false") || defaultValueBoolean.equals("0")) {
+            } else if ("false".equalsIgnoreCase(defaultValueBoolean) || "0".equals(defaultValueBoolean)) {
                 this.defaultValueBoolean = false;
             } else {
                 this.defaultValueComputed = new DatabaseFunction(defaultValueBoolean);
