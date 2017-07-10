@@ -17,7 +17,7 @@ public class OfflineLockService implements LockService {
 
     @Override
     public boolean supports(Database database) {
-        return database.getConnection() != null && database.getConnection() instanceof OfflineConnection;
+        return (database.getConnection() != null) && (database.getConnection() instanceof OfflineConnection);
     }
 
     @Override

@@ -27,11 +27,12 @@ public class IntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof InformixDatabase && isAutoIncrement()) {
+        if ((database instanceof InformixDatabase) && isAutoIncrement()) {
             return new DatabaseDataType("SERIAL");
         }
 
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof OracleDatabase) {
+        if ((database instanceof DB2Database) || (database instanceof DerbyDatabase) || (database instanceof
+            OracleDatabase)) {
             return new DatabaseDataType("INTEGER");
         }
         if (database instanceof PostgresDatabase) {
@@ -49,7 +50,8 @@ public class IntType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }
-        if (database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if ((database instanceof HsqlDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
+            InformixDatabase)) {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase) {
@@ -72,7 +74,7 @@ public class IntType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
         if (value instanceof DatabaseFunction) {

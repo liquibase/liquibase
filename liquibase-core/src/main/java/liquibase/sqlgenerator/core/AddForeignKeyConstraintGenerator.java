@@ -74,7 +74,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
             } else if ((database instanceof MSSQLDatabase) && "RESTRICT".equalsIgnoreCase(statement.getOnDelete())) {
                 //don't use
-		    } else if (database instanceof InformixDatabase && !("CASCADE".equalsIgnoreCase(statement.getOnDelete()))) {
+		    } else if ((database instanceof InformixDatabase) && !("CASCADE".equalsIgnoreCase(statement.getOnDelete()))) {
 			    //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
 		    	// see "REFERENCES Clause" in manual
 		    } else {

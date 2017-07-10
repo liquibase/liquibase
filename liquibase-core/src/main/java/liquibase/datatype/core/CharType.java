@@ -21,8 +21,7 @@ public class CharType extends LiquibaseDataType {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
                 String param1 = parameters[0].toString();
-                if (!param1.matches("\\d+")
-                        || new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0) {
+                if (!param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(8000)) > 0)) {
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("char"), 8000);
                     type.addAdditionalInformation(getAdditionalInformation());
@@ -38,7 +37,7 @@ public class CharType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         } else if (database instanceof PostgresDatabase){
-            if (getParameters() != null && getParameters().length == 1 && "2147483647".equals(getParameters()[0]
+            if ((getParameters() != null) && (getParameters().length == 1) && "2147483647".equals(getParameters()[0]
                 .toString())) {
                 DatabaseDataType type = new DatabaseDataType("CHARACTER");
                 type.addAdditionalInformation("VARYING");
@@ -52,7 +51,7 @@ public class CharType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
 
@@ -61,7 +60,7 @@ public class CharType extends LiquibaseDataType {
         }
 
         String val = String.valueOf(value);
-        if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
+        if ((database instanceof MSSQLDatabase) && !StringUtils.isAscii(val)) {
             return "N'"+database.escapeStringForDatabase(val)+"'";
         }
 

@@ -72,12 +72,12 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if(dataSource!=null || schemas!=null) {
-			if(dataSource==null && schemas!=null) {
+		if((dataSource != null) || (schemas != null)) {
+			if((dataSource == null) && (schemas != null)) {
 				throw new LiquibaseException("When schemas are defined you should also define a base dataSource");				
 			}else if(dataSource!=null){
 				log.info("Schema based multitenancy enabled");
-				if(schemas==null || schemas.isEmpty()) {
+				if((schemas == null) || schemas.isEmpty()) {
 					log.warning("Schemas not defined, using defaultSchema only");
 					schemas = new ArrayList<>();
 					schemas.add(defaultSchema);

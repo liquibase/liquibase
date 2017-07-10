@@ -14,7 +14,7 @@ import java.sql.SQLException;
 public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (Column.class.isAssignableFrom(objectType) && database instanceof H2Database) {
+        if (Column.class.isAssignableFrom(objectType) && (database instanceof H2Database)) {
             return PRIORITY_DATABASE;
         } else {
             return PRIORITY_NONE;
@@ -30,7 +30,8 @@ public class ColumnSnapshotGeneratorH2 extends ColumnSnapshotGenerator {
     @Override
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
-        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().startsWith("NEXT VALUE FOR ")) {
+        if ((defaultValue != null) && (defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
+            .getValue().startsWith("NEXT VALUE FOR ")) {
             columnInfo.setAutoIncrementInformation(new Column.AutoIncrementInformation());
             return null;
         }

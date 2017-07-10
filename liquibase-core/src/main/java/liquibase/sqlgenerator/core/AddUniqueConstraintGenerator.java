@@ -56,7 +56,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
                     , database.escapeColumnNameList(statement.getColumnNames())
             );
         }
-        if (database instanceof OracleDatabase || database instanceof PostgresDatabase) {
+        if ((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) {
             if (statement.isDeferrable()) {
                 sql += " DEFERRABLE";
             }
@@ -78,12 +78,11 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             isInUsingIndexClause = true;
         }
     
-        if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
+        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + statement.getTablespace();
-            } else if (database instanceof DB2Database
-                    || database instanceof SybaseASADatabase
-                    || database instanceof InformixDatabase) {
+            } else if ((database instanceof DB2Database) || (database instanceof SybaseASADatabase) || (database
+                instanceof InformixDatabase)) {
                 ; //not supported
             } else if (database instanceof OracleDatabase) {
                 /*

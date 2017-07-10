@@ -304,7 +304,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean parseBoolean(String value) {
         value = StringUtils.trimToNull(value);
-        if (value == null || "null".equalsIgnoreCase(value)) {
+        if ((value == null) || "null".equalsIgnoreCase(value)) {
             return null;
         } else {
             if ("true".equalsIgnoreCase(value) || "1".equals(value)) {

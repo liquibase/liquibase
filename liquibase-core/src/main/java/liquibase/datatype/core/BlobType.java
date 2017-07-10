@@ -18,7 +18,7 @@ public class BlobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
-        if (database instanceof H2Database || database instanceof HsqlDatabase) {
+        if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
             if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.startsWith("java.sql.Types.VARBINARY")) {
                 return new DatabaseDataType("VARBINARY", getParameters());
             } else if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
@@ -130,8 +130,7 @@ public class BlobType extends LiquibaseDataType {
         boolean max = true;
         if (parameters.length > 0) {
             String param1 = parameters[0].toString();
-            max = !param1.matches("\\d+")
-                    || new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0;
+            max = !param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(8000L)) > 0);
         }
         if (max) {
             return new Object[]{"MAX"};

@@ -23,7 +23,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
 
             for (DropColumnStatement drop : dropColumnStatement.getColumns()) {
                 validationErrors.addAll(validateSingleColumn(drop));
-                if (drop.getTableName() != null && !drop.getTableName().equals(firstColumn.getTableName())) {
+                if ((drop.getTableName() != null) && !drop.getTableName().equals(firstColumn.getTableName())) {
                     validationErrors.addError("All columns must be targeted at the same table");
                 }
                 if (drop.isMultiple()) {
@@ -58,7 +58,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
             String alterTable = "ALTER TABLE " + database.escapeTableName(columns.get(0).getCatalogName(), columns.get(0).getSchemaName(), columns.get(0).getTableName());
             for (int i = 0; i < columns.size(); i++) {
                 alterTable +=  " DROP " + database.escapeColumnName(columns.get(i).getCatalogName(), columns.get(i).getSchemaName(), columns.get(i).getTableName(), columns.get(i).getColumnName());
-                if (i < columns.size() - 1) {
+                if (i < (columns.size() - 1)) {
                     alterTable += ",";
                 }
             }
@@ -74,7 +74,8 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
     private Sql[] generateSingleColumnSql(DropColumnStatement statement, Database database) {
         if (database instanceof DB2Database) {
             return new Sql[] {new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))};
-        } else if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        } else if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
+            instanceof FirebirdDatabase) || (database instanceof InformixDatabase)) {
             return new Sql[] {new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))};
         }
         return new Sql[] {new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement))};

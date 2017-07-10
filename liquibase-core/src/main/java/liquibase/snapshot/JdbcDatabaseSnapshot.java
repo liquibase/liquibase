@@ -119,8 +119,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 } catch (SQLException e) {
                                     // SAP SQL Anywhere throws an SQL Exception when we try to get FOREIGN KEYs
                                     // from a table, but the table has no FOREIGN KEYs.
-                                    if (database instanceof SybaseASADatabase
-                                            && e.getSQLState().equalsIgnoreCase(ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
+                                    if ((database instanceof SybaseASADatabase) && e.getSQLState().equalsIgnoreCase
+                                        (ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
                                         LogFactory.getInstance().getLog().debug(
                                                 String.format("Ignored SAP SQL Anywhere SQL " +
                                                         "exception thrown when FOREIGN KEY list of table '%s' was " +
@@ -334,7 +334,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (database instanceof DB2Database || database instanceof MSSQLDatabase) {
+                    if ((database instanceof DB2Database) || (database instanceof MSSQLDatabase)) {
                         return super.shouldBulkSelect(schemaKey, resultSetCache); //can bulk and fast fetch
                     } else {
                         return database instanceof OracleDatabase; //oracle is slow, always bulk select while you are at it. Other databases need to go through all tables.
@@ -388,11 +388,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                         "AND d.object_name IS NULL ";
 
 
-                        if (!isBulkFetchMode && tableName != null) {
+                        if (!isBulkFetchMode && (tableName != null)) {
                             sql += " AND c.TABLE_NAME='" + tableName + "'";
                         }
 
-                        if (!isBulkFetchMode && indexName != null) {
+                        if (!isBulkFetchMode && (indexName != null)) {
                             sql += " AND c.INDEX_NAME='" + indexName + "'";
                         }
 
@@ -421,11 +421,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "join sys.stats s on i.object_id=s.object_id and i.name=s.name " +
                                 "WHERE object_schema_name(i.object_id)='" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
 
-                        if (!isBulkFetchMode && tableName != null) {
+                        if (!isBulkFetchMode && (tableName != null)) {
                             sql += " AND object_name(i.object_id)='" + database.escapeStringForDatabase(tableName) + "'";
                         }
 
-                        if (!isBulkFetchMode && indexName != null) {
+                        if (!isBulkFetchMode && (indexName != null)) {
                             sql += " AND i.name='" + database.escapeStringForDatabase(indexName) + "'";
                         }
 
@@ -473,7 +473,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
+                    if ((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase)) {
                         return super.shouldBulkSelect(schemaKey, resultSetCache);
                     }
                     return false;
@@ -493,7 +493,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
          */
         public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
 
-            if (database instanceof MSSQLDatabase && userDefinedTypes == null) {
+            if ((database instanceof MSSQLDatabase) && (userDefinedTypes == null)) {
                 userDefinedTypes = new HashSet<>();
                 DatabaseConnection databaseConnection = database.getConnection();
                 if (databaseConnection instanceof JdbcConnection) {
@@ -691,9 +691,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                     // sys.extended_properties is added to Azure on V12: https://feedback.azure.com/forums/217321-sql-database/suggestions/6549815-add-sys-extended-properties-for-meta-data-support
-                    if (
-                            (!((MSSQLDatabase) database).isAzureDb()) // Either NOT AzureDB (=SQL Server 2008 or higher)
-                            || database.getDatabaseMajorVersion() >= 12)  { // or at least AzureDB v12
+                    if ((!((MSSQLDatabase) database).isAzureDb()) // Either NOT AzureDB (=SQL Server 2008 or higher)
+                        || (database.getDatabaseMajorVersion() >= 12))  { // or at least AzureDB v12
                             // SQL Server 2005 or later
                             // https://technet.microsoft.com/en-us/library/ms177541.aspx
                             sql = sql.replace("{REMARKS_COLUMN_PLACEHOLDER}", "CAST([ep].[value] AS [nvarchar](MAX)) AS [REMARKS], ");
@@ -715,7 +714,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             if (size > 0) {
                                 row.set("COLUMN_SIZE", size / 2);
                             }
-                        } else if (row.getInt("DATA_PRECISION") != null && row.getInt("DATA_PRECISION") > 0) {
+                        } else if ((row.getInt("DATA_PRECISION") != null) && (row.getInt("DATA_PRECISION") > 0)) {
                             row.set("COLUMN_SIZE", row.getInt("DATA_PRECISION"));
                         }
                     }
@@ -726,7 +725,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 @Override
                 protected List<CachedRow> extract(ResultSet resultSet, boolean informixIndexTrimHint) throws SQLException {
                     List<CachedRow> rows = super.extract(resultSet, informixIndexTrimHint);
-                    if (database instanceof MSSQLDatabase && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
+                    if ((database instanceof MSSQLDatabase) && !userDefinedTypes.isEmpty()) { //UDT types in MSSQL don't take parameters
                         for (CachedRow row : rows) {
                             String dataType = (String) row.get("TYPE_NAME");
                             if (userDefinedTypes.contains(dataType.toLowerCase())) {
@@ -765,8 +764,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema,
-                            (table == null ? SQL_FILTER_MATCH_ALL : table), new String[]{"TABLE"}));
+                    return extract(databaseMetaData.getTables(catalog, schema, ((table == null) ?
+                        SQL_FILTER_MATCH_ALL : table), new String[]{"TABLE"}));
                 }
 
                 @Override
@@ -854,11 +853,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    if (database instanceof DB2Database && ((DB2Database)database).getDataServerType() == DataServerType.DB2I) {
+                    if ((database instanceof DB2Database) && (((DB2Database) database).getDataServerType() ==
+                        DataServerType.DB2I)) {
                         return queryDB2I(schema, view);
                     }
-                    return extract(databaseMetaData.getTables(catalog, schema,
-                            (view == null ? SQL_FILTER_MATCH_ALL : view), new String[]{"VIEW"}));
+                    return extract(databaseMetaData.getTables(catalog, schema, ((view == null) ? SQL_FILTER_MATCH_ALL
+                        : view), new String[]{"VIEW"}));
                 }
 
                 @Override
@@ -871,7 +871,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    if (database instanceof DB2Database && ((DB2Database)database).getDataServerType() == DataServerType.DB2I) {
+                    if ((database instanceof DB2Database) && (((DB2Database) database).getDataServerType() ==
+                        DataServerType.DB2I)) {
                         return queryDB2I(schema, null);
                     }
                     return extract(databaseMetaData.getTables(catalog, schema, SQL_FILTER_MATCH_ALL, new String[]{"VIEW"}));
@@ -1051,7 +1052,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
-                    if (database instanceof OracleDatabase || database instanceof MSSQLDatabase) {
+                    if ((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase)) {
                         return super.shouldBulkSelect(schemaKey, resultSetCache);
                     } else {
                         return false;
@@ -1095,8 +1096,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     Database database = JdbcDatabaseSnapshot.this.getDatabase();
                     String sql;
-                    if (database instanceof MySQLDatabase || database instanceof HsqlDatabase || database instanceof
-                        MariaDBDatabase) {
+                    if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase) || (database
+                        instanceof MariaDBDatabase)) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME "
                                 + "from " + database.getSystemSchema() + ".table_constraints "
                                 + "where constraint_schema='" + jdbcCatalogName + "' "

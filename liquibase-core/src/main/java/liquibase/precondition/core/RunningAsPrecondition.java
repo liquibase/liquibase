@@ -41,7 +41,7 @@ public class RunningAsPrecondition extends AbstractPrecondition {
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         String loggedusername = database.getConnection().getConnectionUserName();
-        if (loggedusername != null && loggedusername.indexOf('@') >= 0) {
+        if ((loggedusername != null) && (loggedusername.indexOf('@') >= 0)) {
             loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
         }
         if (!username.equalsIgnoreCase(loggedusername)) {

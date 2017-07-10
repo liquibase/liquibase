@@ -29,6 +29,6 @@ public class InsertOrUpdateStatement extends InsertStatement {
 	}
 
 	public void setOnlyUpdate(Boolean onlyUpdate) {
-		this.onlyUpdate = (onlyUpdate == null ? Boolean.FALSE : onlyUpdate);
+        this.onlyUpdate = ((onlyUpdate == null) ? Boolean.FALSE : onlyUpdate);
 	}
 }

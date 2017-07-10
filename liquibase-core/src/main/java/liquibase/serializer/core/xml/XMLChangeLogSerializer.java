@@ -97,7 +97,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (details.supports(this, namespace)){
                     String shortName = details.getShortName(namespace);
                     String url = details.getSchemaUrl(namespace);
-                    if (shortName != null && url != null) {
+                    if ((shortName != null) && (url != null)) {
                         shortNameByNamespace.put(namespace, shortName);
                         urlByNamespace.put(namespace, url);
                     }
@@ -163,7 +163,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         String nodeName = object.getSerializedObjectName();
 
         NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
-        if (details != null && !"".equals(details.getShortName(namespace))) {
+        if ((details != null) && !"".equals(details.getShortName(namespace))) {
             nodeName = details.getShortName(namespace)+":"+nodeName;
         }
         Element node = currentChangeLogFileDOM.createElementNS(namespace, nodeName);
@@ -218,7 +218,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     private String qualifyName(String objectName, String objectNamespace, String parentNamespace) {
-        if (objectNamespace != null && !objectNamespace.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE) && !objectNamespace.equals(parentNamespace)) {
+        if ((objectNamespace != null) && !objectNamespace.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE)
+            && !objectNamespace.equals(parentNamespace)) {
             NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, objectNamespace);
             return details.getShortName(objectNamespace) + ":" + objectName;
         } else {
@@ -286,7 +287,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             element.setAttribute("remarks", columnConfig.getRemarks());
         }
 
-        if (columnConfig.isAutoIncrement() != null && columnConfig.isAutoIncrement()) {
+        if ((columnConfig.isAutoIncrement() != null) && columnConfig.isAutoIncrement()) {
             element.setAttribute("autoIncrement", "true");
         }
 
@@ -370,7 +371,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         for (Map.Entry entry : attributeMap.entrySet()) {
             String value = (String) entry.getValue();
             if (value != null) {
-                if (indent >= 0 && !firstAttribute && attributeMap.size() > 2) {
+                if ((indent >= 0) && !firstAttribute && (attributeMap.size() > 2)) {
                     buffer.append("\n").append(StringUtils.repeat(" ", indent)).append("        ");
                 } else {
                     buffer.append(" ");

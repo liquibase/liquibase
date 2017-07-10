@@ -32,7 +32,7 @@ public class DateType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
@@ -67,7 +67,8 @@ public class DateType extends LiquibaseDataType {
         try {
             DateFormat dateFormat = getDateFormat(database);
 
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+', 'YYYY\\-MM\\-DD'\\)")) {
+            if ((database instanceof OracleDatabase) && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+', " +
+                "'YYYY\\-MM\\-DD'\\)")) {
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }

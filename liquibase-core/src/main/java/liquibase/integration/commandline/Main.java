@@ -138,10 +138,10 @@ public class Main {
             Main main = new Main();
             printMsgNoLog(CommandLineUtils.getBanner());
 
-            if (args.length == 1 && ("--" + OPTIONS.HELP).equals(args[0])) {
+            if ((args.length == 1) && ("--" + OPTIONS.HELP).equals(args[0])) {
                 main.printHelp(System.out);
                 return 0;
-            } else if (args.length == 1 && ("--" + OPTIONS.VERSION).equals(args[0])) {
+            } else if ((args.length == 1) && ("--" + OPTIONS.VERSION).equals(args[0])) {
                 printMsgNoLog(String.format(coreBundle.getString("version.number"), LiquibaseUtil.getBuildVersion() +
                         StreamUtil.getLineSeparator()));
                 return 0;
@@ -199,7 +199,7 @@ public class Main {
     }
 
     private static String generateLogLevelWarningMessage() {
-        if (LOG != null && LOG.getLogLevel() != null && (LOG.getLogLevel().equals(LogLevel.OFF))) {
+        if ((LOG != null) && (LOG.getLogLevel() != null) && (LOG.getLogLevel().equals(LogLevel.OFF))) {
             return "";
         } else {
             return "\n\n" + coreBundle.getString("for.more.information.use.loglevel.flag");
@@ -414,10 +414,10 @@ public class Main {
             String arg = args[i];
             if ((arg.startsWith("--") || arg.startsWith("-D")) && !arg.contains("=")) {
                 String nextArg = null;
-                if (i + 1 < args.length) {
+                if ((i + 1) < args.length) {
                     nextArg = args[i + 1];
                 }
-                if (nextArg != null && !nextArg.startsWith("--") && !isCommand(nextArg)) {
+                if ((nextArg != null) && !nextArg.startsWith("--") && !isCommand(nextArg)) {
                     arg = arg + "=" + nextArg;
                     i++;
                 }
@@ -446,7 +446,7 @@ public class Main {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.URL));
             }
 
-            if (isChangeLogRequired(command) && StringUtils.trimToNull(changeLogFile) == null) {
+            if (isChangeLogRequired(command) && (StringUtils.trimToNull(changeLogFile) == null)) {
                 messages.add(String.format(coreBundle.getString("option.required"), "--" + OPTIONS.CHANGELOG_FILE));
             }
 
@@ -541,7 +541,7 @@ public class Main {
         
         if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
             for (final String param : commandParams) {
-                if (param != null && !param.startsWith("-")) {
+                if ((param != null) && !param.startsWith("-")) {
                     final String[] parts = param.split("::");
                     if (parts.length < CHANGESET_MINIMUM_IDENTIFIER_PARTS) {
                         messages.add(coreBundle.getString("changeset.identifier.must.have.form.filepath.id.author"));
@@ -549,9 +549,8 @@ public class Main {
                     }
                 }
             }
-        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command)
-                && diffTypes != null
-                && diffTypes.toLowerCase().contains("data")) {
+        } else if (COMMANDS.DIFF_CHANGELOG.equalsIgnoreCase(command) && (diffTypes != null) && diffTypes.toLowerCase
+            ().contains("data")) {
             messages.add(String.format(coreBundle.getString("including.data.diffchangelog.has.no.effect"),
                     OPTIONS.DIFF_TYPES, COMMANDS.GENERATE_CHANGELOG
             ));
@@ -851,7 +850,7 @@ public class Main {
             String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
             String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
 
-            if (excludeObjects != null && includeObjects != null) {
+            if ((excludeObjects != null) && (includeObjects != null)) {
                 throw new UnexpectedLiquibaseException(
                         String.format(coreBundle.getString("cannot.specify.both"),
                                 OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
@@ -1105,7 +1104,7 @@ public class Main {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new
                             LabelExpression(labels), getOutputWriter());
                 } else if (COMMANDS.UPDATE_TO_TAG.equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.isEmpty()) {
+                    if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"), COMMANDS.UPDATE_TO_TAG));
                     }
@@ -1113,7 +1112,7 @@ public class Main {
                     liquibase.update(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression
                             (labels));
                 } else if (COMMANDS.UPDATE_TO_TAG_SQL.equalsIgnoreCase(command)) {
-                    if (commandParams == null || commandParams.isEmpty()) {
+                    if ((commandParams == null) || commandParams.isEmpty()) {
                         throw new CommandLineParsingException(
                                 String.format(coreBundle.getString("command.requires.tag"),
                                         COMMANDS.UPDATE_TO_TAG_SQL));

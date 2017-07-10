@@ -96,18 +96,18 @@ public class DatabaseObjectComparatorFactory {
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, CompareControl.SchemaComparison[] schemaComparisons, Database accordingTo) {
-        if (object1 == null && object2 == null) {
+        if ((object1 == null) && (object2 == null)) {
             return true;
         }
 
-        if (object1 instanceof Schema || object2 instanceof Schema) {
+        if ((object1 instanceof Schema) || (object2 instanceof Schema)) {
             if (object1 == null) {
                 object1 = new Schema();
             }
             if (object2 == null) {
                 object2 = new Schema();
             }
-        } else if (object1 instanceof Catalog || object2 instanceof Catalog) {
+        } else if ((object1 instanceof Catalog) || (object2 instanceof Catalog)) {
                 if (object1 == null) {
                     object1 = new Catalog();
                 }
@@ -115,13 +115,13 @@ public class DatabaseObjectComparatorFactory {
                     object2 = new Catalog();
                 }
         }
-        if (object1 == null || object2 == null) {
+        if ((object1 == null) || (object2 == null)) {
             return false;
         }
 
         String snapshotId1 = object1.getSnapshotId();
         String snapshotId2 = object2.getSnapshotId();
-        if (snapshotId1 != null && snapshotId2 != null) {
+        if ((snapshotId1 != null) && (snapshotId2 != null)) {
             if (snapshotId1.equals(snapshotId2)) {
                 return true;
             }
@@ -181,7 +181,7 @@ public class DatabaseObjectComparatorFactory {
         }
 
         List<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
-        if (comparators == null || comparators.isEmpty()) {
+        if ((comparators == null) || comparators.isEmpty()) {
             return null;
         }
 

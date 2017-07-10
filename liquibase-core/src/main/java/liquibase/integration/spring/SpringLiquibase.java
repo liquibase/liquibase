@@ -77,7 +77,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             super.init();
             try {
                 Resource[] resources = getResources("");
-                if (resources.length != 0 && (resources.length != 1 || resources[0].exists())) {
+                if ((resources.length != 0) && ((resources.length != 1) || resources[0].exists())) {
                     for (Resource res : resources) {
                         addRootPath(res.getURL());
                     }
@@ -135,7 +135,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             Set<InputStream> returnSet = new HashSet<>();
             Resource[] resources = getResources(adjustClasspath(path));
 
-            if (resources == null || resources.length == 0) {
+            if ((resources == null) || (resources.length == 0)) {
                 return null;
             }
             for (Resource resource : resources) {
@@ -156,7 +156,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 			if (file == null) {
 				return null;
 			}
-			return isPrefixPresent(parentFile) && !isPrefixPresent(file) ? ResourceLoader.CLASSPATH_URL_PREFIX + file : file;
+			return (isPrefixPresent(parentFile) && !isPrefixPresent(file)) ? (ResourceLoader.CLASSPATH_URL_PREFIX +
+                file) : file;
 		}
 
 

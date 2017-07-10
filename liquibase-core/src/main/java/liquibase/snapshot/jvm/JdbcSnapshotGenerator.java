@@ -39,7 +39,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (database instanceof AbstractJdbcDatabase) {
-            if (defaultFor != null && defaultFor.isAssignableFrom(objectType)) {
+            if ((defaultFor != null) && defaultFor.isAssignableFrom(objectType)) {
                 return PRIORITY_DEFAULT;
             }
             if (addsTo() != null) {
@@ -61,7 +61,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
 
     @Override
     public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (defaultFor != null && defaultFor.isAssignableFrom(example.getClass())) {
+        if ((defaultFor != null) && defaultFor.isAssignableFrom(example.getClass())) {
             return snapshotObject(example, snapshot);
         }
 
@@ -86,7 +86,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     }
 
     protected boolean shouldAddTo(Class<? extends DatabaseObject> databaseObjectType, DatabaseSnapshot snapshot) {
-        return defaultFor != null && snapshot.getSnapshotControl().shouldInclude(defaultFor);
+        return (defaultFor != null) && snapshot.getSnapshotControl().shouldInclude(defaultFor);
     }
 
     @Override

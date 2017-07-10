@@ -60,7 +60,7 @@ public class StringUtils {
         String previousPiece = null;
         boolean previousDelimiter = false;
         for (Object piece : parsed.toArray(true)) {
-            if (splitStatements && piece instanceof String && isDelimiter((String) piece, previousPiece, endDelimiter)) {
+            if (splitStatements && (piece instanceof String) && isDelimiter((String) piece, previousPiece, endDelimiter)) {
                 String trimmedString = StringUtils.trimToNull(currentString.toString());
                 if (trimmedString != null) {
                     returnArray.add(trimmedString);
@@ -68,8 +68,8 @@ public class StringUtils {
                 currentString = new StringBuilder();
                 previousDelimiter = true;
             } else {
-                if (!previousDelimiter || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace after a delimiter
-                    if (currentString.length() > 0 || StringUtils.trimToNull((String) piece) != null) { //don't include whitespace before the statement
+                if (!previousDelimiter || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace after a delimiter
+                    if ((currentString.length() > 0) || (StringUtils.trimToNull((String) piece) != null)) { //don't include whitespace before the statement
                         currentString.append(piece);
                     }
                 }
@@ -96,7 +96,8 @@ public class StringUtils {
      */
     protected static boolean isDelimiter(String piece, String previousPiece, String endDelimiter) {
         if (endDelimiter == null) {
-            return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && (previousPiece == null || previousPiece.endsWith("\n")));
+            return ";".equals(piece) || (("go".equalsIgnoreCase(piece) || "/".equals(piece)) && ((previousPiece ==
+                null) || previousPiece.endsWith("\n")));
         } else {
             if (endDelimiter.length() == 1) {
                 return piece.toLowerCase().equalsIgnoreCase(endDelimiter.toLowerCase());
@@ -352,7 +353,7 @@ public class StringUtils {
      * @return true if String is null or empty
      */
     public static boolean isEmpty(String value) {
-        return value == null || value.isEmpty();
+        return (value == null) || value.isEmpty();
     }
 
     /**
@@ -372,7 +373,7 @@ public class StringUtils {
      * @return true if <code>value</code> starts with <code>startsWith</code>, otherwise false. If any of arguments is null returns false
      */
     public static boolean startsWith(String value, String startsWith) {
-        if(value == null || startsWith == null){
+        if((value == null) || (startsWith == null)){
             return false;
         }
 
@@ -405,18 +406,18 @@ public class StringUtils {
                                            int candidatePatch) {
         String[] parts = minimumVersion.split("\\.", 3);
         int minMajor = Integer.parseInt(parts[0]);
-        int minMinor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        int minPatch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+        int minMinor = (parts.length > 1) ? Integer.parseInt(parts[1]) : 0;
+        int minPatch = (parts.length > 2) ? Integer.parseInt(parts[2]) : 0;
 
         if (minMajor > candidateMajor) {
             return false;
         }
 
-        if (minMajor == candidateMajor && minMinor > candidateMinor) {
+        if ((minMajor == candidateMajor) && (minMinor > candidateMinor)) {
             return false;
         }
 
-        return !(minMajor == candidateMajor && minMinor == candidateMinor && minPatch > candidatePatch);
+        return !((minMajor == candidateMajor) && (minMinor == candidateMinor) && (minPatch > candidatePatch));
     }
 
     public static String limitSize(String string, int maxLength) {

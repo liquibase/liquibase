@@ -57,7 +57,7 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     protected void checkVersionInfo(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) throws DatabaseException {
 
-        if (comparisonSnapshot != null && comparisonSnapshot.getDatabase() != null) {
+        if ((comparisonSnapshot != null) && (comparisonSnapshot.getDatabase() != null)) {
             diffResult.setProductNameDiff(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductName(), comparisonSnapshot.getDatabase().getDatabaseProductName()));
             diffResult.setProductVersionDiff(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductVersion(), comparisonSnapshot.getDatabase().getDatabaseProductVersion()));
         }
@@ -74,7 +74,7 @@ public class StandardDiffGenerator implements DiffGenerator {
             for (CompareControl.SchemaComparison schemaComparison : schemaComparisons) {
                 for (T referenceObject : referenceSnapshot.get(type)) {
                     Schema referenceObjectSchema = referenceObject.getSchema();
-                    if (referenceObjectSchema != null && referenceObjectSchema.getName() != null) { //don't filter out null-named schemas. May actually be catalog-level objects that should be included
+                    if ((referenceObjectSchema != null) && (referenceObjectSchema.getName() != null)) { //don't filter out null-named schemas. May actually be catalog-level objects that should be included
                         if (!StringUtils.trimToEmpty(
                             referenceObjectSchema.toCatalogAndSchema().standardize(referenceDatabase).getSchemaName())
                             .equalsIgnoreCase(

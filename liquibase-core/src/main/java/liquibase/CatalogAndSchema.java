@@ -81,26 +81,26 @@ public class CatalogAndSchema {
         }
 
         if (accordingTo.supportsSchemas()) {
-            if (workSchemaName != null && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+            if ((workSchemaName != null) && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
                 workSchemaName = null;
             }
         } else {
-            if (workCatalogName == null && workSchemaName != null) { //had names in the wrong order
+            if ((workCatalogName == null) && (workSchemaName != null)) { //had names in the wrong order
                 workCatalogName = workSchemaName;
             }
             workSchemaName = workCatalogName;
         }
 
-        if (workCatalogName != null && workCatalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
+        if ((workCatalogName != null) && workCatalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
             workCatalogName = null;
         }
 
-        if (workSchemaName != null && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+        if ((workSchemaName != null) && workSchemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
             workSchemaName = null;
         }
 
-        if (!accordingTo.supportsSchemas() && workCatalogName != null && workSchemaName != null && !workCatalogName
-                .equals(workSchemaName)) {
+        if (!accordingTo.supportsSchemas() && (workCatalogName != null) && (workSchemaName != null) &&
+            !workCatalogName.equals(workSchemaName)) {
             workSchemaName = null;
         }
 
@@ -141,7 +141,7 @@ public class CatalogAndSchema {
         String workSchemaName = standard.getSchemaName();
 
         if (workCatalogName == null) {
-            if (!accordingTo.supportsSchemas() && workSchemaName != null) {
+            if (!accordingTo.supportsSchemas() && (workSchemaName != null)) {
                 return new CatalogAndSchema(accordingTo.correctObjectName(workSchemaName, Catalog.class), null);
             }
             workCatalogName = accordingTo.getDefaultCatalogName();

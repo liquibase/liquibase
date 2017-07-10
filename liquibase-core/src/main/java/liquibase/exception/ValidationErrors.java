@@ -21,16 +21,16 @@ public class ValidationErrors {
     public void checkRequiredField(String requiredFieldName, Object value) {
         if (value == null) {
             addError(requiredFieldName + " is required");
-        } else if (value instanceof Collection && ((Collection) value).isEmpty()) {
+        } else if ((value instanceof Collection) && ((Collection) value).isEmpty()) {
             addError(requiredFieldName + " is empty");
-        } else if (value instanceof Object[] && ((Object[]) value).length == 0) {
+        } else if ((value instanceof Object[]) && (((Object[]) value).length == 0)) {
             addError(requiredFieldName + " is empty");
         }
     }
 
     public void checkDisallowedField(String disallowedFieldName, Object value, Database database, Class<? extends Database>... disallowedDatabases) {
         boolean isDisallowed = false;
-        if (disallowedDatabases == null || disallowedDatabases.length == 0) {
+        if ((disallowedDatabases == null) || (disallowedDatabases.length == 0)) {
             isDisallowed = true;
         } else {
             for (Class<? extends Database> databaseClass : disallowedDatabases) {
@@ -40,7 +40,7 @@ public class ValidationErrors {
             }
         }
 
-        if (isDisallowed && value != null) {
+        if (isDisallowed && (value != null)) {
             addError(disallowedFieldName + " is not allowed on "+(database == null?"unknown":database.getShortName()));
         }
     }
@@ -95,7 +95,7 @@ public class ValidationErrors {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof ValidationErrors)) {
+        if ((obj == null) || !(obj instanceof ValidationErrors)) {
             return false;
         }
         return this.toString().equals(obj.toString());

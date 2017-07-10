@@ -68,7 +68,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     protected void validateParameters() {
         super.validateParameters();
 
-        if(changeLogOutputFiles == null || changeLogOutputFiles.isEmpty()) {
+        if((changeLogOutputFiles == null) || changeLogOutputFiles.isEmpty()) {
             throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
         }
     }
@@ -85,7 +85,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     private DiffOutputControl getDiffOutputControl() {
         DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace, null);
 
-        if (excludeObjects != null && includeObjects != null) {
+        if ((excludeObjects != null) && (includeObjects != null)) {
             throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
         }
         if (excludeObjects != null) {

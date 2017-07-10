@@ -78,7 +78,7 @@ public class TimestampType extends DateTimeType {
         }
         if (database instanceof DB2Database) {
             Object[] parameters = getParameters();
-            if (parameters != null && parameters.length > 1) {
+            if ((parameters != null) && (parameters.length > 1)) {
                 parameters = new Object[] {parameters[1]};
             }
             return new DatabaseDataType(database.escapeDataTypeName("timestamp"), parameters);
@@ -116,13 +116,11 @@ public class TimestampType extends DateTimeType {
             type = new DatabaseDataType("TIMESTAMP");
         }
 
-        if (getAdditionalInformation() != null
-                && (database instanceof PostgresDatabase
-                || database instanceof OracleDatabase)
-                || database instanceof HsqlDatabase){
+        if (((getAdditionalInformation() != null) && ((database instanceof PostgresDatabase) || (database instanceof
+            OracleDatabase))) || (database instanceof HsqlDatabase)){
             String additionalInformation = this.getAdditionalInformation();
 
-            if (additionalInformation != null && database instanceof PostgresDatabase) {
+            if ((additionalInformation != null) && (database instanceof PostgresDatabase)) {
                 if (additionalInformation.toUpperCase().contains("TIMEZONE")) {
                     additionalInformation = additionalInformation.toUpperCase().replace("TIMEZONE", "TIME ZONE");
                 }

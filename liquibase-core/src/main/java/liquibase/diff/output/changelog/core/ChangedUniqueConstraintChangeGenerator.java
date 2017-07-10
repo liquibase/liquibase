@@ -67,7 +67,7 @@ public class ChangedUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         Index backingIndex = uniqueConstraint.getBackingIndex();
         if (comparisonDatabase instanceof OracleDatabase) {
-            if (backingIndex != null && backingIndex.getName() != null) {
+            if ((backingIndex != null) && (backingIndex.getName() != null)) {
                 Change[] missingIndexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
                 if (missingIndexChanges != null) {
                     returnList.addAll(Arrays.asList(missingIndexChanges));

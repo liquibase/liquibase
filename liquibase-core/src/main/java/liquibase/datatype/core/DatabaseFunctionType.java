@@ -11,7 +11,7 @@ public class DatabaseFunctionType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null  || "null".equalsIgnoreCase(value.toString()))  {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString()))  {
             return null;
         }
         if (value instanceof DatabaseFunction) {

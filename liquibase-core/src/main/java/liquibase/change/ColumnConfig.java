@@ -62,8 +62,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig(Column columnSnapshot) {
         setName(columnSnapshot.getName());
-        setComputed(columnSnapshot.getComputed() != null && columnSnapshot.getComputed() ? Boolean.TRUE : null);
-        setDescending(columnSnapshot.getDescending() != null && columnSnapshot.getDescending() ? Boolean.TRUE : null);
+        setComputed(((columnSnapshot.getComputed() != null) && columnSnapshot.getComputed()) ? Boolean.TRUE : null);
+        setDescending(((columnSnapshot.getDescending() != null) && columnSnapshot.getDescending()) ? Boolean.TRUE : null);
         if (columnSnapshot.getType() != null) {
             setType(columnSnapshot.getType().toString());
         }
@@ -90,13 +90,13 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         boolean nonDefaultConstraints = false;
         ConstraintsConfig constraints = new ConstraintsConfig();
 
-        if (columnSnapshot.isNullable() != null && !columnSnapshot.isNullable()) {
+        if ((columnSnapshot.isNullable() != null) && !columnSnapshot.isNullable()) {
             constraints.setNullable(columnSnapshot.isNullable());
             nonDefaultConstraints = true;
         }
 
 
-        if (columnSnapshot.getRelation() != null && columnSnapshot.getRelation() instanceof Table) {
+        if ((columnSnapshot.getRelation() != null) && (columnSnapshot.getRelation() instanceof Table)) {
             Table table = (Table) columnSnapshot.getRelation();
             List<NotNullConstraint> notNullConstraints = table.getNotNullConstraints();
             if (notNullConstraints != null) {
@@ -118,7 +118,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             }
 
             PrimaryKey primaryKey = table.getPrimaryKey();
-            if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
+            if ((primaryKey != null) && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
                 constraints.setPrimaryKey(true);
                 constraints.setPrimaryKeyName(primaryKey.getName());
                 constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
@@ -139,9 +139,8 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             List<ForeignKey> fks = table.getOutgoingForeignKeys();
             if (fks != null) {
                 for (ForeignKey fk : fks) {
-                    if (fk.getForeignKeyColumns() != null
-                        && fk.getForeignKeyColumns().size() == 1
-                        && fk.getForeignKeyColumns().get(0).getName().equals(getName())) {
+                    if ((fk.getForeignKeyColumns() != null) && (fk.getForeignKeyColumns().size() == 1) && fk
+                        .getForeignKeyColumns().get(0).getName().equals(getName())) {
                         constraints.setForeignKeyName(fk.getName());
                         constraints.setReferences(fk.getPrimaryKeyTable().getName() +
                             "(" +
@@ -276,7 +275,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * that returns a number. If the value "null" is passed, it will set a null value.
      */
     public ColumnConfig setValueNumeric(String valueNumeric) {
-        if (valueNumeric == null || "null".equalsIgnoreCase(valueNumeric)) {
+        if ((valueNumeric == null) || "null".equalsIgnoreCase(valueNumeric)) {
             this.valueNumeric = null;
         } else {
             String saved = valueNumeric;
@@ -311,7 +310,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig setValueBoolean(String valueBoolean) {
         valueBoolean = StringUtils.trimToNull(valueBoolean);
-        if (valueBoolean == null || "null".equalsIgnoreCase(valueBoolean)) {
+        if ((valueBoolean == null) || "null".equalsIgnoreCase(valueBoolean)) {
             this.valueBoolean = null;
         } else {
             if ("true".equalsIgnoreCase(valueBoolean) || "1".equals(valueBoolean)) {
@@ -382,7 +381,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * If the string "null" is passed, it will set a null value.
      */
     public ColumnConfig setValueDate(String valueDate) {
-        if (valueDate == null || "null".equalsIgnoreCase(valueDate)) {
+        if ((valueDate == null) || "null".equalsIgnoreCase(valueDate)) {
             this.valueDate = null;
         } else {
             try {
@@ -502,7 +501,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * A special case is made for "GENERATED_BY_DEFAULT" which simply sets the ColumnConfig object to autoIncrement.
      */
     public ColumnConfig setDefaultValueNumeric(String defaultValueNumeric) {
-        if (defaultValueNumeric == null || "null".equalsIgnoreCase(defaultValueNumeric)) {
+        if ((defaultValueNumeric == null) || "null".equalsIgnoreCase(defaultValueNumeric)) {
             this.defaultValueNumeric = null;
         } else {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
@@ -550,7 +549,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
         defaultValueDate = StringUtils.trimToNull(defaultValueDate);
-        if (defaultValueDate == null || "null".equalsIgnoreCase(defaultValueDate)) {
+        if ((defaultValueDate == null) || "null".equalsIgnoreCase(defaultValueDate)) {
             this.defaultValueDate = null;
         } else {
             try {
@@ -580,7 +579,7 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      */
     public ColumnConfig setDefaultValueBoolean(String defaultValueBoolean) {
         defaultValueBoolean = StringUtils.trimToNull(defaultValueBoolean);
-        if (defaultValueBoolean == null || "null".equalsIgnoreCase(defaultValueBoolean)) {
+        if ((defaultValueBoolean == null) || "null".equalsIgnoreCase(defaultValueBoolean)) {
             this.defaultValueBoolean = null;
         } else {
             if ("true".equalsIgnoreCase(defaultValueBoolean) || "1".equals(defaultValueBoolean)) {
@@ -693,12 +692,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
      * Returns true if any of the setDefaultValue* functions have had a non-null value set
      */
     public boolean hasDefaultValue() {
-        return this.getDefaultValue() != null
-                || this.getDefaultValueBoolean() != null
-                || this.getDefaultValueDate() != null
-                || this.getDefaultValueNumeric() != null
-                || this.getDefaultValueComputed() != null
-                || this.getDefaultValueSequenceNext() != null;
+        return (this.getDefaultValue() != null) || (this.getDefaultValueBoolean() != null) || (this
+            .getDefaultValueDate() != null) || (this.getDefaultValueNumeric() != null) || (this
+            .getDefaultValueComputed() != null) || (this.getDefaultValueSequenceNext() != null);
     }
 
     /**

@@ -63,7 +63,7 @@ public class Labels {
     }
 
     public boolean isEmpty() {
-        return this.labels == null || this.labels.isEmpty();
+        return (this.labels == null) || this.labels.isEmpty();
     }
 
     public Set<String> getLabels() {

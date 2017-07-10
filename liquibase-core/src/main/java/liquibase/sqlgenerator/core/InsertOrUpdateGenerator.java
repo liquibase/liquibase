@@ -51,9 +51,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                         insertOrUpdateStatement.getSchemaName(),
                         insertOrUpdateStatement.getTableName(),
-                        thisPkColumn)).append(newValue == null || "NULL".equalsIgnoreCase(newValue.toString()) ? " is " : " = ");
+                        thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ?
+                " is " : " = ");
 
-            if (newValue == null || "NULL".equalsIgnoreCase(newValue.toString())) {
+            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
@@ -99,7 +100,8 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         		insertOrUpdateStatement.getCatalogName(), 
         		insertOrUpdateStatement.getSchemaName(),
         		insertOrUpdateStatement.getTableName());
-        if (!(database instanceof OracleDatabase && insertOrUpdateStatement.getOnlyUpdate() != null && insertOrUpdateStatement.getOnlyUpdate())) {
+        if (!((database instanceof OracleDatabase) && (insertOrUpdateStatement.getOnlyUpdate() != null) &&
+            insertOrUpdateStatement.getOnlyUpdate())) {
             whereClause += ";\n";
         }
 

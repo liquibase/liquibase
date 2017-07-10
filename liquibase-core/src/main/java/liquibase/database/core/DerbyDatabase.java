@@ -89,8 +89,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return (driverVersionMajor == 10 && driverVersionMinor >= 6) ||
-                driverVersionMajor >= 11;
+        return ((driverVersionMajor == 10) && (driverVersionMinor >= 6)) || (driverVersionMajor >= 11);
     }
 
     @Override
@@ -130,7 +129,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (driverName != null && driverName.toLowerCase().contains("embedded")) {
+        if ((driverName != null) && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
                     url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
@@ -189,7 +188,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if ((getConnection() == null) || (getConnection() instanceof OfflineConnection)) {
             return null;
         }
         try {
@@ -211,8 +210,8 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
             return false; ///assume not;
         }
         try {
-            return this.getDatabaseMajorVersion() > 10
-                    || (this.getDatabaseMajorVersion() == 10 && this.getDatabaseMinorVersion() > 7);
+            return (this.getDatabaseMajorVersion() > 10) || ((this.getDatabaseMajorVersion() == 10) && (this
+                .getDatabaseMinorVersion() > 7));
         } catch (DatabaseException e) {
             return false; //assume not
         }

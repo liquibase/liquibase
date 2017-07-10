@@ -68,7 +68,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public DatabaseChangeLog getRootChangeLog() {
-        return rootChangeLog != null ? rootChangeLog : this;
+        return (rootChangeLog != null) ? rootChangeLog : this;
     }
 
     public void setParentChangeLog(DatabaseChangeLog parentChangeLog) {
@@ -175,17 +175,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public ChangeSet getChangeSet(String path, String author, String id) {
         for (ChangeSet changeSet : changeSets) {
-            if (normalizePath(changeSet.getFilePath()).equalsIgnoreCase(normalizePath(path))
-                    && changeSet.getAuthor().equalsIgnoreCase(author)
-                    && changeSet.getId().equalsIgnoreCase(id)
-                    && (changeSet.getDbmsSet() == null
-                        || changeLogParameters == null
-                        || changeLogParameters.getValue("database.typeName", this) == null
-                        || changeSet.getDbmsSet().isEmpty()
-                        || changeSet.getDbmsSet().contains(
-                            changeLogParameters.getValue("database.typeName", this).toString()
-                           )
-                       )
+            if (normalizePath(changeSet.getFilePath()).equalsIgnoreCase(normalizePath(path)) && changeSet.getAuthor()
+                .equalsIgnoreCase(author) && changeSet.getId().equalsIgnoreCase(id) && ((changeSet.getDbmsSet() ==
+                null) || (changeLogParameters == null) || (changeLogParameters.getValue("database.typeName", this) ==
+                null) || changeSet.getDbmsSet().isEmpty() || changeSet.getDbmsSet().contains(changeLogParameters
+                .getValue("database.typeName", this).toString()))
                ) {
                 return changeSet;
             }
@@ -238,7 +232,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if ((o == null) || (getClass() != o.getClass())) {
             return false;
         }
 
@@ -305,7 +299,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
         try {
             Object value = parsedNode.getValue();
-            if (value != null && value instanceof String) {
+            if ((value != null) && (value instanceof String)) {
                 parsedNode.setValue(changeLogParameters.expandExpressions(parsedNode.getValue(String.class), this));
             }
 
@@ -470,7 +464,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             SortedSet<String> resources = new TreeSet<>(resourceComparator);
             if (unsortedResources != null) {
                 for (String resourcePath : unsortedResources) {
-                    if (resourceFilter == null || resourceFilter.include(resourcePath)) {
+                    if ((resourceFilter == null) || resourceFilter.include(resourcePath)) {
                         resources.add(resourcePath);
                     }
                 }

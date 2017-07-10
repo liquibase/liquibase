@@ -19,7 +19,7 @@ public class NetUtil {
         // That is why windows should be treated differently to linux/unix and use the
         // default way of getting the localhost.
         String osName = System.getProperty("os.name");
-        if (osName != null && osName.toLowerCase().contains("windows")) {
+        if ((osName != null) && osName.toLowerCase().contains("windows")) {
             return InetAddress.getLocalHost();
         }
 

@@ -64,18 +64,18 @@ public class Schema extends AbstractDatabaseObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         Schema schema = (Schema) o;
 
-        if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
-        return getName() != null ? getName().equalsIgnoreCase(schema.getName()) : schema.getName() == null;
+        if ((getCatalog() != null) ? !getCatalog().equals(schema.getCatalog()) : (schema.getCatalog() != null)) return false;
+        return (getName() != null) ? getName().equalsIgnoreCase(schema.getName()) : (schema.getName() == null);
     }
 
     @Override
     public int hashCode() {
-        int result = getCatalog() != null ? getCatalog().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        int result = (getCatalog() != null) ? getCatalog().hashCode() : 0;
+        result = (31 * result) + ((getName() != null) ? getName().hashCode() : 0);
         return result;
     }
 
@@ -95,7 +95,7 @@ public class Schema extends AbstractDatabaseObject {
             schemaName = "DEFAULT";
         }
 
-        if (catalogName == null || catalogName.equals(schemaName)) {
+        if ((catalogName == null) || catalogName.equals(schemaName)) {
             return schemaName;
         } else {
             return catalogName +"."+ schemaName;
@@ -104,7 +104,7 @@ public class Schema extends AbstractDatabaseObject {
 
     public CatalogAndSchema toCatalogAndSchema() {
         String catalogName;
-        if (getCatalog() != null && getCatalog().isDefault()) {
+        if ((getCatalog() != null) && getCatalog().isDefault()) {
             catalogName = null;
         } else {
             catalogName = getCatalogName();

@@ -158,7 +158,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         String machineExcludes = (String) servletValueContainer.getValue(LIQUIBASE_HOST_EXCLUDES);
 
         boolean shouldRun = false;
-        if (machineIncludes == null && machineExcludes == null) {
+        if ((machineIncludes == null) && (machineExcludes == null)) {
             shouldRun = true;
         } else if (machineIncludes != null) {
             for (String machine : machineIncludes.split(",")) {

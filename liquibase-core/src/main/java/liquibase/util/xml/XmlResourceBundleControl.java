@@ -30,8 +30,7 @@ public class XmlResourceBundleControl extends ResourceBundle.Control {
             throws IllegalAccessException,
             InstantiationException,
             IOException {
-        if (baseName == null || locale == null
-                || format == null || loader == null)
+        if ((baseName == null) || (locale == null) || (format == null) || (loader == null))
             throw new IllegalArgumentException(
                     "attempt to call newBundle with baseName, locale, format or loader being null.");
         ResourceBundle bundle = null;

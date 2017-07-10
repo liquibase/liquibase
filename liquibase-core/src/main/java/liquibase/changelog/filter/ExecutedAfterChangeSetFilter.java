@@ -17,7 +17,7 @@ public class ExecutedAfterChangeSetFilter implements ChangeSetFilter {
     public ExecutedAfterChangeSetFilter(Date date, List<RanChangeSet> ranChangeSets) {
         this.date = date;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (ranChangeSet.getDateExecuted() != null && ranChangeSet.getDateExecuted().getTime() > date.getTime()) {
+            if ((ranChangeSet.getDateExecuted() != null) && (ranChangeSet.getDateExecuted().getTime() > date.getTime())) {
                 changeLogsAfterDate.add(changeLogToString(ranChangeSet.getId(), ranChangeSet.getAuthor(), ranChangeSet.getChangeLog()));
             }
         }

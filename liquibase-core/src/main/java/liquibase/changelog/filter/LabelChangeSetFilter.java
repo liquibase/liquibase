@@ -22,17 +22,17 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
-            if (visitor.getLabels() != null && !labelExpression.matches(visitor.getLabels())) {
+            if ((visitor.getLabels() != null) && !labelExpression.matches(visitor.getLabels())) {
                 visitorsToRemove.add(visitor);
             }
         }
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
-        if (labelExpression == null || labelExpression.isEmpty()) {
+        if ((labelExpression == null) || labelExpression.isEmpty()) {
             return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass());
         }
 
-        if (changeSet.getLabels() == null || changeSet.getLabels().isEmpty()) {
+        if ((changeSet.getLabels() == null) || changeSet.getLabels().isEmpty()) {
             return new ChangeSetFilterResult(true, "Change set runs under all labels", this.getClass());
         }
 

@@ -24,13 +24,13 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         List<SqlVisitor> visitorsToRemove = new ArrayList<>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
-            if (visitor.getContexts() != null && !visitor.getContexts().matches(contexts)) {
+            if ((visitor.getContexts() != null) && !visitor.getContexts().matches(contexts)) {
                 visitorsToRemove.add(visitor);
             }
         }
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
-        if (contexts == null || contexts.isEmpty()) {
+        if ((contexts == null) || contexts.isEmpty()) {
             return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass());
         }
 

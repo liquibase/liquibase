@@ -62,7 +62,8 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         if (statement.isReplaceIfExists()) {
             if (database instanceof FirebirdDatabase) {
                 viewDefinition.replaceIfExists("CREATE", "RECREATE");
-            } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
+            } else if ((database instanceof SybaseASADatabase) && statement.getSelectQuery().toLowerCase().startsWith
+                ("create view")) {
                 // Sybase ASA saves view definitions with header.
             } else if (database instanceof MSSQLDatabase) {
                 //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view

@@ -84,7 +84,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     protected String getCharTypeName() {
-        if (getDatabase() instanceof MSSQLDatabase && ((MSSQLDatabase) getDatabase()).sendsStringParametersAsUnicode()) {
+        if ((getDatabase() instanceof MSSQLDatabase) && ((MSSQLDatabase) getDatabase()).sendsStringParametersAsUnicode()) {
             return "nvarchar";
         }
         return "varchar";
@@ -119,7 +119,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 DataType type = changeLogTable.getColumn("LIQUIBASE").getType();
                 if (type.getTypeName().toLowerCase().startsWith("varchar")) {
                     Integer columnSize = type.getColumnSize();
-                    liquibaseColumnNotRightSize = columnSize != null && columnSize < 20;
+                    liquibaseColumnNotRightSize = (columnSize != null) && (columnSize < 20);
                 } else {
                     liquibaseColumnNotRightSize = false;
                 }
@@ -130,7 +130,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 DataType type = changeLogTable.getColumn("MD5SUM").getType();
                 if (type.getTypeName().toLowerCase().startsWith("varchar")) {
                     Integer columnSize = type.getColumnSize();
-                    checksumNotRightSize = columnSize != null && columnSize < 35;
+                    checksumNotRightSize = (columnSize != null) && (columnSize < 35);
                 } else {
                     liquibaseColumnNotRightSize = false;
                 }
@@ -180,7 +180,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasContexts) {
                 Integer columnSize = changeLogTable.getColumn("CONTEXTS").getType().getColumnSize();
-                if (columnSize != null && columnSize < Integer.parseInt(getContextsSize())) {
+                if ((columnSize != null) && (columnSize < Integer.parseInt(getContextsSize()))) {
                     executor.comment("Modifying size of databasechangelog.contexts column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "CONTEXTS", charTypeName + "("+getContextsSize()+")"));
                 }
@@ -191,7 +191,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
             if (hasLabels) {
                 Integer columnSize = changeLogTable.getColumn("LABELS").getType().getColumnSize();
-                if (columnSize != null && columnSize < Integer.parseInt(getLabelsSize())) {
+                if ((columnSize != null) && (columnSize < Integer.parseInt(getLabelsSize()))) {
                     executor.comment("Modifying size of databasechangelog.labels column");
                     statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LABELS", charTypeName+"("+getLabelsSize()+")"));
                 }
@@ -273,9 +273,10 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                     String fileName = rs.get("FILENAME").toString();
                     String author = rs.get("AUTHOR").toString();
                     String id = rs.get("ID").toString();
-                    String md5sum = rs.get("MD5SUM") == null || !databaseChecksumsCompatible ? null : rs.get("MD5SUM").toString();
-                    String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
-                    String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
+                    String md5sum = ((rs.get("MD5SUM") == null) || !databaseChecksumsCompatible) ? null : rs.get
+                        ("MD5SUM").toString();
+                    String description = (rs.get("DESCRIPTION") == null) ? null : rs.get("DESCRIPTION").toString();
+                    String comments = (rs.get("COMMENTS") == null) ? null : rs.get("COMMENTS").toString();
                     Object tmpDateExecuted = rs.get("DATEEXECUTED");
                     Date dateExecuted = null;
                     if (tmpDateExecuted instanceof Date) {
@@ -288,9 +289,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         }
                     }
                     String tmpOrderExecuted = rs.get("ORDEREXECUTED").toString();
-                    Integer orderExecuted = (tmpOrderExecuted == null ? null : Integer.valueOf(tmpOrderExecuted));
-                    String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
-                    String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
+                    Integer orderExecuted = ((tmpOrderExecuted == null) ? null : Integer.valueOf(tmpOrderExecuted));
+                    String tag = (rs.get("TAG") == null) ? null : rs.get("TAG").toString();
+                    String execType = (rs.get("EXECTYPE") == null) ? null : rs.get("EXECTYPE").toString();
                     ContextExpression contexts = new ContextExpression((String) rs.get("CONTEXTS"));
                     Labels labels = new Labels((String) rs.get("LABELS"));
                     String deploymentId = (String) rs.get("DEPLOYMENT_ID");

@@ -103,7 +103,8 @@ public class DataTypeWrapper extends LiquibaseDataType {
 
     @Override
     public boolean equals(final Object o) {
-        return o instanceof DataTypeWrapper && underlyingDataType.equals(((DataTypeWrapper)o).getUnderlyingDataType());
+        return (o instanceof DataTypeWrapper) && underlyingDataType.equals(((DataTypeWrapper) o)
+            .getUnderlyingDataType());
     }
 
     @Override

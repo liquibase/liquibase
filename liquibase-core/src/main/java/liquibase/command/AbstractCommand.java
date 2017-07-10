@@ -6,7 +6,7 @@ public abstract class AbstractCommand<T extends CommandResult> implements Liquib
 
     @Override
     public int getPriority(String commandName) {
-        if (commandName != null && commandName.equalsIgnoreCase(getName())) {
+        if ((commandName != null) && commandName.equalsIgnoreCase(getName())) {
             return PrioritizedService.PRIORITY_DEFAULT;
         } else {
             return -1;

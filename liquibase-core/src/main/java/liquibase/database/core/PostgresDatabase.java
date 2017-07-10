@@ -109,8 +109,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         int majorVersion = conn.getDatabaseMajorVersion();
         int minorVersion =conn.getDatabaseMinorVersion();
 
-        if (majorVersion < MINIMUM_DBMS_MAJOR_VERSION ||
-                (majorVersion == MINIMUM_DBMS_MAJOR_VERSION && minorVersion < MINIMUM_DBMS_MINOR_VERSION)) {
+        if ((majorVersion < MINIMUM_DBMS_MAJOR_VERSION) || ((majorVersion == MINIMUM_DBMS_MAJOR_VERSION) &&
+            (minorVersion < MINIMUM_DBMS_MINOR_VERSION))) {
             LogFactory.getInstance().getLog().warning(
                     String.format("Your PostgreSQL software version (%d.%d) seems to indicate that your software is " +
                                     "older than %d.%d. Unfortunately, this is not supported, and this connection " +
@@ -165,7 +165,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'");
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
-                    if (setting != null && "on".equals(setting)) {
+                    if ((setting != null) && "on".equals(setting)) {
                         LOG.warning("EnterpriseDB " + conn.getURL() + " does not store DATE columns. Auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
@@ -220,7 +220,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (quotingStrategy == ObjectQuotingStrategy.LEGACY && hasMixedCase(objectName)) {
+        if ((quotingStrategy == ObjectQuotingStrategy.LEGACY) && hasMixedCase(objectName)) {
             return "\"" + objectName + "\"";
         } else {
             return super.escapeObjectName(objectName, objectType);
@@ -229,7 +229,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
+        if ((objectName == null) || (quotingStrategy != ObjectQuotingStrategy.LEGACY)) {
             return super.correctObjectName(objectName, objectType);
         }
         if (objectName.contains("-")

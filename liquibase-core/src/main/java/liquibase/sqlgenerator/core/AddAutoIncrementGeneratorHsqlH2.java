@@ -18,7 +18,7 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
 
     @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof HsqlDatabase || database instanceof H2Database;
+        return (database instanceof HsqlDatabase) || (database instanceof H2Database);
     }
 
     @Override

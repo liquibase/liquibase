@@ -454,7 +454,7 @@ public class Liquibase {
         if (database instanceof OracleDatabase) {
             executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
         }
-        if (database instanceof MSSQLDatabase && database.getDefaultCatalogName() != null) {
+        if ((database instanceof MSSQLDatabase) && (database.getDefaultCatalogName() != null)) {
             executor.execute(new RawSqlStatement("USE " +
                 database.escapeObjectName(database.getDefaultCatalogName(), Catalog.class) + ";")
             );
@@ -585,7 +585,7 @@ public class Liquibase {
         String rollbackScriptContents;
         try {
             Set<InputStream> streams = resourceAccessor.getResourcesAsStream(rollbackScript);
-            if (streams == null || streams.isEmpty()) {
+            if ((streams == null) || streams.isEmpty()) {
                 throw new LiquibaseException("Cannot find rollbackScript "+rollbackScript);
             } else if (streams.size() > 1) {
                 throw new LiquibaseException("Found multiple rollbackScripts named "+rollbackScript);
@@ -1033,7 +1033,7 @@ public class Liquibase {
             changeLog.validate(database, contexts, labelExpression);
 
             ChangeLogIterator logIterator;
-            if (count == null && tag == null) {
+            if ((count == null) && (tag == null)) {
                 logIterator = new ChangeLogIterator(changeLog,
                         new NotRanChangeSetFilter(database.getRanChangeSetList()),
                         new ContextChangeSetFilter(contexts),
@@ -1126,7 +1126,7 @@ public class Liquibase {
      * Drops all database objects in the passed schema(s).
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
-        if (schemas == null || schemas.length == 0) {
+        if ((schemas == null) || (schemas.length == 0)) {
             schemas = new CatalogAndSchema[] {
                 new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName())
             };
@@ -1456,7 +1456,7 @@ public class Liquibase {
             throw new LiquibaseException(new IllegalArgumentException("changeSetIdentifier"));
         }
         final List<String> parts = StringUtils.splitAndTrim(changeSetIdentifier, "::");
-        if (parts == null || parts.size() < 3) {
+        if ((parts == null) || (parts.size() < 3)) {
             throw new LiquibaseException(
                 new IllegalArgumentException("Invalid changeSet identifier: " + changeSetIdentifier)
             );
@@ -1572,7 +1572,7 @@ public class Liquibase {
                                   Class<? extends DatabaseObject>... snapshotTypes)
         throws DatabaseException, IOException, ParserConfigurationException {
         Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
-        if (snapshotTypes != null && snapshotTypes.length > 0) {
+        if ((snapshotTypes != null) && (snapshotTypes.length > 0)) {
             finalCompareTypes = new HashSet<>(Arrays.asList(snapshotTypes));
         }
 

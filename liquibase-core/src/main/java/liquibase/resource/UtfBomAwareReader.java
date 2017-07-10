@@ -64,22 +64,21 @@ public class UtfBomAwareReader extends Reader {
 		int n, unread;
 		n = pis.read(bom, 0, bom.length);
 
-		if (bom[0] == _0xEF && bom[1] == _0xBB && bom[2] == _0xBF) {
+		if ((bom[0] == _0xEF) && (bom[1] == _0xBB) && (bom[2] == _0xBF)) {
 			charsetName = "UTF-8";
 			unread = n - 3;
-		} else if (bom[0] == _0xFE && bom[1] == _0xFF) {
+		} else if ((bom[0] == _0xFE) && (bom[1] == _0xFF)) {
 			charsetName = "UTF-16BE";
 			unread = n - 2;
-		} else if (bom[0] == _0xFF && bom[1] == _0xFE) {
-			if (n == 4 && bom[2] == _0x00 && bom[3] == _0x00) {
+		} else if ((bom[0] == _0xFF) && (bom[1] == _0xFE)) {
+			if ((n == 4) && (bom[2] == _0x00) && (bom[3] == _0x00)) {
 				charsetName = "UTF-32LE";
 				unread = 0;
 			} else {
 				charsetName = "UTF-16LE";
 				unread = n - 2;
 			}
-		} else if (bom[0] == _0x00 && bom[1] == _0x00 && bom[2] == _0xFE
-				&& bom[3] == _0xFF) {
+		} else if ((bom[0] == _0x00) && (bom[1] == _0x00) && (bom[2] == _0xFE) && (bom[3] == _0xFF)) {
 			charsetName = "UTF-32BE";
 			unread = 4;
 		} else {

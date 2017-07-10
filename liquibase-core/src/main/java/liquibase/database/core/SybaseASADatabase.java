@@ -201,7 +201,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
                 return "dba";
             } else {
                 Connection connection = ((JdbcConnection) getConnection()).getWrappedConnection();
-                return (connection == null ? null : connection.getMetaData().getUserName());
+                return ((connection == null) ? null : connection.getMetaData().getUserName());
             }
         } catch (SQLException e) {
             throw new UnexpectedLiquibaseException(e);

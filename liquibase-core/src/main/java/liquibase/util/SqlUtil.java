@@ -81,11 +81,11 @@ public class SqlUtil {
             }
         }
 
-        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
+        if ((database instanceof OracleDatabase) && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
             //oracle returns functions without quotes
             Object maybeDate = null;
 
-            if (liquibaseDataType instanceof DateType || typeId == Types.DATE) {
+            if ((liquibaseDataType instanceof DateType) || (typeId == Types.DATE)) {
                 if (stringVal.endsWith("'HH24:MI:SS')")) {
                     maybeDate = DataTypeFactory.getInstance().fromDescription(
                     "time", database).sqlToObject(stringVal, database);
@@ -93,7 +93,7 @@ public class SqlUtil {
                     maybeDate = DataTypeFactory.getInstance().fromDescription(
                     "date", database).sqlToObject(stringVal, database);
                 }
-            } else if (liquibaseDataType instanceof DateTimeType || typeId == Types.TIMESTAMP) {
+            } else if ((liquibaseDataType instanceof DateTimeType) || (typeId == Types.TIMESTAMP)) {
                 maybeDate = DataTypeFactory.getInstance().fromDescription(
                 "datetime", database).sqlToObject(stringVal, database);
             } else if (!stringVal.matches("\\d+\\.?\\d*")) { //not just a number
@@ -123,7 +123,7 @@ public class SqlUtil {
         try (Scanner scanner = new Scanner(stringVal.trim())) {
             if (typeId == Types.ARRAY) {
                 return new DatabaseFunction(stringVal);
-            } else if ((liquibaseDataType instanceof BigIntType || typeId == Types.BIGINT)) {
+            } else if (((liquibaseDataType instanceof BigIntType) || (typeId == Types.BIGINT))) {
                 if (scanner.hasNextBigInteger()) {
                     return scanner.nextBigInteger();
                 } else {
@@ -150,30 +150,30 @@ public class SqlUtil {
                 }
     
                 return value;
-            } else if (liquibaseDataType instanceof BlobType|| typeId == Types.BLOB) {
+            } else if ((liquibaseDataType instanceof BlobType) || (typeId == Types.BLOB)) {
                 if (strippedSingleQuotes) {
                     return stringVal;
                 } else {
                     return new DatabaseFunction(stringVal);
                 }
-            } else if ((liquibaseDataType instanceof BooleanType || typeId == Types.BOOLEAN )) {
+            } else if (((liquibaseDataType instanceof BooleanType) || (typeId == Types.BOOLEAN))) {
                 if (scanner.hasNextBoolean()) {
                     return scanner.nextBoolean();
                 } else {
                     return new DatabaseFunction(stringVal);
                 }
-            } else if (liquibaseDataType instanceof CharType || typeId == Types.CHAR) {
+            } else if ((liquibaseDataType instanceof CharType) || (typeId == Types.CHAR)) {
                 return stringVal;
-            } else if (liquibaseDataType instanceof ClobType || typeId == Types.CLOB) {
+            } else if ((liquibaseDataType instanceof ClobType) || (typeId == Types.CLOB)) {
                 return stringVal;
             } else if (typeId == Types.DATALINK) {
                 return new DatabaseFunction(stringVal);
-            } else if (liquibaseDataType instanceof DateType || typeId == Types.DATE) {
+            } else if ((liquibaseDataType instanceof DateType) || (typeId == Types.DATE)) {
                 if ("year".equalsIgnoreCase(typeName)) {
                     return stringVal.trim();
                 }
                 return DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
-            } else if ((liquibaseDataType instanceof DecimalType || typeId == Types.DECIMAL)) {
+            } else if (((liquibaseDataType instanceof DecimalType) || (typeId == Types.DECIMAL))) {
                 if (scanner.hasNextBigDecimal()) {
                     return scanner.nextBigDecimal();
                 } else {
@@ -181,19 +181,19 @@ public class SqlUtil {
                 }
             } else if (typeId == Types.DISTINCT) {
                 return new DatabaseFunction(stringVal);
-            } else if ((liquibaseDataType instanceof DoubleType || typeId == Types.DOUBLE)) {
+            } else if (((liquibaseDataType instanceof DoubleType) || (typeId == Types.DOUBLE))) {
                 if (scanner.hasNextDouble()) {
                     return scanner.nextDouble();
                 } else {
                     return new DatabaseFunction(stringVal);
                 }
-            } else if ((liquibaseDataType instanceof FloatType || typeId == Types.FLOAT)) {
+            } else if (((liquibaseDataType instanceof FloatType) || (typeId == Types.FLOAT))) {
                 if (scanner.hasNextFloat()) {
                     return scanner.nextFloat();
                 } else {
                     return new DatabaseFunction(stringVal);
                 }
-            } else if ((liquibaseDataType instanceof IntType || typeId == Types.INTEGER)) {
+            } else if (((liquibaseDataType instanceof IntType) || (typeId == Types.INTEGER))) {
                 if (scanner.hasNextInt()) {
                     return scanner.nextInt();
                 } else {
@@ -207,19 +207,17 @@ public class SqlUtil {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.LONGVARCHAR) {
                 return stringVal;
-            } else if (liquibaseDataType instanceof NCharType
-                || typeId == Types.NCHAR
-                || "NCLOB".equalsIgnoreCase(liquibaseDataType.getName())) {
+            } else if ((liquibaseDataType instanceof NCharType) || (typeId == Types.NCHAR) || "NCLOB"
+                .equalsIgnoreCase(liquibaseDataType.getName())) {
                 return stringVal;
             } else if (typeId == Types.NCLOB) {
                 return stringVal;
             } else if (typeId == Types.NULL) {
                 return null;
-            } else if ((liquibaseDataType instanceof NumberType || typeId == Types.NUMERIC)) {
+            } else if (((liquibaseDataType instanceof NumberType) || (typeId == Types.NUMERIC))) {
                 if (scanner.hasNextBigDecimal()) {
-                    if ( (database instanceof MSSQLDatabase) && stringVal.endsWith(".0")
-                        || stringVal.endsWith(".00")
-                        || stringVal.endsWith(".000")) {
+                    if (((database instanceof MSSQLDatabase) && stringVal.endsWith(".0")) || stringVal.endsWith
+                        (".00") || stringVal.endsWith(".000")) {
                         // MSSQL can store the value with the decimal digits. return it directly to
                         // avoid unexpected differences
                         return new DatabaseFunction(stringVal);
@@ -231,10 +229,10 @@ public class SqlUtil {
                     }
                     return new DatabaseFunction(stringVal);
                 }
-            } else if (liquibaseDataType instanceof NVarcharType || typeId == Types.NVARCHAR) {
+            } else if ((liquibaseDataType instanceof NVarcharType) || (typeId == Types.NVARCHAR)) {
                 return stringVal;
             } else if (typeId == Types.OTHER) {
-                if (database instanceof DB2Database && "DECFLOAT".equalsIgnoreCase(typeName)) {
+                if ((database instanceof DB2Database) && "DECFLOAT".equalsIgnoreCase(typeName)) {
                     return new BigDecimal(stringVal);
                 }
                 return new DatabaseFunction(stringVal);
@@ -244,7 +242,7 @@ public class SqlUtil {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.ROWID) {
                 return new DatabaseFunction(stringVal);
-            } else if ((liquibaseDataType instanceof SmallIntType || typeId == Types.SMALLINT)) {
+            } else if (((liquibaseDataType instanceof SmallIntType) || (typeId == Types.SMALLINT))) {
                 if (scanner.hasNextInt()) {
                     return scanner.nextInt();
                 } else {
@@ -254,15 +252,14 @@ public class SqlUtil {
                 return new DatabaseFunction(stringVal);
             } else if (typeId == Types.STRUCT) {
                 return new DatabaseFunction(stringVal);
-            } else if (liquibaseDataType instanceof TimeType || typeId == Types.TIME) {
+            } else if ((liquibaseDataType instanceof TimeType) || (typeId == Types.TIME)) {
                 return DataTypeFactory.getInstance().fromDescription("time", database)
                     .sqlToObject(stringVal, database);
-            } else if (liquibaseDataType instanceof DateTimeType
-                || liquibaseDataType instanceof TimestampType
-                || typeId == Types.TIMESTAMP) {
+            } else if ((liquibaseDataType instanceof DateTimeType) || (liquibaseDataType instanceof TimestampType) ||
+                (typeId == Types.TIMESTAMP)) {
                 return DataTypeFactory.getInstance().fromDescription("datetime", database)
                     .sqlToObject(stringVal, database);
-            } else if ((liquibaseDataType instanceof TinyIntType || typeId == Types.TINYINT)) {
+            } else if (((liquibaseDataType instanceof TinyIntType) || (typeId == Types.TINYINT))) {
                 if (scanner.hasNextInt()) {
                     return scanner.nextInt();
                 } else {
@@ -270,9 +267,9 @@ public class SqlUtil {
                 }
             } else if (typeId == Types.VARBINARY) {
                 return new DatabaseFunction(stringVal);
-            } else if (liquibaseDataType instanceof VarcharType || typeId == Types.VARCHAR) {
+            } else if ((liquibaseDataType instanceof VarcharType) || (typeId == Types.VARCHAR)) {
                 return stringVal;
-            } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
+            } else if ((database instanceof MySQLDatabase) && typeName.toLowerCase().startsWith("enum")) {
                 return stringVal;
             } else {
                 if ("".equals(stringVal)) {

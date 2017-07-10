@@ -140,7 +140,7 @@ final class IOCase implements Serializable {
      * @throws NullPointerException if either string is null
      */
     public int checkCompareTo(String str1, String str2) {
-        if (str1 == null || str2 == null) {
+        if ((str1 == null) || (str2 == null)) {
             throw new NullPointerException("The strings must not be null");
         }
         return isSensitive ? str1.compareTo(str2) : str1.compareToIgnoreCase(str2);
@@ -158,7 +158,7 @@ final class IOCase implements Serializable {
      * @throws NullPointerException if either string is null
      */
     public boolean checkEquals(String str1, String str2) {
-        if (str1 == null || str2 == null) {
+        if ((str1 == null) || (str2 == null)) {
             throw new NullPointerException("The strings must not be null");
         }
         return isSensitive ? str1.equals(str2) : str1.equalsIgnoreCase(str2);

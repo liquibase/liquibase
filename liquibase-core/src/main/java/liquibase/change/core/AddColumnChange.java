@@ -99,24 +99,24 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             Set<ColumnConstraint> constraints = new HashSet<>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
-                if (constraintsConfig.isNullable() != null && !constraintsConfig.isNullable()) {
+                if ((constraintsConfig.isNullable() != null) && !constraintsConfig.isNullable()) {
                     constraints.add(new NotNullConstraint());
                 }
-                if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
+                if ((constraintsConfig.isUnique() != null) && constraintsConfig.isUnique()) {
                     constraints.add(new UniqueConstraint());
                 }
-                if (constraintsConfig.isPrimaryKey() != null && constraintsConfig.isPrimaryKey()) {
+                if ((constraintsConfig.isPrimaryKey() != null) && constraintsConfig.isPrimaryKey()) {
                     constraints.add(new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName()));
                 }
 
-                if (constraintsConfig.getReferences() != null ||
-                        (constraintsConfig.getReferencedColumnNames() != null && constraintsConfig.getReferencedTableName() != null)) {
+                if ((constraintsConfig.getReferences() != null) || ((constraintsConfig.getReferencedColumnNames() !=
+                    null) && (constraintsConfig.getReferencedTableName() != null))) {
                     constraints.add(new ForeignKeyConstraint(constraintsConfig.getForeignKeyName(), constraintsConfig.getReferences()
                             , constraintsConfig.getReferencedTableName(), constraintsConfig.getReferencedColumnNames()));
                 }
             }
 
-            if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
+            if ((column.isAutoIncrement() != null) && column.isAutoIncrement()) {
                 constraints.add(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
             }
 
@@ -214,7 +214,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
                     ConstraintsConfig constraints = column.getConstraints();
                     if (constraints != null) {
-                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNames().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
+                        result.assertComplete(constraints.isPrimaryKey() == ((snapshotPK != null) && snapshotPK
+                            .getColumnNames().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
                     }
                 }
             }

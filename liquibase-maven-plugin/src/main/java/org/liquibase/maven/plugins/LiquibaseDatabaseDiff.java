@@ -159,7 +159,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         if (diffChangeLogFile != null) {
             try {
                 DiffOutputControl diffOutputControl = new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace, null).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName));
-                if (diffExcludeObjects != null && diffIncludeObjects != null) {
+                if ((diffExcludeObjects != null) && (diffIncludeObjects != null)) {
                     throw new UnexpectedLiquibaseException("Cannot specify both excludeObjects and includeObjects");
                 }
                 ObjectChangeFilter objectChangeFilter = null;

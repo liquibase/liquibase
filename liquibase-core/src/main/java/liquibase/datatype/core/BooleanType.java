@@ -16,7 +16,7 @@ public class BooleanType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
-        if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
+        if ((database instanceof DB2Database) || (database instanceof FirebirdDatabase)) {
             return new DatabaseDataType("SMALLINT");
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("bit"));
@@ -27,7 +27,7 @@ public class BooleanType extends LiquibaseDataType {
             return new DatabaseDataType("BIT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
-        } else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        } else if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("BIT");
         } else if (database instanceof DerbyDatabase) {
             if (((DerbyDatabase) database).supportsBooleanDataType()) {
@@ -48,7 +48,7 @@ public class BooleanType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
 
@@ -94,14 +94,10 @@ public class BooleanType extends LiquibaseDataType {
         if (database instanceof DerbyDatabase) {
             return !((DerbyDatabase) database).supportsBooleanDataType();
         }
-        return database instanceof DB2Database
-                || database instanceof FirebirdDatabase
-                || database instanceof MSSQLDatabase
-                || database instanceof MySQLDatabase
-                || database instanceof OracleDatabase
-                || database instanceof SQLiteDatabase
-                || database instanceof SybaseASADatabase
-                || database instanceof SybaseDatabase;
+        return (database instanceof DB2Database) || (database instanceof FirebirdDatabase) || (database instanceof
+            MSSQLDatabase) || (database instanceof MySQLDatabase) || (database instanceof OracleDatabase) ||
+            (database instanceof SQLiteDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
+            SybaseDatabase);
     }
 
     /**

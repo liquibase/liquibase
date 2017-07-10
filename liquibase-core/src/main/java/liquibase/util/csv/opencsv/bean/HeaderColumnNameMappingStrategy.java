@@ -133,7 +133,7 @@ public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
     * @return - the column name or null if the position is larger than the header array or there is no headers defined.
     */
    public String getColumnName(int col) {
-      return (null != header && col < header.length) ? header[col] : null;
+      return ((null != header) && (col < header.length)) ? header[col] : null;
    }
 
    /**

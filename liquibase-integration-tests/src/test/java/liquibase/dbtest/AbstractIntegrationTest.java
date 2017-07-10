@@ -116,7 +116,7 @@ public abstract class AbstractIntegrationTest {
 
         // JDBC URL (no global default so all databases!)
         String url = integrationTestProperties.getProperty("integration.test." + dbms.getShortName() + ".url");
-        if ( (url==null) || (url.length()) == 0) {
+        if ((url == null) || ((url.length()) == 0)) {
             throw new LiquibaseException("No JDBC URL found for integration test of database type " + dbms.getShortName());
         }
         this.setJdbcUrl(url);

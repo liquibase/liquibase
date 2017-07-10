@@ -167,7 +167,8 @@ public class DiffToChangeLog {
             for (DatabaseObject object : diffResult.getMissingObjects(type, new DatabaseObjectComparator() {
                 @Override
                 public int compare(DatabaseObject o1, DatabaseObject o2) {
-                    if (o1 instanceof Column && o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null && o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) {
+                    if ((o1 instanceof Column) && (o1.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null) &&
+                        (o2.getAttribute(ORDER_ATTRIBUTE, Integer.class) != null)) {
                         int i = o1.getAttribute(ORDER_ATTRIBUTE, Integer.class).compareTo(o2.getAttribute(ORDER_ATTRIBUTE, Integer.class));
                         if (i != 0) {
                             return i;
@@ -227,7 +228,8 @@ public class DiffToChangeLog {
 
     private List<DatabaseObject> sortObjects(final String type, Collection<DatabaseObject> objects, Database database) {
 
-        if (diffOutputControl.getSchemaComparisons() != null && !objects.isEmpty() && supportsSortingObjects(database) && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+        if ((diffOutputControl.getSchemaComparisons() != null) && !objects.isEmpty() && supportsSortingObjects
+            (database) && (database.getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
             List<String> schemas = new ArrayList<>();
             CompareControl.SchemaComparison[] schemaComparisons = this.diffOutputControl.getSchemaComparisons();
             if (schemaComparisons != null) {
@@ -319,7 +321,8 @@ public class DiffToChangeLog {
      * Used by {@link #sortMissingObjects(Collection, Database)} to determine whether to go into the sorting logic.
      */
     protected boolean supportsSortingObjects(Database database) {
-        return database instanceof DB2Database || database instanceof MSSQLDatabase || database instanceof OracleDatabase;
+        return (database instanceof DB2Database) || (database instanceof MSSQLDatabase) || (database instanceof
+            OracleDatabase);
     }
 
     /**
@@ -532,7 +535,7 @@ public class DiffToChangeLog {
                 this.overriddenIdRoot = true;
             }
 
-             if (changes != null && changes.length > 0) {
+             if ((changes != null) && (changes.length > 0)) {
                  desc = " ("+StringUtils.join(changes, " :: ", new StringUtils.StringUtilsFormatter<Change>() {
                      @Override
                      public String toString(Change obj) {
@@ -691,7 +694,7 @@ public class DiffToChangeLog {
                     return false;
                 }
                 Edge e = (Edge) obj;
-                return e.from == from && e.to == to;
+                return (e.from == from) && (e.to == to);
             }
 
             @Override

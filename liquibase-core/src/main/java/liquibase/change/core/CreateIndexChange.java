@@ -207,7 +207,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @Override
     public Object getSerializableFieldValue(String field) {
         Object value = super.getSerializableFieldValue(field);
-        if (value != null && "columns".equals(field)) {
+        if ((value != null) && "columns".equals(field)) {
             for (ColumnConfig config : (Collection<ColumnConfig>) value) {
                 config.setType(null);
                 config.setAutoIncrement(null);

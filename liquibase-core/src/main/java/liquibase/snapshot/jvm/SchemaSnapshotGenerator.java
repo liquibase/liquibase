@@ -43,7 +43,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         } else {
             if (database.supportsCatalogs()) {
-                if (catalogName == null && schemaName != null) {
+                if ((catalogName == null) && (schemaName != null)) {
                     catalogName = schemaName;
                     schemaName = null;
                 }
@@ -99,7 +99,8 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             database.setObjectQuotingStrategy(currentStrategy);
         }
 
-        if (match != null && (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultSchemaName()))) {
+        if ((match != null) && ((match.getName() == null) || match.getName().equalsIgnoreCase(database
+            .getDefaultSchemaName()))) {
             match.setDefault(true);
         }
         return match;

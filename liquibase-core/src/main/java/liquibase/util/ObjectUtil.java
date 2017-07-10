@@ -117,7 +117,8 @@ public class ObjectUtil {
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
-            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && method.getParameterTypes().length == 0) {
+            if ((method.getName().equals(getMethodName) || method.getName().equals(isMethodName)) && (method
+                .getParameterTypes().length == 0)) {
                 return method;
             }
         }
@@ -129,7 +130,7 @@ public class ObjectUtil {
         Method[] methods = getMethods(object);
 
         for (Method method : methods) {
-            if (method.getName().equals(methodName) && method.getParameterTypes().length == 1) {
+            if (method.getName().equals(methodName) && (method.getParameterTypes().length == 1)) {
                 return method;
             }
         }

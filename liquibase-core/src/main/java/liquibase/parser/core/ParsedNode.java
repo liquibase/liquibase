@@ -150,7 +150,7 @@ public class ParsedNode {
      * For each key in the map, a new child is added with the key as the name and the value (with all {@link #setValue(Object)}) logic) is the value.
      */
     public ParsedNode addChildren(Map<String, Object> child) throws ParsedNodeException {
-        if (child == null || child.isEmpty()) {
+        if ((child == null) || child.isEmpty()) {
             return this; //do nothing
         }
         for (Map.Entry<String, Object> entry : child.entrySet()) {
@@ -247,7 +247,7 @@ public class ParsedNode {
                 return (T) new BigInteger(rawValue.toString());
             } else if (type.equals(BigDecimal.class)) {
                 return (T) new BigDecimal(rawValue.toString());
-            } else if (type.equals(Boolean.class) && rawValue instanceof String) {
+            } else if (type.equals(Boolean.class) && (rawValue instanceof String)) {
                 return (T) Boolean.valueOf(rawValue.toString());
             } else if (type.isAssignableFrom(Date.class)) {
                 return (T) new ISODateFormat().parse(rawValue.toString());
@@ -299,7 +299,7 @@ public class ParsedNode {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ParsedNode && this.toString().equals(obj.toString());
+        return (obj instanceof ParsedNode) && this.toString().equals(obj.toString());
     }
 
     @Override

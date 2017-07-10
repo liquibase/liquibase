@@ -19,7 +19,7 @@ public class SnapshotGeneratorChain {
 
             for (SnapshotGenerator generator : snapshotGenerators) {
                 Class<? extends SnapshotGenerator>[] replaces = generator.replaces();
-                if (replaces != null && replaces.length > 0) {
+                if ((replaces != null) && (replaces.length > 0)) {
                     replacedGenerators.addAll(Arrays.asList(replaces));
                 }
             }
@@ -47,7 +47,7 @@ public class SnapshotGeneratorChain {
         }
 
         T obj = next.snapshot(example, snapshot, this);
-        if (obj != null && obj.getSnapshotId() == null) {
+        if ((obj != null) && (obj.getSnapshotId() == null)) {
             obj.setSnapshotId(snapshotIdService.generateId());
         }
         return obj;

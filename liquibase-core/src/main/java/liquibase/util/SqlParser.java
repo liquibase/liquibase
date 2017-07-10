@@ -23,10 +23,11 @@ public class SqlParser {
                     if (preserveWhitespace) {
                         clauses.append(new StringClauses.Whitespace(token.image));
                     }
-                } else if (token.kind == SimpleSqlGrammarConstants.LINE_COMMENT || token.kind == SimpleSqlGrammarConstants.MULTI_LINE_COMMENT) {
+                } else if ((token.kind == SimpleSqlGrammarConstants.LINE_COMMENT) || (token.kind ==
+                    SimpleSqlGrammarConstants.MULTI_LINE_COMMENT)) {
                     if (preserveComments) {
                         String comment = token.image;
-                        if (!preserveWhitespace && token.kind == SimpleSqlGrammarConstants.LINE_COMMENT) {
+                        if (!preserveWhitespace && (token.kind == SimpleSqlGrammarConstants.LINE_COMMENT)) {
                             if (!comment.endsWith("\n")) {
                                 comment = comment + "\n";
                             }

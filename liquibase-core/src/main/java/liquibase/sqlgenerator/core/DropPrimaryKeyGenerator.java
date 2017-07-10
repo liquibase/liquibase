@@ -23,8 +23,8 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
-        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase
-            || database instanceof SybaseDatabase) {
+        if ((database instanceof FirebirdDatabase) || (database instanceof InformixDatabase) || (database instanceof
+            SybaseDatabase)) {
             validationErrors.checkRequiredField("constraintName", dropPrimaryKeyStatement.getConstraintName());
         }
 
@@ -49,7 +49,8 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
             }
         } else if (database instanceof PostgresDatabase) {
 			if (statement.getConstraintName() == null) {
-				String schemaName = statement.getSchemaName() != null ? statement.getSchemaName() : database.getDefaultSchemaName();
+				String schemaName = (statement.getSchemaName() != null) ? statement.getSchemaName() : database
+                    .getDefaultSchemaName();
 				schemaName = database.correctObjectName(schemaName, Schema.class);
 				String tableName = database.correctObjectName(statement.getTableName(), Table.class);
 
@@ -70,7 +71,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP PRIMARY KEY";
-            if (statement.getDropIndex() == null || statement.getDropIndex()) {
+            if ((statement.getDropIndex() == null) || statement.getDropIndex()) {
                 sql += " DROP INDEX";
             } else {
                 sql += " KEEP INDEX";

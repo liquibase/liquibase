@@ -22,7 +22,8 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
-        if (updateStatement.getWhereParameters() != null && !updateStatement.getWhereParameters().isEmpty() && updateStatement.getWhereClause() == null) {
+        if ((updateStatement.getWhereParameters() != null) && !updateStatement.getWhereParameters().isEmpty() &&
+            (updateStatement.getWhereClause() == null)) {
             validationErrors.addError("whereParams set but no whereClause");
         }
         return validationErrors;
@@ -56,9 +57,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     private String convertToString(Object newValue, Database database) {
         String sqlString;
-        if (newValue == null || "NULL".equalsIgnoreCase(newValue.toString())) {
+        if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
             sqlString = "NULL";
-        } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
+        } else if ((newValue instanceof String) && !looksLikeFunctionCall(((String) newValue), database)) {
             sqlString = DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database);
         } else if (newValue instanceof Date) {
             // converting java.util.Date to java.sql.Date

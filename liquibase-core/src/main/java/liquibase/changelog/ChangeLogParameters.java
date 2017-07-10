@@ -52,7 +52,8 @@ public class ChangeLogParameters {
             }
             this.set("database.defaultCatalogName", database.getDefaultCatalogName());
             this.set("database.defaultSchemaName", database.getDefaultSchemaName());
-            this.set("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName()) == null ? "" : "." + database.getDefaultSchemaName());
+            this.set("database.defaultSchemaNamePrefix", (StringUtils.trimToNull(database.getDefaultSchemaName()) ==
+                null) ? "" : ("." + database.getDefaultSchemaName()));
             this.set("database.lineComment", database.getLineComment());
             this.set("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
             this.set("database.typeName", database.getShortName());
@@ -126,7 +127,7 @@ public class ChangeLogParameters {
      */
     public Object getValue(String key, DatabaseChangeLog changeLog) {
         ChangeLogParameter parameter = findParameter(key, changeLog);
-        return parameter != null ? parameter.getValue() : null;
+        return (parameter != null) ? parameter.getValue() : null;
     }
 
     private ChangeLogParameter findParameter(String key, DatabaseChangeLog changeLog) {
@@ -228,10 +229,10 @@ public class ChangeLogParameters {
         }
 
         public boolean isValid() {
-            boolean isValid = validContexts == null || validContexts.matches(ChangeLogParameters.this.currentContexts);
+            boolean isValid = (validContexts == null) || validContexts.matches(ChangeLogParameters.this.currentContexts);
 
             if (isValid) {
-                isValid = labels == null || currentLabelExpression == null || currentLabelExpression.matches(labels);
+                isValid = (labels == null) || (currentLabelExpression == null) || currentLabelExpression.matches(labels);
             }
 
             if (isValid) {
@@ -270,9 +271,8 @@ public class ChangeLogParameters {
                 String expressionString = originalText.substring(matcher.start(), matcher.end());
                 String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
-                Object value = enableEscaping && valueTolookup.startsWith(":") 
-                		? null 
-                		: changeLogParameters.getValue(valueTolookup, changeLog);
+                Object value = (enableEscaping && valueTolookup.startsWith(":")) ? null : changeLogParameters
+                    .getValue(valueTolookup, changeLog);
 
                 if (value != null) {
                     text = text.replace(expressionString, value.toString());

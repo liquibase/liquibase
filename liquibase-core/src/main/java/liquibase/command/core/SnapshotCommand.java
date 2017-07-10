@@ -46,7 +46,7 @@ public class SnapshotCommand extends AbstractCommand<SnapshotCommand.SnapshotCom
     }
 
     public SnapshotCommand setSchemas(String... schemas) {
-        if (schemas == null || schemas.length == 0 || schemas[0] == null) {
+        if ((schemas == null) || (schemas.length == 0) || (schemas[0] == null)) {
             this.schemas = null;
             return this;
         }

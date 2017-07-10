@@ -31,7 +31,7 @@ public class DiffToReport {
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
         CompareControl.SchemaComparison[] schemas = diffResult.getCompareControl().getSchemaComparisons();
-        if (schemas != null && schemas.length > 0) {
+        if ((schemas != null) && (schemas.length > 0)) {
             out.println("Compared Schemas: " + StringUtils.join(Arrays.asList(schemas), ", ", new StringUtils.StringUtilsFormatter<CompareControl.SchemaComparison>() {
                 @Override
                 public String toString(CompareControl.SchemaComparison obj) {
@@ -144,7 +144,8 @@ public class DiffToReport {
         } else {
             out.println();
             for (DatabaseObject object : objects) {
-                if (getIncludeSchema() && object.getSchema() != null && (lastSchema == null || !lastSchema.equals(object.getSchema()))) {
+                if (getIncludeSchema() && (object.getSchema() != null) && ((lastSchema == null) || !lastSchema.equals
+                    (object.getSchema()))) {
                     lastSchema = object.getSchema();
                     String schemaName = object.getSchema().getName();
                     if (schemaName == null) {
@@ -162,7 +163,7 @@ public class DiffToReport {
     protected String includeSchemaComparison(String schemaName) {
         String convertedSchemaName = CompareControl.SchemaComparison.convertSchema(schemaName, diffResult.getCompareControl().getSchemaComparisons());
 
-        if (convertedSchemaName != null && !convertedSchemaName.equals(schemaName)) {
+        if ((convertedSchemaName != null) && !convertedSchemaName.equals(schemaName)) {
             schemaName = schemaName + " -> " + convertedSchemaName;
         }
         return schemaName;

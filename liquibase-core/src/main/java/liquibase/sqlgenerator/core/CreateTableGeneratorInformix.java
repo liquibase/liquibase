@@ -84,8 +84,8 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             }
 
             boolean isAutoIncrementColumn = autoIncrementConstraint != null;            
-            boolean isPrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null && 
-            		statement.getPrimaryKeyConstraint().getColumns().contains(column);
+            boolean isPrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && statement
+                .getPrimaryKeyConstraint().getColumns().contains(column);
 
             if (isPrimaryKeyColumn) {
             	primaryKeyColumns.add(column);
@@ -131,7 +131,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         //
 
         PrimaryKeyConstraint pkConstraint = statement.getPrimaryKeyConstraint();
-        if (statement.getPrimaryKeyConstraint() != null && !statement.getPrimaryKeyConstraint().getColumns().isEmpty()) {
+        if ((statement.getPrimaryKeyConstraint() != null) && !statement.getPrimaryKeyConstraint().getColumns().isEmpty()) {
             buffer.append(" PRIMARY KEY (");
             buffer.append(StringUtils.join(primaryKeyColumns, ", "));
             buffer.append(")");
@@ -146,7 +146,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
         for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
             String referencesString = fkConstraint.getReferences();
-            if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
+            if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null)) {
                 referencesString = database.getDefaultSchemaName()+"."+referencesString;
             }
             buffer.append(" FOREIGN KEY (")
@@ -172,14 +172,14 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
         // TODO: code duplication. Maybe we can merge this whole class into CreateTableGenerator again.
         for (UniqueConstraint uniqueConstraint : statement.getUniqueConstraints()) {
-            if (uniqueConstraint.getConstraintName() != null && !constraintNameAfterUnique(database)) {
+            if ((uniqueConstraint.getConstraintName() != null) && !constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append(")");
-            if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
+            if ((uniqueConstraint.getConstraintName() != null) && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
@@ -193,7 +193,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
          */
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
-        if (statement.getTablespace() != null && database.supportsTablespaces()) {
+        if ((statement.getTablespace() != null) && database.supportsTablespaces()) {
             sql += " IN " + statement.getTablespace();
         }
 

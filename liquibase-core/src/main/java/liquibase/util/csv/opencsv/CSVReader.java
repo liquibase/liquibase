@@ -204,10 +204,7 @@ public class CSVReader implements Closeable, Iterable<String[]> {
      * @param verifyReader   true to verify reader before each read, false otherwise
      */
     CSVReader(Reader reader, int line, CSVParser csvParser, boolean keepCR, boolean verifyReader) {
-        this.br =
-                (reader instanceof BufferedReader ?
-                        (BufferedReader) reader :
-                        new BufferedReader(reader));
+        this.br = ((reader instanceof BufferedReader) ? (BufferedReader) reader : new BufferedReader(reader));
         this.lineReader = new LineReader(br, keepCR);
         this.skipLines = line;
         this.parser = csvParser;

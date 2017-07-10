@@ -165,7 +165,7 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Number number = queryForObject(sql, Long.class, sqlVisitors);
-        return (number != null ? number.longValue() : 0);
+        return ((number != null) ? number.longValue() : 0);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Number number = queryForObject(sql, Integer.class, sqlVisitors);
-        return (number != null ? number.intValue() : 0);
+        return ((number != null) ? number.intValue() : 0);
     }
 
     @Override

@@ -55,7 +55,7 @@ public class ReflectionSerializer {
     private Field findField(Object object, String field) {
         Field foundField = null;
         Class<? extends Object> classToCheck = object.getClass();
-        while (foundField == null && !classToCheck.equals(Object.class)) {
+        while ((foundField == null) && !classToCheck.equals(Object.class)) {
             try {
                 foundField = classToCheck.getDeclaredField(field);
             } catch (NoSuchFieldException e) {

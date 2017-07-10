@@ -138,7 +138,8 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             }
 
             if (value instanceof DatabaseObject) {
-                if (parentObject != null && ((DatabaseObject) value).getSnapshotId().equals(parentObject.getSnapshotId())) {
+                if ((parentObject != null) && ((DatabaseObject) value).getSnapshotId().equals(parentObject
+                    .getSnapshotId())) {
                     continue;
                 }
 
@@ -186,7 +187,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
     }
 
     protected boolean shouldExpandNestedObject(Object nestedValue, DatabaseObject container) {
-        return container instanceof Table || container instanceof View;
+        return (container instanceof Table) || (container instanceof View);
     }
 
     protected void addDivider(StringBuilder buffer) {

@@ -185,7 +185,7 @@ public class SqlGeneratorFactory {
 
     private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
         SortedSet<SqlGenerator> sqlGenerators = getGenerators(statement, database);
-        if (sqlGenerators == null || sqlGenerators.isEmpty()) {
+        if ((sqlGenerators == null) || sqlGenerators.isEmpty()) {
             return null;
         }
         //noinspection unchecked
@@ -206,7 +206,7 @@ public class SqlGeneratorFactory {
         SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
         for (SqlStatement statement : statements) {
             Sql[] sqlArray = factory.generateSql(statement, database);
-            if (sqlArray != null && sqlArray.length > 0) {
+            if ((sqlArray != null) && (sqlArray.length > 0)) {
               List<Sql> sqlList = Arrays.asList(sqlArray);
               returnList.addAll(sqlList);
             }

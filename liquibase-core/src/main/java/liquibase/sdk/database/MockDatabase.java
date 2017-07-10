@@ -254,9 +254,8 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
-        return "AUTO_INCREMENT_CLAUSE"
-                + startWith != null ? (" " + startWith) : ""
-                + incrementBy != null ? (" " + incrementBy) : "";
+        return (("AUTO_INCREMENT_CLAUSE" + startWith) != null) ? (" " + startWith) : ((("" + incrementBy) != null) ?
+            (" " + incrementBy) : "");
     }
 
     public SqlStatement getCommitSQL() {

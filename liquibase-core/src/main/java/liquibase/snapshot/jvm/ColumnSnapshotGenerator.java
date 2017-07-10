@@ -46,7 +46,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Relation relation = ((Column) example).getRelation();
-        if (((Column) example).getComputed() != null && ((Column) example).getComputed()) {
+        if ((((Column) example).getComputed() != null) && ((Column) example).getComputed()) {
             return example;
         }
         Schema schema = relation.getSchema();
@@ -151,7 +151,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected void setAutoIncrementDetails(Column column, Database database, DatabaseSnapshot snapshot) {
-        if (column.getAutoIncrementInformation() != null && database instanceof MSSQLDatabase && database.getConnection() != null && !(database.getConnection() instanceof OfflineConnection)) {
+        if ((column.getAutoIncrementInformation() != null) && (database instanceof MSSQLDatabase) && (database
+            .getConnection() != null) && !(database.getConnection() instanceof OfflineConnection)) {
             Map<String, Column.AutoIncrementInformation> autoIncrementColumns = (Map) snapshot.getScratchData("autoIncrementColumns");
             if (autoIncrementColumns == null) {
                 autoIncrementColumns = new HashMap<>();
@@ -173,7 +174,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     LogFactory.getInstance().getLog().info("Could not read identity information", e);
                 }
             }
-            if (column.getRelation() != null && column.getSchema() != null) {
+            if ((column.getRelation() != null) && (column.getSchema() != null)) {
                 Column.AutoIncrementInformation autoIncrementInformation = autoIncrementColumns.get(column.getSchema().getName() + "." + column.getRelation().getName() + "." + column.getName());
                 if (autoIncrementInformation != null) {
                     column.setAutoIncrementInformation(autoIncrementInformation);
@@ -200,10 +201,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setRemarks(remarks);
         column.setOrder(position);
 
-        if (columnMetadataResultSet.get("IS_FILESTREAM") != null && (Boolean) columnMetadataResultSet.get("IS_FILESTREAM"))  {
+        if ((columnMetadataResultSet.get("IS_FILESTREAM") != null) && (Boolean) columnMetadataResultSet.get
+            ("IS_FILESTREAM"))  {
             column.setAttribute("fileStream", true);
         }
-        if (columnMetadataResultSet.get("IS_ROWGUIDCOL") != null && (Boolean) columnMetadataResultSet.get("IS_ROWGUIDCOL"))  {
+        if ((columnMetadataResultSet.get("IS_ROWGUIDCOL") != null) && (Boolean) columnMetadataResultSet.get
+            ("IS_ROWGUIDCOL"))  {
             column.setAttribute("rowGuid", true);
         }
         if (database instanceof OracleDatabase) {
@@ -297,9 +300,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Object defaultValue = readDefaultValue(columnMetadataResultSet, column, database);
 
         // TODO Is uppercasing the potential function name always a good idea? In theory, we could get a quoted function name (inprobable, but not impossible)
-        if (defaultValue != null
-                && defaultValue instanceof DatabaseFunction
-                && ((DatabaseFunction) defaultValue).getValue().matches("\\w+")) {
+        if ((defaultValue != null) && (defaultValue instanceof DatabaseFunction) && ((DatabaseFunction) defaultValue)
+            .getValue().matches("\\w+")) {
             defaultValue = new DatabaseFunction(((DatabaseFunction) defaultValue).getValue().toUpperCase());
         }
         column.setDefaultValue(defaultValue);
@@ -348,7 +350,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if (database instanceof MySQLDatabase && ("ENUM".equalsIgnoreCase(columnTypeName) || "SET".equalsIgnoreCase
+        if ((database instanceof MySQLDatabase) && ("ENUM".equalsIgnoreCase(columnTypeName) || "SET".equalsIgnoreCase
             (columnTypeName))) {
             try {
                 String boilerLength;
@@ -381,7 +383,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (!database.dataTypeIsNotModifiable(columnTypeName)) { // don't set size for types like int4, int8 etc
             columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
             decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
-            if (decimalDigits != null && decimalDigits.equals(0)) {
+            if ((decimalDigits != null) && decimalDigits.equals(0)) {
                 decimalDigits = null;
             }
         }
@@ -398,13 +400,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     columnSize = columnSize / 2; //Stored as double length chars
                 }
             }
-            if ("TIMESTAMP".equalsIgnoreCase(columnTypeName) && decimalDigits == null) { //actually a date
+            if ("TIMESTAMP".equalsIgnoreCase(columnTypeName) && (decimalDigits == null)) { //actually a date
                 columnTypeName = "DATE";
                 dataType = Types.DATE;
             }
         }
 
-        if (database instanceof PostgresDatabase && columnSize != null && columnSize.equals(Integer.MAX_VALUE)) {
+        if ((database instanceof PostgresDatabase) && (columnSize != null) && columnSize.equals(Integer.MAX_VALUE)) {
             columnSize = null;
         }
 
@@ -433,13 +435,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
          */
         int jdbcType = columnMetadataResultSet.getInt("DATA_TYPE");
 
-        if (jdbcType == Types.TIMESTAMP || jdbcType == Types.TIMESTAMP_WITH_TIMEZONE) {
+        if ((jdbcType == Types.TIMESTAMP) || (jdbcType == Types.TIMESTAMP_WITH_TIMEZONE)) {
 
             if (decimalDigits == null) {
                 type.setColumnSize(null);
             } else {
-                type.setColumnSize(
-                        decimalDigits != database.getDefaultFractionalDigitsForTimestamp() ? decimalDigits : null
+                type.setColumnSize((decimalDigits != database.getDefaultFractionalDigitsForTimestamp()) ?
+                    decimalDigits : null
                 );
             }
 
@@ -460,7 +462,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MSSQLDatabase) {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
-            if (defaultValue != null && defaultValue instanceof String) {
+            if ((defaultValue != null) && (defaultValue instanceof String)) {
                 if ("(NULL)".equals(defaultValue)) {
                     columnMetadataResultSet.set("COLUMN_DEF", new DatabaseFunction("null"));
                 }
@@ -471,25 +473,26 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
                 columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
 
-                if (columnMetadataResultSet.get("COLUMN_DEF") != null && "NULL".equalsIgnoreCase((String)
+                if ((columnMetadataResultSet.get("COLUMN_DEF") != null) && "NULL".equalsIgnoreCase((String)
                     columnMetadataResultSet.get("COLUMN_DEF"))) {
                     columnMetadataResultSet.set("COLUMN_DEF", null);
                 }
 
                 Object columnDef = columnMetadataResultSet.get("COLUMN_DEF");
-                if ("CHAR".equalsIgnoreCase(columnInfo.getType().getTypeName()) && columnDef instanceof String && !((String) columnDef).startsWith("'") && !((String) columnDef).endsWith("'")) {
+                if ("CHAR".equalsIgnoreCase(columnInfo.getType().getTypeName()) && (columnDef instanceof String) && !
+                    ((String) columnDef).startsWith("'") && !((String) columnDef).endsWith("'")) {
                     return new DatabaseFunction((String) columnDef);
                 }
 
                 if ("YES".equals(columnMetadataResultSet.get("VIRTUAL_COLUMN"))) {
                     Object column_def = columnMetadataResultSet.get("COLUMN_DEF");
-                    if (column_def != null && !"null".equals(column_def)) {
+                    if ((column_def != null) && !"null".equals(column_def)) {
                         columnMetadataResultSet.set("COLUMN_DEF", "GENERATED ALWAYS AS (" + column_def + ")");
                     }
                 }
 
                 Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
-                if (defaultValue != null && defaultValue instanceof String) {
+                if ((defaultValue != null) && (defaultValue instanceof String)) {
                     String lowerCaseDefaultValue = ((String) defaultValue).toLowerCase();
                     if (lowerCaseDefaultValue.contains("iseq$$") && lowerCaseDefaultValue.endsWith(".nextval")) {
                         columnMetadataResultSet.set("COLUMN_DEF", null);
@@ -502,7 +505,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (database instanceof PostgresDatabase) {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
-            if (defaultValue != null && defaultValue instanceof String) {
+            if ((defaultValue != null) && (defaultValue instanceof String)) {
                 Matcher matcher = postgresStringValuePattern.matcher((String) defaultValue);
                 if (matcher.matches()) {
                     defaultValue = matcher.group(1);
@@ -518,7 +521,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (database instanceof DB2Database) {
-            if (columnMetadataResultSet.get("COLUMN_DEF") != null && "NULL".equalsIgnoreCase((String)
+            if ((columnMetadataResultSet.get("COLUMN_DEF") != null) && "NULL".equalsIgnoreCase((String)
                 columnMetadataResultSet.get("COLUMN_DEF"))) {
                 columnMetadataResultSet.set("COLUMN_DEF", null);
             }

@@ -27,7 +27,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             } else {
                 Date existingDate = existingChangeSet.getDateExecuted();
                 Date thisDate = ranChangeSet.getDateExecuted();
-                if (existingDate != null && thisDate != null) {
+                if ((existingDate != null) && (thisDate != null)) {
                     int comparedDates = thisDate.compareTo(existingDate);
                     if (comparedDates < 0) {
                         addToSet = true;
@@ -35,7 +35,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                         Integer existingOrder = existingChangeSet.getOrderExecuted();
                         Integer thisOrder = ranChangeSet.getOrderExecuted();
 
-                        if (existingOrder != null && thisOrder != null && thisOrder.compareTo(existingOrder) < 0) {
+                        if ((existingOrder != null) && (thisOrder != null) && (thisOrder.compareTo(existingOrder) < 0)) {
                             addToSet = true;
                         }
                     }

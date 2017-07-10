@@ -102,7 +102,7 @@ public class CsvToBean<T> extends AbstractCSVToBean {
    }
 
    private void processLine(MappingStrategy<T> mapper, CsvToBeanFilter filter, String[] line, List<T> list) throws IllegalAccessException, InvocationTargetException, InstantiationException, IntrospectionException {
-      if (filter == null || filter.allowLine(line)) {
+      if ((filter == null) || filter.allowLine(line)) {
          T obj = processLine(mapper, line);
          list.add(obj);
       }

@@ -127,7 +127,7 @@ public abstract class HTMLWriter {
         fileWriter.append("</TR>\n");
 
         ChangeSet lastChangeSet = null;
-        if (changes == null || changes.isEmpty()) {
+        if ((changes == null) || changes.isEmpty()) {
             fileWriter.append("<tr><td>None Found</td></tr>");
         } else {
             for (Change change : changes) {

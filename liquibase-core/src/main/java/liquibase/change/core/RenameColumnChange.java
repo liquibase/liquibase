@@ -127,10 +127,10 @@ public class RenameColumnChange extends AbstractChange {
                 database
             );
 
-            if (newColumn == null && oldColumn == null) {
+            if ((newColumn == null) && (oldColumn == null)) {
                 return changeStatus.unknown("Neither column exists");
             }
-            if (newColumn != null && oldColumn != null) {
+            if ((newColumn != null) && (oldColumn != null)) {
                 return changeStatus.unknown("Both columns exist");
             }
             changeStatus.assertComplete(newColumn != null, "New column does not exist");

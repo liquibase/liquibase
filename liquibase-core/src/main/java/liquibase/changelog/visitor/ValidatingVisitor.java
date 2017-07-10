@@ -110,7 +110,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 try {                
                     ValidationErrors foundErrors = change.validate(database);
 
-                    if (foundErrors != null && foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN))) {
+                    if ((foundErrors != null) && foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
+                        (ChangeSet.ValidationFailOption.MARK_RAN))) {
                             LogFactory.getInstance().getLog().info(
                                     "Skipping change set " + changeSet + " due to validation error(s): " +
                                             StringUtils.join(foundErrors.getErrorMessages(), ", "));
@@ -180,13 +181,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public boolean validationPassed() {
-        return invalidMD5Sums.isEmpty()
-                && failedPreconditions.isEmpty()
-                && errorPreconditions.isEmpty()
-                && duplicateChangeSets.isEmpty()
-                && changeValidationExceptions.isEmpty()
-                && setupExceptions.isEmpty()
-                && !validationErrors.hasErrors();
+        return invalidMD5Sums.isEmpty() && failedPreconditions.isEmpty() && errorPreconditions.isEmpty() &&
+            duplicateChangeSets.isEmpty() && changeValidationExceptions.isEmpty() && setupExceptions.isEmpty() &&
+            !validationErrors.hasErrors();
     }
 
     public Database getDatabase() {

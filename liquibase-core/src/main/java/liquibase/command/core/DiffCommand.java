@@ -66,7 +66,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     }
 
     public DiffCommand setSnapshotTypes(String... snapshotTypes) {
-        if (snapshotTypes == null || snapshotTypes.length == 0 || snapshotTypes[0] == null) {
+        if ((snapshotTypes == null) || (snapshotTypes.length == 0) || (snapshotTypes[0] == null)) {
             this.snapshotTypes = null;
             return this;
         }
@@ -154,7 +154,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
 
-        if (compareControl == null || compareControl.getSchemaComparisons() == null) {
+        if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
         } else {
             schemas =new CatalogAndSchema[compareControl.getSchemaComparisons().length];
@@ -190,7 +190,7 @@ public class DiffCommand extends AbstractCommand<CommandResult> {
     protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
         CatalogAndSchema[] schemas;
 
-        if (compareControl == null || compareControl.getSchemaComparisons() == null) {
+        if ((compareControl == null) || (compareControl.getSchemaComparisons() == null)) {
             schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
         } else {
             schemas =new CatalogAndSchema[compareControl.getSchemaComparisons().length];

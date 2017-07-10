@@ -196,7 +196,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return correctObjectName(schema.getCatalogName() == null ? schema.getSchemaName() : schema.getCatalogName(), Schema.class);
+        return correctObjectName((schema.getCatalogName() == null) ? schema.getSchemaName() : schema.getCatalogName(), Schema.class);
     }
 
     @Override
@@ -266,7 +266,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {//NOPMD
-        return super.getDefaultCatalogName() == null ? null : super.getDefaultCatalogName().toUpperCase();
+        return (super.getDefaultCatalogName() == null) ? null : super.getDefaultCatalogName().toUpperCase();
     }
 
     /**
@@ -361,7 +361,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 }
 
                 if (filteredInOriginalQuery) {
-                    if (example instanceof PrimaryKey || example instanceof Index || example instanceof liquibase.statement.UniqueConstraint) { //some objects don't get renamed back and so are already filtered in the metadata queries
+                    if ((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
+                        liquibase.statement.UniqueConstraint)) { //some objects don't get renamed back and so are already filtered in the metadata queries
                         return false;
                     } else {
                         return true;
@@ -484,7 +485,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public Set<String> getUserDefinedTypes() {
         if (userDefinedTypes == null) {
             userDefinedTypes = new HashSet<>();
-            if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
+            if ((getConnection() != null) && !(getConnection() instanceof OfflineConnection)) {
                 try {
                     try {
                         //noinspection HardCodedStringLiteral
@@ -505,11 +506,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public String generateDatabaseFunctionValue(DatabaseFunction databaseFunction) {
         //noinspection HardCodedStringLiteral
-        if (databaseFunction != null && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
+        if ((databaseFunction != null) && "current_timestamp".equalsIgnoreCase(databaseFunction.toString())) {
             return databaseFunction.toString();
         }
-        if(databaseFunction instanceof SequenceNextValueFunction
-                || databaseFunction instanceof SequenceCurrentValueFunction){
+        if((databaseFunction instanceof SequenceNextValueFunction) || (databaseFunction instanceof
+            SequenceCurrentValueFunction)){
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
             return quotedSeq.replaceFirst("\"([^\\.\"]*)\\.([^\\.\"]*)\"","\"$1\".\"$2\"");
@@ -523,7 +524,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public ValidationErrors validate() {
         ValidationErrors errors = super.validate();
         DatabaseConnection connection = getConnection();
-        if (connection == null || connection instanceof OfflineConnection) {
+        if ((connection == null) || (connection instanceof OfflineConnection)) {
             //noinspection HardCodedStringLiteral
             LogFactory.getInstance().getLog().info("Cannot validate offline database");
             return errors;
@@ -556,7 +557,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public boolean canAccessDbaRecycleBin() {
         if (canAccessDbaRecycleBin == null) {
             DatabaseConnection connection = getConnection();
-            if (connection == null || connection instanceof OfflineConnection) {
+            if ((connection == null) || (connection instanceof OfflineConnection)) {
                 return false;
             }
 
@@ -568,7 +569,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 this.canAccessDbaRecycleBin = true;
             } catch (Exception e) {
                 //noinspection HardCodedStringLiteral
-                if (e instanceof SQLException && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
+                if ((e instanceof SQLException) && e.getMessage().startsWith("ORA-00942")) { //ORA-00942: table or view does not exist
                     this.canAccessDbaRecycleBin = false;
                 } else {
                     //noinspection HardCodedStringLiteral
@@ -595,7 +596,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
      * The maximum length of an identifier differs by Oracle version and object type.
      */
     public boolean isValidOracleIdentifier(String identifier, Class<? extends DatabaseObject> type) {
-        if (identifier == null || identifier.length() < 1)
+        if ((identifier == null) || (identifier.length() < 1))
             return false;
 
         if (!identifier.matches("^(i?)[A-Z][A-Z0-9\\$\\_\\#]*$"))
@@ -619,7 +620,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if (getDatabaseMajorVersion() < ORACLE_12C_MAJOR_VERSION) {
                 return SHORT_IDENTIFIERS_LENGTH;
             }
-            else if (getDatabaseMajorVersion() == ORACLE_12C_MAJOR_VERSION && getDatabaseMinorVersion() <= 1) {
+            else if ((getDatabaseMajorVersion() == ORACLE_12C_MAJOR_VERSION) && (getDatabaseMinorVersion() <= 1)) {
                 return SHORT_IDENTIFIERS_LENGTH;
             } else {
                 return LONG_IDENTIFIERS_LEGNTH;

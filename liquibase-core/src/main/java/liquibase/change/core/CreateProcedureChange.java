@@ -174,24 +174,23 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public ValidationErrors validate(Database database) {
         // Not falling back to default because of path/procedureText option group. Need to specify everything.
         ValidationErrors validate = new ValidationErrors();
-        if (StringUtils.trimToNull(getProcedureText()) != null && StringUtils.trimToNull(getPath()) != null) {
+        if ((StringUtils.trimToNull(getProcedureText()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
             validate.addError(
                 "Cannot specify both 'path' and a nested procedure text in " +
                     ChangeFactory.getInstance().getChangeMetaData(this).getName()
             );
         }
 
-        if (StringUtils.trimToNull(getProcedureText()) == null && StringUtils.trimToNull(getPath()) == null) {
+        if ((StringUtils.trimToNull(getProcedureText()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
             validate.addError(
                 "Cannot specify either 'path' or a nested procedure text in " +
                     ChangeFactory.getInstance().getChangeMetaData(this).getName()
             );
         }
 
-        if (this.getReplaceIfExists() != null
-            && (DatabaseList.definitionMatches(getDbms(), database, true))) {
+        if ((this.getReplaceIfExists() != null) && (DatabaseList.definitionMatches(getDbms(), database, true))) {
             if (database instanceof MSSQLDatabase) {
-                if (this.getReplaceIfExists() && this.getProcedureName() == null) {
+                if (this.getReplaceIfExists() && (this.getProcedureName() == null)) {
                     validate.addError("procedureName is required if replaceIfExists = true");
                 }
             } else {
@@ -238,7 +237,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
         try {
             String procedureText = this.procedureText;
-            if (stream == null && procedureText == null) {
+            if ((stream == null) && (procedureText == null)) {
                 procedureText = "";
             }
 

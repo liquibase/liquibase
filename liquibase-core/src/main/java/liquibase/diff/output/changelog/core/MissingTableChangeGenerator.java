@@ -48,8 +48,9 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             if ("current".equals(function.getValue())) {
                 if (database instanceof InformixDatabase) {
                     if (dataType instanceof DateTimeType) {
-                        if (dataType.getAdditionalInformation() == null || dataType.getAdditionalInformation().isEmpty()) {
-                            if (dataType.getParameters() != null && dataType.getParameters().length > 0) {
+                        if ((dataType.getAdditionalInformation() == null) || dataType.getAdditionalInformation()
+                            .isEmpty()) {
+                            if ((dataType.getParameters() != null) && (dataType.getParameters().length > 0)) {
 
                                 String parameter = String.valueOf(dataType.getParameters()[0]);
 
@@ -116,7 +117,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         Table missingTable = (Table) missingObject;
 
         PrimaryKey primaryKey = missingTable.getPrimaryKey();
-        List<String> pkColumnList = (primaryKey != null ? primaryKey.getColumnNamesAsList() : null);
+        List<String> pkColumnList = ((primaryKey != null) ? primaryKey.getColumnNamesAsList() : null);
 
         CreateTableChange change = createCreateTableChange();
         change.setTableName(missingTable.getName());
@@ -129,7 +130,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
         if (missingTable.getRemarks() != null) {
             change.setRemarks(missingTable.getRemarks());
         }
-        if (missingTable.getTablespace() != null && comparisonDatabase.supportsTablespaces()) {
+        if ((missingTable.getTablespace() != null) && comparisonDatabase.supportsTablespaces()) {
             change.setTablespace(missingTable.getTablespace());
         }
 
@@ -150,10 +151,14 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
 
             ConstraintsConfig constraintsConfig = null;
             // In MySQL, the primary key must be specified at creation for an autoincrement column
-            if (pkColumnList != null && pkColumnList.contains(column.getName())) {
-                if (referenceDatabase instanceof MSSQLDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && !primaryKey.getBackingIndex().getClustered()) {
+            if ((pkColumnList != null) && pkColumnList.contains(column.getName())) {
+                if ((referenceDatabase instanceof MSSQLDatabase) && (primaryKey.getBackingIndex() != null) &&
+                    (primaryKey.getBackingIndex().getClustered() != null) && !primaryKey.getBackingIndex()
+                    .getClustered()) {
                     // have to handle PK as a separate statement
-                } else if (referenceDatabase instanceof PostgresDatabase && primaryKey.getBackingIndex() != null && primaryKey.getBackingIndex().getClustered() != null && primaryKey.getBackingIndex().getClustered()) {
+                } else if ((referenceDatabase instanceof PostgresDatabase) && (primaryKey.getBackingIndex() != null)
+                    && (primaryKey.getBackingIndex().getClustered() != null) && primaryKey.getBackingIndex()
+                    .getClustered()) {
                     // have to handle PK as a separate statement
                 } else {
                     constraintsConfig = new ConstraintsConfig();
@@ -161,7 +166,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                     constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
 
                     // MySQL sets some primary key names as PRIMARY which is invalid
-                    if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
+                    if ((comparisonDatabase instanceof MySQLDatabase) && "PRIMARY".equals(primaryKey.getName())) {
                         constraintsConfig.setPrimaryKeyName(null);
                     } else {
                         constraintsConfig.setPrimaryKeyName(primaryKey.getName());
@@ -169,7 +174,7 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
                     control.setAlreadyHandledMissing(primaryKey);
                     control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
                 }
-            } else if (column.isNullable() != null && !column.isNullable()) {
+            } else if ((column.isNullable() != null) && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
             }
@@ -187,10 +192,10 @@ public class MissingTableChangeGenerator extends AbstractChangeGenerator impleme
             if (column.getAutoIncrementInformation() != null) {
                 BigInteger startWith = column.getAutoIncrementInformation().getStartWith();
                 BigInteger incrementBy = column.getAutoIncrementInformation().getIncrementBy();
-                if (startWith != null && !startWith.equals(BigInteger.ONE)) {
+                if ((startWith != null) && !startWith.equals(BigInteger.ONE)) {
                     columnConfig.setStartWith(startWith);
                 }
-                if (incrementBy != null && !incrementBy.equals(BigInteger.ONE)) {
+                if ((incrementBy != null) && !incrementBy.equals(BigInteger.ONE)) {
                     columnConfig.setIncrementBy(incrementBy);
                 }
             }

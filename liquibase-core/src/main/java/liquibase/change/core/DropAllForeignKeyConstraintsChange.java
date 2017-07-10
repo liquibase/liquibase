@@ -92,10 +92,10 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                             database.correctObjectName(getBaseTableName(), Table.class))
                     , database);
 
-            List<ForeignKey> results = (target == null ? null : target.getOutgoingForeignKeys());
+            List<ForeignKey> results = ((target == null) ? null : target.getOutgoingForeignKeys());
             Set<String> handledConstraints = new HashSet<>();
 
-            if (results != null && (!results.isEmpty())) {
+            if ((results != null) && (!results.isEmpty())) {
                 for (ForeignKey fk : results) {
                     Table baseTable = fk.getForeignKeyTable();
                     String constraintName = fk.getName();

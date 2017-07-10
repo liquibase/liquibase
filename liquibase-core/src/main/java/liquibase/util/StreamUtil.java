@@ -165,7 +165,7 @@ public class StreamUtil {
         if (resourceAccessor == null) {
             return null;
         }
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+        if ((relativeToChangelogFile != null) && relativeToChangelogFile) {
             String base;
             if (changeSet.getChangeLog() == null) {
                 base = changeSet.getFilePath();
@@ -183,11 +183,12 @@ public class StreamUtil {
 
     public static InputStream singleInputStream(String path, ResourceAccessor resourceAccessor) throws IOException {
         Set<InputStream> streams = resourceAccessor.getResourcesAsStream(path);
-        if (streams == null || streams.isEmpty()) {
+        if ((streams == null) || streams.isEmpty()) {
             return null;
         }
         if (streams.size() != 1) {
-            if (streams.size() > 1 && path != null && path.startsWith("liquibase/parser/core/xml/") && path.endsWith(".xsd")) {
+            if ((streams.size() > 1) && (path != null) && path.startsWith("liquibase/parser/core/xml/") && path
+                .endsWith(".xsd")) {
                 LogFactory.getInstance().getLog().debug("Found " + streams.size() + " files that match " + path+", but choosing one at random.");
                 InputStream returnStream = null;
                 for (InputStream stream : streams) {
@@ -222,14 +223,14 @@ public class StreamUtil {
             return null;
         }
 
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+        if ((relativeToChangelogFile != null) && relativeToChangelogFile) {
             String base;
             if (changeSet.getChangeLog() == null) {
                 base = changeSet.getFilePath();
             } else {
                 base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
             }
-            if (base == null || !base.contains("/")) {
+            if ((base == null) || !base.contains("/")) {
                 base = ".";
             }
 

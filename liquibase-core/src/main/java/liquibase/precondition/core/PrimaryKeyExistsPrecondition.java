@@ -60,7 +60,7 @@ public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (getPrimaryKeyName() == null && getTableName() == null) {
+        if ((getPrimaryKeyName() == null) && (getTableName() == null)) {
             validationErrors.addError("Either primaryKeyName or tableName must be set");
         }
         return validationErrors;

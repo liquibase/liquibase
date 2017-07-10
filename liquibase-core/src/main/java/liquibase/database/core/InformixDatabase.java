@@ -232,7 +232,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
-        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
+        if ((getConnection() == null) || (getConnection() instanceof OfflineConnection)) {
             return null;
         }
         try {

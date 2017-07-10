@@ -110,10 +110,8 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             String escapedTableName = database.escapeObjectName(getTableName(), Table.class);
             String escapedColumnName = database.escapeObjectName(getColumnName(), Table.class);
-            if (escapedTableName != null
-                && escapedColumnName != null
-                && !escapedTableName.startsWith("\"")
-                && !escapedColumnName.startsWith("\"")
+            if ((escapedTableName != null) && (escapedColumnName != null) && !escapedTableName.startsWith("\"") &&
+                !escapedColumnName.startsWith("\"")
             ) {
                 sequenceName = sequenceName.toLowerCase();
             }
@@ -157,12 +155,12 @@ public class AddAutoIncrementChange extends AbstractChange {
             }
 
             result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
-            if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
+            if ((getStartWith() != null) && (column.getAutoIncrementInformation().getStartWith() != null)) {
                 result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()),
                      "startsWith incorrect");
             }
 
-            if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
+            if ((getIncrementBy() != null) && (column.getAutoIncrementInformation().getIncrementBy() != null)) {
                 result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()),
                      "Increment by incorrect");
             }

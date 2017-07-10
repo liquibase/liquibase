@@ -170,7 +170,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             stream = openSqlStream();
 
             String sql = this.sql;
-            if (stream == null && sql == null) {
+            if ((stream == null) && (sql == null)) {
                 sql = "";
             }
 
@@ -291,7 +291,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
                 returnChar = ' ';
             }
 
-            while (returnChar == ' ' && (!seenNonSpace || lastChar == ' ')) {
+            while ((returnChar == ' ') && (!seenNonSpace || (lastChar == ' '))) {
                 returnChar = stream.read();
 
                 if (isWhiteSpace(returnChar)) {
@@ -303,7 +303,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
             lastChar = returnChar;
 
-            if (lastChar == ' ' && isOnlyWhitespaceRemaining()) {
+            if ((lastChar == ' ') && isOnlyWhitespaceRemaining()) {
                 return -1;
             }
 
@@ -365,7 +365,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         private boolean isWhiteSpace(int read) {
-            return read == ' ' || read == '\n' || read == '\r' || read == '\t';
+            return (read == ' ') || (read == '\n') || (read == '\r') || (read == '\t');
         }
 
         @Override

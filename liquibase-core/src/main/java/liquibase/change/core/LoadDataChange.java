@@ -198,7 +198,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     public void setSeparator(String separator) {
-        if (separator != null && "\\t".equals(separator)) {
+        if ((separator != null) && "\\t".equals(separator)) {
             separator = "\t";
         }
         this.separator = separator;
@@ -276,10 +276,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             while ((line = reader.readNext()) != null) {
                 lineNumber++;
                 if
-                (
-                    line.length == 0
-                || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)
-                || (isCommentingEnabled && isLineCommented(line))
+                ((line.length == 0) || ((line.length == 1) && (StringUtils.trimToNull(line[0]) == null)) ||
+                    (isCommentingEnabled && isLineCommented(line))
                 ) {
                     //nothing interesting on this line
                     continue;
@@ -399,7 +397,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         }
                     } else {
                         // No columnConfig found. Assume header column name to be the table column name.
-                        if (columnName.contains("(") || columnName.contains(")") && database instanceof AbstractJdbcDatabase) {
+                        if (columnName.contains("(") || (columnName.contains(")") && (database instanceof
+                            AbstractJdbcDatabase))) {
                             columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
                         }
 
@@ -474,11 +473,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     statementSet.addInsertStatement((InsertStatement) stmt);
                 }
 
-                if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase
-                        || database instanceof PostgresDatabase) {
+                if ((database instanceof MSSQLDatabase) || (database instanceof MySQLDatabase) || (database
+                    instanceof PostgresDatabase)) {
                     List<InsertStatement> innerStatements = statementSet.getStatements();
-                    if (innerStatements != null && (!innerStatements.isEmpty())
-                            && innerStatements.get(0) instanceof InsertOrUpdateStatement) {
+                    if ((innerStatements != null) && (!innerStatements.isEmpty()) && (innerStatements.get(0)
+                        instanceof InsertOrUpdateStatement)) {
                         //cannot do insert or update in a single statement
                         return statementSet.getStatementsArray();
                     }
@@ -492,7 +491,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
-            if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
+            if ((getChangeSet() != null) && (getChangeSet().getFailOnError() != null) && !getChangeSet()
+                .getFailOnError()) {
                 LOG.info("Change set " + getChangeSet().toString(false) +
                          " failed, but failOnError was false.  Error: " + ule.getMessage());
                 return new SqlStatement[0];
@@ -608,7 +608,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
      * If not, the value "toString()" representation (trimmed of spaces left and right) is returned.
      */
     protected static String getValueToWrite(Object value) {
-        if (value == null || "NULL".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "NULL".equalsIgnoreCase(value.toString())) {
             return "";
         } else {
             return value.toString().trim();
@@ -672,14 +672,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     protected ColumnConfig getColumnConfig(int index, String header) {
         for (LoadDataColumnConfig config : columns) {
-            if (config.getIndex() != null && config.getIndex().equals(index)) {
+            if ((config.getIndex() != null) && config.getIndex().equals(index)) {
                 return config;
             }
-            if (config.getHeader() != null && config.getHeader().equalsIgnoreCase(header)) {
+            if ((config.getHeader() != null) && config.getHeader().equalsIgnoreCase(header)) {
                 return config;
             }
 
-            if (config.getName() != null && config.getName().equalsIgnoreCase(header)) {
+            if ((config.getName() != null) && config.getName().equalsIgnoreCase(header)) {
                 return config;
             }
         }

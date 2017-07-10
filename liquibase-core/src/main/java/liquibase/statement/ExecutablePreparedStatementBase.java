@@ -220,7 +220,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
             long length = StreamUtil.getContentLength(in);
 
-            if (in.markSupported() && length <= IN_MEMORY_THRESHOLD) {
+            if (in.markSupported() && (length <= IN_MEMORY_THRESHOLD)) {
                 in.reset();
             } else {
                 StreamUtil.closeQuietly(in);
@@ -261,7 +261,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
             long length = StreamUtil.getContentLength(reader);
 
-            if (reader.markSupported() && length <= IN_MEMORY_THRESHOLD) {
+            if (reader.markSupported() && (length <= IN_MEMORY_THRESHOLD)) {
                 reader.reset();
             } else {
                 StreamUtil.closeQuietly(reader);
@@ -281,16 +281,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     }
 
     private static Reader createReader(InputStream in, String encoding) {
-        return new BufferedReader(
-                StringUtils.trimToNull(encoding) == null
-                        ? new UtfBomAwareReader(in)
-                        : new UtfBomAwareReader(in, encoding));
+        return new BufferedReader((StringUtils.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
+            UtfBomAwareReader(in, encoding));
     }
 
     private InputStream getResourceAsStream(String valueLobFile) throws IOException {
         String fileName = getFileName(valueLobFile);
         Set<InputStream> streams = this.resourceAccessor.getResourcesAsStream(fileName);
-        if (streams == null || streams.isEmpty()) {
+        if ((streams == null) || streams.isEmpty()) {
             return null;
         }
         if (streams.size() > 1) {

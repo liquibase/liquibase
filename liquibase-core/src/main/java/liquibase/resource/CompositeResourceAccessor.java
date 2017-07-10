@@ -26,7 +26,7 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     public Set<InputStream> getResourcesAsStream(String path) throws IOException {
         for (ResourceAccessor accessor : resourceAccessors) {
             Set<InputStream> returnSet = accessor.getResourcesAsStream(path);
-            if (returnSet != null && !returnSet.isEmpty()) {
+            if ((returnSet != null) && !returnSet.isEmpty()) {
                 return returnSet;
             }
         }

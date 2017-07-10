@@ -87,7 +87,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
     protected void handleNullableDifferences(Column column, ObjectDifferences differences, DiffOutputControl control, List<Change> changes, Database referenceDatabase, Database comparisonDatabase) {
         Difference nullableDifference = differences.getDifference("nullable");
-        if (nullableDifference != null && nullableDifference.getReferenceValue() != null) {
+        if ((nullableDifference != null) && (nullableDifference.getReferenceValue() != null)) {
             boolean nullable = (Boolean) nullableDifference.getReferenceValue();
             if (nullable) {
                 DropNotNullConstraintChange change = new DropNotNullConstraintChange();
@@ -154,8 +154,9 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
 
             String tableName = column.getRelation().getName();
 
-            if (comparisonDatabase instanceof OracleDatabase && ("clob".equalsIgnoreCase(((DataType) typeDifference
-                .getReferenceValue()).getTypeName()) || "clob".equalsIgnoreCase(((DataType) typeDifference.getComparedValue()).getTypeName()))) {
+            if ((comparisonDatabase instanceof OracleDatabase) && ("clob".equalsIgnoreCase(((DataType) typeDifference
+                .getReferenceValue()).getTypeName()) || "clob".equalsIgnoreCase(((DataType) typeDifference
+                .getComparedValue()).getTypeName()))) {
                 String tempColName = "TEMP_CLOB_CONVERT";
                 OutputChange outputChange = new OutputChange();
                 outputChange.setMessage("Cannot convert directly from " + ((DataType) typeDifference.getComparedValue()).getTypeName()+" to "+((DataType) typeDifference.getReferenceValue()).getTypeName()+". Instead a new column will be created and the data transferred. This may cause unexpected side effects including constraint issues and/or table locks.");
@@ -190,7 +191,7 @@ public class ChangedColumnChangeGenerator extends AbstractChangeGenerator implem
                 changes.add(renameColumnChange);
 
             } else {
-                if (comparisonDatabase instanceof MSSQLDatabase && column.getDefaultValue() != null) { //have to drop the default value, will be added back with the "data type changed" logic.
+                if ((comparisonDatabase instanceof MSSQLDatabase) && (column.getDefaultValue() != null)) { //have to drop the default value, will be added back with the "data type changed" logic.
                     DropDefaultValueChange dropDefaultValueChange = new DropDefaultValueChange();
                     dropDefaultValueChange.setCatalogName(catalogName);
                     dropDefaultValueChange.setSchemaName(schemaName);

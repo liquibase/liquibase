@@ -55,7 +55,7 @@ public class TreeStyleLogger extends DefaultLogger {
         LocalTime now = LocalTime.now();
         now = now.truncatedTo(ChronoUnit.SECONDS);
         String timeString = now.format(DateTimeFormatter.ISO_LOCAL_TIME);
-        if (lastLoggingTs == null || (lastLoggingTs.compareTo(now) != 0))
+        if ((lastLoggingTs == null) || (lastLoggingTs.compareTo(now) != 0))
             out.print(timeString);
         else
             out.print(BLANK_TIME);
@@ -64,7 +64,7 @@ public class TreeStyleLogger extends DefaultLogger {
 
         // Print the DatabaseChangeLog name if it has changed compared to the previous call
         if (currentChangeLogPath != null) {
-            if (lastChangeLogPath == null || (lastChangeLogPath.compareTo(currentChangeLogPath) != 0)) {
+            if ((lastChangeLogPath == null) || (lastChangeLogPath.compareTo(currentChangeLogPath) != 0)) {
                 out.print(String.format("|- %s%n%s", currentChangeLogPath, BLANK_TIME + " " + BLANK_CHANGELOG));
             } else {
                 out.print(BLANK_CHANGELOG);
@@ -75,7 +75,7 @@ public class TreeStyleLogger extends DefaultLogger {
         // Print the ChangeSet name if it has changed compared to the previous call
         if (currentChangeSetName != null) {
             out.print(" ");
-            if (lastChangeSetName == null || (lastChangeSetName.compareTo(currentChangeSetName)  != 0)) {
+            if ((lastChangeSetName == null) || (lastChangeSetName.compareTo(currentChangeSetName) != 0)) {
                 out.print(String.format("|- %s%n%s", currentChangeSetName, BLANK_TIME + " " + BLANK_CHANGELOG + " " + BLANK_CHANGESET));
             } else {
                 out.print(BLANK_CHANGESET);

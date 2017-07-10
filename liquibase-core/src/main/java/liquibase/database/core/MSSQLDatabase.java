@@ -134,7 +134,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         boolean isRealSqlServerConnection = PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
 
-        if (isRealSqlServerConnection && majorVersion <= SQL_SERVER_2008_MAJOR_VERSION) {
+        if (isRealSqlServerConnection && (majorVersion <= SQL_SERVER_2008_MAJOR_VERSION)) {
             LogFactory.getInstance().getLog().warning(
                 String.format("Your SQL Server major version (%d) seems to indicate that your software is older than " +
                  "SQL Server 2008. Unfortunately, this is not supported, and this connection cannot be used.",
@@ -259,14 +259,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example.getSchema() == null || example.getSchema().getName() == null) {
+        if ((example.getSchema() == null) || (example.getSchema().getName() == null)) {
             return super.isSystemObject(example);
         }
 
-        if (example instanceof Table && "sys".equals(example.getSchema().getName())) {
+        if ((example instanceof Table) && "sys".equals(example.getSchema().getName())) {
             return true;
         }
-        if (example instanceof View && "sys".equals(example.getSchema().getName())) {
+        if ((example instanceof View) && "sys".equals(example.getSchema().getName())) {
             return true;
         }
         return super.isSystemObject(example);
@@ -355,7 +355,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return super.escapeObjectName(objectName, objectType);
         }
 
-        if (catalogName != null && !catalogName.equalsIgnoreCase(this.getDefaultCatalogName())) {
+        if ((catalogName != null) && !catalogName.equalsIgnoreCase(this.getDefaultCatalogName())) {
             return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         } else {
             String name = this.escapeObjectName(objectName, objectType);
@@ -372,7 +372,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         String schemaName = super.getJdbcSchemaName(schema);
-        if (schemaName != null && !isCaseSensitive()) {
+        if ((schemaName != null) && !isCaseSensitive()) {
             schemaName = schemaName.toLowerCase();
         }
         return schemaName;
@@ -386,7 +386,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                     String catalog = getConnection().getCatalog();
                     String sql = "SELECT CONVERT([sysname], DATABASEPROPERTYEX(N'" + escapeStringForDatabase(catalog) + "', 'Collation'))";
                     String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement(sql), String.class);
-                    caseSensitive = collation != null && !collation.contains("_CI_");
+                    caseSensitive = (collation != null) && !collation.contains("_CI_");
                 } else if (getConnection() instanceof OfflineConnection) {
                     caseSensitive = ((OfflineConnection) getConnection()).isCaseSensitive();
                 }
@@ -394,7 +394,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                 LogFactory.getInstance().getLog().warning("Cannot determine case sensitivity from MSSQL", e);
             }
         }
-        return caseSensitive != null && caseSensitive;
+        return (caseSensitive != null) && caseSensitive;
     }
 
     @Override
@@ -519,7 +519,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
                         if (rs.next()) {
                             baseType = rs.getString(1);
                         }
-                        sendsStringParametersAsUnicode = baseType == null || baseType.startsWith("n"); // i.e. nvarchar (or nchar)
+                        sendsStringParametersAsUnicode = (baseType == null) || baseType.startsWith("n"); // i.e. nvarchar (or nchar)
                     } finally {
                         JdbcUtils.close(rs, ps);
                     }
@@ -531,7 +531,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             }
         }
 
-        return sendsStringParametersAsUnicode == null ? true : sendsStringParametersAsUnicode;
+        return (sendsStringParametersAsUnicode == null) ? true : sendsStringParametersAsUnicode;
     }
 
     public boolean isAzureDb() {

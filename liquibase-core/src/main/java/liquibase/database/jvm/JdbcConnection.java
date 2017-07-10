@@ -443,7 +443,7 @@ public class JdbcConnection implements DatabaseConnection {
     public int hashCode() {
         Connection underlyingConnection = this.getUnderlyingConnection();
         try {
-            if (underlyingConnection == null || underlyingConnection.isClosed()) {
+            if ((underlyingConnection == null) || underlyingConnection.isClosed()) {
                 return super.hashCode();
             }
         } catch (SQLException e) {

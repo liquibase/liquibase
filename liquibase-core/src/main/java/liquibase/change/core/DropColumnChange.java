@@ -253,6 +253,6 @@ public class DropColumnChange extends AbstractChange implements ChangeWithColumn
     }
     
     private boolean isMultiple() {
-        return columns != null && !columns.isEmpty();
+        return (columns != null) && !columns.isEmpty();
     }
 }

@@ -69,7 +69,7 @@ public class ISODateFormat {
                 return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
             }
         default:
-            if (length < 19 || dateAsString.charAt(19) != '.') {
+            if ((length < 19) || (dateAsString.charAt(19) != '.')) {
                 throw new ParseException(String.format("Unknown date format to parse: %s.", dateAsString), 0);
             }
             long time = 0;

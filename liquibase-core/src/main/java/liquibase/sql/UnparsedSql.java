@@ -29,7 +29,8 @@ public class UnparsedSql implements Sql {
                 DatabaseObject[] containingObjects = object.getContainingObjects();
                 if (containingObjects != null) {
                     for (DatabaseObject containingObject : containingObjects) {
-                        if (containingObject != null && !this.affectedDatabaseObjects.contains(containingObject) && !moreAffectedDatabaseObjects.contains(containingObject)) {
+                        if ((containingObject != null) && !this.affectedDatabaseObjects.contains(containingObject) &&
+                            !moreAffectedDatabaseObjects.contains(containingObject)) {
                             moreAffectedDatabaseObjects.add(containingObject);
                         }
                     }

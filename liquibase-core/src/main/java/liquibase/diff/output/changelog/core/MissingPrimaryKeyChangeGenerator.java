@@ -68,17 +68,19 @@ public class MissingPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
             change.setTablespace(pk.getTablespace());
         }
 
-        if (referenceDatabase instanceof MSSQLDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && !pk.getBackingIndex().getClustered()) {
+        if ((referenceDatabase instanceof MSSQLDatabase) && (pk.getBackingIndex() != null) && (pk.getBackingIndex()
+            .getClustered() != null) && !pk.getBackingIndex().getClustered()) {
             change.setClustered(false);
         }
-        if (referenceDatabase instanceof PostgresDatabase && pk.getBackingIndex() != null && pk.getBackingIndex().getClustered() != null && pk.getBackingIndex().getClustered()) {
+        if ((referenceDatabase instanceof PostgresDatabase) && (pk.getBackingIndex() != null) && (pk.getBackingIndex
+            ().getClustered() != null) && pk.getBackingIndex().getClustered()) {
             change.setClustered(true);
         }
 
-        if (comparisonDatabase instanceof OracleDatabase
-                || (comparisonDatabase instanceof DB2Database && pk.getBackingIndex() != null && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
+        if ((comparisonDatabase instanceof OracleDatabase) || ((comparisonDatabase instanceof DB2Database) && (pk
+            .getBackingIndex() != null) && !comparisonDatabase.isSystemObject(pk.getBackingIndex()))) {
             Index backingIndex = pk.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
+            if ((backingIndex != null) && (backingIndex.getName() != null)) {
                 try {
                     if (!control.getIncludeCatalog() && !control.getIncludeSchema()) {
                         CatalogAndSchema schema = comparisonDatabase.getDefaultSchema().customize(comparisonDatabase);

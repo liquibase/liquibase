@@ -474,7 +474,8 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     @Deprecated
     protected void closeDatabase(Liquibase liquibase) {
-        if (liquibase != null && liquibase.getDatabase() != null && liquibase.getDatabase().getConnection() != null) {
+        if ((liquibase != null) && (liquibase.getDatabase() != null) && (liquibase.getDatabase().getConnection() !=
+            null)) {
             try {
                 liquibase.getDatabase().close();
             } catch (DatabaseException e) {

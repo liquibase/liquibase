@@ -29,7 +29,7 @@ public class ChangeMetaData implements PrioritizedService {
         if (parameters == null) {
             parameters  = new HashSet<>();
         }
-        if (appliesTo != null && appliesTo.length == 0) {
+        if ((appliesTo != null) && (appliesTo.length == 0)) {
             appliesTo  = null;
         }
         this.name = name;
@@ -43,7 +43,7 @@ public class ChangeMetaData implements PrioritizedService {
         this.parameters = Collections.unmodifiableMap(this.parameters);
 
         this.appliesTo = null;
-        if (appliesTo != null && appliesTo.length > 0) {
+        if ((appliesTo != null) && (appliesTo.length > 0)) {
             this.appliesTo = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(appliesTo)));
         }
 
@@ -137,6 +137,6 @@ public class ChangeMetaData implements PrioritizedService {
     }
 
     public boolean appliesTo(DatabaseObject databaseObject) {
-        return appliesTo != null && appliesTo.contains(databaseObject.getObjectTypeName());
+        return (appliesTo != null) && appliesTo.contains(databaseObject.getObjectTypeName());
     }
 }

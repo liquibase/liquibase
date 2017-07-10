@@ -27,8 +27,8 @@ public class TinyIntType  extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("tinyint"));
         }
-        if (database instanceof DerbyDatabase || database instanceof PostgresDatabase || database instanceof FirebirdDatabase
-                || database instanceof DB2Database) {
+        if ((database instanceof DerbyDatabase) || (database instanceof PostgresDatabase) || (database instanceof
+            FirebirdDatabase) || (database instanceof DB2Database)) {
             return new DatabaseDataType("SMALLINT");
         }
         if (database instanceof MySQLDatabase) {
@@ -44,7 +44,7 @@ public class TinyIntType  extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
         if (value instanceof DatabaseFunction) {

@@ -70,7 +70,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
         for (Map<String, ?> sequenceRow : sequences) {
             String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
-            if ((database.isCaseSensitive() && name.equals(example.getName()) || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
+            if (((database.isCaseSensitive() && name.equals(example.getName())) || (!database.isCaseSensitive() &&
+                name.equalsIgnoreCase(example.getName())))) {
                 return mapToSequence(sequenceRow, example.getSchema(), database);
             }
         }

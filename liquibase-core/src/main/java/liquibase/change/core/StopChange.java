@@ -65,7 +65,7 @@ public class StopChange extends AbstractChange {
     @Override
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Object value = parsedNode.getValue();
-        if (value != null && value instanceof String) {
+        if ((value != null) && (value instanceof String)) {
             setMessage((String) value);
         }
     }

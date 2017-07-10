@@ -95,11 +95,11 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (supportedDatabases.length == 1
-            && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if ((supportedDatabases.length == 1) && StringUtils.join(supportedDatabases, ",").equals
+            (ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                if (database.getShortName() == null || "unsupported".equals(database.getShortName())) {
+                if ((database.getShortName() == null) || "unsupported".equals(database.getShortName())) {
                     continue;
                 }
                 if (!change.supports(database)) {
@@ -111,9 +111,9 @@ public class ChangeParameterMetaData {
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
-                        if (finalErrors.getUnsupportedErrorMessages().isEmpty()
-                            || finalErrors.getUnsupportedErrorMessages().size() ==
-                                originalErrors.getUnsupportedErrorMessages().size()) {
+                        if (finalErrors.getUnsupportedErrorMessages().isEmpty() || (finalErrors
+                            .getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages()
+                            .size())) {
                             computedDatabases.add(database.getShortName());
                         }
                         validDatabases++;
@@ -145,8 +145,8 @@ public class ChangeParameterMetaData {
 
         Set<String> computedDatabases = new HashSet<>();
 
-        if (requiredDatabases.length == 1
-            && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+        if ((requiredDatabases.length == 1) && StringUtils.join(requiredDatabases, ",").equals
+            (ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
                 try {
@@ -155,9 +155,8 @@ public class ChangeParameterMetaData {
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
                         this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
-                        if (!originalErrors.getRequiredErrorMessages().isEmpty()
-                            && finalErrors.getRequiredErrorMessages().size() <
-                               originalErrors.getRequiredErrorMessages().size()
+                        if (!originalErrors.getRequiredErrorMessages().isEmpty() && (finalErrors
+                            .getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size())
                          ) {
                             computedDatabases.add(database.getShortName());
                         }
@@ -282,7 +281,7 @@ public class ChangeParameterMetaData {
      * Sets the value of this parameter on the given change.
      */
     public void setValue(Change change, Object value) {
-        if (value instanceof String && (! "string".equals(dataType))) {
+        if ((value instanceof String) && (!"string".equals(dataType))) {
             try {
                 switch (dataType) {
                     case "bigInteger":
@@ -308,7 +307,7 @@ public class ChangeParameterMetaData {
                         throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
                     }
                     Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
-                    if (value != null && !expectedWriteType.isAssignableFrom(value.getClass())) {
+                    if ((value != null) && !expectedWriteType.isAssignableFrom(value.getClass())) {
                         if (expectedWriteType.equals(String.class)) {
                             value = value.toString();
                         } else {

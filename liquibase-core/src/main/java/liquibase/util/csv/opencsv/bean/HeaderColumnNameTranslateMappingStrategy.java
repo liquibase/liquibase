@@ -42,7 +42,7 @@ public class HeaderColumnNameTranslateMappingStrategy<T> extends HeaderColumnNam
     */
    @Override
    public String getColumnName(int col) {
-      return col < header.length ? columnMapping.get(header[col].toUpperCase()) : null;
+      return (col < header.length) ? columnMapping.get(header[col].toUpperCase()) : null;
    }
 
    /**

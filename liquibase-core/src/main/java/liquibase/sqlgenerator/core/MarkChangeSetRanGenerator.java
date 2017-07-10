@@ -83,8 +83,10 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
                         .addColumnValue("EXECTYPE", statement.getExecType().value)
-                        .addColumnValue("CONTEXTS", changeSet.getContexts() == null || changeSet.getContexts().isEmpty() ? null : buildFullContext(changeSet))
-                        .addColumnValue("LABELS", changeSet.getLabels() == null || changeSet.getLabels().isEmpty() ? null : changeSet.getLabels().toString())
+                        .addColumnValue("CONTEXTS", ((changeSet.getContexts() == null) || changeSet.getContexts()
+                            .isEmpty()) ? null : buildFullContext(changeSet))
+                        .addColumnValue("LABELS", ((changeSet.getLabels() == null) || changeSet.getLabels().isEmpty()
+                        ) ? null : changeSet.getLabels().toString())
                         .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"))
                         .addColumnValue("DEPLOYMENT_ID", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getDeploymentId());
 
@@ -107,7 +109,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             notFirstContext = true;
         }
         ContextExpression changeSetContext = changeSet.getContexts();
-        if (changeSetContext != null && !changeSetContext.isEmpty()) {
+        if ((changeSetContext != null) && !changeSetContext.isEmpty()) {
             appendContext(contextExpression, changeSetContext.toString(), notFirstContext);
         }
         return contextExpression.toString();

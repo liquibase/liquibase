@@ -25,10 +25,8 @@ public class DateTimeType extends LiquibaseDataType {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         int maxFractionalDigits = database.getMaxFractionalDigitsForTimestamp();
 
-        if (database instanceof DerbyDatabase
-                || database instanceof FirebirdDatabase
-                || database instanceof H2Database
-                || database instanceof HsqlDatabase) {
+        if ((database instanceof DerbyDatabase) || (database instanceof FirebirdDatabase) || (database instanceof
+            H2Database) || (database instanceof HsqlDatabase)) {
             return new DatabaseDataType("TIMESTAMP");
         }
 
@@ -66,8 +64,8 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof InformixDatabase) {
 
           // From database to changelog
-          if (getAdditionalInformation() == null || getAdditionalInformation().isEmpty()) {
-            if (getParameters() != null && getParameters().length > 0) {
+          if ((getAdditionalInformation() == null) || getAdditionalInformation().isEmpty()) {
+            if ((getParameters() != null) && (getParameters().length > 0)) {
 
               String parameter = String.valueOf(getParameters()[0]);
               
@@ -90,7 +88,7 @@ public class DateTimeType extends LiquibaseDataType {
           }
 
           // From changelog to the database
-          if (getAdditionalInformation() != null && !getAdditionalInformation().isEmpty()) {
+          if ((getAdditionalInformation() != null) && !getAdditionalInformation().isEmpty()) {
             return new DatabaseDataType(originalDefinition);
           }
 
@@ -126,7 +124,7 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            if (getParameters().length == 0 || (maxFractionalDigits == 0)) {
+            if ((getParameters().length == 0) || (maxFractionalDigits == 0)) {
                 // fast out...
                 return new DatabaseDataType(getName());
             }
@@ -148,7 +146,7 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
@@ -176,12 +174,14 @@ public class DateTimeType extends LiquibaseDataType {
         try {
             DateFormat dateTimeFormat = getDateTimeFormat(database);
 
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+', 'YYYY\\-MM\\-DD HH24:MI:SS'\\)")) {
+            if ((database instanceof OracleDatabase) && value.matches("to_date\\('\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+'," +
+                " 'YYYY\\-MM\\-DD HH24:MI:SS'\\)")) {
                 dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:s");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }
 
-            if (database instanceof HsqlDatabase && value.matches("TIMESTAMP'\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+(?:\\.\\d+)?'")) {
+            if ((database instanceof HsqlDatabase) && value.matches("TIMESTAMP'\\d+\\-\\d+\\-\\d+ \\d+:\\d+:\\d+(?:\\" +
+                ".\\d+)?'")) {
                 dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:s.S");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }

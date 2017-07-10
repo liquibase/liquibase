@@ -25,7 +25,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Catalog match = null;
         String catalogName = example.getName();
-        if (catalogName == null && database.supportsCatalogs()) {
+        if ((catalogName == null) && database.supportsCatalogs()) {
             catalogName = database.getDefaultCatalogName();
         }
         example = new Catalog(catalogName);
@@ -46,14 +46,14 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
             throw new DatabaseException(e);
         }
 
-        if (match != null && isDefaultCatalog(match, database)) {
+        if ((match != null) && isDefaultCatalog(match, database)) {
             match.setDefault(true);
         }
         return match;
     }
 
     protected boolean isDefaultCatalog(Catalog match, Database database) {
-        return (match.getName() == null || match.getName().equalsIgnoreCase(database.getDefaultCatalogName()));
+        return ((match.getName() == null) || match.getName().equalsIgnoreCase(database.getDefaultCatalogName()));
     }
 
     @Override

@@ -152,7 +152,8 @@ public abstract class AbstractExecuteTest {
     }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {
-        if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {
+        if ((database instanceof MockDatabase) || (database instanceof ExampleCustomDatabase) || (database instanceof
+            UnsupportedDatabase)) {
             return false;
         }
         if (!SqlGeneratorFactory.getInstance().supports(statementUnderTest, database)
@@ -161,12 +162,12 @@ public abstract class AbstractExecuteTest {
         }
 
         boolean shouldInclude = true;
-        if (includeDatabases != null && includeDatabases.length > 0) {
+        if ((includeDatabases != null) && (includeDatabases.length > 0)) {
             shouldInclude = Arrays.asList(includeDatabases).contains(database.getClass());
         }
 
         boolean shouldExclude = false;
-        if (excludeDatabases != null && excludeDatabases.length > 0) {
+        if ((excludeDatabases != null) && (excludeDatabases.length > 0)) {
             shouldExclude = Arrays.asList(excludeDatabases).contains(database.getClass());
         }
 

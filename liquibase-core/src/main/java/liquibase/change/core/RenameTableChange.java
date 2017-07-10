@@ -81,10 +81,10 @@ public class RenameTableChange extends AbstractChange {
             Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
             Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
 
-            if (newTable == null && oldTable == null) {
+            if ((newTable == null) && (oldTable == null)) {
                 return changeStatus.unknown("Neither table exists");
             }
-            if (newTable != null && oldTable != null) {
+            if ((newTable != null) && (oldTable != null)) {
                 return changeStatus.unknown("Both tables exist");
             }
             changeStatus.assertComplete(newTable != null, "New table does not exist");

@@ -100,7 +100,7 @@ public final class CheckSum {
                 if (currentChar == '\r') {
                     currentChar = '\n';
                 }
-                if (previousChar == '\r' && currentChar == '\n') {
+                if ((previousChar == '\r') && (currentChar == '\n')) {
                     // If this is the "\n" or "\r\n", skip the current character.
                     currentChar = stream.read();
                 }
@@ -135,6 +135,6 @@ public final class CheckSum {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof CheckSum && this.toString().equals(obj.toString());
+        return (obj instanceof CheckSum) && this.toString().equals(obj.toString());
     }
 }

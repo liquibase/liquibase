@@ -32,16 +32,15 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
         // Default filter of index creation:
         // creation of all indexes with associations are switched off.
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-        if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
-            associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
-            associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
+        if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains
+            (Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
             return new Sql[0];
         }
 
 	    StringBuilder buffer = new StringBuilder();
 
 	    buffer.append("CREATE ");
-	    if (statement.isUnique() != null && statement.isUnique()) {
+	    if ((statement.isUnique() != null) && statement.isUnique()) {
 		    buffer.append("UNIQUE ");
 	    }
 	    buffer.append("INDEX ");
@@ -70,17 +69,17 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    }
 	    buffer.append(")");
 
-	    if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
-		    if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
+	    if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
 			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+		    } else if ((database instanceof DB2Database) || (database instanceof InformixDatabase)) {
 			    buffer.append(" IN ").append(statement.getTablespace());
 		    } else {
 			    buffer.append(" TABLESPACE ").append(statement.getTablespace());
 		    }
 	    }
 
-        if (statement.isClustered() != null && statement.isClustered()) {
+        if ((statement.isClustered() != null) && statement.isClustered()) {
             return new Sql[]{
                     new UnparsedSql(buffer.toString(), getAffectedIndex(statement)),
                     new UnparsedSql("CLUSTER " + database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName()) + " USING " + database.escapeObjectName(statement.getIndexName(), Index.class))

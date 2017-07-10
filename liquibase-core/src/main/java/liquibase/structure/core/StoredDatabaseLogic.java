@@ -54,11 +54,11 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if ((obj == null) || (getClass() != obj.getClass())) return false;
 
         StoredDatabaseLogic that = (StoredDatabaseLogic) obj;
 
-        if (this.getSchema() != null && that.getSchema() != null) {
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
             return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
         }
 

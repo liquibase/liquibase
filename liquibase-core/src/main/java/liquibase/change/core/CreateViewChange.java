@@ -136,10 +136,10 @@ public class CreateViewChange extends AbstractChange {
 	public ValidationErrors validate(Database database) {
 		ValidationErrors validate = super.validate(database);
 		if (!validate.hasErrors()) {
-			if (StringUtils.trimToNull(getSelectQuery()) != null && StringUtils.trimToNull(getPath()) != null) {
+			if ((StringUtils.trimToNull(getSelectQuery()) != null) && (StringUtils.trimToNull(getPath()) != null)) {
 				validate.addError("Cannot specify both 'path' and a nested view definition in " + ChangeFactory.getInstance().getChangeMetaData(this).getName());
 			}
-			if (StringUtils.trimToNull(getSelectQuery()) == null && StringUtils.trimToNull(getPath()) == null) {
+			if ((StringUtils.trimToNull(getSelectQuery()) == null) && (StringUtils.trimToNull(getPath()) == null)) {
 				validate.addError("For a createView change, you must specify either 'path' or a nested view " +
 						"definition in " +
 						"" + ChangeFactory
@@ -182,7 +182,7 @@ public class CreateViewChange extends AbstractChange {
 
 		try {
 			String selectQuery = this.selectQuery;
-			if (stream == null && selectQuery == null) {
+			if ((stream == null) && (selectQuery == null)) {
 				selectQuery = "";
 			}
 
@@ -214,7 +214,7 @@ public class CreateViewChange extends AbstractChange {
         List<SqlStatement> statements = new ArrayList<>();
 
 		boolean replaceIfExists = false;
-		if (getReplaceIfExists() != null && getReplaceIfExists()) {
+		if ((getReplaceIfExists() != null) && getReplaceIfExists()) {
 			replaceIfExists = true;
 		}
 
@@ -248,7 +248,7 @@ public class CreateViewChange extends AbstractChange {
                     .setFullDefinition(fullDefinition));
 		}
 
-		if (database instanceof OracleDatabase && StringUtils.trimToNull(remarks) != null) {
+		if ((database instanceof OracleDatabase) && (StringUtils.trimToNull(remarks) != null)) {
 			SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, viewName, remarks);
 			if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
 				statements.add(remarksStatement);

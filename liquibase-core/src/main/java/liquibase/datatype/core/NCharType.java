@@ -26,8 +26,7 @@ public class NCharType extends CharType {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
                 String param1 = parameters[0].toString();
-                if (!param1.matches("\\d+")
-                        || new BigInteger(param1).compareTo(BigInteger.valueOf(4000)) > 0) {
+                if (!param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(4000)) > 0)) {
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nchar"), 4000);
                     type.addAdditionalInformation(getAdditionalInformation());

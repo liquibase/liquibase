@@ -42,7 +42,7 @@ public class SnapshotControl implements LiquibaseSerializable {
     }
 
     public SnapshotControl(Database database, boolean expandTypesIfNeeded, Class<? extends DatabaseObject>... types) {
-        if (types == null || types.length == 0) {
+        if ((types == null) || (types.length == 0)) {
             setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
         } else {
             if (expandTypesIfNeeded) {

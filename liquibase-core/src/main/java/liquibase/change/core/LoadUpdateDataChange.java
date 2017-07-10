@@ -56,7 +56,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     public void setOnlyUpdate(Boolean onlyUpdate) {
-        this.onlyUpdate = (onlyUpdate == null ? Boolean.FALSE : onlyUpdate);
+        this.onlyUpdate = ((onlyUpdate == null) ? Boolean.FALSE : onlyUpdate);
     }
 
     /**
@@ -116,10 +116,10 @@ public class LoadUpdateDataChange extends LoadDataChange {
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(),
                     insertOrUpdateStatement.getSchemaName(),
                     insertOrUpdateStatement.getTableName(),
-                    thisPkColumn)).append(newValue == null || "NULL".equalsIgnoreCase(newValue.toString()) ? " is " :
-                    " = ");
+                    thisPkColumn)).append(((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) ? " is" +
+                " " : " = ");
 
-            if (newValue == null || "NULL".equalsIgnoreCase(newValue.toString())) {
+            if ((newValue == null) || "NULL".equalsIgnoreCase(newValue.toString())) {
                 where.append("NULL");
             } else {
                 where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue,

@@ -99,10 +99,10 @@ public class CommandLineUtils {
                     databaseClass, driverPropertiesFile, propertyProviderClass, resourceAccessor);
 
             if (!database.supportsSchemas()) {
-                if (defaultSchemaName != null && defaultCatalogName == null) {
+                if ((defaultSchemaName != null) && (defaultCatalogName == null)) {
                     defaultCatalogName = defaultSchemaName;
                 }
-                if (liquibaseSchemaName != null && liquibaseCatalogName == null) {
+                if ((liquibaseSchemaName != null) && (liquibaseCatalogName == null)) {
                     liquibaseCatalogName = liquibaseSchemaName;
                 }
             }
@@ -148,8 +148,8 @@ public class CommandLineUtils {
      */
     public static void initializeDatabase(String username, String defaultCatalogName, String defaultSchemaName,
                                           Database database) throws DatabaseException {
-        if ((defaultCatalogName != null || defaultSchemaName != null)
-                && !(database.getConnection() instanceof OfflineConnection)) {
+        if (((defaultCatalogName != null) || (defaultSchemaName != null)) && !(database.getConnection() instanceof
+            OfflineConnection)) {
             if (database instanceof OracleDatabase) {
                 String schema = defaultCatalogName;
                 if (schema == null) {
@@ -159,7 +159,7 @@ public class CommandLineUtils {
                         new RawSqlStatement("ALTER SESSION SET CURRENT_SCHEMA=" +
                                 database.escapeObjectName(schema, Schema.class)))
                 ;
-            } else if (database instanceof MSSQLDatabase && defaultSchemaName != null) {
+            } else if ((database instanceof MSSQLDatabase) && (defaultSchemaName != null)) {
                 if (username != null) {
                     ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement(
                             "IF USER_NAME() <> N'dbo'\r\n" +
@@ -172,7 +172,7 @@ public class CommandLineUtils {
                                     "	EXEC sp_executesql @sql\r\n" +
                                     "END"));
                 }
-            } else if (database instanceof PostgresDatabase && defaultSchemaName != null) {
+            } else if ((database instanceof PostgresDatabase) && (defaultSchemaName != null)) {
                 ExecutorService.getInstance().getExecutor(database).execute(new RawSqlStatement("SET SEARCH_PATH TO "
                         + database.escapeObjectName(defaultSchemaName, Schema.class)));
             } else if (database instanceof DB2Database) {

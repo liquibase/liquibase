@@ -48,9 +48,9 @@ public class SchemesTreeBuilder {
             } else {
                 for (SchemaNode child : children) {
                     SchemaNode found = child.find(name);
-                    if (result == null && found != null) {
+                    if ((result == null) && (found != null)) {
                         result = child.find(name);
-                    } else if (result != null && found != null) {
+                    } else if ((result != null) && (found != null)) {
                         throw new IllegalStateException(String.format(
                                 "Duplicate schema names [%s] detected!",
                                 result.getItem().name()));

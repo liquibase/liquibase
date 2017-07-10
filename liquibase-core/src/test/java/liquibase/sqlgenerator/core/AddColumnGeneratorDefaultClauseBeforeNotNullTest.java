@@ -23,14 +23,9 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database instanceof OracleDatabase
-                || database instanceof HsqlDatabase
-                || database instanceof H2Database
-                || database instanceof DerbyDatabase
-                || database instanceof DB2Database
-                || database instanceof FirebirdDatabase
-                || database instanceof SybaseASADatabase
-                || database instanceof SybaseDatabase
-                || database instanceof InformixDatabase;
+        return (database instanceof OracleDatabase) || (database instanceof HsqlDatabase) || (database instanceof
+            H2Database) || (database instanceof DerbyDatabase) || (database instanceof DB2Database) || (database
+            instanceof FirebirdDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
+            SybaseDatabase) || (database instanceof InformixDatabase);
     }
 }

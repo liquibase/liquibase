@@ -26,14 +26,14 @@ public class DatabaseObjectComparatorChain {
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
-        if (object1 == null && object2 == null) {
+        if ((object1 == null) && (object2 == null)) {
             return true;
         }
-        if (object1 == null && object2 != null) {
+        if ((object1 == null) && (object2 != null)) {
             return false;
         }
 
-        if (object1 != null && object2 == null) {
+        if ((object1 != null) && (object2 == null)) {
             return false;
         }
 
@@ -79,14 +79,14 @@ public class DatabaseObjectComparatorChain {
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl, Set<String> exclude) {
-        if (object1 == null && object2 == null) {
+        if ((object1 == null) && (object2 == null)) {
             return new ObjectDifferences(compareControl);
         }
-        if (object1 == null && object2 != null) {
+        if ((object1 == null) && (object2 != null)) {
             return new ObjectDifferences(compareControl).addDifference("Reference value was null", "this", null, null);
         }
 
-        if (object1 != null && object2 == null) {
+        if ((object1 != null) && (object2 == null)) {
             return new ObjectDifferences(compareControl).addDifference("Compared value was null", "this", null, null);
         }
 

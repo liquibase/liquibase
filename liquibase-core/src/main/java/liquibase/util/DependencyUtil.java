@@ -84,7 +84,7 @@ public class DependencyUtil {
                     }
                 }
             }
-            if (nextNodesToDisplay != null && !nextNodesToDisplay.isEmpty()) {
+            if ((nextNodesToDisplay != null) && !nextNodesToDisplay.isEmpty()) {
                 if (nextNodesToDisplay.size() == recursiveSizeCheck) {
                     //Recursion is not making progress, heading to a stack overflow exception.
                     //Probably some cycles in there somewhere, so pull out a node and re-try
@@ -92,7 +92,7 @@ public class DependencyUtil {
                     int nodeToRemoveLinks = Integer.MAX_VALUE;
                     for (GraphNode node : nextNodesToDisplay) {
                         List links = node.getComingInNodes();
-                        if (links != null && links.size() < nodeToRemoveLinks) {
+                        if ((links != null) && (links.size() < nodeToRemoveLinks)) {
                             nodeToRemove = node;
                             nodeToRemoveLinks = links.size();
                         }

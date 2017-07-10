@@ -31,7 +31,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
         String dbmsList;
-        if (changeSet.getDbmsSet() == null || changeSet.getDbmsSet().isEmpty()) {
+        if ((changeSet.getDbmsSet() == null) || changeSet.getDbmsSet().isEmpty()) {
             dbmsList = "all databases";
         } else {
             dbmsList = "'"+StringUtils.join(changeSet.getDbmsSet(), ", ") + "'";

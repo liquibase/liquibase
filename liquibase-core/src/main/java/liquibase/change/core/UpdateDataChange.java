@@ -62,8 +62,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                 needsPreparedStatement = true;
             }
 
-            if (database instanceof OracleDatabase &&  column.getType() != null && "CLOB".equalsIgnoreCase(column
-                .getType()) && column.getValue() != null && column.getValue().length() >= 4000) {
+            if ((database instanceof OracleDatabase) && (column.getType() != null) && "CLOB".equalsIgnoreCase(column
+                .getType()) && (column.getValue() != null) && (column.getValue().length() >= 4000)) {
                 needsPreparedStatement = true;
             }
         }

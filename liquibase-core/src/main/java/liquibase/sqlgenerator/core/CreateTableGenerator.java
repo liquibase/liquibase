@@ -39,8 +39,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
         
-        boolean isSinglePrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
-            && statement.getPrimaryKeyConstraint().getColumns().size() == 1;
+        boolean isSinglePrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && (statement
+            .getPrimaryKeyConstraint().getColumns().size() == 1);
         
         boolean isPrimaryKeyAutoIncrement = false;
         
@@ -66,10 +66,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             boolean isAutoIncrementColumn = autoIncrementConstraint != null;
-            boolean isPrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
-                    && statement.getPrimaryKeyConstraint().getColumns().contains(column);
-            isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement
-                    || isPrimaryKeyColumn && isAutoIncrementColumn;
+            boolean isPrimaryKeyColumn = (statement.getPrimaryKeyConstraint() != null) && statement
+                .getPrimaryKeyConstraint().getColumns().contains(column);
+            isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement || (isPrimaryKeyColumn && isAutoIncrementColumn);
 
             if ((database instanceof SQLiteDatabase) &&
                     isSinglePrimaryKeyColumn &&
@@ -87,7 +86,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             // for the serial data type in postgres, there should be no default value
-            if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
+            if (!columnType.isAutoIncrement() && (statement.getDefaultValue(column) != null)) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
                     String constraintName = statement.getDefaultValueConstraintName(column);
@@ -96,7 +95,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
                     buffer.append(" CONSTRAINT ").append(database.escapeObjectName(constraintName, ForeignKey.class));
                 }
-                if (database instanceof OracleDatabase && statement.getDefaultValue(column).toString().startsWith("GENERATED ALWAYS ")) {
+                if ((database instanceof OracleDatabase) && statement.getDefaultValue(column).toString().startsWith
+                    ("GENERATED ALWAYS ")) {
                     buffer.append(" ");
                 } else {
                     buffer.append(" DEFAULT ");
@@ -147,12 +147,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     } // do we have a NN constraint name?
                 } // does the DB support constraint names?
             } else {
-                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase || (database instanceof MSSQLDatabase && columnType.toString().toLowerCase().contains("timestamp"))) {
+                if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
+                    instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && columnType.toString()
+                    .toLowerCase().contains("timestamp"))) {
                     buffer.append(" NULL");
                 } // Do we need to specify NULL explicitly?
             } // Do we have a NOT NULL constraint for this column?
 
-            if (database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null) {
+            if ((database instanceof MySQLDatabase) && (statement.getColumnRemarks(column) != null)) {
                 buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
             }
 
@@ -167,7 +169,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 isSinglePrimaryKeyColumn &&
                 isPrimaryKeyAutoIncrement) ) {
 
-            if (statement.getPrimaryKeyConstraint() != null && !statement.getPrimaryKeyConstraint().getColumns()
+            if ((statement.getPrimaryKeyConstraint() != null) && !statement.getPrimaryKeyConstraint().getColumns()
                 .isEmpty()) {
                 if (database.supportsPrimaryKeyNames()) {
                     String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
@@ -186,8 +188,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
                 buffer.append(")");
                 // Setting up table space for PK's index if it exist
-                if ((database instanceof OracleDatabase || database instanceof PostgresDatabase) &&
-                    statement.getPrimaryKeyConstraint().getTablespace() != null) {
+                if (((database instanceof OracleDatabase) || (database instanceof PostgresDatabase)) && (statement
+                    .getPrimaryKeyConstraint().getTablespace() != null)) {
                     buffer.append(" USING INDEX TABLESPACE ");
                     buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
                 }
@@ -207,7 +209,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
                     .append(") REFERENCES ");
             if (referencesString != null) {
-                if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
+                if (!referencesString.contains(".") && (database.getDefaultSchemaName() != null) && database
+                    .getOutputDefaultSchema()) {
                     referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class) +"."+referencesString;
                 }
                 buffer.append(referencesString);
@@ -256,22 +259,22 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
          */
         String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
 
-        if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
+        if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)){
         	LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
         	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
-        if (statement.getTablespace() != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
+        if ((statement.getTablespace() != null) && database.supportsTablespaces()) {
+            if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
                 sql += " ON " + statement.getTablespace();
-            } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+            } else if ((database instanceof DB2Database) || (database instanceof InformixDatabase)) {
                 sql += " IN " + statement.getTablespace();
             } else {
                 sql += " TABLESPACE " + statement.getTablespace();
             }
         }
 
-        if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
+        if((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
             sql += " COMMENT='"+database.escapeStringForDatabase(statement.getRemarks())+"' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));

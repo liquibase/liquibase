@@ -28,7 +28,8 @@ public class CurrencyType  extends LiquibaseDataType {
             }
             return new DatabaseDataType(database.escapeDataTypeName("money"));
         }
-        if (database instanceof InformixDatabase || database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        if ((database instanceof InformixDatabase) || (database instanceof SybaseASADatabase) || (database instanceof
+            SybaseDatabase)) {
             return new DatabaseDataType("MONEY");
         }
         if (database instanceof OracleDatabase) {

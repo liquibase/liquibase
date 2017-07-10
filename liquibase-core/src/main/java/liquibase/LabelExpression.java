@@ -73,7 +73,7 @@ public class LabelExpression {
      * Returns true if the passed runtime labels match this label expression
      */
     public boolean matches(Labels runtimeLabels) {
-        if (runtimeLabels == null || runtimeLabels.isEmpty()) {
+        if ((runtimeLabels == null) || runtimeLabels.isEmpty()) {
             return true;
         }
         if (this.labels.isEmpty()) {
@@ -161,7 +161,7 @@ public class LabelExpression {
     }
 
     public boolean isEmpty() {
-        return this.labels == null || this.labels.isEmpty();
+        return (this.labels == null) || this.labels.isEmpty();
     }
 
 }

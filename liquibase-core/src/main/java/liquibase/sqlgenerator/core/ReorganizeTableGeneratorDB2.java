@@ -22,7 +22,8 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
 
     @Override
     public boolean supports(ReorganizeTableStatement statement, Database database) {
-        return database instanceof DB2Database && ((DB2Database) database).getDataServerType() != DataServerType.DB2Z;
+        return (database instanceof DB2Database) && (((DB2Database) database).getDataServerType() != DataServerType
+            .DB2Z);
     }
 
     @Override

@@ -15,8 +15,8 @@ public class UUIDType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         try {
-            if (database instanceof H2Database
-                    || (database instanceof PostgresDatabase && database.getDatabaseMajorVersion() * 10 + database.getDatabaseMinorVersion() >= 83)) {
+            if ((database instanceof H2Database) || ((database instanceof PostgresDatabase) && (((database
+                .getDatabaseMajorVersion() * 10) + database.getDatabaseMinorVersion()) >= 83))) {
                 return new DatabaseDataType("UUID");
             }
         } catch (DatabaseException e) {
@@ -26,7 +26,7 @@ public class UUIDType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType(database.escapeDataTypeName("uniqueidentifier"));
         }
-        if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        if ((database instanceof SybaseASADatabase) || (database instanceof SybaseDatabase)) {
             return new DatabaseDataType("UNIQUEIDENTIFIER");
         }
         if (database instanceof OracleDatabase) {

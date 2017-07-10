@@ -192,7 +192,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         try {
             if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
-            } else if (dateAsString.indexOf('.') > 0 && dateAsString.indexOf('-') > 0) {
+            } else if ((dateAsString.indexOf('.') > 0) && (dateAsString.indexOf('-') > 0)) {
                 return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSSSSS").parse(dateAsString);
 
             } else {
@@ -226,7 +226,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
-        if (rawCatalogName != null && rawSchemaName == null) {
+        if ((rawCatalogName != null) && (rawSchemaName == null)) {
             rawSchemaName = rawCatalogName;
         }
         return new CatalogAndSchema(rawSchemaName, null).customize(this);
@@ -259,7 +259,7 @@ public class DB2Database extends AbstractJdbcDatabase {
     public DataServerType getDataServerType() {
         if (this.dataServerType == null) {
             DatabaseConnection databaseConnection = getConnection();
-            if (databaseConnection != null && databaseConnection instanceof JdbcConnection) {
+            if ((databaseConnection != null) && (databaseConnection instanceof JdbcConnection)) {
                 try {
                     String databaseProductVersion = databaseConnection.getDatabaseProductVersion();
                     String databaseProductName = databaseConnection.getDatabaseProductName();
@@ -290,7 +290,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Index && example.getName() != null && example.getName().matches("SQL\\d+")) {
+        if ((example instanceof Index) && (example.getName() != null) && example.getName().matches("SQL\\d+")) {
             return true;
         }
         return super.isSystemObject(example);

@@ -95,7 +95,7 @@ public class DiffResult {
     }
 
     public void addMissingObject(DatabaseObject obj) {
-        if (obj instanceof Column && ((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+        if ((obj instanceof Column) && (((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
             return; //not really missing, it's a virtual column
         }
         missingObjects.add(obj);
@@ -169,9 +169,10 @@ public class DiffResult {
 
 
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
-        if (obj instanceof Catalog || obj instanceof Schema) {
-            if (differences.getSchemaComparisons() != null && differences.getDifferences().size() == 1 && differences.getDifference("name") != null) {
-                if (obj instanceof Catalog && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
+        if ((obj instanceof Catalog) || (obj instanceof Schema)) {
+            if ((differences.getSchemaComparisons() != null) && (differences.getDifferences().size() == 1) &&
+                (differences.getDifference("name") != null)) {
+                if ((obj instanceof Catalog) && this.getReferenceSnapshot().getDatabase().supportsSchemas()) { //still save name
                     changedObjects.put(obj, differences);
                     return;
                 } else {

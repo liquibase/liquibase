@@ -30,11 +30,11 @@ public class View extends Relation {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         View that = (View) o;
 
-        if (this.getSchema() != null && that.getSchema() != null) {
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
             return StringUtils.trimToEmpty(this.getSchema().getName()).equalsIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
         }
 

@@ -44,7 +44,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof UniqueConstraint && databaseObject2 instanceof UniqueConstraint)) {
+        if (!((databaseObject1 instanceof UniqueConstraint) && (databaseObject2 instanceof UniqueConstraint))) {
             return false;
         }
 
@@ -54,22 +54,25 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
         int thisConstraintSize = thisConstraint.getColumns().size();
         int otherConstraintSize = otherConstraint.getColumns().size();
 
-        if (thisConstraint.getTable() != null && otherConstraint.getTable() != null) {
+        if ((thisConstraint.getTable() != null) && (otherConstraint.getTable() != null)) {
             if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getTable(), otherConstraint.getTable(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
+            if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&
+                !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(),
+                    databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
 
-            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+            if ((databaseObject1.getName() != null) && (databaseObject2.getName() != null) &&
+                DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
                 return true;
             } else {
-                if (thisConstraintSize == 0 || otherConstraintSize == 0) {
+                if ((thisConstraintSize == 0) || (otherConstraintSize == 0)) {
                     return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
                 }
 
-                if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
+                if ((thisConstraintSize > 0) && (otherConstraintSize > 0) && (thisConstraintSize != otherConstraintSize)) {
                     return false;
                 }
 
@@ -81,7 +84,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
                 return true;
             }
         } else {
-            if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
+            if ((thisConstraintSize > 0) && (otherConstraintSize > 0) && (thisConstraintSize != otherConstraintSize)) {
                 return false;
             }
 
@@ -89,7 +92,7 @@ public class UniqueConstraintComparator implements DatabaseObjectComparator {
                 return false;
             }
 
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
+            if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null)) {
                 return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo);
             } else {
                 return true;

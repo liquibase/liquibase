@@ -108,9 +108,8 @@ public class SnapshotGeneratorFactory {
          * SELECT COUNT(*) on that table. If that works, we count that as confirmation of existence.
          */
         // @todo Actually, there may be extreme cases (distorted table statistics etc.) where a COUNT(*) might not be so cheap. Maybe SELECT a dummy constant is the better way?
-        if (example instanceof Table &&
-                (example.getName().equals(database.getDatabaseChangeLogTableName())
-                        || example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
+        if ((example instanceof Table) && (example.getName().equals(database.getDatabaseChangeLogTableName()) ||
+            example.getName().equals(database.getDatabaseChangeLogLockTableName()))) {
             try {
                 ExecutorService.getInstance().getExecutor(database).queryForInt(
                         new RawSqlStatement("SELECT COUNT(*) FROM " +
@@ -308,7 +307,7 @@ public class SnapshotGeneratorFactory {
         // object type "type" in the DBMS "database"
         SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
 
-        if (generators != null && !generators.isEmpty()) {
+        if ((generators != null) && !generators.isEmpty()) {
             SnapshotGenerator generator = generators.iterator().next();
             addsTo = generator.addsTo();
             if (addsTo != null) {

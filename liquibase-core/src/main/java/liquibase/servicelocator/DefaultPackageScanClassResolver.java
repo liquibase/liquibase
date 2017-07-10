@@ -349,7 +349,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 if (name != null) {
                     name = name.trim();
                     builder.append(parent).append("/").append(name);
-                    String packageOrClass = parent == null ? name : builder.toString();
+                    String packageOrClass = (parent == null) ? name : builder.toString();
 
                     if (file.isDirectory()) {
                         loadImplementationsInDirectory(packageOrClass, file, classLoader);

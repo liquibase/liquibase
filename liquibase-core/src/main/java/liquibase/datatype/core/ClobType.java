@@ -16,7 +16,7 @@ public class ClobType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
 
@@ -30,7 +30,7 @@ public class ClobType extends LiquibaseDataType {
         if (val.startsWith("'")) {
             return val;
         } else {
-            if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
+            if ((database instanceof MSSQLDatabase) && !StringUtils.isAscii(val)) {
                 return "N'" + database.escapeStringForDatabase(val) + "'";
             }
 
@@ -42,8 +42,9 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
         if (database instanceof MSSQLDatabase) {
-            if (!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text")
-                    || originalDefinition.toLowerCase().startsWith("[text]")) {
+            if ((!LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration
+                .CONVERT_DATA_TYPES).getValue(Boolean.class) && originalDefinition.toLowerCase().startsWith("text"))
+                || originalDefinition.toLowerCase().startsWith("[text]")) {
                 DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("varchar"));
                 // If there is additional specification after ntext (e.g.  COLLATE), import that.
                 String originalExtraInfo = originalDefinition.replaceFirst("^\\[?text\\]?\\s*", "");
@@ -98,13 +99,14 @@ public class ClobType extends LiquibaseDataType {
             } else {
                 return new DatabaseDataType("LONGTEXT");
             }
-        } else if (database instanceof H2Database || database instanceof HsqlDatabase) {
+        } else if ((database instanceof H2Database) || (database instanceof HsqlDatabase)) {
             if (originalDefinition.toLowerCase().startsWith("longvarchar") || originalDefinition.startsWith("java.sql.Types.LONGVARCHAR")) {
                 return new DatabaseDataType("LONGVARCHAR");
             } else {
                 return new DatabaseDataType("CLOB");
             }
-        } else if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase || database instanceof SybaseDatabase) {
+        } else if ((database instanceof PostgresDatabase) || (database instanceof SQLiteDatabase) || (database
+            instanceof SybaseDatabase)) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
             if ("nclob".equalsIgnoreCase(originalDefinition)) {

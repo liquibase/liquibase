@@ -698,9 +698,8 @@ public class SystemUtils {
      * @since 2.0
      * @since Java 1.2
      */
-    public static final String USER_COUNTRY =
-        getSystemProperty("user.country") == null ?
-            getSystemProperty("user.region") : getSystemProperty("user.country");
+    public static final String USER_COUNTRY = (getSystemProperty("user.country") == null) ? getSystemProperty("user" +
+        ".region") : getSystemProperty("user.country");
 
     /**
      * <p>The <code>user.dir</code> System Property. User's current working
@@ -1205,7 +1204,7 @@ public class SystemUtils {
         if (JAVA_VERSION != null) {
             for (int i = 0; i < JAVA_VERSION.length(); i++) {
                 char ch = JAVA_VERSION.charAt(i);
-                if (ch >= '0' && ch <= '9') {
+                if ((ch >= '0') && (ch <= '9')) {
                     return JAVA_VERSION.substring(i);
                 }
             }
@@ -1247,7 +1246,7 @@ public class SystemUtils {
      * @return true if matches, or false if not or can't determine
      */
     private static boolean getOSMatches(String osNamePrefix, String osVersionPrefix) {
-        if (OS_NAME == null || OS_VERSION == null) {
+        if ((OS_NAME == null) || (OS_VERSION == null)) {
             return false;
         }
         return OS_NAME.startsWith(osNamePrefix) && OS_VERSION.startsWith(osVersionPrefix);
@@ -1324,7 +1323,7 @@ public class SystemUtils {
      * @since Java 1.4
      */
     public static boolean isJavaAwtHeadless() {
-        return JAVA_AWT_HEADLESS != null ? JAVA_AWT_HEADLESS.equals(Boolean.TRUE.toString()) : false;
+        return (JAVA_AWT_HEADLESS != null) ? JAVA_AWT_HEADLESS.equals(Boolean.TRUE.toString()) : false;
     }
     /**
      * <p>Gets the Java home directory as a <code>File</code>.</p>

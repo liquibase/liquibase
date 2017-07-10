@@ -223,7 +223,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
-            if (defaultSchemaName != null && !this.supportsSchemas()) {
+            if ((defaultSchemaName != null) && !this.supportsSchemas()) {
                 return defaultSchemaName;
             }
 
@@ -251,9 +251,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
-        if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
-                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
-                quotingEndCharacter))) {
+        if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||
+            (objectName == null) || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith
+            (quotingEndCharacter))) {
             return objectName;
         } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase();
@@ -274,7 +274,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return getDefaultCatalogName();
         }
 
-        if (defaultSchemaName == null && connection != null) {
+        if ((defaultSchemaName == null) && (connection != null)) {
             defaultSchemaName = getConnectionSchemaName();
         }
 
@@ -524,13 +524,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean generateAutoIncrementStartWith(final BigInteger startWith) {
-        return startWith != null
-                && !startWith.equals(defaultAutoIncrementStartWith);
+        return (startWith != null) && !startWith.equals(defaultAutoIncrementStartWith);
     }
 
     protected boolean generateAutoIncrementBy(final BigInteger incrementBy) {
-        return incrementBy != null
-                && !incrementBy.equals(defaultAutoIncrementBy);
+        return (incrementBy != null) && !incrementBy.equals(defaultAutoIncrementBy);
     }
 
     protected String getAutoIncrementOpening() {
@@ -646,7 +644,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean isCaseSensitive() {
         if (caseSensitive == null) {
-            if (connection != null && connection instanceof JdbcConnection) {
+            if ((connection != null) && (connection instanceof JdbcConnection)) {
                 try {
                     caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
@@ -759,12 +757,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean supportsDropTableCascadeConstraints() {
-        return (this instanceof SQLiteDatabase
-                || this instanceof SybaseDatabase
-                || this instanceof SybaseASADatabase
-                || this instanceof PostgresDatabase
-                || this instanceof OracleDatabase
-        );
+        return ((this instanceof SQLiteDatabase) || (this instanceof SybaseDatabase) || (this instanceof
+            SybaseASADatabase) || (this instanceof PostgresDatabase) || (this instanceof OracleDatabase));
     }
 
     @Override
@@ -772,15 +766,15 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (example == null) {
             return false;
         }
-        if (example.getSchema() != null && example.getSchema().getName() != null && "information_schema"
-                .equalsIgnoreCase(example.getSchema().getName())) {
+        if ((example.getSchema() != null) && (example.getSchema().getName() != null) && "information_schema"
+            .equalsIgnoreCase(example.getSchema().getName())) {
             return true;
         }
-        if (example instanceof Table && getSystemTables().contains(example.getName())) {
+        if ((example instanceof Table) && getSystemTables().contains(example.getName())) {
             return true;
         }
 
-        return example instanceof View && getSystemViews().contains(example.getName());
+        return (example instanceof View) && getSystemViews().contains(example.getName());
 
     }
 
@@ -863,9 +857,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (!supportsCatalogInObjectName(objectType)) {
                 catalogName = null;
             }
-            if (catalogName == null && schemaName == null) {
+            if ((catalogName == null) && (schemaName == null)) {
                 return escapeObjectName(objectName, objectType);
-            } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
+            } else if ((catalogName == null) || !this.supportsCatalogInObjectName(objectType)) {
                 if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
                     return escapeObjectName(objectName, objectType);
                 } else {
@@ -1104,7 +1098,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if ((o == null) || (getClass() != o.getClass())) {
             return false;
         }
 
@@ -1123,7 +1117,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public int hashCode() {
-        return (connection != null ? connection.hashCode() : super.hashCode());
+        return ((connection != null) ? connection.hashCode() : super.hashCode());
     }
 
     @Override
@@ -1438,7 +1432,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (!isDefaultCatalog(catalog)) {
             return false;
         }
-        return schema == null || schema.equalsIgnoreCase(getDefaultSchemaName());
+        return (schema == null) || schema.equalsIgnoreCase(getDefaultSchemaName());
     }
 
     @Override
@@ -1447,7 +1441,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return true;
         }
 
-        return catalog == null || catalog.equalsIgnoreCase(getDefaultCatalogName());
+        return (catalog == null) || catalog.equalsIgnoreCase(getDefaultCatalogName());
 
     }
 
@@ -1541,7 +1535,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public int getDefaultFractionalDigitsForTimestamp() {
-        return (getMaxFractionalDigitsForTimestamp() >= 6 ? 6 : getMaxFractionalDigitsForTimestamp());
+        return ((getMaxFractionalDigitsForTimestamp() >= 6) ? 6 : getMaxFractionalDigitsForTimestamp());
     }
 
     @Override

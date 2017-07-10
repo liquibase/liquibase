@@ -38,7 +38,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
             for (AddColumnStatement column : statement.getColumns()) {
                 validationErrors.addAll(validateSingleColumn(column, database));
-                if (firstColumn.getTableName() != null && !firstColumn.getTableName().equals(column.getTableName())) {
+                if ((firstColumn.getTableName() != null) && !firstColumn.getTableName().equals(column.getTableName())) {
                     validationErrors.addError("All columns must be targeted at the same table");
                 }
                 if (column.isMultiple()) {
@@ -58,15 +58,13 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         validationErrors.checkRequiredField("columnType", statement.getColumnType());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && (database instanceof H2Database
-                || database instanceof DB2Database
-                || database instanceof DerbyDatabase
-                || database instanceof SQLiteDatabase)) {
+        if (statement.isPrimaryKey() && ((database instanceof H2Database) || (database instanceof DB2Database) ||
+            (database instanceof DerbyDatabase) || (database instanceof SQLiteDatabase))) {
             validationErrors.addError("Cannot add a primary key column");
         }
 
         // TODO HsqlDatabase autoincrement on non primary key? other databases?
-        if (database instanceof MySQLDatabase && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
+        if ((database instanceof MySQLDatabase) && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
         
@@ -99,7 +97,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             String alterTable = generateSingleColumBaseSQL(columns.get(0), database);
             for (int i = 0; i < columns.size(); i++) {
                 alterTable += generateSingleColumnSQL(columns.get(i), database);
-                if (i < columns.size() - 1) {
+                if (i < (columns.size() - 1)) {
                     alterTable += ",";
                 }
             }
@@ -150,7 +148,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase|| (database instanceof MSSQLDatabase && "timestamp".equalsIgnoreCase(columnType.toString()))) {
+            if ((database instanceof SybaseDatabase) || (database instanceof SybaseASADatabase) || (database
+                instanceof MySQLDatabase) || ((database instanceof MSSQLDatabase) && "timestamp".equalsIgnoreCase
+                (columnType.toString()))) {
                 alterTable += " NULL";
             }
         }
@@ -159,11 +159,11 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " PRIMARY KEY";
         }
 
-        if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
+        if((database instanceof MySQLDatabase) && (statement.getRemarks() != null)) {
             alterTable += " COMMENT '" + statement.getRemarks() + "' ";
         }
 
-        if (statement.getAddAfterColumn() != null && !statement.getAddAfterColumn().isEmpty()) {
+        if ((statement.getAddAfterColumn() != null) && !statement.getAddAfterColumn().isEmpty()) {
             alterTable += " AFTER `" + statement.getAddAfterColumn() + "` ";
         }
 
@@ -226,7 +226,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
-            if (database instanceof OracleDatabase && defaultValue.toString().startsWith("GENERATED ALWAYS ")) {
+            if ((database instanceof OracleDatabase) && defaultValue.toString().startsWith("GENERATED ALWAYS ")) {
                 clause += " " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
             } else {
                 if (database instanceof MSSQLDatabase) {

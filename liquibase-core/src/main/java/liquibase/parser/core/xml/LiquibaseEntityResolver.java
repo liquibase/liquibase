@@ -62,7 +62,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             resolved = tryResolveLiquibaseSchema(systemId, publicId);
        }
 
-	   if(resolved==null && resourceAccessor!=null && basePath!=null) {
+	   if((resolved == null) && (resourceAccessor != null) && (basePath != null)) {
             resolved =  tryResolveFromResourceAccessor(systemId);
        }
 

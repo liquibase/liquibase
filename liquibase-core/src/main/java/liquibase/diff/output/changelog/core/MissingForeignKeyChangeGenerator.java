@@ -54,7 +54,8 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
             if (control.getIncludeCatalog()) {
                 change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
                 includedCatalog = true;
-            } else if (defaultCatalogName != null && !defaultCatalogName.equalsIgnoreCase(missingPrimaryKeyCatalogName)) {
+            } else if ((defaultCatalogName != null) && !defaultCatalogName.equalsIgnoreCase
+                (missingPrimaryKeyCatalogName)) {
                 if (!(StringUtils.trimToEmpty(comparisonDatabase.getDefaultCatalogName()).equalsIgnoreCase(StringUtils.trimToEmpty(missingPrimaryKeyCatalogName)))) { //don't include catalogName if it's in the default catalog
                     change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
                     includedCatalog = true;
@@ -66,7 +67,8 @@ public class MissingForeignKeyChangeGenerator extends AbstractChangeGenerator im
         if (referenceDatabase.supportsSchemas()) {
             if (includedCatalog || control.getIncludeSchema()) {
                 change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
-            } else if ((defaultSchemaName != null && !defaultSchemaName.equalsIgnoreCase(((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().getName()))) {
+            } else if (((defaultSchemaName != null) && !defaultSchemaName.equalsIgnoreCase(((ForeignKey)
+                missingObject).getPrimaryKeyTable().getSchema().getName()))) {
                 if (!(StringUtils.trimToEmpty(comparisonDatabase.getDefaultSchemaName()).equalsIgnoreCase(StringUtils.trimToEmpty(fk.getPrimaryKeyTable().getSchema().getName())))) { //don't include schemaName if it's in the default schema
                     change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
                 }

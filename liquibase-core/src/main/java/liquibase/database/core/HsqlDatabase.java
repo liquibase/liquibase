@@ -481,7 +481,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public boolean isUsingOracleSyntax() {
         if (oracleSyntax == null) {
             oracleSyntax = Boolean.FALSE;
-            if (getConnection() != null && getConnection().getURL() != null) {
+            if ((getConnection() != null) && (getConnection().getURL() != null)) {
                 for (String str : getConnection().getURL().split(";")) {
                     if (str.contains("sql.syntax_ora") && str.contains("=")) {
                         oracleSyntax = Boolean.valueOf(str.split("=")[1].trim());
@@ -499,7 +499,8 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
             return super.escapeObjectName(objectName, objectType);
         }
-        if (objectName != null && quotingStrategy != ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && isReservedWord(objectName.toUpperCase())) {
+        if ((objectName != null) && (quotingStrategy != ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) && isReservedWord
+            (objectName.toUpperCase())) {
                 return "\""+objectName.toUpperCase()+"\"";
         }
         return objectName;

@@ -68,7 +68,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public boolean supports(Database database) {
-        return database.getConnection() != null && database.getConnection() instanceof OfflineConnection;
+        return (database.getConnection() != null) && (database.getConnection() instanceof OfflineConnection);
     }
 
     public boolean isExecuteDmlAgainstDatabase() {
@@ -220,7 +220,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
         {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
-                if (changeSet == null || (line[COLUMN_ID].equals(changeSet.getId()) && line[COLUMN_AUTHOR].equals(changeSet.getAuthor()) && line[COLUMN_FILENAME].equals(changeSet.getFilePath()))) {
+                if ((changeSet == null) || (line[COLUMN_ID].equals(changeSet.getId()) && line[COLUMN_AUTHOR].equals
+                    (changeSet.getAuthor()) && line[COLUMN_FILENAME].equals(changeSet.getFilePath()))) {
                     line = replaceLogic.execute(line);
                 }
                 if (line != null) {
@@ -263,8 +264,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             newLine[COLUMN_TAG] = "";
             newLine[COLUMN_LIQUIBASE] = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
             if (newLine.length > 11) {
-                newLine[COLUMN_CONTEXTS] = changeSet.getContexts() == null ? null : changeSet.getContexts().toString();
-                newLine[COLUMN_LABELS] = changeSet.getLabels() == null ? null : changeSet.getLabels().toString();
+                newLine[COLUMN_CONTEXTS] = (changeSet.getContexts() == null) ? null : changeSet.getContexts().toString();
+                newLine[COLUMN_LABELS] = (changeSet.getLabels() == null) ? null : changeSet.getLabels().toString();
             }
 
             if (newLine.length > 13) {

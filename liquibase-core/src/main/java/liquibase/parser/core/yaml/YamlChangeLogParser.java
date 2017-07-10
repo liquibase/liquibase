@@ -29,7 +29,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     
             Map parsedYaml = parseYamlStream(physicalChangeLogLocation, yaml, changeLogStream);
 
-            if (parsedYaml == null || parsedYaml.isEmpty()) {
+            if ((parsedYaml == null) || parsedYaml.isEmpty()) {
                 throw new ChangeLogParseException("Empty file " + physicalChangeLogLocation);
             }
 
@@ -45,7 +45,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             }
 
             for (Object obj : (List) rootList) {
-                if (obj instanceof Map && ((Map) obj).containsKey("property")) {
+                if ((obj instanceof Map) && ((Map) obj).containsKey("property")) {
                     Map property = (Map) ((Map) obj).get("property");
                     ContextExpression context = new ContextExpression((String) property.get("context"));
                     Labels labels = new Labels((String) property.get("labels"));
@@ -134,7 +134,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
     protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters, DatabaseChangeLog changeLog) {
         if (obj instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
-                if (entry.getValue() instanceof Map || entry.getValue() instanceof Collection) {
+                if ((entry.getValue() instanceof Map) || (entry.getValue() instanceof Collection)) {
                     replaceParameters(entry.getValue(), changeLogParameters, changeLog);
                 } else if (entry.getValue() instanceof String) {
                     entry.setValue(changeLogParameters.expandExpressions((String) entry.getValue(), changeLog));
@@ -144,7 +144,7 @@ public class YamlChangeLogParser extends YamlParser implements ChangeLogParser {
             ListIterator iterator = ((List) obj).listIterator();
             while (iterator.hasNext()) {
                 Object child = iterator.next();
-                if (child instanceof Map || child instanceof Collection) {
+                if ((child instanceof Map) || (child instanceof Collection)) {
                     replaceParameters(child, changeLogParameters, changeLog);
                 } else if (child instanceof String) {
                     iterator.set(changeLogParameters.expandExpressions((String) child, changeLog));

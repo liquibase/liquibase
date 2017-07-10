@@ -75,7 +75,7 @@ public class ChangeSetExecutedPrecondition extends AbstractPrecondition {
         } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (ranChangeSet == null || ranChangeSet.getExecType() == null || !ranChangeSet.getExecType().ran) {
+        if ((ranChangeSet == null) || (ranChangeSet.getExecType() == null) || !ranChangeSet.getExecType().ran) {
             throw new PreconditionFailedException("Change Set '"+interestedChangeSet.toString(false)+"' has not been run", changeLog, this);
         }
     }

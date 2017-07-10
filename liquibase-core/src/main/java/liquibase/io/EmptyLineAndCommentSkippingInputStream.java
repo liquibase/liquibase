@@ -35,8 +35,8 @@ public class EmptyLineAndCommentSkippingInputStream extends BufferedInputStream 
         int read = super.read();
 
         // skip comment
-        if (commentSkipEnabled && read == this.commentLineStartsWith.toCharArray()[0]) {
-            while ((read = super.read()) != '\n' && read != '\r' && read > 0) {
+        if (commentSkipEnabled && (read == this.commentLineStartsWith.toCharArray()[0])) {
+            while ((((read = super.read())) != '\n') && (read != '\r') && (read > 0)) {
                 ;//keep looking
             }
         }

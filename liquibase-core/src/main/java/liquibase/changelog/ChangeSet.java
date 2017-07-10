@@ -387,7 +387,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 break;
             default:
                 Change change = toChange(child, resourceAccessor);
-                if (change == null && child.getValue() instanceof String) {
+                if ((change == null) && (child.getValue() instanceof String)) {
                     this.setAttribute(child.getName(), child.getValue());
                 } else {
                     addChange(change);
@@ -404,7 +404,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
             DatabaseChangeLog changeLog = this.getChangeLog();
             ChangeSet changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
-            while (changeSet == null && changeLog != null) {
+            while ((changeSet == null) && (changeLog != null)) {
                 changeLog = changeLog.getParentChangeLog();
                 if (changeLog != null) {
                     changeSet = changeLog.getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
@@ -622,7 +622,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
             } catch (Exception e1) {
                 throw new MigrationFailedException(this, e);
             }
-            if (getFailOnError() != null && !getFailOnError()) {
+            if ((getFailOnError() != null) && !getFailOnError()) {
                 log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
@@ -719,7 +719,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
      * Returns whether custom rollback steps are specified for this changeSet, or whether auto-generated ones should be used
      */
     protected boolean hasCustomRollbackChanges() {
-        return rollback != null && rollback.getChanges() != null && !rollback.getChanges().isEmpty();
+        return (rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty();
     }
     
     /**
@@ -766,11 +766,11 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         DatabaseChangeLog changeLog = getChangeLog();
         while (changeLog != null) {
             ContextExpression expression = changeLog.getContexts();
-            if (expression != null && !expression.isEmpty()) {
+            if ((expression != null) && !expression.isEmpty()) {
                 expressions.add(expression);
             }
             ContextExpression includeExpression = changeLog.getIncludeContexts();
-            if (includeExpression != null && !includeExpression.isEmpty()) {
+            if ((includeExpression != null) && !includeExpression.isEmpty()) {
                 expressions.add(includeExpression);
             }
             changeLog = changeLog.getParentChangeLog();
@@ -838,7 +838,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
 
     public boolean supportsRollback(Database database) {
-        if (rollback != null && rollback.getChanges() != null && !rollback.getChanges().isEmpty()) {
+        if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
             return true;
         }
 
@@ -1036,7 +1036,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("labels".equals(field)) {
-            if (this.getLabels() != null && !this.getLabels().isEmpty()) {
+            if ((this.getLabels() != null) && !this.getLabels().isEmpty()) {
                 return StringUtils.join(this.getLabels().getLabels(), ", ");
             } else {
                 return null;
@@ -1044,7 +1044,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("dbms".equals(field)) {
-            if (this.getDbmsSet() != null && !this.getDbmsSet().isEmpty()) {
+            if ((this.getDbmsSet() != null) && !this.getDbmsSet().isEmpty()) {
                 StringBuffer dbmsString = new StringBuffer();
                 for (String dbms : this.getDbmsSet()) {
                     dbmsString.append(dbms).append(",");
@@ -1067,7 +1067,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("preconditions".equals(field)) {
-            if (this.getPreconditions() != null && !this.getPreconditions().getNestedPreconditions().isEmpty()) {
+            if ((this.getPreconditions() != null) && !this.getPreconditions().getNestedPreconditions().isEmpty()) {
                 return this.getPreconditions();
             } else {
                 return null;
@@ -1083,7 +1083,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         }
 
         if ("rollback".equals(field)) {
-            if (rollback != null && rollback.getChanges() != null && !rollback.getChanges().isEmpty()) {
+            if ((rollback != null) && (rollback.getChanges() != null) && !rollback.getChanges().isEmpty()) {
                 return rollback;
             } else {
                 return null;

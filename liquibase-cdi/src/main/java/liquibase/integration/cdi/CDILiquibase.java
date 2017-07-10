@@ -136,7 +136,7 @@ public class CDILiquibase implements Extension {
             updateSuccessful = false;
             throw ex;
         } finally {
-            if (liquibase != null && liquibase.getDatabase() != null) {
+            if ((liquibase != null) && (liquibase.getDatabase() != null)) {
                 liquibase.getDatabase().close();
             } else if (c != null) {
                 try {

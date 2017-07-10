@@ -50,7 +50,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         referencedObjects = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
-        this.originalExamples = (examples == null ? new DatabaseObject[0] : examples);
+        this.originalExamples = ((examples == null) ? new DatabaseObject[0] : examples);
 
         init(examples);
 
@@ -244,7 +244,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             return null;
         }
 
-        if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
+        if ((example instanceof Schema) && (example.getName() == null) && ((((Schema) example).getCatalog() == null)
+            || (((Schema) example).getCatalogName() == null))) {
             CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
@@ -310,8 +311,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
         for (String field : new HashSet<>(object.getAttributes())) {
             Object fieldValue = object.getAttribute(field, Object.class);
-            if ("columns".equals(field) && (object.getClass() == PrimaryKey.class || object.getClass() == Index.class || object.getClass() == UniqueConstraint.class)) {
-                if (fieldValue != null && !((Collection) fieldValue).isEmpty()) {
+            if ("columns".equals(field) && ((object.getClass() == PrimaryKey.class) || (object.getClass() == Index
+                .class) || (object.getClass() == UniqueConstraint.class))) {
+                if ((fieldValue != null) && !((Collection) fieldValue).isEmpty()) {
                     String columnName = ((Column) ((Collection) fieldValue).iterator().next()).getName();
                     if (columnName.endsWith(" ASC") || columnName.endsWith(" DESC")) {
                         continue;
@@ -320,7 +322,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             }
             Object newFieldValue = replaceObject(fieldValue);
             if (newFieldValue == null) { //sometimes an object references a non-snapshotted object. Leave it with the unsnapshotted example
-                if ((object instanceof UniqueConstraint || object instanceof PrimaryKey || object instanceof ForeignKey) && "backingIndex".equals(field)) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
+                if (((object instanceof UniqueConstraint) || (object instanceof PrimaryKey) || (object instanceof
+                    ForeignKey)) && "backingIndex".equals(field)) { //unless it is the backing index, that is handled a bit strange and we need to handle the case where there is no backing index (disabled PK on oracle)
                     object.setAttribute(field, null);
                 }
             } else if (fieldValue != newFieldValue) {
@@ -354,7 +357,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
                 return savedFieldValue;
             }
-            if (fieldValue instanceof Catalog && isWrongCatalog(((DatabaseObject) fieldValue))) {
+            if ((fieldValue instanceof Catalog) && isWrongCatalog(((DatabaseObject) fieldValue))) {
                 DatabaseObject savedFieldValue = referencedObjects.get((DatabaseObject) fieldValue, schemaComparisons);
                 if (savedFieldValue == null) {
                     savedFieldValue = (DatabaseObject) fieldValue;
@@ -383,11 +386,12 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             List newValues = new ArrayList();
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
-                if (fieldValue instanceof DatabaseObject && !snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
+                if ((fieldValue instanceof DatabaseObject) && !snapshotControl.shouldInclude(((DatabaseObject)
+                    fieldValue).getClass())) {
                     return fieldValue;
                 }
 
-                if (obj instanceof DatabaseObject && ((DatabaseObject) obj).getSnapshotId() == null) {
+                if ((obj instanceof DatabaseObject) && (((DatabaseObject) obj).getSnapshotId() == null)) {
                     obj = include((DatabaseObject) obj);
                 }
                 if (obj != null) {
@@ -498,7 +502,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
     protected SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
-        if (generators == null || generators.isEmpty()) {
+        if ((generators == null) || generators.isEmpty()) {
             return null;
         }
         //noinspection unchecked
@@ -526,7 +530,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             Map<String, DatabaseObject> allObjects = new HashMap<>();
             ParsedNode databaseNode = parsedNode.getChild(null, "database");
             DatabaseConnection connection = getDatabase().getConnection();
-            if (databaseNode != null && connection instanceof OfflineConnection) {
+            if ((databaseNode != null) && (connection instanceof OfflineConnection)) {
                 ((OfflineConnection) connection).setDatabaseMajorVersion(databaseNode.getChildValue(null, "majorVersion", Integer.class));
                 ((OfflineConnection) connection).setDatabaseMinorVersion(databaseNode.getChildValue(null, "minorVersion", Integer.class));
                 ((OfflineConnection) connection).setProductVersion(databaseNode.getChildValue(null, "productVersion", String.class));
@@ -539,13 +543,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
             for (DatabaseObject object : allObjects.values()) {
                 for (String attr : new ArrayList<>(object.getAttributes())) {
                     Object value = object.getAttribute(attr, Object.class);
-                    if (value instanceof String && allObjects.containsKey(value)) {
+                    if ((value instanceof String) && allObjects.containsKey(value)) {
                         if (ObjectUtil.hasProperty(object, attr)) {
                             ObjectUtil.setProperty(object, attr, allObjects.get(value));
                         } else {
                             object.setAttribute(attr, allObjects.get(value));
                         }
-                    } else if (value instanceof Collection && !((Collection) value).isEmpty() && allObjects.containsKey(((Collection) value).iterator().next())) {
+                    } else if ((value instanceof Collection) && !((Collection) value).isEmpty() && allObjects
+                        .containsKey(((Collection) value).iterator().next())) {
                         List newList = new ArrayList();
                         for (String element : (Collection<String>) value) {
                             newList.add(allObjects.get(element));
@@ -556,8 +561,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
                             object.setAttribute(attr, newList);
                         }
                     } else {
-                        if (value != null && ObjectUtil.hasProperty(object, attr)) {
-                            if (value instanceof byte[] && ObjectUtil.getPropertyType(object, attr).equals(String.class)) {
+                        if ((value != null) && ObjectUtil.hasProperty(object, attr)) {
+                            if ((value instanceof byte[]) && ObjectUtil.getPropertyType(object, attr).equals(String
+                                .class)) {
                                 value = new String((byte[]) value, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
                             }
                             object.setAttribute(attr, null);

@@ -78,8 +78,8 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
             }
         }
         // Assumes that if no filter is specified for a catalog or schema all should be accepted.
-        return filterType == FilterType.EXCLUDE
-                || (object instanceof Catalog || object instanceof Schema) && !catalogOrSchemaFilter;
+        return (filterType == FilterType.EXCLUDE) || (((object instanceof Catalog) || (object instanceof Schema)) &&
+            !catalogOrSchemaFilter);
     }
 
     public enum FilterType {
@@ -103,11 +103,11 @@ public class StandardObjectChangeFilter implements ObjectChangeFilter {
             }
 
             Boolean matches = null;
-            if (objectType != null && !objectType.isAssignableFrom(object.getClass())) {
+            if ((objectType != null) && !objectType.isAssignableFrom(object.getClass())) {
                 matches = false;
             }
             if (matches == null) {
-                matches = object.getName() != null && nameMatcher.matcher(object.getName()).matches();
+                matches = (object.getName() != null) && nameMatcher.matcher(object.getName()).matches();
             }
 
             if (!matches) {

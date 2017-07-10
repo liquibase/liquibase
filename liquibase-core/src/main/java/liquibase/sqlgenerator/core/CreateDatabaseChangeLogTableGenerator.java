@@ -49,7 +49,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     }
 
     protected String getCharTypeName(Database database) {
-        if (database instanceof MSSQLDatabase && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
+        if ((database instanceof MSSQLDatabase) && ((MSSQLDatabase) database).sendsStringParametersAsUnicode()) {
             return "nvarchar";
         }
         return "varchar";

@@ -227,7 +227,7 @@ public class CustomChangeWrapper extends AbstractChange {
      */
     @Override
     public boolean supportsRollback(Database database) {
-        return customChange instanceof CustomSqlRollback || customChange instanceof CustomTaskRollback;
+        return (customChange instanceof CustomSqlRollback) || (customChange instanceof CustomTaskRollback);
     }
 
     /**
@@ -333,7 +333,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
         for (ParsedNode node : parsedNode.getChildren()) {
             Object value = node.getValue();
-            if (value != null && ObjectUtil.hasProperty(customChange, node.getName())) {
+            if ((value != null) && ObjectUtil.hasProperty(customChange, node.getName())) {
                 this.setParam(node.getName(), value.toString());
             }
         }

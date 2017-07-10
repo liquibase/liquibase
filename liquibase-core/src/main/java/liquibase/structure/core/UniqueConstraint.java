@@ -23,7 +23,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
     public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, Column... columns) {
         this();
         setName(name);
-        if (tableName != null && columns != null) {
+        if ((tableName != null) && (columns != null)) {
             setTable(new Table(tableCatalog, tableSchema, tableName));
             setColumns(new ArrayList<>(Arrays.asList(columns)));
         }
@@ -148,18 +148,15 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (o == null || getClass() != o.getClass())
+		if ((o == null) || (getClass() != o.getClass()))
 			return false;
 		if (null == this.getColumnNames())
 			return false;
 		UniqueConstraint that = (UniqueConstraint) o;
 		boolean result = false;
-		result = !(getColumnNames() != null ? !getColumnNames()
-				.equalsIgnoreCase(that.getColumnNames()) : that
-				.getColumnNames() != null)
-				&& isDeferrable() == that.isDeferrable()
-				&& isInitiallyDeferred() == that.isInitiallyDeferred()
-				&& isDisabled() == that.isDisabled();
+        result = !((getColumnNames() != null) ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : (that
+            .getColumnNames() != null)) && (isDeferrable() == that.isDeferrable()) && (isInitiallyDeferred() == that
+            .isInitiallyDeferred()) && (isDisabled() == that.isDisabled());
 		// Need check for nulls here due to NullPointerException using
 		// Postgres
 		if (result) {
@@ -183,9 +180,8 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		// Need check for nulls here due to NullPointerException using Postgres
 		String thisTableName;
 		String thatTableName;
-		thisTableName = null == this.getTable() ? "" : this.getTable()
-				.getName();
-		thatTableName = null == o.getTable() ? "" : o.getTable().getName();
+        thisTableName = (null == this.getTable()) ? "" : this.getTable().getName();
+        thatTableName = (null == o.getTable()) ? "" : o.getTable().getName();
 		int returnValue = thisTableName.compareTo(thatTableName);
 		if (returnValue == 0) {
 			returnValue = this.getName().compareTo(o.getName());
@@ -208,10 +204,10 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 			result = this.getTable().hashCode();
 		}
 		if (this.getName() != null) {
-			result = 31 * result + this.getName().toUpperCase().hashCode();
+            result = (31 * result) + this.getName().toUpperCase().hashCode();
 		}
 		if (getColumnNames() != null) {
-			result = 31 * result + getColumnNames().hashCode();
+            result = (31 * result) + getColumnNames().hashCode();
 		}
 		return result;
 	}

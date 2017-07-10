@@ -170,7 +170,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public void setDeleteCascade(Boolean deleteCascade) {
-        if (deleteCascade != null && deleteCascade) {
+        if ((deleteCascade != null) && deleteCascade) {
             setOnDelete("CASCADE");
         }
     }

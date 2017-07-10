@@ -112,7 +112,7 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 		if (!getColumnName().matches("(?i)[a-z][a-z_0-9]*"))
 			return false;
 
-		if (!(getSchemaName() != null || database.getDefaultSchemaName() != null)) {
+		if (!((getSchemaName() != null) || (database.getDefaultSchemaName() != null))) {
 			return false;
 		}
 

@@ -49,7 +49,7 @@ public class MavenUtils {
     Set<URI> uris = new HashSet<>();
     // Find project dependencies, including the transitive ones.
     Set dependencies = project.getArtifacts();
-    if (dependencies != null && !dependencies.isEmpty()) {
+    if ((dependencies != null) && !dependencies.isEmpty()) {
         for (Iterator it = dependencies.iterator(); it.hasNext();) {
             addArtifact(uris, (Artifact) it.next(), log, verbose);
         }

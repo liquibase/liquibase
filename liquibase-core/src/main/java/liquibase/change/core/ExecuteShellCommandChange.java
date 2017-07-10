@@ -96,7 +96,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(final Database database) {
         boolean shouldRun = true;
-        if (os != null && (!os.isEmpty())) {
+        if ((os != null) && (!os.isEmpty())) {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
@@ -237,7 +237,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         } else {
             List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os",
                     String.class)), ",");
-            if (os.size() == 1 && ("".equals(os.get(0)))) {
+            if ((os.size() == 1) && ("".equals(os.get(0)))) {
                 this.os = null;
             } else if (!os.isEmpty()) {
                 this.os = os;

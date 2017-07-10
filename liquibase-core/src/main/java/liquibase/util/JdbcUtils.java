@@ -98,9 +98,9 @@ public abstract class JdbcUtils {
             obj = rs.getBytes(index);
         } else if (obj instanceof Clob) {
             obj = rs.getString(index);
-        } else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
+        } else if ((obj != null) && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
             obj = rs.getTimestamp(index);
-        } else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.DATE")) {
+        } else if ((obj != null) && obj.getClass().getName().startsWith("oracle.sql.DATE")) {
             String metaDataClassName = rs.getMetaData().getColumnClassName(index);
             if ("java.sql.Timestamp".equals(metaDataClassName) ||
                     "oracle.sql.TIMESTAMP".equals(metaDataClassName)) {
@@ -108,7 +108,7 @@ public abstract class JdbcUtils {
             } else {
                 obj = rs.getDate(index);
             }
-        } else if (obj != null && obj instanceof java.sql.Date) {
+        } else if ((obj != null) && (obj instanceof Date)) {
             if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
                 obj = rs.getTimestamp(index);
             }
@@ -123,10 +123,9 @@ public abstract class JdbcUtils {
      * @return whether the type is numeric
      */
     public static boolean isNumeric(int sqlType) {
-        return Types.BIT == sqlType || Types.BIGINT == sqlType || Types.DECIMAL == sqlType ||
-                Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
-                Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
-                Types.TINYINT == sqlType;
+        return (Types.BIT == sqlType) || (Types.BIGINT == sqlType) || (Types.DECIMAL == sqlType) || (Types.DOUBLE ==
+            sqlType) || (Types.FLOAT == sqlType) || (Types.INTEGER == sqlType) || (Types.NUMERIC == sqlType) ||
+            (Types.REAL == sqlType) || (Types.SMALLINT == sqlType) || (Types.TINYINT == sqlType);
     }
 
     /**
@@ -136,7 +135,7 @@ public abstract class JdbcUtils {
      * @return the single result object
      */
     public static Object requiredSingleResult(Collection results) throws DatabaseException {
-        int size = (results != null ? results.size() : 0);
+        int size = ((results != null) ? results.size() : 0);
         if (size == 0) {
             throw new DatabaseException("Empty result set, expected one row");
         }
@@ -161,7 +160,7 @@ public abstract class JdbcUtils {
         int numberOfColumns = metadata.getColumnCount();
         String correctedColumnName = database.correctObjectName(columnNameToCheck, Column.class);
         // get the column names; column indexes start from 1
-        for (int i = 1; i < numberOfColumns + 1; i++) {
+        for (int i = 1; i < (numberOfColumns + 1); i++) {
             String columnName = metadata.getColumnLabel(i);
             // Get the name of the column's table name
             if (correctedColumnName.equalsIgnoreCase(columnName)) {

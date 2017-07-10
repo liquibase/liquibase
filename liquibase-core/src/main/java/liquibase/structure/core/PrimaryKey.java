@@ -125,11 +125,12 @@ public class PrimaryKey extends AbstractDatabaseObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equals(that.getTable().getName()) : that.getTable().getName() != null);
+        return !((getColumnNames() != null) ? !getColumnNames().equals(that.getColumnNames()) : (that.getColumnNames
+            () != null)) && !((getTable().getName() != null) ? !getTable().getName().equals(that.getTable().getName()) : (that.getTable().getName() != null));
 
     }
 

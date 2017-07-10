@@ -53,7 +53,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         continue;
                     }
 
-                    if (database instanceof DB2Database && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
+                    if ((database instanceof DB2Database) && "SYSIBM".equals(row.getString("INDEX_QUALIFIER"))) {
                         continue;
                     }
 
@@ -73,14 +73,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         foundIndexes.put(indexName, index);
                     }
                     String ascOrDesc = row.getString("ASC_OR_DESC");
-                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                    Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean
+                        .FALSE : null);
                     index.addColumn(new Column(row.getString("COLUMN_NAME")).setComputed(false).setDescending(descending).setRelation(index.getTable()));
                 }
 
                 //add clustered indexes first, than all others in case there is a clustered and non-clustered version of the same index. Prefer the clustered version
                 List<Index> stillToAdd = new ArrayList<>();
                 for (Index exampleIndex : foundIndexes.values()) {
-                    if (exampleIndex.getClustered() != null && exampleIndex.getClustered()) {
+                    if ((exampleIndex.getClustered() != null) && exampleIndex.getClustered()) {
                         table.getIndexes().add(exampleIndex);
                     } else {
                         stillToAdd.add(exampleIndex);
@@ -102,13 +103,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 throw new DatabaseException(e);
             }
         }
-        if (foundObject instanceof UniqueConstraint && ((UniqueConstraint) foundObject).getBackingIndex() == null
-                && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+        if ((foundObject instanceof UniqueConstraint) && (((UniqueConstraint) foundObject).getBackingIndex() == null)
+            && !(snapshot.getDatabase() instanceof DB2Database) && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
             Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
         }
-        if (foundObject instanceof ForeignKey && ((ForeignKey) foundObject).getBackingIndex() == null) {
+        if ((foundObject instanceof ForeignKey) && (((ForeignKey) foundObject).getBackingIndex() == null)) {
             Index exampleIndex = new Index().setTable(((ForeignKey) foundObject).getForeignKeyTable());
             exampleIndex.getColumns().addAll(((ForeignKey) foundObject).getForeignKeyColumns());
             ((ForeignKey) foundObject).setBackingIndex(exampleIndex);
@@ -157,7 +158,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (indexName == null) {
                     continue;
                 }
-                if (exampleName != null && !exampleName.equals(correctedIndexName)) {
+                if ((exampleName != null) && !exampleName.equals(correctedIndexName)) {
                     continue;
                 }
                 /*
@@ -165,7 +166,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 * An identifier with a leading blank is not allowed.
                 * So here is it replaced.
                 */
-                if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
+                if ((database instanceof InformixDatabase) && indexName.startsWith(" ")) {
                     continue; // suppress creation of generated_index records
                 }
                 short type = row.getShort("TYPE");
@@ -184,7 +185,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 }
 
-                if (columnName == null && definition == null) {
+                if ((columnName == null) && (definition == null)) {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
@@ -204,9 +205,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                  * Our strategy here is: If the expression would be a valid Oracle identifier, but not a valid Oracle
                  * function name, then we assume it is the name of a regular column.
                  */
-                if (database instanceof OracleDatabase
-                    && definition != null
-                    && columnName != null)
+                if ((database instanceof OracleDatabase) && (definition != null) && (columnName != null))
                 {
                     String potentialColumnExpression = definition.replaceFirst("^\"?(.*?)\"?$", "$1");
                     OracleDatabase oracle = (OracleDatabase)database;
@@ -226,7 +225,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setUnique(!nonUnique);
                     
                     String tablespaceName = row.getString("TABLESPACE_NAME");
-                    if (tablespaceName != null && database.supportsTablespaces()) {
+                    if ((tablespaceName != null) && database.supportsTablespaces()) {
                         returnIndex.setTablespace(tablespaceName);
                     }
 
@@ -254,7 +253,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     foundIndexes.put(correctedIndexName, returnIndex);
                 }
 
-                if (database instanceof MSSQLDatabase && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
+                if ((database instanceof MSSQLDatabase) && (Boolean) row.get("IS_INCLUDED_COLUMN")) {
                     List<String> includedColumns = returnIndex.getAttribute("includedColumns", List.class);
                     if (includedColumns == null) {
                         includedColumns = new ArrayList<>();
@@ -281,7 +280,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         // or is it a computed expression (definition != null)
                         if (definition == null) {
                             String ascOrDesc = row.getString("ASC_OR_DESC");
-                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ?
+                                Boolean.FALSE : null);
                             returnIndex.getColumns().set(position - 1, new Column(columnName)
                                     .setDescending(descending).setRelation(returnIndex.getTable()));
                         } else {
@@ -314,7 +314,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         }
                     }
                     if (actuallyMatches) {
-                        if (index.getClustered() != null && index.getClustered()) {
+                        if ((index.getClustered() != null) && index.getClustered()) {
                             return finalizeIndex(schema, tableName, index, snapshot);
                         } else {
                             nonClusteredIndexes.add(index);
@@ -330,7 +330,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Index finalizeIndex(Schema schema, String tableName, Index index, DatabaseSnapshot snapshot) {
-        if (index.isUnique() == null || !index.isUnique()) {
+        if ((index.isUnique() == null) || !index.isUnique()) {
             List<Column> columns = index.getColumns();
             PrimaryKey tablePK = new PrimaryKey(null, schema.getCatalogName(), schema.getName(), tableName, columns.toArray(new Column[index.getColumns().size()]));
             if (snapshot.get(tablePK) != null) { //actually is unique since it's the PK

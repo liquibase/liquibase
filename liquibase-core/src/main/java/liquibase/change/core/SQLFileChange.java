@@ -168,7 +168,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public void setSql(String sql) {
-        if (getChangeSet() != null && getChangeSet().getChangeLogParameters() != null) {
+        if ((getChangeSet() != null) && (getChangeSet().getChangeLogParameters() != null)) {
             sql = getChangeSet().getChangeLogParameters().expandExpressions(sql, getChangeSet().getChangeLog());
         }
         super.setSql(sql);

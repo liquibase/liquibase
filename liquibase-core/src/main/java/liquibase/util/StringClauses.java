@@ -469,7 +469,7 @@ public class StringClauses {
         ListIterator iterator = finalList.listIterator();
         while (iterator.hasNext()) {
             Object next = iterator.next();
-            if (next == null || "".equals(next.toString())) {
+            if ((next == null) || "".equals(next.toString())) {
                 iterator.remove();
             }
         }
@@ -499,7 +499,7 @@ public class StringClauses {
             return true;
         }
         for (Object clause : clauses.values()) {
-            if (clause != null && !"".equals(clause.toString().trim())) {
+            if ((clause != null) && !"".equals(clause.toString().trim())) {
                 return false;
             }
         }

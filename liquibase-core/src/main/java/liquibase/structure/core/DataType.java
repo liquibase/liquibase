@@ -83,11 +83,8 @@ public class DataType extends AbstractLiquibaseSerializable {
             }
 
             //Failing on data types such as nvarchar if included
-            if (columnSizeUnit != null &&
-                ("VARCHAR".equalsIgnoreCase(typeName)
-                    || "VARCHAR2".equalsIgnoreCase(typeName)
-                    || "CHAR".equalsIgnoreCase(typeName)
-                )
+            if ((columnSizeUnit != null) && ("VARCHAR".equalsIgnoreCase(typeName) || "VARCHAR2".equalsIgnoreCase
+                (typeName) || "CHAR".equalsIgnoreCase(typeName))
             ) {
                 value += " " + columnSizeUnit;
             }

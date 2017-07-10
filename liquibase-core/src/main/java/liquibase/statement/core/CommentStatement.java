@@ -18,7 +18,7 @@ public class CommentStatement extends AbstractSqlStatement {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof CommentStatement)) {
+		if ((obj == null) || !(obj instanceof CommentStatement)) {
 			return false;
 		}
 		return this.toString().equals(obj.toString());
@@ -26,7 +26,7 @@ public class CommentStatement extends AbstractSqlStatement {
 
 	@Override
 	public String toString() {
-		if (text != null && text.length() >= MAX_LENGTH) {
+		if ((text != null) && (text.length() >= MAX_LENGTH)) {
 			return text.substring(0, MAX_LENGTH - 3) + "..."; 
 		}
 		return getText();

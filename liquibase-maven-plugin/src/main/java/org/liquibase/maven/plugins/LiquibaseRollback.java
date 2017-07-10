@@ -60,13 +60,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   }
 
   protected void checkRequiredRollbackParameters() throws MojoFailureException {
-    if (rollbackCount == -1 && rollbackDate == null && rollbackTag == null) {
+    if ((rollbackCount == -1) && (rollbackDate == null) && (rollbackTag == null)) {
       throw new MojoFailureException("One of the rollback options must be specified, "
                                      + "please specify one of rollbackTag, rollbackCount "
                                      + "or rollbackDate");
     }
 
-    if (rollbackCount!=-1 && rollbackCount <= 0) {
+    if ((rollbackCount != -1) && (rollbackCount <= 0)) {
       throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
                                      + "select a value greater than 0");
     }
@@ -75,17 +75,17 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                      + " one of rollbackTag, rollbackCount, rollbackDate.";
 
     if (rollbackCount > 0) {
-      if (rollbackDate != null || rollbackTag != null) {
+      if ((rollbackDate != null) || (rollbackTag != null)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.COUNT;
     } else if (rollbackDate != null) {
-      if (rollbackTag != null || rollbackCount > 0) {
+      if ((rollbackTag != null) || (rollbackCount > 0)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.DATE;
     } else if (rollbackTag != null) {
-      if (rollbackCount > 0 || rollbackDate != null) {
+      if ((rollbackCount > 0) || (rollbackDate != null)) {
         throw new MojoFailureException(message);
       }
       type = RollbackType.TAG;

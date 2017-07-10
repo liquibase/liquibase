@@ -107,7 +107,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
     
                     for (int i = 0; i < columnNames.size(); i++) {
                         Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-                        if (dataTypes[i] == null && value != null) {
+                        if ((dataTypes[i] == null) && (value != null)) {
                             if (value instanceof Number) {
                                 dataTypes[i] = "NUMERIC";
                             } else if (value instanceof Boolean) {
@@ -130,7 +130,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     }
                     outputFile.writeNext(line);
                     rowNum++;
-                    if (rowNum % 5000 == 0) {
+                    if ((rowNum % 5000) == 0) {
                         outputFile.flush();
                     }
                 }

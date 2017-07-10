@@ -15,12 +15,11 @@ public class NVarcharType extends CharType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (getRawDefinition() != null && getRawDefinition().toLowerCase().contains("national character varying")) {
+        if ((getRawDefinition() != null) && getRawDefinition().toLowerCase().contains("national character varying")) {
             setAdditionalInformation(null); //just go to nvarchar
         }
-        if (database instanceof HsqlDatabase
-                || database instanceof PostgresDatabase
-                || database instanceof DerbyDatabase) {
+        if ((database instanceof HsqlDatabase) || (database instanceof PostgresDatabase) || (database instanceof
+            DerbyDatabase)) {
 
             return new DatabaseDataType("VARCHAR", getParameters());
         }
@@ -31,8 +30,7 @@ public class NVarcharType extends CharType {
             Object[] parameters = getParameters();
             if (parameters.length > 0) {
                 String param1 = parameters[0].toString();
-                if (!param1.matches("\\d+")
-                        || new BigInteger(param1).compareTo(BigInteger.valueOf(4000L)) > 0) {
+                if (!param1.matches("\\d+") || (new BigInteger(param1).compareTo(BigInteger.valueOf(4000L)) > 0)) {
 
                     DatabaseDataType type = new DatabaseDataType(database.escapeDataTypeName("nvarchar"), "MAX");
                     type.addAdditionalInformation(getAdditionalInformation());

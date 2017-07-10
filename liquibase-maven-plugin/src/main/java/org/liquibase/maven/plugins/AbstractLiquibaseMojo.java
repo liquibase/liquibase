@@ -340,7 +340,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
         Database database = null;
         try {
-            String dbPassword = emptyPassword || password == null ? "" : password;
+            String dbPassword = (emptyPassword || (password == null)) ? "" : password;
             String driverPropsFile = (driverPropertiesFile == null) ? null : driverPropertiesFile.getAbsolutePath();
             database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
                     url,
@@ -501,7 +501,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     + "a parameter or in a properties file.");
         }
 
-        if (password != null && emptyPassword) {
+        if ((password != null) && emptyPassword) {
             throw new MojoFailureException("A password cannot be present and the empty "
                     + "password property both be specified.");
         }

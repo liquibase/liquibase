@@ -51,7 +51,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         AddUniqueConstraintChange change = createAddUniqueConstraintChange();
         change.setTableName(uc.getTable().getName());
-        if (uc.getBackingIndex() != null && control.getIncludeTablespace()) {
+        if ((uc.getBackingIndex() != null) && control.getIncludeTablespace()) {
             change.setTablespace(uc.getBackingIndex().getTablespace());
         }
         if (control.getIncludeCatalog()) {
@@ -71,7 +71,7 @@ public class MissingUniqueConstraintChangeGenerator extends AbstractChangeGenera
 
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = uc.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
+            if ((backingIndex != null) && (backingIndex.getName() != null)) {
                 Change[] changes = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
                 if (changes != null) {
                     returnList.addAll(Arrays.asList(changes));

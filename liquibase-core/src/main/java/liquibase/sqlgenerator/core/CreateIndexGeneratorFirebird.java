@@ -106,9 +106,8 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
          * so we should not duplicate that functionality (=we should not issue CREATE INDEX statements for them)
          */
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-        if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
-                associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
-                associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
+        if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains
+            (Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
             return new Sql[0];
         }
 
@@ -117,7 +116,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         buffer.append("CREATE ");
 
         // If the statement wants a UNIQUE index, issue a CREATE UNIQUE ... INDEX statement.
-        if (statement.isUnique() != null && statement.isUnique()) {
+        if ((statement.isUnique() != null) && statement.isUnique()) {
             buffer.append("UNIQUE ");
         }
 
@@ -200,7 +199,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
                 idxColsBuf.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
             }
 
-            if (column.getDescending() != null && column.getDescending()) {
+            if ((column.getDescending() != null) && column.getDescending()) {
                 result.setFoundDescColumns(true);
             } else {
                 result.setFoundAscColumns(true);
@@ -226,7 +225,7 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
         if (result.isFoundAscColumns() && result.isFoundDescColumns()) {
             errors.addError("Firebird cannot create indexes with mixed ASCending / DESCending columns.");
         }
-        if (result.getNumComputedCols() > 0 && result.getNumRegularCols() > 0) {
+        if ((result.getNumComputedCols() > 0) && (result.getNumRegularCols() > 0)) {
             errors.addError("Firebird cannot create indexes with both computed expressions and regular columns.");
         }
         if (result.getNumComputedCols() > 1) {

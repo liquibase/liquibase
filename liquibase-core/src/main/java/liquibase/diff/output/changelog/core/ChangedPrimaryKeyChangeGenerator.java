@@ -45,7 +45,7 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
         //don't try to recreate PKs that differ in just clustered
         Difference clusteredDiff = differences.getDifference("clustered");
         if (clusteredDiff != null) {
-            if (clusteredDiff.getReferenceValue() == null || clusteredDiff.getComparedValue() == null) {
+            if ((clusteredDiff.getReferenceValue() == null) || (clusteredDiff.getComparedValue() == null)) {
                 differences.removeDifference("clustered");
             }
         }
@@ -69,7 +69,7 @@ public class ChangedPrimaryKeyChangeGenerator extends AbstractChangeGenerator im
 
         if (comparisonDatabase instanceof OracleDatabase) {
             Index backingIndex = pk.getBackingIndex();
-            if (backingIndex != null && backingIndex.getName() != null) {
+            if ((backingIndex != null) && (backingIndex.getName() != null)) {
                 Change[] indexChanges = ChangeGeneratorFactory.getInstance().fixMissing(backingIndex, control, referenceDatabase, comparisonDatabase);
                 if (indexChanges != null) {
                     returnList.addAll(Arrays.asList(indexChanges));

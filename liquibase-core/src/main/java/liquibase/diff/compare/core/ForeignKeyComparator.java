@@ -38,26 +38,26 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof ForeignKey && databaseObject2 instanceof ForeignKey)) {
+        if (!((databaseObject1 instanceof ForeignKey) && (databaseObject2 instanceof ForeignKey))) {
             return false;
         }
 
         ForeignKey thisForeignKey = (ForeignKey) databaseObject1;
         ForeignKey otherForeignKey = (ForeignKey) databaseObject2;
 
-        if (thisForeignKey.getName() != null && otherForeignKey.getName() != null) {
+        if ((thisForeignKey.getName() != null) && (otherForeignKey.getName() != null)) {
             if (chain.isSameObject(thisForeignKey, otherForeignKey, accordingTo)) {
                 return true;
             }
         }
 
-        if (thisForeignKey.getPrimaryKeyTable() == null || thisForeignKey.getForeignKeyTable() == null
-                || otherForeignKey.getPrimaryKeyTable() == null || otherForeignKey.getForeignKeyTable() == null) {
+        if ((thisForeignKey.getPrimaryKeyTable() == null) || (thisForeignKey.getForeignKeyTable() == null) ||
+            (otherForeignKey.getPrimaryKeyTable() == null) || (otherForeignKey.getForeignKeyTable() == null)) {
             return false; //tables not set, have to rely on name
         }
 
-        if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
-                otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
+        if ((thisForeignKey.getForeignKeyColumns() != null) && (thisForeignKey.getPrimaryKeyColumns() != null) &&
+            (otherForeignKey.getForeignKeyColumns() != null) && (otherForeignKey.getPrimaryKeyColumns() != null)) {
         boolean columnsTheSame;
         StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter<Column>() {
             @Override

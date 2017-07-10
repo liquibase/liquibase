@@ -33,7 +33,7 @@ public class CompareControl {
     }
 
     public CompareControl(SchemaComparison[] schemaComparison, String compareTypes) {
-        if (schemaComparison != null && schemaComparison.length > 0) {
+        if ((schemaComparison != null) && (schemaComparison.length > 0)) {
             this.schemaComparisons = schemaComparison;
         } else {
             this.schemaComparisons = new SchemaComparison[]{new SchemaComparison(new CatalogAndSchema(null, null), new CatalogAndSchema(null, null))};
@@ -69,7 +69,7 @@ public class CompareControl {
     }
 
     protected void setTypes(Set<Class<? extends DatabaseObject>> types) {
-        if (types == null || types.isEmpty()) {
+        if ((types == null) || types.isEmpty()) {
             types = DatabaseObjectFactory.getInstance().getStandardTypes();
         }
         this.compareTypes = types;
@@ -146,7 +146,7 @@ public class CompareControl {
         }
 
         public static String convertSchema(String schemaName, SchemaComparison[] schemaComparisons) {
-            if (schemaComparisons == null || schemaComparisons.length == 0 || schemaName == null) {
+            if ((schemaComparisons == null) || (schemaComparisons.length == 0) || (schemaName == null)) {
                 return schemaName;
             }
 
@@ -175,15 +175,15 @@ public class CompareControl {
     public static ComputedSchemas computeSchemas(String schemaNames, String referenceSchemaNames, String outputSchemaNames, String defaultCatalogName, String defaultSchemaName, String referenceDefaultCatalogName, String referenceDefaultSchemaName, Database database) {
 
         //Make sure either both schemaNames and referenceSchemaNames are set or both are null. If only one is set, make them equal
-        if (schemaNames == null && referenceSchemaNames == null) {
+        if ((schemaNames == null) && (referenceSchemaNames == null)) {
             ;//they will be set to the defaults
-        } else if (schemaNames == null && referenceSchemaNames != null) {
+        } else if ((schemaNames == null) && (referenceSchemaNames != null)) {
             schemaNames = referenceSchemaNames;
-        } else if (schemaNames != null && referenceSchemaNames == null) {
+        } else if ((schemaNames != null) && (referenceSchemaNames == null)) {
             referenceSchemaNames = schemaNames;
         }
 
-        if (schemaNames == null && outputSchemaNames != null) {
+        if ((schemaNames == null) && (outputSchemaNames != null)) {
             if (defaultSchemaName == null) {
                 schemaNames = database.getDefaultSchemaName();
             } else {
@@ -211,7 +211,7 @@ public class CompareControl {
             if (splitReferenceSchemaNames.size() != splitSchemaNames.size()) {
                 throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --referenceSchemas");
             }
-            if (splitOutputSchemaNames != null && splitOutputSchemaNames.size() != splitSchemaNames.size()) {
+            if ((splitOutputSchemaNames != null) && (splitOutputSchemaNames.size() != splitSchemaNames.size())) {
                 throw new UnexpectedLiquibaseException("You must specify the same number of schemas in --schemas and --outputSchemasAs");
             }
 

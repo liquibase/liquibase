@@ -68,7 +68,8 @@ public class ChangeGeneratorFactory {
         SortedSet<ChangeGenerator> validGenerators = new TreeSet<>(new ChangeGeneratorComparator(objectType, database));
 
         for (ChangeGenerator generator : generators) {
-            if (generatorType.isAssignableFrom(generator.getClass()) && generator.getPriority(objectType, database) > 0) {
+            if (generatorType.isAssignableFrom(generator.getClass()) && (generator.getPriority(objectType, database)
+                > 0)) {
                 validGenerators.add(generator);
             }
         }
@@ -77,7 +78,7 @@ public class ChangeGeneratorFactory {
 
     private ChangeGeneratorChain createGeneratorChain(Class<? extends ChangeGenerator> generatorType, Class<? extends DatabaseObject> objectType, Database database) {
         SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
-        if (generators == null || generators.isEmpty()) {
+        if ((generators == null) || generators.isEmpty()) {
             return null;
         }
         //noinspection unchecked

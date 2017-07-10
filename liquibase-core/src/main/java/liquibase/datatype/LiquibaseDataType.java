@@ -138,7 +138,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
      * Returns the value object in a format to include in SQL. Quote if necessary.
      */
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return functionToSql((DatabaseFunction) value, database);
@@ -149,7 +149,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     protected String functionToSql(DatabaseFunction function, Database database) {
-        return function == null ? null : database.generateDatabaseFunctionValue(function);
+        return (function == null) ? null : database.generateDatabaseFunctionValue(function);
     }
 
     protected String numberToSql(Number number, Database database) {
@@ -163,7 +163,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     protected String otherToSql(Object value, Database database) {
-        return value == null ? null : value.toString();
+        return (value == null) ? null : value.toString();
     }
 
     public Object sqlToObject(String value, Database database) {
@@ -173,7 +173,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     @Override
     public String toString() {
         String returnString = getName();
-        if (parameters != null && !parameters.isEmpty() && maxParameters > 0) {
+        if ((parameters != null) && !parameters.isEmpty() && (maxParameters > 0)) {
             returnString += "(";
             for (Object param : parameters) {
                 if (returnString == null) {
@@ -195,7 +195,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     @Override
     public boolean equals(final Object o) {
-        return o instanceof LiquibaseDataType && toString().equals(o.toString());
+        return (o instanceof LiquibaseDataType) && toString().equals(o.toString());
     }
 
     @Override

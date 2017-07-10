@@ -170,7 +170,7 @@ public class ServiceLocator {
                     throw new UnexpectedLiquibaseException(e);
                 }
 
-                if (returnObject == null || newInstance.getPriority() > returnObject.getPriority()) {
+                if ((returnObject == null) || (newInstance.getPriority() > returnObject.getPriority())) {
                     returnObject = newInstance;
                 }
             }
@@ -221,7 +221,8 @@ public class ServiceLocator {
 
         classResolver.addClassLoader(resourceAccessor.toClassLoader());
         for (Class<?> clazz : classResolver.findImplementations(requiredInterface, packagesToScan.toArray(new String[packagesToScan.size()]))) {
-            if (clazz.getAnnotation(LiquibaseService.class ) != null  && clazz.getAnnotation(LiquibaseService.class).skip()) {
+            if ((clazz.getAnnotation(LiquibaseService.class) != null) && clazz.getAnnotation(LiquibaseService.class)
+                .skip()) {
                 continue;
             }
 

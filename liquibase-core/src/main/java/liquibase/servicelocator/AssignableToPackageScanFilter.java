@@ -26,7 +26,7 @@ public class AssignableToPackageScanFilter implements PackageScanFilter {
 
     @Override
     public boolean matches(Class<?> type) {
-        if (parents != null && !parents.isEmpty()) {
+        if ((parents != null) && !parents.isEmpty()) {
             for (Class<?> parent : parents) {
                 if (parent.isAssignableFrom(type)) {
                     return true;
@@ -42,7 +42,7 @@ public class AssignableToPackageScanFilter implements PackageScanFilter {
         for (Class<?> parent : parents) {
             sb.append(parent.getSimpleName()).append(", ");
         }
-        sb.setLength(sb.length() > 0 ? sb.length() - 2 : 0);
+        sb.setLength((sb.length() > 0) ? (sb.length() - 2) : 0);
         return "is assignable to " + sb;
     }
 }

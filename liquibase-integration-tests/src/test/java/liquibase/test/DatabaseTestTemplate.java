@@ -80,7 +80,7 @@ public class DatabaseTestTemplate {
                 }
                 throw newError;
             } finally {
-                if (database.getConnection() != null && !database.getAutoCommitMode()) {
+                if ((database.getConnection() != null) && !database.getAutoCommitMode()) {
                     database.rollback();
                 }
             }

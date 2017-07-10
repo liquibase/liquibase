@@ -32,7 +32,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     @Override
     public Set<InputStream> getResourcesAsStream(String path) throws IOException {
         Enumeration<URL> resources = classLoader.getResources(path);
-        if (resources == null || !resources.hasMoreElements()) {
+        if ((resources == null) || !resources.hasMoreElements()) {
             return null;
         }
         Set<String> seenUrls = new HashSet<>();
@@ -108,9 +108,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                         if (entry.getName().startsWith(path)) {
 
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
+                                String pathAsDir = path.endsWith("/") ? path : (path + "/");
                                 if (!entry.getName().startsWith(pathAsDir)
                                  || entry.getName().substring(pathAsDir.length()).contains("/")) {
                                     continue;

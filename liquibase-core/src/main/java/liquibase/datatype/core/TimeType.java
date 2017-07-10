@@ -36,13 +36,13 @@ public class TimeType  extends LiquibaseDataType {
         if (database instanceof MySQLDatabase) {
             boolean supportsParameters = true;
             try {
-                supportsParameters = database.getDatabaseMajorVersion() >= 5
-                        && database.getDatabaseMinorVersion() >= 6
-                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
+                supportsParameters = (database.getDatabaseMajorVersion() >= 5) && (database.getDatabaseMinorVersion()
+                    >= 6) && (((MySQLDatabase) database).getDatabasePatchVersion() >= 4);
             } catch (Exception ignore) {
                 //assume supports parameters
             }
-            if (supportsParameters && getParameters().length > 0 && Integer.parseInt(getParameters()[0].toString()) <= 6) {
+            if (supportsParameters && (getParameters().length > 0) && (Integer.parseInt(getParameters()[0].toString()
+            ) <= 6)) {
                 return new DatabaseDataType(getName(), getParameters());
             } else {
                 return new DatabaseDataType(getName());
@@ -66,7 +66,7 @@ public class TimeType  extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }  else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
@@ -93,7 +93,7 @@ public class TimeType  extends LiquibaseDataType {
         try {
             DateFormat timeFormat = getTimeFormat(database);
 
-            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+:\\d+:\\d+', 'HH24:MI:SS'\\)")) {
+            if ((database instanceof OracleDatabase) && value.matches("to_date\\('\\d+:\\d+:\\d+', 'HH24:MI:SS'\\)")) {
                 timeFormat = new SimpleDateFormat("HH:mm:s");
                 value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
             }

@@ -114,8 +114,8 @@ public class LoggingExecutor extends AbstractExecutor {
 
                 output.write(statement);
 
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase
-                        || database instanceof SybaseASADatabase) {
+                if ((database instanceof MSSQLDatabase) || (database instanceof SybaseDatabase) || (database
+                    instanceof SybaseASADatabase)) {
                     output.write(StreamUtil.getLineSeparator());
                     output.write("GO");
                 } else {

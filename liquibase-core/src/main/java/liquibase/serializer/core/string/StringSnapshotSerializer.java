@@ -47,7 +47,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
                             values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
                         } else {
                             String valueString = value.toString();
-                            if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
+                            if ((value instanceof Double) || (value instanceof Float)) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
                                     valueString = valueString.replaceFirst("0*$","");
                                 }

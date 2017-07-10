@@ -53,7 +53,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
         for (Map<String, ?> col : metadata) {
             String ascOrDesc = (String) col.get("ASC_OR_DESC");
-            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : ("A".equals(ascOrDesc) ? Boolean.FALSE : null);
             if (database instanceof H2Database) {
                 for (String columnName : StringUtils.splitAndTrim((String) col.get("COLUMN_NAME"), ",")) {
                     constraint.getColumns().add(new Column(columnName).setDescending(descending).setRelation(table));
@@ -126,10 +126,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (columnCache == null) {
-            bulkQuery = (database instanceof OracleDatabase || database instanceof MSSQLDatabase) && columnQueryCount > 3;
+            bulkQuery = ((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase)) &&
+                (columnQueryCount > 3);
             snapshot.setScratchData(queryCountKey, columnQueryCount + 1);
 
-            if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
+            if ((database instanceof MySQLDatabase) || (database instanceof HsqlDatabase)) {
                 sql = "select const.CONSTRAINT_NAME, COLUMN_NAME "
                         + "from " + database.getSystemSchema() + ".table_constraints const "
                         + "join " + database.getSystemSchema() + ".key_column_usage col "

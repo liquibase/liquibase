@@ -43,7 +43,7 @@ public class DecimalType  extends LiquibaseDataType {
     }
     if (database instanceof InformixDatabase) {
 
-      if(getParameters() != null && getParameters().length == 2) {
+      if((getParameters() != null) && (getParameters().length == 2)) {
 
         // Don't use 255 as a scale because it is invalid, 
         // use only 1 argument in this special case

@@ -44,7 +44,7 @@ public class IndexComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Index && databaseObject2 instanceof Index)) {
+        if (!((databaseObject1 instanceof Index) && (databaseObject2 instanceof Index))) {
             return false;
         }
 
@@ -54,23 +54,26 @@ public class IndexComparator implements DatabaseObjectComparator {
         int thisIndexSize = thisIndex.getColumns().size();
         int otherIndexSize = otherIndex.getColumns().size();
 
-        if (thisIndex.getTable() != null && otherIndex.getTable() != null) {
+        if ((thisIndex.getTable() != null) && (otherIndex.getTable() != null)) {
             if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null && !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
+            if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null) &&
+                !DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(),
+                    databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo)) {
                 return false;
             }
 
-            if (databaseObject1.getName() != null && databaseObject2.getName() != null && DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+            if ((databaseObject1.getName() != null) && (databaseObject2.getName() != null) &&
+                DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
                 return true;
             } else {
-                if (thisIndexSize == 0 || otherIndexSize == 0) {
+                if ((thisIndexSize == 0) || (otherIndexSize == 0)) {
                     return DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo);
                 }
 
 
-                if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+                if ((thisIndexSize > 0) && (otherIndexSize > 0) && (thisIndexSize != otherIndexSize)) {
                     return false;
                 }
 
@@ -83,7 +86,7 @@ public class IndexComparator implements DatabaseObjectComparator {
                 return true;
             }
         } else {
-            if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+            if ((thisIndexSize > 0) && (otherIndexSize > 0) && (thisIndexSize != otherIndexSize)) {
                 return false;
             }
 
@@ -91,7 +94,7 @@ public class IndexComparator implements DatabaseObjectComparator {
                 return false;
             }
 
-            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
+            if ((databaseObject1.getSchema() != null) && (databaseObject2.getSchema() != null)) {
                 return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), chain.getSchemaComparisons(), accordingTo);
             } else {
                 return true;

@@ -83,18 +83,18 @@ public class Catalog extends AbstractDatabaseObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if ((o == null) || (getClass() != o.getClass())) return false;
 
         Catalog catalog = (Catalog) o;
 
-        return getName() != null ? getName().equalsIgnoreCase(catalog.getName()) : catalog.getName() == null;
+        return (getName() != null) ? getName().equalsIgnoreCase(catalog.getName()) : (catalog.getName() == null);
     }
 
 
 
     @Override
     public int hashCode() {
-        return getName() != null ? getName().hashCode() : 0;
+        return (getName() != null) ? getName().hashCode() : 0;
     }
 
     @Override

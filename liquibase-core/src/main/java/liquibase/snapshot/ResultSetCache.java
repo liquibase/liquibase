@@ -118,7 +118,7 @@ class ResultSetCache {
         private String[] permute(String[] params, int fromIndex) {
             String[] nullVersion = Arrays.copyOf(params, params.length);
             nullVersion[fromIndex] = null;
-            if (params.length == fromIndex + 1) {
+            if (params.length == (fromIndex + 1)) {
                 return new String[]{
                         createKey(database, params),
                         createKey(database, nullVersion)
@@ -139,7 +139,7 @@ class ResultSetCache {
             } else if (database.supportsCatalogs() && database.supportsSchemas()) {
                 return (catalog + "." + schema).toLowerCase();
             } else {
-                if (catalog == null && schema != null) {
+                if ((catalog == null) && (schema != null)) {
                     return schema.toLowerCase();
                 } else {
                     if (catalog == null) {
@@ -202,10 +202,10 @@ class ResultSetCache {
         }
 
         public boolean equals(Object expectedValue, Object foundValue, boolean equalIfEitherNull) {
-            if (expectedValue == null && foundValue == null) {
+            if ((expectedValue == null) && (foundValue == null)) {
                 return true;
             }
-            if (expectedValue == null || foundValue == null) {
+            if ((expectedValue == null) || (foundValue == null)) {
                 return equalIfEitherNull;
             }
 
@@ -235,7 +235,7 @@ class ResultSetCache {
                     @Override
                     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
                         Object value = super.getColumnValue(rs, index);
-                        if (value != null && value instanceof String) {
+                        if ((value != null) && (value instanceof String)) {
 
                             // Don't trim for informix database,
                             // We need to discern the space in front of an index name,
@@ -245,7 +245,7 @@ class ResultSetCache {
                                 value = ((String) value).trim(); // Trim the value normally
                             } else {
                                 boolean startsWithSpace = false;
-                                if (database instanceof InformixDatabase && ((String) value).matches("^ .*$")) {
+                                if ((database instanceof InformixDatabase) && ((String) value).matches("^ .*$")) {
                                     startsWithSpace = true; // Set the flag if the value started with a space
                                 }
                                 value = ((String) value).trim(); // Trim the value normally

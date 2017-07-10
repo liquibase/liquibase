@@ -20,7 +20,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("indexName", statement.getIndexName());
 
-        if (database instanceof MySQLDatabase || database instanceof MSSQLDatabase) {
+        if ((database instanceof MySQLDatabase) || (database instanceof MSSQLDatabase)) {
             validationErrors.checkRequiredField("tableName", statement.getTableName());
         }
 
@@ -34,7 +34,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
             if (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)) {
                 return new Sql[0];
             } else if (associatedWith.contains(Index.MARK_FOREIGN_KEY)) {
-                if (!(database instanceof OracleDatabase || database instanceof MSSQLDatabase)) {
+                if (!((database instanceof OracleDatabase) || (database instanceof MSSQLDatabase))) {
                     return new Sql[0];
                 }
             }

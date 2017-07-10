@@ -13,7 +13,7 @@ public class FluentPropertyBeanIntrospector implements BeanIntrospector {
             try {
                 Class<?>[] argTypes = method.getParameterTypes();
                 int argCount = argTypes.length;
-                if (argCount == 1 && method.getName().startsWith("set")) {
+                if ((argCount == 1) && method.getName().startsWith("set")) {
                     String propertyName = Introspector.decapitalize(method.getName().substring(3));
                     if (!"class".equals(propertyName)) {
                         PropertyDescriptor pd = context.getDescriptor(propertyName);
@@ -22,9 +22,8 @@ public class FluentPropertyBeanIntrospector implements BeanIntrospector {
                             pd = new PropertyDescriptor(propertyName, null, method);
                             context.addDescriptor(pd);
                             setWriteMethod = true;
-                        } else if (pd.getWriteMethod() == null
-                                && pd.getReadMethod() != null
-                                && pd.getReadMethod().getReturnType() == argTypes[0]) {
+                        } else if ((pd.getWriteMethod() == null) && (pd.getReadMethod() != null) && (pd.getReadMethod
+                            ().getReturnType() == argTypes[0])) {
 
                             pd.setWriteMethod(method);
                             setWriteMethod = true;

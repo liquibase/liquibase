@@ -47,7 +47,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     @Override
     public int compareTo(Object o) {
         AbstractDatabaseObject that = (AbstractDatabaseObject) o;
-        if (this.getSchema() != null && that.getSchema() != null) {
+        if ((this.getSchema() != null) && (that.getSchema() != null)) {
             int compare = StringUtils.trimToEmpty(this.getSchema().getName()).compareToIgnoreCase(StringUtils.trimToEmpty(that.getSchema().getName()));
             if (compare != 0) {
                 return compare;
@@ -154,14 +154,15 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             }
 
             Class propertyType = ObjectUtil.getPropertyType(this, name);
-            if (propertyType != null && Collection.class.isAssignableFrom(propertyType) && !(child.getValue() instanceof Collection)) {
+            if ((propertyType != null) && Collection.class.isAssignableFrom(propertyType) && !(child.getValue()
+                instanceof Collection)) {
                 if (this.attributes.get(name) == null) {
                     this.setAttribute(name, new ArrayList<Column>());
                 }
                 this.getAttribute(name, List.class).add(child.getValue());
             } else {
                 Object childValue = child.getValue();
-                if (childValue != null && childValue instanceof String) {
+                if ((childValue != null) && (childValue instanceof String)) {
                     Matcher matcher = Pattern.compile("(.*)!\\{(.*)\\}").matcher((String) childValue);
                     if (matcher.matches()) {
                         String stringValue = matcher.group(1);

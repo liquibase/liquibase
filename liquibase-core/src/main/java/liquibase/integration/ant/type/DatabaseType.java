@@ -73,11 +73,11 @@ public class DatabaseType extends DataType {
                 }
                 Properties connectionProps = new Properties();
                 String connectionUserName = getUser();
-                if(connectionUserName != null && !connectionUserName.isEmpty()) {
+                if((connectionUserName != null) && !connectionUserName.isEmpty()) {
                     connectionProps.setProperty(USER_PROPERTY_NAME, connectionUserName);
                 }
                 String connectionPassword = getPassword();
-                if(connectionPassword != null && !connectionPassword.isEmpty()) {
+                if((connectionPassword != null) && !connectionPassword.isEmpty()) {
                     connectionProps.setProperty(PASSWORD_PROPERTY_NAME, connectionPassword);
                 }
                 ConnectionProperties dbConnectionProperties = getConnectionProperties();
@@ -149,7 +149,7 @@ public class DatabaseType extends DataType {
         if(getUrl() == null) {
             throw new BuildException("JDBC URL is required.");
         }
-        if(getDriver() == null && !getUrl().startsWith("offline:")) {
+        if((getDriver() == null) && !getUrl().startsWith("offline:")) {
             throw new BuildException("JDBC driver is required.");
         }
     }
@@ -174,19 +174,10 @@ public class DatabaseType extends DataType {
 
     @Override
     public void setRefid(Reference ref) {
-        if(driver != null
-                || url != null
-                || user != null
-                || password != null
-                || defaultSchemaName != null
-                || defaultCatalogName != null
-                || currentDateTimeFunction != null
-                || databaseClass != null
-                || liquibaseSchemaName != null
-                || liquibaseCatalogName != null
-                || databaseChangeLogTableName != null
-                || databaseChangeLogLockTableName != null
-                || liquibaseTablespaceName != null) {
+        if((driver != null) || (url != null) || (user != null) || (password != null) || (defaultSchemaName != null)
+            || (defaultCatalogName != null) || (currentDateTimeFunction != null) || (databaseClass != null) ||
+            (liquibaseSchemaName != null) || (liquibaseCatalogName != null) || (databaseChangeLogTableName != null)
+            || (databaseChangeLogLockTableName != null) || (liquibaseTablespaceName != null)) {
             throw tooManyAttributes();
         }
         super.setRefid(ref);

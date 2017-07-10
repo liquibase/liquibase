@@ -31,7 +31,8 @@ public class SmallIntType extends LiquibaseDataType {
             type.addAdditionalInformation(getAdditionalInformation());
             return type;
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if ((database instanceof DB2Database) || (database instanceof DerbyDatabase) || (database instanceof
+            FirebirdDatabase) || (database instanceof InformixDatabase)) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 
@@ -51,7 +52,7 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public String objectToSql(Object value, Database database) {
-        if (value == null || "null".equalsIgnoreCase(value.toString())) {
+        if ((value == null) || "null".equalsIgnoreCase(value.toString())) {
             return null;
         }
         if (value instanceof DatabaseFunction) {

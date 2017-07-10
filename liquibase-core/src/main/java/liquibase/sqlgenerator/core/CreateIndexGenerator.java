@@ -37,10 +37,9 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
                          SqlGeneratorChain sqlGeneratorChain) {
 
         Warnings warnings = super.warn(createIndexStatement, database, sqlGeneratorChain);
-        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase
-                || database instanceof DB2Database || database instanceof PostgresDatabase
-                || database instanceof MockDatabase)) {
-            if (createIndexStatement.isClustered() != null && createIndexStatement.isClustered()) {
+        if (!((database instanceof MSSQLDatabase) || (database instanceof OracleDatabase) || (database instanceof
+            DB2Database) || (database instanceof PostgresDatabase) || (database instanceof MockDatabase))) {
+            if ((createIndexStatement.isClustered() != null) && createIndexStatement.isClustered()) {
                 warnings.addWarning("Creating clustered index not supported with "+database);
             }
         }
@@ -71,18 +70,16 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	         *  parent table.
 		      */
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith != null &&
-                    (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)
-                    )) {
+		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
+                .contains(Index.MARK_UNIQUE_CONSTRAINT))) {
 			    return new Sql[0];
 		    }
 	    } else {
 		    // Default filter of index creation:
 		    // creation of all indexes with associations are switched off.
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
-		        associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
-				associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
+		    if ((associatedWith != null) && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith
+                .contains(Index.MARK_UNIQUE_CONSTRAINT) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
 			    return new Sql[0];
 		    }
 	    }
@@ -90,7 +87,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	    StringBuffer buffer = new StringBuffer();
 
 	    buffer.append("CREATE ");
-	    if (statement.isUnique() != null && statement.isUnique()) {
+	    if ((statement.isUnique() != null) && statement.isUnique()) {
 		    buffer.append("UNIQUE ");
 	    }
 
@@ -112,7 +109,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             buffer.append(database.escapeIndexName(statement.getTableCatalogName(), indexSchema, statement.getIndexName())).append(" ");
 	    }
 	    buffer.append("ON ");
-        if (database instanceof OracleDatabase && statement.isClustered() != null && statement.isClustered()){
+        if ((database instanceof OracleDatabase) && (statement.isClustered() != null) && statement.isClustered()){
             buffer.append("CLUSTER ");
         }
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
@@ -128,7 +125,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
                     buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName()));
                 }
             }
-            if (column.getDescending() != null && column.getDescending()) {
+            if ((column.getDescending() != null) && column.getDescending()) {
                 buffer.append(" DESC");
             }
             if (iterator.hasNext()) {
@@ -137,17 +134,17 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	    }
 	    buffer.append(")");
 
-	    if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
-		    if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
+	    if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
 			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if (database instanceof DB2Database || database instanceof InformixDatabase) {
+		    } else if ((database instanceof DB2Database) || (database instanceof InformixDatabase)) {
 			    buffer.append(" IN ").append(statement.getTablespace());
 		    } else {
 			    buffer.append(" TABLESPACE ").append(statement.getTablespace());
 		    }
 	    }
 
-        if (database instanceof DB2Database && statement.isClustered() != null && statement.isClustered()){
+        if ((database instanceof DB2Database) && (statement.isClustered() != null) && statement.isClustered()){
             buffer.append(" CLUSTER");
         }
 

@@ -58,10 +58,10 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
         boolean fullDefinitionOverridden = false;
         if (selectQuery == null) {
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
-        } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && !view.getColumns()
-            .isEmpty()) {
+        } else if ((comparisonDatabase instanceof OracleDatabase) && (view.getColumns() != null) && !view.getColumns
+            ().isEmpty()) {
             String viewName;
-            if (change.getCatalogName() == null && change.getSchemaName() == null) {
+            if ((change.getCatalogName() == null) && (change.getSchemaName() == null)) {
                 viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
             } else {
                 viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
@@ -70,7 +70,7 @@ public class ChangedViewChangeGenerator extends AbstractChangeGenerator implemen
                     + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
-                    if (((Column) obj).getComputed() != null && ((Column) obj).getComputed()) {
+                    if ((((Column) obj).getComputed() != null) && ((Column) obj).getComputed()) {
                         return ((Column) obj).getName();
                     } else {
                         return comparisonDatabase.escapeColumnName(null, null, null, ((Column) obj).getName(), false);
