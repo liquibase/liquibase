@@ -49,7 +49,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private Path classpath;
     private DatabaseType databaseType;
     private ChangeLogParametersType changeLogParameters;
-    private boolean promptOnNonLocalDatabase = false;
+    private boolean promptOnNonLocalDatabase;
 
     public BaseLiquibaseTask() {
         super();

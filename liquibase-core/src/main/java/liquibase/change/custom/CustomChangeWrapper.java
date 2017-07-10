@@ -45,7 +45,7 @@ public class CustomChangeWrapper extends AbstractChange {
 
     private ClassLoader classLoader;
 
-    private boolean configured = false;
+    private boolean configured;
 
     @Override
     public boolean generateStatementsVolatile(Database database) {

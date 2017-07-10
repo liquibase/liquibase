@@ -40,7 +40,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+VIEW\\s+(\\S+)\\s+?AS\\s*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private Boolean sendsStringParametersAsUnicode = null;
+    private Boolean sendsStringParametersAsUnicode;
 
     @Override
     public String getShortName() {

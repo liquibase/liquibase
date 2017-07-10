@@ -17,7 +17,7 @@ public class Context {
     public static final String LIQUIBASE_SDK_PROPERTIES_FILENAME = "liquibase.sdk.properties";
     private static final List<Class<?>> extensionInterfaces = Arrays.asList(Change.class, SqlGenerator.class);
     private static Context instance;
-    private boolean initialized = false;
+    private boolean initialized;
 
     private Set<Class> allClasses = new HashSet<>();
     private Map<Class, Set<Class>> seenExtensionClasses = new HashMap<>();

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class ContextExpression {
 
     private HashSet<String> contexts = new HashSet<>();
-    private String originalString = null;
+    private String originalString;
 
     public ContextExpression() {
     }

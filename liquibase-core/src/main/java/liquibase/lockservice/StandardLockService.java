@@ -31,13 +31,13 @@ public class StandardLockService implements LockService {
 
     protected Database database;
 
-    protected boolean hasChangeLogLock = false;
+    protected boolean hasChangeLogLock;
 
     private Long changeLogLockPollRate;
     private Long changeLogLockRecheckTime;
 
-    private Boolean hasDatabaseChangeLogLockTable = null;
-    private boolean isDatabaseChangeLogLockTableInitialized = false;
+    private Boolean hasDatabaseChangeLogLockTable;
+    private boolean isDatabaseChangeLogLockTableInitialized;
     private ObjectQuotingStrategy quotingStrategy;
 
 

@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class LogFactory {
     private final Map<String, Logger> loggers = new HashMap<>();
-    private static String defaultLoggingLevel = null;
+    private static String defaultLoggingLevel;
     private static DefaultLogger defaultLogger = new DefaultLogger();
 
     private static LogFactory instance;

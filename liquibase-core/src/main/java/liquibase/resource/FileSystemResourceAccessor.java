@@ -15,7 +15,7 @@ import java.util.zip.GZIPInputStream;
 public class FileSystemResourceAccessor extends AbstractResourceAccessor {
 
     private File baseDirectory;
-    private boolean readyForInit = false;
+    private boolean readyForInit;
 
     /**
      * Creates with no base directory. All files will be resolved exactly as they are given.

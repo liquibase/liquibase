@@ -63,7 +63,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String defaultSchema;
 
-    private boolean dropFirst = false;
+    private boolean dropFirst;
 
     private boolean shouldRun = true;
 

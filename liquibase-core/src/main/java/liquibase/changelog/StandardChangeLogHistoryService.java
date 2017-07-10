@@ -35,8 +35,8 @@ import java.util.*;
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
     private List<RanChangeSet> ranChangeSetList;
-    private boolean serviceInitialized = false;
-    private Boolean hasDatabaseChangeLogTable = null;
+    private boolean serviceInitialized;
+    private Boolean hasDatabaseChangeLogTable;
     private boolean databaseChecksumsCompatible = true;
     private Integer lastChangeSetSequenceValue;
 

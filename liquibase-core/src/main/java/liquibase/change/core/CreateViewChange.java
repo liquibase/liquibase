@@ -43,7 +43,7 @@ public class CreateViewChange extends AbstractChange {
 
 	private String path;
 	private Boolean relativeToChangelogFile;
-	private String encoding = null;
+	private String encoding;
 	private String remarks;
 
 	@DatabaseChangeProperty(since = "3.0")

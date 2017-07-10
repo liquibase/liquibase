@@ -9,7 +9,7 @@ import org.apache.tools.ant.BuildException;
  * Ant task for migrating a database forward testing rollback.
  */
 public class DatabaseUpdateTestingRollbackTask extends AbstractChangeLogBasedTask {
-    private boolean dropFirst = false;
+    private boolean dropFirst;
 
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {

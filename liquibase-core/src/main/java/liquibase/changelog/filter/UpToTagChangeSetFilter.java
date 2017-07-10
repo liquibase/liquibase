@@ -9,7 +9,7 @@ import java.util.List;
 
 public class UpToTagChangeSetFilter implements ChangeSetFilter {
     private final String tag;
-    private boolean seenTag = false;
+    private boolean seenTag;
 
     public UpToTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets) {
         this.tag = tag;

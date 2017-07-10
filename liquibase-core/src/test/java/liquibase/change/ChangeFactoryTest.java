@@ -225,7 +225,7 @@ public class ChangeFactoryTest {
 
     @LiquibaseService(skip = true)
     public static class SometimesExceptionThrowingChange extends CreateTableChange {
-        private static int timesCalled = 0;
+        private static int timesCalled;
         public SometimesExceptionThrowingChange() {
             if (timesCalled > 1) {
                 throw new RuntimeException("I throw exceptions");

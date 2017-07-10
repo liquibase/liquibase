@@ -12,7 +12,7 @@ import java.util.*;
 
 public class Main {
 
-    private boolean debug = false;
+    private boolean debug;
 
     private CommandLine globalArguments;
     private String command;

@@ -45,7 +45,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     protected final int ORACLE_12C_MAJOR_VERSION = 12;
 
     private Set<String> reservedWords = new HashSet<>();
-    private Set<String> userDefinedTypes = null;
+    private Set<String> userDefinedTypes;
     private Map<String, String> savedSessionNlsSettings;
 
     private Boolean canAccessDbaRecycleBin;

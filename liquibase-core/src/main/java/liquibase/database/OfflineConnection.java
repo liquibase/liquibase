@@ -29,10 +29,10 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> databaseParams = new HashMap<>();
-    private DatabaseSnapshot snapshot = null;
+    private DatabaseSnapshot snapshot;
     private OutputLiquibaseSql outputLiquibaseSql = OutputLiquibaseSql.NONE;
     private String changeLogFile = "databasechangelog.csv";
-    private boolean caseSensitive = false;
+    private boolean caseSensitive;
     private String productName;
     private String productVersion;
     private int databaseMajorVersion = 999;

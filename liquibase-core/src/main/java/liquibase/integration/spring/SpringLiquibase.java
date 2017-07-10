@@ -228,7 +228,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	protected String defaultSchema;
 
-	protected boolean dropFirst = false;
+	protected boolean dropFirst;
 
 	protected boolean shouldRun = true;
 

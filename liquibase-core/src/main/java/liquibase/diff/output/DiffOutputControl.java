@@ -30,10 +30,10 @@ public class DiffOutputControl {
     private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
-    private ObjectQuotingStrategy objectQuotingStrategy = null;
+    private ObjectQuotingStrategy objectQuotingStrategy;
 
-    private ContextExpression context = null;
-    private Labels labels = null;
+    private ContextExpression context;
+    private Labels labels;
 
     private ObjectChangeFilter objectChangeFilter;
 

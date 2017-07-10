@@ -32,7 +32,7 @@ import java.util.*;
  * @param <T> - class to convert the objects to.
  */
 public class CsvToBean<T> extends AbstractCSVToBean {
-   private Map<Class<?>, PropertyEditor> editorMap = null;
+   private Map<Class<?>, PropertyEditor> editorMap;
 
    /**
     * Default constructor.

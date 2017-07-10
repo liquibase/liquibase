@@ -15,7 +15,7 @@ import java.io.Writer;
  * Ant task for migrating a database forward.
  */
 public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
-    private boolean dropFirst = false;
+    private boolean dropFirst;
     private String toTag;
 
     @Override

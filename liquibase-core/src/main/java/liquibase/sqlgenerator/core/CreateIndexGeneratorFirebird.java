@@ -24,10 +24,10 @@ public class CreateIndexGeneratorFirebird extends CreateIndexGenerator {
     // Just a little value object for passing a complex result of the column analysis
     private final class ColumnAnalysisResult {
         private String columnExpression;
-        private boolean foundAscColumns = false;
-        private boolean foundDescColumns = false;
-        private int numComputedCols = 0;
-        private int numRegularCols = 0;
+        private boolean foundAscColumns;
+        private boolean foundDescColumns;
+        private int numComputedCols;
+        private int numRegularCols;
 
         public String getColumnExpression() {
             return columnExpression;

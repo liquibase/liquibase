@@ -49,8 +49,8 @@ public class CSVReader implements Closeable, Iterable<String[]> {
     private boolean keepCR;
     private boolean verifyReader;
 
-    private long linesRead = 0;
-    private long recordsRead = 0;
+    private long linesRead;
+    private long recordsRead;
 
     /**
      * Constructs CSVReader using a comma for the separator.

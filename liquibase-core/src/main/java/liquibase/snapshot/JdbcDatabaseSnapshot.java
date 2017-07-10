@@ -23,7 +23,7 @@ import java.util.Set;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
-    private boolean warnedAboutDbaRecycleBin = false;
+    private boolean warnedAboutDbaRecycleBin;
 
     private CachingDatabaseMetaData cachingDatabaseMetaData;
 
@@ -346,7 +346,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
             return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
-                public boolean isBulkFetchMode = false;
+                public boolean isBulkFetchMode;
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {

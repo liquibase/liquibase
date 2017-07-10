@@ -77,7 +77,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
     // most databases either lowercase or uppercase unuqoted objects such as table and column names.
-    protected Boolean unquotedObjectsAreUppercased = null;
+    protected Boolean unquotedObjectsAreUppercased;
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
     protected Boolean caseSensitive;
@@ -91,7 +91,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
 
-    private boolean defaultCatalogSet = false;
+    private boolean defaultCatalogSet;
 
     private Map<String, Object> attributes = new HashMap<>();
 

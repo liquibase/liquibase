@@ -20,7 +20,7 @@ public class ConfigurationProperty {
     private Object value;
     private String description;
     private Object defaultValue;
-    private boolean wasOverridden = false;
+    private boolean wasOverridden;
 
     public ConfigurationProperty(String namespace, String propertyName, Class type) {
         this.namespace = namespace;

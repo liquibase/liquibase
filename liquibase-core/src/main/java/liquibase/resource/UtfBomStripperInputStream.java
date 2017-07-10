@@ -20,7 +20,7 @@ public class UtfBomStripperInputStream extends PushbackInputStream {
 	private static final byte _0xFE = (byte) 0xFE;
 	private static final byte _0xEF = (byte) 0xEF;
 
-    private String detectedCharsetName = null;
+    private String detectedCharsetName;
 
 	public UtfBomStripperInputStream(InputStream in) throws IOException {
         super(in, 4);

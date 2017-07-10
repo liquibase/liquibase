@@ -40,8 +40,8 @@ import java.util.Map;
 public class HeaderColumnNameMappingStrategy<T> implements MappingStrategy<T> {
    protected String[] header;
    protected Map<String, Integer> indexLookup = new HashMap<>();
-   protected Map<String, PropertyDescriptor> descriptorMap = null;
-   protected Map<String, BeanField> fieldMap = null;
+   protected Map<String, PropertyDescriptor> descriptorMap;
+   protected Map<String, BeanField> fieldMap;
    protected Class<T> type;
    protected boolean annotationDriven;
    protected boolean determinedIfAnnotationDriven;

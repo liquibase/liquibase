@@ -38,7 +38,7 @@ public class DiffToChangeLog {
     public static final String ORDER_ATTRIBUTE = "order";
     public static final String DATABASE_CHANGE_LOG_CLOSING_XML_TAG = "</databaseChangeLog>";
     private String idRoot = String.valueOf(new Date().getTime());
-    private boolean overriddenIdRoot = false;
+    private boolean overriddenIdRoot;
 
     private int changeNumber = 1;
 

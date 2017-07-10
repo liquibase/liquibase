@@ -102,7 +102,7 @@ public class CSVParser {
     private final boolean ignoreQuotations;
     private final CSVReaderNullFieldIndicator nullFieldIndicator;
     private String pending;
-    private boolean inField = false;
+    private boolean inField;
 
     /**
      * Constructs CSVParser using a comma for the separator.

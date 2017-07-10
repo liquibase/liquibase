@@ -24,8 +24,8 @@ import java.util.Set;
 public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     private Set<DiffStatusListener> statusListeners = new HashSet<>();
 
-    private Class<? extends DatabaseObject> defaultFor = null;
-    private Class<? extends DatabaseObject>[] addsTo = null;
+    private Class<? extends DatabaseObject> defaultFor;
+    private Class<? extends DatabaseObject>[] addsTo;
 
     protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor) {
         this.defaultFor = defaultFor;

@@ -8,7 +8,7 @@ import liquibase.exception.LockException;
 public class OfflineLockService implements LockService {
 
     private Database database;
-    private boolean hasChangeLogLock = false;
+    private boolean hasChangeLogLock;
 
     @Override
     public int getPriority() {

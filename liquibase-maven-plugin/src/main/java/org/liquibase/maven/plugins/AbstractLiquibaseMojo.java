@@ -240,7 +240,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *
      * @parameter expression="${liquibase.skip}" default-value="false"
      */
-    protected boolean skip = false;
+    protected boolean skip;
 
     /**
      * Array to put a expression variable to maven plugin.

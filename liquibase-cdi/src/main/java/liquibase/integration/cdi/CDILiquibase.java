@@ -83,8 +83,8 @@ public class CDILiquibase implements Extension {
     @Inject @LiquibaseType
     ResourceAccessor resourceAccessor;
 
-    private boolean initialized = false;
-    private boolean updateSuccessful = false;
+    private boolean initialized;
+    private boolean updateSuccessful;
 
     public boolean isInitialized() {
         return initialized;

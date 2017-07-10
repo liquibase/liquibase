@@ -36,7 +36,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
      * Output CREATE TABLE LIQUIBASECHANGELOG or not
      */
     private boolean executeDdlAgainstDatabase = true;
-    private int COLUMN_ID = 0;
+    private int COLUMN_ID;
     private int COLUMN_AUTHOR = 1;
     private int COLUMN_FILENAME = 2;
     private int COLUMN_DATEEXECUTED = 3;

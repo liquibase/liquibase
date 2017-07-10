@@ -21,7 +21,7 @@ public class UtfBomAwareReader extends Reader {
 	private static final byte _0xEF = (byte) 0xEF;
 
 	private PushbackInputStream pis;
-	private InputStreamReader is = null;
+	private InputStreamReader is;
 	private String defaultCharsetName;
 
 	public UtfBomAwareReader(InputStream in) {

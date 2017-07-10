@@ -27,7 +27,7 @@ import java.util.*;
 
 public class YamlSnapshotSerializer extends YamlSerializer implements SnapshotSerializer {
 
-    private boolean alreadySerializingObject = false;
+    private boolean alreadySerializingObject;
 
     @Override
     public void write(DatabaseSnapshot snapshot, OutputStream out) throws IOException {

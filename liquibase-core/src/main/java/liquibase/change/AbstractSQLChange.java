@@ -31,7 +31,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String sql;
     private String dbms;
 
-    protected String encoding = null;
+    protected String encoding;
 
 
     protected AbstractSQLChange() {
@@ -265,7 +265,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
 
         private int lastChar = 'X';
-        private boolean seenNonSpace = false;
+        private boolean seenNonSpace;
 
         public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
             this.stream = new PushbackInputStream(stream, 2048);
