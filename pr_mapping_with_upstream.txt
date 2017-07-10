@@ -106,4 +106,8 @@ request number (pr#) to maximise its usefulness. Thank you.
 623     MERGED         Don't hardcode version dependencies using 'Class-Path:' in MANIFEST.MF - 3.5.x
 622     DUPLICATE      Another version of #623 (already merged)
 621     MERGED         Fix some required fields in the preconditions
+620     N/A            Made ChangeWithColumns extend Change so that an extension would have …
+                       It seems the original author did not want to merge that change any more (from what he wrote
+                       in his comments), but did not delete the PR. Skipping it for now.
+
 596     DUPLICATE      of pr #655
