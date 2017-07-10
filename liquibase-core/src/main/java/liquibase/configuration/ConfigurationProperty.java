@@ -96,7 +96,7 @@ public class ConfigurationProperty {
             } else if (type.equals(BigDecimal.class)) {
                 return new BigDecimal((String) value);
             } else if (type.equals(Long.class)) {
-            	return Long.valueOf((String) value);
+                return Long.valueOf((String) value);
             } else {
                 throw new UnexpectedLiquibaseException("Cannot parse property "+type.getSimpleName()+" to a "+type.getSimpleName());
             }

@@ -12,9 +12,9 @@ public class CreateIndexStatement extends AbstractSqlStatement {
     private AddColumnConfig[] columns;
     private String tablespace;
     private Boolean unique;
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
-	private String associatedWith;
+    // Contain associations of index
+    // for example: foreignKey, primaryKey or uniqueConstraint
+    private String associatedWith;
     private Boolean clustered;
 
     public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, AddColumnConfig... columns) {
@@ -24,7 +24,7 @@ public class CreateIndexStatement extends AbstractSqlStatement {
         this.tableName = tableName;
         this.columns = columns;
         this.unique = isUnique;
-	    this.associatedWith = associatedWith;
+        this.associatedWith = associatedWith;
     }
 
     public String getTableCatalogName() {
@@ -61,13 +61,13 @@ public class CreateIndexStatement extends AbstractSqlStatement {
         return unique;
     }
 
-	public String getAssociatedWith() {
-		return associatedWith;
-	}
+    public String getAssociatedWith() {
+        return associatedWith;
+    }
 
-	public void setAssociatedWith(String associatedWith) {
-		this.associatedWith = associatedWith;
-	}
+    public void setAssociatedWith(String associatedWith) {
+        this.associatedWith = associatedWith;
+    }
 
     public Boolean isClustered() {
         return clustered;

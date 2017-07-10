@@ -66,15 +66,15 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         if (statement.getOrdered() != null) {
-        	if (!(database instanceof SybaseASADatabase)) {
-	            if (statement.getOrdered()) {
-	                buffer.append(" ORDER");
-	            } else {
-	               if (database instanceof OracleDatabase) {
-	                   buffer.append(" NOORDER");
-	               }
-	            }
-        	}
+            if (!(database instanceof SybaseASADatabase)) {
+                if (statement.getOrdered()) {
+                    buffer.append(" ORDER");
+                } else {
+                   if (database instanceof OracleDatabase) {
+                       buffer.append(" NOORDER");
+                   }
+                }
+            }
         }
         if (statement.getCycle() != null) {
             if (statement.getCycle()) {

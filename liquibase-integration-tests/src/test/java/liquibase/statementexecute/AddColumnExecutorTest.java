@@ -32,7 +32,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_autoIncrement() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new AutoIncrementConstraint("column_name"));
 
@@ -46,7 +46,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_notNull() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, null, "table_name", "column_name", "int", 42, new NotNullConstraint());
         assertCorrect("alter table [table_name] add [column_name] int default 42 not null", SybaseASADatabase.class, SybaseDatabase.class);
@@ -100,7 +100,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_primaryKey() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint());
 
@@ -113,7 +113,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void generateSql_foreignKey() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint(), new ForeignKeyConstraint("fk_test_fk", "table_name(column_name)"));
 

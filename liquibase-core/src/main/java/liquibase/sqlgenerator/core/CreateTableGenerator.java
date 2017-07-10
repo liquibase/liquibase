@@ -31,9 +31,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+
         List<Sql> additionalSql = new ArrayList<>();
-    	
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(),
             statement.getSchemaName(), statement.getTableName())).append(" ");
@@ -118,12 +118,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     }
 
                     if( autoIncrementConstraint.getStartWith() != null ){
-	                    if (database instanceof PostgresDatabase) {
-	                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
-	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
-	                    }else if(database instanceof MySQLDatabase){
-	                    	mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
-	                    }
+                        if (database instanceof PostgresDatabase) {
+                            String sequenceName = statement.getTableName()+"_"+column+"_seq";
+                            additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+                        }else if(database instanceof MySQLDatabase){
+                            mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
+                        }
                     }
                 } else {
                     LogFactory.getInstance().getLog().warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
@@ -260,8 +260,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
 
         if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)){
-        	LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
-        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
+            LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+            sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
         if ((statement.getTablespace() != null) && database.supportsTablespaces()) {

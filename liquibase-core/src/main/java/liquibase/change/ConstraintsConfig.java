@@ -262,13 +262,13 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
      * Returns the tablespace to use for the defined primary key. Returns null if not specified.
      */
     public String getPrimaryKeyTablespace() {
-		return primaryKeyTablespace;
-	}
+        return primaryKeyTablespace;
+    }
 
-	public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
-		this.primaryKeyTablespace = primaryKeyTablespace;
+    public ConstraintsConfig setPrimaryKeyTablespace(String primaryKeyTablespace) {
+        this.primaryKeyTablespace = primaryKeyTablespace;
         return this;
-	}
+    }
 
     public String getReferencedTableCatalogName() {
         return referencedTableCatalogName;

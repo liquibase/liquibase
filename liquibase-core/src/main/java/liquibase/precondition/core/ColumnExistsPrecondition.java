@@ -75,13 +75,13 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-		if (canCheckFast(database)) {
-			checkFast(database, changeLog);
+        if (canCheckFast(database)) {
+            checkFast(database, changeLog);
 
-		} else {
-			checkUsingSnapshot(database, changeLog, changeSet);
-		}
-	}
+        } else {
+            checkUsingSnapshot(database, changeLog, changeSet);
+        }
+    }
 
     private void checkUsingSnapshot(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
@@ -99,40 +99,40 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
         }
     }
 
-	private boolean canCheckFast(Database database) {
-		if (getCatalogName() != null)
-			return false;
+    private boolean canCheckFast(Database database) {
+        if (getCatalogName() != null)
+            return false;
 
-		if (!(database.getConnection() instanceof JdbcConnection))
-			return false;
+        if (!(database.getConnection() instanceof JdbcConnection))
+            return false;
 
-		if (getColumnName() == null)
-			return false;
+        if (getColumnName() == null)
+            return false;
 
-		if (!getColumnName().matches("(?i)[a-z][a-z_0-9]*"))
-			return false;
+        if (!getColumnName().matches("(?i)[a-z][a-z_0-9]*"))
+            return false;
 
-		if (!((getSchemaName() != null) || (database.getDefaultSchemaName() != null))) {
-			return false;
-		}
+        if (!((getSchemaName() != null) || (database.getDefaultSchemaName() != null))) {
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	private void checkFast(Database database, DatabaseChangeLog changeLog)
-			throws PreconditionFailedException, PreconditionErrorException {
+    private void checkFast(Database database, DatabaseChangeLog changeLog)
+            throws PreconditionFailedException, PreconditionErrorException {
 
-		Statement statement = null;
-		try {
-			statement = ((JdbcConnection) database.getConnection())
-					.createStatement();
+        Statement statement = null;
+        try {
+            statement = ((JdbcConnection) database.getConnection())
+                    .createStatement();
 
-			String schemaName = getSchemaName();
-			if (schemaName == null) {
-				schemaName = database.getDefaultSchemaName();
-			}
-			String tableName = getTableName();
-			String columnName = getColumnName();
+            String schemaName = getSchemaName();
+            if (schemaName == null) {
+                schemaName = database.getDefaultSchemaName();
+            }
+            String tableName = getTableName();
+            String columnName = getColumnName();
 
             if (database instanceof PostgresDatabase) {
                 String sql = "SELECT 1 FROM pg_attribute a WHERE EXISTS (SELECT 1 FROM pg_class JOIN pg_catalog.pg_namespace ns ON ns.oid = pg_class.relnamespace WHERE lower(ns.nspname)='"+schemaName.toLowerCase()+"' AND lower(relname) = lower('"+tableName+"') AND pg_class.oid = a.attrelid) AND lower(a.attname) = lower('"+columnName+"');";
@@ -154,29 +154,29 @@ public class ColumnExistsPrecondition extends AbstractPrecondition {
             }
 
             try {
-				String sql = format("select t.%s from %s.%s t where 0=1",
-						database.escapeColumnNameList(columnName),
-						database.escapeObjectName(schemaName, Schema.class),
-						database.escapeObjectName(tableName, Table.class));
-				statement.executeQuery(sql).close();
+                String sql = format("select t.%s from %s.%s t where 0=1",
+                        database.escapeColumnNameList(columnName),
+                        database.escapeObjectName(schemaName, Schema.class),
+                        database.escapeObjectName(tableName, Table.class));
+                statement.executeQuery(sql).close();
 
-				// column exists
-				return;
+                // column exists
+                return;
 
-			} catch (SQLException e) {
-				// column or table does not exist
-				throw new PreconditionFailedException(format(
-						"Column %s.%s.%s does not exist", schemaName,
-						tableName, columnName), changeLog, this);
-			}
+            } catch (SQLException e) {
+                // column or table does not exist
+                throw new PreconditionFailedException(format(
+                        "Column %s.%s.%s does not exist", schemaName,
+                        tableName, columnName), changeLog, this);
+            }
 
-		} catch (DatabaseException e) {
-			throw new PreconditionErrorException(e, changeLog, this);
+        } catch (DatabaseException e) {
+            throw new PreconditionErrorException(e, changeLog, this);
 
-		} finally {
-			JdbcUtils.closeStatement(statement);
-		}
-	}
+        } finally {
+            JdbcUtils.closeStatement(statement);
+        }
+    }
 
     @Override
     public String getName() {

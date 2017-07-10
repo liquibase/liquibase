@@ -89,7 +89,7 @@ public class ChangeLogSerializerFactoryTest {
         XMLChangeLogSerializer highestPriority = new XMLChangeLogSerializer() {
             @Override
             public int getPriority() {
-            	return super.getPriority() + 4;
+                return super.getPriority() + 4;
             }
         };
         factory.register(highestPriority);
@@ -97,7 +97,7 @@ public class ChangeLogSerializerFactoryTest {
         XMLChangeLogSerializer higherPriority = new XMLChangeLogSerializer() {
             @Override
             public int getPriority() {
-            	return super.getPriority() + 1;
+                return super.getPriority() + 1;
             }
         };
         factory.register(higherPriority);

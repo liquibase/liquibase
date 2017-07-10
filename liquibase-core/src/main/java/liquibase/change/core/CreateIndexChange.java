@@ -27,9 +27,9 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String tablespace;
     private List<AddColumnConfig> columns;
 
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
-	private String associatedWith;
+    // Contain associations of index
+    // for example: foreignKey, primaryKey or uniqueConstraint
+    private String associatedWith;
     private Boolean clustered;
 
 
@@ -95,18 +95,18 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-	    return new SqlStatement[]{
+        return new SqlStatement[]{
                 new CreateIndexStatement(
-					    getIndexName(),
+                        getIndexName(),
                         getCatalogName(),
-					    getSchemaName(),
-					    getTableName(),
-					    this.isUnique(),
-					    getAssociatedWith(),
-					    getColumns().toArray(new AddColumnConfig[getColumns().size()]))
-					    .setTablespace(getTablespace())
+                        getSchemaName(),
+                        getTableName(),
+                        this.isUnique(),
+                        getAssociatedWith(),
+                        getColumns().toArray(new AddColumnConfig[getColumns().size()]))
+                        .setTablespace(getTablespace())
                         .setClustered(getClustered())
-	    };
+        };
     }
 
     @Override
@@ -165,21 +165,21 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return this.unique;
     }
 
-	/**
-	 * @return Index associations. Valid values:<br>
-	 * <li>primaryKey</li>
-	 * <li>foreignKey</li>
-	 * <li>uniqueConstraint</li>
-	 * <li>none</li>
-	 * */
+    /**
+     * @return Index associations. Valid values:<br>
+     * <li>primaryKey</li>
+     * <li>foreignKey</li>
+     * <li>uniqueConstraint</li>
+     * <li>none</li>
+     * */
     @DatabaseChangeProperty(isChangeProperty = false)
-	public String getAssociatedWith() {
-		return associatedWith;
-	}
+    public String getAssociatedWith() {
+        return associatedWith;
+    }
 
-	public void setAssociatedWith(String associatedWith) {
-		this.associatedWith = associatedWith;
-	}
+    public void setAssociatedWith(String associatedWith) {
+        this.associatedWith = associatedWith;
+    }
 
 
     @DatabaseChangeProperty(since = "3.0")

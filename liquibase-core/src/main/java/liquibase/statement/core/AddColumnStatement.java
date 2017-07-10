@@ -149,28 +149,28 @@ public class AddColumnStatement extends AbstractSqlStatement {
     }
 
     public String getAddAfterColumn() {
-    	return addAfterColumn;
+        return addAfterColumn;
     }
 
     public void setAddAfterColumn(String addAfterColumn) {
-		this.addAfterColumn = addAfterColumn;
-	}
+        this.addAfterColumn = addAfterColumn;
+    }
 
     public String getAddBeforeColumn() {
-    	return addBeforeColumn;
+        return addBeforeColumn;
     }
 
     public void setAddBeforeColumn(String addBeforeColumn) {
-		this.addBeforeColumn = addBeforeColumn;
-	}
+        this.addBeforeColumn = addBeforeColumn;
+    }
 
-	public Integer getAddAtPosition() {
-		return addAtPosition;
-	}
+    public Integer getAddAtPosition() {
+        return addAtPosition;
+    }
 
-	public void setAddAtPosition(Integer addAtPosition) {
-		this.addAtPosition = addAtPosition;
-	}
+    public void setAddAtPosition(Integer addAtPosition) {
+        this.addAtPosition = addAtPosition;
+    }
 
     public String getDefaultValueConstraintName() {
         return defaultValueConstraintName;

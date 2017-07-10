@@ -31,9 +31,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
     @Override
     public ValidationErrors validate(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+            AddAutoIncrementStatement statement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -46,9 +46,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
     @Override
     public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+            AddAutoIncrementStatement statement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
         String sql = "ALTER TABLE "
             + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             + " MODIFY "

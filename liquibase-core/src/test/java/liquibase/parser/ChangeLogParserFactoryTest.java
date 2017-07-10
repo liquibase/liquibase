@@ -68,7 +68,7 @@ public class ChangeLogParserFactoryTest {
     }
 
     @SuppressWarnings("unchecked")
-	@Test
+    @Test
     public void builtInGeneratorsAreFound() {
         List<ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
         assertEquals(5, generators.size());

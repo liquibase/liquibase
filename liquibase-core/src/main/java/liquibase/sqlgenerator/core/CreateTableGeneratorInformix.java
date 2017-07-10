@@ -44,11 +44,11 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
      * @param sqlGeneratorChain Other generators in the pipeline for this command
      * @return An array of Sql[] statements containing the requested SQL statements for Informix SQL
      */
-	@Override
+    @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
 
-		// CREATE TABLE table_name ...
+        // CREATE TABLE table_name ...
         buffer.append("CREATE TABLE ")
                 .append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
                 .append(" ");
@@ -88,11 +88,11 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 .getPrimaryKeyConstraint().getColumns().contains(column);
 
             if (isPrimaryKeyColumn) {
-            	primaryKeyColumns.add(column);
+                primaryKeyColumns.add(column);
             }
             
             if (statement.getDefaultValue(column) != null) {
-            	Object defaultValue = statement.getDefaultValue(column);
+                Object defaultValue = statement.getDefaultValue(column);
                 buffer.append(" DEFAULT ");
                 buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
             }
@@ -198,9 +198,9 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         }
 
         return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
-	}
+    }
 
-	private boolean constraintNameAfterUnique(Database database) {
-		return true;
-	}
+    private boolean constraintNameAfterUnique(Database database) {
+        return true;
+    }
 }

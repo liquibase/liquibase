@@ -30,15 +30,15 @@ public class ChangeFactoryTest {
         ChangeFactory.reset();
     }
 
-	@Test
-	public void supportStatement() throws Exception {
-		CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
-		MSSQLDatabase database10 = new MSSQLDatabase() {
+    @Test
+    public void supportStatement() throws Exception {
+        CreateSequenceStatement statement = new CreateSequenceStatement(null, null, "seq_my_table");
+        MSSQLDatabase database10 = new MSSQLDatabase() {
             @Override
             public int getDatabaseMajorVersion() throws DatabaseException {
                 return SQL_SERVER_2008_MAJOR_VERSION;
             }
-		};
+        };
 
         MSSQLDatabase database11 = new MSSQLDatabase() {
             @Override
@@ -48,11 +48,11 @@ public class ChangeFactoryTest {
         };
 
         ChangeFactory.getInstance(); //make sure there is no problem with SqlGeneratorFactory.generatorsByKey cache
-		assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
+        assertFalse("unsupported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database10));
         assertTrue("supported create sequence", SqlGeneratorFactory.getInstance().supports(statement, database11));
-	}
+    }
 
-	@Test
+    @Test
     public void constructor() {
         ChangeFactory instance = ChangeFactory.getInstance();
         assertTrue(instance.getRegistry().containsKey("createTable"));

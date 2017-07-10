@@ -12,26 +12,26 @@ import java.util.Properties;
 
 public class ChangeExecListenerUtilsTest extends Assert {
 //	private Database database = createMock(Database.class);
-	private ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();
-	
-	private File tmpFile;
-	
-	@Before
-	public void setup() throws Exception {
-		tmpFile = File.createTempFile("changeExecListener", ".properties");
-		FileOutputStream out = new FileOutputStream(tmpFile);
-		
-		Properties properties = new Properties();
-		properties.put("test", "value");
-		properties.put("exclusions", "table.name, table2.name2");
-		properties.store(out, "");
-	}
-	
-	@After
-	public void tearDown() throws Exception {
-		tmpFile.delete();
-	}
-	
+    private ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();
+
+    private File tmpFile;
+
+    @Before
+    public void setup() throws Exception {
+        tmpFile = File.createTempFile("changeExecListener", ".properties");
+        FileOutputStream out = new FileOutputStream(tmpFile);
+
+        Properties properties = new Properties();
+        properties.put("test", "value");
+        properties.put("exclusions", "table.name, table2.name2");
+        properties.store(out, "");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        tmpFile.delete();
+    }
+
 //	@Test
 //	public void testWithProperties() throws Exception {
 //		ChangeExecListenerWithProperties listener =

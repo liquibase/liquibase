@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChangeLogParameters {
-	
+
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<>();
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
@@ -91,12 +91,12 @@ public class ChangeLogParameters {
     }
 
     public void set(String paramter, Object value) {
-    	// TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in #findParameter() is only catching the first one. So here we should eliminate duplicate entries
-		ChangeLogParameter param = findParameter(paramter, null);
-		if (param == null) {
-			// okay add it
-	        changeLogParameters.add(new ChangeLogParameter(paramter, value));
-		}
+        // TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in #findParameter() is only catching the first one. So here we should eliminate duplicate entries
+        ChangeLogParameter param = findParameter(paramter, null);
+        if (param == null) {
+            // okay add it
+            changeLogParameters.add(new ChangeLogParameter(paramter, value));
+        }
     }
 
     public void set(String key, String value, String contexts, String labels, String databases, boolean globalParam, DatabaseChangeLog changeLog) {
@@ -104,18 +104,18 @@ public class ChangeLogParameters {
     }
     
     public void set(String key, String value, ContextExpression contexts, Labels labels, String databases, boolean globalParam, DatabaseChangeLog changeLog) {
-    	// TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in #findParameter() is only catching the first one. So here we should eliminate duplicate entries
-    	if (globalParam == true) {
-    		// if it is global param ignore additional adds
-    		ChangeLogParameter param = findParameter(key, null);
-    		if (param == null) {
-    			// okay add it
-    	        changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
-    		}
-    	} else {
-    		//this is a non-global param, just add it
-    		changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
-    	}
+        // TODO: this was a bug. Muliple created parameters have been created, but the corresponding method in #findParameter() is only catching the first one. So here we should eliminate duplicate entries
+        if (globalParam == true) {
+            // if it is global param ignore additional adds
+            ChangeLogParameter param = findParameter(key, null);
+            if (param == null) {
+                // okay add it
+                changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
+            }
+        } else {
+            //this is a non-global param, just add it
+            changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases, globalParam, changeLog));
+        }
     }
 
     /**
@@ -131,24 +131,24 @@ public class ChangeLogParameters {
     }
 
     private ChangeLogParameter findParameter(String key, DatabaseChangeLog changeLog) {
-    	ChangeLogParameter result = null;
-    	
-    	List<ChangeLogParameter> found = new ArrayList<>();
+        ChangeLogParameter result = null;
+
+        List<ChangeLogParameter> found = new ArrayList<>();
         for (ChangeLogParameter param : changeLogParameters) {
             if (param.getKey().equalsIgnoreCase(key) && param.isValid()) {
-            	found.add(param);
+                found.add(param);
             }
         }
         
         if (found.size() == 1) {
-        	// this case is typically a global param, but could also be a unique non-global param in one specific changelog
-        	result = found.get(0);
+            // this case is typically a global param, but could also be a unique non-global param in one specific changelog
+            result = found.get(0);
         } else if (found.size() > 1) {
-        	for (ChangeLogParameter changeLogParameter : found) {
-				if (changeLogParameter.getChangeLog() == changeLog) {
-					result = changeLogParameter;
-				}
-			}
+            for (ChangeLogParameter changeLogParameter : found) {
+                if (changeLogParameter.getChangeLog() == changeLog) {
+                    result = changeLogParameter;
+                }
+            }
         }
         
         return result;
@@ -242,17 +242,17 @@ public class ChangeLogParameters {
             return isValid;
         }
 
-		public boolean isGlobal() {
-			return global;
-		}
+        public boolean isGlobal() {
+            return global;
+        }
 
-		public DatabaseChangeLog getChangeLog() {
-			return changeLog;
-		}
+        public DatabaseChangeLog getChangeLog() {
+            return changeLog;
+        }
     }
 
     protected static class ExpressionExpander {
-    	private boolean enableEscaping;
+        private boolean enableEscaping;
         private ChangeLogParameters changeLogParameters;
         private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
 
@@ -281,7 +281,7 @@ public class ChangeLogParameters {
             
             // replace all escaped expressions with its literal
             if (enableEscaping) {
-            	text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
+                text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
             }
             
             return text;

@@ -97,7 +97,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
 ////        }
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
-	    pkConstraint.setTablespace(tablespace);
+        pkConstraint.setTablespace(tablespace);
 
         List<ColumnConstraint> allConstraints = new ArrayList<>();
         allConstraints.addAll(Arrays.asList(constraints));
@@ -227,7 +227,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return defaultValueConstraintNames;
     }
 
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
 }

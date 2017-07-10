@@ -37,23 +37,23 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
             return new Sql[0];
         }
 
-	    StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new StringBuilder();
 
-	    buffer.append("CREATE ");
-	    if ((statement.isUnique() != null) && statement.isUnique()) {
-		    buffer.append("UNIQUE ");
-	    }
-	    buffer.append("INDEX ");
+        buffer.append("CREATE ");
+        if ((statement.isUnique() != null) && statement.isUnique()) {
+            buffer.append("UNIQUE ");
+        }
+        buffer.append("INDEX ");
 
-	    if (statement.getIndexName() != null) {
+        if (statement.getIndexName() != null) {
             // for postgres setting the schema name for the index name is invalid
             buffer.append(database.escapeObjectName(statement.getIndexName(), Index.class)).append(" ");
-	    }
-	    buffer.append("ON ");
-	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
-	    while (iterator.hasNext()) {
-		    AddColumnConfig column = iterator.next();
+        }
+        buffer.append("ON ");
+        buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
+        Iterator<AddColumnConfig> iterator = Arrays.asList(statement.getColumns()).iterator();
+        while (iterator.hasNext()) {
+            AddColumnConfig column = iterator.next();
             if (column.getComputed() == null) {
                 buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column.getName(), false));
             } else {
@@ -64,20 +64,20 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
                 }
             }
             if (iterator.hasNext()) {
-			    buffer.append(", ");
-		    }
-	    }
-	    buffer.append(")");
+                buffer.append(", ");
+            }
+        }
+        buffer.append(")");
 
-	    if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
-		    if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
-			    buffer.append(" ON ").append(statement.getTablespace());
-		    } else if ((database instanceof DB2Database) || (database instanceof InformixDatabase)) {
-			    buffer.append(" IN ").append(statement.getTablespace());
-		    } else {
-			    buffer.append(" TABLESPACE ").append(statement.getTablespace());
-		    }
-	    }
+        if ((StringUtils.trimToNull(statement.getTablespace()) != null) && database.supportsTablespaces()) {
+            if ((database instanceof MSSQLDatabase) || (database instanceof SybaseASADatabase)) {
+                buffer.append(" ON ").append(statement.getTablespace());
+            } else if ((database instanceof DB2Database) || (database instanceof InformixDatabase)) {
+                buffer.append(" IN ").append(statement.getTablespace());
+            } else {
+                buffer.append(" TABLESPACE ").append(statement.getTablespace());
+            }
+        }
 
         if ((statement.isClustered() != null) && statement.isClustered()) {
             return new Sql[]{

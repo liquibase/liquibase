@@ -41,7 +41,7 @@ public class BooleanType extends LiquibaseDataType {
             if (originalDefinition.toLowerCase().startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
-	}
+    }
 
         return super.toDatabaseDataType(database);
     }

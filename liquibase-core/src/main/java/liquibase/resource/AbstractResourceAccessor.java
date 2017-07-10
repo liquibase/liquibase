@@ -14,7 +14,7 @@ import java.util.*;
 public abstract class AbstractResourceAccessor implements ResourceAccessor {
 
     //We don't use an HashSet otherwise iteration order is not deterministic
-	private List<String> rootStrings = new ArrayList<>();
+    private List<String> rootStrings = new ArrayList<>();
 
     protected AbstractResourceAccessor() {
         init();
@@ -52,7 +52,7 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         if (path == null) {
             return;
         }
-    	String externalForm = path.toExternalForm();
+        String externalForm = path.toExternalForm();
         if (externalForm.startsWith("file:")) {
             try {
                 externalForm = new File(path.toURI()).getCanonicalFile().toURI().toURL().toExternalForm();
@@ -60,12 +60,12 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
                 //keep original version
             }
         }
-    	if (!externalForm.endsWith("/")) {
-    		externalForm += "/";
-    	}
-    	if (!rootStrings.contains(externalForm)) {
-    		rootStrings.add(externalForm);
-    	}
+        if (!externalForm.endsWith("/")) {
+            externalForm += "/";
+        }
+        if (!rootStrings.contains(externalForm)) {
+            rootStrings.add(externalForm);
+        }
     }
 
     protected List<String> getRootPaths() {
@@ -158,10 +158,10 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         }
         String separator = "";
         if (!base.endsWith("/") && !path.startsWith("/")) {
-        	separator = "/";
+            separator = "/";
         }
         if (base.endsWith("/") && path.startsWith("/")) {
-        	base = base.substring(0, base.length() - 1);
+            base = base.substring(0, base.length() - 1);
         }            
         return convertToPath(base + separator + path);
     }

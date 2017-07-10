@@ -16,12 +16,12 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     
     public AddAutoIncrementStatement(
             String catalogName,
-    		String schemaName,
-    		String tableName,
-    		String columnName,
-    		String columnDataType,
-    		BigInteger startWith,
-    		BigInteger incrementBy) {
+            String schemaName,
+            String tableName,
+            String columnName,
+            String columnDataType,
+            BigInteger startWith,
+            BigInteger incrementBy) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -52,10 +52,10 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     }
     
     public BigInteger getStartWith() {
-    	return startWith;
+        return startWith;
     }
     
     public BigInteger getIncrementBy() {
-    	return incrementBy;
+        return incrementBy;
     }
 }
