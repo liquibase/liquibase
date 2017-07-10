@@ -110,4 +110,5 @@ request number (pr#) to maximise its usefulness. Thank you.
                        It seems the original author did not want to merge that change any more (from what he wrote
                        in his comments), but did not delete the PR. Skipping it for now.
 619     MERGED         Avoid null pointer exception on snapshot action
+618     MERGED         Fix the escaping of object name on the MS SQL
 596     DUPLICATE      of pr #655

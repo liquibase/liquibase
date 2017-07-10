@@ -109,6 +109,8 @@ bug list (https://dbmanul.atlassian.net).
 - When snapshotting a SQL Server database, invalid `[].` prefixes that appear in front of identifiers could be generated
   due to a problem in schema name processing. This caused invalid SQL to be generated. The problem was fixed in
   commit cabacfe3593324f5223e53496d80c894f48abfa2.
+- The quotingStrategy attribute did not work on SQL Server, as well as the `--outputDefaultSchema` command line
+  option. Thanks to Pavel Vojtechovsky for the bug fix (edff877eeec5b0c053c9ca7e1c094c7614b923a8)
 
 #### MySQL / MariaDB
  - [CORE-3040] - onlyUpdate="true" flag generates empty statements for MySQL DB. Thanks to Luciano Boschi
