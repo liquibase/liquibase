@@ -112,17 +112,17 @@ public class Main {
         System.err.println(msg);
     }
 
-    public static void main(String[] args) throws CommandLineParsingException, IOException {
+    public static void main(String[] args) {
         int errorLevel = 0;
         try {
             errorLevel = run(args);
-        } catch (LiquibaseException ignored) {
+        } catch (LiquibaseException|CommandLineParsingException ignored) {
             System.exit(-1);
         }
         System.exit(errorLevel);
     }
 
-    public static int run(String[] args) throws CommandLineParsingException, IOException, LiquibaseException {
+    public static int run(String[] args) throws CommandLineParsingException, LiquibaseException {
         try {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration
                     (GlobalConfiguration.class);
@@ -213,7 +213,8 @@ public class Main {
      * @return An array of exactly 2 entries
      * @throws CommandLineParsingException if the string cannot be split into exactly 2 parts
      */
-    @SuppressWarnings("squid:S109") // What the number 2 stands for is obvious from the context
+    // What the number 2 stands for is obvious from the context
+    @SuppressWarnings("squid:S109")
     private static String[] splitArg(String arg) throws CommandLineParsingException {
         String[] splitArg = arg.split("=", 2);
         if (splitArg.length < 2) {
@@ -421,8 +422,9 @@ public class Main {
                     i++;
                 }
             }
-
-            arg = arg.replace("\\,", ","); //sometimes commas come through escaped still
+    
+            // Sometimes, commas are still escaped as \, at this point, fix it:
+            arg = arg.replace("\\,", ",");
             fixedArgs.add(arg);
         }
 
@@ -529,12 +531,14 @@ public class Main {
     }
 
     private void checkForMalformedCommandParameters(final List<String> messages) {
-        @SuppressWarnings("squid:S00117") // SONAR should not complain about local constants
+        // SONAR should not complain about local constants
+        @SuppressWarnings("squid:S00117")
         final int CHANGESET_MINIMUM_IDENTIFIER_PARTS = 3;
 
-        if (commandParams.isEmpty())
+        if (commandParams.isEmpty()) {
             return;
-
+        }
+        
         if (COMMANDS.CALCULATE_CHECKSUM.equalsIgnoreCase(command)) {
             for (final String param : commandParams) {
                 if (param != null && !param.startsWith("-")) {
@@ -641,7 +645,8 @@ public class Main {
                 }
                 seenCommand = true;
             } else if (seenCommand) {
-                if (arg.startsWith("-D")) { // ChangeLog parameter
+                // ChangeLog parameter:
+                if (arg.startsWith("-D")) {
                     String[] splitArg = splitArg(arg);
 
                     String attributeName = splitArg[0].replaceFirst("^-D", "");
@@ -650,8 +655,9 @@ public class Main {
                     changeLogParameters.put(attributeName, value);
                 } else {
                     commandParams.add(arg);
-                    if (arg.startsWith("--"))
+                    if (arg.startsWith("--")) {
                         parseOptionArgument(arg);
+                    }
                 }
             } else if (arg.startsWith("--")) {
                 parseOptionArgument(arg);
@@ -673,7 +679,8 @@ public class Main {
      * @throws CommandLineParsingException if a problem occurs
      */
     private void parseOptionArgument(String arg) throws CommandLineParsingException {
-        @SuppressWarnings("squid:S00117") // SONAR should not complain about local constants
+        // SONAR should not complain about local constants:
+        @SuppressWarnings("squid:S00117")
         final String PROMPT_FOR_VALUE = "PROMPT";
 
         String[] splitArg = splitArg(arg);
@@ -704,9 +711,9 @@ public class Main {
             } else {
                 field.set(this, value);
             }
-        } catch (Exception ignored) {
+        } catch (IllegalAccessException|NoSuchFieldException e) {
             throw new CommandLineParsingException(
-                    String.format(coreBundle.getString("option.unknown"), attributeName)
+                String.format(coreBundle.getString("option.unknown"), attributeName)
             );
         }
     }
@@ -839,6 +846,19 @@ public class Main {
                 this.databaseChangeLogLockTableName);
         try {
 
+            boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
+            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "true"));
+            String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
+            String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
+
+            if (excludeObjects != null && includeObjects != null) {
+                throw new UnexpectedLiquibaseException(
+                        String.format(coreBundle.getString("cannot.specify.both"),
+                                OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
+            }
+            
+            ObjectChangeFilter objectChangeFilter = null;
+            boolean includeSchema = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_SCHEMA, "false"));
             CompareControl.ComputedSchemas computedSchemas = CompareControl.computeSchemas(
                     getCommandParam(OPTIONS.SCHEMAS, null),
                     getCommandParam(OPTIONS.REFERENCE_SCHEMAS, null),
@@ -846,28 +866,17 @@ public class Main {
                     defaultCatalogName, defaultSchemaName,
                     referenceDefaultCatalogName, referenceDefaultSchemaName,
                     database);
+    
             CompareControl.SchemaComparison[] finalSchemaComparisons = computedSchemas.finalSchemaComparisons;
-            CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
-
-            boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
-            boolean includeSchema = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_SCHEMA, "false"));
-            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "true"));
-            String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
-            String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
             DiffOutputControl diffOutputControl = new DiffOutputControl(
-                    includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
-
-            if (excludeObjects != null && includeObjects != null) {
-                throw new UnexpectedLiquibaseException(
-                        String.format(coreBundle.getString("cannot.specify.both"),
-                                OPTIONS.EXCLUDE_OBJECTS, OPTIONS.INCLUDE_OBJECTS));
-            }
-            ObjectChangeFilter objectChangeFilter = null;
+               includeCatalog, includeSchema, includeTablespace, finalSchemaComparisons);
+               
             if (excludeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.EXCLUDE,
                         excludeObjects);
                 diffOutputControl.setObjectChangeFilter(objectChangeFilter);
             }
+            
             if (includeObjects != null) {
                 objectChangeFilter = new StandardObjectChangeFilter(StandardObjectChangeFilter.FilterType.INCLUDE,
                         includeObjects);
@@ -895,7 +904,8 @@ public class Main {
             } else if (COMMANDS.GENERATE_CHANGELOG.equalsIgnoreCase(command)) {
                 String currentChangeLogFile = this.changeLogFile;
                 if (currentChangeLogFile == null) {
-                    currentChangeLogFile = ""; //will output to stdout
+                    //will output to stdout:
+                    currentChangeLogFile = "";
                 }
 
                 File file = new File(currentChangeLogFile);
@@ -907,7 +917,7 @@ public class Main {
                         if (!file.delete()) {
                             // Nothing needs to be done
                         }
-                    } catch (Exception e) {
+                    } catch (SecurityException e) {
                         throw new LiquibaseException(
                                 String.format(coreBundle.getString("attempt.to.delete.the.file.failed.cannot.continue"),
                                         currentChangeLogFile
@@ -915,7 +925,8 @@ public class Main {
                         );
                     }
                 }
-
+    
+                CatalogAndSchema[] finalTargetSchemas = computedSchemas.finalTargetSchemas;
                 CommandLineUtils.doGenerateChangeLog(currentChangeLogFile, database, finalTargetSchemas,
                         StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor),
                         StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory),
@@ -1276,12 +1287,13 @@ public class Main {
                 .getOutputEncoding();
 
         if (outputFile != null) {
+            FileOutputStream fileOut;
             try {
-                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
+                fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
                 LogFactory.getInstance().getLog().severe(String.format(
-                        coreBundle.getString("could.not.create.output.file") + "\n",
+                        coreBundle.getString("could.not.create.output.file"),
                         outputFile));
                 throw e;
             }
@@ -1364,7 +1376,8 @@ public class Main {
         private static final String REFERENCE_DEFAULT_CATALOG_NAME = "referenceDefaultCatalogName";
         private static final String REFERENCE_DEFAULT_SCHEMA_NAME = "referenceDefaultSchemaName";
         private static final String REFERENCE_DRIVER = "referenceDriver";
-        @SuppressWarnings("squid:S2068") // SONAR confuses this constant name with a hard-coded password
+        // SONAR confuses this constant name with a hard-coded password:
+        @SuppressWarnings("squid:S2068")
         private static final String REFERENCE_PASSWORD = "referencePassword";
         private static final String REFERENCE_SCHEMAS = "referenceSchemas";
         private static final String REFERENCE_URL = "referenceUrl";

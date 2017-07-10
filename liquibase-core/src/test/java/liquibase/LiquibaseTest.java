@@ -140,7 +140,7 @@ public class LiquibaseTest {
     @Test
     public void getFileOpener() throws LiquibaseException {
         Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
-        assertSame(liquibase.getResourceAccessor(), liquibase.getFileOpener());
+        assertSame(liquibase.getResourceAccessor(), liquibase.getResourceAccessor());
     }
 
     @Test
@@ -226,25 +226,6 @@ public class LiquibaseTest {
         });
     }
 
-
-//todo: reintroduce    @Test
-//    public void isSaveToRunMigration() throws Exception {
-//        TestLiquibase liquibase = testLiquibase;
-//
-//        // curiously setting the database of mock liquibase
-//        Database database = testLiquibase.getDatabase();
-//
-//        liquibase.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
-//        assertTrue(liquibase.isSafeToRunUpdate());
-//
-//        liquibase.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
-//        assertFalse(liquibase.isSafeToRunUpdate());
-//
-//        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(new PrintWriter(System.out), database));
-//        assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunUpdate());
-//
-//    }
-
     /**
      * Convenience helper class for testing Liquibase methods that simply delegate to another.
      * To use, create a subclass that overrides the method delegated to with an implementation that stores whatever params are being passed.
@@ -260,7 +241,7 @@ public class LiquibaseTest {
         /**
          * If using multiple parameters, store them here
          */
-        protected Map<String, Object> objectsToVerify = new HashMap<String, Object>();
+        protected final Map<String, Object> objectsToVerify = new HashMap<>();
 
         private LiquibaseDelegate() throws LiquibaseException {
             super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));

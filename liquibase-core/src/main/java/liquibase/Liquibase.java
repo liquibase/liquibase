@@ -146,14 +146,6 @@ public class Liquibase {
 
     /**
      * Return ResourceAccessor used by this Liquibase instance.
-     * @deprecated use the newer-terminology version {@link #getResourceAccessor()}
-     */
-    public ResourceAccessor getFileOpener() {
-        return resourceAccessor;
-    }
-
-    /**
-     * Return ResourceAccessor used by this Liquibase instance.
      */
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
