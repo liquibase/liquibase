@@ -138,8 +138,11 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
             }
 
             if (value instanceof DatabaseObject) {
-                if ((parentObject != null) && ((DatabaseObject) value).getSnapshotId().equals(parentObject
-                    .getSnapshotId())) {
+                if (
+                        (parentObject != null)
+                        && ((DatabaseObject) value).getSnapshotId() != null
+                        && ((DatabaseObject) value).getSnapshotId().equals(parentObject.getSnapshotId())
+                   ) {
                     continue;
                 }
 
