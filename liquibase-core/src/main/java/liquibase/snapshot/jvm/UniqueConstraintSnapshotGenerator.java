@@ -241,6 +241,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                             //+ "\n"
                             + "order by T2.COLUMN_NAME\n";
 
+                } else if (((DB2Database)database).isZOS()) {
+                    sql = "select k.colname as column_name from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
+                            + "where k.constname = t.constname "
+                            + "and k.TBCREATOR = t.TBCREATOR "
+                            + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
+                            + "and t.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
+                            + "order by colseq";
                 } else {
                     sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t "
                             + "where k.constname = t.constname "

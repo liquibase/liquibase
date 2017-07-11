@@ -12,7 +12,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -238,15 +237,15 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     public boolean isZOS() {
         if (this.isZOS == null) {
-            if (getConnection() != null && getConnection() instanceof JdbcConnection) {
-                try {
-                    this.isZOS = getConnection().getDatabaseProductName().toLowerCase().contains("zos");
-                } catch (DatabaseException e) {
-                    this.isZOS = false;
-                }
-            } else {
-                this.isZOS = false;
-            }
+        	this.isZOS = false;
+
+        	if (getConnection() != null && getConnection() instanceof JdbcConnection) {
+				try {
+					this.isZOS = getDatabaseProductVersion().startsWith("DSN");
+				} catch (DatabaseException e) {
+					// Result's already set to false
+				}
+			}
         }
         return this.isZOS;
     }

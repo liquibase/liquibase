@@ -96,10 +96,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                     if (database instanceof DB2Database) {
-                        String sql = getDB2Sql(jdbcSchemaName);
-                        if (tableName != null) {
-                            sql = sql.replace(" ORDER BY ", " AND fk_col.tabname='" + tableName + "' ORDER BY ");
+                        String sql;
+                        if (((DB2Database)database).isZOS()) {
+                        	sql = getDB2ZOSSql(jdbcSchemaName, tableName);
+                        } else {
+                        	sql = getDB2Sql(jdbcSchemaName, tableName);
                         }
+
                         return executeAndExtract(sql, database);
                     } else {
                         if (tableName == null) {
@@ -171,7 +174,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
-                        String sql = getDB2Sql(jdbcSchemaName);
+                        String sql;
+                        if (((DB2Database)database).isZOS()) {
+                        	sql = getDB2ZOSSql(jdbcSchemaName, null);
+                        } else {
+                        	sql = getDB2Sql(jdbcSchemaName, null);
+                        }
+
                         return executeAndExtract(sql, database);
                     } else if (database instanceof MSSQLDatabase) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
@@ -221,7 +230,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "order by 5, 6, 7, 9, 8";
                 }
 
-                protected String getDB2Sql(String jdbcSchemaName) {
+                protected String getDB2Sql(String jdbcSchemaName, String tableName) {
                     return "SELECT  " +
                             "  pk_col.tabschema AS pktable_cat,  " +
                             "  pk_col.tabname as pktable_name,  " +
@@ -241,6 +250,31 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
                             "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
                             "and pk_col.colseq=fk_col.colseq " +
+                            (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") + 
+                            "ORDER BY fk_col.colseq";
+                }
+
+                protected String getDB2ZOSSql(String jdbcSchemaName, String tableName) {
+                    return "SELECT  " +
+                            "  ref.REFTBCREATOR AS pktable_cat,  " +
+                            "  ref.REFTBNAME as pktable_name,  " +
+                            "  pk_col.colname as pkcolumn_name, " +
+                            "  ref.CREATOR as fktable_cat,  " +
+                            "  ref.TBNAME as fktable_name,  " +
+                            "  fk_col.colname as fkcolumn_name, " +
+                            "  fk_col.colseq as key_seq,  " +
+                            "  1 as update_rule,  " +
+                            "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
+                            "  ref.relname as fk_name,  " +
+                            "  pk_col.colname as pk_name,  " +
+                            "  7 as deferrability  " +
+                            "FROM " +
+                            "SYSIBM.SYSRELS ref " +
+                            "join SYSIBM.SYSFOREIGNKEYS fk_col on ref.relname = fk_col.RELNAME and ref.CREATOR = fk_col.CREATOR and ref.TBNAME = fk_col.TBNAME " +
+                            "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
+                            "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
+                            "and pk_col.colseq=fk_col.colseq " +
+                            (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") + 
                             "ORDER BY fk_col.colseq";
                 }
 
@@ -1170,6 +1204,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql = "select constraint_name as constraint_name, table_name as table_name from QSYS2.TABLE_CONSTRAINTS where table_schema='" + jdbcSchemaName + "' and constraint_type='UNIQUE'";
                             if (tableName != null) {
                                 sql += " and table_name = '" + tableName + "'";
+                            }
+                        // DB2 z/OS
+                        } else if (database.getDatabaseProductName().equals("DB2")) {
+                            sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
+                                    + "where k.constname = t.constname "
+                                    + "and k.TBCREATOR = t.TBCREATOR "
+                                    + "and t.TBCREATOR = '" + jdbcSchemaName + "' ";
+                            if (tableName != null) {
+                                sql += " and t.tbname = '" + tableName + "'";
                             }
                         }
                         // here we are on DB2 UDB
