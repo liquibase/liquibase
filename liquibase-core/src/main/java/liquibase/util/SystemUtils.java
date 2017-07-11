@@ -1151,7 +1151,7 @@ public class SystemUtils {
         if (JAVA_VERSION_TRIMMED == null) {
             return 0f;
         }
-        String str = JAVA_VERSION_TRIMMED.substring(0, 3);
+        String str = StringUtils.substring(JAVA_VERSION_TRIMMED, 0, 3);
         if (JAVA_VERSION_TRIMMED.length() >= 5) {
             str = str + JAVA_VERSION_TRIMMED.substring(4, 5);
         }
