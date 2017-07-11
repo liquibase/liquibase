@@ -78,8 +78,11 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 }
             }
         }
+        if (((DB2Database) database).isZOS()) {
+            viewDefinition.replaceIfExists("OR", "");
+            viewDefinition.replaceIfExists("REPLACE", "");
+        }
         sql.add(new UnparsedSql(viewDefinition.toString(), getAffectedView(statement)));
-
         return sql.toArray(new Sql[sql.size()]);
     }
 

@@ -43,10 +43,15 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
 
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
-                return new Sql[]{
-                        new UnparsedSql("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "')",
-                                getAffectedTable(statement))
-                };
+                //TODO: Find how to reorg tables in z/os
+                if (((DB2Database) database).isZOS()) {
+                    return null;
+                } else {
+                    return new Sql[] {
+                            new UnparsedSql("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "')",
+                                    getAffectedTable(statement))
+                    };
+                }
             } else {
                 return null;
             }

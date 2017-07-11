@@ -36,6 +36,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         validationErrors.checkRequiredField("constraintName", addForeignKeyConstraintStatement.getConstraintName());
 
         validationErrors.checkDisallowedField("onDelete", addForeignKeyConstraintStatement.getOnDelete(), database, SybaseDatabase.class);
+        validationErrors.checkDisallowedField("onUpdate", addForeignKeyConstraintStatement.getOnUpdate(), database, DB2Database.class);
 
         return validationErrors;
     }

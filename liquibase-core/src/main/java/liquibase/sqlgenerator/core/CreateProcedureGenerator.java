@@ -84,10 +84,11 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 procedureText = procedureText + ";";
             }
         }
-
+        if (((DB2Database) database).isZOS() & procedureText.toLowerCase().contains("replace")) {
+            procedureText = procedureText.replace("OR REPLACE", "");
+            procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
+        }
         sql.add(new UnparsedSql(procedureText, statement.getEndDelimiter()));
-
-
         surroundWithSchemaSets(sql, statement.getSchemaName(), database);
         return sql.toArray(new Sql[sql.size()]);
     }
