@@ -3,18 +3,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.dbmanul</groupId>
-    <artifactId>dbmanul-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <groupId>org.liquibase</groupId>
+    <artifactId>liquibase-parent</artifactId>
+    <version>3.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>DB-Manul</name>
-    <description>A change management system for databases based on Liquibase</description>
-    <url>http://www.dbmanul.org</url>
+    <name>Liquibase Parent Configuration</name>
+    <description>Liquibase is a tool for managing and executing database changes.</description>
+    <url>http://www.liquibase.org</url>
 
     <organization>
-        <name>dbmanul.org</name>
-        <url>http://www.dbmanul.org</url>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
     </organization>
 
     <licenses>
@@ -24,18 +24,29 @@
         </license>
     </licenses>
 
+    <issueManagement>
+        <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <developers>
         <developer>
-            <id>stupiddog1979</id>
-            <name>Andreas Buschka</name>
-            <email>andreas.buschka@dbmanul.org</email>
-            <url>http://dbmanul.org</url>
-            <organizationUrl>http://dbmanul.org</organizationUrl>
+            <id>nvoxland</id>
+            <name>Nathan Voxland</name>
+            <email>nathan@voxland.net</email>
+            <url>http://nathan.voxland.net</url>
+            <organizationUrl>http://nathan.voxland.net/</organizationUrl>
             <roles>
+                <role>architect</role>
                 <role>developer</role>
-                <role>maintainer</role>
             </roles>
-            <timezone>Europe/Berlin</timezone>
+            <timezone>-6</timezone>
         </developer>
     </developers>
 
@@ -50,38 +61,8 @@
         <module>liquibase-integration-tests</module>
     </modules>
 
-    <scm>
-        <connection>scm:git:git@github.com:dbmanul/dbmanul.git</connection>
-        <url>scm:git:git@github.com:dbmanul/dbmanul.git</url>
-        <developerConnection>scm:git:git@github.com:dbmanul/dbmanul.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <issueManagement>
-        <system>JIRA</system>
-        <url>dbmanul.atlassian.net</url>
-    </issueManagement>
-
-    <ciManagement>
-        <system>CircleCI</system>
-        <url>https://circleci.com/gh/dbmanul/dbmanul/tree/master</url>
-    </ciManagement>
-
-    <distributionManagement>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Production Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sontatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <properties>
-        <jdk.version>1.8</jdk.version>
+        <jdk.version>1.7</jdk.version>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -422,16 +403,13 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
+                    <version>3.6.1</version>
                     <configuration>
                         <source>${jdk.version}</source>
                         <target>${jdk.version}</target>
                         <optimize>true</optimize>
                         <debug>true</debug>
                         <encoding>${project.build.sourceEncoding}</encoding>
-                        <!-- Workaround for a bug in maven-compiler-plugin 3.1 which causes all files to always
-                                 recompile, making the build _slower_ than faster. -->
-                        <useIncrementalCompilation>false</useIncrementalCompilation>
                         <!-- <compilerArgument>-Xlint:deprecation</compilerArgument> -->
                     </configuration>
                 </plugin>
@@ -473,7 +451,7 @@
                         </systemPropertyVariables>
                         <systemProperties>
                             <property>
-                                <name>dbmanul.defaultlogger.level</name>
+                                <name>liquibase.defaultlogger.level</name>
                                 <value>severe</value>
                             </property>
                         </systemProperties>
@@ -494,7 +472,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>1.7</version>
+                                        <version>${jdk.version}</version>
                                     </requireJavaVersion>
                                     <!-- Avoid the M.A.D. Gadget vulnerability in certain Apache commons-collections versions -->
                                     <bannedDependencies>
@@ -630,19 +608,33 @@
 
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Sonatype Production Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sontatype Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <profiles>
         <profile>
             <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <configuration>
-                            <keyname>${dbmanul.gpg.keyname}</keyname>
-                            <passphraseServerId>${dbmanul.gpg.keyname}</passphraseServerId>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -665,7 +657,7 @@
                 </os>
             </activation>
             <modules>
-                <module>dbmanul-debian</module>
+                <module>liquibase-debian</module>
             </modules>
         </profile>
 
@@ -677,7 +669,7 @@
                 </os>
             </activation>
             <modules>
-                <module>dbmanul-rpm</module>
+                <module>liquibase-rpm</module>
             </modules>
         </profile>
 

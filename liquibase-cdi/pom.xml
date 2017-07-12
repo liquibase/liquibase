@@ -2,17 +2,17 @@
 				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.dbmanul</groupId>
-		<artifactId>dbmanul-parent</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-parent</artifactId>
+        <version>3.6.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>dbmanul-cdi</artifactId>
-	<name>DB-Manul CDI</name>
+	<artifactId>liquibase-cdi</artifactId>
+	<name>Liquibase CDI</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.dbmanul</groupId>
-			<artifactId>dbmanul-core</artifactId>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
