@@ -9,6 +9,7 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 
 @SuppressWarnings("ALL")
 public class InsertOrUpdateGeneratorInformix extends InsertOrUpdateGenerator {
@@ -70,31 +71,41 @@ public class InsertOrUpdateGeneratorInformix extends InsertOrUpdateGenerator {
 
   @Override
   protected String getElse(Database database) {
-    return "WHEN MATCHED THEN\n";
+    return "";
   }
 
   @Override
   protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
                                       String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+
+    Map<String, Object> columnValues = insertOrUpdateStatement.getColumnValues();
     String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
-    StringBuilder sql = new StringBuilder("UPDATE SET ");
 
-    HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+    // Only generate the update statement if non key columns exist
+    if (pkFields.length != columnValues.size()) {
+      StringBuilder sql = new StringBuilder("WHEN MATCHED THEN\n");
+      sql.append("UPDATE SET ");
 
-    for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
-      // Do not include Primary Key fields within the update
-      if (!hashPkFields.contains(columnKey)) {
-        sql.append(DEST_ALIAS).append(".").append(columnKey).append(" = ");
-        sql.append(SOURCE_ALIAS).append(".").append(columnKey);
-        sql.append(", ");
+      HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+
+      for (String columnKey : columnValues.keySet()) {
+        // Do not include Primary Key fields within the update
+        if (!hashPkFields.contains(columnKey)) {
+          sql.append(DEST_ALIAS).append(".").append(columnKey).append(" = ");
+          sql.append(SOURCE_ALIAS).append(".").append(columnKey);
+          sql.append(", ");
+        }
       }
-    }
 
-    int lastComma = sql.lastIndexOf(",");
-    if (lastComma > -1) {
-      sql.delete(lastComma, lastComma + 2);
+      int lastComma = sql.lastIndexOf(",");
+      if (lastComma > -1) {
+        sql.delete(lastComma, lastComma + 2);
+      }
+      return sql.toString();
     }
-    return sql.toString();
+    else {
+      return "";
+    }
   }
 
   // Copied and modified from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL

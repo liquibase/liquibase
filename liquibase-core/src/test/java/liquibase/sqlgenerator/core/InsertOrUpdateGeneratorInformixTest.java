@@ -73,7 +73,7 @@ public class InsertOrUpdateGeneratorInformixTest {
     Integer lineNumber = 0;
     String[] lines = elseStatement.split("\n");
 
-    assertEquals("WHEN MATCHED THEN", lines[lineNumber]);
+    assertEquals("", lines[lineNumber]);
   }
 
   @Test
@@ -84,7 +84,28 @@ public class InsertOrUpdateGeneratorInformixTest {
     Integer lineNumber = 0;
     String[] lines = updateStatement.split("\n");
 
+    assertEquals("WHEN MATCHED THEN", lines[lineNumber]);
+    lineNumber++;
     assertEquals("UPDATE SET dst.col2 = src.col2, dst.col3 = src.col3", lines[lineNumber]);
+  }
+
+  /**
+   * When the table data is only keys, there will be no WHEN MATCHED THEN UPDATE... statement.
+   * @throws Exception Throws exception
+   */
+  @Test
+  public void getUpdateStatementKeysOnly() throws Exception {
+    statement = new InsertOrUpdateStatement("mycatalog", "myschema", "mytable", "pk_col1,pk_col2");
+    statement.addColumnValue("pk_col1", 1);
+    statement.addColumnValue("pk_col2", 2);
+
+    String updateStatement = (String)invokePrivateMethod(generator,"getUpdateStatement", new Object[] { statement, database, null, null });
+    assertNotNull(updateStatement);
+
+    Integer lineNumber = 0;
+
+    String[] lines = updateStatement.split("\n");
+    assertEquals("", lines[lineNumber]);
   }
 
 
