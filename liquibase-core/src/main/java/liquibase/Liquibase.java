@@ -57,12 +57,11 @@ import java.util.*;
  */
 public class Liquibase {
 
+    private static final Logger LOG = LogFactory.getInstance().getLog();
     protected Database database;
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
     private ResourceAccessor resourceAccessor;
-    private static final Logger LOG = LogFactory.getInstance().getLog();
-
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private ChangeLogSyncListener changeLogSyncListener;
@@ -446,7 +445,7 @@ public class Liquibase {
         if (connection != null) {
             executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
         }
-        executor.comment("DB-Manul version: " + LiquibaseUtil.getBuildVersion());
+        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" +
             StreamUtil.getLineSeparator()
         );

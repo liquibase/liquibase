@@ -13,7 +13,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
-@DatabaseChange(name="stop", description = "Stops DB-Manul execution with a message. Mainly useful for debugging and " +
+@DatabaseChange(name = "stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging " +
+    "and " +
  "stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
 public class StopChange extends AbstractChange {
 
@@ -49,14 +50,6 @@ public class StopChange extends AbstractChange {
         return "Changelog Execution Stopped";
     }
 
-    public static class StopChangeException extends RuntimeException {
-        private static final long serialVersionUID = 6681759443230468424L;
-    
-        public StopChangeException(String message) {
-            super(message);
-        }
-    }
-
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
@@ -67,6 +60,14 @@ public class StopChange extends AbstractChange {
         Object value = parsedNode.getValue();
         if ((value != null) && (value instanceof String)) {
             setMessage((String) value);
+        }
+    }
+
+    public static class StopChangeException extends RuntimeException {
+        private static final long serialVersionUID = 6681759443230468424L;
+
+        public StopChangeException(String message) {
+            super(message);
         }
     }
 }

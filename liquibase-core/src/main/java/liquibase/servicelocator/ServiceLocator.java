@@ -84,6 +84,10 @@ public class ServiceLocator {
         instance = newInstance;
     }
 
+    public static synchronized void reset() {
+        instance = new ServiceLocator();
+    }
+
     protected PackageScanClassResolver defaultClassLoader(){
         if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
             logger.debug("Using WebSphere Specific Class Resolver");
@@ -236,9 +240,11 @@ public class ServiceLocator {
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    logger.info("Can not use "+clazz+" as a DB-Manul service because it does not have a no-argument constructor" );
+                    logger.info("Can not use " + clazz + " as a Liquibase service because it does not have a " +
+                        "no-argument constructor");
                 } catch (NoClassDefFoundError e) {
-                    String message = "Can not use " + clazz + " as a DB-Manul service because " + e.getMessage().replace("/", ".") + " is not in the classpath";
+                    String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage()
+                        .replace("/", ".") + " is not in the classpath";
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
                         logger.info(message);
                     } else {
@@ -249,10 +255,6 @@ public class ServiceLocator {
         }
 
         return classes;
-    }
-
-    public static synchronized void reset() {
-        instance = new ServiceLocator();
     }
 
     protected Logger getLogger() {

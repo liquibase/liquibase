@@ -62,7 +62,7 @@ public class DatabaseTestContext {
             tempDir += System.getProperty("file.separator");
 
         String tempUrl = givenUrl.replace("***TEMPDIR***/", tempDir);
-        String url = tempUrl;
+        final String url = tempUrl;
 
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);

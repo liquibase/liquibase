@@ -139,7 +139,8 @@ public class LiquibaseTest {
             when(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection)).thenReturn(database);
 
             Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, databaseConnection);
-            assertSame("DB-Manul constructor passing connection did not find the correct database implementation", database, liquibase.getDatabase());
+            assertSame("Liquibase constructor passing connection did not find the correct database implementation",
+                database, liquibase.getDatabase());
 
         } finally {
             DatabaseFactory.reset();
@@ -257,14 +258,13 @@ public class LiquibaseTest {
     private static class LiquibaseDelegate extends Liquibase {
 
         /**
-         * If using a single parameter, store in here
-         */
-        protected Object objectToVerify;
-
-        /**
          * If using multiple parameters, store them here
          */
         protected final Map<String, Object> objectsToVerify = new HashMap<>();
+        /**
+         * If using a single parameter, store in here
+         */
+        protected Object objectToVerify;
 
         private LiquibaseDelegate() throws LiquibaseException {
             super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));

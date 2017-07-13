@@ -41,12 +41,10 @@ import java.util.Map;
  * @author ladislav.gazo
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
-	private Logger log = LogFactory.getInstance().getLog(MultiTenantSpringLiquibase.class.getName());
-	
+    private final List<DataSource> dataSources = new ArrayList<>();
+    private Logger log = LogFactory.getInstance().getLog(MultiTenantSpringLiquibase.class.getName());
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
-	private final List<DataSource> dataSources = new ArrayList<>();
-	
 		/** Defines a single data source and several schemas for a multi-tenant environment. */
 	private DataSource dataSource;
 	private List<String> schemas;
@@ -120,11 +118,11 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	private void runOnAllDataSources() throws LiquibaseException {
 		for(DataSource aDataSource : dataSources) {
-			log.info("Initializing DB-Manul for data source " + aDataSource);
-			SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
+            log.info("Initializing Liquibase for data source " + aDataSource);
+            SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
 			liquibase.afterPropertiesSet();
-			log.info("DB-Manul ran for data source " + aDataSource);
-		}
+            log.info("Liquibase ran for data source " + aDataSource);
+        }
 	}
 	
 	private void runOnAllSchemas() throws LiquibaseException {
@@ -132,12 +130,12 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			if("default".equals(schema)) {
 				schema = null;
 			}
-			log.info("Initializing DB-Manul for schema " + schema);
-			SpringLiquibase liquibase = getSpringLiquibase(dataSource);
+            log.info("Initializing Liquibase for schema " + schema);
+            SpringLiquibase liquibase = getSpringLiquibase(dataSource);
 			liquibase.setDefaultSchema(schema);
 			liquibase.afterPropertiesSet();
-			log.info("DB-Manul ran for schema " + schema);
-		}
+            log.info("Liquibase ran for schema " + schema);
+        }
 	}
 
 	private SpringLiquibase getSpringLiquibase(DataSource dataSource) {

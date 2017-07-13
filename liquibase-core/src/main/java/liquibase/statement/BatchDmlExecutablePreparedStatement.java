@@ -1,11 +1,5 @@
 package liquibase.statement;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.changelog.ChangeSet;
@@ -14,6 +8,11 @@ import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Performance-optimised version of {@link ExecutablePreparedStatementBase}. JDBC batching collects several
@@ -31,7 +30,8 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
             Database database, String catalogName, String schemaName, String tableName,
             List<LoadDataColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor,
             List<ExecutablePreparedStatementBase> statements) {
-        super(database, catalogName, schemaName, tableName, new ArrayList<>(columns), changeSet, resourceAccessor);
+        super(database, catalogName, schemaName, tableName, new ArrayList<ColumnConfig>(columns), changeSet,
+            resourceAccessor);
         this.collectedStatements = new ArrayList<>(statements);
     }
 
@@ -62,7 +62,10 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
     @Override
     protected void executePreparedStatement(PreparedStatement stmt) throws SQLException {
         int updateCounts[] = stmt.executeBatch();
-        long sumUpdateCounts = Arrays.stream(updateCounts).summaryStatistics().getSum();
+        long sumUpdateCounts = 0;
+        for (int updateCount : updateCounts) {
+            sumUpdateCounts = updateCount;
+        }
         LOG.info(String.format("Executing JDBC DML batch was successful. %d operations were executed, %d individual UPDATE events were confirmed by the database.",
                 updateCounts.length, sumUpdateCounts));
     }

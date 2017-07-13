@@ -54,6 +54,15 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         this.resourceAccessor = resourceAccessor;
     }
 
+    private static InputStream createStream(InputStream in) {
+        return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
+    }
+
+    private static Reader createReader(InputStream in, String encoding) {
+        return new BufferedReader((StringUtils.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
+            UtfBomAwareReader(in, encoding));
+    }
+
     @Override
     public void execute(PreparedStatementFactory factory) throws DatabaseException {
 
@@ -145,7 +154,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                                 coreBundle.getString("jdbc.bind.parameter.unknown.numeric.value.type"),
                                 col.getName(),
                                 col.getValueNumeric().toString(),
-                                col.getValueNumeric().getClass().getTypeName()
+                            col.getValueNumeric().getClass().getName()
                         )
                 );
             }
@@ -184,16 +193,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
             LOG.debug("value is explicit null");
             stmt.setNull(i, java.sql.Types.NULL);
-        }
-    }
-
-    private class LOBContent<T> {
-        private final T content;
-        private final long length;
-
-        LOBContent(T content, long length) {
-            this.content = content;
-            this.length = length;
         }
     }
 
@@ -236,10 +235,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         }
     }
 
-    private static InputStream createStream(InputStream in) {
-        return (in instanceof BufferedInputStream) ? in : new BufferedInputStream(in);
-    }
-
     private LOBContent<Reader> toCharacterStream(String valueLobFile, String encoding)
             throws IOException, DatabaseException {
         InputStream in = getResourceAsStream(valueLobFile);
@@ -278,11 +273,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 closeables.add(in);
             }
         }
-    }
-
-    private static Reader createReader(InputStream in, String encoding) {
-        return new BufferedReader((StringUtils.trimToNull(encoding) == null) ? new UtfBomAwareReader(in) : new
-            UtfBomAwareReader(in, encoding));
     }
 
     private InputStream getResourceAsStream(String valueLobFile) throws IOException {
@@ -334,7 +324,6 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         return p;
     }
 
-
     @Override
     public boolean skipOnUnsupported() {
         return false;
@@ -354,6 +343,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 
     public List<ColumnConfig> getColumns() {
         return columns;
+    }
+
+    private class LOBContent<T> {
+        private final T content;
+        private final long length;
+
+        LOBContent(T content, long length) {
+            this.content = content;
+            this.length = length;
+        }
     }
 
 }
