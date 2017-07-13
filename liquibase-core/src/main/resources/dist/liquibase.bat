@@ -10,6 +10,9 @@ set CP=.
 for /R %LIQUIBASE_HOME% %%f in (liquibase*.jar) do set CP=!CP!;%%f
 for /R %LIQUIBASE_HOME%\lib %%f in (*.jar) do set CP=!CP!;%%f
 
+rem special characters may be lost
+setlocal DISABLEDELAYEDEXPANSION
+
 rem get command line args into a variable
 set CMD_LINE_ARGS=%1
 if ""%1""=="""" goto done
