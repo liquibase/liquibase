@@ -219,6 +219,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	protected boolean shouldRun = true;
 
 	protected File rollbackFile;
+
+	protected String databaseChangeLogTableName;
+
+	protected String databaseChangeLogLockTableName;
     /**
      * Ignores classpath prefix during changeset comparison.
      * This is particularly useful if Liquibase is run in different ways.
@@ -363,6 +367,22 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.defaultSchema = defaultSchema;
 	}
 
+	public String getDatabaseChangeLogTableName() {
+		return databaseChangeLogTableName;
+	}
+
+	public void setDatabaseChangeLogTableName(String databaseChangeLogTableName) {
+		this.databaseChangeLogTableName = databaseChangeLogTableName;
+	}
+
+	public String getDatabaseChangeLogLockTableName() {
+		return databaseChangeLogLockTableName;
+	}
+
+	public void setDatabaseChangeLogLockTableName(String databaseChangeLogLockTableName) {
+		this.databaseChangeLogLockTableName = databaseChangeLogLockTableName;
+	}
+
 	/**
 	 * Executed automatically when the bean is initialized.
 	 */
@@ -471,6 +491,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
 		if (StringUtils.trimToNull(this.defaultSchema) != null) {
 			database.setDefaultSchemaName(this.defaultSchema);
+		}
+		if (StringUtils.trimToNull(this.databaseChangeLogTableName) != null) {
+			database.setDatabaseChangeLogTableName(this.databaseChangeLogTableName);
+		}
+		if (StringUtils.trimToNull(this.databaseChangeLogLockTableName) != null) {
+			database.setDatabaseChangeLogLockTableName(this.databaseChangeLogLockTableName);
 		}
 		return database;
 	}
