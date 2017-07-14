@@ -117,7 +117,7 @@
 
         <!-- JDBC driver versions -->
         <derby.version>10.12.1.1</derby.version>
-        <mariadb-java-client.version>2.0.3</mariadb-java-client.version>
+        <mariadb-java-client.version>1.6.2</mariadb-java-client.version>
         <mssql-jdbc.version>6.2.0.jre7</mssql-jdbc.version>
         <hsqldb.version>2.3.5</hsqldb.version>
         <mysql-connector-java.version>6.0.6</mysql-connector-java.version>
