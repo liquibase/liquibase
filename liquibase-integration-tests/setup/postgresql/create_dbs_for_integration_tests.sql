@@ -8,6 +8,7 @@
 
 DROP DATABASE IF EXISTS liquibase;
 DROP TABLESPACE IF EXISTS liquibase2;
+DROP SCHEMA IF EXISTS lbschem2;
 DROP USER IF EXISTS lbuser;
 
 CREATE USER lbuser WITH
@@ -15,18 +16,18 @@ CREATE USER lbuser WITH
   NOSUPERUSER
   NOCREATEDB
   NOCREATEROLE
-  INHERIT
+INHERIT
   NOREPLICATION
   CONNECTION LIMIT -1
-  PASSWORD 'lbuser';
+PASSWORD 'lbuser';
 
 COMMENT ON ROLE lbuser IS 'Integration test user for Liquibase';
 
 CREATE DATABASE liquibase
 WITH
-OWNER = default
-ENCODING = 'UTF8'
-CONNECTION LIMIT = -1;
+    OWNER = default
+          ENCODING = 'UTF8'
+          CONNECTION LIMIT = -1;
 
 COMMENT ON DATABASE liquibase
 IS 'LB catalog/database for integration tests';
@@ -36,7 +37,7 @@ GRANT ALL ON DATABASE liquibase TO lbuser;
 \c liquibase
 
 CREATE SCHEMA lbschem2
-  AUTHORIZATION lbuser;
+AUTHORIZATION lbuser;
 
 COMMENT ON SCHEMA lbschem2
 IS 'Testing schema for integration tests';
@@ -66,7 +67,7 @@ IS 'A testing tablespace for integration tests';
 GRANT CREATE ON TABLESPACE liquibase2 TO lbuser;
 
 CREATE SCHEMA lbcat2
-  AUTHORIZATION lbuser;
+AUTHORIZATION lbuser;
 
 COMMENT ON SCHEMA lbcat2
 IS 'Testing schema for integration tests';
