@@ -24,17 +24,6 @@
         </license>
     </licenses>
 
-    <issueManagement>
-        <url>http://liquibase.jira.com/browse/CORE</url>
-    </issueManagement>
-
-    <scm>
-        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
-        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
-        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
     <developers>
         <developer>
             <id>nvoxland</id>
@@ -60,6 +49,30 @@
         <module>liquibase-cdi</module>
         <module>liquibase-integration-tests</module>
     </modules>
+
+    <scm>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Sonatype Production Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sontatype Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <properties>
         <jdk.version>1.7</jdk.version>
@@ -609,19 +622,6 @@
         </pluginManagement>
 
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Production Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sontatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <profiles>
         <profile>
