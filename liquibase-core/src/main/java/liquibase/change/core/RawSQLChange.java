@@ -15,8 +15,9 @@ import liquibase.util.StringUtils;
  */
 @DatabaseChange(name="sql",
         description = "The 'sql' tag allows you to specify whatever sql you want. It is useful for complex changes " +
-         "that aren't supported through DB-Manul's automated refactoring tags and to work around bugs and limitations " +
-          "of DB-Manul. The SQL contained in the sql tag can be multi-line.\n" +
+            "that aren't supported through Liquibase's automated refactoring tags and to work around bugs and " +
+            "limitations " +
+            "of Liquibase. The SQL contained in the sql tag can be multi-line.\n" +
         "\n" +
         "The createProcedure refactoring is the best way to create stored procedures.\n" +
         "\n" +

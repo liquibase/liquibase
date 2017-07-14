@@ -38,8 +38,8 @@ import static java.util.ResourceBundle.getBundle;
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     public static final String PRODUCT_NAME = "oracle";
+    private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
     protected final int SHORT_IDENTIFIERS_LENGTH = 30;
     protected final int LONG_IDENTIFIERS_LEGNTH = 128;
     protected final int ORACLE_12C_MAJOR_VERSION = 12;
@@ -117,7 +117,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 } catch (Exception e) {
                     //noinspection HardCodedStringLiteral
                     LogFactory.getInstance().getLog().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
-                    ; //cannot set it. That is OK
+
+                    //cannot set it. That is OK
                 }
 
                 Statement statement = null;
@@ -361,12 +362,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 }
 
                 if (filteredInOriginalQuery) {
-                    if ((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
-                        liquibase.statement.UniqueConstraint)) { //some objects don't get renamed back and so are already filtered in the metadata queries
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return !((example instanceof PrimaryKey) || (example instanceof Index) || (example instanceof
+                        liquibase.statement.UniqueConstraint));
                 } else {
                     return true;
                 }
@@ -542,7 +539,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral,
         // HardCodedStringLiteral
         //noinspection HardCodedStringLiteral,HardCodedStringLiteral,HardCodedStringLiteral
-        return "DB-Manul needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
+        return "Liquibase needs to access the DBA_RECYCLEBIN table so we can automatically handle the case where " +
         "constraints are deleted and restored. Since Oracle doesn't properly restore the original table names " +
         "referenced in the constraint, we use the information from the DBA_RECYCLEBIN to automatically correct this" +
         " issue.\n" +

@@ -107,7 +107,7 @@
 
         <dependency>
             <groupId>org.firebirdsql.jdbc</groupId>
-            <artifactId>jaybird-jdk18</artifactId>
+            <artifactId>jaybird-jdk17</artifactId>
             <scope>test</scope>
         </dependency>
 

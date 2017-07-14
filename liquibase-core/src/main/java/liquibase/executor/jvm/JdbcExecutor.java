@@ -100,7 +100,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void execute(final SqlStatement sql) throws DatabaseException {
-        execute(sql, new ArrayList<>());
+        execute(sql, new ArrayList<SqlVisitor>());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws DatabaseException {
-        return query(sql, rse, new ArrayList<>());
+        return query(sql, rse, new ArrayList<SqlVisitor>());
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {

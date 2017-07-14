@@ -6,16 +6,16 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogLevel;
 
 import java.io.PrintStream;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * A new Logger for (hopefully) better readable output during changeset execution
  */
 public class TreeStyleLogger extends DefaultLogger {
 
-    LocalTime lastLoggingTs;
+    Date lastLoggingTs;
     String lastChangeLogPath;
     String currentChangeLogPath;
     String lastChangeSetName;
@@ -45,6 +45,9 @@ public class TreeStyleLogger extends DefaultLogger {
 
     @Override
     protected void print(LogLevel logLevel, String message) throws UnexpectedLiquibaseException {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+
         final String BLANK_TIME      = "        ";
         final String BLANK_CHANGELOG = "|  ";
         final String BLANK_CHANGESET = "|     ";
@@ -52,9 +55,8 @@ public class TreeStyleLogger extends DefaultLogger {
         PrintStream out = getOutStream(logLevel);
 
         // Print the time if the second has changed compared to the previous call
-        LocalTime now = LocalTime.now();
-        now = now.truncatedTo(ChronoUnit.SECONDS);
-        String timeString = now.format(DateTimeFormatter.ISO_LOCAL_TIME);
+        Date now = new Date();
+        String timeString = timeFormat.format(calendar.getTime());
         if ((lastLoggingTs == null) || (lastLoggingTs.compareTo(now) != 0))
             out.print(timeString);
         else

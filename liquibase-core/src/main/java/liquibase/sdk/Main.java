@@ -20,10 +20,14 @@ public class Main {
 
     private Options globalOptions;
 
+    public Main() {
+        globalOptions = new Options();
+    }
+
     public static void main(String[] args) {
         Main main = new Main();
 
-        main.header("DB-Manul SDK");
+        main.header("Liquibase SDK");
 
         try {
             main.init(args);
@@ -72,10 +76,6 @@ public class Main {
             System.out.println("Unexpected error: "+exception.getMessage());
             exception.printStackTrace();
         }
-    }
-
-    public Main() {
-        globalOptions = new Options();
     }
 
     public void init(String[] args) throws UserError {
@@ -145,7 +145,8 @@ public class Main {
             dir = dir.getParentFile();
         }
 
-        throw new UnexpectedLiquibaseException("Could not find DB-Manul SDK home. Please run liquibase-sdk from the liquibase/sdk directory or one of it's sub directories");
+        throw new UnexpectedLiquibaseException("Could not find Liquibase SDK home. Please run liquibase-sdk from the " +
+            "liquibase/sdk directory or one of it's sub directories");
     }
 
     public String getCommand() {

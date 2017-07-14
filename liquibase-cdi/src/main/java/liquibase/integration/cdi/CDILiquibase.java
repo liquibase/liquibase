@@ -72,17 +72,14 @@ import java.util.Map;
 @ApplicationScoped
 public class CDILiquibase implements Extension {
 
+    @Inject
+    @LiquibaseType
+    ResourceAccessor resourceAccessor;
     private Logger log = LogFactory.getInstance().getLog(CDILiquibase.class.getName());
-
     @Inject @LiquibaseType
     private CDILiquibaseConfig config;
-
     @Inject @LiquibaseType
     private DataSource dataSource;
-
-    @Inject @LiquibaseType
-    ResourceAccessor resourceAccessor;
-
     private boolean initialized;
     private boolean updateSuccessful;
 
@@ -96,7 +93,7 @@ public class CDILiquibase implements Extension {
 
     @PostConstruct
     public void onStartup() {
-        log.info("Booting DB-Manul " + LiquibaseUtil.getBuildVersion());
+        log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
             hostName = NetUtil.getLocalHostName();

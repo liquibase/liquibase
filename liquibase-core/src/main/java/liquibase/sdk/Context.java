@@ -87,7 +87,7 @@ public class Context {
             Class type = getExtensionType(clazz);
             if (type != null) {
                 if (!seenExtensionClasses.containsKey(type)) {
-                    seenExtensionClasses.put(type, new HashSet<>());
+                    seenExtensionClasses.put(type, new HashSet<Class>());
                 }
                 seenExtensionClasses.get(type).add(clazz);
             }
