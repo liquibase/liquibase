@@ -8,7 +8,8 @@
 
 DROP DATABASE IF EXISTS liquibase;
 DROP TABLESPACE IF EXISTS liquibase2;
-DROP SCHEMA IF EXISTS lbschem2;
+DROP SCHEMA IF EXISTS lbschem2 CASCADE;
+DROP SCHEMA IF EXISTS lbcat2 CASCADE;
 DROP USER IF EXISTS lbuser;
 
 CREATE USER lbuser WITH
@@ -29,18 +30,16 @@ WITH
           ENCODING = 'UTF8'
           CONNECTION LIMIT = -1;
 
-COMMENT ON DATABASE liquibase
-IS 'LB catalog/database for integration tests';
+COMMENT ON DATABASE liquibase IS 'LB catalog/database for integration tests';
 
 GRANT ALL ON DATABASE liquibase TO lbuser;
 
 \c liquibase
 
-CREATE SCHEMA lbschem2
-AUTHORIZATION lbuser;
+/************************************************************************************************* Schema: LBSCHEM2 */
+CREATE SCHEMA lbschem2 AUTHORIZATION lbuser;
 
-COMMENT ON SCHEMA lbschem2
-IS 'Testing schema for integration tests';
+COMMENT ON SCHEMA lbschem2 IS 'Testing schema for integration tests';
 
 GRANT ALL ON SCHEMA lbschem2 TO lbuser;
 
@@ -56,21 +55,21 @@ GRANT EXECUTE ON FUNCTIONS TO lbuser;
 ALTER DEFAULT PRIVILEGES IN SCHEMA lbschem2
 GRANT USAGE ON TYPES TO lbuser;
 
+/******************************************************************************************** Tablespace: liquibase2 */
+
 CREATE TABLESPACE liquibase2 LOCATION :path_for_tablespace;
 
-ALTER TABLESPACE liquibase2
-OWNER TO lbuser;
+ALTER TABLESPACE liquibase2 OWNER TO lbuser;
 
-COMMENT ON TABLESPACE liquibase2
-IS 'A testing tablespace for integration tests';
+COMMENT ON TABLESPACE liquibase2 IS 'A testing tablespace for integration tests';
 
 GRANT CREATE ON TABLESPACE liquibase2 TO lbuser;
 
-CREATE SCHEMA lbcat2
-AUTHORIZATION lbuser;
+/**************************************************************************************************** Schema: LBCAT2 */
 
-COMMENT ON SCHEMA lbcat2
-IS 'Testing schema for integration tests';
+CREATE SCHEMA lbcat2 AUTHORIZATION lbuser;
+
+COMMENT ON SCHEMA lbcat2 IS 'Testing schema for integration tests';
 
 GRANT ALL ON SCHEMA lbcat2 TO lbuser;
 
