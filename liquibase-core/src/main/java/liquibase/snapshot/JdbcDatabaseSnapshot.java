@@ -1206,7 +1206,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 sql += " and table_name = '" + tableName + "'";
                             }
                         // DB2 z/OS
-                        } else if (database.getDatabaseProductName().equals("DB2")) {
+                        } else if ((((DB2Database) database).isZOS())){
                             sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
                                     + "where k.constname = t.constname "
                                     + "and k.TBCREATOR = t.TBCREATOR "
