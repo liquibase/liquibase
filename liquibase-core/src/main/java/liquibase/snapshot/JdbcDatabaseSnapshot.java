@@ -263,7 +263,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "  ref.TBNAME as fktable_name,  " +
                             "  fk_col.colname as fkcolumn_name, " +
                             "  fk_col.colseq as key_seq,  " +
-                            "  1 as update_rule,  " +
                             "  decode (ref.deleterule, 'A', 3, 'C', 0, 'N', 2, 'R', 1, 1) as delete_rule,  " +
                             "  ref.relname as fk_name,  " +
                             "  pk_col.colname as pk_name,  " +

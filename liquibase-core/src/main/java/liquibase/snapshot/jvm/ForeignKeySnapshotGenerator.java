@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
@@ -150,8 +151,11 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKey.addPrimaryKeyColumn(pkColumn);
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 
-                ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
-                foreignKey.setUpdateRule(updateRule);
+                // DB2 on z/OS doesn't support ON UPDATE
+                if (!(database instanceof DB2Database && ((DB2Database) database).isZOS())) {
+                    ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
+                    foreignKey.setUpdateRule(updateRule);
+                }
                 ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(row.getInt("DELETE_RULE"), database);
                 foreignKey.setDeleteRule(deleteRule);
                 short deferrability = row.getShort("DEFERRABILITY");
