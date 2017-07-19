@@ -245,6 +245,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     sql = "select k.colname as column_name from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
                             + "where k.constname = t.constname "
                             + "and k.TBCREATOR = t.TBCREATOR "
+                            + "and t.type = 'U'"
                             + "and k.constname='" + database.correctObjectName(name, UniqueConstraint.class) + "' "
                             + "and t.TBCREATOR = '" + database.correctObjectName(schema.getName(), Schema.class) + "' "
                             + "order by colseq";
