@@ -250,7 +250,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "join syscat.keycoluse pk_col on ref.refkeyname=pk_col.constname and ref.reftabschema=pk_col.tabschema and ref.reftabname=pk_col.tabname " +
                             "WHERE ref.tabschema = '" + jdbcSchemaName + "' " +
                             "and pk_col.colseq=fk_col.colseq " +
-                            (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") + 
+                            (tableName != null ? " AND fk_col.tabname='" + tableName + "' " : "") +
                             "ORDER BY fk_col.colseq";
                 }
 
@@ -273,7 +273,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             "join SYSIBM.SYSKEYCOLUSE pk_col on ref.REFTBCREATOR = pk_col.TBCREATOR and ref.REFTBNAME = pk_col.TBNAME " +
                             "WHERE ref.CREATOR = '" + jdbcSchemaName + "' " +
                             "and pk_col.colseq=fk_col.colseq " +
-                            (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") + 
+                            (tableName != null ? " AND ref.TBNAME='" + tableName + "' " : "") +
                             "ORDER BY fk_col.colseq";
                 }
 
@@ -956,7 +956,28 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String sql = mssqlSql(catalogAndSchema, tableName);
                         pkInfo = executeAndExtract(sql, database);
                     } else {
-                        if (database instanceof OracleDatabase) {
+                        if (((DB2Database)database).isZOS()){
+                            String sql = "SELECT 'NULL' AS TABLE_CAT," +
+                                    " SYSTAB.TBCREATOR AS TABLE_SCHEM, " +
+                                    "SYSTAB.TBNAME AS TABLE_NAME, " +
+                                    "COLUSE.COLNAME AS COLUMN_NAME, " +
+                                    "COLUSE.COLSEQ AS KEY_SEQ, " +
+                                    "SYSTAB.CONSTNAME AS PK_NAME " +
+                                    "FROM SYSIBM.SYSTABCONST SYSTAB " +
+                                    "JOIN SYSIBM.SYSKEYCOLUSE COLUSE " +
+                                    "ON SYSTAB.TBCREATOR = COLUSE.TBCREATOR " +
+                                    "WHERE SYSTAB.TYPE = 'P' " +
+                                    "AND SYSTAB.TBNAME='" + table + "' " +
+                                    "AND SYSTAB.TBCREATOR='" + schemaName + "' " +
+                                    "AND SYSTAB.TBNAME=COLUSE.TBNAME " +
+                                    "AND SYSTAB.CONSTNAME=COLUSE.CONSTNAME " +
+                                    "ORDER BY COLUSE.COLNAME";
+                            try {
+                                return pkInfo = executeAndExtract(sql, database);
+                            } catch (DatabaseException e) {
+                                throw new SQLException(e);
+                            }
+                        } else if (database instanceof OracleDatabase) {
                             warnAboutDbaRecycleBin();
 
                             String sql = "SELECT NULL AS table_cat, c.owner AS table_schem, c.table_name, c.column_name, c.position AS key_seq, c.constraint_name AS pk_name " +
