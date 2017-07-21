@@ -956,7 +956,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String sql = mssqlSql(catalogAndSchema, tableName);
                         pkInfo = executeAndExtract(sql, database);
                     } else {
-                        if (((DB2Database)database).isZOS()){
+                        if (database instanceof DB2Database && ((DB2Database)database).isZOS()){
                             String sql = "SELECT 'NULL' AS TABLE_CAT," +
                                     " SYSTAB.TBCREATOR AS TABLE_SCHEM, " +
                                     "SYSTAB.TBNAME AS TABLE_NAME, " +
