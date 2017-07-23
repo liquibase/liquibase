@@ -19,6 +19,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.statement.core.RawSqlStatement;
@@ -82,12 +83,12 @@ public class DiffToChangeLog {
         this.changeSetPath = changeLogFile;
         File file = new File(changeLogFile);
         if (!file.exists()) {
-            LogFactory.getInstance().getLog().info(file + " does not exist, creating");
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, file + " does not exist, creating");
             FileOutputStream stream = new FileOutputStream(file);
             print(new PrintStream(stream, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
             stream.close();
         } else {
-            LogFactory.getInstance().getLog().info(file + " exists, appending");
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, file + " exists, appending");
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             print(new PrintStream(out, true, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding()), changeLogSerializer);
 
@@ -97,7 +98,7 @@ public class DiffToChangeLog {
             innerXml = innerXml.replaceFirst(DATABASE_CHANGE_LOG_CLOSING_XML_TAG, "");
             innerXml = innerXml.trim();
             if ("".equals(innerXml)) {
-                LogFactory.getInstance().getLog().info("No changes found, nothing to do");
+                LogFactory.getLog(getClass()).info(LogTarget.LOG, "No changes found, nothing to do");
                 return;
             }
     
@@ -310,7 +311,7 @@ public class DiffToChangeLog {
                     return toSort;
                 }
             } catch (DatabaseException e) {
-                LogFactory.getInstance().getLog().debug("Cannot get object dependencies: " + e.getMessage());
+                LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Cannot get object dependencies: " + e.getMessage());
             }
         }
 
@@ -468,7 +469,7 @@ public class DiffToChangeLog {
             for (Class<? extends DatabaseObject> type : types) {
                 log += "    " + type.getName();
             }
-            LogFactory.getInstance().getLog().debug(log);
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, log);
             loggedOrderFor.add(generatorType);
         }
 

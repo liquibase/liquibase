@@ -2,6 +2,7 @@ package liquibase.parser;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -53,7 +54,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            LogFactory.getInstance().getLog().debug("No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();
@@ -69,7 +70,7 @@ public class NamespaceDetailsFactory {
         }
 
         if (validNamespaceDetails.isEmpty()) {
-            LogFactory.getInstance().getLog().debug("No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "No serializer namespace details associated with namespace '" + namespace + "' and serializer " + serializer.getClass().getName());
         }
 
         return validNamespaceDetails.iterator().next();

@@ -36,7 +36,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, ChangeLogParameters changeLogParameters) {
-		log = LogFactory.getInstance().getLog();
+		log = LogFactory.getLog(getClass());
 		this.resourceAccessor = resourceAccessor;
 
 		databaseChangeLog = new DatabaseChangeLog();

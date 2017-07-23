@@ -9,6 +9,7 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
@@ -222,7 +223,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 message = new StringBuffer(getOnFailMessage());
             }
             if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                LogFactory.getInstance().getLog().info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
+                LogFactory.getLog(getClass()).info(LogTarget.LOG, "Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
             } else {
                 if (getOnFailMessage() == null) {
                     throw e;
@@ -239,10 +240,10 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
             }
 
             if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
-                LogFactory.getInstance().getLog().info("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                LogFactory.getLog(getClass()).info(LogTarget.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                LogFactory.getInstance().getLog().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
             } else {
                 if (getOnErrorMessage() == null) {
                     throw e;

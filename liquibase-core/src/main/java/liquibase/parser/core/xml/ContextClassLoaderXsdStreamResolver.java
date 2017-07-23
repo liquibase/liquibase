@@ -1,6 +1,7 @@
 package liquibase.parser.core.xml;
 
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 
 import java.io.InputStream;
@@ -11,16 +12,16 @@ public class ContextClassLoaderXsdStreamResolver extends XsdStreamResolver {
 
     @Override
     public InputStream getResourceAsStream(String xsdFile) {
-        LOGGER.debug("Trying to load resource from context classloader");
+        LOGGER.debug(LogTarget.LOG, "Trying to load resource from context classloader");
 
         if (Thread.currentThread().getContextClassLoader() == null) {
-            LOGGER.debug("Failed to load resource from context classloader");
+            LOGGER.debug(LogTarget.LOG, "Failed to load resource from context classloader");
             return getSuccessorValue(xsdFile);
         }
 
         InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
         if(resourceAsStream == null){
-            LOGGER.debug("Failed to load resource from context classloader");
+            LOGGER.debug(LogTarget.LOG, "Failed to load resource from context classloader");
             return getSuccessorValue(xsdFile);
         }
         return resourceAsStream;

@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedStatementBase {
     private final List<ExecutablePreparedStatementBase> collectedStatements;
-    private final Logger LOG = LogFactory.getInstance().getLog();
+    private final Logger LOG = LogFactory.getLog(getClass());
 
     public BatchDmlExecutablePreparedStatement(
             Database database, String catalogName, String schemaName, String tableName,
@@ -66,7 +67,7 @@ public class BatchDmlExecutablePreparedStatement extends ExecutablePreparedState
         for (int updateCount : updateCounts) {
             sumUpdateCounts = updateCount;
         }
-        LOG.info(String.format("Executing JDBC DML batch was successful. %d operations were executed, %d individual UPDATE events were confirmed by the database.",
+        LOG.info(LogTarget.LOG, String.format("Executing JDBC DML batch was successful. %d operations were executed, %d individual UPDATE events were confirmed by the database.",
                 updateCounts.length, sumUpdateCounts));
     }
 

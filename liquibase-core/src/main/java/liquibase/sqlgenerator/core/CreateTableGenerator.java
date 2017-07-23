@@ -5,6 +5,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -126,7 +127,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                         }
                     }
                 } else {
-                    LogFactory.getInstance().getLog().warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -260,7 +261,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
 
         if ((database instanceof MySQLDatabase) && (mysqlTableOptionStartWith != null)){
-            LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, "[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
             sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 

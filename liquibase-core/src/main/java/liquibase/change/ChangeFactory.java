@@ -25,7 +25,7 @@ public class ChangeFactory {
     private Logger log;
 
     private ChangeFactory() {
-      log = LogFactory.getInstance().getLog();
+      log = LogFactory.getLog(getClass());
     }
 
     protected Logger getLogger() {

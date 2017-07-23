@@ -14,6 +14,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -65,7 +66,7 @@ import java.util.jar.Manifest;
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
-    protected final Logger log = LogFactory.getInstance().getLog(SpringLiquibase.class.getName());
+    protected final Logger log = LogFactory.getLog(SpringLiquibase.class);
     protected String beanName;
 
 	protected ResourceLoader resourceLoader;
@@ -150,7 +151,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 					}
 					connection.close();
 				} catch (Exception e) {
-					log.warning("problem closing connection", e);
+					log.warn(LogTarget.LOG, "problem closing connection", e);
 				}
 			}
 		}
@@ -231,12 +232,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-            LogFactory.getInstance().getLog().info("Liquibase did not run because " + LiquibaseConfiguration
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Liquibase did not run because " + LiquibaseConfiguration
                 .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
             return;
 		}
 		if (!shouldRun) {
-            LogFactory.getInstance().getLog().info("Liquibase did not run because 'shouldRun' " + "property was set " +
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
                 "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
 		}
@@ -319,7 +320,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
-            log.warning("Null connection returned by liquibase datasource. Using offline unknown database");
+            log.warn(LogTarget.LOG, "Null connection returned by liquibase datasource. Using offline unknown database");
             liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
@@ -413,7 +414,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
                 if (liquibasePackages.isEmpty()) {
-                    LogFactory.getInstance().getLog().warning("No Liquibase-Packages entry found in MANIFEST.MF. " +
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "No Liquibase-Packages entry found in MANIFEST.MF. " +
                         "Using fallback of entire 'liquibase' package");
                     liquibasePackages.add("liquibase");
                 }
@@ -425,7 +426,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
             } catch (IOException e) {
-                LogFactory.getInstance().getLog().warning("Error initializing SpringLiquibase", e);
+                LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Error initializing SpringLiquibase", e);
             }
         }
 
@@ -465,7 +466,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
             for (Resource resource : resources) {
-                LogFactory.getInstance().getLog().debug("Opening " + resource.getURL().toExternalForm() + " as " +
+                LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Opening " + resource.getURL().toExternalForm() + " as " +
                     path);
                 URLConnection connection = resource.getURL().openConnection();
                 connection.setUseCaches(false);

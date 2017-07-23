@@ -3,8 +3,7 @@ package liquibase.servicelocator;
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-import liquibase.logging.core.TreeStyleLogger;
+import liquibase.logging.LogTarget;
 import liquibase.osgi.OSGiPackageScanClassResolver;
 import liquibase.osgi.OSGiResourceAccessor;
 import liquibase.osgi.OSGiUtil;
@@ -44,7 +43,7 @@ public class ServiceLocator {
                     instance = new ServiceLocator();
                 }
             } catch (Throwable e1) {
-                LogFactory.getInstance().getLog().severe("Cannot build ServiceLocator", e1);
+                LogFactory.getLog(ServiceLocator.class).error(LogTarget.LOG, "Cannot build ServiceLocator", e1);
             }
         }
     }
@@ -53,7 +52,6 @@ public class ServiceLocator {
 
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
-    private Logger logger = new TreeStyleLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
     private PackageScanClassResolver classResolver;
 
     protected ServiceLocator() {
@@ -90,7 +88,7 @@ public class ServiceLocator {
 
     protected PackageScanClassResolver defaultClassLoader(){
         if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
-            logger.debug("Using WebSphere Specific Class Resolver");
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Using WebSphere Specific Class Resolver");
             return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
         } else {
             return new DefaultPackageScanClassResolver();
@@ -193,7 +191,7 @@ public class ServiceLocator {
     }
 
     public <T> Class<? extends T>[] findClasses(Class<T> requiredInterface) throws ServiceNotFoundException {
-        logger.debug("ServiceLocator.findClasses for "+requiredInterface.getName());
+        LogFactory.getLog(getClass()).debug(LogTarget.LOG, "ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {
                 Class.forName(requiredInterface.getName());
@@ -219,7 +217,7 @@ public class ServiceLocator {
     }
 
     private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
-        logger.debug("ServiceLocator finding classes matching interface " + requiredInterface.getName());
+        LogFactory.getLog(getClass()).debug(LogTarget.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
         List<Class> classes = new ArrayList<>();
 
@@ -236,28 +234,24 @@ public class ServiceLocator {
             if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && Modifier.isPublic(clazz.getModifiers())) {
                 try {
                     clazz.getConstructor();
-                    logger.debug(clazz.getName() + " matches "+requiredInterface.getName());
+                    LogFactory.getLog(getClass()).debug(LogTarget.LOG, clazz.getName() + " matches "+requiredInterface.getName());
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    logger.info("Can not use " + clazz + " as a Liquibase service because it does not have a " +
+                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Can not use " + clazz + " as a Liquibase service because it does not have a " +
                         "no-argument constructor");
                 } catch (NoClassDefFoundError e) {
                     String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage()
                         .replace("/", ".") + " is not in the classpath";
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
-                        logger.info(message);
+                        LogFactory.getLog(getClass()).info(LogTarget.LOG, message);
                     } else {
-                        logger.warning(message);
+                        LogFactory.getLog(getClass()).warn(LogTarget.LOG, message);
                     }
                 }
             }
         }
 
         return classes;
-    }
-
-    protected Logger getLogger() {
-        return logger;
     }
 }

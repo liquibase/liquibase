@@ -1,7 +1,7 @@
 package liquibase.changelog;
 
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
+import liquibase.logging.*;
+import liquibase.logging.core.NoOpLoggerContext;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
@@ -31,10 +31,20 @@ public class UnknownChangeLogFormatLoggingTest {
     @Before
     public void setUp() throws Exception {
         mockLogger = Mockito.mock(Logger.class);
-        LogFactory.setInstance(new LogFactory() {
+        LogFactory.setService(new LoggerService() {
             @Override
             public Logger getLog(String name) {
                 return mockLogger;
+            }
+
+            @Override
+            public Logger getLog(Class clazz) {
+                return mockLogger;
+            }
+
+            @Override
+            public LoggerContext pushContext(Object object) {
+                return new NoOpLoggerContext();
             }
         });
     }
@@ -43,7 +53,7 @@ public class UnknownChangeLogFormatLoggingTest {
     public void testUnknownFileTypeWarning() throws Exception {
         ArgumentCaptor<String> loggerCaptor = ArgumentCaptor.forClass(String.class);
         new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/unknownIncludedFileChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
-        Mockito.verify(mockLogger, Mockito.atLeastOnce()).warning(loggerCaptor.capture());
+        Mockito.verify(mockLogger, Mockito.atLeastOnce()).warn(LogTarget.LOG, loggerCaptor.capture());
         final String recordedValue = loggerCaptor.getValue();
         Assert.assertTrue("The warning should contain a path to the unrecognized file", recordedValue.contains("liquibase/parser/core/xml/preconditionsChangeLog"));
     }

@@ -301,7 +301,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
         configureFieldsAndValues(fileOpener);
 
-        LogFactory.getInstance().setDefaultLoggingLevel(logging);
+//        LogFactory.getInstance().setDefaultLoggingLevel(logging);
         getLog().info(CommandLineUtils.getBanner());
 
         // Displays the settings for the Mojo depending of verbosity mode.

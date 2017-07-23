@@ -6,7 +6,7 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.ant.logging.AntTaskLogFactory;
+import liquibase.integration.ant.logging.AntTaskLogService;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
 import liquibase.logging.LogFactory;
@@ -57,7 +57,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogFactory.setInstance(new AntTaskLogFactory(this));
+        LogFactory.setService(new AntTaskLogService(this));
         classpath = new Path(getProject());
     }
 
@@ -596,17 +596,7 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     @Deprecated
     public String getLogLevel() {
-        return LogFactory.getInstance().getLog().getLogLevel().name();
-    }
-
-    /**
-     * @deprecated Use the ant logging flags (-debug, -verbose, -quiet) instead of this method to control logging
-     * output. This will no longer change log levels.
-     * @param level Log level to set.
-     */
-    @Deprecated
-    public void setLogLevel(String level) {
-        LogFactory.getInstance().getLog().setLogLevel(level);
+        return LogFactory.getLog(getClass()).getLogLevel().name();
     }
 
     /**
@@ -632,7 +622,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getInstance().getLog();
+            Logger logger = LogFactory.getLog(getClass());
         }
 
 

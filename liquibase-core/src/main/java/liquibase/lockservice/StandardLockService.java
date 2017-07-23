@@ -13,6 +13,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -95,8 +96,8 @@ public class StandardLockService implements LockService {
                 executor.comment("Create Database Lock Table");
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
                 database.commit();
-                LogFactory.getInstance().getLog().debug(
-                        "Created database lock table with name: " +
+                LogFactory.getLog(getClass()).debug(
+                        LogTarget.LOG, "Created database lock table with name: " +
                                 database.escapeTableName(
                                         database.getLiquibaseCatalogName(),
                                         database.getLiquibaseSchemaName(),
@@ -106,7 +107,7 @@ public class StandardLockService implements LockService {
             } catch (DatabaseException e) {
                 if ((e.getMessage() != null) && e.getMessage().contains("exists")) {
                     //hit a race condition where the table got created by another node.
-                    LogFactory.getInstance().getLog().debug("Database lock table already appears to exist " +
+                    LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Database lock table already appears to exist " +
                             "due to exception: " + e.getMessage() + ". Continuing on");
                 }  else {
                     throw e;
@@ -205,7 +206,7 @@ public class StandardLockService implements LockService {
         while (!locked && (new Date().getTime() < timeToGiveUp)) {
             locked = acquireLock();
             if (!locked) {
-                LogFactory.getInstance().getLog().info("Waiting for changelog lock....");
+                LogFactory.getLog(getClass()).info(LogTarget.LOG, "Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
@@ -255,8 +256,8 @@ public class StandardLockService implements LockService {
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
                 if ((rowsUpdated == -1) && (database instanceof MSSQLDatabase)) {
-                    LogFactory.getInstance().getLog().debug(
-                            "Database did not return a proper row count (Might have NOCOUNT enabled)"
+                    LogFactory.getLog(getClass()).debug(
+                            LogTarget.LOG, "Database did not return a proper row count (Might have NOCOUNT enabled)"
                     );
                     database.rollback();
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(
@@ -277,7 +278,7 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogFactory.getInstance().getLog().info(coreBundle.getString("successfully.acquired.change.log.lock"));
+                LogFactory.getLog(getClass()).info(LogTarget.LOG, coreBundle.getString("successfully.acquired.change.log.lock"));
 
                 hasChangeLogLock = true;
 
@@ -310,8 +311,8 @@ public class StandardLockService implements LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if ((updatedRows == -1) && (database instanceof MSSQLDatabase)) {
-                    LogFactory.getInstance().getLog().debug(
-                            "Database did not return a proper row count (Might have NOCOUNT enabled.)"
+                    LogFactory.getLog(getClass()).debug(
+                            LogTarget.LOG, "Database did not return a proper row count (Might have NOCOUNT enabled.)"
                     );
                     database.rollback();
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(
@@ -351,7 +352,7 @@ public class StandardLockService implements LockService {
             try {
                 hasChangeLogLock = false;
 
-                LogFactory.getInstance().getLog().info("Successfully released change log lock");
+                LogFactory.getLog(getClass()).info(LogTarget.LOG, "Successfully released change log lock");
                 database.rollback();
             } catch (DatabaseException e) {
             }
@@ -405,7 +406,7 @@ public class StandardLockService implements LockService {
             releaseLock();
         } catch (LockException e) {
             // ignore ?
-            LogFactory.getInstance().getLog().info("Ignored exception in forceReleaseLock: " + e.getMessage());
+            LogFactory.getLog(getClass()).info("Ignored exception in forceReleaseLock: " + e.getMessage());
         }*/
     }
 

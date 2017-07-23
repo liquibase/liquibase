@@ -3,7 +3,7 @@ package liquibase.logging.core;
 import liquibase.configuration.AbstractConfigurationContainer;
 
 /**
- * Configuration container for {@link liquibase.logging.core.DefaultLogger} properties
+ * Configuration container for {@link Slf4jLogger} properties
  */
 public class DefaultLoggerConfiguration extends AbstractConfigurationContainer {
 

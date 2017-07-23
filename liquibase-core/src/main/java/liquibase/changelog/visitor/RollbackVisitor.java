@@ -6,6 +6,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
 
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        LogFactory.getInstance().getLog().info("Rolling Back Changeset:" + changeSet);
+        LogFactory.getLog(getClass()).info(LogTarget.LOG, "Rolling Back Changeset:" + changeSet);
         changeSet.rollback(this.database);
         this.database.removeRanStatus(changeSet);
         sendRollbackEvent(changeSet, databaseChangeLog, database);
