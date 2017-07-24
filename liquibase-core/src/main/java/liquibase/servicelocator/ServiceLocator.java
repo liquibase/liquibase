@@ -230,10 +230,7 @@ public class ServiceLocator {
                 continue;
             }
 
-            if (clazz.getName().contains("$"))
-                continue; // Not usable as a service class.
-
-            if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && Modifier.isPublic(clazz.getModifiers())) {
+            if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && !clazz.isAnonymousClass() &&!clazz.isSynthetic() && Modifier.isPublic(clazz.getModifiers())) {
                 try {
                     clazz.getConstructor();
                     logger.debug(clazz.getName() + " matches "+requiredInterface.getName());
