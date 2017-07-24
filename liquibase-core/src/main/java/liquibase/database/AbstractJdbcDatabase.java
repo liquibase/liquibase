@@ -250,6 +250,21 @@ public abstract class AbstractJdbcDatabase implements Database {
         return connection.getCatalog();
     }
 
+    @Deprecated
+    public CatalogAndSchema correctSchema(final String catalog, final String schema) {
+        return new CatalogAndSchema(catalog, schema).standardize(this);
+    }
+
+    @Deprecated
+    @Override
+    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
+        if (schema == null) {
+            return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
+        }
+
+        return schema.standardize(this);
+    }
+
     @Override
     public String correctObjectName(final String objectName, final Class<? extends DatabaseObject> objectType) {
         if ((quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) || (unquotedObjectsAreUppercased == null) ||

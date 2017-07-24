@@ -610,6 +610,11 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
+    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
+        return schema.standardize(this);
+    }
+
+    @Override
     /**
      * Returns name all lower case except for the last letter capital for easier detection of corrected names.
      */
