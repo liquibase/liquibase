@@ -189,13 +189,13 @@ Optional Diff Parameters:
                                             instead of the real names.
  --includeCatalog=<true|false>              If true, the catalog will be
                                             included in generated changeSets
-                                            Defaults to true
+                                            Defaults to false
  --includeSchema=<true|false>               If true, the schema will be
                                             included in generated changeSets
-                                            Defaults to true
+                                            Defaults to false
  --includeTablespace=<true|false>           If true, the tablespace of tables
                                             and indexes will be included.
-                                            Defaults to true
+                                            Defaults to false
  --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name
  --dataOutputDirectory=DIR                  Output data as CSV in the given
                                             directory

@@ -846,7 +846,7 @@ public class Main {
         try {
 
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_CATALOG, "false"));
-            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "true"));
+            boolean includeTablespace = Boolean.parseBoolean(getCommandParam(OPTIONS.INCLUDE_TABLESPACE, "false"));
             String excludeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.EXCLUDE_OBJECTS, null));
             String includeObjects = StringUtils.trimToNull(getCommandParam(OPTIONS.INCLUDE_OBJECTS, null));
 
