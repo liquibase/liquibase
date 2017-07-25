@@ -17,6 +17,7 @@ import liquibase.util.JdbcUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -97,10 +98,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     if (database instanceof DB2Database) {
                         String sql;
-                        if (((DB2Database)database).isZOS()) {
-                        	sql = getDB2ZOSSql(jdbcSchemaName, tableName);
+                        if (((DB2Database) database).isZOS()) {
+                            sql = getDB2ZOSSql(jdbcSchemaName, tableName);
                         } else {
-                        	sql = getDB2Sql(jdbcSchemaName, tableName);
+                            sql = getDB2Sql(jdbcSchemaName, tableName);
                         }
 
                         return executeAndExtract(sql, database);
@@ -162,7 +163,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (getAllCatalogsStringScratchData() == null) {
                             sql += "WHERE f.owner = '" + jdbcSchemaName + "' ";
                         } else {
-                            sql += "WHERE f.owner IN ('"+jdbcSchemaName+"', " + getAllCatalogsStringScratchData() + ") ";
+                            sql += "WHERE f.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ") ";
                         }
                         sql += "AND p.constraint_type in ('P', 'U') " +
                                 "AND f.constraint_type = 'R' " +
@@ -175,10 +176,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
                         String sql;
-                        if (((DB2Database)database).isZOS()) {
-                        	sql = getDB2ZOSSql(jdbcSchemaName, null);
+                        if (((DB2Database) database).isZOS()) {
+                            sql = getDB2ZOSSql(jdbcSchemaName, null);
                         } else {
-                        	sql = getDB2Sql(jdbcSchemaName, null);
+                            sql = getDB2Sql(jdbcSchemaName, null);
                         }
 
                         return executeAndExtract(sql, database);
@@ -340,10 +341,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (!bulkFetch || getAllCatalogsStringScratchData() == null) {
                             sql += "WHERE c.TABLE_OWNER = '" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "' ";
                         } else {
-                            sql += "WHERE c.TABLE_OWNER IN ('"+database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class)+"', " + getAllCatalogsStringScratchData()+ ")";
+                            sql += "WHERE c.TABLE_OWNER IN ('" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "', " + getAllCatalogsStringScratchData() + ")";
                         }
                         sql += "AND i.OWNER = c.TABLE_OWNER " +
-                                        "AND d.object_name IS NULL ";
+                                "AND d.object_name IS NULL ";
 
 
                         if (!bulkFetch && tableName != null) {
@@ -461,7 +462,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             }
 
-            return getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
+            List<CachedRow> columns = getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
@@ -566,7 +567,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     if (!bulk || getAllCatalogsStringScratchData() == null) {
                         sql += "WHERE OWNER='" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "' AND hidden_column='NO'";
                     } else {
-                        sql += "WHERE OWNER IN ('"+ ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema)+"', " + getAllCatalogsStringScratchData()+ ") AND hidden_column='NO'";
+                        sql += "WHERE OWNER IN ('" + ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema) + "', " + getAllCatalogsStringScratchData() + ") AND hidden_column='NO'";
                     }
 
                     if (!bulk) {
@@ -577,7 +578,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND COLUMN_NAME='" + database.escapeStringForDatabase(columnName) + "'";
                         }
                     }
-                    sql += " AND "+ ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
+                    sql += " AND " + ((OracleDatabase) database).getSystemTableWhereClause("TABLE_NAME");
                     sql += " ORDER BY OWNER, TABLE_NAME, c.COLUMN_ID";
 
                     return this.executeAndExtract(sql, database);
@@ -714,6 +715,19 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return rows;
                 }
             });
+            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                filterXmlGeneratedColumns(columns);
+            }
+            return columns;
+        }
+
+        private void filterXmlGeneratedColumns(List<CachedRow> columns) throws SQLException {
+            Iterator<CachedRow> iterator = columns.iterator();
+            while (iterator.hasNext()) {
+                if ("DB2_GENERATED_DOCID_FOR_XML".equals(iterator.next().getString("COLUMN_NAME"))) {
+                    iterator.remove();
+                }
+            }
         }
 
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
@@ -752,6 +766,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryOracle(catalogAndSchema, table);
                     } else if (database instanceof MSSQLDatabase) {
                         return queryMssql(catalogAndSchema, table);
+                    } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                        return queryDb2Zos(catalogAndSchema, table);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -767,6 +783,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         return queryOracle(catalogAndSchema, null);
                     } else if (database instanceof MSSQLDatabase) {
                         return queryMssql(catalogAndSchema, null);
+                    } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                        return queryDb2Zos(catalogAndSchema, null);
                     }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -809,10 +827,29 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     if (tableName != null || allCatalogsString == null) {
                         sql += "WHERE a.OWNER='" + ownerName + "'";
                     } else {
-                        sql += "WHERE a.OWNER IN ('"+ownerName+"', " + allCatalogsString + ")";
+                        sql += "WHERE a.OWNER IN ('" + ownerName + "', " + allCatalogsString + ")";
                     }
                     if (tableName != null) {
                         sql += " AND a.TABLE_NAME='" + tableName + "'";
+                    }
+
+                    return executeAndExtract(sql, database);
+                }
+
+                private List<CachedRow> queryDb2Zos(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
+                    String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
+
+                    String sql = "SELECT CREATOR AS TABLE_SCHEM, " +
+                            "NAME AS TABLE_NAME, " +
+                            "'TABLE' AS TABLE_TYPE, " +
+                            "REMARKS " +
+                            "FROM  SYSIBM.SYSTABLES " +
+                            "WHERE TYPE = 'T' ";
+                    if (ownerName != null) {
+                        sql += "AND CREATOR='" + ownerName + "'";
+                    }
+                    if (tableName != null) {
+                        sql += " AND NAME='" + tableName + "'";
                     }
 
                     return executeAndExtract(sql, database);
@@ -877,7 +914,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return extract(databaseMetaData.getTables(catalog, schema, null, new String[]{"VIEW"}));
                 }
 
-                private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
+                private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String viewName) throws DatabaseException, SQLException {
+                    String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
 
                     String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a.VIEW_NAME as TABLE_NAME, 'TABLE' as TABLE_TYPE, c.COMMENTS as REMARKS, TEXT as OBJECT_BODY";
                     if (database.getDatabaseMajorVersion() > 10) {
@@ -888,7 +926,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     if (viewName != null || getAllCatalogsStringScratchData() == null) {
                         sql += "WHERE a.OWNER='" + ownerName + "'";
                     } else {
-                        sql += "WHERE a.OWNER IN ('"+ownerName+"', " + getAllCatalogsStringScratchData() + ")";
+                        sql += "WHERE a.OWNER IN ('" + ownerName + "', " + getAllCatalogsStringScratchData() + ")";
                     }
                     if (viewName != null) {
                         sql += " AND a.VIEW_NAME='" + viewName + "'";
@@ -956,7 +994,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         String sql = mssqlSql(catalogAndSchema, tableName);
                         pkInfo = executeAndExtract(sql, database);
                     } else {
-                        if (database instanceof DB2Database && ((DB2Database)database).isZOS()){
+                        if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
                             String sql = "SELECT 'NULL' AS TABLE_CAT," +
                                     " SYSTAB.TBCREATOR AS TABLE_SCHEM, " +
                                     "SYSTAB.TBNAME AS TABLE_NAME, " +
@@ -1084,7 +1122,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             if (getAllCatalogsStringScratchData() == null) {
                                 sql += "AND k.owner='" + catalogAndSchema.getCatalogName() + "' ";
                             } else {
-                                sql += "AND k.owner IN ('"+catalogAndSchema.getCatalogName()+"', " + getAllCatalogsStringScratchData()+ ")";
+                                sql += "AND k.owner IN ('" + catalogAndSchema.getCatalogName() + "', " + getAllCatalogsStringScratchData() + ")";
                             }
                             sql += "AND k.constraint_name = c.constraint_name " +
                                     "AND k.table_name = c.table_name " +
@@ -1211,7 +1249,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null || getAllCatalogsStringScratchData() == null) {
                             sql += "and uc.owner = '" + jdbcSchemaName + "'";
                         } else {
-                            sql += "and uc.owner IN ('"+jdbcSchemaName+"', " + getAllCatalogsStringScratchData()+ ")";
+                            sql += "and uc.owner IN ('" + jdbcSchemaName + "', " + getAllCatalogsStringScratchData() + ")";
                         }
                         sql += "AND d.object_name IS NULL ";
 
@@ -1225,8 +1263,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             if (tableName != null) {
                                 sql += " and table_name = '" + tableName + "'";
                             }
-                        // DB2 z/OS
-                        } else if ((((DB2Database) database).isZOS())){
+                            // DB2 z/OS
+                        } else if ((((DB2Database) database).isZOS())) {
                             sql = "select distinct k.constname as constraint_name, t.tbname as TABLE_NAME from SYSIBM.SYSKEYCOLUSE k, SYSIBM.SYSTABCONST t "
                                     + "where k.constname = t.constname "
                                     + "and k.TBCREATOR = t.TBCREATOR "
