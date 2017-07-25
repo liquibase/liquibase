@@ -6,6 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.test.TestContext;
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +38,7 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogTableName()
                                 );
-                        LogFactory.getInstance().getLog().sql(sql);
+                        LogFactory.getLog(getClass()).sql(LogTarget.LOG, sql);
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok
@@ -49,7 +50,7 @@ public class LockServiceExecuteTest {
                                         database.getLiquibaseSchemaName(),
                                         database.getDatabaseChangeLogLockTableName()
                                 );
-                        LogFactory.getInstance().getLog().sql(sql);
+                        LogFactory.getLog(getClass()).sql(LogTarget.LOG, sql);
                         statement.execute(sql);
                     } catch (Exception e) {
                         //ok

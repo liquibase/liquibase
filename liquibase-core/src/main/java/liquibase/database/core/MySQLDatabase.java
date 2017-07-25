@@ -9,6 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -515,7 +516,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 }
                 if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
                     setHasJdbcConstraintDeferrableBug(true);
-                    LogFactory.getInstance().getLog().warning("Your MySQL/MariaDB database JDBC driver might have " +
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
                             "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
                             "support this feature. A workaround for this problem will be used. Please check with " +
                             "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
@@ -560,8 +561,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
-            LogFactory.getInstance().getLog().warning(
-                    "Unable to determine exact database server version"
+            LogFactory.getLog(getClass()).warn(
+                    LogTarget.LOG, "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;

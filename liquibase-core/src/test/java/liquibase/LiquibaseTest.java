@@ -18,6 +18,9 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.logging.LoggerContext;
+import liquibase.logging.LoggerService;
+import liquibase.logging.core.NoOpLoggerContext;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
@@ -70,10 +73,20 @@ public class LiquibaseTest {
         when(mockChangeLogParserFactory.getParser(anyString(), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
         when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLog);
 
-        LogFactory.setInstance(new LogFactory() {
+        LogFactory.setService(new LoggerService() {
             @Override
             public Logger getLog(String name) {
                 return mockLogger;
+            }
+
+            @Override
+            public Logger getLog(Class clazz) {
+                return mockLogger;
+            }
+
+            @Override
+            public LoggerContext pushContext(Object object) {
+                return new NoOpLoggerContext();
             }
         });
     }
@@ -84,12 +97,10 @@ public class LiquibaseTest {
         Mockito.reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
         LockServiceFactory.reset();
         ChangeLogParserFactory.reset();
-        LogFactory.reset();
     }
 
     @Test
     public void testConstructor() throws Exception {
-        LogFactory.reset(); //going to test log setup
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 

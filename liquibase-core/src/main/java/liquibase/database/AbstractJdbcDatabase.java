@@ -19,6 +19,7 @@ import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -123,24 +124,24 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
-        LogFactory.getInstance().getLog().debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
+        LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
             boolean autoCommit = conn.getAutoCommit();
             if (autoCommit == getAutoCommitMode()) {
                 // Don't adjust the auto-commit mode if it's already what the database wants it to be.
-                LogFactory.getInstance().getLog().debug("Not adjusting the auto commit mode; it is already " + autoCommit);
+                LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Not adjusting the auto commit mode; it is already " + autoCommit);
             } else {
                 // Store the previous auto-commit mode, because the connection needs to be restored to it when this
                 // AbstractDatabase type is closed. This is important for systems which use connection pools.
                 previousAutoCommit = autoCommit;
 
-                LogFactory.getInstance().getLog().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
+                LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
 
             }
         } catch (DatabaseException e) {
-            LogFactory.getInstance().getLog().warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
+            LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
 
         this.connection.attached(this);
@@ -232,7 +233,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     defaultCatalogName = getConnectionCatalogName();
                 } catch (DatabaseException e) {
-                    LogFactory.getInstance().getLog().info("Error getting default catalog", e);
+                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Error getting default catalog", e);
                 }
             }
         }
@@ -324,7 +325,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return ExecutorService.getInstance().getExecutor(this).
                     queryForObject(currentSchemaStatement, String.class);
         } catch (Exception e) {
-            LogFactory.getInstance().getLog().info("Error getting default schema", e);
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Error getting default schema", e);
         }
         return null;
     }
@@ -669,7 +670,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
-                    LogFactory.getInstance().getLog().warning("Cannot determine case sensitivity from JDBC driver", e);
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
@@ -720,7 +721,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                 final long createSnapshotStarted = System.currentTimeMillis();
                 snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-                LogFactory.getInstance().getLog().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+                LogFactory.getLog(getClass()).debug(LogTarget.LOG, String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -738,7 +739,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     compareControl);
 
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
-            LogFactory.getInstance().getLog().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
             this.commit(); //clear out currently executed statements
@@ -769,7 +770,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             LockServiceFactory.getInstance().getLockService(this).destroy();
 
             this.setAutoCommit(previousAutoCommit);
-            LogFactory.getInstance().getLog().info(String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, String.format("Successfully deleted all supported object types in schema %s.", schemaToDrop.toString()));
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
             this.commit();
@@ -1150,7 +1151,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     connection.setAutoCommit(previousAutoCommit);
                 } catch (DatabaseException e) {
-                    LogFactory.getInstance().getLog().warning("Failed to restore the auto commit to " + previousAutoCommit);
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Failed to restore the auto commit to " + previousAutoCommit);
 
                     throw e;
                 }
@@ -1221,12 +1222,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
                 continue;
             }
-            LogFactory.getInstance().getLog().debug("Executing Statement: " + statement);
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Executing Statement: " + statement);
             try {
                 ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    LogFactory.getInstance().getLog().severe("Error executing statement '"+statement.toString()+"', but continuing", e);
+                    LogFactory.getLog(getClass()).error(LogTarget.LOG, "Error executing statement '"+statement.toString()+"', but continuing", e);
                 } else {
                     throw e;
                 }
@@ -1540,8 +1541,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public int getMaxFractionalDigitsForTimestamp() {
         if (getConnection() == null) {
             // if no connection is there we cannot do anything...
-            LogFactory.getInstance().getLog().warning(
-                    "No database connection available - specified"
+            LogFactory.getLog(getClass()).warn(
+                    LogTarget.LOG, "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
             return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;
         }

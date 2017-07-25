@@ -7,6 +7,7 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
@@ -27,7 +28,7 @@ import static java.util.ResourceBundle.getBundle;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-    private static final Logger LOG = LogFactory.getInstance().getLog();
+    private static final Logger LOG = LogFactory.getLog(ExecutablePreparedStatementBase.class);
     private static ResourceBundle coreBundle = getBundle("liquibase/i18n/liquibase-core");
 
     protected Database database;
@@ -70,8 +71,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
         List<ColumnConfig> cols = new ArrayList<>(getColumns().size());
 
         String sql = generateSql(cols);
-        LOG.sql(sql);
-        LOG.debug("Number of columns = " + cols.size());
+        LOG.sql(LogTarget.LOG, sql);
+        LOG.debug(LogTarget.LOG, "Number of columns = " + cols.size());
 
         // create prepared statement
         PreparedStatement stmt = factory.create(sql);
@@ -105,7 +106,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             throws SQLException, DatabaseException {
         int i = 1;  // index starts from 1
         for (ColumnConfig col : cols) {
-            LOG.debug("Applying column parameter = " + i + " for column " + col.getName());
+            LOG.debug(LogTarget.LOG, "Applying column parameter = " + i + " for column " + col.getName());
             applyColumnParameter(stmt, i, col);
             i++;
         }
@@ -124,13 +125,13 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
     private void applyColumnParameter(PreparedStatement stmt, int i, ColumnConfig col) throws SQLException,
             DatabaseException {
         if (col.getValue() != null) {
-            LOG.debug("value is string = " + col.getValue());
+            LOG.debug(LogTarget.LOG, "value is string = " + col.getValue());
             stmt.setString(i, col.getValue());
         } else if (col.getValueBoolean() != null) {
-            LOG.debug("value is boolean = " + col.getValueBoolean());
+            LOG.debug(LogTarget.LOG, "value is boolean = " + col.getValueBoolean());
             stmt.setBoolean(i, col.getValueBoolean());
         } else if (col.getValueNumeric() != null) {
-            LOG.debug("value is numeric = " + col.getValueNumeric());
+            LOG.debug(LogTarget.LOG, "value is numeric = " + col.getValueNumeric());
             Number number = col.getValueNumeric();
             if (number instanceof ColumnConfig.ValueNumeric) {
                 ColumnConfig.ValueNumeric valueNumeric = (ColumnConfig.ValueNumeric) number;
@@ -159,14 +160,14 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
                 );
             }
         } else if (col.getValueDate() != null) {
-            LOG.debug("value is date = " + col.getValueDate());
+            LOG.debug(LogTarget.LOG, "value is date = " + col.getValueDate());
             if (col.getValueDate() instanceof Timestamp) {
                 stmt.setTimestamp(i, (Timestamp) col.getValueDate());
             } else {
                 stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
             }
         } else if (col.getValueBlobFile() != null) {
-            LOG.debug("value is blob = " + col.getValueBlobFile());
+            LOG.debug(LogTarget.LOG, "value is blob = " + col.getValueBlobFile());
             try {
                 LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
                 if (lob.length <= Integer.MAX_VALUE) {
@@ -179,7 +180,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
         } else if (col.getValueClobFile() != null) {
             try {
-                LOG.debug("value is clob = " + col.getValueClobFile());
+                LOG.debug(LogTarget.LOG, "value is clob = " + col.getValueClobFile());
                 LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
                 if (lob.length <= Integer.MAX_VALUE) {
                     stmt.setCharacterStream(i, lob.content, (int) lob.length);
@@ -191,7 +192,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
             }
         } else {
             // NULL values might intentionally be set into a change, we must also add them to the prepared statement
-            LOG.debug("value is explicit null");
+            LOG.debug(LogTarget.LOG, "value is explicit null");
             stmt.setNull(i, java.sql.Types.NULL);
         }
     }

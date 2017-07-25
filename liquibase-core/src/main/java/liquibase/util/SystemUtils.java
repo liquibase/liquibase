@@ -17,6 +17,7 @@
 package liquibase.util;
 
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 
 import java.io.File;
 
@@ -1268,8 +1269,8 @@ public class SystemUtils {
             return System.getProperty(property);
         } catch (SecurityException ex) {
             // we are not allowed to look at this property
-            LogFactory.getInstance().getLog().severe(
-                "Caught a SecurityException reading the system property '" + property
+            LogFactory.getLog(SystemUtils.class).error(
+                    LogTarget.LOG, "Caught a SecurityException reading the system property '" + property
                 + "'; the SystemUtils property value will default to null.",
                     ex
             );

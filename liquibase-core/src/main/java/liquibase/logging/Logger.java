@@ -1,20 +1,10 @@
 package liquibase.logging;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.servicelocator.PrioritizedService;
-
 /**
  * Interface for all logger implementations in this software. The hierarchy of log levels is:
- * (finest) DEBUG < SQL < INFO < WARNING < SEVERE (coarsest)
+ * (finest) DEBUG < SQL < INFO < WARNING < ERROR (coarsest)
  */
-public interface Logger extends PrioritizedService {
-
-    /**
-     * Set the identifier for the logger. LogFactory might use that name to find a logger for a specific purpose.
-     * @param name Identifier for the purpose of the logger.
-     */
-    void setName(String name);
+public interface Logger {
 
     /**
      * Returns the currently set log level
@@ -22,119 +12,89 @@ public interface Logger extends PrioritizedService {
      */
     LogLevel getLogLevel();
 
-    /**
-     * Changes the current log level
-     * @param level the new disired log level
-     */
-    void setLogLevel(LogLevel level);
-
-    /**
-     * Changes the current log level
-     * @param level the new disired log level
-     */
-    void setLogLevel(String level);
-
-    /**
-     * Opens a new log file and chooses a new log level at the same time. Typically used to initialize the Logger.
-     * @param logLevel desired log level
-     * @param logFile
-     */
-    void setLogLevel(String logLevel, String logFile);
-
-    /**
-     * Informs the logger that work on a new, possible different, DatabaseChangeLog has begun. Might be useful for
-     * visualizing the DatabaseChangeLog/ChangeSet hierarchy in the log files.
-     * @param databaseChangeLog the new DatabaseChangeLog
-     */
-    void setChangeLog(DatabaseChangeLog databaseChangeLog);
-
-    /**
-     * Informs the logger that work on a new, possible different, ChangeSet has begun. Might be useful for
-     * visualizing the DatabaseChangeLog/ChangeSet hierarchy in the log files.
-     * @param changeSet the new ChangeSet
-     */
-    void setChangeSet(ChangeSet changeSet);
-
-    /**
-     * Closes the current log output file.
-     */
-    void closeLogFile();
+//    /**
+//     * Closes the current log output file.
+//     */
+//    void closeLogFile();
 
     /**
      * Log a severe event.
+     *
+     * @param target
      * @param message the text message describing the event
      * @see LogLevel
      */
-    void severe(String message);
+    void error(LogTarget target, String message);
 
     /**
      * Log a severe event together with data from an error/exception
+     * @param target
      * @param message the text message describing the event
      * @param e the error/exception that occured
      * @see LogLevel
      */
-    void severe(String message, Throwable e);
+    void error(LogTarget target, String message, Throwable e);
 
     /**
      * Log a event the user should be warned about
+     * @param target
      * @param message the text message describing the event
      * @see LogLevel
      */
-    void warning(String message);
+    void warn(LogTarget target, String message);
 
     /**
      * Log a event the user should be warned about together with data from an error/exception
+     * @param target
      * @param message the text message describing the event
      * @param e the error/exception that occured
      * @see LogLevel
      */
-    void warning(String message, Throwable e);
+    void warn(LogTarget target, String message, Throwable e);
 
     /**
      * Logs a general event that might be useful for the user
+     *
+     * @param logTarget
      * @param message the text message describing the event
      * @see LogLevel
      */
-    void info(String message);
+    void info(LogTarget logTarget, String message);
 
     /**
      * Logs a general event that might be useful for the user together with data from an error/exception
+     *
+     * @param target
      * @param message the text message describing the event
      * @param e the error/exception that occured
      * @see LogLevel
      */
-    void info(String message, Throwable e);
+    void info(LogTarget target, String message, Throwable e);
 
     /**
      * Logs a native SQL statement sent to a database instance
      *
+     * @param target
      * @param message the text message describing the event
      * @see LogLevel
      */
-    void sql(String message);
-
-    /**
-     * Logs a native SQL statement sent to a database instance together with data from an error/exception
-     *
-     * @param message the text message describing the event
-     * @param e       the error/exception that occured
-     * @see LogLevel
-     */
-    void sql(String message, Throwable e);
+    void sql(LogTarget target, String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting
+     *
+     * @param target
      * @param message the text message describing the event
      * @see LogLevel
      */
-    void debug(String message);
+    void debug(LogTarget target, String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting together with data from an error/exception
+     * @param target
      * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
+     * @param e the error/exception that occured  @see LogLevel
      */
-    void debug(String message, Throwable e);
+    void debug(LogTarget target, String message, Throwable e);
 
 }

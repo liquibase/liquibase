@@ -10,6 +10,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -107,7 +108,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
                 } catch (SQLException e) {
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().info("Could get sql keywords on OracleDatabase: " + e.getMessage());
+                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Could get sql keywords on OracleDatabase: " + e.getMessage());
                     //can not get keywords. Continue on
                 }
                 try {
@@ -116,7 +117,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     method.invoke(sqlConn, true);
                 } catch (Exception e) {
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Could not set remarks reporting on OracleDatabase: " + e.getMessage());
 
                     //cannot set it. That is OK
                 }
@@ -143,7 +144,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     @SuppressWarnings("HardCodedStringLiteral") String message = "Cannot read from v$parameter: "+e.getMessage();
 
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().info("Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
+                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Could not set check compatibility mode on OracleDatabase, assuming not running in any sort of compatibility mode: " + message);
                 } finally {
                     JdbcUtils.close(resultSet, statement);
                 }
@@ -246,7 +247,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
             //noinspection HardCodedStringLiteral
-            LogFactory.getInstance().getLog().info("Error getting default schema", e);
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Error getting default schema", e);
         }
         return null;
     }
@@ -523,7 +524,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         DatabaseConnection connection = getConnection();
         if ((connection == null) || (connection instanceof OfflineConnection)) {
             //noinspection HardCodedStringLiteral
-            LogFactory.getInstance().getLog().info("Cannot validate offline database");
+            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Cannot validate offline database");
             return errors;
         }
 
@@ -570,7 +571,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 } else {
                     //noinspection HardCodedStringLiteral
-                    LogFactory.getInstance().getLog().warning("Cannot check dba_recyclebin access", e);
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Cannot check dba_recyclebin access", e);
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {

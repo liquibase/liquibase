@@ -3,6 +3,7 @@ package liquibase.resource;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.util.StringUtils;
 
 import java.io.File;
@@ -43,7 +44,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 continue;
             }
             seenUrls.add(url.toExternalForm());
-            LogFactory.getInstance().getLog().debug("Opening "+url.toExternalForm()+" as "+path);
+            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Opening "+url.toExternalForm()+" as "+path);
 
             URLConnection connection = url.openConnection();
             connection.setUseCaches(false);

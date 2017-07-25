@@ -1,6 +1,7 @@
 package liquibase.parser.core.xml;
 
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
@@ -24,13 +25,13 @@ public class ResourceAccessorXsdStreamResolver extends XsdStreamResolver {
 
 			InputStream resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
 			if(resourceAsStream == null){
-				LOGGER.debug("Could not load "+xsdFile+" with the standard resource accessor.");
+				LOGGER.debug(LogTarget.LOG, "Could not load "+xsdFile+" with the standard resource accessor.");
 				return getSuccessorValue(xsdFile);
 			}
 			return resourceAsStream;
 
 		}catch (IOException e){
-			LOGGER.debug("Could not load "+xsdFile+" with the standard resource accessor.");
+			LOGGER.debug(LogTarget.LOG, "Could not load "+xsdFile+" with the standard resource accessor.");
 			return getSuccessorValue(xsdFile);
 		}
 	}

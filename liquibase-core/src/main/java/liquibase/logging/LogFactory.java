@@ -1,81 +1,29 @@
 package liquibase.logging;
 
-import liquibase.logging.core.DefaultLogger;
-import liquibase.servicelocator.ServiceLocator;
-
-import java.util.HashMap;
-import java.util.Map;
+import liquibase.logging.core.Slf4jLoggerService;
 
 public class LogFactory {
-    private final Map<String, Logger> loggers = new HashMap<>();
-    private static String defaultLoggingLevel;
-    private static DefaultLogger defaultLogger = new DefaultLogger();
 
-    private static LogFactory instance;
 
-    public static synchronized void reset() {
-        instance = new LogFactory();
-    }
-
-    public static synchronized LogFactory getInstance() {
-        if (instance == null) {
-            instance = new LogFactory();
-        }
-        return instance;
-    }
+    private static LoggerService loggerService = new Slf4jLoggerService();
 
     /**
-     * Set the instance used by this singleton. Used primarily for testing.
+     * Set the instance used by this singleton.
      */
-    public static void setInstance(LogFactory instance) {
-        LogFactory.instance = instance;
+    public static void setService(LoggerService service) {
+        LogFactory.loggerService = service;
     }
 
-    /**
-     * @deprecated Use non-static {@link #getLog(String)} method
-     */
-    public static Logger getLogger(String name) {
-        return getInstance().getLog(name);
+    public static Logger getLog(String name) {
+        return loggerService.getLog(name);
     }
 
-    public Logger getLog(String name) {
-        if (!loggers.containsKey(name)) {
-            Logger value;
-            try {
-                ServiceLocator serviceLocator = ServiceLocator.getInstance();
-                if (serviceLocator == null) {
-                    return defaultLogger; //ServiceLocator not yet running
-                }
-                value = (Logger) serviceLocator.newInstance(Logger.class);
-            } catch (Exception e) {
-                return defaultLogger;
-            }
-            value.setName(name);
-            if (defaultLoggingLevel != null) {
-                value.setLogLevel(defaultLoggingLevel);
-            }
-            loggers.put(name, value);
-        }
-
-        return loggers.get(name);
+    public static Logger getLog(Class clazz) {
+        return loggerService.getLog(clazz);
     }
 
-   /**
-     * @deprecated Use non-static {@link #getLog()} method
-     */
-    public static Logger getLogger() {
-        return getInstance().getLog();
+    public static LoggerContext pushContext(Object object) {
+        return loggerService.pushContext(object);
     }
 
-    public Logger getLog() {
-        return getLog("liquibase");
-    }
-
-    public void setDefaultLoggingLevel(String defaultLoggingLevel) {
-        this.defaultLoggingLevel = defaultLoggingLevel;
-    }
-
-    public void setDefaultLoggingLevel(LogLevel defaultLoggingLevel) {
-        this.defaultLoggingLevel = defaultLoggingLevel.name();
-    }
 }

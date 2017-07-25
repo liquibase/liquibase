@@ -16,6 +16,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.util.StringUtils;
 
@@ -27,7 +28,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
     private Database database;
     private CatalogAndSchema[] schemas;
 
-    private Logger log = LogFactory.getInstance().getLog();
+    private Logger log = LogFactory.getLog(getClass());
 
     @Override
     public String getName() {
@@ -82,7 +83,7 @@ public class DropAllCommand extends AbstractCommand<CommandResult> {
             lockService.waitForLock();
 
             for (CatalogAndSchema schema : schemas) {
-                log.info("Dropping Database Objects in schema: " + schema);
+                log.info(LogTarget.LOG, "Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
                 database.dropDatabaseObjects(schema);
             }

@@ -3,6 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 
@@ -24,9 +25,9 @@ public final class ChangeExecListenerUtils {
         ChangeExecListener changeExecListener = null;
 
         if (changeExecListenerClass != null) {
-            Logger logger = LogFactory.getInstance().getLog();
+            Logger logger = LogFactory.getLog(ChangeExecListenerUtils.class);
 
-            logger.debug("Setting ChangeExecListener: " + changeExecListenerClass);
+            logger.debug(LogTarget.LOG, "Setting ChangeExecListener: " + changeExecListenerClass);
 
             ClassLoader classLoader = resourceAccessor.toClassLoader();
             Class<?> clazz = Class.forName(changeExecListenerClass, true, classLoader);
@@ -34,25 +35,25 @@ public final class ChangeExecListenerUtils {
             Properties properties = loadProperties(changeExecListenerPropertiesFile);
             Constructor<?> cons = getConstructor(clazz, Database.class, Properties.class);
             if (cons != null) {
-                logger.debug("Create " + clazz.getSimpleName() + "(Database, Properties)");
+                logger.debug(LogTarget.LOG, "Create " + clazz.getSimpleName() + "(Database, Properties)");
                 changeExecListener = (ChangeExecListener) cons.newInstance(database, properties);
             } else {
                 cons = getConstructor(clazz, Properties.class, Database.class);
                 if (cons != null) {
-                    logger.debug("Create " + clazz.getSimpleName() + "(Properties, Database)");
+                    logger.debug(LogTarget.LOG, "Create " + clazz.getSimpleName() + "(Properties, Database)");
                     changeExecListener = (ChangeExecListener) cons.newInstance(properties, database);
                 } else {
                     cons = getConstructor(clazz, Database.class);
                     if (cons != null) {
-                        logger.debug("Create " + clazz.getSimpleName() + "(Database)");
+                        logger.debug(LogTarget.LOG, "Create " + clazz.getSimpleName() + "(Database)");
                         changeExecListener = (ChangeExecListener) cons.newInstance(database);
                     } else {
                         cons = getConstructor(clazz, Properties.class);
                         if (cons != null) {
-                            logger.debug("Create " + clazz.getSimpleName() + "(Properties)");
+                            logger.debug(LogTarget.LOG, "Create " + clazz.getSimpleName() + "(Properties)");
                             changeExecListener = (ChangeExecListener) cons.newInstance(properties);
                         } else {
-                            logger.debug("Create " + clazz.getSimpleName() + "()");
+                            logger.debug(LogTarget.LOG, "Create " + clazz.getSimpleName() + "()");
                             changeExecListener = (ChangeExecListener) clazz.newInstance();
                         }
                     }

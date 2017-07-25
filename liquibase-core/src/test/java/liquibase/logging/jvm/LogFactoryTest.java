@@ -9,6 +9,6 @@ public class LogFactoryTest {
     
     @Test
     public void getLogger() {
-        assertNotNull(LogFactory.getInstance().getLog());
+        assertNotNull(LogFactory.getLog(getClass()));
     }
 }

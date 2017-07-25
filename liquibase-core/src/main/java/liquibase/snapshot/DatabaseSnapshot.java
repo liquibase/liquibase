@@ -11,6 +11,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.logging.Logger;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -251,7 +252,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
         }
 
         if (!snapshotControl.shouldInclude(example)) {
-            LOGGER.debug("Excluding " + example);
+            LOGGER.debug(LogTarget.LOG, "Excluding " + example);
             return example;
         }
 
@@ -282,11 +283,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             if (example instanceof Schema) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogFactory.getInstance().getLog().warning("Did not find schema '" + example + "' to snapshot");
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogFactory.getInstance().getLog().warning("Did not find catalog '" + example + "' to snapshot");
+                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {

@@ -7,6 +7,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.logging.LogFactory;
+import liquibase.logging.LogTarget;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
@@ -132,8 +133,8 @@ public class DateTimeType extends LiquibaseDataType {
             Object[] params = getParameters();
             Integer precision = Integer.valueOf(params[0].toString());
             if (precision > 6) {
-                LogFactory.getInstance().getLog().warning(
-                        "MySQL does not support a timestamp precision"
+                LogFactory.getLog(getClass()).warn(
+                        LogTarget.LOG, "MySQL does not support a timestamp precision"
                                 + " of '" + precision + "' - resetting to"
                                 + " the maximum of '6'");
                 params = new Object[] {6};

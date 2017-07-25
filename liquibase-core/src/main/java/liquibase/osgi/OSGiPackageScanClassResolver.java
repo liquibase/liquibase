@@ -1,5 +1,6 @@
 package liquibase.osgi;
 
+import liquibase.logging.LogTarget;
 import liquibase.servicelocator.DefaultPackageScanClassResolver;
 import liquibase.servicelocator.PackageScanFilter;
 import org.osgi.framework.Bundle;
@@ -40,7 +41,7 @@ public class OSGiPackageScanClassResolver extends DefaultPackageScanClassResolve
                     classes.add(klass);
                 }
             } catch (ClassNotFoundException e) {
-                log.debug("Cant load class: " + e.getMessage());
+                log.debug(LogTarget.LOG, "Cant load class: " + e.getMessage());
             }
 
         }

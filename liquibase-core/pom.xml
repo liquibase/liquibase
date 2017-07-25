@@ -15,7 +15,9 @@
 
 
 	<properties>
-        <bundle.namespace>liquibase.*</bundle.namespace>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<bundle.namespace>liquibase.*</bundle.namespace>
         <project.version>3.6.0-SNP</project.version>
 	</properties>
 
@@ -133,7 +135,17 @@
 			<scope>test</scope>
 		</dependency>
 
-	</dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+    </dependencies>
 
 	<build>
     <finalName>liquibase-${project.version}</finalName>
