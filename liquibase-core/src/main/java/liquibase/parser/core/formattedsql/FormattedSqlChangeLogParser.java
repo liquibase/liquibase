@@ -74,11 +74,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
             StringBuffer currentSql = new StringBuffer();
             StringBuffer currentRollbackSql = new StringBuffer();
+            Boolean isMainSql = true;
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
             Pattern changeLogPattern = Pattern.compile("\\-\\-\\s*liquibase formatted.*", Pattern.CASE_INSENSITIVE);
             Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset\\s+([^:]+):(\\S+).*", Pattern.CASE_INSENSITIVE);
+            Pattern changeSetRollbackPattern = Pattern.compile("\\-\\-[\\s]*changesetrollback.*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
             Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
@@ -187,15 +189,19 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     currentSql = new StringBuffer();
                     currentRollbackSql = new StringBuffer();
+                    isMainSql = true;
                 } else {
                     if (changeSet != null) {
+                        Matcher changeSetRollbackMatcher = changeSetRollbackPattern.matcher(line);
                         Matcher commentMatcher = commentPattern.matcher(line);
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
                         Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
                         Matcher preconditionMatcher = preconditionPattern.matcher(line);
                         Matcher validCheckSumMatcher = validCheckSumPattern.matcher(line);
 
-                        if (commentMatcher.matches()) {
+                        if (changeSetRollbackMatcher.matches()) {
+                            isMainSql = false;
+                        } else if (commentMatcher.matches()) {
                             if (commentMatcher.groupCount() == 1) {
                                 changeSet.setComments(commentMatcher.group(1));
                             }
@@ -237,7 +243,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 }
                             }
                         } else {
-                            currentSql.append(line).append(SystemUtils.LINE_SEPARATOR);
+                            if (isMainSql) {
+                                currentSql.append(line).append(SystemUtils.LINE_SEPARATOR);
+                            } else {
+                                currentRollbackSql.append(line).append(SystemUtils.LINE_SEPARATOR);
+                            }
                         }
                     }
                 }
