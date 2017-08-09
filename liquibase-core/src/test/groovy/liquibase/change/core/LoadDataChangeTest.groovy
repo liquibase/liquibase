@@ -17,7 +17,7 @@ import spock.lang.Unroll
 public class LoadDataChangeTest extends StandardChangeTest {
 
 
-    def "loadDataEmpty using InsertSetStatement"() throws Exception {
+    def "loadDataEmpty database agnostic"() throws Exception {
         when:
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
@@ -29,31 +29,9 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
 		SqlStatement[] sqlStatement = refactoring.generateStatements(new MSSQLDatabase());
 		then:
-		sqlStatement.length == 1
-		assert sqlStatement[0] instanceof InsertSetStatement
-
-		when:
-        SqlStatement[] sqlStatements = ((InsertSetStatement)sqlStatement[0]).getStatementsArray();
-
-		then:
-        sqlStatements.length == 0
+		sqlStatement.length == 0
     }
 
-    def "loadDataEmpty not using InsertSetStatement"() throws Exception {
-        when:
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/empty.data.csv");
-        refactoring.setSeparator(",");
-
-        refactoring.setResourceAccessor(new JUnitResourceAccessor());
-
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-
-        then:
-        sqlStatements.length == 0
-    }
 
     @Unroll("multiple formats with the same data for #fileName")
     def "multiple formats with the same data using InsertSetStatement"() throws Exception {

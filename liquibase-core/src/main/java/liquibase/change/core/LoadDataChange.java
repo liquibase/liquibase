@@ -211,6 +211,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 lineNumber++;
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)
                         || (isCommentingEnabled && isLineCommented(line))) {
+                	System.out.println(this.getClass().getName()+":: 4 generateStatement:: line is EMPTY");
+
                     continue; //nothing on this line
                 }
 
@@ -348,13 +350,20 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             if (anyPreparedStatements) {
                 return statements.toArray(new SqlStatement[statements.size()]);
             } else {
+            	if (statements.isEmpty()) {
+            		// avoid returning unnecessary dummy statement
+            		return new SqlStatement[0];
+            	}
+
                 InsertSetStatement statementSet = this.createStatementSet(getCatalogName(), getSchemaName(), getTableName());
                 for (SqlStatement stmt : statements) {
                     statementSet.addInsertStatement((InsertStatement) stmt);
                 }
 
                 if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
+
                     List<InsertStatement> innerStatements = statementSet.getStatements();
+
                     if (innerStatements != null && innerStatements.size() > 0 && innerStatements.get(0) instanceof InsertOrUpdateStatement) {
                         //cannot do insert or update in a single statement
                         return statementSet.getStatementsArray();
