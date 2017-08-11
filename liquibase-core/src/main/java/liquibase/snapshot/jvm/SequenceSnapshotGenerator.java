@@ -6,14 +6,14 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotIdService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
-
+import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -64,14 +64,18 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             return null;
         }
 
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
+        List<Map<String, ?>> sequences = ExecutorService.getInstance()
+                .getExecutor(database)
+                .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
         for (Map<String, ?> sequenceRow : sequences) {
-            String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
-            if ((database.isCaseSensitive() && name.equals(example.getName()) || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
-                return mapToSequence(sequenceRow, example.getSchema(), database);
+            if ("S".equalsIgnoreCase(StringUtils.trimToNull(sequenceRow.get("SEQTYPE").toString()))) {
+                String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
+                if ((database.isCaseSensitive() && name.equals(example.getName())
+                        || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
+                    return mapToSequence(sequenceRow, example.getSchema(), database);
+                }
             }
         }
-
         return null;
     }
 
@@ -128,12 +132,12 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected String getSelectSequenceSql(Schema schema, Database database) {
         if (database instanceof DB2Database) {
-        	if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
+            if (database.getDatabaseProductName().startsWith("DB2 UDB for AS/400")) {
                 return "SELECT SEQNAME AS SEQUENCE_NAME FROM QSYS2.SYSSEQUENCES WHERE SEQSCHEMA = '" + schema.getCatalogName() + "'";
             }
 
-            if (((DB2Database)database).isZOS()) {
-            	return "SELECT NAME AS SEQUENCE_NAME FROM SYSIBM.SYSSEQUENCES WHERE SCHEMA = '" + schema.getCatalogName() + "'";
+            if (((DB2Database) database).isZOS()) {
+                return "SELECT NAME AS SEQUENCE_NAME, SEQTYPE FROM SYSIBM.SYSSEQUENCES WHERE SCHEMA = '" + schema.getCatalogName() + "'";
             }
 
             return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'";
@@ -158,12 +162,11 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             return "SELECT SEQUENCE_NAME AS SEQUENCE_NAME, MIN_VALUE, MAX_VALUE, INCREMENT_BY, CYCLE_FLAG AS WILL_CYCLE, ORDER_FLAG AS IS_ORDERED, LAST_NUMBER as START_VALUE, CACHE_SIZE FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
         } else if (database instanceof PostgresDatabase) {
             return "SELECT c.relname AS SEQUENCE_NAME FROM pg_class c " +
-                    "join pg_namespace on c.relnamespace = pg_namespace.oid "+
+                    "join pg_namespace on c.relnamespace = pg_namespace.oid " +
                     "WHERE c.relkind='S' " +
                     "AND nspname = '" + schema.getName() + "' " +
                     "AND c.oid not in (select d.objid FROM pg_depend d where d.refobjsubid > 0)"
-            ;
-
+                    ;
 
 
 //        select c.relname FROM pg_class c, pg_user u
