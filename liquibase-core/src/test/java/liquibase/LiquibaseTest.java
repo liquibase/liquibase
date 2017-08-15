@@ -16,10 +16,10 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.LoggerContext;
-import liquibase.logging.LoggerService;
+import liquibase.logging.LoggerFactory;
 import liquibase.logging.core.NoOpLoggerContext;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -73,20 +73,20 @@ public class LiquibaseTest {
         when(mockChangeLogParserFactory.getParser(anyString(), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
         when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLog);
 
-        LogFactory.setService(new LoggerService() {
-            @Override
-            public Logger getLog(String name) {
-                return mockLogger;
-            }
-
+        LogService.setLoggerFactory(new LoggerFactory() {
             @Override
             public Logger getLog(Class clazz) {
                 return mockLogger;
             }
 
             @Override
-            public LoggerContext pushContext(Object object) {
+            public LoggerContext pushContext(String key, Object object) {
                 return new NoOpLoggerContext();
+            }
+
+            @Override
+            public void close() {
+
             }
         });
     }

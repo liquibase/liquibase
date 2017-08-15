@@ -4,8 +4,8 @@ import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
@@ -18,7 +18,7 @@ import java.sql.Driver;
 import java.util.*;
 
 public class DatabaseFactory {
-    private static final Logger LOG = LogFactory.getLog(DatabaseFactory.class);
+    private static final Logger LOG = LogService.getLog(DatabaseFactory.class);
     private static DatabaseFactory instance;
     private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<>();
     private Map<String, SortedSet<Database>> internalDatabases = new HashMap<>();
@@ -113,7 +113,7 @@ public class DatabaseFactory {
         }
 
         if (foundDatabases.isEmpty()) {
-            LOG.warn(LogTarget.LOG, "Unknown database: " + connection.getDatabaseProductName());
+            LOG.warn(LogType.LOG, "Unknown database: " + connection.getDatabaseProductName());
             UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
             unsupportedDB.setConnection(connection);
             return unsupportedDB;
@@ -217,7 +217,7 @@ public class DatabaseFactory {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
                     LOG.debug(
-                            LogTarget.LOG, "Loading properties from the file:'" + driverPropertiesFile + "'"
+                            LogType.LOG, "Loading properties from the file:'" + driverPropertiesFile + "'"
                     );
                     FileInputStream inputStream = new FileInputStream(propertiesFile);
                     try {
@@ -232,15 +232,15 @@ public class DatabaseFactory {
             }
 
 
-            LOG.debug(LogTarget.LOG, "Properties:");
+            LOG.debug(LogType.LOG, "Properties:");
             for (Map.Entry entry : driverProperties.entrySet()) {
-                LOG.debug(LogTarget.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
+                LOG.debug(LogType.LOG, "Key:'" + entry.getKey().toString() + "' Value:'" + entry.getValue().toString() + "'");
             }
 
 
-            LOG.debug(LogTarget.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
+            LOG.debug(LogType.LOG, "Connecting to the URL:'" + url + "' using driver:'" + driverObject.getClass().getName() + "'");
             Connection connection = driverObject.connect(url, driverProperties);
-            LOG.debug(LogTarget.LOG, "Connection has been created");
+            LOG.debug(LogType.LOG, "Connection has been created");
             if (connection == null) {
                 throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }

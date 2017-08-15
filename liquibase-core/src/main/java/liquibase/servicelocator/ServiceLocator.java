@@ -2,8 +2,8 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.osgi.OSGiPackageScanClassResolver;
 import liquibase.osgi.OSGiResourceAccessor;
 import liquibase.osgi.OSGiUtil;
@@ -43,7 +43,7 @@ public class ServiceLocator {
                     instance = new ServiceLocator();
                 }
             } catch (Throwable e1) {
-                LogFactory.getLog(ServiceLocator.class).error(LogTarget.LOG, "Cannot build ServiceLocator", e1);
+                LogService.getLog(ServiceLocator.class).error(LogType.LOG, "Cannot build ServiceLocator", e1);
             }
         }
     }
@@ -88,7 +88,7 @@ public class ServiceLocator {
 
     protected PackageScanClassResolver defaultClassLoader(){
         if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
-            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Using WebSphere Specific Class Resolver");
+            LogService.getLog(getClass()).debug(LogType.LOG, "Using WebSphere Specific Class Resolver");
             return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
         } else {
             return new DefaultPackageScanClassResolver();
@@ -191,7 +191,7 @@ public class ServiceLocator {
     }
 
     public <T> Class<? extends T>[] findClasses(Class<T> requiredInterface) throws ServiceNotFoundException {
-        LogFactory.getLog(getClass()).debug(LogTarget.LOG, "ServiceLocator.findClasses for "+requiredInterface.getName());
+        LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {
                 Class.forName(requiredInterface.getName());
@@ -217,7 +217,7 @@ public class ServiceLocator {
     }
 
     private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
-        LogFactory.getLog(getClass()).debug(LogTarget.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
+        LogService.getLog(getClass()).debug(LogType.LOG, "ServiceLocator finding classes matching interface " + requiredInterface.getName());
 
         List<Class> classes = new ArrayList<>();
 
@@ -231,19 +231,19 @@ public class ServiceLocator {
             if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && !clazz.isAnonymousClass() &&!clazz.isSynthetic() && Modifier.isPublic(clazz.getModifiers())) {
                 try {
                     clazz.getConstructor();
-                    LogFactory.getLog(getClass()).debug(LogTarget.LOG, clazz.getName() + " matches "+requiredInterface.getName());
+                    LogService.getLog(getClass()).debug(LogType.LOG, clazz.getName() + " matches "+requiredInterface.getName());
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Can not use " + clazz + " as a Liquibase service because it does not have a " +
+                    LogService.getLog(getClass()).info(LogType.LOG, "Can not use " + clazz + " as a Liquibase service because it does not have a " +
                         "no-argument constructor");
                 } catch (NoClassDefFoundError e) {
                     String message = "Can not use " + clazz + " as a Liquibase service because " + e.getMessage()
                         .replace("/", ".") + " is not in the classpath";
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
-                        LogFactory.getLog(getClass()).info(LogTarget.LOG, message);
+                        LogService.getLog(getClass()).info(LogType.LOG, message);
                     } else {
-                        LogFactory.getLog(getClass()).warn(LogTarget.LOG, message);
+                        LogService.getLog(getClass()).warn(LogType.LOG, message);
                     }
                 }
             }

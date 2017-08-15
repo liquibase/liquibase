@@ -8,8 +8,8 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
@@ -276,7 +276,7 @@ public class SqlUtil {
                 if ("".equals(stringVal)) {
                     return stringVal;
                 }
-                LogFactory.getLog(SqlUtil.class).info(LogTarget.LOG, "Unknown default value: value '" + stringVal +
+                LogService.getLog(SqlUtil.class).info(LogType.LOG, "Unknown default value: value '" + stringVal +
                     "' type " + typeName + " (" + type + "). Calling it a function so it's not additionally quoted");
                 if (strippedSingleQuotes) { //put quotes back
                     return new DatabaseFunction("'"+stringVal+"'");

@@ -8,7 +8,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
-import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -301,7 +300,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         ResourceAccessor fileOpener = getFileOpener(artifactClassLoader);
         configureFieldsAndValues(fileOpener);
 
-//        LogFactory.getInstance().setDefaultLoggingLevel(logging);
+//        LogService.getInstance().setDefaultLoggingLevel(logging);
         getLog().info(CommandLineUtils.getBanner());
 
         // Displays the settings for the Mojo depending of verbosity mode.

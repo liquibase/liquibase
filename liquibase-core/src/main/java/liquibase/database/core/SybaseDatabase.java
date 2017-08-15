@@ -6,8 +6,8 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -266,8 +266,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLog(getClass())
-        		.warn(LogTarget.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        	LogService.getLog(getClass())
+        		.warn(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
@@ -285,8 +285,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         try {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
-        	LogFactory.getLog(getClass())
-    			.warn(LogTarget.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        	LogService.getLog(getClass())
+    			.warn(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }

@@ -6,10 +6,10 @@ import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.ant.logging.AntTaskLogService;
+import liquibase.integration.ant.logging.AntTaskLogFactory;
 import liquibase.integration.ant.type.ChangeLogParametersType;
 import liquibase.integration.ant.type.DatabaseType;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -57,7 +57,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
     @Override
     public void init() throws BuildException {
-        LogFactory.setService(new AntTaskLogService(this));
+        LogService.setLoggerFactory(new AntTaskLogFactory(this));
         classpath = new Path(getProject());
     }
 
@@ -591,15 +591,6 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     /**
-     * @deprecated No longer needed. This method has no replacement.
-     * @return Log level.
-     */
-    @Deprecated
-    public String getLogLevel() {
-        return LogFactory.getLog(getClass()).getLogLevel().name();
-    }
-
-    /**
      * Redirector of logs from java.util.logging to ANT's logging
      */
     @Deprecated
@@ -622,7 +613,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getLog(getClass());
+            Logger logger = LogService.getLog(getClass());
         }
 
 

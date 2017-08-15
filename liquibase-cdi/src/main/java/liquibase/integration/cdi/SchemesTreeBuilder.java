@@ -3,8 +3,8 @@ package liquibase.integration.cdi;
 import liquibase.integration.cdi.annotations.LiquibaseSchema;
 import liquibase.integration.cdi.exceptions.CyclicDependencyException;
 import liquibase.integration.cdi.exceptions.DependencyNotFoundException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 @ApplicationScoped
 public class SchemesTreeBuilder {
-    private static final Logger log = LogFactory.getLog(SchemesTreeBuilder.class);
+    private static final Logger log = LogService.getLog(SchemesTreeBuilder.class);
 
     private class SchemaNode {
         private final LiquibaseSchema item;
@@ -79,9 +79,9 @@ public class SchemesTreeBuilder {
      * @return sorted collection of schemes
      */
     public List<LiquibaseSchema> build(final String id, Collection<LiquibaseSchema> schemes) {
-        log.debug(LogTarget.LOG, String.format("[id = %s] build(%s)", id, schemes));
+        log.debug(LogType.LOG, String.format("[id = %s] build(%s)", id, schemes));
 
-        log.info(LogTarget.LOG, String.format("[id = %s] Sorting schemes according dependencies...", id));
+        log.info(LogType.LOG, String.format("[id = %s] Sorting schemes according dependencies...", id));
 
         if (schemes.isEmpty()) {
             return Collections.emptyList();
@@ -102,14 +102,14 @@ public class SchemesTreeBuilder {
             }
         }
 
-        log.info(LogTarget.LOG, String.format("[id = %s] Found [%s] not dependent schemes.", id, notDependent.size()));
+        log.info(LogType.LOG, String.format("[id = %s] Found [%s] not dependent schemes.", id, notDependent.size()));
 
         if (notDependent.isEmpty()) { // if there is no not-dependent schema, then there is a cyclic dependency.
             throw new CyclicDependencyException(String.format("[id = %s] Not independent schemes, possible cyclic dependencies discovered.", id));
         } else {
             // take first of not-dependent and use it as root of hierarchy.
             root = new SchemaNode(notDependent.get(0));
-            log.debug(LogTarget.LOG, String.format("[id = %s] Selected dependencies tree root [%s]", id, root.getItem()));
+            log.debug(LogType.LOG, String.format("[id = %s] Selected dependencies tree root [%s]", id, root.getItem()));
             availableSchemes.removeAll(notDependent); // we won't to check not-dependent schemes.
             notDependent.remove(root.getItem());  // remove root from not-dependent schemes
             schemes.retainAll(availableSchemes); // remove not-dependent from all schemes
@@ -119,7 +119,7 @@ public class SchemesTreeBuilder {
                 root.addChild(liquibaseSchema);
             }
 
-            log.debug(LogTarget.LOG, String.format("[id = %s] Made other non-dependent schemes children of root. [%s] dependent schemes to resolve. Resolving...",
+            log.debug(LogType.LOG, String.format("[id = %s] Made other non-dependent schemes children of root. [%s] dependent schemes to resolve. Resolving...",
                     id,
                     availableSchemes.size()
             ));
@@ -129,10 +129,10 @@ public class SchemesTreeBuilder {
             // until we resolve all dependencies
             while (!availableSchemes.isEmpty()) {
                 cycles++;
-                log.debug(LogTarget.LOG, String.format("[id = %s] Resolution cycle [%s] started.", id, cycles));
+                log.debug(LogType.LOG, String.format("[id = %s] Resolution cycle [%s] started.", id, cycles));
                 int additions = 0; //we will count dependencies resolution for each resolution cycle.
                 for (LiquibaseSchema liquibaseSchema : schemes) {
-                    log.debug(LogTarget.LOG, String.format(
+                    log.debug(LogType.LOG, String.format(
                             "[id = %s] LiquibaseSchema [name=%s] depends on liquibaseSchema [name=%s].",
                             id, liquibaseSchema.name(), liquibaseSchema.depends()
                     ));
@@ -140,7 +140,7 @@ public class SchemesTreeBuilder {
 
                     // we make the dependent liquibaseSchema as a child for it's dependency if found. If not, we just continue.
                     if (parent == null) {
-                        log.debug(LogTarget.LOG, String.format(
+                        log.debug(LogType.LOG, String.format(
                                 "[id = %s] Dependency not found in resolved dependencies tree, skipping liquibaseSchema [name=%s] for a while.",
                                 id, liquibaseSchema.name()
                         ));
@@ -159,7 +159,7 @@ public class SchemesTreeBuilder {
                             ));
                         }
                     } else {
-                        log.debug(LogTarget.LOG, String.format(
+                        log.debug(LogType.LOG, String.format(
                                 "[id = %s] Dependency found for liquibaseSchema [name=%s], moving it to resolved dependencies tree.",
                                 id, liquibaseSchema.name()
                         ));
@@ -168,7 +168,7 @@ public class SchemesTreeBuilder {
                         additions++;
                     }
                 }
-                log.debug(LogTarget.LOG, String.format("[id = %s] Resolution cycle [%s] completed", id, cycles));
+                log.debug(LogType.LOG, String.format("[id = %s] Resolution cycle [%s] completed", id, cycles));
 
                 //if not resolutions happened through resolution cycle, definitely there is a cyclic dependency.
                 if (additions == 0) {
@@ -178,7 +178,7 @@ public class SchemesTreeBuilder {
                 schemes.retainAll(availableSchemes);
             }
 
-            log.info(LogTarget.LOG, String.format("[id = %s] Dependencies resolved in [cycles=%s, millis=%s]", id, cycles, System.currentTimeMillis() - start));
+            log.info(LogType.LOG, String.format("[id = %s] Dependencies resolved in [cycles=%s, millis=%s]", id, cycles, System.currentTimeMillis() - start));
         }
 
         return root.toList();

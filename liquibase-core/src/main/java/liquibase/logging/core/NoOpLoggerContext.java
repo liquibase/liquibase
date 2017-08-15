@@ -2,6 +2,9 @@ package liquibase.logging.core;
 
 import liquibase.logging.LoggerContext;
 
+/**
+ * "Blank" context to use for {@link liquibase.logging.LoggerFactory} implementations that do not support nested contexts.
+ */
 public class NoOpLoggerContext implements LoggerContext {
 
     @Override
@@ -10,12 +13,12 @@ public class NoOpLoggerContext implements LoggerContext {
     }
 
     @Override
-    public void showProgress() {
+    public void showMoreProgress() {
 
     }
 
     @Override
-    public void showProgress(int percentComplete) {
+    public void showMoreProgress(int percentComplete) {
 
     }
 }

@@ -5,8 +5,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -75,7 +75,7 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
                     ")"));
         } catch (DatabaseException e) {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
-                LogFactory.getLog(getClass()).warn(LogTarget.LOG, "MariaDB returned DatabaseException", e);
+                LogService.getLog(getClass()).warn(LogType.LOG, "MariaDB returned DatabaseException", e);
                 assumeTrue("MariaDB seems to run in strict mode (no datetime literals with 0000-00-00 allowed). " + "Cannot run this test", false);
                 
             } else {

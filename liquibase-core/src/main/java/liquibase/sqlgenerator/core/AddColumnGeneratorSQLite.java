@@ -4,8 +4,8 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -68,7 +68,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
             sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
         } catch (DatabaseException e) {
-            LogFactory.getLog(getClass()).error(LogTarget.LOG, "DatabaseException caught", e);
+            LogService.getLog(getClass()).error(LogType.LOG, "DatabaseException caught", e);
         }
 
         return sql.toArray(new Sql[sql.size()]);

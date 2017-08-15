@@ -11,8 +11,8 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -36,7 +36,7 @@ import java.util.*;
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditional {
     private static final ThreadLocal<DatabaseChangeLog> ROOT_CHANGE_LOG = new ThreadLocal<>();
     private static final ThreadLocal<DatabaseChangeLog> PARENT_CHANGE_LOG = new ThreadLocal<>();
-    private static final Logger LOG = LogFactory.getLog(DatabaseChangeLog.class);
+    private static final Logger LOG = LogService.getLog(DatabaseChangeLog.class);
 
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
@@ -269,7 +269,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            LogFactory.getLog(getClass()).warn(LogTarget.LOG, message);
+            LogService.getLog(getClass()).warn(LogType.LOG, message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -360,7 +360,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         resourceComparator = (Comparator<?>) Class.forName(resourceComparatorDef).newInstance();
                     } catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
                         //take default comparator
-                        LogFactory.getLog(getClass()).info(LogTarget.LOG, "no resourceComparator defined - taking default " +
+                        LogService.getLog(getClass()).info(LogType.LOG, "no resourceComparator defined - taking default " +
                          "implementation");
                         resourceComparator = getStandardChangeLogComparator();
                     }
@@ -406,7 +406,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                         Properties props = new Properties();
                         InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
                         if (propertiesStream == null) {
-                            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Could not open properties file " + file);
+                            LogService.getLog(getClass()).info(LogType.LOG, "Could not open properties file " + file);
                         } else {
                             props.load(propertiesStream);
                         
@@ -446,8 +446,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (!(pathName.endsWith("/"))) {
                 pathName = pathName + '/';
             }
-            LOG.debug(LogTarget.LOG, "includeAll for " + pathName);
-            LOG.debug(LogTarget.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
+            LOG.debug(LogType.LOG, "includeAll for " + pathName);
+            LOG.debug(LogType.LOG, "Using file opener for includeAll: " + resourceAccessor.toString());
 
             String relativeTo = null;
             if (isRelativeToChangelogFile) {
@@ -522,8 +522,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // This matches only an extension, but filename can be a full path, too. Is it right?
             boolean matchesFileExtension = StringUtils.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || logEveryUnknownFileFormat) {
-                LogFactory.getLog(getClass()).warn(
-                        LogTarget.LOG, "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
+                LogService.getLog(getClass()).warn(
+                        LogType.LOG, "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
                 );
             }
             return false;

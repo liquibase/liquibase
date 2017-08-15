@@ -1,8 +1,8 @@
 package liquibase.structure.core;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
@@ -65,7 +65,7 @@ public class DatabaseObjectFactory {
                         set.add(clazz);
                     }
                 } catch (Exception e) {
-                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+                    LogService.getLog(getClass()).info(LogType.LOG, "Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
                 }
             }
 

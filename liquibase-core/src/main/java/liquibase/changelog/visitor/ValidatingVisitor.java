@@ -7,8 +7,8 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -48,10 +48,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
             preconditions.check(database, changeLog, null);
         } catch (PreconditionFailedException e) {
-            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Precondition Failed: "+e.getMessage(), e);
+            LogService.getLog(getClass()).debug(LogType.LOG, "Precondition Failed: "+e.getMessage(), e);
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {
-            LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Precondition Error: "+e.getMessage(), e);
+            LogService.getLog(getClass()).debug(LogType.LOG, "Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
@@ -59,7 +59,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     database.rollback();
                 }
             } catch (DatabaseException e) {
-                LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Error rolling back after precondition check", e);
+                LogService.getLog(getClass()).warn(LogType.LOG, "Error rolling back after precondition check", e);
             }
         }
     }
@@ -113,14 +113,14 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
                     if ((foundErrors != null) && foundErrors.hasErrors() && (changeSet.getOnValidationFail().equals
                         (ChangeSet.ValidationFailOption.MARK_RAN))) {
-                            LogFactory.getLog(getClass()).info(
-                                    LogTarget.LOG, "Skipping change set " + changeSet + " due to validation error(s): " +
+                            LogService.getLog(getClass()).info(
+                                    LogType.LOG, "Skipping change set " + changeSet + " due to validation error(s): " +
                                             StringUtils.join(foundErrors.getErrorMessages(), ", "));
                             changeSet.setValidationFailed(true);
                     } else {
                         if (!foundErrors.getWarningMessages().isEmpty())
-                            LogFactory.getLog(getClass()).warn(
-                                    LogTarget.LOG, "Change set " + changeSet + ": " +
+                            LogService.getLog(getClass()).warn(
+                                    LogType.LOG, "Change set " + changeSet + ": " +
                                             StringUtils.join(foundErrors.getWarningMessages(), ", "));
                         validationErrors.addAll(foundErrors, changeSet);
                     }

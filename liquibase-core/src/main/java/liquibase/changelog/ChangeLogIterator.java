@@ -8,7 +8,7 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.logging.LogService;
 import liquibase.logging.Logger;
 import liquibase.logging.LoggerContext;
 import liquibase.util.StringUtils;
@@ -48,9 +48,9 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
-        Logger log = LogFactory.getLog(getClass());
+        Logger log = LogService.getLog(getClass());
         databaseChangeLog.setRuntimeEnvironment(env);
-        try (LoggerContext ignored = LogFactory.pushContext(databaseChangeLog)) {
+        try (LoggerContext ignored = LogService.pushContext("databaseChangeLog", databaseChangeLog)) {
             List<ChangeSet> changeSetList = new ArrayList<>(databaseChangeLog.getChangeSets());
             if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
                 Collections.reverse(changeSetList);
@@ -73,7 +73,7 @@ public class ChangeLogIterator {
                     }
                 }
 
-                try (LoggerContext ignored2 = LogFactory.pushContext(changeSet)) {
+                try (LoggerContext ignored2 = LogService.pushContext("changeSet", changeSet)) {
                     if (shouldVisit && !alreadySaw(changeSet)) {
                         visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
                         markSeen(changeSet);

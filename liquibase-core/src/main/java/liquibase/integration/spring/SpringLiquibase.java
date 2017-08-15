@@ -13,8 +13,8 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -66,7 +66,7 @@ import java.util.jar.Manifest;
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
-    protected final Logger log = LogFactory.getLog(SpringLiquibase.class);
+    protected final Logger log = LogService.getLog(SpringLiquibase.class);
     protected String beanName;
 
 	protected ResourceLoader resourceLoader;
@@ -151,7 +151,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 					}
 					connection.close();
 				} catch (Exception e) {
-					log.warn(LogTarget.LOG, "problem closing connection", e);
+					log.warn(LogType.LOG, "problem closing connection", e);
 				}
 			}
 		}
@@ -232,12 +232,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Liquibase did not run because " + LiquibaseConfiguration
+            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run because " + LiquibaseConfiguration
                 .getInstance().describeValueLookupLogic(shouldRunProperty) + " was set to false");
             return;
 		}
 		if (!shouldRun) {
-            LogFactory.getLog(getClass()).info(LogTarget.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
+            LogService.getLog(getClass()).info(LogType.LOG, "Liquibase did not run because 'shouldRun' " + "property was set " +
                 "to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
 		}
@@ -320,7 +320,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
-            log.warn(LogTarget.LOG, "Null connection returned by liquibase datasource. Using offline unknown database");
+            log.warn(LogType.LOG, "Null connection returned by liquibase datasource. Using offline unknown database");
             liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
@@ -414,7 +414,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
                 if (liquibasePackages.isEmpty()) {
-                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "No Liquibase-Packages entry found in MANIFEST.MF. " +
+                    LogService.getLog(getClass()).warn(LogType.LOG, "No Liquibase-Packages entry found in MANIFEST.MF. " +
                         "Using fallback of entire 'liquibase' package");
                     liquibasePackages.add("liquibase");
                 }
@@ -426,7 +426,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
             } catch (IOException e) {
-                LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Error initializing SpringLiquibase", e);
+                LogService.getLog(getClass()).warn(LogType.LOG, "Error initializing SpringLiquibase", e);
             }
         }
 
@@ -466,7 +466,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 return null;
             }
             for (Resource resource : resources) {
-                LogFactory.getLog(getClass()).debug(LogTarget.LOG, "Opening " + resource.getURL().toExternalForm() + " as " +
+                LogService.getLog(getClass()).debug(LogType.LOG, "Opening " + resource.getURL().toExternalForm() + " as " +
                     path);
                 URLConnection connection = resource.getURL().openConnection();
                 connection.setUseCaches(false);

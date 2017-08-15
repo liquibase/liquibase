@@ -13,8 +13,8 @@ import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -101,7 +101,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             String currentOS = System.getProperty("os.name");
             if (!os.contains(currentOS)) {
                 shouldRun = false;
-                LogFactory.getLog(getClass()).info(LogTarget.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
+                LogService.getLog(getClass()).info(LogType.LOG, "Not executing on os " + currentOS + " when " + os + " was " +
                         "specified");
             }
         }
@@ -189,8 +189,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
                 (GlobalConfiguration.class).getOutputEncoding());
 
-        LogFactory.getLog(getClass()).error(LogTarget.LOG, errorStreamOut);
-        LogFactory.getLog(getClass()).info(LogTarget.LOG, infoStreamOut);
+        LogService.getLog(getClass()).error(LogType.LOG, errorStreamOut);
+        LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
 
         throwExceptionIfError(returnCode);
     }

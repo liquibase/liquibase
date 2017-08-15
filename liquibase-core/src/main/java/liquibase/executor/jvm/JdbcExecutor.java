@@ -7,8 +7,8 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class JdbcExecutor extends AbstractExecutor {
 
-    private Logger log = LogFactory.getLog(getClass());
+    private Logger log = LogService.getLog(getClass());
 
     @Override
     public boolean updatesDatabase() {
@@ -222,7 +222,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
-                log.sql(LogTarget.LOG, sqlToExecute[0]);
+                log.debug(LogType.WRITE_SQL, sqlToExecute[0]);
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 
@@ -258,7 +258,7 @@ public class JdbcExecutor extends AbstractExecutor {
 
     @Override
     public void comment(String message) throws DatabaseException {
-        LogFactory.getLog(getClass()).debug(LogTarget.LOG, message);
+        LogService.getLog(getClass()).debug(LogType.LOG, message);
     }
 
     private class ExecuteStatementCallback implements StatementCallback {
@@ -280,7 +280,7 @@ public class JdbcExecutor extends AbstractExecutor {
                     }
                 }
 
-                log.sql(LogTarget.LOG, String.format("%s", statement));
+                log.info(LogType.WRITE_SQL, String.format("%s", statement));
                 if (statement.contains("?")) {
                     stmt.setEscapeProcessing(false);
                 }
@@ -334,7 +334,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Can only query with statements that return one sql statement");
                 }
-                log.sql(LogTarget.LOG, sqlToExecute[0]);
+                log.info(LogType.READ_SQL, sqlToExecute[0]);
 
                 rs = stmt.executeQuery(sqlToExecute[0]);
                 ResultSet rsToUse = rs;

@@ -1,100 +1,54 @@
 package liquibase.logging;
 
 /**
- * Interface for all logger implementations in this software. The hierarchy of log levels is:
- * (finest) DEBUG < SQL < INFO < WARNING < ERROR (coarsest)
+ * Interface to class that does the actual logging.
+ * Instances will be created by {@link LoggerFactory} to know the class to log against.
+ *
+ * All log methods take a {@link LogType} to describe the type of message being logged.
+ *
+ * The hierarchy of log levels is:
+ * (finest) DEBUG < INFO < WARN < ERROR (coarsest)
  */
 public interface Logger {
 
     /**
-     * Returns the currently set log level
-     * @return the current logging level
+     * Log an error that occurred.
      */
-    LogLevel getLogLevel();
-
-//    /**
-//     * Closes the current log output file.
-//     */
-//    void closeLogFile();
+    void error(LogType target, String message);
 
     /**
-     * Log a severe event.
-     *
-     * @param target
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Log an error together with data from an error/exception
      */
-    void error(LogTarget target, String message);
-
-    /**
-     * Log a severe event together with data from an error/exception
-     * @param target
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
-     */
-    void error(LogTarget target, String message, Throwable e);
+    void error(LogType target, String message, Throwable e);
 
     /**
      * Log a event the user should be warned about
-     * @param target
-     * @param message the text message describing the event
-     * @see LogLevel
      */
-    void warn(LogTarget target, String message);
+    void warn(LogType target, String message);
 
     /**
      * Log a event the user should be warned about together with data from an error/exception
-     * @param target
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
      */
-    void warn(LogTarget target, String message, Throwable e);
+    void warn(LogType target, String message, Throwable e);
 
     /**
-     * Logs a general event that might be useful for the user
-     *
-     * @param logTarget
-     * @param message the text message describing the event
-     * @see LogLevel
+     * Logs a general event that might be useful for the user.
      */
-    void info(LogTarget logTarget, String message);
+    void info(LogType logType, String message);
 
     /**
      * Logs a general event that might be useful for the user together with data from an error/exception
-     *
-     * @param target
-     * @param message the text message describing the event
-     * @param e the error/exception that occured
-     * @see LogLevel
      */
-    void info(LogTarget target, String message, Throwable e);
-
-    /**
-     * Logs a native SQL statement sent to a database instance
-     *
-     * @param target
-     * @param message the text message describing the event
-     * @see LogLevel
-     */
-    void sql(LogTarget target, String message);
+    void info(LogType target, String message, Throwable e);
 
     /**
      * Logs a debugging event to aid in troubleshooting
-     *
-     * @param target
-     * @param message the text message describing the event
-     * @see LogLevel
      */
-    void debug(LogTarget target, String message);
+    void debug(LogType target, String message);
 
     /**
      * Logs a debugging event to aid in troubleshooting together with data from an error/exception
-     * @param target
-     * @param message the text message describing the event
-     * @param e the error/exception that occured  @see LogLevel
      */
-    void debug(LogTarget target, String message, Throwable e);
+    void debug(LogType target, String message, Throwable e);
 
 }

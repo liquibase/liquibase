@@ -7,8 +7,8 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 
 import java.util.Date;
 
@@ -40,7 +40,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         } else {
             if (foundRan.getLastCheckSum() == null) {
                 try {
-                    LogFactory.getLog(getClass()).info(LogTarget.LOG, "Updating NULL md5sum for " + changeSet.toString());
+                    LogService.getLog(getClass()).info(LogType.LOG, "Updating NULL md5sum for " + changeSet.toString());
                     replaceChecksum(changeSet);
                 } catch (DatabaseException e) {
                     throw new DatabaseException(e);
@@ -69,8 +69,8 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
                 if ((changeSet != null) && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() &&
                     new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()
                     ) {
-                    LogFactory.getLog(getClass()).debug(
-                            LogTarget.LOG, "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
+                    LogService.getLog(getClass()).debug(
+                            LogType.LOG, "Updating null or out of date checksum on changeSet " + changeSet + " to correct value"
                     );
                     replaceChecksum(changeSet);
                 }

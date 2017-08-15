@@ -65,7 +65,7 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
                 .addAlias("file.encoding");
 
         getContainer().addProperty(CONVERT_DATA_TYPES, Boolean.class)
-            .setDescription("Should Liquibase convert to/from standard data types. Applies to both snapshot and " +
+            .setDescription("Should Liquibase convert to/from STANDARD data types. Applies to both snapshot and " +
                 "update commands.")
                 .setDefaultValue(true);
 

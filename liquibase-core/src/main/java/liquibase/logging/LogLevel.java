@@ -8,16 +8,12 @@ package liquibase.logging;
 public enum LogLevel {
 
 
-    TRACE,
     /**
      * Very detailed information about every internal step this program takes. Normally only activated during
      * troubleshooting.
      */
     DEBUG,
-    /*
-     * A native SQL statement sent to a database instance
-     */
-    SQL,
+
     /**
      * Regular message of a successful completion of a working unit, or output of configuration
      * information that is expected to be essential for troubleshooting.
@@ -32,7 +28,7 @@ public enum LogLevel {
      * Errors and other severe events. In most cases, these events will stop further processing of a change log.
      */
     ERROR,
-/**
+    /**
      * No logging at all
      */
     OFF

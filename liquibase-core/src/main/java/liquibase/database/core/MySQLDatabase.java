@@ -8,8 +8,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -516,7 +516,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 }
                 if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
                     setHasJdbcConstraintDeferrableBug(true);
-                    LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
+                    LogService.getLog(getClass()).warn(LogType.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
                             "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
                             "support this feature. A workaround for this problem will be used. Please check with " +
                             "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
@@ -561,8 +561,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
-            LogFactory.getLog(getClass()).warn(
-                    LogTarget.LOG, "Unable to determine exact database server version"
+            LogService.getLog(getClass()).warn(
+                    LogType.LOG, "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
             return 0;
@@ -582,7 +582,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
      * <p>Returns the default timestamp fractional digits if nothing is specified.</p>
      * https://dev.mysql.com/doc/refman/5.7/en/fractional-seconds.html :
      * "The fsp value, if given, must be in the range 0 to 6. A value of 0 signifies that there is no fractional part.
-     * If omitted, the default precision is 0. (This differs from the standard SQL default of 6, for compatibility
+     * If omitted, the default precision is 0. (This differs from the STANDARD SQL default of 6, for compatibility
      * with previous MySQL versions.)"
      *
      * @return always 0

@@ -4,8 +4,8 @@
 package liquibase.integration.spring;
 
 import liquibase.exception.LiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
     private final List<DataSource> dataSources = new ArrayList<>();
-    private Logger log = LogFactory.getLog(MultiTenantSpringLiquibase.class);
+    private Logger log = LogService.getLog(MultiTenantSpringLiquibase.class);
 	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
 		/** Defines a single data source and several schemas for a multi-tenant environment. */
@@ -75,16 +75,16 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			if((dataSource == null) && (schemas != null)) {
 				throw new LiquibaseException("When schemas are defined you should also define a base dataSource");				
 			}else if(dataSource!=null){
-				log.info(LogTarget.LOG, "Schema based multitenancy enabled");
+				log.info(LogType.LOG, "Schema based multitenancy enabled");
 				if((schemas == null) || schemas.isEmpty()) {
-					log.warn(LogTarget.LOG, "Schemas not defined, using defaultSchema only");
+					log.warn(LogType.LOG, "Schemas not defined, using defaultSchema only");
 					schemas = new ArrayList<>();
 					schemas.add(defaultSchema);
 				}
 				runOnAllSchemas();
 			}
 		}else {
-			log.info(LogTarget.LOG, "DataSources based multitenancy enabled");
+			log.info(LogType.LOG, "DataSources based multitenancy enabled");
 			resolveDataSources();
 			runOnAllDataSources();
 		}
@@ -110,19 +110,19 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			Object lookup = context.lookup(jndiUrl);
 			if(lookup instanceof DataSource) {
 				dataSources.add((DataSource) lookup);
-				log.debug(LogTarget.LOG, "Added a data source at " + jndiUrl);
+				log.debug(LogType.LOG, "Added a data source at " + jndiUrl);
 			} else {
-				log.info(LogTarget.LOG, "Skipping a resource " + jndiUrl + " not compatible with DataSource.");
+				log.info(LogType.LOG, "Skipping a resource " + jndiUrl + " not compatible with DataSource.");
 			}
 		}
 	}
 
 	private void runOnAllDataSources() throws LiquibaseException {
 		for(DataSource aDataSource : dataSources) {
-            log.info(LogTarget.LOG, "Initializing Liquibase for data source " + aDataSource);
+            log.info(LogType.LOG, "Initializing Liquibase for data source " + aDataSource);
             SpringLiquibase liquibase = getSpringLiquibase(aDataSource);
 			liquibase.afterPropertiesSet();
-            log.info(LogTarget.LOG, "Liquibase ran for data source " + aDataSource);
+            log.info(LogType.LOG, "Liquibase ran for data source " + aDataSource);
         }
 	}
 	
@@ -131,11 +131,11 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			if("default".equals(schema)) {
 				schema = null;
 			}
-            log.info(LogTarget.LOG, "Initializing Liquibase for schema " + schema);
+            log.info(LogType.LOG, "Initializing Liquibase for schema " + schema);
             SpringLiquibase liquibase = getSpringLiquibase(dataSource);
 			liquibase.setDefaultSchema(schema);
 			liquibase.afterPropertiesSet();
-            log.info(LogTarget.LOG, "Liquibase ran for schema " + schema);
+            log.info(LogType.LOG, "Liquibase ran for schema " + schema);
         }
 	}
 

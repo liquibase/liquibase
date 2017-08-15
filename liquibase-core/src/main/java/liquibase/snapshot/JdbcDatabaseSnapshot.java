@@ -8,8 +8,8 @@ import liquibase.database.core.*;
 import liquibase.database.core.DB2Database.DataServerType;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogTarget;
+import liquibase.logging.LogService;
+import liquibase.logging.LogType;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -122,8 +122,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                     // from a table, but the table has no FOREIGN KEYs.
                                     if ((database instanceof SybaseASADatabase) && e.getSQLState().equalsIgnoreCase
                                         (ASANY_NO_FOREIGN_KEYS_FOUND_SQLSTATE)) {
-                                        LogFactory.getLog(getClass()).debug(
-                                                LogTarget.LOG, String.format("Ignored SAP SQL Anywhere SQL " +
+                                        LogService.getLog(getClass()).debug(
+                                                LogType.LOG, String.format("Ignored SAP SQL Anywhere SQL " +
                                                         "exception thrown when FOREIGN KEY list of table '%s' was " +
                                                         "empty.", foundTable));
                                     } else {
@@ -484,7 +484,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         protected void warnAboutDbaRecycleBin() {
             if (!warnedAboutDbaRecycleBin && !(((OracleDatabase) database).canAccessDbaRecycleBin())) {
-                LogFactory.getLog(getClass()).warn(LogTarget.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
+                LogService.getLog(getClass()).warn(LogType.LOG, ((OracleDatabase) database).getDbaRecycleBinWarning());
                 warnedAboutDbaRecycleBin = true;
             }
         }
@@ -1209,7 +1209,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " and systables.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof SybaseDatabase) {
-                        LogFactory.getLog(getClass()).warn(LogTarget.LOG, "Finding unique constraints not currently supported for Sybase");
+                        LogService.getLog(getClass()).warn(LogType.LOG, "Finding unique constraints not currently supported for Sybase");
                         return null; //TODO: find sybase sql
                     } else if (database instanceof SybaseASADatabase) {
                         sql = "select sysconstraint.constraint_name, sysconstraint.constraint_type, systable.table_name " +
