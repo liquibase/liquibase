@@ -359,9 +359,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
 
                 if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
-
                     List<InsertStatement> innerStatements = statementSet.getStatements();
-
                     if (innerStatements != null && innerStatements.size() > 0 && innerStatements.get(0) instanceof InsertOrUpdateStatement) {
                         //cannot do insert or update in a single statement
                         return statementSet.getStatementsArray();
