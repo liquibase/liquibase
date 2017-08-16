@@ -12,24 +12,56 @@ package liquibase.logging;
 public interface Logger {
 
     /**
+     * Log an error that occurred, using the {@link LogType#LOG} type.
+     */
+    void severe(String message);
+
+    /**
+     * Log an error together with data from an error/exception, using the {@link LogType#LOG} type.
+     */
+    void severe(String message, Throwable e);
+
+    /**
      * Log an error that occurred.
      */
-    void error(LogType target, String message);
+    void severe(LogType target, String message);
 
     /**
      * Log an error together with data from an error/exception
      */
-    void error(LogType target, String message, Throwable e);
+    void severe(LogType target, String message, Throwable e);
+
+    /**
+     * Log a event the user should be warned about, using the {@link LogType#LOG} type.
+     */
+    void warning(String message);
+
+    /**
+     * Log a event the user should be warned about together with data from an error/exception, using the {@link LogType#LOG} type.
+     */
+    void warning(String message, Throwable e);
 
     /**
      * Log a event the user should be warned about
      */
-    void warn(LogType target, String message);
+    void warning(LogType target, String message);
 
     /**
      * Log a event the user should be warned about together with data from an error/exception
      */
-    void warn(LogType target, String message, Throwable e);
+    void warning(LogType target, String message, Throwable e);
+
+
+
+    /**
+     * Logs a general event that might be useful for the user, using the {@link LogType#LOG} type.
+     */
+    void info(String message);
+
+    /**
+     * Logs a general event that might be useful for the user together with data from an error/exception, using the {@link LogType#LOG} type.
+     */
+    void info(String message, Throwable e);
 
     /**
      * Logs a general event that might be useful for the user.
@@ -40,6 +72,17 @@ public interface Logger {
      * Logs a general event that might be useful for the user together with data from an error/exception
      */
     void info(LogType target, String message, Throwable e);
+
+
+    /**
+     * Logs a debugging event to aid in troubleshooting, using the {@link LogType#LOG} type.
+     */
+    void debug(String message);
+
+    /**
+     * Logs a debugging event to aid in troubleshooting together with data from an error/exception, using the {@link LogType#LOG} type.
+     */
+    void debug(String message, Throwable e);
 
     /**
      * Logs a debugging event to aid in troubleshooting

@@ -269,7 +269,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
-            LogService.getLog(getClass()).warn(LogType.LOG, message);
+            LogService.getLog(getClass()).warning(LogType.LOG, message);
         }
 
         if (!validatingVisitor.validationPassed()) {
@@ -522,7 +522,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             // This matches only an extension, but filename can be a full path, too. Is it right?
             boolean matchesFileExtension = StringUtils.trimToEmpty(fileName).matches("\\.\\w+$");
             if (matchesFileExtension || logEveryUnknownFileFormat) {
-                LogService.getLog(getClass()).warn(
+                LogService.getLog(getClass()).warning(
                         LogType.LOG, "included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type"
                 );
             }

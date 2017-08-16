@@ -3,7 +3,7 @@ package liquibase.logging;
 /**
  * The allowed levels for logging. The hierarchy is defined as following:
  * "<" means "returns fewer information than"
- * OFF < ERROR < WARNING < INFO < DEBUG
+ * OFF < SEVERE < WARNING < INFO < DEBUG
  */
 public enum LogLevel {
 
@@ -27,7 +27,7 @@ public enum LogLevel {
     /**
      * Errors and other severe events. In most cases, these events will stop further processing of a change log.
      */
-    ERROR,
+    SEVERE,
     /**
      * No logging at all
      */

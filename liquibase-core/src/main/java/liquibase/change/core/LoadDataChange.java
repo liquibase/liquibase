@@ -559,7 +559,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new DatabaseException(e);
         }
         if (snapshotOfTable == null) {
-            LOG.warn(LogType.LOG, String.format(
+            LOG.warning(LogType.LOG, String.format(
                     coreBundle.getString("could.not.snapshot.table.to.get.the.missing.column.type.information"),
                     database.escapeTableName(
                             targetTable.getSchema().getCatalogName(),
@@ -600,7 +600,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             LoadDataColumnConfig columnConfig = entry.getValue();
             DataType dataType = tableColumns.get(entry.getKey()).getType();
             if (dataType == null) {
-                LOG.warn(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
+                LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.find.load.data.type"),
                     columnConfig.toString(), snapshotOfTable.toString()));
                 columnConfig.setType(LOAD_DATA_TYPE.STRING.toString());
             } else {
@@ -609,7 +609,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (liquibaseDataType != null) {
                     columnConfig.setType(liquibaseDataType.getLoadTypeName().toString());
                 } else {
-                    LOG.warn(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
+                    LOG.warning(LogType.LOG, String.format(coreBundle.getString("unable.to.convert.load.data.type"),
                         columnConfig.toString(), snapshotOfTable.toString(), liquibaseDataType.toString()));
                 }
             }

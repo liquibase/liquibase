@@ -267,7 +267,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return getConnection().getDatabaseMajorVersion();
         } catch (UnsupportedOperationException e) {
         	LogService.getLog(getClass())
-        		.warn(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+        		.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }
@@ -286,7 +286,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return getConnection().getDatabaseMinorVersion();
         } catch (UnsupportedOperationException e) {
         	LogService.getLog(getClass())
-    			.warn(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+    			.warning(LogType.LOG, "Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
             return -1;
         }
     }

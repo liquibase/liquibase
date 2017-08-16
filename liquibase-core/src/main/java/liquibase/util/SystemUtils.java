@@ -1269,7 +1269,7 @@ public class SystemUtils {
             return System.getProperty(property);
         } catch (SecurityException ex) {
             // we are not allowed to look at this property
-            LogService.getLog(SystemUtils.class).error(
+            LogService.getLog(SystemUtils.class).severe(
                     LogType.LOG, "Caught a SecurityException reading the system property '" + property
                 + "'; the SystemUtils property value will default to null.",
                     ex

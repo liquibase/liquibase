@@ -629,7 +629,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
                 execType = ExecType.FAILED;
             } else {
                 // just log the message, dont log the stacktrace by appending exception. Its logged anyway to stdout
-                log.error(LogType.LOG, "Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
+                log.severe(LogType.LOG, "Change Set " + toString(false) + " failed.  Error: " + e.getMessage());
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {

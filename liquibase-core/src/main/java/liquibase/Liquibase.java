@@ -207,7 +207,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -312,7 +312,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -357,7 +357,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -556,7 +556,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Error releasing lock", e);
+                LOG.severe(LogType.LOG, "Error releasing lock", e);
             }
             resetServices();
         }
@@ -606,8 +606,8 @@ public class Liquibase {
                 "Error executing rollback script. ChangeSets will still be marked as rolled back: " + e.getMessage(),
                 e
             );
-            LogService.getLog(getClass()).error(LogType.LOG, ex.getMessage());
-            LOG.error(LogType.LOG, "Error executing rollback script", ex);
+            LogService.getLog(getClass()).severe(LogType.LOG, ex.getMessage());
+            LOG.severe(LogType.LOG, "Error executing rollback script", ex);
             if (changeExecListener != null) {
                 changeExecListener.runFailed(null, databaseChangeLog, database, ex);
             }
@@ -718,7 +718,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
         resetServices();
@@ -807,7 +807,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
         resetServices();
@@ -884,7 +884,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -955,7 +955,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             resetServices();
         }
@@ -1095,7 +1095,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
             resetServices();
@@ -1160,7 +1160,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
     }
@@ -1177,7 +1177,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
     }
@@ -1445,7 +1445,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
         resetServices();
@@ -1522,7 +1522,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                LOG.error(LogType.LOG, "Could not release lock", e);
+                LOG.severe(LogType.LOG, "Could not release lock", e);
             }
         }
     }

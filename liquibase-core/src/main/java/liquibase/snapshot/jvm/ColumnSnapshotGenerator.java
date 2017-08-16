@@ -372,7 +372,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "(" + enumClause + ")");
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Error fetching enum values", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Error fetching enum values", e);
             }
         }
 

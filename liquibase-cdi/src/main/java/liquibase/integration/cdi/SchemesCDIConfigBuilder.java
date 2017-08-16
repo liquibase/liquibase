@@ -74,13 +74,13 @@ public class SchemesCDIConfigBuilder {
                 }
             });
         } catch (Exception ex) {
-            log.warn(LogType.LOG, String.format("[id = %s] Unable to initialize liquibase where '%s'.", id, ex.getMessage()), ex);
+            log.warning(LogType.LOG, String.format("[id = %s] Unable to initialize liquibase where '%s'.", id, ex.getMessage()), ex);
             return null;
         } finally {
             try {
                 is.close();
             } catch (IOException ioe) {
-                log.warn(LogType.LOG, String.format("[id = %s] IOException during closing an input stream '%s'.", id, ioe.getMessage()), ioe);
+                log.warning(LogType.LOG, String.format("[id = %s] IOException during closing an input stream '%s'.", id, ioe.getMessage()), ioe);
             }
         }
     }
@@ -205,7 +205,7 @@ public class SchemesCDIConfigBuilder {
             actionResult = action.call();
             lock.release();
         } catch (Exception e) {
-            log.warn(LogType.LOG, e.getMessage(), e);
+            log.warning(LogType.LOG, e.getMessage(), e);
         }
         return actionResult;
     }
@@ -257,7 +257,7 @@ public class SchemesCDIConfigBuilder {
                     is.close();
                 }
             } catch (IOException ioe) {
-                log.warn(LogType.LOG, String.format("IOException during closing an input stream '%s'.", ioe.getMessage()), ioe);
+                log.warning(LogType.LOG, String.format("IOException during closing an input stream '%s'.", ioe.getMessage()), ioe);
             }
         }
     }

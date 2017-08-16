@@ -77,7 +77,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 			}else if(dataSource!=null){
 				log.info(LogType.LOG, "Schema based multitenancy enabled");
 				if((schemas == null) || schemas.isEmpty()) {
-					log.warn(LogType.LOG, "Schemas not defined, using defaultSchema only");
+					log.warning(LogType.LOG, "Schemas not defined, using defaultSchema only");
 					schemas = new ArrayList<>();
 					schemas.add(defaultSchema);
 				}

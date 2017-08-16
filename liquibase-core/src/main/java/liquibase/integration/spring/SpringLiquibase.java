@@ -151,7 +151,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 					}
 					connection.close();
 				} catch (Exception e) {
-					log.warn(LogType.LOG, "problem closing connection", e);
+					log.warning(LogType.LOG, "problem closing connection", e);
 				}
 			}
 		}
@@ -320,7 +320,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
         DatabaseConnection liquibaseConnection;
         if (c == null) {
-            log.warn(LogType.LOG, "Null connection returned by liquibase datasource. Using offline unknown database");
+            log.warning(LogType.LOG, "Null connection returned by liquibase datasource. Using offline unknown database");
             liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
         } else {
@@ -414,7 +414,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
                 if (liquibasePackages.isEmpty()) {
-                    LogService.getLog(getClass()).warn(LogType.LOG, "No Liquibase-Packages entry found in MANIFEST.MF. " +
+                    LogService.getLog(getClass()).warning(LogType.LOG, "No Liquibase-Packages entry found in MANIFEST.MF. " +
                         "Using fallback of entire 'liquibase' package");
                     liquibasePackages.add("liquibase");
                 }
@@ -426,7 +426,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                 }
 
             } catch (IOException e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Error initializing SpringLiquibase", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Error initializing SpringLiquibase", e);
             }
         }
 

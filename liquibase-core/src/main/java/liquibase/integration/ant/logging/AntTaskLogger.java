@@ -18,22 +18,22 @@ public final class AntTaskLogger extends AbstractLogger {
     }
 
     @Override
-    public void error(LogType target, String message) {
+    public void severe(LogType target, String message) {
         task.log(message, Project.MSG_ERR);
     }
 
     @Override
-    public void error(LogType target, String message, Throwable e) {
+    public void severe(LogType target, String message, Throwable e) {
         task.log(message, e, Project.MSG_ERR);
     }
 
     @Override
-    public void warn(LogType target, String message) {
+    public void warning(LogType target, String message) {
         task.log(message, Project.MSG_WARN);
     }
 
     @Override
-    public void warn(LogType target, String message, Throwable e) {
+    public void warning(LogType target, String message, Throwable e) {
         task.log(message, e, Project.MSG_WARN);
     }
 

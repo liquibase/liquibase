@@ -43,7 +43,7 @@ public class ServiceLocator {
                     instance = new ServiceLocator();
                 }
             } catch (Throwable e1) {
-                LogService.getLog(ServiceLocator.class).error(LogType.LOG, "Cannot build ServiceLocator", e1);
+                LogService.getLog(ServiceLocator.class).severe(LogType.LOG, "Cannot build ServiceLocator", e1);
             }
         }
     }
@@ -243,7 +243,7 @@ public class ServiceLocator {
                     if (e.getMessage().startsWith("org/yaml/snakeyaml")) {
                         LogService.getLog(getClass()).info(LogType.LOG, message);
                     } else {
-                        LogService.getLog(getClass()).warn(LogType.LOG, message);
+                        LogService.getLog(getClass()).warning(LogType.LOG, message);
                     }
                 }
             }

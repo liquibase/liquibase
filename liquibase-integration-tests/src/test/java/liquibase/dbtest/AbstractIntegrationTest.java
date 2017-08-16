@@ -484,7 +484,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (Exception e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Probably expected error dropping databasechangelog table");
+                LogService.getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
                 database.rollback();
             } finally {
@@ -512,7 +512,7 @@ public abstract class AbstractIntegrationTest {
                     database.commit();
                 }
             } catch (Exception e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Probably expected error dropping databasechangeloglock table");
+                LogService.getLog(getClass()).warning(LogType.LOG, "Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();
                 database.rollback();
             } finally {

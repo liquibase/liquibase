@@ -283,11 +283,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable {
 
             if (example instanceof Schema) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Did not find schema '" + example + "' to snapshot");
             }
             if (example instanceof Catalog) {
                 if (snapshotControl.isWarnIfObjectNotFound())
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Did not find catalog '" + example + "' to snapshot");
             }
 
         } else {

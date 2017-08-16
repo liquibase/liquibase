@@ -147,7 +147,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if ((setting != null) && "on".equals(setting)) {
-                        LOG.warn(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Auto-converts " +
+                        LOG.warning(LogType.LOG, "EnterpriseDB " + conn.getURL() + " does not store DATE columns. Auto-converts " +
                                 "them " +
                                 "to TIMESTAMPs. (edb_redwood_date=true)");
                     }
@@ -265,7 +265,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             major = getDatabaseMajorVersion();
             minor = getDatabaseMinorVersion();
         } catch (DatabaseException x) {
-            LogService.getLog(getClass()).warn(
+            LogService.getLog(getClass()).warning(
                     LogType.LOG, "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);

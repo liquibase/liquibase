@@ -141,7 +141,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             }
         } catch (DatabaseException e) {
-            LogService.getLog(getClass()).warn(LogType.LOG, "Cannot set auto commit to " + getAutoCommitMode() + " on connection");
+            LogService.getLog(getClass()).warning(LogType.LOG, "Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
 
         this.connection.attached(this);
@@ -670,7 +670,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Cannot determine case sensitivity from JDBC driver", e);
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
@@ -1151,7 +1151,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 try {
                     connection.setAutoCommit(previousAutoCommit);
                 } catch (DatabaseException e) {
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Failed to restore the auto commit to " + previousAutoCommit);
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Failed to restore the auto commit to " + previousAutoCommit);
 
                     throw e;
                 }
@@ -1227,7 +1227,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    LogService.getLog(getClass()).error(LogType.LOG, "Error executing statement '"+statement.toString()+"', but continuing", e);
+                    LogService.getLog(getClass()).severe(LogType.LOG, "Error executing statement '"+statement.toString()+"', but continuing", e);
                 } else {
                     throw e;
                 }
@@ -1541,7 +1541,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     public int getMaxFractionalDigitsForTimestamp() {
         if (getConnection() == null) {
             // if no connection is there we cannot do anything...
-            LogService.getLog(getClass()).warn(
+            LogService.getLog(getClass()).warning(
                     LogType.LOG, "No database connection available - specified"
                             + " DATETIME/TIMESTAMP precision will be tried");
             return DEFAULT_MAX_TIMESTAMP_FRACTIONAL_DIGITS;

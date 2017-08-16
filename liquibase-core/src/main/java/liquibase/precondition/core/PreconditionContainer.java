@@ -243,7 +243,7 @@ public class PreconditionContainer extends AndPrecondition implements ChangeLogC
                 LogService.getLog(getClass()).info(LogType.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
                 throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Continuing past: " + toString() + " despite precondition error:\n " + message);
             } else {
                 if (getOnErrorMessage() == null) {
                     throw e;

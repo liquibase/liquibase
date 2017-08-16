@@ -571,7 +571,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     this.canAccessDbaRecycleBin = false;
                 } else {
                     //noinspection HardCodedStringLiteral
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Cannot check dba_recyclebin access", e);
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot check dba_recyclebin access", e);
                     this.canAccessDbaRecycleBin = false;
                 }
             } finally {

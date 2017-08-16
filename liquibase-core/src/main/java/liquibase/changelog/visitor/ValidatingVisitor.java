@@ -59,7 +59,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                     database.rollback();
                 }
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Error rolling back after precondition check", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Error rolling back after precondition check", e);
             }
         }
     }
@@ -119,7 +119,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                             changeSet.setValidationFailed(true);
                     } else {
                         if (!foundErrors.getWarningMessages().isEmpty())
-                            LogService.getLog(getClass()).warn(
+                            LogService.getLog(getClass()).warning(
                                     LogType.LOG, "Change set " + changeSet + ": " +
                                             StringUtils.join(foundErrors.getWarningMessages(), ", "));
                         validationErrors.addAll(foundErrors, changeSet);

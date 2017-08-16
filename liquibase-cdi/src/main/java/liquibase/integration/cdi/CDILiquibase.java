@@ -99,7 +99,7 @@ public class CDILiquibase implements Extension {
         try {
             hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
-            log.warn(LogType.LOG, "Cannot find hostname: " + e.getMessage());
+            log.warning(LogType.LOG, "Cannot find hostname: " + e.getMessage());
             log.debug(LogType.LOG, "", e);
             return;
         }

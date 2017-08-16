@@ -302,7 +302,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         ranChangeSet.setOrderExecuted(orderExecuted);
                         ranChangeSetList.add(ranChangeSet);
                     } catch (IllegalArgumentException e) {
-                        LogService.getLog(getClass()).error(LogType.LOG, "Unknown EXECTYPE from database: " + execType);
+                        LogService.getLog(getClass()).severe(LogType.LOG, "Unknown EXECTYPE from database: " + execType);
                         throw e;
                     }
                 }

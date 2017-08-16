@@ -75,7 +75,7 @@ public class MariaDBIntegrationTest extends AbstractIntegrationTest {
                     ")"));
         } catch (DatabaseException e) {
             if (e.getCause() instanceof SQLSyntaxErrorException) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "MariaDB returned DatabaseException", e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "MariaDB returned DatabaseException", e);
                 assumeTrue("MariaDB seems to run in strict mode (no datetime literals with 0000-00-00 allowed). " + "Cannot run this test", false);
                 
             } else {

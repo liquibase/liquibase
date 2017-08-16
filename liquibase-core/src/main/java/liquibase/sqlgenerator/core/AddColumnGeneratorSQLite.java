@@ -68,7 +68,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
             sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
         } catch (DatabaseException e) {
-            LogService.getLog(getClass()).error(LogType.LOG, "DatabaseException caught", e);
+            LogService.getLog(getClass()).severe(LogType.LOG, "DatabaseException caught", e);
         }
 
         return sql.toArray(new Sql[sql.size()]);

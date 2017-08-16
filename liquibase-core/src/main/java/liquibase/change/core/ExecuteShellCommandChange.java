@@ -189,7 +189,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         String infoStreamOut = inputStream.toString(LiquibaseConfiguration.getInstance().getConfiguration
                 (GlobalConfiguration.class).getOutputEncoding());
 
-        LogService.getLog(getClass()).error(LogType.LOG, errorStreamOut);
+        LogService.getLog(getClass()).severe(LogType.LOG, errorStreamOut);
         LogService.getLog(getClass()).info(LogType.LOG, infoStreamOut);
 
         throwExceptionIfError(returnCode);

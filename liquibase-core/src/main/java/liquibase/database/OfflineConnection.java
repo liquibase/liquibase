@@ -71,7 +71,7 @@ public class OfflineConnection implements DatabaseConnection {
                         this.databaseMinorVersion = Integer.parseInt(versionParts[1]);
                     }
                 } catch (NumberFormatException e) {
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Cannot parse database version "+productVersion);
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Cannot parse database version "+productVersion);
                 }
             } else if ("productName".equals(paramEntry.getKey())) {
                 this.productName = paramEntry.getValue();
@@ -117,7 +117,7 @@ public class OfflineConnection implements DatabaseConnection {
             try {
                 ObjectUtil.setProperty(database, param.getKey(), param.getValue());
             } catch (Exception e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, "Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
+                LogService.getLog(getClass()).warning(LogType.LOG, "Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
             }
         }
         if (database instanceof AbstractJdbcDatabase) {

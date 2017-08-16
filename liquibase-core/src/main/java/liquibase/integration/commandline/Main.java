@@ -137,7 +137,7 @@ public class Main {
                     (GlobalConfiguration.class);
 
             if (!globalConfiguration.getShouldRun()) {
-                log.warn(LogType.USER_MESSAGE, (
+                log.warning(LogType.USER_MESSAGE, (
                         String.format(coreBundle.getString("did.not.run.because.param.was.set.to.false"),
                                 LiquibaseConfiguration.getInstance().describeValueLookupLogic(
                                         globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)))));
@@ -160,7 +160,7 @@ public class Main {
             try {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
-                log.warn(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
+                log.warning(LogType.USER_MESSAGE, coreBundle.getString("how.to.display.help"));
                 throw e;
             }
 
@@ -195,8 +195,8 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    log.error(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
-                    log.error(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
+                    log.severe(LogType.USER_MESSAGE, (String.format(coreBundle.getString("unexpected.error"), message)), e);
+                    log.severe(LogType.USER_MESSAGE, generateLogLevelWarningMessage(outputLoggingEnabled));
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();
@@ -629,7 +629,7 @@ public class Main {
                             String.format(coreBundle.getString("parameter.unknown"), entry.getKey())
                     );
                 } else {
-                    LogService.getLog(getClass()).warn(
+                    LogService.getLog(getClass()).warning(
                             LogType.LOG, String.format(coreBundle.getString("parameter.ignored"), entry.getKey())
                     );
                 }
@@ -1236,7 +1236,7 @@ public class Main {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogService.getLog(getClass()).warn(LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
+                LogService.getLog(getClass()).warning(LogType.LOG, coreBundle.getString("problem.closing.connection"), e);
             }
         }
     }
@@ -1321,7 +1321,7 @@ public class Main {
                 fileOut = new FileOutputStream(outputFile, false);
                 return new OutputStreamWriter(fileOut, charsetName);
             } catch (IOException e) {
-                LogService.getLog(getClass()).error(LogType.LOG, String.format(
+                LogService.getLog(getClass()).severe(LogType.LOG, String.format(
                         coreBundle.getString("could.not.create.output.file"),
                         outputFile));
                 throw e;

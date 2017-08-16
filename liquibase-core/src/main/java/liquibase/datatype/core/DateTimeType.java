@@ -133,7 +133,7 @@ public class DateTimeType extends LiquibaseDataType {
             Object[] params = getParameters();
             Integer precision = Integer.valueOf(params[0].toString());
             if (precision > 6) {
-                LogService.getLog(getClass()).warn(
+                LogService.getLog(getClass()).warning(
                         LogType.LOG, "MySQL does not support a timestamp precision"
                                 + " of '" + precision + "' - resetting to"
                                 + " the maximum of '6'");

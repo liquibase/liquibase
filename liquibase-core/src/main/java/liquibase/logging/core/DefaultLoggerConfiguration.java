@@ -38,7 +38,7 @@ public class DefaultLoggerConfiguration extends AbstractConfigurationContainer {
         } else if ("warning".equalsIgnoreCase(logLevel)) {
             return LogLevel.WARNING;
         } else if ("error".equalsIgnoreCase(logLevel) || "severe".equalsIgnoreCase(logLevel)) {
-            return LogLevel.ERROR;
+            return LogLevel.SEVERE;
         } else if ("off".equalsIgnoreCase(logLevel)) {
             return LogLevel.OFF;
         } else {

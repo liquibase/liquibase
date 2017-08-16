@@ -18,22 +18,22 @@ public class Slf4jLogger extends AbstractLogger {
     }
 
     @Override
-    public void error(LogType target, String message) {
+    public void severe(LogType target, String message) {
         logger.error(MarkerFactory.getMarker(target.name()), message);
     }
 
     @Override
-    public void error(LogType target, String message, Throwable e) {
+    public void severe(LogType target, String message, Throwable e) {
         logger.error(MarkerFactory.getMarker(target.name()), message, e);
     }
 
     @Override
-    public void warn(LogType target, String message) {
+    public void warning(LogType target, String message) {
         logger.warn(MarkerFactory.getMarker(target.name()), message);
     }
 
     @Override
-    public void warn(LogType target, String message, Throwable e) {
+    public void warning(LogType target, String message, Throwable e) {
         logger.warn(MarkerFactory.getMarker(target.name()), message, e);
     }
 

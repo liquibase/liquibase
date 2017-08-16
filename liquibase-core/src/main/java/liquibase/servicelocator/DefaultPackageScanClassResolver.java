@@ -136,7 +136,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 log.debug(LogType.LOG, "No URLs returned by classloader");
             }
         } catch (IOException ioe) {
-            log.warn(LogType.LOG, "Cannot read package: " + packageName, ioe);
+            log.warning(LogType.LOG, "Cannot read package: " + packageName, ioe);
             return;
         }
 
@@ -230,7 +230,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     try {
                         loadImplementationsInJar(packageName, stream, loader, urlPath, null);
                     } catch (IOException ioe) {
-                        log.warn(LogType.LOG, "Cannot search jar file '" + urlPath + "' for classes due to an IOException: " + ioe.getMessage(), ioe);
+                        log.warning(LogType.LOG, "Cannot search jar file '" + urlPath + "' for classes due to an IOException: " + ioe.getMessage(), ioe);
                     } finally {
                         stream.close();
                     }
@@ -385,7 +385,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             log.debug(LogType.LOG, "Cannot find the class definition '" + className + "' in classloader: " + classLoader
                     + ". Reason: " + e, e);
         } catch (Exception e) {
-            log.error(LogType.LOG, "Cannot load class '"+className+"' in classloader: "+classLoader+".  Reason: "+e, e);
+            log.severe(LogType.LOG, "Cannot load class '"+className+"' in classloader: "+classLoader+".  Reason: "+e, e);
         }
 
     }
@@ -507,7 +507,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     log.debug(LogType.LOG, "Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
                 } catch (Exception e) {
-                    log.error(LogType.LOG, "Cannot load class '"+fqn+"' in classloader: "+classLoader+".  Reason: "+e, e);
+                    log.severe(LogType.LOG, "Cannot load class '"+fqn+"' in classloader: "+classLoader+".  Reason: "+e, e);
                 }
             }
             if (!found) {
@@ -515,7 +515,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 log.debug(LogType.LOG, "Cannot find class '" + fqn + "' in any classloaders: " + set);
             }
         } catch (Exception e) {
-            log.warn(LogType.LOG, "Cannot examine class '" + fqn + "' due to a " + e.getClass().getName()
+            log.warning(LogType.LOG, "Cannot examine class '" + fqn + "' due to a " + e.getClass().getName()
                     + " with message: " + e.getMessage(), e);
         }
     }

@@ -65,10 +65,10 @@ public class OutputChange extends AbstractChange {
                 } else if ("INFO".equalsIgnoreCase(target)) {
                     LogService.getLog(getClass()).info(LogType.LOG, getMessage());
                 } else if ("WARN".equalsIgnoreCase(target) || "WARNING".equalsIgnoreCase(target)) {
-                    LogService.getLog(getClass()).warn(LogType.LOG, getMessage());
+                    LogService.getLog(getClass()).warning(LogType.LOG, getMessage());
                 } else if ("SEVERE".equalsIgnoreCase(target) || "FATAL".equalsIgnoreCase(target) || "ERROR"
                     .equalsIgnoreCase(target)) {
-                    LogService.getLog(getClass()).error(LogType.LOG, getMessage());
+                    LogService.getLog(getClass()).severe(LogType.LOG, getMessage());
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
                 }

@@ -516,7 +516,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
                 }
                 if (rs.getShort("DEFERRABILITY") != DatabaseMetaData.importedKeyNotDeferrable) {
                     setHasJdbcConstraintDeferrableBug(true);
-                    LogService.getLog(getClass()).warn(LogType.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
+                    LogService.getLog(getClass()).warning(LogType.LOG, "Your MySQL/MariaDB database JDBC driver might have " +
                             "a bug where constraints are reported as DEFERRABLE, even though MySQL/MariaDB do not " +
                             "support this feature. A workaround for this problem will be used. Please check with " +
                             "MySQL/MariaDB for availability of fixed JDBC drivers to avoid this warning.");
@@ -561,7 +561,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             minor = getDatabaseMinorVersion();
             patch = getDatabasePatchVersion();
         } catch (DatabaseException x) {
-            LogService.getLog(getClass()).warn(
+            LogService.getLog(getClass()).warning(
                     LogType.LOG, "Unable to determine exact database server version"
                             + " - specified TIMESTAMP precision"
                             + " will not be set: ", x);
