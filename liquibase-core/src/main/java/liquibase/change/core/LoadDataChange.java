@@ -211,8 +211,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 lineNumber++;
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)
                         || (isCommentingEnabled && isLineCommented(line))) {
-                	System.out.println(this.getClass().getName()+":: 4 generateStatement:: line is EMPTY");
-
                     continue; //nothing on this line
                 }
 
