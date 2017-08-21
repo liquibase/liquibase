@@ -912,6 +912,7 @@
 			<xsd:attributeGroup ref="tableNameAttribute" />
             <xsd:attribute name="tablespace" type="xsd:string" />            
 			<xsd:attribute name="remarks" type="xsd:string" />
+			<xsd:attribute name="replaceIfExists" type="xsd:boolean" />
             <xsd:anyAttribute namespace="##other" processContents="lax"/>
 		</xsd:complexType>
 	</xsd:element>

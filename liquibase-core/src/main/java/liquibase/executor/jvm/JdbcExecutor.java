@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -12,14 +13,18 @@ import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.sql.CallableSql;
+import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -108,6 +113,12 @@ public class JdbcExecutor extends AbstractExecutor {
         if(sql instanceof ExecutablePreparedStatement) {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return;
+        }
+        if (sql instanceof ComplexStatement) {
+            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                executeDb2ZosComplexStatement(sql);
+                return;
+            }
         }
 
         execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
@@ -255,6 +266,46 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public void comment(String message) throws DatabaseException {
         LogFactory.getLogger().debug(message);
+    }
+
+    private void executeDb2ZosComplexStatement(SqlStatement sqlStatement) throws DatabaseException {
+        DatabaseConnection con = database.getConnection();
+
+        if (con instanceof OfflineConnection) {
+            throw new DatabaseException("Cannot execute commands against an offline database");
+        }
+        Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(sqlStatement, database);
+        for (Sql sql : sqls) {
+            try {
+                if (sql instanceof CallableSql) {
+                    try (CallableStatement call = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql.toSql());
+                         ResultSet resultSet = call.executeQuery()) {
+                        checkCallStatus(resultSet, ((CallableSql) sql).getExpectedStatus());
+                    }
+                } else {
+                    try (Statement stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement()) {
+                        stmt.execute(sql.toSql());
+//                        con.commit();
+                    }
+                }
+            } catch (Exception e) {
+                throw new DatabaseException(e.getMessage() + " [Failed SQL: " + sql.toSql() + "]", e);
+            }
+        }
+    }
+
+    private void checkCallStatus(ResultSet resultSet, String status) throws SQLException, DatabaseException {
+        if (status != null) {
+            StringBuilder message = new StringBuilder();
+            while (resultSet.next()) {
+                String string = resultSet.getString(2);
+                if (string.contains(status)) {
+                    return;
+                }
+                message.append(string).append("\n");
+            }
+            throw new DatabaseException(message.toString());
+        }
     }
 
     /**

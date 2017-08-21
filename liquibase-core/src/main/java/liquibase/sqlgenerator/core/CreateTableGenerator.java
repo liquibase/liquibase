@@ -8,6 +8,7 @@ import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.replace.ReplaceTableGenerator;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SequenceNextValueFunction;
@@ -317,6 +318,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='" + database.escapeStringForDatabase(statement.getRemarks()) + "' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
+        if (Boolean.TRUE.equals(statement.getReplaceIfExists()) && database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+            additionalSql = new ReplaceTableGenerator(statement).generateReplacementSql(database, additionalSql);
+        }
         return additionalSql.toArray(new Sql[additionalSql.size()]);
     }
 

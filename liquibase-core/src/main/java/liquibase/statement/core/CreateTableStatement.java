@@ -5,12 +5,13 @@ import liquibase.statement.*;
 
 import java.util.*;
 
-public class CreateTableStatement extends AbstractSqlStatement {
+public class CreateTableStatement extends AbstractSqlStatement implements ComplexStatement{
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private String remarks;
+    private Boolean replaceIfExists;
     private List<String> columns = new ArrayList<String>();
     private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
     private Map<String, LiquibaseDataType> columnTypes = new HashMap<String, LiquibaseDataType>();
@@ -66,6 +67,14 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    public Boolean getReplaceIfExists() {
+        return replaceIfExists;
+    }
+
+    public void setReplaceIfExists(Boolean replaceIfExists) {
+        this.replaceIfExists = replaceIfExists;
     }
 
     public PrimaryKeyConstraint getPrimaryKeyConstraint() {
