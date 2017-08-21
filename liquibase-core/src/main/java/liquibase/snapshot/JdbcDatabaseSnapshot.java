@@ -716,15 +716,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
             if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
-                filterXmlGeneratedColumns(columns);
+                filterDB2ZosGeneratedColumns(columns);
             }
             return columns;
         }
 
-        private void filterXmlGeneratedColumns(List<CachedRow> columns) throws SQLException {
+        private void filterDB2ZosGeneratedColumns(List<CachedRow> columns) throws SQLException {
             Iterator<CachedRow> iterator = columns.iterator();
             while (iterator.hasNext()) {
-                if ("DB2_GENERATED_DOCID_FOR_XML".equals(iterator.next().getString("COLUMN_NAME"))) {
+                if ((iterator.next().getString("COLUMN_NAME")).startsWith("DB2_GENERATED")) {
                     iterator.remove();
                 }
             }
