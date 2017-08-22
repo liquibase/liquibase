@@ -53,20 +53,34 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         if (example.getSnapshotId() != null) {
             return example;
         }
-        if (example.getAttribute("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
-            example.setSnapshotId(SnapshotIdService.getInstance().generateId());
-            example.setAttribute("liquibase-complete", null);
-            return example;
-        }
-
         Database database = snapshot.getDatabase();
-        if (!database.supportsSequences()) {
-            return null;
-        }
+        List<Map<String, ?>> sequences;
+        if ((database instanceof DB2Database && ((DB2Database) database).isZOS())) {
+            sequences = ExecutorService.getInstance()
+                    .getExecutor(database)
+                    .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
+            return getSequences(example, database, sequences);
+        } else {
+            if (example.getAttribute("liquibase-complete", false)) { //need to go through "snapshotting" the object even if it was previously populated in addTo. Use the "liquibase-complete" attribute to track that it doesn't need to be fully snapshotted
+                example.setSnapshotId(SnapshotIdService.getInstance().generateId());
+                example.setAttribute("liquibase-complete", null);
+                return example;
+            }
 
-        List<Map<String, ?>> sequences = ExecutorService.getInstance()
-                .getExecutor(database)
-                .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
+            if (!database.supportsSequences()) {
+                return null;
+            }
+
+            sequences = ExecutorService.getInstance()
+                    .getExecutor(database)
+                    .queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
+            DatabaseObject sequenceRow = getSequences(example, database, sequences);
+            if (sequenceRow != null) return sequenceRow;
+        }
+        return null;
+    }
+
+    private DatabaseObject getSequences(DatabaseObject example, Database database, List<Map<String, ?>> sequences) {
         for (Map<String, ?> sequenceRow : sequences) {
             if ("S".equalsIgnoreCase(StringUtils.trimToNull(sequenceRow.get("SEQTYPE").toString()))) {
                 String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
