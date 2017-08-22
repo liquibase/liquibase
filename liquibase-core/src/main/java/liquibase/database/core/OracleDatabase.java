@@ -1,23 +1,5 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.statement.*;
-import liquibase.statement.core.RawCallStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-import liquibase.util.JdbcUtils;
-import liquibase.util.StringUtils;
-
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -28,6 +10,29 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.core.RawCallStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 /**
  * Encapsulates Oracle database support.
@@ -437,7 +442,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 || databaseFunction instanceof SequenceCurrentValueFunction){
             String quotedSeq = super.generateDatabaseFunctionValue(databaseFunction);
             // replace "myschema.my_seq".nextval with "myschema"."my_seq".nextval
-            return quotedSeq.replaceFirst("\"([^\\.\"]*)\\.([^\\.\"]*)\"","\"$1\".\"$2\"");
+            return quotedSeq.replaceFirst("\"([^\\.\"]+)\\.([^\\.\"]+)\"","\"$1\".\"$2\"");
 
         }
 
