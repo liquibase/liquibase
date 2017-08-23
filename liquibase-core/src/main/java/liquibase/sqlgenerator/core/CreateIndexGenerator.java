@@ -9,11 +9,13 @@ import liquibase.sdk.database.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.replace.ReplaceIndexGenerator;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +66,8 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 			    return new Sql[0];
 		    }
 	    }
+
+        List<Sql> additionalSql = new ArrayList<Sql>();
 
 	    StringBuffer buffer = new StringBuffer();
 
@@ -129,7 +133,13 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             buffer.append(" CLUSTER");
         }
 
-        return new Sql[] {new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
+        additionalSql.add(0, new UnparsedSql(buffer.toString(), getAffectedIndex(statement)));
+        if (database instanceof DB2Database && (((DB2Database) database).isZOS())) {
+            additionalSql = new ReplaceIndexGenerator(statement).generateReplacementSql(database, additionalSql);
+            return additionalSql.toArray(new Sql[additionalSql.size()]);
+        }
+
+        return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
     }
 
     protected Index getAffectedIndex(CreateIndexStatement statement) {
