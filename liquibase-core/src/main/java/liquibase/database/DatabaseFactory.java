@@ -200,6 +200,10 @@ public class DatabaseFactory {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
 
+            if (driverObject instanceof LiquibaseExtDriver) {
+                ((LiquibaseExtDriver)driverObject).setResourceAccessor(resourceAccessor);
+            }
+
             Properties driverProperties;
             if (propertyProviderClass == null) {
                 driverProperties = new Properties();
