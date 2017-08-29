@@ -31,7 +31,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, HsqlDatabase.class, PostgresDatabase.class);
+        if (!(database instanceof DB2Database && ((DB2Database) database).isZOS())) {
+            validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, HsqlDatabase.class, PostgresDatabase.class);
+        }
 
 
         return validationErrors;
@@ -42,7 +44,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
-        if (database instanceof HsqlDatabase) {
+        if (database instanceof HsqlDatabase || database instanceof DB2Database && ((DB2Database) database).isZOS()) {
             buffer.append(" AS BIGINT ");
         }
         if (statement.getStartValue() != null) {
@@ -58,11 +60,15 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             buffer.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
-        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
-            if (statement.getCacheSize().equals(BigInteger.ZERO)) {
-                buffer.append(" NOCACHE ");
-            } else {
-                buffer.append(" CACHE ").append(statement.getCacheSize());
+        if (statement.getCacheSize() != null) {
+            if (database instanceof OracleDatabase || database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                if (BigInteger.ZERO.equals(statement.getCacheSize())) {
+                    if (database instanceof OracleDatabase) {
+                        buffer.append(" NOCACHE ");
+                    }
+                } else {
+                    buffer.append(" CACHE ").append(statement.getCacheSize());
+                }
             }
         }
 
