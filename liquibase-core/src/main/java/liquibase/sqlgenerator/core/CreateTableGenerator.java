@@ -30,6 +30,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
         validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
+        if (createTableStatement.getReplaceIfExists() != null && !(database instanceof DB2Database && ((DB2Database) database).isZOS())) {
+            validationErrors.checkDisallowedField("replaceIfExists", createTableStatement.getReplaceIfExists(), database);
+        }
         return validationErrors;
     }
 

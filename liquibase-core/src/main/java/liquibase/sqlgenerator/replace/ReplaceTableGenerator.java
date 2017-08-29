@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.replace;
 import liquibase.database.Database;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.statement.core.CreateTableStatement;
 
 import java.text.SimpleDateFormat;
@@ -23,22 +24,17 @@ public class ReplaceTableGenerator extends AbstractDb2ZosReplaceGenerator {
         Map<String, ?> tableInfo = getObjectInfo(database);
         if (tableInfo != null) {
             String schemaTableName = "\"" + tableInfo.get("SCHEMA") + "\".\"" + tableInfo.get("NAME") + "\"";
-            String databaseTablespaceName = "\"" + tableInfo.get("DBNAME") + "\".\"" + tableInfo.get("TABLESPACE") + "\"";
-            String templateId = getTemplateId("DATA");
-
-            StringBuilder sql = new StringBuilder("call DSNUTILU('REPLACE', 'NO', '");
-            appendCopySql(sql, schemaTableName);
-            appendUnloadSql(sql, schemaTableName, templateId);
-            appendDropTableSql(sql, schemaTableName);
-            appendCreateSql(sql, statementSql);
-            appendLoadSql(sql, schemaTableName, templateId);
-//           todo: database name can change after re-creating a table
-//           appendCheckSql(sql, databaseTablespaceName);
-//           appendRunStatsSql(sql, databaseTablespaceName, schemaTableName);
-            sql.append("', 1)");
 
             List<Sql> sqlList = new ArrayList<>();
-            sqlList.add(new CallableSql(sql.toString(), "DSNU010I"));
+            sqlList.add(getCopySql(schemaTableName));
+            sqlList.add(getUnloadSql(schemaTableName, tableInfo.get("ENCODING")));
+            sqlList.add(getDropTableSql(schemaTableName));
+            sqlList.addAll(statementSql);
+            sqlList.add(getLoadSql(schemaTableName, tableInfo.get("ENCODING")));
+            if (tableInfo.get("DBNAME") != null) {
+                sqlList.add(getCheckSql(tableInfo.get("DBNAME"), tableInfo.get("TABLESPACE")));
+            }
+            sqlList.add(getRunStatsSql(schemaTableName));
             sqlList.addAll(getRebindPackagesSql(database, tableInfo.get("SCHEMA"), tableInfo.get("NAME"), ObjectType.TABLE));
             return sqlList;
         }
@@ -47,61 +43,58 @@ public class ReplaceTableGenerator extends AbstractDb2ZosReplaceGenerator {
 
     @Override
     protected String getObjectQuery() {
-        String sql = "SELECT CREATOR AS SCHEMA, " +
-                "NAME, " +
-                "TSNAME AS TABLESPACE, " +
-                "DBNAME " +
-                "FROM  SYSIBM.SYSTABLES " +
-                "WHERE TYPE = 'T' AND NAME='" + statement.getTableName() + "'";
+        String sql = "SELECT tb.CREATOR AS SCHEMA, " +
+                "tb.NAME, " +
+                "tb.TSNAME AS TABLESPACE, " +
+                "db.NAME AS DBNAME, " +
+                "CASE tb.ENCODING_SCHEME " +
+                "WHEN 'A' THEN 'ASCII' " +
+                "WHEN 'U' THEN 'UNICODE' " +
+                "ELSE null END AS ENCODING " +
+                "FROM SYSIBM.SYSTABLES tb " +
+                "LEFT JOIN SYSIBM.SYSDATABASE db ON tb.DBNAME = db.NAME AND db.IMPLICIT = 'N' " +
+                "WHERE tb.TYPE = 'T' AND tb.NAME='" + statement.getTableName() + "'";
         if (statement.getSchemaName() != null) {
-            sql += "AND CREATOR='" + statement.getSchemaName() + "'";
+            sql += "AND tb.CREATOR='" + statement.getSchemaName() + "'";
         }
         return sql;
     }
 
-    private static String getTemplateId(String prefix) {
-        String format = new SimpleDateFormat(":HH:mm:ss").format(new Date());
-        return prefix + format.replaceAll(":", ".T");
+    private Sql getCopySql(String schemaTableName) {
+        String sql = "call DSNUTILU('COPY', 'NO', 'LISTDEF LST INCLUDE TABLESPACES TABLE " + schemaTableName + " TEMPLATE COPYT RETPD 1 DSN (&DB..&TS..M&MO..D&DA..Y&YE..T&TI.) DISP (NEW,CATLG,CATLG) COPY LIST LST COPYDDN (COPYT) PARALLEL (2)', 1)";
+        return new CallableSql(sql, DSNUTIL_SUCCESS_STATUS);
     }
 
-    private void appendCopySql(StringBuilder sql, String schemaTableName) {
-        sql.append("LISTDEF LST INCLUDE TABLESPACES TABLE ").append(schemaTableName)
-                .append(" TEMPLATE COPYT RETPD 1 DSN (&DB..&TS..M&MO..D&DA..Y&YE..T&TI.) DISP (NEW,CATLG,CATLG) COPY LIST LST COPYDDN (COPYT) PARALLEL (2)");
-    }
-
-    private void appendUnloadSql(StringBuilder sql, String schemaTableName, String templateId) {
-        sql.append(" TEMPLATE UNLOADT RETPD 1 DSN (").append(templateId).append(") DISP (NEW,CATLG,DELETE) ")
-                .append("TEMPLATE PUNCHT DSN (UNLAOD.USER) DISP (NEW,DELETE,DELETE) ")
-                .append("UNLOAD FROM TABLE ").append(schemaTableName).append(" PUNCHDDN PUNCHT UNLDDN UNLOADT");
-    }
-
-    private void appendDropTableSql(StringBuilder sql, String schemaTableName) {
-        sql.append(" EXEC SQL DROP TABLE ").append(schemaTableName).append(" ENDEXEC");
-    }
-
-    private void appendCreateSql(StringBuilder sql, List<Sql> statementSql) {
-        sql.append(" EXEC SQL ");
-        for (Sql statement : statementSql) {
-            sql.append(statement.toSql()).append(";");
+    private Sql getUnloadSql(String schemaTableName, Object encoding) {
+        String sql = "call DSNUTILU('UNLOAD', 'NO', 'TEMPLATE UNLOADT RETPD 1 DSN (UNLOAD.PUNCH) DISP (NEW,CATLG,DELETE) TEMPLATE PUNCHT DSN (UNLAOD.USER) DISP (NEW,DELETE,DELETE) UNLOAD FROM TABLE " + schemaTableName + " PUNCHDDN PUNCHT UNLDDN UNLOADT DELIMITED ";
+        if (encoding != null) {
+            sql += encoding + " ";
         }
-        sql.append("ENDEXEC");
+        sql += "', 1)";
+        return new CallableSql(sql, DSNUTIL_SUCCESS_STATUS);
     }
 
-    private void appendLoadSql(StringBuilder sql, String schemaTableName, String templateId) {
-        sql.append(" TEMPLATE LOADT DSN (").append(templateId).append(") DISP (SHR,DELETE,DELETE) ")
-                .append("TEMPLATE IS DSN (LOAD.IS) DISP (NEW,DELETE,DELETE) ")
-                .append("TEMPLATE OS DSN (LOAD.OS) DISP (NEW,DELETE,DELETE)")
-                .append("LOAD DATA INDDN(LOADT) WORKDDN(IS, OS) INTO TABLE ").append(schemaTableName).append(" IGNOREFIELDS YES FORMAT UNLOAD");
+    private Sql getDropTableSql(String schemaTableName) {
+        String sql = "DROP TABLE " + schemaTableName;
+        return new UnparsedSql(sql);
     }
 
-    private void appendCheckSql(StringBuilder sql, String databaseTablespaceName) {
-        sql.append(" TEMPLATE PU UNIT SYSDA DSN (CHECK.SYSUT1.TEMP) DISP (NEW,DELETE,DELETE) ")
-                .append("TEMPLATE SO UNIT SYSDA DSN (CHECK.SORTOUT.TEMP) DISP (NEW,DELETE,DELETE) ")
-                .append("TEMPLATE ER UNIT SYSDA DSN (CHECK.SYSERR.ERRORS) DISP (NEW,CATLG,CATLG) ")
-                .append("CHECK DATA TABLESPACE ").append(databaseTablespaceName).append(" INCLUDE XML TABLESPACES SCOPE ALL ERRDDN ER WORKDDN PU, SO");
+    private Sql getLoadSql(String schemaTableName, Object encoding) {
+        String sql = "call DSNUTILU('LOAD', 'NO', 'TEMPLATE LOADT DSN (UNLOAD.PUNCH) DISP (SHR,DELETE,DELETE) LOAD DATA FORMAT DELIMITED ";
+        if (encoding != null) {
+            sql += encoding + " ";
+        }
+        sql += "INDDN(LOADT) INTO TABLE " + schemaTableName + " IGNOREFIELDS YES', 1)";
+        return new CallableSql(sql, DSNUTIL_SUCCESS_STATUS);
     }
 
-    private void appendRunStatsSql(StringBuilder sql, String databaseTablespaceName, String schemaTableName) {
-        sql.append(" RUNSTATS TABLESPACE(").append(databaseTablespaceName).append(") TABLE (").append(schemaTableName).append(")");
+    private Sql getCheckSql(Object dbName, Object tablespace) {
+        String sql = "call DSNUTILU('CHECK', 'NO', 'TEMPLATE PU UNIT SYSDA DSN (CHECK.SYSUT1.TEMP) DISP (NEW,DELETE,DELETE) TEMPLATE SO UNIT SYSDA DSN (CHECK.SORTOUT.TEMP) DISP (NEW,DELETE,DELETE) TEMPLATE ER UNIT SYSDA DSN (CHECK.SYSERR.ERRORS) DISP (NEW,CATLG,CATLG) CHECK DATA TABLESPACE \"" + dbName + "\".\"" + tablespace + "\" INCLUDE XML TABLESPACES SCOPE ALL ERRDDN ER WORKDDN PU, SO', 1)";
+        return new CallableSql(sql, null);
+    }
+
+    private Sql getRunStatsSql(String schemaTableName) {
+        String sql = "call DSNUTILU('STATS', 'NO', 'LISTDEF LST INCLUDE TABLESPACES TABLE " + schemaTableName + " RUNSTATS TABLESPACE LIST(LST)', 1)";
+        return new CallableSql(sql, DSNUTIL_SUCCESS_STATUS);
     }
 }

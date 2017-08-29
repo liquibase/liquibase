@@ -285,7 +285,7 @@ public class JdbcExecutor extends AbstractExecutor {
                 } else {
                     try (Statement stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement()) {
                         stmt.execute(sql.toSql());
-//                        con.commit();
+                        con.commit();
                     }
                 }
             } catch (Exception e) {

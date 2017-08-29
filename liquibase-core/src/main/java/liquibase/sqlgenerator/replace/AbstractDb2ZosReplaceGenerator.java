@@ -17,6 +17,8 @@ import java.util.Map;
  */
 public abstract class AbstractDb2ZosReplaceGenerator {
 
+    protected static final String DSNUTIL_SUCCESS_STATUS = "DSNU010I";
+
     /**
      * Generates sqls required for an object replacement.
      *

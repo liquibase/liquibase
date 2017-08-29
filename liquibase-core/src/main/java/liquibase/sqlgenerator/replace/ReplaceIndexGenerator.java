@@ -3,7 +3,10 @@ package liquibase.sqlgenerator.replace;
 import liquibase.database.Database;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,67 +23,57 @@ public class ReplaceIndexGenerator extends AbstractDb2ZosReplaceGenerator {
     public List<Sql> generateReplacementSql(Database database, List<Sql> statementSql) {
         Map<String, ?> indexInfo = getObjectInfo(database);
         if (indexInfo != null) {
-            String ownerIndexName = "\"" + indexInfo.get("OWNER") + "\".\"" + indexInfo.get("INDEX_NAME") + "\"";
-            String databaseTablespaceName = "\"" + indexInfo.get("DBNAME") + "\".\"" + indexInfo.get("TABLESPACE_NAME") + "\"";
-
-            StringBuilder sql = new StringBuilder("call DSNUTILU('REPLACE', 'NO', '");
-            appendDropIndexSql(sql, ownerIndexName);
-            appendCreateIndexSql(sql, statementSql);
-            appendRebuildIndex(sql, ownerIndexName);
-            appendCheckSql(sql, databaseTablespaceName);
-            appendRunStatsSql(sql, ownerIndexName);
-            sql.append("', 1)");
+            String ownerIndexName = getIndexOwnerName(indexInfo);
 
             List<Sql> sqlList = new ArrayList<>();
-            sqlList.add(new CallableSql(sql.toString(), "DSNU010I"));
+            sqlList.add(getDropIndexSql(ownerIndexName));
+            sqlList.add(getCreateIndexSql(statementSql.get(0)));
+            sqlList.add(getRebuildIndex(ownerIndexName));
+            sqlList.add(getRunStatsSql(ownerIndexName));
             sqlList.addAll(getRebindPackagesSql(database, indexInfo.get("TABLE_SCHEMA"), indexInfo.get("TBNAME"), ObjectType.INDEX));
             return sqlList;
         }
         return statementSql;
     }
 
-    private void appendDropIndexSql(StringBuilder sql, String ownerIndexName) {
-        sql.append("EXEC SQL DROP INDEX ").append(ownerIndexName).append(" ENDEXEC;");
-    }
-
-    private void appendCreateIndexSql(StringBuilder sql, List<Sql> statementSql) {
-        sql.append("EXEC SQL ");
-        for (Sql statement : statementSql) {
-            sql.append(statement.toSql()).append(" DEFER YES").append("; ");
+    private String getIndexOwnerName(Map<String, ?> indexInfo) {
+        String ownerIndexName = "\"";
+        if(StringUtils.trimToNull(String.valueOf(indexInfo.get("OWNER")))!=null){
+            ownerIndexName+= indexInfo.get("OWNER") + "\".\"";
         }
-        sql.append("ENDEXEC; ");
+        ownerIndexName+=indexInfo.get("INDEX_NAME") + "\"";
+        return ownerIndexName;
     }
 
-    private void appendRebuildIndex(StringBuilder sql, String ownerIndexName) {
-        sql.append("REBUILD INDEX (").append(ownerIndexName).append(");");
+    private Sql getDropIndexSql(String ownerIndexName) {
+        String sql = "DROP INDEX " + ownerIndexName;
+        return new UnparsedSql(sql);
     }
 
-    private void appendCheckSql(StringBuilder sql, String databaseTablespaceName) {
-        sql.append(" TEMPLATE PU UNIT SYSDA DSN (CHECK.SYSUT1.TEMP) DISP (NEW,DELETE,DELETE) ")
-                .append("TEMPLATE SO UNIT SYSDA DSN (CHECK.SORTOUT.TEMP) DISP (NEW,DELETE,DELETE) ")
-                .append("TEMPLATE ER UNIT SYSDA DSN (CHECK.SYSERR.ERRORS) DISP (NEW,CATLG,CATLG) ")
-                .append("CHECK DATA TABLESPACE ").append(databaseTablespaceName).append(" INCLUDE XML TABLESPACES SCOPE ALL ERRDDN ER WORKDDN PU, SO;");
+    private Sql getCreateIndexSql(Sql statement) {
+        return new UnparsedSql(statement.toSql() + " DEFER YES", (DatabaseObject[]) statement.getAffectedDatabaseObjects().toArray(new DatabaseObject[statement.getAffectedDatabaseObjects().size()]));
     }
 
-    private void appendRunStatsSql(StringBuilder sql, String ownerIndexName) {
-        sql.append(" RUNSTATS INDEX(").append(ownerIndexName).append(")");
+    private Sql getRebuildIndex(String ownerIndexName) {
+        String sql = "call DSNUTILU('REBUILD', 'NO', 'REBUILD INDEX (" + ownerIndexName + ")', 1)";
+        return new CallableSql(sql, DSNUTIL_SUCCESS_STATUS);
+    }
+
+    private Sql getRunStatsSql(String ownerIndexName) {
+        String sql = "call DSNUTILU('STATS', 'NO', 'RUNSTATS INDEX(" + ownerIndexName + ")', 1)";
+        return new CallableSql(sql, DSNUTIL_SUCCESS_STATUS);
     }
 
     @Override
     protected String getObjectQuery() {
-        String sql = "SELECT indx.DBNAME, " +
-                "indx.NAME AS INDEX_NAME," +
+        String sql = "SELECT indx.NAME AS INDEX_NAME, " +
                 "indx.OWNER, " +
-                "indx.TBCREATOR AS TABLE_SCHEMA, " +
-                "sp.NAME AS TABLESPACE_NAME " +
-                "FROM SYSIBM.SYSTABLESPACE sp " +
+                "indx.TBCREATOR AS TABLE_SCHEMA " +
+                "FROM SYSIBM.SYSINDEXES indx " +
                 "INNER JOIN SYSIBM.SYSTABLES tb " +
-                "ON sp.DBNAME = tb.DBNAME " +
-                "AND tb.TSNAME = sp.NAME " +
-                "INNER JOIN SYSIBM.SYSINDEXES indx " +
-                "ON tb.NAME = indx.TBNAME " +
-                "WHERE tb.NAME = '" + statement.getTableName() + "'" +
-                "AND indx.NAME ='" + statement.getIndexName() + "'";
+                "ON indx.TBNAME = tb.NAME " +
+                "WHERE tb.NAME = '" + statement.getTableName() + "' " +
+                "AND indx.NAME ='" + statement.getIndexName() + "' ";
         if (statement.getTableSchemaName() != null) {
             sql += "AND indx.TBCREATOR= '" + statement.getTableSchemaName() + "'";
         }
