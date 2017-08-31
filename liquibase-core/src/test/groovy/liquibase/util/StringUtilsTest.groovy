@@ -150,4 +150,26 @@ class StringUtilsTest extends Specification {
         "abc "  | 5   | "  abc"
         " abc"  | 5   | "  abc"
     }
+
+    @Unroll
+    def "stripSqlCommentsFromTheEnd"() {
+        expect:
+        StringUtils.stripSqlCommentsAndWhitespacesFromTheEnd(input) == output
+
+        where:
+        input                                                                                                                                            | output
+        null                                                                                                                                             | null
+        ""                                                                                                                                               | ""
+        "   "                                                                                                                                            | ""
+        "no comments"                                                                                                                                    | "no comments"
+        "-- some comments"                                                                                                                               | ""
+        "   -- some comments   "                                                                                                                         | ""
+        "create table mtable; --some line comments"                                                                                                      | "create table mtable;"
+        "some txt; \n-- line cmt \n--another "                                                                                                           | "some txt;"
+        "some txt; \n-- line cmt \n--another \n /* and block\\/ */"                                                                                      | "some txt;"
+        "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;--last comment"                                                | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
+        "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;--last comment\n/*****another\nblock\n***/"                    | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
+        "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;\t--last comment\n\n\n\t--another\n/*****another\nblock\n***/" | "some txt; \n-- line cmt \n--another \n /* and block\\/ */\\t\n\ndefine something;"
+
+    }
 }
