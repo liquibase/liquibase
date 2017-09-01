@@ -194,17 +194,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
             outputGobbler.start();
 
             // check if timeout is specified
-            if (StringUtils.isEmpty(timeout)) {
-                returnCode = p.waitFor();
+            // can't use Process's new api with timeout, so just workaround it for now
+            long timeoutInMillis = getTimeoutInMillis();
+            if (timeoutInMillis > 0) {
+                returnCode = waitForOrKill(p, timeoutInMillis);
             } else {
-                // can't use Process's new api with timeout, so just workaround it for now
-                long timeoutInMillis = getTimeoutInMillis();
-                if (timeoutInMillis > 0) {
-                    returnCode = waitForOrKill(p, timeoutInMillis);
-                } else {
-                    // do default behavior for any value less than 0
-                    returnCode = p.waitFor();
-                }
+                // do default behavior for any value equal to or less than 0
+                returnCode = p.waitFor();
             }
 
             errorGobbler.finish();
@@ -262,7 +258,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     /**
      * @return the timeout value in millisecond
      */
-    private long getTimeoutInMillis() {
+    protected long getTimeoutInMillis() {
         if (timeout != null) {
             //Matcher matcher = TIMEOUT_PATTERN.matcher("10s");
             Matcher matcher = TIMEOUT_PATTERN.matcher(timeout);
