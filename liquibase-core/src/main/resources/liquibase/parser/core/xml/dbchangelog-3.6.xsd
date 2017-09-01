@@ -1051,6 +1051,7 @@
 			</xsd:sequence>
 			<xsd:attribute name="executable" type="xsd:string" use="required" />
 			<xsd:attribute name="os" type="xsd:string" />
+			<xsd:attribute name="timeout" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
