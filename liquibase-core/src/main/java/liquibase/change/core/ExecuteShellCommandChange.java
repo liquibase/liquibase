@@ -240,7 +240,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
         } catch (TimeoutException e) {
             // timed out, bail out
             process.destroy();
-            throw new TimeoutException("Process timed out (" + timeout + ")");
+            String timeoutStr = timeout != null ? timeout : timeoutInMillis + " ms";
+            throw new TimeoutException("Process timed out (" + timeoutStr + ")");
         }
 
         return ret;
