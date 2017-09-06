@@ -2,15 +2,10 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.DatabaseList;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.*;
-import liquibase.parser.core.ParsedNode;
-import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -22,7 +17,6 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +32,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String tableName;
     private String tablespace;
     private String remarks;
-    private Boolean replaceIfExists;
 
     public CreateTableChange() {
         super();
@@ -59,9 +52,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     validationErrors.addError("column 'name' is required for all columns");
                 }
             }
-        }
-        if (this.getReplaceIfExists() != null && !(database instanceof DB2Database && ((DB2Database) database).isZOS())) {
-            validationErrors.checkDisallowedField("replaceIfExists", this.getReplaceIfExists(), database);
         }
         return validationErrors;
     }
@@ -123,7 +113,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         }
 
         statement.setTablespace(StringUtils.trimToNull(getTablespace()));
-        statement.setReplaceIfExists(getReplaceIfExists());
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         statements.add(statement);
@@ -261,15 +250,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
-    }
-
-    @DatabaseChangeProperty
-    public Boolean getReplaceIfExists() {
-        return replaceIfExists;
-    }
-
-    public void setReplaceIfExists(Boolean replaceIfExists) {
-        this.replaceIfExists = replaceIfExists;
     }
 
     @Override
