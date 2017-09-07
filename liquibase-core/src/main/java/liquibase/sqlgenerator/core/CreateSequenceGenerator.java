@@ -44,7 +44,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
-        if (database instanceof HsqlDatabase || database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+        if (database instanceof HsqlDatabase || (database instanceof DB2Database && ((DB2Database) database).isZOS())) {
             buffer.append(" AS BIGINT ");
         }
         if (statement.getStartValue() != null) {
@@ -61,7 +61,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         }
 
         if (statement.getCacheSize() != null) {
-            if (database instanceof OracleDatabase || database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+            if (database instanceof OracleDatabase || (database instanceof DB2Database && ((DB2Database) database).isZOS())) {
                 if (BigInteger.ZERO.equals(statement.getCacheSize())) {
                     if (database instanceof OracleDatabase) {
                         buffer.append(" NOCACHE ");

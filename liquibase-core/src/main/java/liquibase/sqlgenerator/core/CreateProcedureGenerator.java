@@ -84,7 +84,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
                 procedureText = procedureText + ";";
             }
         }
-        if (((DB2Database) database).isZOS() & procedureText.toLowerCase().contains("replace")) {
+        if (database instanceof DB2Database && ((DB2Database) database).isZOS() & procedureText.toLowerCase().contains("replace")) {
             procedureText = procedureText.replace("OR REPLACE", "");
             procedureText = procedureText.replaceAll("[\\s]{2,}", " ");
         }
