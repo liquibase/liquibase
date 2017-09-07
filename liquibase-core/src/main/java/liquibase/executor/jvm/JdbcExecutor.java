@@ -1,7 +1,5 @@
 package liquibase.executor.jvm;
 
-import liquibase.change.Change;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
@@ -10,21 +8,17 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
-import liquibase.executor.Executor;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.sql.CallableSql;
 import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -114,7 +108,7 @@ public class JdbcExecutor extends AbstractExecutor {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return;
         }
-        if (sql instanceof ComplexStatement) {
+        if (sql instanceof CompoundStatement) {
             if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
                 executeDb2ZosComplexStatement(sql);
                 return;
