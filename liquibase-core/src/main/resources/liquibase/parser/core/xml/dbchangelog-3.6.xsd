@@ -1051,20 +1051,22 @@
 			</xsd:sequence>
 			<xsd:attribute name="executable" type="xsd:string" use="required" />
 			<xsd:attribute name="os" type="xsd:string" />
+			<xsd:attribute name="timeout" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="sqlFile">
-		<xsd:complexType>
-			<xsd:attribute name="path" type="xsd:string" use="required" />
-			<xsd:attribute name="stripComments" type="booleanExp" />
-			<xsd:attribute name="splitStatements" type="booleanExp" />
-			<xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
-			<xsd:attribute name="endDelimiter" type="xsd:string" />
-            <xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-            <xsd:attribute name="dbms" type="xsd:string" />
-		</xsd:complexType>
-	</xsd:element>
+    <xsd:complexType>
+      <xsd:attribute name="path" type="xsd:string" use="required" />
+      <xsd:attribute name="stripComments" type="booleanExp" />
+      <xsd:attribute name="splitStatements" type="booleanExp" />
+      <xsd:attribute name="encoding" type="xsd:string" default="UTF-8"/>
+      <xsd:attribute name="endDelimiter" type="xsd:string" />
+      <xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
+      <xsd:attribute name="dbms" type="xsd:string" />
+      <xsd:anyAttribute namespace="##other" processContents="lax"/>
+    </xsd:complexType>
+  </xsd:element>
 
 	<xsd:element name="tagDatabase">
 		<xsd:complexType>
