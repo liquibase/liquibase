@@ -289,8 +289,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             });
         }
 
-        public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
-            return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
+        public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException, SQLException {
+            List<CachedRow> indexes =  getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
                 public boolean bulkFetch = false;
 
@@ -430,6 +430,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return false;
                 }
             });
+
+            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                filterDB2ZosGeneratedIndexes(indexes);
+            }
+            return indexes;
+        }
+
+        private void filterDB2ZosGeneratedIndexes(List<CachedRow> indexes) throws SQLException {
+            Iterator<CachedRow> iterator = indexes.iterator();
+            while (iterator.hasNext()) {
+                String nextElement = iterator.next().getString("INDEX_NAME");
+                if (nextElement != null && nextElement.contains("_#_")) {
+                    iterator.remove();
+                }
+            }
         }
 
         protected void warnAboutDbaRecycleBin() {
