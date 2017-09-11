@@ -49,7 +49,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         } else if (database instanceof SybaseDatabase) {
             return new Sql[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName(), getAffectedIndex(statement))};
         } else if (database instanceof SybaseASADatabase) {
-            return new Sql[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName(), getAffectedIndex(statement))};
+            return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName()) + "." + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName()), getAffectedIndex(statement))};
         } else if (database instanceof PostgresDatabase) {
             return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName()), getAffectedIndex(statement))};
         }
