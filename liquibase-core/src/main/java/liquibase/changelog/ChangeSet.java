@@ -124,6 +124,13 @@ public class ChangeSet implements Conditional, ChangeLogChild {
     private Labels labels;
 
     /**
+     *
+     * If set to true, the changeSet will be ignored (skipped)
+     *
+     */
+    private boolean ignore;
+
+    /**
      * Databases for which this changeset should run.  The string values should match the value returned from Database.getShortName()
      */
     private Set<String> dbmsSet;
@@ -276,6 +283,7 @@ public class ChangeSet implements Conditional, ChangeLogChild {
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
         this.created = node.getChildValue(null, "created", String.class);
         this.runOrder = node.getChildValue(null, "runOrder", String.class);
+        this.ignore = node.getChildValue(null, "ignore", false);
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
@@ -746,6 +754,14 @@ public class ChangeSet implements Conditional, ChangeLogChild {
 
     public Set<String> getDbmsSet() {
         return dbmsSet;
+    }
+
+    public boolean isIgnore() {
+        return ignore;
+    }
+
+    public void setIgnore(boolean ignore) {
+      this.ignore = ignore;
     }
 
     public Collection<ContextExpression> getInheritableContexts() {
