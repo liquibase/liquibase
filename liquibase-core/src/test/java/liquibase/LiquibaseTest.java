@@ -110,7 +110,7 @@ public class LiquibaseTest {
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
-        Liquibase liquibase = new Liquibase("com/example/test.xml", resourceAccessor, database);
+        Liquibase liquibase = new Liquibase("com/example/test.xml", resourceAccessor, database, false);
 
         assertNotNull(liquibase.getLog());
 
@@ -127,13 +127,13 @@ public class LiquibaseTest {
 
     @Test
     public void constructor_changelogPathsStandardize() throws Exception {
-        Liquibase liquibase = new Liquibase("path\\with\\windows\\separators.xml", mockResourceAccessor, new MockDatabase());
+        Liquibase liquibase = new Liquibase("path\\with\\windows\\separators.xml", mockResourceAccessor, new MockDatabase(), false);
         assertEquals("path/with/windows/separators.xml", liquibase.getChangeLogFile());
 
-        liquibase = new Liquibase("path/with/unix/separators.xml", mockResourceAccessor, new MockDatabase());
+        liquibase = new Liquibase("path/with/unix/separators.xml", mockResourceAccessor, new MockDatabase(), false);
         assertEquals("path/with/unix/separators.xml", liquibase.getChangeLogFile());
 
-        liquibase = new Liquibase("/absolute/path/remains.xml", mockResourceAccessor, new MockDatabase());
+        liquibase = new Liquibase("/absolute/path/remains.xml", mockResourceAccessor, new MockDatabase(), false);
         assertEquals("/absolute/path/remains.xml", liquibase.getChangeLogFile());
     }
 
@@ -146,7 +146,7 @@ public class LiquibaseTest {
             DatabaseFactory.setInstance(mock(DatabaseFactory.class));
             when(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(databaseConnection)).thenReturn(database);
 
-            Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, databaseConnection);
+            Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, databaseConnection, false);
             assertSame("Liquibase constructor passing connection did not find the correct database implementation", database, liquibase.getDatabase());
 
         } finally {
@@ -156,7 +156,7 @@ public class LiquibaseTest {
 
     @Test
     public void getFileOpener() throws LiquibaseException {
-        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
+        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase, false);
         assertSame(liquibase.getResourceAccessor(), liquibase.getFileOpener());
     }
 
@@ -165,7 +165,7 @@ public class LiquibaseTest {
         Database database = mockDatabase;
         String testFunction = "GetMyTime";
 
-        new Liquibase("com/example/test.xml", mockResourceAccessor, database).setCurrentDateTimeFunction(testFunction);
+        new Liquibase("com/example/test.xml", mockResourceAccessor, database, false).setCurrentDateTimeFunction(testFunction);
         verify(database).setCurrentDateTimeFunction(testFunction);
     }
 
@@ -250,7 +250,7 @@ public class LiquibaseTest {
 
         doThrow(LockException.class).when(mockLockService).waitForLock();
 
-        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
+        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase, false);
         try {
             liquibase.update((Contexts) null);
         } finally {
@@ -263,7 +263,7 @@ public class LiquibaseTest {
     public void update_exceptionDoingUpdate() throws LiquibaseException {
         Contexts contexts = new Contexts("a,b");
 
-        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
+        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase, false);
 
         doThrow(ChangeLogParseException.class).when(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
 
@@ -288,7 +288,7 @@ public class LiquibaseTest {
 
     @Test
     public void getStandardChangelogIterator() throws LiquibaseException {
-        ChangeLogIterator iterator = new Liquibase("com/example/changelog.xml", mockResourceAccessor, mockDatabase).getStandardChangelogIterator(new Contexts("a", "b"), new LabelExpression("x", "y"), mockChangeLog);
+        ChangeLogIterator iterator = new Liquibase("com/example/changelog.xml", mockResourceAccessor, mockDatabase, false).getStandardChangelogIterator(new Contexts("a", "b"), new LabelExpression("x", "y"), mockChangeLog);
         assertListsEqual(new Class[] {ShouldRunChangeSetFilter.class,
                 ContextChangeSetFilter.class,
                 LabelChangeSetFilter.class,
@@ -437,7 +437,7 @@ public class LiquibaseTest {
         protected Map<String, Object> objectsToVerify = new HashMap<String, Object>();
 
         private LiquibaseDelegate() throws LiquibaseException {
-            super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));
+            super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class), false);
         }
 
         /**

@@ -5,10 +5,12 @@ import liquibase.command.CommandExecutionException;
 import liquibase.command.DiffCommand;
 import liquibase.command.DiffToChangeLogCommand;
 import liquibase.command.GenerateChangeLogCommand;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.*;
+import liquibase.database.sqlplus.SqlPlusConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
@@ -92,7 +94,7 @@ public class CommandLineUtils {
                     liquibaseCatalogName = liquibaseSchemaName;
                 }
             }
-            
+
             defaultCatalogName = StringUtils.trimToNull(defaultCatalogName);
             defaultSchemaName = StringUtils.trimToNull(defaultSchemaName);
 
@@ -113,6 +115,9 @@ public class CommandLineUtils {
             
             //Todo: move to database object methods in 4.0
             initializeDatabase(username, defaultCatalogName, defaultSchemaName, database);
+            //Todo: необходимо переделать интерфейс Database для более изящной реализации
+            if (database instanceof AbstractJdbcDatabase)
+                ((AbstractJdbcDatabase) database).setSqlPlusConnection(new SqlPlusConnection(url,username,password));
 
 //            ValidationErrors errors = database.validate();
 //            if (errors.hasErrors()) {

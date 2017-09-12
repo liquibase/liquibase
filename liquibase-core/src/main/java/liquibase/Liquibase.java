@@ -16,10 +16,7 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.ObjectQuotingStrategy;
+import liquibase.database.*;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffGeneratorFactory;
@@ -73,16 +70,20 @@ public class Liquibase {
 
     private boolean ignoreClasspathPrefix = true;
 
+    //Учим Liquibase работать с SQLPlus
+    private boolean isSqlPlus;
+    private boolean isManual;
+
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
      * @See DatabaseConnection
      * @See Database
-     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database)
+     * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database, boolean)
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
-        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn, boolean isSqlPlus) throws LiquibaseException {
+        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn), isSqlPlus);
     }
 
     /**
@@ -93,7 +94,7 @@ public class Liquibase {
      * @See Database
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database, boolean isSqlPlus) throws LiquibaseException {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
@@ -103,6 +104,8 @@ public class Liquibase {
         this.resourceAccessor = resourceAccessor;
         this.changeLogParameters = new ChangeLogParameters(database);
         this.database = database;
+        this.isSqlPlus = isSqlPlus;
+        log.debug("Setting parameter isSqlPlus: "+this.isSqlPlus);
     }
 
     public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
@@ -194,13 +197,19 @@ public class Liquibase {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
-
+        log.debug("=======!FORKED Liquibase!=======");
+        log.debug("Database instance: "+database.getClass());
+        if (database instanceof AbstractJdbcDatabase){
+            log.debug("SQLPLUS Support: "+((AbstractJdbcDatabase) database).getSqlPlusConnection());
+        }
+        else log.debug("SQLPLUS Support: None");
+        log.debug("================================");
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
         try {
             DatabaseChangeLog changeLog = getDatabaseChangeLog();
-            
+
             if (checkLiquibaseTables) {
                 checkLiquibaseTables(true, changeLog, contexts, labelExpression);
             }
@@ -255,10 +264,10 @@ public class Liquibase {
     }
 
     public void update(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
-        update(contexts, labelExpression, output, true);	
+        update(contexts, labelExpression, output, true);
     }
-    
-    public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables) 
+
+    public void update(Contexts contexts, LabelExpression labelExpression, Writer output, boolean checkLiquibaseTables)
     		throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -873,12 +882,12 @@ public class Liquibase {
     public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
         futureRollbackSQL(null, contexts, output, true);
     }
-    
+
     public void futureRollbackSQL(Writer output) throws LiquibaseException {
         futureRollbackSQL(null, null, new Contexts(), new LabelExpression(), output);
     }
 
-    public void futureRollbackSQL(String contexts, Writer output, boolean checkLiquibaseTables) 
+    public void futureRollbackSQL(String contexts, Writer output, boolean checkLiquibaseTables)
            throws LiquibaseException {
         futureRollbackSQL(null, contexts, output, checkLiquibaseTables);
     }
@@ -886,12 +895,12 @@ public class Liquibase {
     public void futureRollbackSQL(Integer count, String contexts, Writer output) throws LiquibaseException {
         futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, true);
     }
-    
+
     public void futureRollbackSQL(Contexts contexts, LabelExpression labelExpression, Writer output) throws LiquibaseException {
         futureRollbackSQL(null, null, contexts, labelExpression, output);
     }
 
-    public void futureRollbackSQL(Integer count, String contexts, Writer output, boolean checkLiquibaseTables) 
+    public void futureRollbackSQL(Integer count, String contexts, Writer output, boolean checkLiquibaseTables)
            throws LiquibaseException {
         futureRollbackSQL(count, new Contexts(contexts), new LabelExpression(), output, checkLiquibaseTables);
     }
@@ -1410,7 +1419,7 @@ public class Liquibase {
      * @param database Database which propeties are put in the changelog
      * @throws DatabaseException
      */
-    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
+    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {
             setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
             setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
             setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
@@ -1488,5 +1497,20 @@ public class Liquibase {
         }
     }
 
+    public boolean isSqlPlus() {
+        return isSqlPlus;
+    }
+
+    public void setSqlPlus(boolean sqlPlus) {
+        isSqlPlus = sqlPlus;
+    }
+
+    public boolean isManual() {
+        return isManual;
+    }
+
+    public void setManual(boolean manual) {
+        isManual = manual;
+    }
 }
 

@@ -48,6 +48,9 @@ import java.util.jar.JarFile;
 public class Main {
     protected ClassLoader classLoader;
 
+    protected boolean isSqlPlus = false;
+    protected boolean isManual;
+
     protected String driver;
     protected String username;
     protected String password;
@@ -732,6 +735,8 @@ public class Main {
                     commandParams.add(arg);
                 }
             } else if (arg.startsWith("--")) {
+                if (arg.equals("--sqlplus"))
+                    isSqlPlus = true;
                 String[] splitArg = splitArg(arg);
 
                 String attributeName = splitArg[0];
@@ -1041,7 +1046,7 @@ public class Main {
             }
 
 
-            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database, isSqlPlus);
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);

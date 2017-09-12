@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
+import liquibase.database.sqlplus.SqlPlusConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;

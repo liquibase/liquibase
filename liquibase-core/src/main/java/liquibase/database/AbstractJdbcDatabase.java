@@ -9,6 +9,7 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.sqlplus.SqlPlusConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -56,6 +57,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
     private final static int FETCH_SIZE = 1000;
+    SqlPlusConnection sqlPlusConnection;
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -126,6 +128,14 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     // ------- DATABASE INFORMATION METHODS ---- //
+
+    public void setSqlPlusConnection(SqlPlusConnection sqlPlusConnection){
+        this.sqlPlusConnection = sqlPlusConnection;
+    }
+
+    public String getSqlPlusConnection(){
+        return sqlPlusConnection.getConnectionAsString();
+    }
 
     @Override
     public DatabaseConnection getConnection() {
@@ -488,7 +498,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected boolean isDateTime(final String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
     }
-    
+
     protected boolean isTimestamp(final String isoDate) {
         return isoDate.length() >= "yyyy-MM-ddThh:mm:ss.SSS".length();
     }
@@ -1296,9 +1306,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void executeRollbackStatements(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
         execute(statements, filterRollbackVisitors(sqlVisitors));
     }
-    
+
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {        
+    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
         final SqlStatement[] statements = change.generateRollbackStatements(this);
         executeRollbackStatements(statements, sqlVisitors);
     }
@@ -1325,10 +1335,10 @@ public abstract class AbstractJdbcDatabase implements Database {
                }
             }
         }
-        
+
         return rollbackVisitors;
     }
-    
+
     @Override
     public List<DatabaseFunction> getDateFunctions() {
         return dateFunctions;
