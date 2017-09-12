@@ -129,6 +129,7 @@ public class CommandLineUtils {
 //            }
             return database;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new DatabaseException(e);
         }
     }

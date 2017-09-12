@@ -18,8 +18,8 @@ public class SqlPlusConnection {
         this.url = url;
         this.username = username;
         this.password = password;
-        ;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("sqlplus/init.sql")));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("sqlplus/init.sql")));
         StringBuilder initSQL = new StringBuilder();
         String line;
         try {
