@@ -1,14 +1,26 @@
 package liquibase.serializer.core.string;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
+import org.apache.commons.io.IOUtils;
+
 import liquibase.changelog.ChangeLogChild;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
-
-import java.io.*;
-import java.util.*;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
 
@@ -58,6 +70,10 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                             values.add(indent(indent) + field + "=" + serializeObject((Collection) value, indent + 1));
                         } else if (value instanceof Object[]) {
                             values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
+                        } else if (value instanceof SerialClob) {
+                            values.add(indent(indent) + field + "=\"md5sum:" + MD5Util.computeMD5(IOUtils.toString(((SerialClob)value).getCharacterStream())) + "\"");
+                        } else if (value instanceof SerialBlob) {
+                            values.add(indent(indent) + field + "=\"md5sum:" + MD5Util.computeMD5(((SerialBlob)value).getBinaryStream()) + "\"");
                         } else {
                             String valueString = value.toString();
                             if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
