@@ -253,17 +253,18 @@
 		<xsd:attribute name="id" type="xsd:string" use="required" />
 		<xsd:attribute name="author" type="xsd:string" use="required" />
 		<xsd:attribute name="context" type="xsd:string" />
-        <xsd:attribute name="labels" type="xsd:string" />
+    <xsd:attribute name="labels" type="xsd:string" />
 		<xsd:attribute name="dbms" type="xsd:string" />
 		<xsd:attribute name="runOnChange" type="booleanExp" />
 		<xsd:attribute name="runAlways" type="booleanExp" />
 		<xsd:attribute name="failOnError" type="booleanExp" />
-        <xsd:attribute name="onValidationFail" type="onChangeSetValidationFail" />
+    <xsd:attribute name="onValidationFail" type="onChangeSetValidationFail" />
 		<xsd:attribute name="runInTransaction" type="booleanExp" default="true" />
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
-        <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
-        <xsd:attribute name="created" type="xsd:string"/>
+    <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
+    <xsd:attribute name="created" type="xsd:string"/>
 		<xsd:attribute name="runOrder" type="xsd:string"/>
+    <xsd:attribute name="ignore" type="booleanExp" />
 	</xsd:attributeGroup>
 
 	<!-- Attributes for constraints -->

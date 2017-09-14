@@ -247,7 +247,8 @@ public class Liquibase {
                 new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
                 new ContextChangeSetFilter(contexts),
                 new LabelChangeSetFilter(labelExpression),
-                new DbmsChangeSetFilter(database));
+                new DbmsChangeSetFilter(database),
+                new IgnoreChangeSetFilter());
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
