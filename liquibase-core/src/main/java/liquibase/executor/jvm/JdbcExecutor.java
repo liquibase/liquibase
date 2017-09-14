@@ -18,6 +18,7 @@ import liquibase.statement.*;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+import sqlplus.context.SqlPlusContext;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -100,11 +101,13 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if(sql instanceof ExecutablePreparedStatement) {
+            if (SqlPlusContext.getInstance().isSqlplus())
+            log.debug("FORK! EXECUTABLE SQL: "+sql);
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return;
         }
 
-        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
+            execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
     }
 
 

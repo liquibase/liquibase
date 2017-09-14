@@ -68,7 +68,7 @@ public abstract class BaseLiquibaseTask extends Task {
         try {
             ResourceAccessor resourceAccessor = createResourceAccessor(classLoader);
             database = createDatabaseFromType(databaseType);
-            liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database, false);
+            liquibase = new Liquibase(getChangeLogFile(), resourceAccessor, database);
             if(changeLogParameters != null) {
                 changeLogParameters.applyParameters(liquibase);
             }

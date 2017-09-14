@@ -9,7 +9,6 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.sqlplus.SqlPlusConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
@@ -20,6 +19,7 @@ import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -31,12 +31,15 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import sqlplus.context.SqlPlusContext;
+import sqlplus.runner.SQLPlusRunner;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -55,9 +58,10 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractJdbcDatabase implements Database {
 
+    private Logger log = LogFactory.getLogger();
+
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
     private final static int FETCH_SIZE = 1000;
-    SqlPlusConnection sqlPlusConnection;
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -128,14 +132,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     // ------- DATABASE INFORMATION METHODS ---- //
-
-    public void setSqlPlusConnection(SqlPlusConnection sqlPlusConnection){
-        this.sqlPlusConnection = sqlPlusConnection;
-    }
-
-    public String getSqlPlusConnection(){
-        return sqlPlusConnection.getConnectionAsString();
-    }
 
     @Override
     public DatabaseConnection getConnection() {
@@ -322,8 +318,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Overwrite this method to get the default schema name for the connection.
      * If you only need to change the statement that obtains the current schema then override
-     *  @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
+     *
      * @return
+     * @see AbstractJdbcDatabase#getConnectionSchemaNameCallStatement()
      */
     protected String getConnectionSchemaName() {
         if (connection == null || connection instanceof OfflineConnection) {
@@ -332,7 +329,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             String currentSchemaStatement = getConnectionSchemaNameCallStatement();
             return ExecutorService.getInstance().getExecutor(this).
-            		queryForObject(new RawCallStatement(currentSchemaStatement), String.class);
+                    queryForObject(new RawCallStatement(currentSchemaStatement), String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -343,10 +340,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Used to obtain the connection schema name through a statement
      * Override this method to change the statement.
      * Only override this if getConnectionSchemaName is left unchanges or is using this method.
-     * @see AbstractJdbcDatabase#getConnectionSchemaName()
+     *
      * @return
+     * @see AbstractJdbcDatabase#getConnectionSchemaName()
      */
-    protected String getConnectionSchemaNameCallStatement(){
+    protected String getConnectionSchemaNameCallStatement() {
         return "call current_schema";
     }
 
@@ -702,21 +700,21 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean isCaseSensitive() {
-    	if (caseSensitive == null) {
+        if (caseSensitive == null) {
             if (connection != null && connection instanceof JdbcConnection) {
                 try {
-                	caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
+                    caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
                     LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
             }
         }
 
-    	if (caseSensitive == null) {
+        if (caseSensitive == null) {
             return false;
-    	} else {
-    		return caseSensitive.booleanValue();
-    	}
+        } else {
+            return caseSensitive.booleanValue();
+        }
     }
 
     public void setCaseSensitive(Boolean caseSensitive) {
@@ -747,31 +745,31 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             DatabaseSnapshot snapshot;
             try {
-	            final SnapshotControl snapshotControl = new SnapshotControl(this);
-	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+                final SnapshotControl snapshotControl = new SnapshotControl(this);
+                final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
 
-	            //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
-	            //as part of tables.
-	            typesToInclude.remove(Index.class);
-	            typesToInclude.remove(PrimaryKey.class);
-	            typesToInclude.remove(UniqueConstraint.class);
+                //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+                //as part of tables.
+                typesToInclude.remove(Index.class);
+                typesToInclude.remove(PrimaryKey.class);
+                typesToInclude.remove(UniqueConstraint.class);
 
-	            if (supportsForeignKeyDisable()) {
-		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
-		            typesToInclude.remove(ForeignKey.class);
-	            }
+                if (supportsForeignKeyDisable()) {
+                    //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+                    typesToInclude.remove(ForeignKey.class);
+                }
 
-	            final long createSnapshotStarted = System.currentTimeMillis();
-	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+                final long createSnapshotStarted = System.currentTimeMillis();
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+                LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-	        final long changeSetStarted = System.currentTimeMillis();
-	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+            final long changeSetStarted = System.currentTimeMillis();
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false, null).addIncludedSchema(schemaToDrop)).generateChangeSets();
-	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+            LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             boolean previousAutoCommit = this.getAutoCommitMode();
             this.commit(); //clear out currently executed statements
@@ -1243,7 +1241,6 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
      *
      * @throws liquibase.exception.DatabaseException
-     *
      */
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
@@ -1260,9 +1257,14 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(this);
-
-        execute(statements, sqlVisitors);
+        if (SqlPlusContext.getInstance().isSqlplus()) {
+            //Катим ченджсет одним скриптом
+            SQLPlusRunner.makeChangeSetFile(change, this);
+            log.debug("FORK! SUCCESS!!!");
+        } else {
+            SqlStatement[] statements = change.generateStatements(this);
+            execute(statements, sqlVisitors);
+        }
     }
 
     /*
@@ -1283,7 +1285,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
             } catch (DatabaseException e) {
                 if (statement.continueOnError()) {
-                    LogFactory.getLogger().severe("Error executing statement '"+statement.toString()+"', but continuing", e);
+                    LogFactory.getLogger().severe("Error executing statement '" + statement.toString() + "', but continuing", e);
                 } else {
                     throw e;
                 }
@@ -1330,9 +1332,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         final List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
         if (visitors != null) {
             for (SqlVisitor visitor : visitors) {
-               if (visitor.isApplyToRollback()) {
-                   rollbackVisitors.add(visitor);
-               }
+                if (visitor.isApplyToRollback()) {
+                    rollbackVisitors.add(visitor);
+                }
             }
         }
 
@@ -1479,11 +1481,11 @@ public abstract class AbstractJdbcDatabase implements Database {
         return currentDateTimeFunction;
     }
 
- 	@Override
+    @Override
     public void setOutputDefaultSchema(final boolean outputDefaultSchema) {
-		this.outputDefaultSchema = outputDefaultSchema;
+        this.outputDefaultSchema = outputDefaultSchema;
 
- 	}
+    }
 
     @Override
     public boolean isDefaultSchema(final String catalog, final String schema) {
@@ -1507,10 +1509,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     }
 
- 	@Override
+    @Override
     public boolean getOutputDefaultSchema() {
- 		return outputDefaultSchema;
- 	}
+        return outputDefaultSchema;
+    }
 
     @Override
     public boolean getOutputDefaultCatalog() {
@@ -1528,8 +1530,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-	public String getSystemSchema(){
-    	return "information_schema";
+    public String getSystemSchema() {
+        return "information_schema";
     }
 
     @Override

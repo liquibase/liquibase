@@ -223,7 +223,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultSchemaName(getDefaultSchema());
-            Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database, false);
+            Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
 
             @SuppressWarnings("unchecked")
             Enumeration<String> initParameters = servletContext.getInitParameterNames();

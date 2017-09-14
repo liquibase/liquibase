@@ -11,6 +11,7 @@ import liquibase.command.SnapshotCommand;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
+import liquibase.database.sqlplus.SqlPlusConnection;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.StandardObjectChangeFilter;
@@ -30,6 +31,7 @@ import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.changelog.visitor.ChangeExecListener;
+import sqlplus.context.SqlPlusContext;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -47,9 +49,6 @@ import java.util.jar.JarFile;
  */
 public class Main {
     protected ClassLoader classLoader;
-
-    protected boolean isSqlPlus = false;
-    protected boolean isManual;
 
     protected String driver;
     protected String username;
@@ -76,6 +75,8 @@ public class Main {
     protected Boolean includeSystemClasspath;
     protected Boolean strict = Boolean.TRUE;
     protected String defaultsFile = "liquibase.properties";
+    protected Boolean sqlplus = false;
+    protected Boolean manual = false;
 
     protected String diffTypes;
     protected String changeSetAuthor;
@@ -181,6 +182,7 @@ public class Main {
                 main.printHelp(setupMessages, System.err);
                 return;
             }
+
 
             main.applyDefaults();
             main.configureClassLoader();
@@ -735,12 +737,10 @@ public class Main {
                     commandParams.add(arg);
                 }
             } else if (arg.startsWith("--")) {
-                if (arg.equals("--sqlplus"))
-                    isSqlPlus = true;
                 String[] splitArg = splitArg(arg);
 
                 String attributeName = splitArg[0];
-                String value = splitArg[1];
+                String value = splitArg.length>1 ? splitArg[1] : null;
 
                 if (StringUtils.trimToEmpty(value).equalsIgnoreCase("PROMPT")) {
                     Console c = System.console();
@@ -758,6 +758,10 @@ public class Main {
                 try {
                     Field field = getClass().getDeclaredField(attributeName);
                     if (field.getType().equals(Boolean.class)) {
+                        if (attributeName.equals("sqlplus") || attributeName.equals("manual")) {
+                            field.set(this, true);
+                            SqlPlusContext.getInstance().setBooleanFieldValue(attributeName);
+                        }
                         field.set(this, Boolean.valueOf(value));
                     } else {
                         field.set(this, value);
@@ -780,7 +784,7 @@ public class Main {
 
     private String[] splitArg(String arg) throws CommandLineParsingException {
         String[] splitArg = arg.split("=", 2);
-        if (splitArg.length < 2) {
+        if (splitArg.length < 2 && !splitArg[0].equals("--sqlplus")) {
             throw new CommandLineParsingException("Could not parse '" + arg + "'");
         }
 
@@ -956,6 +960,8 @@ public class Main {
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
+        SqlPlusContext.getInstance().initSqlPlusConnection(new SqlPlusConnection(this.url, this.username, this.password));
+
         Database database = CommandLineUtils.createDatabaseObject(fileOpener, this.url,
                 this.username, this.password, this.driver, this.defaultCatalogName, this.defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.propertyProviderClass, this.liquibaseCatalogName, this.liquibaseSchemaName,
                 this.databaseChangeLogTableName, this.databaseChangeLogLockTableName);
@@ -1046,7 +1052,7 @@ public class Main {
             }
 
 
-            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database, isSqlPlus);
+            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             ChangeExecListener listener = ChangeExecListenerUtils.getChangeExecListener(
                     liquibase.getDatabase(), liquibase.getResourceAccessor(),
                     changeExecListenerClass, changeExecListenerPropertiesFile);

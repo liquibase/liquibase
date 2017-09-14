@@ -424,7 +424,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
         try {
-            return new Liquibase("", fo, db, false);
+            return new Liquibase("", fo, db);
         } catch (LiquibaseException ex) {
             throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(),ex);
         }

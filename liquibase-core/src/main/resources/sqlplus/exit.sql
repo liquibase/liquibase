@@ -1,0 +1,3 @@
+set echo off
+exit
+/

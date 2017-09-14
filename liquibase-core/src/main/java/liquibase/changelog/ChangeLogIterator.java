@@ -12,6 +12,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.util.CollectionUtil;
 import liquibase.util.StringUtils;
+import sqlplus.context.SqlPlusContext;
 
 import java.util.*;
 
@@ -49,6 +50,7 @@ public class ChangeLogIterator {
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
         Logger log = LogFactory.getLogger();
+        log.debug("FORK!"+ SqlPlusContext.getInstance().getConnection());
         databaseChangeLog.setRuntimeEnvironment(env);
         log.setChangeLog(databaseChangeLog);
         try {

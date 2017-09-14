@@ -50,6 +50,7 @@ import liquibase.structure.core.Catalog;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import sqlplus.context.SqlPlusContext;
 
 /**
  * Primary facade class for interacting with Liquibase.
@@ -61,6 +62,9 @@ public class Liquibase {
     private String changeLogFile;
     private ResourceAccessor resourceAccessor;
 
+    boolean isSqlPlus = false;
+    boolean isManual = false;
+
     protected Database database;
     private Logger log;
 
@@ -70,10 +74,6 @@ public class Liquibase {
 
     private boolean ignoreClasspathPrefix = true;
 
-    //Учим Liquibase работать с SQLPlus
-    private boolean isSqlPlus;
-    private boolean isManual;
-
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
      *
@@ -82,8 +82,8 @@ public class Liquibase {
      * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database, boolean)
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn, boolean isSqlPlus) throws LiquibaseException {
-        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn), isSqlPlus);
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
+        this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
     }
 
     /**
@@ -94,7 +94,7 @@ public class Liquibase {
      * @See Database
      * @see ResourceAccessor
      */
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database, boolean isSqlPlus) throws LiquibaseException {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
@@ -104,8 +104,6 @@ public class Liquibase {
         this.resourceAccessor = resourceAccessor;
         this.changeLogParameters = new ChangeLogParameters(database);
         this.database = database;
-        this.isSqlPlus = isSqlPlus;
-        log.debug("Setting parameter isSqlPlus: "+this.isSqlPlus);
     }
 
     public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
@@ -197,13 +195,12 @@ public class Liquibase {
     public void update(Contexts contexts, LabelExpression labelExpression, boolean checkLiquibaseTables) throws LiquibaseException {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
-        log.debug("=======!FORKED Liquibase!=======");
-        log.debug("Database instance: "+database.getClass());
-        if (database instanceof AbstractJdbcDatabase){
-            log.debug("SQLPLUS Support: "+((AbstractJdbcDatabase) database).getSqlPlusConnection());
-        }
-        else log.debug("SQLPLUS Support: None");
-        log.debug("================================");
+
+        isSqlPlus = SqlPlusContext.getInstance().isSqlplus();
+        isManual = SqlPlusContext.getInstance().isManual();
+        log.debug("FORK! Checking SQLPLUS support: "+isSqlPlus);
+        log.debug("FORK! Checking MANUAL support: "+isManual);
+
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
 
@@ -1495,22 +1492,6 @@ public class Liquibase {
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-    }
-
-    public boolean isSqlPlus() {
-        return isSqlPlus;
-    }
-
-    public void setSqlPlus(boolean sqlPlus) {
-        isSqlPlus = sqlPlus;
-    }
-
-    public boolean isManual() {
-        return isManual;
-    }
-
-    public void setManual(boolean manual) {
-        isManual = manual;
     }
 }
 
