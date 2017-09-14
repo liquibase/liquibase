@@ -50,7 +50,6 @@ public class ChangeLogIterator {
 
     public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
         Logger log = LogFactory.getLogger();
-        log.debug("FORK!"+ SqlPlusContext.getInstance().getConnection());
         databaseChangeLog.setRuntimeEnvironment(env);
         log.setChangeLog(databaseChangeLog);
         try {

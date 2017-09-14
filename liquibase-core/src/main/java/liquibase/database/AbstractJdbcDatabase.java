@@ -1259,8 +1259,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         if (SqlPlusContext.getInstance().isSqlplus()) {
             //Катим ченджсет одним скриптом
-            SQLPlusRunner.makeChangeSetFile(change, this);
-            log.debug("FORK! SUCCESS!!!");
+            String pathToTempFile = SQLPlusRunner.makeChangeSetFile(change, this);
+            try {
+                SQLPlusRunner.run(pathToTempFile);
+            } catch (SqlPlusException e) {
+                throw new LiquibaseException(e);
+            }
         } else {
             SqlStatement[] statements = change.generateStatements(this);
             execute(statements, sqlVisitors);
