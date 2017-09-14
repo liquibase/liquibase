@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Created by sbt-gette-is on 12.09.2017.
+ * @author gette
  */
 public class SqlPlusConnection {
-    // sqlplus "user/pass@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=hostname.network)(Port=1521))(CONNECT_DATA=(SID=remote_SID)))"
     private String url;
     private String username;
     private String password;

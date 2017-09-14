@@ -101,8 +101,6 @@ public class JdbcExecutor extends AbstractExecutor {
     @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if(sql instanceof ExecutablePreparedStatement) {
-            if (SqlPlusContext.getInstance().isSqlplus())
-            log.debug("FORK! EXECUTABLE SQL: "+sql);
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return;
         }

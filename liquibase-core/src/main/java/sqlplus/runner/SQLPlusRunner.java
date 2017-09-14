@@ -1,7 +1,6 @@
 package sqlplus.runner;
 
 import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.SqlPlusException;
 import liquibase.logging.LogFactory;
@@ -14,13 +13,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Created by sbt-gette-is on 12.09.2017.
+ * @author gette
  */
 public class SQLPlusRunner {
     private static Logger log = LogFactory.getLogger();
 
     public static void run(String pathToFile) throws SqlPlusException {
-        log.debug("FORK! SQLPlusRunner funktioniert!");
+        log.debug("SQLPlusRunner has been initialized.");
         try {
             Process notepad = new ProcessBuilder("notepad", pathToFile).start();
             notepad.waitFor();
@@ -37,11 +36,11 @@ public class SQLPlusRunner {
     public static void executeSQLPlus(String pathToFile) throws IOException, SqlPlusException, InterruptedException {
         try {
             int err = 0;
-            log.debug("ЗАПУСК!");
-            //Process sqlplus = new ProcessBuilder("sqlplus " + SqlPlusContext.getInstance().getConnection() + "@" + pathToFile).start();
-            log.debug("FULL CMD:" + "cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
+            log.debug("Launching SQLPLUS.");
+
+            log.debug("Command:" + "cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
             Process sqlplus = Runtime.getRuntime().exec("cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
-            //Process sqlplus = Runtime.getRuntime().exec("sqlplus");
+
             // copy input and error to the output stream
             StreamPumper inputPumper =
                     new StreamPumper(sqlplus.getInputStream());
@@ -61,11 +60,10 @@ public class SQLPlusRunner {
             // check its exit value
             err = sqlplus.exitValue();
             if (err == 0) {
-                System.out.println("================================================");
-                System.out.println("Конвертация закончена успешно: " + err);
+               log.debug("SQLPlusRunner. Successful Execution");
             } else {
-                throw new SqlPlusException("Получен код выполнения, отличный от нуля. Код выполнения: " + err);
-                //TODO опрос, что делать дальше
+                Thread.sleep(1000);
+                throw new SqlPlusException("Something went wrong with SQLPLUS" + err);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,8 +85,7 @@ public class SQLPlusRunner {
             sqlplus = sqlplus.concat(statement.toString() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator"));
         }
         sqlplus = sqlplus.concat(SqlPlusContext.getInstance().getConnection().getExitSQL());
-        log.debug("SQLPLUS Script: " + sqlplus);
-        ChangeSet changeSet = change.getChangeSet();
+
 //        String fileName = changeSet.getId().concat(changeSet.getAuthor()).concat(".sql");
 //        boolean flag = true;
 //        while (flag) {

@@ -198,8 +198,6 @@ public class Liquibase {
 
         isSqlPlus = SqlPlusContext.getInstance().isSqlplus();
         isManual = SqlPlusContext.getInstance().isManual();
-        log.debug("FORK! Checking SQLPLUS support: "+isSqlPlus);
-        log.debug("FORK! Checking MANUAL support: "+isManual);
 
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);

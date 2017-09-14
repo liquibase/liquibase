@@ -1,7 +1,7 @@
 package liquibase.exception;
 
 /**
- * Created by sbt-gette-is on 14.09.2017.
+ * @author gette
  */
 public class SqlPlusException extends Exception {
     public SqlPlusException(String message) {

@@ -3,11 +3,9 @@ package sqlplus.context;
 import liquibase.database.sqlplus.SqlPlusConnection;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.HashSet;
 
 /**
- * Created by sbt-gette-is on 13.09.2017.
+ * @author gette
  */
 public class SqlPlusContext {
     private boolean sqlplus = false;
