@@ -237,15 +237,15 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     public boolean isZOS() {
         if (this.isZOS == null) {
-        	this.isZOS = false;
-
-        	if (getConnection() != null && getConnection() instanceof JdbcConnection) {
-				try {
-					this.isZOS = getDatabaseProductVersion().startsWith("DSN");
-				} catch (DatabaseException e) {
-					// Result's already set to false
-				}
-			}
+            this.isZOS = false;
+            try {
+                String productVersion = getDatabaseProductVersion();
+                if (productVersion != null) {
+                    this.isZOS = productVersion.startsWith("DSN");
+                }
+            } catch (DatabaseException e) {
+                // Result's already set to false
+            }
         }
         return this.isZOS;
     }

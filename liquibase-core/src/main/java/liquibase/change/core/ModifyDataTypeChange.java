@@ -27,7 +27,7 @@ public class ModifyDataTypeChange extends AbstractChange {
     @Override
     public SqlStatement[] generateStatements(Database database) {
         ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
-        if (database instanceof DB2Database) {
+        if (database instanceof DB2Database && !((DB2Database) database).isZOS()) {
             return new SqlStatement[] {
                     modifyDataTypeStatement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
