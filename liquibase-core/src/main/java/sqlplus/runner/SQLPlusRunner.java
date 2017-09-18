@@ -6,11 +6,11 @@ import liquibase.exception.SqlPlusException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.statement.SqlStatement;
+import org.apache.tools.ant.taskdefs.StreamPumper;
 import sqlplus.context.SqlPlusContext;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+
 
 /**
  * @author gette
@@ -27,9 +27,9 @@ public class SQLPlusRunner {
             executeSQLPlus(pathToFile);
 
         } catch (IOException e) {
-            System.err.println(e.getStackTrace());
+            throw new SqlPlusException(e);
         } catch (InterruptedException e) {
-            System.err.println(e.getStackTrace());
+            throw new SqlPlusException(e);
         }
     }
 
@@ -41,38 +41,28 @@ public class SQLPlusRunner {
             log.debug("Command:" + "cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
             Process sqlplus = Runtime.getRuntime().exec("cmd.exe /c sqlplus " + SqlPlusContext.getInstance().getConnection().getConnectionAsString() + " @" + pathToFile);
 
-            // copy input and error to the output stream
-            StreamPumper inputPumper =
-                    new StreamPumper(sqlplus.getInputStream());
-            StreamPumper errorPumper =
-                    new StreamPumper(sqlplus.getErrorStream());
-
-            // starts pumping away the generated output/error
-            inputPumper.start();
-            errorPumper.start();
-
+            OutputStream os = new ByteArrayOutputStream(4096);
+            StreamPumper inputPumper = new StreamPumper(sqlplus.getInputStream(), os);
+            inputPumper.run();
             // Wait for everything to finish
             sqlplus.waitFor();
-            inputPumper.join();
-            errorPumper.join();
+            log.info("SQLPLUS OUTPUT: " + os.toString());
             sqlplus.destroy();
+
 
             // check its exit value
             err = sqlplus.exitValue();
             if (err == 0) {
-               log.debug("SQLPlusRunner. Successful Execution");
+                log.debug("SQLPlusRunner. Successful Execution");
             } else {
                 Thread.sleep(1000);
                 throw new SqlPlusException("Something went wrong with SQLPLUS" + err);
             }
         } catch (IOException e) {
-            e.printStackTrace();
             throw new SqlPlusException(e);
         } catch (SqlPlusException e) {
-            e.printStackTrace();
             throw new SqlPlusException(e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
             throw new SqlPlusException(e);
         }
     }
@@ -80,7 +70,7 @@ public class SQLPlusRunner {
     public static String makeChangeSetFile(Change change, Database database) {
         SqlStatement[] statements = change.generateStatements(database);
 
-        String sqlplus = SqlPlusContext.getInstance().getConnection().getInitSQL();
+        String sqlplus = SqlPlusContext.getInstance().getConnection().getInitSQL() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator");
         for (SqlStatement statement : statements) {
             sqlplus = sqlplus.concat(statement.toString() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator"));
         }

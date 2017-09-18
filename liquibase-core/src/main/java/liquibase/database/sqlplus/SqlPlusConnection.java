@@ -24,7 +24,6 @@ public class SqlPlusConnection {
 
     }
 
-    //TODO: Возможно, SID приходит не в урле, а каким-то другим образом. Необходимо это учесть
     public String getConnectionAsString() {
         return username + "/" + password + "@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=" + url.split("@")[1].split(":")[0] + ")(Port=" + url.split("@")[1].split(":")[1] + "))(CONNECT_DATA=(SID=" + url.split("@")[1].split(":")[2] + ")))";
     }

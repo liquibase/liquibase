@@ -61,6 +61,7 @@
             <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>org.yaml:snakeyaml</include>
+                <include>org.apache.ant:ant</include>
             </includes>
         </dependencySet>
 

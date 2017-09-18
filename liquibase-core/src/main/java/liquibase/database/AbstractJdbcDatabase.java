@@ -58,8 +58,6 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractJdbcDatabase implements Database {
 
-    private Logger log = LogFactory.getLogger();
-
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
     private final static int FETCH_SIZE = 1000;
 

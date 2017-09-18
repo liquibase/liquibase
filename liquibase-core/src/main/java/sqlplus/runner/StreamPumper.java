@@ -25,6 +25,8 @@ import java.io.InputStreamReader;
 
 // Inner class for continually pumping the input stream during
 // Process's runtime.
+
+@Deprecated
 public class StreamPumper extends Thread {
     private BufferedReader din;
     private boolean endOfStream = false;
