@@ -32,7 +32,9 @@ public abstract class AbstractLogger implements Logger {
             return LogLevel.SEVERE;
         } else if ("off".equalsIgnoreCase(logLevel)) {
             return LogLevel.OFF;
-        } else {
+        } else if ("sqlplus".equalsIgnoreCase(logLevel))
+            return LogLevel.SQLPLUS;
+        else {
             throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel+".  Valid levels are: debug, info, warning, severe, off");
         }
     }

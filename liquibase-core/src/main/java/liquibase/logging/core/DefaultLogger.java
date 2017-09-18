@@ -56,6 +56,20 @@ public class DefaultLogger extends AbstractLogger {
             }
         }
     }
+    @Override
+    public void sqlplus(String message){
+        if (getLogLevel().compareTo(LogLevel.SQLPLUS) <=0){
+            print(LogLevel.SQLPLUS, message);
+        }
+    }
+
+    @Override
+    public void sqlplus(String message, Throwable e){
+        if (getLogLevel().compareTo(LogLevel.SQLPLUS) <=0){
+            print(LogLevel.SQLPLUS, message);
+            e.printStackTrace(err);
+        }
+    }
 
     @Override
     public void severe(String message) {

@@ -30,6 +30,12 @@ public final class AntTaskLogger extends AbstractLogger {
     }
 
     @Override
+    public void sqlplus(String message) {task.log(buildMessage(message), Project.MSG_WARN);}
+
+    @Override
+    public void sqlplus(String message, Throwable e) {task.log(buildMessage(message),e,Project.MSG_WARN);}
+
+    @Override
     public void severe(String message) {
         task.log(buildMessage(message), Project.MSG_ERR);
     }

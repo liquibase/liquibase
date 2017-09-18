@@ -46,16 +46,15 @@ public class SQLPlusRunner {
             inputPumper.run();
             // Wait for everything to finish
             sqlplus.waitFor();
-            log.info("SQLPLUS OUTPUT: " + os.toString());
+            log.sqlplus(os.toString());
             sqlplus.destroy();
 
 
             // check its exit value
             err = sqlplus.exitValue();
             if (err == 0) {
-                log.debug("SQLPlusRunner. Successful Execution");
+                log.sqlplus("SQLPlusRunner. Successful Execution");
             } else {
-                Thread.sleep(1000);
                 throw new SqlPlusException("Something went wrong with SQLPLUS" + err);
             }
         } catch (IOException e) {
