@@ -21,9 +21,11 @@ public class SQLPlusRunner {
     public static void run(String pathToFile) throws SqlPlusException {
         log.debug("SQLPlusRunner has been initialized.");
         try {
-            Process notepad = new ProcessBuilder("notepad", pathToFile).start();
-            notepad.waitFor();
-            notepad.destroy();
+            if (SqlPlusContext.getInstance().isManual()) {
+                Process notepad = new ProcessBuilder("notepad", pathToFile).start();
+                notepad.waitFor();
+                notepad.destroy();
+            }
             executeSQLPlus(pathToFile);
 
         } catch (IOException e) {
@@ -55,7 +57,7 @@ public class SQLPlusRunner {
             if (err == 0) {
                 log.sqlplus("SQLPlusRunner. Successful Execution");
             } else {
-                throw new SqlPlusException("Something went wrong with SQLPLUS" + err);
+                throw new SqlPlusException("Something went wrong with SQLPLUS. ORA-00" + err);
             }
         } catch (IOException e) {
             throw new SqlPlusException(e);
@@ -69,7 +71,7 @@ public class SQLPlusRunner {
     public static String makeChangeSetFile(Change change, Database database) {
         SqlStatement[] statements = change.generateStatements(database);
 
-        String sqlplus = SqlPlusContext.getInstance().getConnection().getInitSQL() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator");
+        String sqlplus = SqlPlusContext.getInstance().getConnection().getInitSQL();
         for (SqlStatement statement : statements) {
             sqlplus = sqlplus.concat(statement.toString() + System.getProperty("line.separator") + "/" + System.getProperty("line.separator"));
         }

@@ -784,7 +784,7 @@ public class Main {
 
     private String[] splitArg(String arg) throws CommandLineParsingException {
         String[] splitArg = arg.split("=", 2);
-        if (splitArg.length < 2 && !splitArg[0].equals("--sqlplus")) {
+        if (splitArg.length < 2 && !splitArg[0].equals("--sqlplus") && !splitArg[0].equals("--manual")) {
             throw new CommandLineParsingException("Could not parse '" + arg + "'");
         }
 
