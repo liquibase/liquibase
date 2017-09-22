@@ -30,7 +30,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
 
         if (createViewStatement.isReplaceIfExists()) {
-            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, DB2Database.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, DB2Database.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
         }
 
         return validationErrors;
@@ -71,7 +71,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
                 sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[" + schema.getSchemaName() + "].[" + statement.getViewName() + "]'))\n" +
                         "    EXEC sp_executesql N'CREATE VIEW [" + schema.getSchemaName() + "].[" + statement.getViewName() + "] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 viewDefinition.replaceIfExists("CREATE", "ALTER");
-            } else if (database instanceof PostgresDatabase) {
+            } else if (database instanceof PostgresDatabase || database instanceof HsqlDatabase) {
                 sql.add(new UnparsedSql("DROP VIEW IF EXISTS " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
             } else {
                 if (!viewDefinition.contains("replace")) {
