@@ -134,7 +134,13 @@ public class FileSystemResourceAccessor extends AbstractResourceAccessor {
             for (String returnPath : returnSet) {
                 returnPath = returnPath.replace("\\", "/");
                 for (String rootPath : rootPaths) {
-                    if (returnPath.startsWith(rootPath)) {
+                    boolean matches = false;
+                    if (isCaseSensitive()) {
+                        matches = returnPath.startsWith(rootPath);
+                    } else {
+                        matches = returnPath.toLowerCase().startsWith(rootPath.toLowerCase());
+                    }
+                    if (matches) {
                         returnPath = returnPath.substring(rootPath.length());
                         break;
                     }
