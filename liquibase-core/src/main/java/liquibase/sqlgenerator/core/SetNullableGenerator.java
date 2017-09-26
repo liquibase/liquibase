@@ -38,8 +38,8 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         }
 
         try {
-            if ((database instanceof DB2Database) && (database.getDatabaseMajorVersion() > 0 && database.getDatabaseMajorVersion() < 9)) {
-                validationErrors.addError("DB2 versions less than 9 do not support modifying null constraints");
+            if ((database instanceof DB2Database) && ((database.getDatabaseMajorVersion() > 0 && database.getDatabaseMajorVersion() < 9) || ((DB2Database) database).isZOS())) {
+                validationErrors.addError("DB2 versions less than 9 or z/OS do not support modifying null constraints");
             }
         } catch (DatabaseException ignore) {
             //cannot check
