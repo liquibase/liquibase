@@ -396,6 +396,30 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         returnList.addAll(executeAndExtract(sql, database));
 
+                    } else if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                        String sql = "SELECT i.CREATOR AS TABLE_SCHEM, " +
+                                "i.TBNAME AS TABLE_NAME, " +
+                                "i.NAME AS INDEX_NAME, " +
+                                "3 AS TYPE, " +
+                                "k.COLNAME AS COLUMN_NAME, " +
+                                "k.COLNO AS ORDINAL_POSITION, " +
+                                "CASE UNIQUERULE WHEN 'D' then 1 else 0 end as NON_UNIQUE, " +
+                                "k.ORDERING AS ORDER, " +
+                                "i.CREATOR AS INDEX_QUALIFIER " +
+                                "FROM SYSIBM.SYSKEYS k " +
+                                "JOIN SYSIBM.SYSINDEXES i ON k.IXNAME = i.NAME " +
+                                "WHERE  i.CREATOR = '" + database.correctObjectName(catalogAndSchema.getSchemaName(), Schema.class) + "'";
+                        if (!bulkFetch && tableName != null) {
+                            sql += " AND i.TBNAME='" + database.escapeStringForDatabase(tableName) + "'";
+                        }
+
+                        if (!bulkFetch && indexName != null) {
+                            sql += " AND i.NAME='" + database.escapeStringForDatabase(indexName) + "'";
+                        }
+
+                        sql += "ORDER BY i.NAME, k.COLNO";
+
+                        returnList.addAll(executeAndExtract(sql, database));
                     } else {
                         List<String> tables = new ArrayList<String>();
                         if (tableName == null) {
