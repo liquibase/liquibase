@@ -1,0 +1,13 @@
+{
+  "language": "java",
+  "sudo": "required",
+  "jdk": "openjdk6",
+  "before_install": [
+    "sudo apt-get -qq update",
+    "sudo apt-get install -y rpm"
+  ],
+  "script": "mvn clean package",
+  "group": "stable",
+  "dist": "precise",
+  "os": "linux"
+}
