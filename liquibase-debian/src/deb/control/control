@@ -7,4 +7,3 @@ Depends:
 Maintainer: Nathan Voxland <nathan.voxland@liquibase.org>
 Description: Liquibase Debian Installer
 Distribution: development
-
