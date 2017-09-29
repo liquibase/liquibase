@@ -1,12 +1,9 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.ValidationErrors;
 import liquibase.logging.Logger;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
@@ -23,18 +20,18 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.*;
 
 /**
  * Encapsulates PostgreSQL database support.
  */
 public class PostgresDatabase extends AbstractJdbcDatabase {
-    public static final String PRODUCT_NAME = "PostgreSQL";
+    private static final Logger log = LogFactory.getInstance().getLog();
+    private static final String PRODUCT_NAME = "PostgreSQL";
 
-    private Set<String> systemTablesAndViews = new HashSet<String>();
+    private Set<String> systemTablesAndViews = new HashSet<>();
 
-    private Set<String> reservedWords = new HashSet<String>();
+    private Set<String> reservedWords = new HashSet<>();
 
     public PostgresDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
@@ -112,21 +109,84 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public void setConnection(DatabaseConnection conn) {
-        super.setConnection(conn);
+    public void setConnection(DatabaseConnection databaseConnection) {
+        super.setConnection(databaseConnection);
+        logWarnIfStoreDateColumnNotSupported(databaseConnection);
+        setDefaultSchemaNameToSearchPathIfNeeded(databaseConnection);
+    }
 
-        Logger log = LogFactory.getInstance().getLog();
+    /**
+     * This method adds defaultSchema to searchPath array if needed
+     *
+     * @param databaseConnection - this expected JDBC connection that will be used to execute queries
+     */
+    private void setDefaultSchemaNameToSearchPathIfNeeded(final DatabaseConnection databaseConnection) {
+        if (!(databaseConnection instanceof JdbcConnection)) {
+            return;
+        }
+        final List<String> searchPaths = getAllSearchPaths((JdbcConnection) databaseConnection);
+        if (searchPaths == null/*in case of failure*/ || searchPaths.contains(defaultSchemaName)) {
+            return;
+        }
+        searchPaths.add(defaultCatalogName);
+        String dbName;
+        try {
+            dbName = buildAlterSearchPathQuery(databaseConnection.getDatabaseProductName(), searchPaths);
+        } catch (DatabaseException databaseException) {
+            log.warning(("Couldn't get name from DatabaseConnection due to exception"), databaseException);
+            return;
+        }
+        final String ALTER_SEARCH_PATH_QUERY = buildAlterSearchPathQuery(dbName, searchPaths);
 
-        if (conn instanceof JdbcConnection) {
+        try (Statement statement = ((JdbcConnection) databaseConnection).createStatement();
+             ResultSet resultSet = statement.executeQuery(ALTER_SEARCH_PATH_QUERY)) {
+            log.info("Default schema: %s has been added to search paths successfully!");
+        } catch (SQLException | DatabaseException exception) {
+            log.warning(String.format("Default schema:%s wasn't added to search path due to " +
+                    "exception during execution of SQL statement:%s", defaultSchemaName, ALTER_SEARCH_PATH_QUERY), exception);
+        }
+    }
+
+    private List<String> getAllSearchPaths(JdbcConnection databaseConnection) {
+        final String SHOW_SEARCH_PATH_QUERY = "SHOW search_path";
+        final List<String> searchPaths = new ArrayList<>();
+        try (Statement statement = databaseConnection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SHOW_SEARCH_PATH_QUERY)) {
+            while (resultSet.next()) {
+                String searchPath = resultSet.getString(1);
+                searchPaths.add(searchPath);
+            }
+        } catch (SQLException | DatabaseException exception) {
+            log.warning(String.format("Default schema:%s wasn't added to search path due to " +
+                    "exception during execution of SQL statement:%s", defaultSchemaName, SHOW_SEARCH_PATH_QUERY), exception);
+            return null;
+        }
+        return searchPaths;
+    }
+
+    private String buildAlterSearchPathQuery(String dbName, List<String> existingSearchPaths) {
+        return new StringBuilder().append(" ALTER ").
+                     append(dbName).
+                     append(" SET ").
+                     append(" search_path ").
+                     append(StringUtils.join(existingSearchPaths, ",")).toString();
+    }
+
+    /**
+     * In this method we log.warn If edb_redwood_date is set to TRUE. Specific to PostgreSQL
+     * @param databaseConnection - jdbc connection that will use in order to execute statement
+     */
+    private void logWarnIfStoreDateColumnNotSupported(final DatabaseConnection databaseConnection) {
+        if (databaseConnection instanceof JdbcConnection) {
             Statement statement = null;
             ResultSet resultSet = null;
             try {
-                statement = ((JdbcConnection) conn).createStatement();
+                statement = ((JdbcConnection) databaseConnection).createStatement();
                 resultSet = statement.executeQuery("select setting from pg_settings where name = 'edb_redwood_date'");
                 if (resultSet.next()) {
                     String setting = resultSet.getString(1);
                     if (setting != null && setting.equals("on")) {
-                        log.warning("EnterpriseDB "+conn.getURL()+" does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
+                        log.warning("EnterpriseDB "+databaseConnection.getURL()+" does not store DATE columns. Auto-converts them to TIMESTAMPs. (edb_redwood_date=true)");
                     }
                 }
             } catch (Exception e) {
@@ -135,7 +195,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
                 JdbcUtils.close(resultSet, statement);
             }
         }
-
     }
 
     //    public void dropDatabaseObjects(String schema) throws DatabaseException {
