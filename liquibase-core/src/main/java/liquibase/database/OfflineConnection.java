@@ -18,6 +18,8 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -50,12 +52,16 @@ public class OfflineConnection implements DatabaseConnection {
         }
         this.databaseShortName = matcher.group(1).toLowerCase();
         String params = StringUtils.trimToNull(matcher.group(2));
-        if (params != null) {
-            String[] keyValues = params.split("&");
-            for (String param : keyValues) {
-                String[] split = param.split("=");
-                this.params.put(split[0], split[1]);
+        try {
+            if (params != null) {
+                String[] keyValues = params.split("&");
+                for (String param : keyValues) {
+                    String[] split = param.split("=");
+                    this.params.put(URLDecoder.decode(split[0], "UTF-8"), URLDecoder.decode(split[1], "UTF-8"));
+                }
             }
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
 
 
