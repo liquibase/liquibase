@@ -131,7 +131,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         searchPaths.add(defaultCatalogName);
         String dbName;
         try {
-            dbName = buildAlterSearchPathQuery(databaseConnection.getDatabaseProductName(), searchPaths);
+            dbName = databaseConnection.getDatabaseProductName();
         } catch (DatabaseException databaseException) {
             log.warning(("Couldn't get name from DatabaseConnection due to exception"), databaseException);
             return;
@@ -164,12 +164,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return searchPaths;
     }
 
-    private String buildAlterSearchPathQuery(String dbName, List<String> existingSearchPaths) {
+    private String buildAlterSearchPathQuery(String dbName, List<String> searchPaths) {
         return new StringBuilder().append(" ALTER ").
                      append(dbName).
                      append(" SET ").
                      append(" search_path ").
-                     append(StringUtils.join(existingSearchPaths, ",")).toString();
+                     append(StringUtils.join(searchPaths, ",")).toString();
     }
 
     /**
