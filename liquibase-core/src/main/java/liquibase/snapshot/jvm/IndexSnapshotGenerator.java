@@ -362,9 +362,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                             returnIndex.getColumns().add(null);
                         }
                         if (definition == null) {
-                            String ascOrDesc = row.getString("ASC_OR_DESC");
-                            Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
-                            returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                            if (database instanceof DB2Database && ((DB2Database) database).isZOS()) {
+                                columnName = getDb2ZosOrderedColumnName(columnName, row.getString("ORDER"));
+                                returnIndex.getColumns().set(position - 1, new Column().setName(columnName, true).setRelation(returnIndex.getTable()));
+                            } else {
+                                String ascOrDesc = row.getString("ASC_OR_DESC");
+                                Boolean descending = "D".equals(ascOrDesc) ? Boolean.TRUE : "A".equals(ascOrDesc) ? Boolean.FALSE : null;
+                                returnIndex.getColumns().set(position - 1, new Column(columnName).setDescending(descending).setRelation(returnIndex.getTable()));
+                            }
                         } else {
                             returnIndex.getColumns().set(position - 1, new Column().setRelation(returnIndex.getTable()).setName(definition, true));
                         }
@@ -460,6 +465,25 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected boolean addToViews(Database database) {
         return database instanceof MSSQLDatabase;
+    }
+
+    private String getDb2ZosOrderedColumnName(String columnName, String order){
+        if (order != null) {
+            switch (order) {
+                case "A":
+                    columnName += " ASC";
+                    break;
+                case "D":
+                    columnName += " DESC";
+                    break;
+                case "R":
+                    columnName += " RANDOM";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return columnName;
     }
 
 
